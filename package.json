@@ -1,0 +1,15 @@
+{
+  "name": "auto-payment-bot",
+  "version": "1.0.0",
+  "description": "Auto payment processor for RealEarnBot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "keywords": ["payment", "bot", "automation"],
+  "author": "RealEarnBot",
+  "license": "MIT"
+}

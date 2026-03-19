@@ -652,7 +652,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <label class="flabel" data-i18n="tonWalletAddr">TON Wallet Address</label>
       <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
       <label class="flabel" data-i18n="amountCoins">Amount (Coins)</label>
-      <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
+      <input type="number" class="finput" id="wdAmt" placeholder="2000" min="2000" oninput="updWdPrev()">
+      <div style="font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin:-4px 0 8px 2px" data-i18n="wdMinHint">⚠️ Minimum: 2,000 Coins (0.1 TON)</div>
       <div class="ton-row">
         <div class="ton-chip">
           <div class="tcl"><img src="https://i.ibb.co/WNfvBK9h/toncoin-1.webp" alt="TON"> <span data-i18n="tonValue">TON Value</span></div>
@@ -803,7 +804,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpMinWithdraw">📦 Minimum Withdrawal</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">200 Coins</span>
+            <span style="font-size:12px;font-weight:800;color:#fff">2,000 Coins (0.1 TON)</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpRefCommission">👥 Referral Commission</span>
@@ -818,7 +819,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <!-- Withdrawal conditions -->
       <div style="background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,0,0,.4));border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWdTitle">📤 Withdrawal Conditions</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">200 Coins</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
       </div>
     </div>
     <div style="height:12px"></div>
@@ -1595,10 +1596,7 @@ async function doWithdraw(){
     // Fix 10: server-side error redirects
     const msg=e.message||'';
     const errCode=e.errorCode||'';
-    if(errCode==='MULTI_ACCOUNT_DETECTED'||msg.includes('MULTI_ACCOUNT')){
-      const t=TRANSLATIONS[localStorage.getItem('pandaLang')||'en']||TRANSLATIONS['en'];
-      showNotif(`❌ ${t.multiAccount}`,'e');
-    } else if(errCode==='DEPOSIT_REQUIRED'||msg.includes('DEPOSIT_REQUIRED')||msg.includes('إيداع')){
+    if(errCode==='DEPOSIT_REQUIRED'||msg.includes('DEPOSIT_REQUIRED')||msg.includes('إيداع')){
       showDepositRequiredModal();
     } else {
       showNotif(`❌ ${msg}`,'e');
@@ -2254,7 +2252,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'20% من مشتريات الصديق',
     helpAddTask:'➕ إضافة مهمة (100 عضو)',
     helpWdTitle:'📤 شروط السحب',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">200 Coins</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
     upgTitle:'⬆️ ترقية التانك',miningInfoTitle:'⚡ معلومات التعدين',
     addTaskTitle:'➕ إضافة مهمة مجتمعية',
     taskCostFormula:'التكلفة = <strong style="color:var(--coin)">عدد المستخدمين × 60 Coins</strong>',
@@ -2264,6 +2262,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'رابط تيليجرام',taskLinkPh:'https://t.me/قناتك',
     taskTargetLabel:'عدد المستخدمين المستهدف (الحد الأدنى 100)',
     taskTotalCost:'التكلفة الإجمالية:',taskCreateBtn:'✅ إنشاء المهمة',
+    wdMinHint:'⚠️ الحد الأدنى: 2,000 Coins (0.1 TON)',
     multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🐼',
     depositRequired:'⛔ السحب متاح فقط للمودعين\n\n💎 قم بإيداع TON واحد على الأقل لتفعيل السحب\n\n🔄 جارٍ تحويلك لصفحة الإيداع...',
     depositRequiredBtn:'💎 إيداع الآن',
@@ -2312,7 +2311,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"20% of friend's purchases",
     helpAddTask:'➕ Add Task (100 members)',
     helpWdTitle:'📤 Withdrawal Conditions',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">200 Coins</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
     upgTitle:'⬆️ Upgrade Tank',miningInfoTitle:'⚡ Mining Info',
     addTaskTitle:'➕ Add Community Task',
     taskCostFormula:'Cost = <strong style="color:var(--coin)">Target Users × 60 Coins</strong>',
@@ -2322,6 +2321,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Telegram Link',taskLinkPh:'https://t.me/yourchannel',
     taskTargetLabel:'Target Users (min 100)',
     taskTotalCost:'Total Cost:',taskCreateBtn:'✅ Create Task',
+    wdMinHint:'⚠️ Minimum: 2,000 Coins (0.1 TON)',
     multiAccount:'⚠️ You are using multiple accounts — play fair 🐼',
     depositRequired:'⛔ Withdrawal is only available for depositors\n\n💎 Make at least one TON deposit to unlock withdrawals\n\n🔄 Redirecting you to the deposit page...',
     depositRequiredBtn:'💎 Deposit Now',
@@ -2370,7 +2370,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'20% с покупок друга',
     helpAddTask:'➕ Добавить задание (100 участников)',
     helpWdTitle:'📤 Условия вывода',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">200 Coins</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
     upgTitle:'⬆️ Улучшить танк',miningInfoTitle:'⚡ Инфо о майнинге',
     addTaskTitle:'➕ Добавить задание',
     taskCostFormula:'Стоимость = <strong style="color:var(--coin)">Кол-во участников × 60 Coins</strong>',
@@ -2380,6 +2380,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Ссылка Telegram',taskLinkPh:'https://t.me/вашканал',
     taskTargetLabel:'Целевых участников (мин. 100)',
     taskTotalCost:'Итого:',taskCreateBtn:'✅ Создать задание',
+    wdMinHint:'⚠️ Минимум: 2,000 Coins (0.1 TON)',
     multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🐼',
     depositRequired:'⛔ Вывод доступен только для пополнивших счёт\n\n💎 Пополните счёт хотя бы на 1 TON, чтобы разблокировать вывод\n\n🔄 Перенаправление на страницу пополнения...',
     depositRequiredBtn:'💎 Пополнить сейчас',
@@ -2428,7 +2429,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Comisión de referido',helpRefCommissionVal:'20% de las compras del amigo',
     helpAddTask:'➕ Añadir tarea (100 miembros)',
     helpWdTitle:'📤 Condiciones de retiro',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">200 Monedas</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
     upgTitle:'⬆️ Mejorar tanque',miningInfoTitle:'⚡ Info de minería',
     addTaskTitle:'➕ Añadir tarea comunitaria',
     taskCostFormula:'Costo = <strong style="color:var(--coin)">Usuarios objetivo × 60 Monedas</strong>',
@@ -2438,6 +2439,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Enlace de Telegram',taskLinkPh:'https://t.me/tucanal',
     taskTargetLabel:'Usuarios objetivo (mín. 100)',
     taskTotalCost:'Costo total:',taskCreateBtn:'✅ Crear tarea',
+    wdMinHint:'⚠️ Mínimo: 2,000 Monedas (0.1 TON)',
     multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🐼',
     depositRequired:'⛔ El retiro solo está disponible para quienes han depositado\n\n💎 Realiza al menos un depósito de TON para desbloquear los retiros\n\n🔄 Redirigiendo a la página de depósito...',
     depositRequiredBtn:'💎 Depositar ahora',
@@ -2486,7 +2488,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"20% des achats de l'ami",
     helpAddTask:'➕ Ajouter tâche (100 membres)',
     helpWdTitle:'📤 Conditions de retrait',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">200 Pièces</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
     upgTitle:'⬆️ Améliorer le réservoir',miningInfoTitle:'⚡ Info de minage',
     addTaskTitle:'➕ Ajouter une tâche communautaire',
     taskCostFormula:'Coût = <strong style="color:var(--coin)">Utilisateurs cibles × 60 Pièces</strong>',
@@ -2496,6 +2498,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Lien Telegram',taskLinkPh:'https://t.me/votrechaîne',
     taskTargetLabel:'Utilisateurs cibles (min. 100)',
     taskTotalCost:'Coût total:',taskCreateBtn:'✅ Créer la tâche',
+    wdMinHint:'⚠️ Minimum: 2,000 Pièces (0.1 TON)',
     multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🐼',
     depositRequired:'⛔ Le retrait est réservé aux utilisateurs ayant effectué un dépôt\n\n💎 Effectuez au moins un dépôt TON pour débloquer les retraits\n\n🔄 Redirection vers la page de dépôt...',
     depositRequiredBtn:'💎 Déposer maintenant',

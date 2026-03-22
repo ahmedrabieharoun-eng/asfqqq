@@ -447,7 +447,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   <img class="ld-logo"
     src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17ae25b3-ef08-4156-a126-02972d3e8367.png"
     alt="Panda">
-  <div class="ld-title">Panda Bamboo Factory</div>
+  <div class="ld-title" id="ldTitle">Panda Bamboo Factory</div>
   <div class="ld-sub" id="ldStatus">Loading...</div>
   <div class="ld-bar-wrap">
     <div class="ld-segments" id="ldSegs">
@@ -573,7 +573,14 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     <div class="ttab active" data-t="referral" onclick="switchTTab(this,'referral')">👥 <span data-i18n="tabReferralTxt">Referral</span></div>
     <div class="ttab" data-t="social"    onclick="switchTTab(this,'social')">📢 <span data-i18n="tabSocialTxt">Social</span></div>
   </div>
-  <div class="tcont active" id="tcReferral"><div id="refTaskList"></div></div>
+  <div class="tcont active" id="tcReferral">
+    <!-- Regular referrals -->
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;padding:0 2px">👥 Regular Referrals</div>
+    <div id="refTaskList"></div>
+    <!-- Active referrals (deposited) -->
+    <div style="font-size:12px;font-weight:700;color:var(--coin);margin:14px 0 8px 2px">💎 Active Referrals <span style="font-size:10px;color:var(--muted);font-weight:600">(Friends who deposited)</span></div>
+    <div id="refActiveTaskList"></div>
+  </div>
   <div class="tcont" id="tcSocial">
     <!-- Sub-tabs: Partner / Community -->
     <div style="display:flex;gap:6px;margin-bottom:10px">
@@ -653,7 +660,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
       <label class="flabel" data-i18n="amountCoins">Amount (Coins)</label>
       <input type="number" class="finput" id="wdAmt" placeholder="2000" min="2000" oninput="updWdPrev()">
-      <div style="font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin:-4px 0 8px 2px" data-i18n="wdMinHint">⚠️ Minimum: 2,000 Coins (0.1 TON)</div>
+      <div style="font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin:-4px 0 8px 2px" data-i18n="wdMinHint">⚠️ Minimum: 200 Coins</div>
       <div class="ton-row">
         <div class="ton-chip">
           <div class="tcl"><img src="https://i.ibb.co/WNfvBK9h/toncoin-1.webp" alt="TON"> <span data-i18n="tonValue">TON Value</span></div>
@@ -898,7 +905,7 @@ const CFG = {
   API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // fallback
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
   RATE         : 10,
-  MIN_WD       : 2000,
+  MIN_WD       : 200,
   TON_PER_COIN : 0.00005,
   TON_USD      : 3.5,
   FREE_WD_LIMIT: 200,
@@ -907,82 +914,17 @@ const CFG = {
   BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
 };
 
-/* ════ MULTI-SERVER RACE SYSTEM ════════════════════════════════════
-   On first load: race all servers with getState → fastest wins.
-   Winner is stored in sessionStorage for the whole session.
-   If sticky server fails mid-session → re-race automatically.
-   Dead servers are skipped for DEAD_WINDOW_MS (12h) before retry.
+/* ════ SINGLE SERVER ═══════════════════════════════════════════════
+   🔧 غيّر SERVER_URL لرابط السيرفر الخاص بك
 ═══════════════════════════════════════════════════════════════════ */
-const SERVERS = [
-  'https://noisy-dust-b9e8.mmrr2872008.workers.dev',
-  'https://little-bush-fcf7.aborabie2777.workers.dev',
-  'https://rough-bar-ac76.aborabie4777.workers.dev',
-  'https://silent-block-bedf.ahmedrabieharoun.workers.dev',
-];
-const DEAD_WINDOW_MS = 12 * 60 * 60 * 1000; // 12 hours
-const RACE_TIMEOUT_MS = 5000;               // 5s per server in race
+const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
+const API_TIMEOUT_MS = 8000;
 
-const _dead = {}; // { url: deadUntil }
-
-function _isAlive(url){ return Date.now() > (_dead[url]||0); }
-
-function _markDead(url){
-  _dead[url] = Date.now() + DEAD_WINDOW_MS;
-  console.warn('[LB] dead 12h:', url);
-  if(sessionStorage.getItem('srv') === url) sessionStorage.removeItem('srv');
-}
-
-function _markAlive(url){ delete _dead[url]; }
-
-function _aliveServers(){
-  const a = SERVERS.filter(_isAlive);
-  if(!a.length){ SERVERS.forEach(u=>delete _dead[u]); return [...SERVERS]; }
-  return a;
-}
-
-// Race all alive servers — first valid JSON response wins
-async function _race(action, data, authHdr){
-  const alive = _aliveServers();
-  const body  = JSON.stringify({action, data});
-  const heads = {'Content-Type':'application/json'};
-  if(authHdr) heads.Authorization = authHdr;
-
-  return new Promise((resolve, reject)=>{
-    let done = false;
-    let left = alive.length;
-
-    alive.forEach(url=>{
-      const ctrl = new AbortController();
-      const tOut = setTimeout(()=>ctrl.abort(), RACE_TIMEOUT_MS);
-
-      fetch(`${url}/api`,{method:'POST',headers:heads,body,signal:ctrl.signal})
-        .then(async r=>{
-          clearTimeout(tOut);
-          if(!r.ok) throw new Error(`HTTP ${r.status}`);
-          const j = await r.json();
-          if(!done){
-            done = true;
-            _markAlive(url);
-            sessionStorage.setItem('srv', url);
-            console.log('[LB] winner:', url);
-            resolve({j, url});
-          }
-        })
-        .catch(e=>{
-          clearTimeout(tOut);
-          _markDead(url);
-          if(--left === 0 && !done) reject(new Error('All servers unreachable'));
-        });
-    });
-  });
-}
-
-// Direct call to a specific server (after race selected it)
 async function _call(url, action, data, authHdr){
   const heads = {'Content-Type':'application/json'};
   if(authHdr) heads.Authorization = authHdr;
   const ctrl = new AbortController();
-  const tOut = setTimeout(()=>ctrl.abort(), RACE_TIMEOUT_MS);
+  const tOut = setTimeout(()=>ctrl.abort(), API_TIMEOUT_MS);
   try{
     const r = await fetch(`${url}/api`,{method:'POST',headers:heads,body:JSON.stringify({action,data}),signal:ctrl.signal});
     clearTimeout(tOut);
@@ -990,7 +932,6 @@ async function _call(url, action, data, authHdr){
     return await r.json();
   }catch(e){
     clearTimeout(tOut);
-    _markDead(url);
     throw e;
   }
 }
@@ -1036,17 +977,29 @@ const TANK_LVS = {
   26:{cap:55000000,  upgCost:150000000,  label:'Absolute Tank'},
   27:{cap:70000000,  upgCost:200000000,  label:'Universe Tank'},
 };
-// Fix 5: Added r200 + r500
+// Fix 5: Added r200 + r500 — rewards reduced to 10% of original
 const REF_TASKS=[
-  {id:'r1',  n:1,   bam:500,    coins:2   },
-  {id:'r5',  n:5,   bam:2500,   coins:10  },
-  {id:'r10', n:10,  bam:6000,   coins:25  },
-  {id:'r20', n:20,  bam:15000,  coins:60  },
-  {id:'r50', n:50,  bam:40000,  coins:150 },
-  {id:'r70', n:70,  bam:60000,  coins:220 },
-  {id:'r100',n:100, bam:100000, coins:400 },
-  {id:'r200',n:200, bam:200000, coins:800 },
-  {id:'r500',n:500, bam:500000, coins:2000},
+  {id:'r1',  n:1,   bam:50,    coins:2   },
+  {id:'r5',  n:5,   bam:250,   coins:10  },
+  {id:'r10', n:10,  bam:600,   coins:25  },
+  {id:'r20', n:20,  bam:1500,  coins:60  },
+  {id:'r50', n:50,  bam:4000,  coins:150 },
+  {id:'r70', n:70,  bam:6000,  coins:220 },
+  {id:'r100',n:100, bam:10000, coins:400 },
+  {id:'r200',n:200, bam:20000, coins:800 },
+  {id:'r500',n:500, bam:50000, coins:2000},
+];
+// Active referrals (who deposited) — 2x original rewards
+const REF_ACTIVE_TASKS=[
+  {id:'ra1',  n:1,   bam:1000,   coins:4   },
+  {id:'ra5',  n:5,   bam:5000,   coins:20  },
+  {id:'ra10', n:10,  bam:12000,  coins:50  },
+  {id:'ra20', n:20,  bam:30000,  coins:120 },
+  {id:'ra50', n:50,  bam:80000,  coins:300 },
+  {id:'ra70', n:70,  bam:120000, coins:440 },
+  {id:'ra100',n:100, bam:200000, coins:800 },
+  {id:'ra200',n:200, bam:400000, coins:1600},
+  {id:'ra500',n:500, bam:1000000,coins:4000},
 ];
 const SOC_TASKS=[
   {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/PandaBambooPayouts', bam:1000},
@@ -1079,6 +1032,86 @@ function esc(s){
     .replace(/'/g,'&#39;');
 }
 
+/* ════ DEVICE FINGERPRINT ════════════════════════════════════════════
+   Generates a stable hardware-based ID that survives:
+   ✓ IP change / VPN
+   ✓ Incognito mode
+   ✓ Clearing cookies/cache
+   Based on: GPU, screen, fonts, audio, canvas, hardware concurrency
+═══════════════════════════════════════════════════════════════════ */
+async function getDeviceFingerprint(){
+  try{
+    const parts=[];
+    // 1. Canvas fingerprint
+    try{
+      const c=document.createElement('canvas');
+      const ctx=c.getContext('2d');
+      ctx.textBaseline='top';
+      ctx.font='14px Arial';
+      ctx.fillStyle='#f60';ctx.fillRect(125,1,62,20);
+      ctx.fillStyle='#069';ctx.fillText('🐼PandaBamboo',2,15);
+      ctx.fillStyle='rgba(102,204,0,0.7)';ctx.fillText('🐼PandaBamboo',4,17);
+      parts.push(c.toDataURL());
+    }catch(_){}
+    // 2. WebGL GPU fingerprint
+    try{
+      const c=document.createElement('canvas');
+      const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+      if(gl){
+        const dbg=gl.getExtension('WEBGL_debug_renderer_info');
+        if(dbg){
+          parts.push(gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL));
+          parts.push(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL));
+        }
+        parts.push(gl.getParameter(gl.VERSION));
+        parts.push(gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
+      }
+    }catch(_){}
+    // 3. Screen & hardware
+    parts.push(`${screen.width}x${screen.height}x${screen.colorDepth}`);
+    parts.push(`${navigator.hardwareConcurrency||0}cores`);
+    parts.push(`${navigator.deviceMemory||0}gb`);
+    parts.push(navigator.platform||'');
+    parts.push(navigator.language||'');
+    // 4. Audio fingerprint
+    try{
+      const AudioCtx=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+      if(AudioCtx){
+        const ac=new AudioCtx(1,44100,44100);
+        const osc=ac.createOscillator();
+        const analyser=ac.createAnalyser();
+        const gain=ac.createGain();
+        gain.gain.value=0;
+        osc.connect(analyser);analyser.connect(gain);gain.connect(ac.destination);
+        osc.start(0);
+        const buf=await ac.startRendering();
+        const data=buf.getChannelData(0);
+        let sum=0;for(let i=0;i<data.length;i+=100)sum+=Math.abs(data[i]);
+        parts.push(sum.toFixed(6));
+      }
+    }catch(_){}
+    // 5. Timezone
+    parts.push(Intl.DateTimeFormat().resolvedOptions().timeZone||'');
+    parts.push(new Date().getTimezoneOffset());
+    // Hash everything into a stable 40-char hex string
+    const raw=parts.join('|||');
+    const enc=new TextEncoder();
+    const hashBuf=await crypto.subtle.digest('SHA-256',enc.encode(raw));
+    const hex=[...new Uint8Array(hashBuf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    return hex;
+  }catch(e){
+    console.warn('Fingerprint error:',e);
+    return '';
+  }
+}
+// Compute once and cache
+let _fp='';
+async function getOrComputeFp(){
+  if(_fp) return _fp;
+  _fp=await getDeviceFingerprint();
+  return _fp;
+}
+
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
 const DEBOUNCE_MS  = 3000;
@@ -1094,38 +1127,15 @@ function debounce(key){
   return true;
 }
 
-/* ════ API — Smart Multi-Server ════════════════════════════════════
-   First call (getState on load) → RACE all servers → fastest wins.
-   All subsequent calls → go straight to the winning server.
-   If the winning server fails → auto re-race on next call.
-═══════════════════════════════════════════════════════════════════ */
+/* ════ API — Single Server ═════════════════════════════════════════ */
 let _apiInFlight = 0;
 
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
   const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
-
   try{
-    let j;
-    const sticky = sessionStorage.getItem('srv');
-
-    if(!sticky){
-      // ── No sticky server yet → RACE ─────────────────────────────
-      const {j: rj, url} = await _race(action, data, authHdr);
-      j = rj;
-    } else {
-      // ── Use sticky server, fallback to race on failure ──────────
-      try{
-        j = await _call(sticky, action, data, authHdr);
-      } catch(e){
-        console.warn('[LB] sticky failed, re-racing…', e.message);
-        sessionStorage.removeItem('srv');
-        const {j: rj} = await _race(action, data, authHdr);
-        j = rj;
-      }
-    }
-
+    const j = await _call(SERVER_URL, action, data, authHdr);
     if(!j.success){
       const err = new Error(j.error || 'API error');
       err.errorCode = j.errorCode || '';
@@ -1133,7 +1143,6 @@ async function api(action, data={}){
       throw err;
     }
     return j.data;
-
   } finally { _apiInFlight--; }
 }
 
@@ -1154,19 +1163,30 @@ async function loadState(){
     S.balLog    = d.balanceLog  || [];
     S.doneTasks = d.completedTasks || [];
     S.tasks     = d.tasks || { partner:[], community:[] };
+    // Count active referrals (who deposited) from refs list
+    S._activeRefCount = (d.referrals||[]).filter(r=>r.hasDeposited).length;
     if(d.user && d.user.tankAccrued !== undefined){
       S.tankProgress = parseFloat(d.user.tankAccrued) || 0;
     }
+    // Mark data as successfully loaded from server
+    S._dataLoaded = true;
     // 🔔 Show in-app notification if new referral joined
     if(S._initialized && S.refs.length > prevRefCount){
-      const diff = S.refs.length - prevRefCount;
       const newest = S.refs[0];
-      const name = newest ? esc(newest.name||'صديق') : 'شخص';
-      showNotif(`🎉 دعوت ${name}! ستحصل على 20% من مشترياتهم`,'s');
+      const name = newest ? esc(newest.name||'') : '';
+      const lang = localStorage.getItem('pandaLang')||'en';
+      const t = TRANSLATIONS[lang]||TRANSLATIONS['en'];
+      const msg = (t.newRefNotif||TRANSLATIONS['en'].newRefNotif).replace('{name}', name||'👤');
+      showNotif(msg,'s');
     }
-    // ✅ pendingDeposit يُعالَج من السيرفر الخارجي — لا حاجة لـ verifyDeposit هنا
-  }catch(e){ console.warn('loadState:', e.message); }
-  updateUI();
+    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId, d.pendingDeposit.txHash);
+  }catch(e){
+    console.warn('loadState:', e.message);
+    // If data was never loaded yet, don't call updateUI (keeps UI in loading state)
+    if(!S._dataLoaded) return;
+  }
+  // Only update UI if we have confirmed server data at least once
+  if(S._dataLoaded) updateUI();
   S._initialized = true;
 }
 
@@ -1375,6 +1395,7 @@ function renderSocTasks(){
 }
 
 function renderTasks(){
+  // ── Regular referral tasks (count = all referrals) ──
   document.getElementById('refTaskList').innerHTML=REF_TASKS.map(t=>{
     const done=S.doneTasks.includes(t.id), can=S.refs.length>=t.n&&!done;
     return`<div class="task-item">
@@ -1386,6 +1407,24 @@ function renderTasks(){
       ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" onclick="claimRefTask('${t.id}')">Claim</button>`:`<button class="tbtn done" style="background:rgba(255,255,255,.05)">${S.refs.length}/${t.n}</button>`}
     </div>`;
   }).join('');
+
+  // ── Active referral tasks (count = referrals who deposited) ──
+  const activeCount = S._activeRefCount || 0;
+  const activeListEl = document.getElementById('refActiveTaskList');
+  if(activeListEl){
+    activeListEl.innerHTML=REF_ACTIVE_TASKS.map(t=>{
+      const done=S.doneTasks.includes(t.id), can=activeCount>=t.n&&!done;
+      return`<div class="task-item" style="border-color:rgba(255,215,0,.3)">
+        <div class="ticon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 6px gold)"></div>
+        <div class="tinfo">
+          <div class="tname" style="color:var(--coin)">💎 ${t.n} Active Friend${t.n>1?'s':''}</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px">Friends who deposited TON</div>
+          <div class="trew">${BAM_IMG} ${fmt(t.bam)} Bamboo + <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:50%"> ${t.coins} Coins</div>
+        </div>
+        ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" style="background:linear-gradient(135deg,#f9a825,#e65100)" onclick="claimRefTask('${t.id}')">Claim</button>`:`<button class="tbtn done" style="background:rgba(255,215,0,.07);color:var(--coin)">${activeCount}/${t.n}</button>`}
+      </div>`;
+    }).join('');
+  }
   renderSocTasks();
 }
 
@@ -1402,7 +1441,7 @@ async function claimRefTask(id){
   if(!debounce('claimRef_'+id)) return;
   _taskInFlight.add(id);
   try{
-    const t=REF_TASKS.find(x=>x.id===id);
+    const t=REF_TASKS.find(x=>x.id===id)||REF_ACTIVE_TASKS.find(x=>x.id===id);
     if(!t) return;
     api('claimTask',{taskId:id}).catch(()=>{});
     S.doneTasks.push(id);
@@ -1463,19 +1502,53 @@ async function submitAddTask(){
   const link=(document.getElementById('atLink').value||'').trim();
   const target=parseInt(document.getElementById('atTarget').value)||0;
   const st=document.getElementById('atStatus');
-  st.style.display='block';st.style.color='var(--muted)';st.textContent='⏳ Creating...';
+  st.style.display='block';st.style.color='var(--muted)';st.textContent='⏳ Checking...';
   if(!link.includes('t.me/')){st.style.color='#ff8a80';st.textContent='❌ Invalid Telegram link';return;}
   if(target<MIN_TASK_TARGET){st.style.color='#ff8a80';st.textContent=`❌ Min ${MIN_TASK_TARGET} users`;return;}
-  const cost=target*TASK_COINS_PER_USER; // Fix 2
+  const cost=target*TASK_COINS_PER_USER;
   if((S.user.coins||0)<cost){st.style.color='#ff8a80';st.textContent=`❌ Need ${fmt(cost)} Coins (have ${fmt(S.user.coins||0)})`;return;}
+  st.style.display='none';
+  // Show admin confirmation modal
+  showAdminConfirmModal(link, target, cost);
+}
+
+function showAdminConfirmModal(link, target, cost){
+  const existing=document.getElementById('adminConfirmModal');
+  if(existing) existing.remove();
+  const modal=document.createElement('div');
+  modal.id='adminConfirmModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);padding:20px;animation:fi .2s ease';
+  modal.innerHTML=`
+    <div style="background:linear-gradient(145deg,rgba(10,28,10,.98),rgba(6,18,6,.98));border:1px solid rgba(255,165,0,.4);border-radius:24px;padding:26px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 0 40px rgba(255,165,0,.2)">
+      <div style="font-size:50px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:17px;font-weight:800;color:#ffa726;margin-bottom:10px">تأكيد مهم قبل الإنشاء</div>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,165,0,.3),transparent);margin-bottom:14px"></div>
+      <div style="background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.25);border-radius:14px;padding:14px;margin-bottom:14px;font-size:13px;font-weight:700;color:#ffcc80;line-height:1.7;text-align:right;direction:rtl">
+        🤖 يجب رفع البوت <b style="color:#fff">@PandaBamboBot</b> كمشرف في قناتك <b>قبل</b> إنشاء المهمة.<br><br>
+        ⛔ في حال عدم رفع البوت كمشرف، <b style="color:#ff8a80">سيتم حذف المهمة ولن يتم إرجاع الرصيد إليك.</b>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;direction:rtl">القناة: <b style="color:var(--bamboo)">${esc(link)}</b><br>التكلفة: <b style="color:var(--coin)">${fmt(cost)} Coins</b></div>
+      <div style="display:flex;gap:10px">
+        <button onclick="document.getElementById('adminConfirmModal').remove();openModal('addTaskModal')" style="flex:1;padding:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:var(--muted);font-size:14px;font-weight:800;cursor:pointer;font-family:Fredoka,cursive">إلغاء</button>
+        <button onclick="confirmAndCreateTask('${esc(link)}',${target},${cost})" style="flex:1;padding:13px;background:linear-gradient(135deg,#e65100,#bf360c);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:Fredoka,cursive;box-shadow:0 0 14px rgba(230,81,0,.4)">✅ فهمت، أنشئ المهمة</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+}
+
+async function confirmAndCreateTask(link, target, cost){
+  document.getElementById('adminConfirmModal')?.remove();
+  closeModal('addTaskModal');
+  if(_submitInFlight) return;
   _submitInFlight=true;
   try{
     await api('createTask',{type:_atType,link,targetUsers:target});
-    S.user.coins=(S.user.coins||0)-cost; // Fix 2: deduct coins
-    st.style.color='var(--bamboo)';st.textContent='✅ Task created!';
+    S.user.coins=(S.user.coins||0)-cost;
     updateUI();
-    setTimeout(()=>{closeModal('addTaskModal');loadState();},1500);
-  }catch(e){st.style.color='#ff8a80';st.textContent=`❌ ${e.message||'Failed'}`;}
+    showNotif('✅ Task created successfully!','s');
+    setTimeout(()=>loadState(),1500);
+  }catch(e){showNotif(`❌ ${e.message||'Failed'}`,'e');}
   finally{_submitInFlight=false;}
 }
 
@@ -1562,23 +1635,11 @@ function goToTasksPartner(){
 async function doWithdraw(){
   if(!debounce('withdraw')) return;
   const addr=(document.getElementById('wdAddr').value||'').trim();
-  const amtRaw=parseFloat(document.getElementById('wdAmt').value)||0;
-  const amt=Math.floor(amtRaw); // ✅ عدد صحيح فقط
+  const amt=parseFloat(document.getElementById('wdAmt').value)||0;
   const u=S.user;
-
-  // ✅ التحقق من صيغة عنوان TON
-  if(!addr || !/^[EUk][Qq][A-Za-z0-9_\-]{46}[AQgw=]{0,2}$/.test(addr)){
-    showNotif('Invalid TON address! Use EQ... or UQ... format','e'); return;
-  }
-  if(amt < CFG.MIN_WD){showNotif(`Min ${CFG.MIN_WD} Coins!`,'e'); return;}
-  if(amt !== amtRaw){showNotif('Amount must be a whole number!','e'); return;}
-  if(amt > (u.coins||0)){showNotif('Not enough Coins!','e'); return;}
-
-  // ── Deposit-required guard (client-side fast check) ──────────────
-  if(!u.hasDeposited){
-    showDepositRequiredModal();
-    return;
-  }
+  if(!addr||addr.length<10){showNotif('Enter valid TON address!','e');return;}
+  if(amt<CFG.MIN_WD){showNotif(`Min ${CFG.MIN_WD} Coins!`,'e');return;}
+  if(amt>(u.coins||0)){showNotif('Not enough Coins!','e');return;}
 
   // Fix 9+10: check partner tasks locally first (fast feedback)
   const partnerTasks=S.tasks?.partner||[];
@@ -1590,7 +1651,9 @@ async function doWithdraw(){
   }
 
   try{
-    const res=await api('withdraw',{address:addr,amount:amt});
+    // Get device fingerprint (hardware-based, survives VPN/IP change)
+    const fp = await getOrComputeFp();
+    const res=await api('withdraw',{address:addr,amount:amt,deviceFingerprint:fp});
     u.coins-=amt;
     S.wdHist.unshift({amt,addr,ts:Date.now(),status:'pending'});
     document.getElementById('wdAddr').value='';
@@ -1600,8 +1663,8 @@ async function doWithdraw(){
   }catch(e){
     const msg=e.message||'';
     const errCode=e.errorCode||'';
-    if(errCode==='DEPOSIT_REQUIRED'||msg.includes('DEPOSIT_REQUIRED')||msg.includes('إيداع')){
-      showDepositRequiredModal();
+    if(errCode==='MULTI_ACCOUNT'||msg.includes('MULTI_ACCOUNT')){
+      showNotif(`⚠️ ${msg}`,'e');
     } else {
       showNotif(`❌ ${msg}`,'e');
     }
@@ -1873,7 +1936,6 @@ function updDepPreview(){
 }
 
 /* ════ TON CONNECT ════ */
-// ✅ TonConnect للعرض وإرسال المعاملة فقط — لا يُستدعى verifyDeposit أبداً
 async function initTON(){
   try{
     if(window.TON_CONNECT_UI){
@@ -1904,47 +1966,73 @@ function onWDisc(){
 async function connectWallet(){if(S.tonUI)await S.tonUI.openModal();}
 async function disconnectWallet(){if(S.tonUI)await S.tonUI.disconnect();}
 
-// ✅ SECURED: إرسال المعاملة فقط — لا يُبلَّغ السيرفر بالمبلغ ولا يُطلب تأكيد
-// السيرفر الخارجي يراقب المحفظة مباشرة ويُضيف الرصيد تلقائياً
-window.initiateDeposit = async function(){
-  if(!S.wallet){showNotif('Connect your wallet first!','e'); return;}
-  const amt = parseFloat(document.getElementById('depositAmountInput').value);
-  if(!amt || amt < 1){showNotif('Minimum 1 TON','e'); return;}
-  if(amt > 1000){showNotif('Amount too large','e'); return;}
-  const sd = document.getElementById('depositStatus');
+window.initiateDeposit=async function(){
+  if(!S.wallet){alert('Connect wallet first');return;}
+  const amt=parseFloat(document.getElementById('depositAmountInput').value);
+  if(!amt||amt<1){alert('Minimum 1 TON');return;}
+  if(amt>1000){alert('Amount too large');return;}
   try{
-    const comment = String(S.userId); // الـ userId كتعليق للتعرف على المعاملة
-    const nano = String(Math.floor(amt * 1e9));
+    const comment=String(S.userId);
+    const nano=String(Math.floor(amt*1e9));
     if(!window.TonWeb) throw new Error('TonWeb not loaded');
-    const TW = window.TonWeb; new TW();
-    const cell = new TW.boc.Cell();
-    cell.bits.writeUint(0,32);
-    cell.bits.writeString(comment);
-    const boc = await cell.toBoc(false);
-    const payload = TW.utils.bytesToBase64(boc);
-    const tx = {
-      validUntil: Math.floor(Date.now()/1000) + 600,
-      messages: [{address: CFG.DEPOSIT_WALLET, amount: nano, payload}],
-    };
-    // إرسال المعاملة عبر TonConnect فقط
-    await S.tonUI.sendTransaction(tx);
-    // ✅ لا يُرسَل أي شيء للسيرفر — السيرفر الخارجي يكتشف المعاملة تلقائياً
+    const TW=window.TonWeb; new TW();
+    const cell=new TW.boc.Cell();
+    cell.bits.writeUint(0,32); cell.bits.writeString(comment);
+    const boc=await cell.toBoc(false);
+    const payload=TW.utils.bytesToBase64(boc);
+    const tx={validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:CFG.DEPOSIT_WALLET,amount:nano,payload}]};
+    const result=await S.tonUI.sendTransaction(tx);
+    // Show pending message — balance will be credited by server within 3 minutes
+    const sd=document.getElementById('depositStatus');
     sd.classList.add('visible');
     sd.querySelector('.txsi').innerHTML='⏳';
     sd.querySelector('.txsm').innerHTML='Transaction sent!';
-    document.getElementById('depositStatusDetail').textContent=
-      `Your balance will be credited automatically within 3 minutes. Your ID: ${esc(S.userId)}`;
+    document.getElementById('depositStatusDetail').textContent='Your balance will be added to your account within 3 minutes.';
     showNotif('✅ Transaction sent! Balance will be credited within 3 minutes','s');
-    // تحقق سلبي فقط: إعادة تحميل الحالة بعد 3 دقائق
-    setTimeout(()=>{ loadState(); }, 3 * 60 * 1000);
+    // Register deposit in DB (fire and forget — server monitors wallet independently)
+    try{ await api('deposit',{amount:amt,txHash:result.boc,comment}); }catch(_){}
   }catch(e){
+    const sd=document.getElementById('depositStatus');
     sd.classList.add('visible');
     sd.querySelector('.txsi').innerHTML='❌';
     sd.querySelector('.txsm').innerHTML=e.message?.includes('rejected')?'Transaction rejected':'Transaction failed';
     document.getElementById('depositStatusDetail').textContent=e.message||'Please try again';
   }
 };
-// ✅ تم حذف handleDepOk و startDepVerify بالكامل — لا يوجد verifyDeposit
+async function handleDepOk(result,amt,comment){
+  try{
+    const d=await api('deposit',{amount:amt,txHash:result.boc,comment});
+    const sd=document.getElementById('depositStatus');
+    sd.classList.add('visible');
+    sd.querySelector('.txsi').innerHTML='⏳';
+    sd.querySelector('.txsm').innerHTML='Transaction sent!';
+    document.getElementById('depositStatusDetail').textContent='Waiting for confirmation (~1 min)...';
+    startDepVerify(d.depositId,result.boc);
+  }catch(e){console.error(e);}
+}
+function startDepVerify(depId,txHash){
+  if(S.depCheckInt) clearInterval(S.depCheckInt);
+  if(!depId||!txHash) return;
+  let attempts=0;
+  S.depCheckInt=setInterval(async()=>{
+    attempts++;
+    try{
+      const r=await api('verifyDeposit',{depositId:depId,txHash});
+      if(r.status==='completed'){
+        clearInterval(S.depCheckInt);
+        const sd=document.getElementById('depositStatus');
+        sd.querySelector('.txsi').innerHTML='✅';
+        sd.querySelector('.txsm').innerHTML='Deposit confirmed!';
+        document.getElementById('depositStatusDetail').textContent=`${r.amount} TON added`;
+        showNotif(`💰 ${r.amount} TON deposited!`,'s');
+        S.user.hasDeposited=true;
+        S.user.tonBalance=(S.user.tonBalance||0)+(r.amount||0);
+        loadState();
+        setTimeout(()=>sd.classList.remove('visible'),3000);
+      }
+    }catch(e){if(attempts>=18) clearInterval(S.depCheckInt);}
+  },10000);
+}
 
 /* ════ MODALS ════ */
 function openModal(id){
@@ -2045,9 +2133,14 @@ function ldHide(){
   const s = document.getElementById('loadingScreen');
   if(s){ s.classList.add('hidden'); setTimeout(()=>s.remove(), 700); }
 }
-function ldError(msg){
+function ldError(msg, retryLabel){
+  retryLabel = retryLabel || '🔄 Retry';
   const stat = document.getElementById('ldStatus');
-  if(stat){ stat.textContent = msg; stat.style.color = '#ff8a80'; }
+  if(stat){
+    stat.innerHTML = msg.replace(/\n/g,'<br>');
+    stat.style.color = '#ff8a80';
+    stat.style.lineHeight = '1.7';
+  }
   // Turn all segments red
   document.querySelectorAll('#ldSegs .ld-seg').forEach(s=>{
     s.classList.add('active');
@@ -2056,7 +2149,18 @@ function ldError(msg){
     s.style.boxShadow   = '0 0 10px rgba(239,83,80,.6)';
   });
   const pctEl = document.getElementById('ldPct');
-  if(pctEl){ pctEl.textContent = 'Error'; pctEl.style.color = '#ff8a80'; }
+  if(pctEl){ pctEl.textContent = '⚠️'; pctEl.style.color = '#ff8a80'; }
+  // Add retry button inside loading screen — DO NOT hide the screen
+  const ld = document.getElementById('loadingScreen');
+  if(ld && !document.getElementById('ldRetryBtn')){
+    const btn = document.createElement('button');
+    btn.id = 'ldRetryBtn';
+    btn.textContent = retryLabel;
+    btn.style.cssText = 'margin-top:22px;padding:12px 32px;background:linear-gradient(135deg,#ef5350,#b71c1c);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:Fredoka,cursive;box-shadow:0 4px 16px rgba(239,83,80,.5);';
+    btn.onclick = ()=>{ location.reload(); };
+    ld.appendChild(btn);
+  }
+  // ⛔ Loading screen stays visible — app NEVER opens with zero data
 }
 
 // Preload all item images + panda image
@@ -2091,12 +2195,15 @@ function ldAnimateTo(targetPct, msg, duration=600){
 }
 
 async function init(){
+  // Helper: get current lang translation
+  function lt(key){ const lang=localStorage.getItem('pandaLang')||'en'; return (TRANSLATIONS[lang]||TRANSLATIONS['en'])[key]||TRANSLATIONS['en'][key]||key; }
+
   // Record start time — minimum 6 seconds total
   const startTime = Date.now();
   const MIN_LOADING_MS = 3000;
 
   // Step 1: Telegram setup
-  ldProgress(0,'Starting...');
+  ldProgress(0, lt('ldLoading'));
   if(window.Telegram?.WebApp){
     S.tg=window.Telegram.WebApp;
     S.tg.ready(); S.tg.expand();
@@ -2114,61 +2221,61 @@ async function init(){
       ''
     ).toString().replace(/\D/g,'');
   }
-  await ldAnimateTo(10,'Connecting to Telegram...', 700);
+  await ldAnimateTo(10, lt('ldConnecting'), 700);
   await new Promise(r=>setTimeout(r,400));
 
   // Step 2: Preload images
-  await ldAnimateTo(20,'Loading assets...', 600);
+  await ldAnimateTo(20, lt('ldAssets'), 600);
   await Promise.all([
     preloadImages().catch(()=>{}),
     new Promise(r=>setTimeout(r,800)), // min 0.8s on this step
   ]);
-  await ldAnimateTo(40,'Assets loaded!', 500);
+  await ldAnimateTo(40, lt('ldAssetsOk'), 500);
   await new Promise(r=>setTimeout(r,300));
 
-  // Step 3: Load user data — RACE all servers, fastest wins
-  await ldAnimateTo(50,'🏁 Finding fastest server...', 600);
+  // Step 3: Load user data
+  await ldAnimateTo(50, lt('ldConnecting'), 600);
   let loaded = false;
   let attempts = 0;
   const MAX_ATTEMPTS = 3;
   while(!loaded && attempts < MAX_ATTEMPTS){
     attempts++;
     try{
-      ldProgress(50 + attempts*3, attempts===1 ? '⚡ Racing servers...' : `Retrying... (${attempts}/${MAX_ATTEMPTS})`);
+      ldProgress(50 + attempts*5, attempts===1 ? lt('ldConnected') : `${lt('ldRetrying')} (${attempts}/${MAX_ATTEMPTS})`);
       await loadState();
       if(S.user && S.userId) loaded=true;
       else throw new Error('No user data');
     }catch(e){
       console.warn(`Attempt ${attempts} failed:`,e.message);
-      sessionStorage.removeItem('srv'); // force re-race on retry
       if(attempts < MAX_ATTEMPTS){
-        await new Promise(r=>setTimeout(r,1200*attempts));
+        ldProgress(50 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
+        await new Promise(r=>setTimeout(r,2000*attempts));
       }
     }
   }
   if(!loaded){
-    ldError('Connection failed. Please restart the app.');
+    ldError(lt('ldErrorMsg'), lt('ldRetryBtn'));
     return;
   }
-  const winSrv = sessionStorage.getItem('srv')||'';
-  const winLabel = winSrv ? winSrv.replace('https://','').split('.')[0] : 'server';
-  await ldAnimateTo(70,`✅ Connected to ${winLabel}`, 500);
+  await ldAnimateTo(70, lt('ldConnected'), 500);
   await new Promise(r=>setTimeout(r,300));
 
   // Step 4: Render UI
-  await ldAnimateTo(80,'Building interface...', 400);
+  await ldAnimateTo(80, lt('ldBuilding'), 400);
   renderMarket();
   renderTasks();
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers
-  await ldAnimateTo(90,'Setting up wallet...', 400);
+  await ldAnimateTo(90, lt('ldWallet'), 400);
   setTimeout(()=>initTON(), 600);
+  // Pre-compute device fingerprint in background
+  getOrComputeFp().catch(()=>{});
   startTank();
   setInterval(()=>{ loadState(); }, 30000);
   await new Promise(r=>setTimeout(r,400));
 
-  await ldAnimateTo(100,'Ready! 🐼', 500);
+  await ldAnimateTo(100, lt('ldReady'), 500);
 
   // Ensure minimum loading time (5-10s feel)
   const elapsed = Date.now() - startTime;
@@ -2245,6 +2352,21 @@ const TRANSLATIONS = {
     multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🐼',
     depositRequired:'⛔ السحب متاح فقط للمودعين\n\n💎 قم بإيداع TON واحد على الأقل لتفعيل السحب\n\n🔄 جارٍ تحويلك لصفحة الإيداع...',
     depositRequiredBtn:'💎 إيداع الآن',
+    ldLoading:'جارٍ التحميل...',
+    ldConnecting:'الاتصال بتيليجرام...',
+    ldAssets:'تحميل الملفات...',
+    ldAssetsOk:'تم تحميل الملفات!',
+    ldFinding:'🏁 البحث عن أسرع سيرفر...',
+    ldRacing:'⚡ السباق بين السيرفرات...',
+    ldRetrying:'إعادة المحاولة...',
+    ldBusy:'⏳ السيرفرات مشغولة، إعادة المحاولة...',
+    ldConnected:'✅ متصل',
+    ldBuilding:'بناء الواجهة...',
+    ldWallet:'إعداد المحفظة...',
+    ldReady:'جاهز! 🐼',
+    ldErrorMsg:'⚠️ الخدمة مؤقتاً غير متاحة\nجميع السيرفرات مشغولة\nأعد تشغيل البوت بعد لحظات',
+    ldRetryBtn:'🔄 إعادة المحاولة',
+    newRefNotif:'🎉 دعوت {name}! ستحصل على 20% من مشترياتهم',
   },
   en:{
     navHome:'Home',navMarket:'Market',navTasks:'Tasks',navFriends:'Friends',navFinance:'Finance',
@@ -2304,6 +2426,21 @@ const TRANSLATIONS = {
     multiAccount:'⚠️ You are using multiple accounts — play fair 🐼',
     depositRequired:'⛔ Withdrawal is only available for depositors\n\n💎 Make at least one TON deposit to unlock withdrawals\n\n🔄 Redirecting you to the deposit page...',
     depositRequiredBtn:'💎 Deposit Now',
+    ldLoading:'Loading...',
+    ldConnecting:'Connecting to Telegram...',
+    ldAssets:'Loading assets...',
+    ldAssetsOk:'Assets loaded!',
+    ldFinding:'🏁 Finding fastest server...',
+    ldRacing:'⚡ Racing servers...',
+    ldRetrying:'Retrying...',
+    ldBusy:'⏳ Servers busy, retrying...',
+    ldConnected:'✅ Connected',
+    ldBuilding:'Building interface...',
+    ldWallet:'Setting up wallet...',
+    ldReady:'Ready! 🐼',
+    ldErrorMsg:'⚠️ Service temporarily unavailable\nAll servers are busy\nPlease restart the app in a moment',
+    ldRetryBtn:'🔄 Retry',
+    newRefNotif:'🎉 You invited {name}! You will earn 20% of their purchases',
   },
   ru:{
     navHome:'Главная',navMarket:'Рынок',navTasks:'Задания',navFriends:'Друзья',navFinance:'Финансы',
@@ -2363,6 +2500,21 @@ const TRANSLATIONS = {
     multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🐼',
     depositRequired:'⛔ Вывод доступен только для пополнивших счёт\n\n💎 Пополните счёт хотя бы на 1 TON, чтобы разблокировать вывод\n\n🔄 Перенаправление на страницу пополнения...',
     depositRequiredBtn:'💎 Пополнить сейчас',
+    ldLoading:'Загрузка...',
+    ldConnecting:'Подключение к Telegram...',
+    ldAssets:'Загрузка ресурсов...',
+    ldAssetsOk:'Ресурсы загружены!',
+    ldFinding:'🏁 Поиск быстрого сервера...',
+    ldRacing:'⚡ Соревнование серверов...',
+    ldRetrying:'Повтор попытки...',
+    ldBusy:'⏳ Серверы заняты, повтор...',
+    ldConnected:'✅ Подключено',
+    ldBuilding:'Сборка интерфейса...',
+    ldWallet:'Настройка кошелька...',
+    ldReady:'Готово! 🐼',
+    ldErrorMsg:'⚠️ Сервис временно недоступен\nВсе серверы заняты\nПожалуйста, перезапустите приложение',
+    ldRetryBtn:'🔄 Повторить',
+    newRefNotif:'🎉 Вы пригласили {name}! Вы получите 20% с их покупок',
   },
   es:{
     navHome:'Inicio',navMarket:'Mercado',navTasks:'Tareas',navFriends:'Amigos',navFinance:'Finanzas',
@@ -2422,6 +2574,21 @@ const TRANSLATIONS = {
     multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🐼',
     depositRequired:'⛔ El retiro solo está disponible para quienes han depositado\n\n💎 Realiza al menos un depósito de TON para desbloquear los retiros\n\n🔄 Redirigiendo a la página de depósito...',
     depositRequiredBtn:'💎 Depositar ahora',
+    ldLoading:'Cargando...',
+    ldConnecting:'Conectando a Telegram...',
+    ldAssets:'Cargando recursos...',
+    ldAssetsOk:'¡Recursos cargados!',
+    ldFinding:'🏁 Buscando servidor más rápido...',
+    ldRacing:'⚡ Compitiendo servidores...',
+    ldRetrying:'Reintentando...',
+    ldBusy:'⏳ Servidores ocupados, reintentando...',
+    ldConnected:'✅ Conectado',
+    ldBuilding:'Construyendo interfaz...',
+    ldWallet:'Configurando billetera...',
+    ldReady:'¡Listo! 🐼',
+    ldErrorMsg:'⚠️ Servicio temporalmente no disponible\nTodos los servidores están ocupados\nPor favor reinicia la app en un momento',
+    ldRetryBtn:'🔄 Reintentar',
+    newRefNotif:'🎉 Invitaste a {name}! Ganarás 20% de sus compras',
   },
   fr:{
     navHome:'Accueil',navMarket:'Marché',navTasks:'Tâches',navFriends:'Amis',navFinance:'Finance',
@@ -2481,6 +2648,21 @@ const TRANSLATIONS = {
     multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🐼',
     depositRequired:'⛔ Le retrait est réservé aux utilisateurs ayant effectué un dépôt\n\n💎 Effectuez au moins un dépôt TON pour débloquer les retraits\n\n🔄 Redirection vers la page de dépôt...',
     depositRequiredBtn:'💎 Déposer maintenant',
+    ldLoading:'Chargement...',
+    ldConnecting:'Connexion à Telegram...',
+    ldAssets:'Chargement des ressources...',
+    ldAssetsOk:'Ressources chargées!',
+    ldFinding:'🏁 Recherche du serveur le plus rapide...',
+    ldRacing:'⚡ Course des serveurs...',
+    ldRetrying:'Nouvelle tentative...',
+    ldBusy:'⏳ Serveurs occupés, réessai...',
+    ldConnected:'✅ Connecté',
+    ldBuilding:"Construction de l'interface...",
+    ldWallet:'Configuration du portefeuille...',
+    ldReady:'Prêt! 🐼',
+    ldErrorMsg:'⚠️ Service temporairement indisponible\nTous les serveurs sont occupés\nVeuillez redémarrer l\'application',
+    ldRetryBtn:'🔄 Réessayer',
+    newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 20% de ses achats',
   }
 };
 
@@ -2507,6 +2689,12 @@ function applyLang(lang,flag,code){
   document.getElementById('langCode').textContent=code;
   document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang));
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+
+  // ── Loading screen text (if still visible) ──
+  const ldStat=document.getElementById('ldStatus');
+  if(ldStat && !ldStat.style.color) ldStat.textContent=t.ldLoading||'Loading...';
+  const ldRetryBtn=document.getElementById('ldRetryBtn');
+  if(ldRetryBtn) ldRetryBtn.textContent=t.ldRetryBtn||'🔄 Retry';
 
   // ── Universal data-i18n engine ──
   document.querySelectorAll('[data-i18n]').forEach(el=>{

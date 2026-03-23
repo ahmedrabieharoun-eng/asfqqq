@@ -336,7 +336,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ptc{position:fixed;pointer-events:none;z-index:400;font-size:17px;animation:ptup .9s ease-out forwards}
 @keyframes ptup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-74px) scale(.4);opacity:0}}
 ::-webkit-scrollbar{width:3px}
-@keyframes comp-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,165,0,.7))}50%{filter:drop-shadow(0 0 18px rgba(255,165,0,1))}}
+@keyframes comp-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,165,0,.7))}50%{filter:drop-shadow(0 0 20px rgba(255,165,0,1))}}
+@keyframes comp-shimmer{0%{opacity:.3;transform:scaleX(.5) translateX(-30%)}50%{opacity:1;transform:scaleX(1) translateX(0)}100%{opacity:.3;transform:scaleX(.5) translateX(30%)}}
+@keyframes podium-rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes winning-pulse{0%,100%{border-color:rgba(255,215,0,.2)}50%{border-color:rgba(255,215,0,.55)}}
+@keyframes float-particle{0%{transform:translateY(0) scale(1);opacity:.6}100%{transform:translateY(-100px) scale(.2);opacity:0}}
 @keyframes comp-shimmer{0%{opacity:.4;transform:scaleX(.6)}50%{opacity:1;transform:scaleX(1)}100%{opacity:.4;transform:scaleX(.6)}}
 @keyframes podium-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes winning-pulse{0%,100%{box-shadow:0 0 0 rgba(76,175,80,0)}50%{box-shadow:0 0 18px rgba(76,175,80,.35)}}
@@ -3068,12 +3072,33 @@ function openCompPage(){
     if(!el){clearInterval(window._compCdInt);return;}
     const end=_compData?.endDate||COMP_END_DATE;
     el.textContent=fmtCountdown(end-Date.now());
+    // refresh countdown chips inside panes
+    ['comp-active-content','comp-mining-content'].forEach(id=>{
+      const cd=document.querySelector(`#${id} [id^="cd_"]`);
+      if(cd) cd.textContent=fmtCountdown(end-Date.now());
+    });
   },1000);
+  // spawn ambient particles on bg
+  if(!window._compParticles){
+    window._compParticles=true;
+    const pg=document.getElementById('compPage');
+    function spawnCompParticle(){
+      if(document.getElementById('compPage').style.display==='none') return;
+      const p=document.createElement('div');
+      const emojis=['🎋','⭐','✨','🌟','💫'];
+      p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      p.style.cssText=`position:fixed;left:${5+Math.random()*90}%;bottom:${80+Math.random()*10}px;font-size:${10+Math.random()*10}px;z-index:3;pointer-events:none;animation:float-particle ${1.5+Math.random()*2}s ease-out forwards;opacity:.5`;
+      document.getElementById('compPage').appendChild(p);
+      setTimeout(()=>p.remove(),3500);
+    }
+    window._compParticleInt=setInterval(spawnCompParticle,800);
+  }
 }
 function closeCompPage(){
   document.getElementById('compPage').style.display='none';
   document.body.style.overflow='';
   if(window._compCdInt){clearInterval(window._compCdInt);window._compCdInt=null;}
+  if(window._compParticleInt){clearInterval(window._compParticleInt);window._compParticleInt=null;window._compParticles=false;}
 }
 function openCompHelp(){
   const lang=localStorage.getItem('pandaLang')||'en';
@@ -3200,150 +3225,168 @@ function renderCompPane(elId, opt){
   const {title,desc,prizeTotal,endDate,board,myRank,myScore,myScoreLbl,prizes,scoreSuffix,color,colorRgb,T}=opt;
   const isActive = elId.includes('active');
   const scoreIcon = isActive
-    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:16px;height:16px;object-fit:contain;border-radius:50%;vertical-align:middle">`
-    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`;
+    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:15px;height:15px;object-fit:contain;border-radius:50%;vertical-align:middle">`
+    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:15px;height:15px;object-fit:contain;vertical-align:middle">`;
   const PODIUM_IMGS = ['https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png'];
+  const myWinning  = myRank>=0 && myRank<20;
+  const rankDisp   = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
+  const rankColor  = myWinning ? '#FFD700' : myRank>=0 ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.2)';
+  const rankShadow = myWinning ? '0 0 20px rgba(255,215,0,.8)' : 'none';
 
-  const myWinning = myRank>=0 && myRank<20;
-  const rankDisp  = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
-  const rankColor = myWinning ? color : myRank>=0 ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.22)';
-  const rankShadow= myWinning ? `0 0 18px rgba(${colorRgb},.7)` : 'none';
-
-  /* ── Hero card (image bg) ── */
+  /* ══ HERO CARD ══ */
   let html=`
-  <div style="position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.6)">
-    <!-- card bg image -->
-    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ff69c85a-e4d7-47fe-8add-2a65d73673b7.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.45">
-    <!-- gradient overlay -->
-    <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(${colorRgb},.22) 0%,rgba(2,8,2,.88) 100%);z-index:1"></div>
-    <!-- top shimmer line -->
-    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(${colorRgb},.9),transparent);z-index:2;animation:comp-shimmer 3s ease-in-out infinite"></div>
+  <div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:16px">
+    <!-- bg image blended -->
+    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ff69c85a-e4d7-47fe-8add-2a65d73673b7.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0">
+    <!-- overlay: dark + color tint -->
+    <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(${colorRgb},.18) 0%,rgba(2,6,2,.82) 55%,rgba(2,6,2,.95) 100%);z-index:1"></div>
+    <!-- animated shimmer top -->
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(${colorRgb},.9) 50%,transparent 100%);z-index:2;animation:comp-shimmer 3s ease-in-out infinite"></div>
+    <!-- green glow at bottom edge -->
+    <div style="position:absolute;bottom:0;left:10%;right:10%;height:1px;background:rgba(${colorRgb},.35);z-index:2;filter:blur(2px)"></div>
 
-    <div style="position:relative;z-index:3;padding:18px 16px 16px">
+    <div style="position:relative;z-index:3;padding:20px 16px 18px">
       <!-- title -->
-      <div style="font-size:15px;font-weight:800;color:${color};margin-bottom:3px;text-shadow:0 0 20px rgba(${colorRgb},.5)">${title}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:16px">${desc}</div>
+      <div style="font-size:16px;font-weight:800;color:${color};letter-spacing:.3px;text-shadow:0 0 24px rgba(${colorRgb},.6);margin-bottom:3px">${title}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.42);font-weight:600;margin-bottom:18px">${desc}</div>
 
-      <!-- 3 stat cards using provided images -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <!-- VISUAL HIERARCHY: Big prize (hero) + 2 small info -->
+      <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px">
 
-        <!-- Prize card (cup image) -->
-        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;cursor:default">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fd38c49f-0b7a-4531-b791-aca220f9802c.png" style="width:100%;height:100%;object-fit:cover">
+        <!-- HERO: Prize cup — takes 55% width -->
+        <div style="flex:0 0 55%;position:relative;border-radius:18px;overflow:hidden;aspect-ratio:.95/1">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fd38c49f-0b7a-4531-b791-aca220f9802c.png" style="width:100%;height:100%;object-fit:cover;display:block">
+          <!-- gold glow overlay -->
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,rgba(255,215,0,.08) 0%,transparent 70%)"></div>
         </div>
 
-        <!-- Timer card -->
-        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17d3a8cd-b9d1-4d12-a478-a0e4764c75ae.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
-          <div style="position:relative;z-index:1;text-align:center">
-            <div id="cd_${elId}" style="font-size:13px;font-weight:800;color:#fff;text-shadow:0 0 10px rgba(255,120,80,.9);line-height:1.2;letter-spacing:.5px">${fmtCountdown(endDate)}</div>
-            <div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">${T.compEnds||'Ends In'}</div>
+        <!-- Right column: timer + top20 stacked -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+
+          <!-- Timer card -->
+          <div style="flex:1;position:relative;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72px">
+            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17d3a8cd-b9d1-4d12-a478-a0e4764c75ae.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+            <div style="position:relative;z-index:1;text-align:center;padding:6px 4px">
+              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${T.compEnds||'Ends In'}</div>
+              <div id="cd_${elId}" style="font-size:14px;font-weight:800;color:#fff;text-shadow:0 0 12px rgba(255,120,60,1);letter-spacing:.5px;line-height:1.1">${fmtCountdown(endDate)}</div>
+            </div>
           </div>
-        </div>
 
-        <!-- Top 20 card (image with text already on it) -->
-        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;cursor:default">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d03d5885-157e-4ee9-8ab5-dbe6fc358e33.png" style="width:100%;height:100%;object-fit:cover">
+          <!-- Top20 card -->
+          <div style="flex:1;position:relative;border-radius:14px;overflow:hidden;min-height:72px">
+            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d03d5885-157e-4ee9-8ab5-dbe6fc358e33.png" style="width:100%;height:100%;object-fit:cover;display:block">
+          </div>
         </div>
       </div>
 
-      <!-- My stats row -->
-      <div style="background:rgba(0,0,0,.55);border:1px solid rgba(${colorRgb},.28);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)">
+      <!-- MY STATS — score + rank -->
+      <div style="background:rgba(0,0,0,.52);border:1px solid rgba(${colorRgb},.22);border-radius:16px;padding:12px 15px;display:flex;align-items:center;gap:0;backdrop-filter:blur(12px)">
         <div style="flex:1">
-          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">${T.compMyScore||'Your Score'}</div>
-          <div style="display:flex;align-items:center;gap:6px">
+          <div style="font-size:9px;color:rgba(255,255,255,.38);font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px">${T.compMyScore||'Your Score'}</div>
+          <div style="display:flex;align-items:center;gap:7px">
             ${scoreIcon}
-            <span style="font-size:24px;font-weight:800;color:${color};text-shadow:0 0 14px rgba(${colorRgb},.5);line-height:1">${fmt(myScore)}</span>
-            <span style="font-size:10px;color:rgba(255,255,255,.38);font-weight:600">${scoreSuffix}</span>
+            <span style="font-size:26px;font-weight:800;color:${color};text-shadow:0 0 16px rgba(${colorRgb},.6);line-height:1">${fmt(myScore)}</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.32);font-weight:600;margin-top:4px">${scoreSuffix}</span>
           </div>
         </div>
-        <div style="width:1px;height:40px;background:rgba(255,255,255,.1)"></div>
+        <div style="width:1px;height:44px;background:rgba(255,255,255,.08);margin:0 14px"></div>
         <div style="text-align:right">
-          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">${T.compMyRank||'Your Rank'}</div>
-          <div style="font-size:24px;font-weight:800;color:${rankColor};text-shadow:${rankShadow};line-height:1">${rankDisp}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.38);font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px">${T.compMyRank||'Your Rank'}</div>
+          <div style="font-size:26px;font-weight:800;line-height:1;color:${rankColor};text-shadow:${rankShadow}">${rankDisp}</div>
         </div>
       </div>
 
+      <!-- WINNING BANNER -->
       ${myWinning ? `
-      <div style="margin-top:10px;padding:11px 14px;background:linear-gradient(135deg,rgba(76,175,80,.18),rgba(0,0,0,.4));border:1px solid rgba(76,175,80,.4);border-radius:12px;display:flex;align-items:center;justify-content:space-between;animation:winning-pulse 2s ease-in-out infinite">
-        <div style="font-size:12px;font-weight:800;color:#a5d6a7">🎉 ${T.compWinning||'You are winning!'}</div>
-        <div style="font-size:16px;font-weight:800;color:#00D4FF;text-shadow:0 0 10px rgba(0,212,255,.5)">${prizes[myRank]||0} TON</div>
+      <div style="margin-top:10px;padding:11px 16px;background:linear-gradient(135deg,rgba(76,175,80,.16),rgba(255,215,0,.06));border:1px solid rgba(255,215,0,.3);border-radius:14px;display:flex;align-items:center;justify-content:space-between;animation:winning-pulse 2s ease-in-out infinite">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span style="font-size:18px">🐼</span>
+          <span style="font-size:12px;font-weight:800;color:#a5d6a7">${T.compWinning||'You are winning!'}</span>
+        </div>
+        <div style="font-size:17px;font-weight:800;color:#FFD700;text-shadow:0 0 14px rgba(255,215,0,.7)">${prizes[myRank]||0} TON</div>
       </div>` : ''}
     </div>
   </div>
 
-  <!-- Leaderboard label -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 3px">
-    <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px">
-      <span style="display:inline-block;width:3px;height:16px;background:${color};border-radius:2px;vertical-align:middle"></span>
-      ${T.compLeaderboard||'🏅 Leaderboard'}
+  <!-- LEADERBOARD HEADER -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:4px;height:18px;background:linear-gradient(180deg,${color},transparent);border-radius:2px"></div>
+      <span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.65)">${T.compLeaderboard||'🏅 Leaderboard'}</span>
     </div>
-    <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.8);background:rgba(${colorRgb},.1);border:1px solid rgba(${colorRgb},.25);border-radius:20px;padding:3px 10px">Top 50</div>
+    <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.85);background:rgba(${colorRgb},.1);border:1px solid rgba(${colorRgb},.22);border-radius:20px;padding:3px 11px">Top 50</div>
   </div>`;
 
-  /* ── Podium top 3 ── */
+  /* ══ PODIUM top 3 ══ */
   if(board.length>=1){
-    const order=[1,0,2]; // left=2nd, center=1st, right=3rd
-    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:18px;padding:0 8px">`;
-    for(const idx of order){
-      const u=board[idx]; if(!u) continue;
+    /* order: 2nd (left), 1st (center/tallest), 3rd (right) */
+    const CONF=[
+      {i:1, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png', colH:'88px', avSize:'44px', fontSize:'11px', mt:'22px'},
+      {i:0, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png', colH:'114px',avSize:'54px', fontSize:'13px', mt:'0'},
+      {i:2, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png', colH:'70px', avSize:'38px', fontSize:'10px', mt:'36px'},
+    ];
+    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;margin-bottom:20px;padding:0 4px">`;
+    for(const conf of CONF){
+      const u=board[conf.i]; if(!u) continue;
       const isMe=u.userId===S.userId;
-      const podiumImg=PODIUM_IMGS[idx];
-      const heights=['110px','86px','72px'];
-      const avatarSizes=['52px','44px','38px'];
-      const nameSizes=['12px','11px','10px'];
-      const glow=isMe?`0 0 20px rgba(${colorRgb},.6)`:'none';
+      const prizeAmt=prizes[conf.i];
       const av=u.photo
-        ?`<img src="${esc(u.photo)}" style="width:${avatarSizes[idx]};height:${avatarSizes[idx]};border-radius:50%;object-fit:cover;border:2px solid rgba(${colorRgb},.7);box-shadow:${glow}" onerror="this.style.display='none'">`
-        :`<div style="width:${avatarSizes[idx]};height:${avatarSizes[idx]};border-radius:50%;background:rgba(${colorRgb},.12);border:2px solid rgba(${colorRgb},.4);display:flex;align-items:center;justify-content:center;font-size:${idx===0?'22':'16'}px">🐼</div>`;
-      html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;animation:podium-rise ${0.4+idx*0.15}s ease-out">
+        ?`<img src="${esc(u.photo)}" style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;object-fit:cover;border:2.5px solid ${conf.i===0?'#FFD700':conf.i===1?'#C0C0C0':'#CD7F32'};box-shadow:0 0 ${conf.i===0?'16px rgba(255,215,0,.5)':'10px rgba(255,255,255,.15)'}" onerror="this.style.display='none'">`
+        :`<div style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;background:rgba(${colorRgb},.12);border:2.5px solid ${conf.i===0?'#FFD700':conf.i===1?'#C0C0C0':'#CD7F32'};display:flex;align-items:center;justify-content:center;font-size:${conf.i===0?'24':'18'}px">🐼</div>`;
+      const medal=conf.i===0?'🥇':conf.i===1?'🥈':'🥉';
+      html+=`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:${conf.mt};animation:podium-rise ${0.3+conf.i*0.12}s ease-out both">
+        <div style="font-size:${conf.i===0?'20':'16'}px;margin-bottom:1px">${medal}</div>
         ${av}
-        <div style="font-size:${nameSizes[idx]};font-weight:800;color:${isMe?color:'#fff'};text-align:center;max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${glow}">${esc(u.name||'Panda')}</div>
-        <div style="display:flex;align-items:center;gap:3px;background:rgba(${colorRgb},.14);border:1px solid rgba(${colorRgb},.3);border-radius:10px;padding:2px 7px">
+        <div style="font-size:${conf.fontSize};font-weight:800;color:${isMe?color:'rgba(255,255,255,.9)'};text-align:center;max-width:75px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${isMe?'0 0 10px rgba('+colorRgb+',.5)':'none'}">${esc(u.name||'Panda')}</div>
+        <!-- score chip -->
+        <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.45);border:1px solid rgba(${colorRgb},.28);border-radius:10px;padding:2px 8px">
           ${scoreIcon}<span style="font-size:10px;font-weight:800;color:${color}">${fmt(u.score)}</span>
         </div>
-        <div style="background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(0,0,0,.5));border:1px solid rgba(0,212,255,.35);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:800;color:#00D4FF;white-space:nowrap">${prizes[idx]} TON</div>
+        <!-- prize badge — gold glow for 1st -->
+        <div style="background:${conf.i===0?'linear-gradient(135deg,rgba(255,215,0,.25),rgba(255,165,0,.12))':'rgba(0,0,0,.35)'};border:1px solid ${conf.i===0?'rgba(255,215,0,.55)':'rgba(255,255,255,.12)'};border-radius:10px;padding:3px 9px;font-size:11px;font-weight:800;color:${conf.i===0?'#FFD700':'rgba(255,255,255,.65)'};text-shadow:${conf.i===0?'0 0 8px rgba(255,215,0,.6)':'none'};white-space:nowrap">${prizeAmt} TON</div>
         <!-- podium base image -->
-        <div style="width:100%;position:relative">
-          <img src="${podiumImg}" style="width:100%;height:${heights[idx]};object-fit:cover;border-radius:10px 10px 0 0;display:block">
-          ${isMe?`<div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:${color};background:rgba(0,0,0,.6);border-radius:6px;padding:2px 6px;white-space:nowrap">✦ YOU</div>`:''}</div>
+        <div style="width:100%;position:relative;overflow:hidden;border-radius:10px 10px 0 0">
+          <img src="${conf.podImg}" style="width:100%;height:${conf.colH};object-fit:cover;display:block">
+          ${isMe?`<div style="position:absolute;inset:0;background:rgba(${colorRgb},.12);display:flex;align-items:center;justify-content:center"><span style="font-size:10px;font-weight:800;color:${color};background:rgba(0,0,0,.7);border-radius:6px;padding:2px 7px">YOU ✦</span></div>`:''}</div>
       </div>`;
     }
     html+=`</div>`;
   }
 
-  /* ── Rows 4-50 ── */
+  /* ══ ROWS 4-50 ══ */
   html+=`<div style="display:flex;flex-direction:column;gap:5px">`;
   if(!board.length){
-    html+=`<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.28);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
+    html+=`<div style="text-align:center;padding:44px 20px;color:rgba(255,255,255,.25);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
   } else {
     board.forEach((u,i)=>{
       if(i<3) return;
       const prize=i<20?prizes[i]:null;
       const isMe=u.userId===S.userId;
-      const bg   =isMe?`rgba(${colorRgb},.1)`  :'rgba(255,255,255,.03)';
-      const bord =isMe?`1.5px solid rgba(${colorRgb},.38)`:'1px solid rgba(255,255,255,.05)';
-      const shad =isMe?`box-shadow:0 0 16px rgba(${colorRgb},.18);`:'' ;
+      const isTop=i<20;
+      const rowBg   = isMe?`rgba(${colorRgb},.1)` : isTop?'rgba(255,255,255,.04)' : 'rgba(255,255,255,.02)';
+      const rowBord = isMe?`1.5px solid rgba(${colorRgb},.4)` : isTop?'1px solid rgba(255,255,255,.07)':'1px solid rgba(255,255,255,.03)';
+      const rowShad = isMe?`0 0 18px rgba(${colorRgb},.2)`:'none';
       const av=u.photo
-        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.55:.12})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:15px\'>🐼</div>'">`
-        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px">🐼</div>`;
-      const badgeBg=i<20
-        ?`linear-gradient(135deg,rgba(${colorRgb},.3),rgba(${colorRgb},.1))`
-        :'rgba(255,255,255,.05)';
-      const badgeColor=i<20?color:'rgba(255,255,255,.28)';
-      html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${bg};border:${bord};border-radius:14px;${shad}backdrop-filter:blur(4px);transition:.15s">
+        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.5:.1})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:15px\'>🐼</div>'">`
+        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:15px">🐼</div>`;
+      const badgeBg=isTop
+        ?`linear-gradient(135deg,rgba(${colorRgb},.28),rgba(${colorRgb},.1))`
+        :'rgba(255,255,255,.04)';
+      const badgeColor=isTop?color:'rgba(255,255,255,.25)';
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${rowBg};border:${rowBord};border-radius:14px;box-shadow:${rowShad};backdrop-filter:blur(4px)">
         <div style="min-width:28px;height:28px;border-radius:8px;background:${badgeBg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${badgeColor};flex-shrink:0">${i+1}</div>
         ${av}
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.85)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
+          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.85)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${isMe?'0 0 8px rgba('+colorRgb+',.4)':'none'}">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
           <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
-            ${scoreIcon}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">${fmt(u.score)} ${scoreSuffix}</span>
+            ${scoreIcon}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.38)">${fmt(u.score)} ${scoreSuffix}</span>
           </div>
         </div>
-        <div style="text-align:right;flex-shrink:0">
+        <div style="text-align:right;flex-shrink:0;min-width:44px">
           ${prize
-            ?`<div style="font-size:13px;font-weight:800;color:#00D4FF;line-height:1.1">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(0,212,255,.55)">TON</div>`
-            :`<div style="font-size:18px;color:rgba(255,255,255,.1)">—</div>`}
+            ?`<div style="font-size:13px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.4);line-height:1.1">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(255,215,0,.5)">TON</div>`
+            :`<div style="font-size:20px;color:rgba(255,255,255,.08)">—</div>`}
         </div>
       </div>`;
     });

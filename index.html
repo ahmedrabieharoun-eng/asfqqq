@@ -336,7 +336,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ptc{position:fixed;pointer-events:none;z-index:400;font-size:17px;animation:ptup .9s ease-out forwards}
 @keyframes ptup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-74px) scale(.4);opacity:0}}
 ::-webkit-scrollbar{width:3px}
-@keyframes comp-pulse{0%,100%{box-shadow:0 0 20px rgba(255,165,0,.7),0 0 40px rgba(255,165,0,.3),0 4px 16px rgba(0,0,0,.5)}50%{box-shadow:0 0 30px rgba(255,165,0,1),0 0 60px rgba(255,165,0,.5),0 4px 20px rgba(0,0,0,.6)}}
+@keyframes comp-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,165,0,.7))}50%{filter:drop-shadow(0 0 18px rgba(255,165,0,1))}}
+@keyframes comp-shimmer{0%{opacity:.4;transform:scaleX(.6)}50%{opacity:1;transform:scaleX(1)}100%{opacity:.4;transform:scaleX(.6)}}
+@keyframes podium-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes winning-pulse{0%,100%{box-shadow:0 0 0 rgba(76,175,80,0)}50%{box-shadow:0 0 18px rgba(76,175,80,.35)}}
 ::-webkit-scrollbar-thumb{background:var(--bamboo);border-radius:2px}
 .pg-title{font-size:19px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:7px}
 .topbar-main{display:flex;align-items:center;gap:8px;padding:9px 12px 7px;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(124,179,66,.12);}
@@ -734,48 +737,45 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </div>
 
 <!-- COMPETITION BUTTON -->
-<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:136px;right:14px;z-index:190;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f9a825,#e65100);border:none;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(255,165,0,.7),0 0 40px rgba(255,165,0,.3),0 4px 16px rgba(0,0,0,.5);animation:comp-pulse 2s ease-in-out infinite;">🏆</button>
+<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:136px;right:14px;z-index:190;width:52px;height:52px;border-radius:50%;background:none;border:none;padding:0;cursor:pointer;animation:comp-pulse 2s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(255,165,0,.8))"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:52px;height:52px;object-fit:contain;border-radius:50%"></button>
 
 <!-- COMPETITION PAGE -->
-<div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;overflow-y:auto;padding-bottom:24px;background:#040c04">
+<div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;overflow-y:auto;padding-bottom:30px">
 
-  <!-- Animated bg particles -->
-  <div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden">
-    <div style="position:absolute;top:-60px;left:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,165,0,.07) 0%,transparent 70%);border-radius:50%"></div>
-    <div style="position:absolute;bottom:20%;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(124,179,66,.05) 0%,transparent 70%);border-radius:50%"></div>
-    <div style="position:absolute;top:40%;left:30%;width:140px;height:140px;background:radial-gradient(circle,rgba(0,212,255,.04) 0%,transparent 70%);border-radius:50%"></div>
-  </div>
+  <!-- Full-page background image -->
+  <div style="position:fixed;inset:0;z-index:0;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9c018283-eb53-45b3-8e34-2cf11f3c6119.png') center/cover no-repeat;pointer-events:none"></div>
+  <!-- Dark overlay for readability -->
+  <div style="position:fixed;inset:0;z-index:1;background:rgba(2,8,2,.72);pointer-events:none"></div>
 
-  <!-- Sticky header -->
-  <div style="position:sticky;top:0;z-index:20;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(4,12,4,.88);border-bottom:1px solid rgba(255,165,0,.18)">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 16px">
-      <div style="display:flex;align-items:center;gap:9px">
-        <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#f9a825,#e65100);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 12px rgba(255,165,0,.5)">🏆</div>
+  <!-- ── STICKY HEADER ── -->
+  <div style="position:sticky;top:0;z-index:20;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);background:rgba(3,10,3,.82);border-bottom:1px solid rgba(255,165,0,.22)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,165,0,.6));animation:comp-pulse 2.5s ease-in-out infinite">
         <div>
           <div style="font-size:16px;font-weight:800;color:#ffa726;line-height:1.1" data-i18n="compTitle">Competition</div>
-          <div id="comp-countdown-hdr" style="font-size:10px;font-weight:700;color:rgba(255,165,0,.6);line-height:1"></div>
+          <div id="comp-countdown-hdr" style="font-size:10px;font-weight:700;color:rgba(255,165,0,.55);line-height:1.3;letter-spacing:.3px"></div>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="openCompHelp()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.35);color:#ffa726;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s">?</button>
-        <button onclick="closeCompPage()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        <button onclick="openCompHelp()" style="width:33px;height:33px;border-radius:50%;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.38);color:#ffa726;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center">?</button>
+        <button onclick="closeCompPage()" style="width:33px;height:33px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
     </div>
-
     <!-- Tab bar -->
-    <div style="display:flex;padding:0 12px 12px;gap:8px">
-      <button id="ctab-active" onclick="switchCompTab('active')" style="flex:1;padding:10px 8px;border-radius:14px;border:2px solid rgba(255,193,7,.6);background:rgba(255,193,7,.15);color:var(--coin);font-size:12px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px" data-i18n="compTabActive">💎 Active Refs</button>
+    <div style="display:flex;padding:0 12px 11px;gap:8px">
+      <button id="ctab-active" onclick="switchCompTab('active')" style="flex:1;padding:10px 8px;border-radius:14px;border:2px solid rgba(255,193,7,.65);background:rgba(255,193,7,.14);color:var(--coin);font-size:12px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px" data-i18n="compTabActive">💎 Active Refs</button>
       <button id="ctab-mining" onclick="switchCompTab('mining')" style="flex:1;padding:10px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.35);font-size:12px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px" data-i18n="compTabMining">⚡ Mining Speed</button>
     </div>
   </div>
 
   <!-- Panes -->
-  <div id="cpane-active" style="position:relative;z-index:1"><div id="comp-active-content" style="padding:14px 12px"></div></div>
-  <div id="cpane-mining"  style="position:relative;z-index:1;display:none"><div id="comp-mining-content" style="padding:14px 12px"></div></div>
+  <div id="cpane-active" style="position:relative;z-index:2"><div id="comp-active-content" style="padding:14px 12px 6px"></div></div>
+  <div id="cpane-mining"  style="position:relative;z-index:2;display:none"><div id="comp-mining-content" style="padding:14px 12px 6px"></div></div>
 
-  <!-- Help Modal -->
-  <div id="compHelpModal" onclick="if(event.target===this)closeCompHelp()" style="display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);padding:20px">
-    <div id="compHelpBox" style="background:linear-gradient(145deg,rgba(8,18,8,.99),rgba(4,10,4,.99));border:1px solid rgba(255,165,0,.35);border-radius:26px;padding:22px 18px;max-width:360px;width:100%;max-height:82vh;overflow-y:auto;box-shadow:0 0 50px rgba(255,165,0,.15)">
+  <!-- ── HELP MODAL ── -->
+  <div id="compHelpModal" onclick="if(event.target===this)closeCompHelp()" style="display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);padding:20px">
+    <div id="compHelpBox" style="background:linear-gradient(145deg,rgba(6,16,6,.99),rgba(3,8,3,.99));border:1px solid rgba(255,165,0,.35);border-radius:26px;padding:22px 18px;max-width:360px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 0 60px rgba(255,165,0,.12)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div style="font-size:15px;font-weight:800;color:#ffa726;display:flex;align-items:center;gap:7px">ℹ️ <span data-i18n="compHelpTitle">Competition Guide</span></div>
         <button onclick="closeCompHelp()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:28px;height:28px;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
@@ -3200,124 +3200,150 @@ function renderCompPane(elId, opt){
   const {title,desc,prizeTotal,endDate,board,myRank,myScore,myScoreLbl,prizes,scoreSuffix,color,colorRgb,T}=opt;
   const isActive = elId.includes('active');
   const scoreIcon = isActive
-    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:18px;height:18px;object-fit:contain;border-radius:50%;vertical-align:middle">`
-    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:18px;height:18px;object-fit:contain;vertical-align:middle">`;
+    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:16px;height:16px;object-fit:contain;border-radius:50%;vertical-align:middle">`
+    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`;
+  const PODIUM_IMGS = ['https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png'];
 
-  const myWinning  = myRank>=0 && myRank<20;
-  const rankDisp   = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
-  const rankGlow   = myWinning ? `0 0 16px rgba(${colorRgb},.5)` : 'none';
-  const rankColor  = myWinning ? color : myRank>=0 ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.2)';
+  const myWinning = myRank>=0 && myRank<20;
+  const rankDisp  = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
+  const rankColor = myWinning ? color : myRank>=0 ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.22)';
+  const rankShadow= myWinning ? `0 0 18px rgba(${colorRgb},.7)` : 'none';
 
-  /* ─── Hero banner ─── */
-  let html = `
-  <div style="position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;background:linear-gradient(135deg,rgba(${colorRgb},.14) 0%,rgba(0,0,0,.7) 100%);border:1px solid rgba(${colorRgb},.28)">
-    <!-- top glow line -->
-    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(${colorRgb},.8),transparent)"></div>
-    <div style="padding:18px 16px 14px">
-      <div style="font-size:16px;font-weight:800;color:${color};margin-bottom:4px;display:flex;align-items:center;gap:7px">${title}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.45);font-weight:600;margin-bottom:16px">${desc}</div>
-      <!-- 3 stat pills -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:16px">
-        <div style="background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 6px;text-align:center">
-          <div style="font-size:18px;margin-bottom:2px">🏆</div>
-          <div style="font-size:14px;font-weight:800;color:#00D4FF;line-height:1">${prizeTotal}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px">${T.compPrize||'Prize Pool'}</div>
+  /* ── Hero card (image bg) ── */
+  let html=`
+  <div style="position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.6)">
+    <!-- card bg image -->
+    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ff69c85a-e4d7-47fe-8add-2a65d73673b7.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.45">
+    <!-- gradient overlay -->
+    <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(${colorRgb},.22) 0%,rgba(2,8,2,.88) 100%);z-index:1"></div>
+    <!-- top shimmer line -->
+    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(${colorRgb},.9),transparent);z-index:2;animation:comp-shimmer 3s ease-in-out infinite"></div>
+
+    <div style="position:relative;z-index:3;padding:18px 16px 16px">
+      <!-- title -->
+      <div style="font-size:15px;font-weight:800;color:${color};margin-bottom:3px;text-shadow:0 0 20px rgba(${colorRgb},.5)">${title}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:16px">${desc}</div>
+
+      <!-- 3 stat cards using provided images -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+
+        <!-- Prize card (cup image) -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;cursor:default">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fd38c49f-0b7a-4531-b791-aca220f9802c.png" style="width:100%;height:100%;object-fit:cover">
         </div>
-        <div style="background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 6px;text-align:center">
-          <div style="font-size:18px;margin-bottom:2px">⏱</div>
-          <div id="cd_${elId}" style="font-size:12px;font-weight:800;color:#ff8a80;line-height:1">${fmtCountdown(endDate)}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px">${T.compEnds||'Ends In'}</div>
-        </div>
-        <div style="background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 6px;text-align:center">
-          <div style="font-size:18px;margin-bottom:2px">🎯</div>
-          <div style="font-size:14px;font-weight:800;color:var(--bamboo);line-height:1">Top 20</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:600;margin-top:2px">${T.compWinners||'Winners'}</div>
-        </div>
-      </div>
-      <!-- My stats card -->
-      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(${colorRgb},.22);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:12px">
-        <div style="flex:1">
-          <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">${T.compMyScore||'Your Score'}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            ${scoreIcon}
-            <span style="font-size:22px;font-weight:800;color:${color}">${fmt(myScore)}</span>
-            <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">${scoreSuffix}</span>
+
+        <!-- Timer card -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17d3a8cd-b9d1-4d12-a478-a0e4764c75ae.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <div style="position:relative;z-index:1;text-align:center">
+            <div id="cd_${elId}" style="font-size:13px;font-weight:800;color:#fff;text-shadow:0 0 10px rgba(255,120,80,.9);line-height:1.2;letter-spacing:.5px">${fmtCountdown(endDate)}</div>
+            <div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">${T.compEnds||'Ends In'}</div>
           </div>
         </div>
-        <div style="width:1px;height:36px;background:rgba(255,255,255,.08)"></div>
-        <div style="text-align:right">
-          <div style="font-size:10px;color:rgba(255,255,255,.45);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">${T.compMyRank||'Your Rank'}</div>
-          <div style="font-size:22px;font-weight:800;color:${rankColor};text-shadow:${rankGlow}">${rankDisp}</div>
+
+        <!-- Top 20 card (image with text already on it) -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;cursor:default">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d03d5885-157e-4ee9-8ab5-dbe6fc358e33.png" style="width:100%;height:100%;object-fit:cover">
         </div>
       </div>
+
+      <!-- My stats row -->
+      <div style="background:rgba(0,0,0,.55);border:1px solid rgba(${colorRgb},.28);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)">
+        <div style="flex:1">
+          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">${T.compMyScore||'Your Score'}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${scoreIcon}
+            <span style="font-size:24px;font-weight:800;color:${color};text-shadow:0 0 14px rgba(${colorRgb},.5);line-height:1">${fmt(myScore)}</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.38);font-weight:600">${scoreSuffix}</span>
+          </div>
+        </div>
+        <div style="width:1px;height:40px;background:rgba(255,255,255,.1)"></div>
+        <div style="text-align:right">
+          <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">${T.compMyRank||'Your Rank'}</div>
+          <div style="font-size:24px;font-weight:800;color:${rankColor};text-shadow:${rankShadow};line-height:1">${rankDisp}</div>
+        </div>
+      </div>
+
       ${myWinning ? `
-      <div style="margin-top:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(0,0,0,.3));border:1px solid rgba(76,175,80,.35);border-radius:12px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:12px;font-weight:700;color:#81c784">🎉 ${T.compWinning||'You are winning!'}</div>
-        <div style="font-size:14px;font-weight:800;color:#00D4FF">${prizes[myRank]||0} TON</div>
+      <div style="margin-top:10px;padding:11px 14px;background:linear-gradient(135deg,rgba(76,175,80,.18),rgba(0,0,0,.4));border:1px solid rgba(76,175,80,.4);border-radius:12px;display:flex;align-items:center;justify-content:space-between;animation:winning-pulse 2s ease-in-out infinite">
+        <div style="font-size:12px;font-weight:800;color:#a5d6a7">🎉 ${T.compWinning||'You are winning!'}</div>
+        <div style="font-size:16px;font-weight:800;color:#00D4FF;text-shadow:0 0 10px rgba(0,212,255,.5)">${prizes[myRank]||0} TON</div>
       </div>` : ''}
     </div>
   </div>
 
-  <!-- Leaderboard header -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px">
-    <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.6)">${T.compLeaderboard||'🏅 Leaderboard — Top 50'}</div>
-    <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.7);background:rgba(${colorRgb},.1);border:1px solid rgba(${colorRgb},.2);border-radius:8px;padding:3px 8px">${T.compWinners||'Winners'}: 20</div>
-  </div>
+  <!-- Leaderboard label -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 3px">
+    <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px">
+      <span style="display:inline-block;width:3px;height:16px;background:${color};border-radius:2px;vertical-align:middle"></span>
+      ${T.compLeaderboard||'🏅 Leaderboard'}
+    </div>
+    <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.8);background:rgba(${colorRgb},.1);border:1px solid rgba(${colorRgb},.25);border-radius:20px;padding:3px 10px">Top 50</div>
+  </div>`;
 
-  <!-- Winner podium (top 3) -->`;
-
-  if(board.length>=3){
-    const podium=[{u:board[1],i:1,h:'76px',mt:'16px',badge:'🥈'},{u:board[0],i:0,h:'96px',mt:'0',badge:'🥇'},{u:board[2],i:2,h:'60px',mt:'28px',badge:'🥉'}];
-    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:18px;padding:0 4px">`;
-    for(const p of podium){
-      const isMe=p.u.userId===S.userId;
-      const avPodium=p.u.photo?`<img src="${esc(p.u.photo)}" style="width:${p.i===0?'52px':'42px'};height:${p.i===0?'52px':'42px'};border-radius:50%;object-fit:cover;border:2px solid rgba(${colorRgb},.6)" onerror="this.style.display='none'">` : `<div style="width:${p.i===0?'52':'42'}px;height:${p.i===0?'52':'42'}px;border-radius:50%;background:rgba(${colorRgb},.12);border:2px solid rgba(${colorRgb},.4);display:flex;align-items:center;justify-content:center;font-size:${p.i===0?'24':'18'}px">🐼</div>`;
-      html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:${p.mt}">
-        <div style="font-size:${p.i===0?'22':'18'}px">${p.badge}</div>
-        ${avPodium}
-        <div style="font-size:${p.i===0?'11':'10'}px;font-weight:800;color:${isMe?color:'#fff'};text-align:center;max-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.u.name||'Panda')}</div>
-        <div style="display:flex;align-items:center;gap:3px;background:rgba(${colorRgb},.12);border:1px solid rgba(${colorRgb},.25);border-radius:8px;padding:3px 7px">
-          ${scoreIcon}<span style="font-size:10px;font-weight:800;color:${color}">${fmt(p.u.score)}</span>
+  /* ── Podium top 3 ── */
+  if(board.length>=1){
+    const order=[1,0,2]; // left=2nd, center=1st, right=3rd
+    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:18px;padding:0 8px">`;
+    for(const idx of order){
+      const u=board[idx]; if(!u) continue;
+      const isMe=u.userId===S.userId;
+      const podiumImg=PODIUM_IMGS[idx];
+      const heights=['110px','86px','72px'];
+      const avatarSizes=['52px','44px','38px'];
+      const nameSizes=['12px','11px','10px'];
+      const glow=isMe?`0 0 20px rgba(${colorRgb},.6)`:'none';
+      const av=u.photo
+        ?`<img src="${esc(u.photo)}" style="width:${avatarSizes[idx]};height:${avatarSizes[idx]};border-radius:50%;object-fit:cover;border:2px solid rgba(${colorRgb},.7);box-shadow:${glow}" onerror="this.style.display='none'">`
+        :`<div style="width:${avatarSizes[idx]};height:${avatarSizes[idx]};border-radius:50%;background:rgba(${colorRgb},.12);border:2px solid rgba(${colorRgb},.4);display:flex;align-items:center;justify-content:center;font-size:${idx===0?'22':'16'}px">🐼</div>`;
+      html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;animation:podium-rise ${0.4+idx*0.15}s ease-out">
+        ${av}
+        <div style="font-size:${nameSizes[idx]};font-weight:800;color:${isMe?color:'#fff'};text-align:center;max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${glow}">${esc(u.name||'Panda')}</div>
+        <div style="display:flex;align-items:center;gap:3px;background:rgba(${colorRgb},.14);border:1px solid rgba(${colorRgb},.3);border-radius:10px;padding:2px 7px">
+          ${scoreIcon}<span style="font-size:10px;font-weight:800;color:${color}">${fmt(u.score)}</span>
         </div>
-        <div style="background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,0,0,.4));border:1px solid rgba(0,212,255,.3);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:800;color:#00D4FF">${prizes[p.i]} TON</div>
-        <div style="width:100%;height:${p.h};background:linear-gradient(180deg,rgba(${colorRgb},.18),rgba(${colorRgb},.05));border:1px solid rgba(${colorRgb},.2);border-radius:10px 10px 0 0"></div>
+        <div style="background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(0,0,0,.5));border:1px solid rgba(0,212,255,.35);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:800;color:#00D4FF;white-space:nowrap">${prizes[idx]} TON</div>
+        <!-- podium base image -->
+        <div style="width:100%;position:relative">
+          <img src="${podiumImg}" style="width:100%;height:${heights[idx]};object-fit:cover;border-radius:10px 10px 0 0;display:block">
+          ${isMe?`<div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:${color};background:rgba(0,0,0,.6);border-radius:6px;padding:2px 6px;white-space:nowrap">✦ YOU</div>`:''}</div>
       </div>`;
     }
     html+=`</div>`;
   }
 
+  /* ── Rows 4-50 ── */
   html+=`<div style="display:flex;flex-direction:column;gap:5px">`;
   if(!board.length){
-    html+=`<div style="text-align:center;padding:36px 20px;color:rgba(255,255,255,.3);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
+    html+=`<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.28);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
   } else {
     board.forEach((u,i)=>{
-      if(i<3) return; // already in podium
+      if(i<3) return;
       const prize=i<20?prizes[i]:null;
       const isMe=u.userId===S.userId;
-      const bg=isMe?`rgba(${colorRgb},.1)`:'rgba(255,255,255,.025)';
-      const border=isMe?`1px solid rgba(${colorRgb},.35)`:'1px solid rgba(255,255,255,.045)';
-      const shadow=isMe?`box-shadow:0 0 14px rgba(${colorRgb},.2);`:'';
-      const avatar=u.photo
-        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.5:.15})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:16px\'>🐼</div>'">`
-        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">🐼</div>`;
-      const rankBadgeBg = i<20
-        ? `linear-gradient(135deg,rgba(${colorRgb},.25),rgba(${colorRgb},.1))`
-        : 'rgba(255,255,255,.04)';
-      const rankBadgeColor = i<20 ? color : 'rgba(255,255,255,.3)';
-      html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${bg};border:${border};border-radius:14px;${shadow}transition:.15s">
-        <div style="min-width:30px;height:30px;border-radius:9px;background:${rankBadgeBg};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${rankBadgeColor};flex-shrink:0">${i+1}</div>
-        ${avatar}
+      const bg   =isMe?`rgba(${colorRgb},.1)`  :'rgba(255,255,255,.03)';
+      const bord =isMe?`1.5px solid rgba(${colorRgb},.38)`:'1px solid rgba(255,255,255,.05)';
+      const shad =isMe?`box-shadow:0 0 16px rgba(${colorRgb},.18);`:'' ;
+      const av=u.photo
+        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.55:.12})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:15px\'>🐼</div>'">`
+        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px">🐼</div>`;
+      const badgeBg=i<20
+        ?`linear-gradient(135deg,rgba(${colorRgb},.3),rgba(${colorRgb},.1))`
+        :'rgba(255,255,255,.05)';
+      const badgeColor=i<20?color:'rgba(255,255,255,.28)';
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${bg};border:${bord};border-radius:14px;${shad}backdrop-filter:blur(4px);transition:.15s">
+        <div style="min-width:28px;height:28px;border-radius:8px;background:${badgeBg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${badgeColor};flex-shrink:0">${i+1}</div>
+        ${av}
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.88)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
+          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.85)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
           <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
-            ${scoreIcon}<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.45)">${fmt(u.score)} ${scoreSuffix}</span>
+            ${scoreIcon}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.4)">${fmt(u.score)} ${scoreSuffix}</span>
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0">
           ${prize
-            ?`<div style="font-size:13px;font-weight:800;color:#00D4FF">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(0,212,255,.6)">TON</div>`
-            :`<div style="font-size:18px;color:rgba(255,255,255,.12)">—</div>`
-          }
+            ?`<div style="font-size:13px;font-weight:800;color:#00D4FF;line-height:1.1">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(0,212,255,.55)">TON</div>`
+            :`<div style="font-size:18px;color:rgba(255,255,255,.1)">—</div>`}
         </div>
       </div>`;
     });
@@ -3325,6 +3351,7 @@ function renderCompPane(elId, opt){
   html+=`</div>`;
   document.getElementById(elId).innerHTML=html;
 }
+
 /* ════ END COMPETITION ════ */
 </script>
 </body>

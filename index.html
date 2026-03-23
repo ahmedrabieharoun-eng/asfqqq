@@ -336,6 +336,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ptc{position:fixed;pointer-events:none;z-index:400;font-size:17px;animation:ptup .9s ease-out forwards}
 @keyframes ptup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-74px) scale(.4);opacity:0}}
 ::-webkit-scrollbar{width:3px}
+@keyframes comp-pulse{0%,100%{box-shadow:0 0 20px rgba(255,165,0,.7),0 0 40px rgba(255,165,0,.3),0 4px 16px rgba(0,0,0,.5)}50%{box-shadow:0 0 30px rgba(255,165,0,1),0 0 60px rgba(255,165,0,.5),0 4px 20px rgba(0,0,0,.6)}}
 ::-webkit-scrollbar-thumb{background:var(--bamboo);border-radius:2px}
 .pg-title{font-size:19px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:7px}
 .topbar-main{display:flex;align-items:center;gap:8px;padding:9px 12px 7px;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(124,179,66,.12);}
@@ -587,8 +588,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     </div>
     <!-- Sub-tabs: Active first, Regular second -->
     <div style="display:flex;gap:6px;margin-bottom:12px">
-      <div class="ttab active" id="rtab-active"  style="flex:1;font-size:12px" onclick="switchRefTab('active')"  data-i18n="tabActiveRef">💎 Active</div>
-      <div class="ttab"        id="rtab-regular" style="flex:1;font-size:12px" onclick="switchRefTab('regular')" data-i18n="tabRegularRef">👥 Referrals</div>
+      <div id="rtab-active"  style="flex:1;font-size:12px;padding:9px;text-align:center;background:rgba(255,193,7,.18);border:2px solid rgba(255,193,7,.55);border-radius:12px;font-weight:800;cursor:pointer;color:var(--coin);transition:all .2s" onclick="switchRefTab('active')"  data-i18n="tabActiveRef">💎 Active</div>
+      <div id="rtab-regular" style="flex:1;font-size:12px;padding:9px;text-align:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-weight:800;cursor:pointer;color:rgba(255,255,255,.4);transition:all .2s" onclick="switchRefTab('regular')" data-i18n="tabRegularRef">👥 Referrals</div>
     </div>
     <div id="refActivePane"><div id="refActiveTaskList"></div></div>
     <div id="refRegularPane" style="display:none"><div id="refTaskList"></div></div>
@@ -671,7 +672,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <label class="flabel" data-i18n="tonWalletAddr">TON Wallet Address</label>
       <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
       <label class="flabel" data-i18n="amountCoins">Amount (Coins)</label>
-      <input type="number" class="finput" id="wdAmt" placeholder="2000" min="2000" oninput="updWdPrev()">
+      <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
       <div style="font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin:-4px 0 8px 2px" data-i18n="wdMinHint">⚠️ Minimum: 200 Coins</div>
       <div class="ton-row">
         <div class="ton-chip">
@@ -730,6 +731,23 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <div id="exchHist"><div class="hist-empty" data-i18n="noConversions">No conversions yet</div></div>
     </div>
   </div>
+</div>
+
+<!-- COMPETITION BUTTON -->
+<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:136px;right:14px;z-index:190;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f9a825,#e65100);border:none;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 20px rgba(255,165,0,.7),0 0 40px rgba(255,165,0,.3),0 4px 16px rgba(0,0,0,.5);animation:comp-pulse 2s ease-in-out infinite;">🏆</button>
+
+<!-- COMPETITION PAGE -->
+<div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(180deg,#050f05,#030a03);overflow-y:auto;padding-bottom:80px">
+  <div style="position:sticky;top:0;z-index:10;background:rgba(5,15,5,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,165,0,.2);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:17px;font-weight:800;color:#ffa726;display:flex;align-items:center;gap:8px">🏆 <span data-i18n="compTitle">Competition</span></div>
+    <button onclick="closeCompPage()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+  </div>
+  <div style="display:flex;gap:0;padding:14px 14px 0">
+    <div id="ctab-active" onclick="switchCompTab('active')" style="flex:1;padding:11px;text-align:center;background:rgba(255,193,7,.18);border:2px solid rgba(255,193,7,.55);border-radius:12px 0 0 12px;font-size:13px;font-weight:800;color:var(--coin);cursor:pointer;transition:all .2s" data-i18n="compTabActive">💎 Active Refs</div>
+    <div id="ctab-mining" onclick="switchCompTab('mining')" style="flex:1;padding:11px;text-align:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:0 12px 12px 0;font-size:13px;font-weight:800;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s" data-i18n="compTabMining">⚡ Mining Speed</div>
+  </div>
+  <div id="cpane-active" style="padding:14px"><div id="comp-active-content"></div></div>
+  <div id="cpane-mining" style="padding:14px;display:none"><div id="comp-mining-content"></div></div>
 </div>
 
 <!-- HELP BUTTON -->
@@ -1408,10 +1426,20 @@ function renderSocTasks(){
 }
 
 function switchRefTab(tab){
-  document.getElementById('rtab-active').className ='ttab'+(tab==='active' ?' active':'');
-  document.getElementById('rtab-regular').className='ttab'+(tab==='regular'?' active':'');
-  document.getElementById('refActivePane').style.display =tab==='active' ?'block':'none';
-  document.getElementById('refRegularPane').style.display=tab==='regular'?'block':'none';
+  const aEl=document.getElementById('rtab-active');
+  const rEl=document.getElementById('rtab-regular');
+  if(aEl){
+    aEl.style.background   = tab==='active'  ? 'rgba(255,193,7,.18)'  : 'rgba(0,0,0,.55)';
+    aEl.style.border       = tab==='active'  ? '2px solid rgba(255,193,7,.55)' : '1px solid rgba(255,255,255,.1)';
+    aEl.style.color        = tab==='active'  ? 'var(--coin)' : 'rgba(255,255,255,.4)';
+  }
+  if(rEl){
+    rEl.style.background   = tab==='regular' ? 'rgba(124,179,66,.18)' : 'rgba(0,0,0,.55)';
+    rEl.style.border       = tab==='regular' ? '2px solid rgba(124,179,66,.55)' : '1px solid rgba(255,255,255,.1)';
+    rEl.style.color        = tab==='regular' ? 'var(--bamboo)' : 'rgba(255,255,255,.4)';
+  }
+  document.getElementById('refActivePane').style.display  = tab==='active'  ? 'block':'none';
+  document.getElementById('refRegularPane').style.display = tab==='regular' ? 'block':'none';
 }
 
 function renderTasks(){
@@ -2422,6 +2450,25 @@ const TRANSLATIONS = {
     taskConfirmBtn:'✅ فهمت، أنشئ المهمة',
     cancelBtn:'إلغاء',
     multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🐼',
+    compTitle:'المسابقات',
+    compTabActive:'💎 الإحالات النشطة',
+    compTabMining:'⚡ سرعة التعدين',
+    compActiveTitle:'💎 مسابقة الإحالات النشطة',
+    compActiveDesc:'أفضل 20 مستخدم لديهم أكثر إحالات نشطة (أجروا إيداع)',
+    compMiningTitle:'⚡ مسابقة سرعة التعدين',
+    compMiningDesc:'أفضل 20 مستخدم بأعلى معدل تعدين',
+    compPrize:'المكافأة',
+    compEnds:'ينتهي خلال',
+    compWinners:'الفائزون',
+    compMyScore:'نقاطك',
+    compMyRank:'مرتبتك',
+    compWinning:'أنت فائز!',
+    compLeaderboard:'🏅 قائمة المتسابقين — أفضل 50',
+    compEmpty:'لا متسابقين بعد. كن الأول!',
+    compUnranked:'غير مصنف',
+    compActiveScoreLbl:'إحالة نشطة',
+    compMiningScoreLbl:'بامبو/يوم',
+    loading:'جارٍ التحميل...',
     newRefNotif:'🎉 دعوت {name}! ستحصل على 20% من مشترياتهم',
   },
   en:{
@@ -2512,6 +2559,25 @@ const TRANSLATIONS = {
     taskConfirmBtn:'✅ Understood, Create Task',
     cancelBtn:'Cancel',
     multiAccount:'⚠️ This device is linked to another account — one device per account 🐼',
+    compTitle:'Competitions',
+    compTabActive:'💎 Active Refs',
+    compTabMining:'⚡ Mining Speed',
+    compActiveTitle:'💎 Active Referrals Competition',
+    compActiveDesc:'Top 20 users with most active referrals (who deposited)',
+    compMiningTitle:'⚡ Mining Speed Competition',
+    compMiningDesc:'Top 20 users with highest mining rate',
+    compPrize:'Prize Pool',
+    compEnds:'Ends In',
+    compWinners:'Winners',
+    compMyScore:'Your Score',
+    compMyRank:'Your Rank',
+    compWinning:'You are winning!',
+    compLeaderboard:'🏅 Leaderboard — Top 50',
+    compEmpty:'No participants yet. Be the first!',
+    compUnranked:'Unranked',
+    compActiveScoreLbl:'active refs',
+    compMiningScoreLbl:'bam/day',
+    loading:'Loading...',
     newRefNotif:'🎉 You invited {name}! You will earn 20% of their purchases',
   },
   ru:{
@@ -2602,6 +2668,25 @@ const TRANSLATIONS = {
     taskConfirmBtn:'✅ Понял, создать задание',
     cancelBtn:'Отмена',
     multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🐼',
+    compTitle:'Соревнования',
+    compTabActive:'💎 Активные рефералы',
+    compTabMining:'⚡ Скорость майнинга',
+    compActiveTitle:'💎 Соревнование по активным рефералам',
+    compActiveDesc:'Топ-20 пользователей с наибольшим числом активных рефералов',
+    compMiningTitle:'⚡ Соревнование по скорости майнинга',
+    compMiningDesc:'Топ-20 пользователей с наивысшей скоростью майнинга',
+    compPrize:'Призовой фонд',
+    compEnds:'До конца',
+    compWinners:'Победители',
+    compMyScore:'Ваши очки',
+    compMyRank:'Ваш ранг',
+    compWinning:'Вы выигрываете!',
+    compLeaderboard:'🏅 Таблица лидеров — Топ 50',
+    compEmpty:'Участников пока нет. Будьте первым!',
+    compUnranked:'Не в рейтинге',
+    compActiveScoreLbl:'акт. реф.',
+    compMiningScoreLbl:'бамбук/день',
+    loading:'Загрузка...',
     newRefNotif:'🎉 Вы пригласили {name}! Вы получите 20% с их покупок',
   },
   es:{
@@ -2692,6 +2777,25 @@ const TRANSLATIONS = {
     taskConfirmBtn:'✅ Entendido, crear tarea',
     cancelBtn:'Cancelar',
     multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🐼',
+    compTitle:'Competencias',
+    compTabActive:'💎 Referidos activos',
+    compTabMining:'⚡ Velocidad de minería',
+    compActiveTitle:'💎 Competencia de referidos activos',
+    compActiveDesc:'Top 20 usuarios con más referidos activos (que depositaron)',
+    compMiningTitle:'⚡ Competencia de velocidad de minería',
+    compMiningDesc:'Top 20 usuarios con mayor tasa de minería',
+    compPrize:'Premio',
+    compEnds:'Termina en',
+    compWinners:'Ganadores',
+    compMyScore:'Tu puntaje',
+    compMyRank:'Tu rango',
+    compWinning:'¡Estás ganando!',
+    compLeaderboard:'🏅 Clasificación — Top 50',
+    compEmpty:'Sin participantes aún. ¡Sé el primero!',
+    compUnranked:'Sin clasificar',
+    compActiveScoreLbl:'ref. activos',
+    compMiningScoreLbl:'bam/día',
+    loading:'Cargando...',
     newRefNotif:'🎉 Invitaste a {name}! Ganarás 20% de sus compras',
   },
   fr:{
@@ -2782,6 +2886,25 @@ const TRANSLATIONS = {
     taskConfirmBtn:'✅ Compris, créer la tâche',
     cancelBtn:'Annuler',
     multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🐼',
+    compTitle:'Compétitions',
+    compTabActive:'💎 Réf. actifs',
+    compTabMining:'⚡ Vitesse de minage',
+    compActiveTitle:'💎 Compétition de parrainages actifs',
+    compActiveDesc:'Top 20 utilisateurs avec le plus de parrainages actifs (ayant déposé)',
+    compMiningTitle:'⚡ Compétition de vitesse de minage',
+    compMiningDesc:'Top 20 utilisateurs avec le taux de minage le plus élevé',
+    compPrize:'Récompense',
+    compEnds:'Se termine dans',
+    compWinners:'Gagnants',
+    compMyScore:'Votre score',
+    compMyRank:'Votre rang',
+    compWinning:'Vous gagnez!',
+    compLeaderboard:'🏅 Classement — Top 50',
+    compEmpty:'Aucun participant. Soyez le premier!',
+    compUnranked:'Non classé',
+    compActiveScoreLbl:'réf. actifs',
+    compMiningScoreLbl:'bamb./jour',
+    loading:'Chargement...',
     newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 20% de ses achats',
   }
 };
@@ -2876,6 +2999,182 @@ function applyLang(lang,flag,code){
     wadEl.textContent=t.notConnected; wadEl.dataset.defaultShown='1';
   }
 }
+
+/* ════ COMPETITION ════════════════════════════════════════════════ */
+const COMP_END_DATE = Date.now() + (10 * 24 * 60 * 60 * 1000); // 10 days from now
+// Prize pool per competition
+const COMP_PRIZES_ACTIVE = [200,80,50,30,20,15,12,10,8,7,6,5,4,3,3,2,2,2,2,2]; // 20 winners, total ~200 TON concept
+const COMP_PRIZES_MINING = [200,80,50,30,20,15,12,10,8,7,6,5,4,3,3,2,2,2,2,2];
+
+let _compTab = 'active';
+let _compData = null;
+
+function openCompPage(){
+  document.getElementById('compPage').style.display='block';
+  document.body.style.overflow='hidden';
+  loadCompData();
+}
+function closeCompPage(){
+  document.getElementById('compPage').style.display='none';
+  document.body.style.overflow='';
+}
+
+function switchCompTab(tab){
+  _compTab=tab;
+  const aEl=document.getElementById('ctab-active');
+  const mEl=document.getElementById('ctab-mining');
+  aEl.style.background = tab==='active' ? 'rgba(255,193,7,.18)' : 'rgba(0,0,0,.55)';
+  aEl.style.border     = tab==='active' ? '2px solid rgba(255,193,7,.55)' : '1px solid rgba(255,255,255,.1)';
+  aEl.style.color      = tab==='active' ? 'var(--coin)' : 'rgba(255,255,255,.4)';
+  mEl.style.background = tab==='mining' ? 'rgba(124,179,66,.18)' : 'rgba(0,0,0,.55)';
+  mEl.style.border     = tab==='mining' ? '2px solid rgba(124,179,66,.55)' : '1px solid rgba(255,255,255,.1)';
+  mEl.style.color      = tab==='mining' ? 'var(--bamboo)' : 'rgba(255,255,255,.4)';
+  document.getElementById('cpane-active').style.display = tab==='active' ? 'block':'none';
+  document.getElementById('cpane-mining').style.display = tab==='mining' ? 'block':'none';
+  if(_compData) renderCompetition(_compData);
+}
+
+async function loadCompData(){
+  const lang=localStorage.getItem('pandaLang')||'en';
+  const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
+  // Show loading
+  ['comp-active-content','comp-mining-content'].forEach(id=>{
+    document.getElementById(id).innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted);font-size:14px">⏳ ${T.loading||'Loading...'}</div>`;
+  });
+  try{
+    const data = await api('getLeaderboard',{});
+    _compData = data;
+    renderCompetition(data);
+  }catch(e){
+    ['comp-active-content','comp-mining-content'].forEach(id=>{
+      document.getElementById(id).innerHTML=`<div style="text-align:center;padding:30px;color:#ff8a80;font-size:13px">❌ ${e.message||'Failed to load'}</div>`;
+    });
+  }
+}
+
+function fmtCountdown(ms){
+  if(ms<=0) return '00:00:00';
+  const d=Math.floor(ms/86400000);
+  const h=Math.floor((ms%86400000)/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  return d>0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
+}
+
+function renderCompetition(data){
+  const lang=localStorage.getItem('pandaLang')||'en';
+  const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
+  const msLeft = (data.endDate||COMP_END_DATE) - Date.now();
+  const myUid = S.userId;
+
+  // ── Active Refs competition ──
+  const activeBoard = (data.activeRefs||[]).slice(0,50);
+  const myActiveRank = activeBoard.findIndex(u=>u.userId===myUid);
+  const myActiveScore = myActiveRank>=0 ? activeBoard[myActiveRank].score : (S._activeRefCount||0);
+  renderCompPane('comp-active-content', {
+    title: T.compActiveTitle||'💎 Active Referrals Competition',
+    desc:  T.compActiveDesc||'Top 20 users with most active referrals (who deposited)',
+    prizeTotal: '200 TON',
+    endDate: msLeft,
+    board: activeBoard,
+    myRank: myActiveRank,
+    myScore: myActiveScore,
+    myScoreLbl: T.compActiveScoreLbl||'Active Refs',
+    prizes: COMP_PRIZES_ACTIVE,
+    scoreSuffix: T.compActiveScoreLbl||'refs',
+    color: 'var(--coin)',
+    colorRgb: '255,193,7',
+    T,
+  });
+
+  // ── Mining Speed competition ──
+  const miningBoard = (data.miningSpeed||[]).slice(0,50);
+  const myMiningRank = miningBoard.findIndex(u=>u.userId===myUid);
+  const myMiningScore = myMiningRank>=0 ? miningBoard[myMiningRank].score : Math.round((S.user?.miningRate||0)*24);
+  renderCompPane('comp-mining-content', {
+    title: T.compMiningTitle||'⚡ Mining Speed Competition',
+    desc:  T.compMiningDesc||'Top 20 users with highest mining rate',
+    prizeTotal: '200 TON',
+    endDate: msLeft,
+    board: miningBoard,
+    myRank: myMiningRank,
+    myScore: myMiningScore,
+    myScoreLbl: T.compMiningScoreLbl||'Bamboo/day',
+    prizes: COMP_PRIZES_MINING,
+    scoreSuffix: T.compMiningScoreLbl||'bam/day',
+    color: 'var(--bamboo)',
+    colorRgb: '124,179,66',
+    T,
+  });
+}
+
+function renderCompPane(elId, opt){
+  const {title,desc,prizeTotal,endDate,board,myRank,myScore,myScoreLbl,prizes,scoreSuffix,color,colorRgb,T}=opt;
+  const rankDisp = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
+  const rankColor = myRank>=0 && myRank<20 ? '#4caf50' : myRank>=0 ? 'var(--muted)' : 'rgba(255,255,255,.3)';
+
+  let html = `
+  <!-- Info card -->
+  <div style="background:linear-gradient(135deg,rgba(${colorRgb},.08),rgba(0,0,0,.5));border:1px solid rgba(${colorRgb},.3);border-radius:18px;padding:16px;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:800;color:${color};margin-bottom:6px">${title}</div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:12px">${desc}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:rgba(0,0,0,.35);border-radius:10px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:3px">🏆 ${T.compPrize||'Prize Pool'}</div>
+        <div style="font-size:14px;font-weight:800;color:#00D4FF">${prizeTotal}</div>
+      </div>
+      <div style="background:rgba(0,0,0,.35);border-radius:10px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:3px">⏱ ${T.compEnds||'Ends In'}</div>
+        <div style="font-size:13px;font-weight:800;color:#ff8a80">${fmtCountdown(endDate)}</div>
+      </div>
+      <div style="background:rgba(0,0,0,.35);border-radius:10px;padding:8px;text-align:center">
+        <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:3px">🎯 ${T.compWinners||'Winners'}</div>
+        <div style="font-size:14px;font-weight:800;color:var(--bamboo)">Top 20</div>
+      </div>
+    </div>
+    <!-- My stats -->
+    <div style="background:rgba(0,0,0,.4);border:1px solid rgba(${colorRgb},.25);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px">${T.compMyScore||'Your Score'}</div>
+        <div style="font-size:18px;font-weight:800;color:${color}">${fmt(myScore)} <span style="font-size:11px;opacity:.7">${scoreSuffix}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px">${T.compMyRank||'Your Rank'}</div>
+        <div style="font-size:18px;font-weight:800;color:${rankColor}">${rankDisp}</div>
+      </div>
+    </div>
+    ${myRank>=0&&myRank<20?`<div style="margin-top:8px;padding:7px 12px;background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.3);border-radius:10px;font-size:11px;font-weight:700;color:#81c784;text-align:center">🎉 ${T.compWinning||'You are winning!'} ${prizes[myRank]||0} TON</div>`:''}
+  </div>
+  <!-- Leaderboard -->
+  <div style="font-size:13px;font-weight:800;color:var(--muted);margin-bottom:8px">${T.compLeaderboard||'🏅 Leaderboard — Top 50'}</div>
+  <div style="display:flex;flex-direction:column;gap:6px">`;
+
+  if(!board.length){
+    html+=`<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
+  } else {
+    board.forEach((u,i)=>{
+      const prize = i<20 ? prizes[i] : null;
+      const isMe = u.userId===S.userId;
+      const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+      const rowBg = isMe ? `rgba(${colorRgb},.12)` : i<20 ? 'rgba(0,0,0,.35)' : 'rgba(0,0,0,.2)';
+      const rowBorder = isMe ? `1px solid rgba(${colorRgb},.4)` : i<20 ? '1px solid rgba(255,255,255,.06)' : '1px solid rgba(255,255,255,.03)';
+      const avatar = u.photo ? `<img src="${esc(u.photo)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<div style=\'width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px\'>🐼</div>'">` : `<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px">🐼</div>`;
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${rowBg};border:${rowBorder};border-radius:12px${isMe?';box-shadow:0 0 12px rgba('+colorRgb+',.25)':''}">
+        <div style="width:28px;text-align:center;font-size:${i<3?'18':'13'}px;font-weight:800;flex-shrink:0">${medal}</div>
+        ${avatar}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:${isMe?color:'#fff'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:1px">${fmt(u.score)} ${scoreSuffix}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          ${prize ? `<div style="font-size:12px;font-weight:800;color:#00D4FF">${prize} TON</div><div style="font-size:9px;color:var(--muted);font-weight:600">${T.compPrize||'Prize'}</div>` : `<div style="font-size:11px;color:rgba(255,255,255,.2);font-weight:600">—</div>`}
+        </div>
+      </div>`;
+    });
+  }
+  html+=`</div>`;
+  document.getElementById(elId).innerHTML=html;
+}
+/* ════ END COMPETITION ════ */
 </script>
 </body>
 </html>

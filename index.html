@@ -740,7 +740,20 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(180deg,#050f05,#030a03);overflow-y:auto;padding-bottom:80px">
   <div style="position:sticky;top:0;z-index:10;background:rgba(5,15,5,.95);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,165,0,.2);padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:17px;font-weight:800;color:#ffa726;display:flex;align-items:center;gap:8px">🏆 <span data-i18n="compTitle">Competition</span></div>
-    <button onclick="closeCompPage()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="openCompHelp()" style="background:rgba(255,165,0,.15);border:1px solid rgba(255,165,0,.4);border-radius:50%;width:32px;height:32px;color:#ffa726;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center">?</button>
+      <button onclick="closeCompPage()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+  </div>
+  <!-- Competition Help Modal (inside comp page) -->
+  <div id="compHelpModal" style="display:none;position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);padding:20px">
+    <div id="compHelpBox" style="background:linear-gradient(145deg,rgba(10,20,10,.98),rgba(5,10,5,.98));border:1px solid rgba(255,165,0,.4);border-radius:24px;padding:22px 18px;max-width:360px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 0 40px rgba(255,165,0,.2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-size:16px;font-weight:800;color:#ffa726">ℹ️ <span data-i18n="compHelpTitle">Competition Guide</span></div>
+        <button onclick="closeCompHelp()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:28px;height:28px;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div id="compHelpContent"></div>
+    </div>
   </div>
   <div style="display:flex;gap:0;padding:14px 14px 0">
     <div id="ctab-active" onclick="switchCompTab('active')" style="flex:1;padding:11px;text-align:center;background:rgba(255,193,7,.18);border:2px solid rgba(255,193,7,.55);border-radius:12px 0 0 12px;font-size:13px;font-weight:800;color:var(--coin);cursor:pointer;transition:all .2s" data-i18n="compTabActive">💎 Active Refs</div>
@@ -2469,6 +2482,8 @@ const TRANSLATIONS = {
     compActiveScoreLbl:'إحالة نشطة',
     compMiningScoreLbl:'بامبو/يوم',
     loading:'جارٍ التحميل...',
+    compHelpTitle:'دليل المسابقة',
+    compHelpBody:'<b style="color:#ffa726">🏆 كيف تعمل المسابقة؟</b><br><br>📅 مدة كل مسابقة <b>10 أيام</b>.<br>🏅 الفائزون الأوائل <b>20 مستخدماً</b> يحصلون على مكافآت TON.<br><br><b style="color:#00D4FF">💎 مسابقة الإحالات النشطة</b><br>يُحسب عدد الأصدقاء الذين انضموا عبر رابطك <b>وقاموا بإيداع TON</b>.<br><br><b style="color:var(--bamboo)">⚡ مسابقة سرعة التعدين</b><br>يُحسب <b>معدل إنتاجك اليومي</b> من البامبو (Bamboo/يوم).<br><br><b style="color:var(--coin)">🎁 توزيع المكافآت</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON لكل منهم<br>#16–20 → 1 TON لكل منهم',
     newRefNotif:'🎉 دعوت {name}! ستحصل على 20% من مشترياتهم',
   },
   en:{
@@ -2578,6 +2593,8 @@ const TRANSLATIONS = {
     compActiveScoreLbl:'active refs',
     compMiningScoreLbl:'bam/day',
     loading:'Loading...',
+    compHelpTitle:'Competition Guide',
+    compHelpBody:'<b style="color:#ffa726">🏆 How does it work?</b><br><br>📅 Each competition lasts <b>10 days</b>.<br>🏅 Top <b>20 users</b> win TON prizes.<br><br><b style="color:#00D4FF">💎 Active Referrals Competition</b><br>Counts friends who joined via your link <b>and deposited TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Mining Speed Competition</b><br>Counts your <b>daily Bamboo production rate</b>.<br><br><b style="color:var(--coin)">🎁 Prize Distribution</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON each<br>#16–20 → 1 TON each',
     newRefNotif:'🎉 You invited {name}! You will earn 20% of their purchases',
   },
   ru:{
@@ -2687,6 +2704,8 @@ const TRANSLATIONS = {
     compActiveScoreLbl:'акт. реф.',
     compMiningScoreLbl:'бамбук/день',
     loading:'Загрузка...',
+    compHelpTitle:'Руководство по соревнованиям',
+    compHelpBody:'<b style="color:#ffa726">🏆 Как это работает?</b><br><br>📅 Каждое соревнование длится <b>10 дней</b>.<br>🏅 Топ <b>20 участников</b> получают призы в TON.<br><br><b style="color:#00D4FF">💎 Соревнование по активным рефералам</b><br>Считаются друзья, зарегистрировавшиеся по вашей ссылке <b>и пополнившие счёт</b>.<br><br><b style="color:var(--bamboo)">⚡ Соревнование по скорости майнинга</b><br>Считается ваш <b>дневной объём производства Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Распределение призов</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON каждому<br>#16–20 → 1 TON каждому',
     newRefNotif:'🎉 Вы пригласили {name}! Вы получите 20% с их покупок',
   },
   es:{
@@ -2796,6 +2815,8 @@ const TRANSLATIONS = {
     compActiveScoreLbl:'ref. activos',
     compMiningScoreLbl:'bam/día',
     loading:'Cargando...',
+    compHelpTitle:'Guía de competencias',
+    compHelpBody:'<b style="color:#ffa726">🏆 ¿Cómo funciona?</b><br><br>📅 Cada competencia dura <b>10 días</b>.<br>🏅 Los <b>20 mejores usuarios</b> ganan premios en TON.<br><br><b style="color:#00D4FF">💎 Competencia de referidos activos</b><br>Cuenta amigos que se unieron por tu enlace <b>y depositaron TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Competencia de velocidad de minería</b><br>Cuenta tu <b>tasa diaria de producción de Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Distribución de premios</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON c/u<br>#16–20 → 1 TON c/u',
     newRefNotif:'🎉 Invitaste a {name}! Ganarás 20% de sus compras',
   },
   fr:{
@@ -2905,6 +2926,8 @@ const TRANSLATIONS = {
     compActiveScoreLbl:'réf. actifs',
     compMiningScoreLbl:'bamb./jour',
     loading:'Chargement...',
+    compHelpTitle:'Guide des compétitions',
+    compHelpBody:'<b style="color:#ffa726">🏆 Comment ça marche?</b><br><br>📅 Chaque compétition dure <b>10 jours</b>.<br>🏅 Les <b>20 meilleurs utilisateurs</b> gagnent des prix en TON.<br><br><b style="color:#00D4FF">💎 Compétition de parrainages actifs</b><br>Compte les amis inscrits via votre lien <b>qui ont déposé du TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Compétition de vitesse de minage</b><br>Compte votre <b>taux de production quotidien de Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Distribution des prix</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON chacun<br>#16–20 → 1 TON chacun',
     newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 20% de ses achats',
   }
 };
@@ -2969,6 +2992,9 @@ function applyLang(lang,flag,code){
   const stC=document.getElementById('stab-community'); if(stC) stC.innerHTML='🌍 '+t.tabCommunity.replace('🌍 ','');
   const rtR=document.getElementById('rtab-regular'); if(rtR) rtR.textContent=t.tabRegularRef||'👥 Referrals';
   const rtA=document.getElementById('rtab-active');  if(rtA) rtA.textContent=t.tabActiveRef||'💎 Active';
+  const ctA=document.getElementById('ctab-active');  if(ctA) ctA.textContent=t.compTabActive||'💎 Active Refs';
+  const ctM=document.getElementById('ctab-mining');  if(ctM) ctM.textContent=t.compTabMining||'⚡ Mining Speed';
+  const cTitle=document.querySelector('#compPage [data-i18n="compTitle"]'); if(cTitle) cTitle.textContent=t.compTitle||'Competition';
 
   // ── Claim button (keep image) ──
   const claimTxt=document.getElementById('claimBtnTxt');
@@ -3003,8 +3029,8 @@ function applyLang(lang,flag,code){
 /* ════ COMPETITION ════════════════════════════════════════════════ */
 const COMP_END_DATE = Date.now() + (10 * 24 * 60 * 60 * 1000); // 10 days from now
 // Prize pool per competition
-const COMP_PRIZES_ACTIVE = [200,80,50,30,20,15,12,10,8,7,6,5,4,3,3,2,2,2,2,2]; // 20 winners, total ~200 TON concept
-const COMP_PRIZES_MINING = [200,80,50,30,20,15,12,10,8,7,6,5,4,3,3,2,2,2,2,2];
+const COMP_PRIZES_ACTIVE = [50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1]; // Top 5: 50,40,30,20,10 | 6-10: 9,8,7,6,5 | 11-15: 2 each | 16-20: 1 each = 200 TON
+const COMP_PRIZES_MINING = [50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1];
 
 let _compTab = 'active';
 let _compData = null;
@@ -3017,6 +3043,21 @@ function openCompPage(){
 function closeCompPage(){
   document.getElementById('compPage').style.display='none';
   document.body.style.overflow='';
+}
+function openCompHelp(){
+  const lang=localStorage.getItem('pandaLang')||'en';
+  const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
+  const isRtl=lang==='ar';
+  const el=document.getElementById('compHelpContent');
+  if(el) el.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--muted);line-height:1.9;direction:${isRtl?'rtl':'ltr'}">${T.compHelpBody||''}</div>`;
+  const titleEl=document.querySelector('#compHelpBox [data-i18n="compHelpTitle"]');
+  if(titleEl) titleEl.textContent=T.compHelpTitle||'Competition Guide';
+  const modal=document.getElementById('compHelpModal');
+  if(modal){modal.style.display='flex';}
+}
+function closeCompHelp(){
+  const modal=document.getElementById('compHelpModal');
+  if(modal) modal.style.display='none';
 }
 
 function switchCompTab(tab){

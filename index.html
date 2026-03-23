@@ -3106,11 +3106,18 @@ function renderCompetition(data){
   const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
   const msLeft = (data.endDate||COMP_END_DATE) - Date.now();
   const myUid = S.userId;
+  const snap = data.mySnapshot||null; // {activeRefs, miningPerDay} at comp start
 
   // ── Active Refs competition ──
   const activeBoard = (data.activeRefs||[]).slice(0,50);
   const myActiveRank = activeBoard.findIndex(u=>u.userId===myUid);
-  const myActiveScore = myActiveRank>=0 ? activeBoard[myActiveRank].score : (S._activeRefCount||0);
+  // Score = current active refs MINUS snapshot (growth since comp started)
+  const activeNow = S._activeRefCount||0;
+  const activeSnap = snap ? (snap.activeRefs||0) : activeNow; // if no snap yet, score=0
+  const myActiveScore = myActiveRank>=0
+    ? activeBoard[myActiveRank].score
+    : Math.max(0, activeNow - activeSnap);
+
   renderCompPane('comp-active-content', {
     title: T.compActiveTitle||'💎 Active Referrals Competition',
     desc:  T.compActiveDesc||'Top 20 users with most active referrals (who deposited)',
@@ -3130,7 +3137,13 @@ function renderCompetition(data){
   // ── Mining Speed competition ──
   const miningBoard = (data.miningSpeed||[]).slice(0,50);
   const myMiningRank = miningBoard.findIndex(u=>u.userId===myUid);
-  const myMiningScore = myMiningRank>=0 ? miningBoard[myMiningRank].score : Math.round((S.user?.miningRate||0)*24);
+  // Score = current mining/day MINUS snapshot (growth since comp started)
+  const miningNow = Math.round((S.user?.miningRate||0)*24);
+  const miningSnap = snap ? (snap.miningPerDay||0) : miningNow; // if no snap yet, score=0
+  const myMiningScore = myMiningRank>=0
+    ? miningBoard[myMiningRank].score
+    : Math.max(0, miningNow - miningSnap);
+
   renderCompPane('comp-mining-content', {
     title: T.compMiningTitle||'⚡ Mining Speed Competition',
     desc:  T.compMiningDesc||'Top 20 users with highest mining rate',

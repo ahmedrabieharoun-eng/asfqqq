@@ -585,13 +585,13 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         <div id="refActiveCount" style="font-size:26px;font-weight:800;color:var(--coin)">0</div>
       </div>
     </div>
-    <!-- Sub-tabs: Referrals / Active -->
+    <!-- Sub-tabs: Active first, Regular second -->
     <div style="display:flex;gap:6px;margin-bottom:12px">
-      <div class="ttab active" id="rtab-regular" style="flex:1;font-size:12px" onclick="switchRefTab('regular')" data-i18n="tabRegularRef">👥 Referrals</div>
-      <div class="ttab"        id="rtab-active"  style="flex:1;font-size:12px" onclick="switchRefTab('active')"  data-i18n="tabActiveRef">💎 Active</div>
+      <div class="ttab active" id="rtab-active"  style="flex:1;font-size:12px" onclick="switchRefTab('active')"  data-i18n="tabActiveRef">💎 Active</div>
+      <div class="ttab"        id="rtab-regular" style="flex:1;font-size:12px" onclick="switchRefTab('regular')" data-i18n="tabRegularRef">👥 Referrals</div>
     </div>
-    <div id="refRegularPane"><div id="refTaskList"></div></div>
-    <div id="refActivePane" style="display:none"><div id="refActiveTaskList"></div></div>
+    <div id="refActivePane"><div id="refActiveTaskList"></div></div>
+    <div id="refRegularPane" style="display:none"><div id="refTaskList"></div></div>
   </div>
   <div class="tcont" id="tcSocial">
     <!-- Sub-tabs: Partner / Community -->
@@ -1408,10 +1408,10 @@ function renderSocTasks(){
 }
 
 function switchRefTab(tab){
+  document.getElementById('rtab-active').className ='ttab'+(tab==='active' ?' active':'');
   document.getElementById('rtab-regular').className='ttab'+(tab==='regular'?' active':'');
-  document.getElementById('rtab-active').className='ttab'+(tab==='active'?' active':'');
+  document.getElementById('refActivePane').style.display =tab==='active' ?'block':'none';
   document.getElementById('refRegularPane').style.display=tab==='regular'?'block':'none';
-  document.getElementById('refActivePane').style.display=tab==='active'?'block':'none';
 }
 
 function renderTasks(){
@@ -2388,7 +2388,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'رابط تيليجرام',taskLinkPh:'https://t.me/قناتك',
     taskTargetLabel:'عدد المستخدمين المستهدف (الحد الأدنى 100)',
     taskTotalCost:'التكلفة الإجمالية:',taskCreateBtn:'✅ إنشاء المهمة',
-    wdMinHint:'⚠️ الحد الأدنى: 2,000 Coins (0.1 TON)',
+    wdMinHint:'⚠️ الحد الأدنى: 200 Coins',
     multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🐼',
     depositRequired:'⛔ السحب متاح فقط للمودعين\n\n💎 قم بإيداع TON واحد على الأقل لتفعيل السحب\n\n🔄 جارٍ تحويلك لصفحة الإيداع...',
     depositRequiredBtn:'💎 إيداع الآن',
@@ -2478,7 +2478,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Telegram Link',taskLinkPh:'https://t.me/yourchannel',
     taskTargetLabel:'Target Users (min 100)',
     taskTotalCost:'Total Cost:',taskCreateBtn:'✅ Create Task',
-    wdMinHint:'⚠️ Minimum: 2,000 Coins (0.1 TON)',
+    wdMinHint:'⚠️ Minimum: 200 Coins',
     multiAccount:'⚠️ You are using multiple accounts — play fair 🐼',
     depositRequired:'⛔ Withdrawal is only available for depositors\n\n💎 Make at least one TON deposit to unlock withdrawals\n\n🔄 Redirecting you to the deposit page...',
     depositRequiredBtn:'💎 Deposit Now',
@@ -2568,7 +2568,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Ссылка Telegram',taskLinkPh:'https://t.me/вашканал',
     taskTargetLabel:'Целевых участников (мин. 100)',
     taskTotalCost:'Итого:',taskCreateBtn:'✅ Создать задание',
-    wdMinHint:'⚠️ Минимум: 2,000 Coins (0.1 TON)',
+    wdMinHint:'⚠️ Минимум: 200 Coins',
     multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🐼',
     depositRequired:'⛔ Вывод доступен только для пополнивших счёт\n\n💎 Пополните счёт хотя бы на 1 TON, чтобы разблокировать вывод\n\n🔄 Перенаправление на страницу пополнения...',
     depositRequiredBtn:'💎 Пополнить сейчас',
@@ -2658,7 +2658,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Enlace de Telegram',taskLinkPh:'https://t.me/tucanal',
     taskTargetLabel:'Usuarios objetivo (mín. 100)',
     taskTotalCost:'Costo total:',taskCreateBtn:'✅ Crear tarea',
-    wdMinHint:'⚠️ Mínimo: 2,000 Monedas (0.1 TON)',
+    wdMinHint:'⚠️ Mínimo: 200 Monedas',
     multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🐼',
     depositRequired:'⛔ El retiro solo está disponible para quienes han depositado\n\n💎 Realiza al menos un depósito de TON para desbloquear los retiros\n\n🔄 Redirigiendo a la página de depósito...',
     depositRequiredBtn:'💎 Depositar ahora',
@@ -2748,7 +2748,7 @@ const TRANSLATIONS = {
     taskLinkLabel:'Lien Telegram',taskLinkPh:'https://t.me/votrechaîne',
     taskTargetLabel:'Utilisateurs cibles (min. 100)',
     taskTotalCost:'Coût total:',taskCreateBtn:'✅ Créer la tâche',
-    wdMinHint:'⚠️ Minimum: 2,000 Pièces (0.1 TON)',
+    wdMinHint:'⚠️ Minimum: 200 Pièces',
     multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🐼',
     depositRequired:'⛔ Le retrait est réservé aux utilisateurs ayant effectué un dépôt\n\n💎 Effectuez au moins un dépôt TON pour débloquer les retraits\n\n🔄 Redirection vers la page de dépôt...',
     depositRequiredBtn:'💎 Déposer maintenant',

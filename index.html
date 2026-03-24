@@ -751,7 +751,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         </div>
         <div class="swap-balance" id="swapToBal"><span data-i18n="balance">Balance:</span> 0 Coins</div>
       </div>
-      <div class="swap-rate" data-i18n="swapRate">📊 100 Bamboo = 10 Coins</div>
+      <div class="swap-rate" data-i18n="swapRate">📊 500 Bamboo = 10 Coins</div>
       <button class="btn-prim" style="margin-top:10px" onclick="doExchange()" data-i18n="exchangeNow">⚡ Exchange Now</button>
     </div>
     <div class="hist-box" style="margin-top:12px">
@@ -893,7 +893,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpConvertBamboo">⚡ Convert Bamboo</span>
-            <span style="font-size:12px;font-weight:800;color:var(--coin)">100 Bamboo = 10 Coins</span>
+            <span style="font-size:12px;font-weight:800;color:var(--coin)">500 Bamboo = 10 Coins</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpWithdrawRate">💸 Withdrawal Rate</span>
@@ -994,7 +994,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 const CFG = {
   API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // fallback
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
-  RATE         : 10,
+  RATE         : 50,
   MIN_WD       : 200,
   TON_PER_COIN : 0.00005,
   TON_USD      : 3.5,
@@ -1081,15 +1081,15 @@ const REF_TASKS=[
 ];
 // Active referrals (who deposited) — 2x original rewards
 const REF_ACTIVE_TASKS=[
-  {id:'ra1',  n:1,   bam:1000,   coins:4   },
-  {id:'ra5',  n:5,   bam:5000,   coins:20  },
-  {id:'ra10', n:10,  bam:12000,  coins:50  },
-  {id:'ra20', n:20,  bam:30000,  coins:120 },
-  {id:'ra50', n:50,  bam:80000,  coins:300 },
-  {id:'ra70', n:70,  bam:120000, coins:440 },
-  {id:'ra100',n:100, bam:200000, coins:800 },
-  {id:'ra200',n:200, bam:400000, coins:1600},
-  {id:'ra500',n:500, bam:1000000,coins:4000},
+  {id:'ra1',  n:1,   bam:10000,   coins:40   },
+  {id:'ra5',  n:5,   bam:50000,   coins:200  },
+  {id:'ra10', n:10,  bam:120000,  coins:500  },
+  {id:'ra20', n:20,  bam:300000,  coins:1200 },
+  {id:'ra50', n:50,  bam:800000,  coins:3000 },
+  {id:'ra70', n:70,  bam:1200000, coins:4400 },
+  {id:'ra100',n:100, bam:2000000, coins:8000 },
+  {id:'ra200',n:200, bam:4000000, coins:16000},
+  {id:'ra500',n:500, bam:10000000,coins:40000},
 ];
 const SOC_TASKS=[
   {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/PandaBambooPayouts', bam:1000},
@@ -2475,7 +2475,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'عنوان محفظة TON',amountCoins:'المبلغ (Coins)',tonValue:'قيمة TON',
     withdrawBtn:'طلب سحب',withdrawHist:'📋 سجل السحب',noWithdrawals:'لا سحوبات بعد',
     swapFrom:'من',swapTo:'إلى',balance:'الرصيد:',maxBtn:'أقصى',
-    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
+    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
     exchangeHist:'📋 سجل التحويل',noConversions:'لا تحويلات بعد',
     helpTitle:'🐼 دليل Panda Bamboo',
     helpPayCh:'قناة\nالمدفوعات',helpNewsCh:'أخبار\nالبوت',helpSupport:'الدعم\nالفني',
@@ -2586,7 +2586,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'TON Wallet Address',amountCoins:'Amount (Coins)',tonValue:'TON Value',
     withdrawBtn:'Request Withdrawal',withdrawHist:'📋 Withdrawal History',noWithdrawals:'No withdrawals yet',
     swapFrom:'FROM',swapTo:'TO',balance:'Balance:',maxBtn:'MAX',
-    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
+    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
     exchangeHist:'📋 Exchange History',noConversions:'No conversions yet',
     helpTitle:'🐼 Panda Bamboo Guide',
     helpPayCh:'Payouts<br>Channel',helpNewsCh:'Bot<br>News',helpSupport:'Technical<br>Support',
@@ -2697,7 +2697,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'Адрес TON-кошелька',amountCoins:'Сумма (Coins)',tonValue:'Стоимость TON',
     withdrawBtn:'Запрос вывода',withdrawHist:'📋 История выводов',noWithdrawals:'Выводов пока нет',
     swapFrom:'ИЗ',swapTo:'В',balance:'Баланс:',maxBtn:'МАКС',
-    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
+    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
     exchangeHist:'📋 История обменов',noConversions:'Обменов пока нет',
     helpTitle:'🐼 Руководство Panda Bamboo',
     helpPayCh:'Канал<br>выплат',helpNewsCh:'Новости<br>бота',helpSupport:'Тех.<br>поддержка',

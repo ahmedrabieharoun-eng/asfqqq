@@ -451,6 +451,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-banner-glow{0%,100%{box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35)}50%{box-shadow:0 0 30px rgba(255,140,0,.35),0 4px 22px rgba(0,0,0,.45)}}
 @keyframes fire-pop{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.12) rotate(3deg)}}
 @keyframes live-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+@keyframes comp-btn-glow{0%,100%{box-shadow:0 0 16px rgba(255,140,0,.7),0 0 32px rgba(255,80,0,.4);transform:scale(1)}50%{box-shadow:0 0 28px rgba(255,165,0,1),0 0 55px rgba(255,80,0,.6);transform:scale(1.08)}}
+@keyframes comp-btn-spin{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}}
 #compBanner{display:flex!important}
 #compBanner.ended{display:none!important}
 </style>
@@ -515,7 +517,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <div class="sec active" id="sectionHome" style="padding:10px 10px 24px">
 
   <!-- COMPETITION BANNER -->
-  <div id="compBanner" onclick="document.querySelector('.ni[data-s=sectionComp]')&&document.querySelector('.ni[data-s=sectionComp]').click()" style="cursor:pointer;background:linear-gradient(135deg,rgba(255,60,0,.13),rgba(255,180,0,.10),rgba(255,60,0,.08));border:1.5px solid rgba(255,140,0,.45);border-radius:16px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35);position:relative;overflow:hidden;animation:comp-banner-glow 2.5s ease-in-out infinite">
+  <div id="compBanner" onclick="openCompPage()" style="cursor:pointer;background:linear-gradient(135deg,rgba(255,60,0,.13),rgba(255,180,0,.10),rgba(255,60,0,.08));border:1.5px solid rgba(255,140,0,.45);border-radius:16px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35);position:relative;overflow:hidden;animation:comp-banner-glow 2.5s ease-in-out infinite">
     <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,200,0,.08),transparent);animation:shim 2.8s infinite;pointer-events:none"></div>
     <div style="font-size:34px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,140,0,.8));animation:fire-pop 1.6s ease-in-out infinite">🏆</div>
     <div style="flex:1;min-width:0">
@@ -523,9 +525,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">Competition Active!</div>
       <div style="font-size:12px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.5)">💎 Prize Pool: 400 TON</div>
     </div>
-    <div style="flex-shrink:0;text-align:center;background:rgba(0,0,0,.35);border:1px solid rgba(255,140,0,.3);border-radius:12px;padding:7px 10px;min-width:72px">
-      <div style="font-size:9px;font-weight:700;color:rgba(255,200,80,.7);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Ends in</div>
-      <div id="compCountdown" style="font-size:15px;font-weight:800;color:#FF8C00;text-shadow:0 0 10px rgba(255,140,0,.7);line-height:1.1;letter-spacing:1px">--:--:--</div>
+    <div style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,140,0,.3),rgba(255,80,0,.2));border:1px solid rgba(255,140,0,.5);border-radius:12px;padding:8px 12px;text-align:center">
+      <div style="font-size:11px;font-weight:800;color:#fff">Tap to join</div>
+      <div style="font-size:18px;line-height:1.2">👉</div>
     </div>
   </div>
 
@@ -764,7 +766,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </div>
 
 <!-- COMPETITION BUTTON -->
-<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:136px;right:14px;z-index:190;width:52px;height:52px;border-radius:50%;background:none;border:none;padding:0;cursor:pointer;animation:comp-pulse 2s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(255,165,0,.8))"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:52px;height:52px;object-fit:contain;border-radius:50%"></button>
+<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:130px;right:10px;z-index:190;width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(255,165,0,.25),rgba(255,80,0,.1));border:2.5px solid rgba(255,165,0,.7);padding:0;cursor:pointer;animation:comp-btn-glow 1.8s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(255,140,0,.9))"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:58px;height:58px;object-fit:contain;border-radius:50%;animation:comp-btn-spin 3s ease-in-out infinite"></button>
 
 <!-- COMPETITION PAGE -->
 <div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;overflow-y:auto;padding-bottom:30px">

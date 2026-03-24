@@ -1320,7 +1320,7 @@ async function api(action, data={}){
   _apiInFlight++;
   const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
   try{
-    const j = await _call(SERVER_URL, action, data, authHdr);
+    const j = await _call(null, action, data, authHdr);
     if(!j.success){
       const err = new Error(j.error || 'API error');
       err.errorCode = j.errorCode || '';

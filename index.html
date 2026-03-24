@@ -451,6 +451,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-banner-glow{0%,100%{box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35)}50%{box-shadow:0 0 30px rgba(255,140,0,.35),0 4px 22px rgba(0,0,0,.45)}}
 @keyframes fire-pop{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.12) rotate(3deg)}}
 @keyframes live-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+#compBanner{display:flex!important}
+#compBanner.ended{display:none!important}
 </style>
 </head>
 <body>
@@ -1312,14 +1314,17 @@ function updateUI(){
   const END_DATE = new Date('2026-12-31T23:59:59Z');
   function tick(){
     const el = document.getElementById('compCountdown');
-    if(!el) return;
+    const b  = document.getElementById('compBanner');
+    if(!el || !b) return;
+    // تأكد إن الكارت ظاهر دايماً طالما التاريخ لسه ما وصلش
+    b.style.display = 'flex';
     const diff = END_DATE.getTime() - Date.now();
     if(diff <= 0){
       el.textContent = 'Ended';
-      const b = document.getElementById('compBanner');
-      if(b) b.style.display = 'none';
+      b.classList.add('ended');
       return;
     }
+    b.classList.remove('ended');
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -1328,8 +1333,12 @@ function updateUI(){
       ? `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
       : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
-  tick();
-  setInterval(tick, 1000);
+  // شغّل بعد تحميل الـ DOM كامل
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ tick(); setInterval(tick, 1000); });
+  } else {
+    tick(); setInterval(tick, 1000);
+  }
 })();
 
 /* ════ TANK ════ */

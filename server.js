@@ -1,326 +1,983 @@
-const axios = require('axios');
+// ================================================================
+//  PANDA BAMBOO FACTORY — Cloudflare Worker v3.0
+//  Firebase Realtime Database
+//  Environment Variables:
+//    FIREBASE_DATABASE_URL  e.g. https://YOUR-DB.firebaseio.com
+//    FIREBASE_API_KEY       Firebase API key
+//    BOT_TOKEN              Telegram Bot Token
+//    ADMIN_IDS              comma-separated admin Telegram IDs
+// ================================================================
 
-// 🔧 الإعدادات - يمكنك تعديلها لاحقاً
-const API_KEY = "21c756eae3ffb458d1fcef45685aacb78b110c179dcea7128c2593e0fc8fdcf0";
-const TELEGRAM_BOT_TOKEN = "8371336266:AAFSXC7UAGBA5hG4NulNV4l5tVyOmwuaAYU";
-const FIREBASE_URL = "https://earn-money-c3bad-default-rtdb.firebaseio.com";
-const MAX_AMOUNT = 0.001;
+const G = {
+  BAMBOO_PER_COIN:10, TON_PER_COIN:0.00005, TON_TO_BAMBOO:10000,
+  MIN_WITHDRAW:200, MIN_DEPOSIT_TON:1,
+  REF_BONUS_PCT:20,
+  WELCOME_BAMBOO:0,
+  WELCOME_COINS :180,
+  WELCOME_RATE  :4.167, // Fix: 100 bamboo/day (100/24) for new users
+  MAX_TANK_LVL:27,      // Fix: 27 real levels
+  MAX_RETRY:3, RETRY_DELAY_MS:100,
+  // Fix 4: rebalanced items — ROI increases with tier, no overlap
+  ITEMS:{
+    bamboo_stick :{price:1500,    power:50    },  // 0.033 bam/hr per coin — entry
+    panda_paw    :{price:5000,    power:200   },  // 0.040 — slightly better
+    leaf_fan     :{price:25000,   power:1200  },  // 0.048 — noticeably better
+    bamboo_energy:{price:125000,  power:7500  },  // 0.060 — clearly better
+    panda_den    :{price:626000,  power:45000 },  // 0.072 — premium
+    bamboo_forest:{price:1300000, power:110000},  // 0.085 — endgame
+  },
+  // 27 tank levels — capacity starts at 5,000 and scales progressively
+  TANK:{
+    1 :{cap:5000,      upgCost:1000      },
+    2 :{cap:10000,     upgCost:3000      },
+    3 :{cap:20000,     upgCost:8000      },
+    4 :{cap:40000,     upgCost:20000     },
+    5 :{cap:80000,     upgCost:50000     },
+    6 :{cap:150000,    upgCost:120000    },
+    7 :{cap:250000,    upgCost:250000    },
+    8 :{cap:400000,    upgCost:450000    },
+    9 :{cap:600000,    upgCost:750000    },
+    10:{cap:900000,    upgCost:1200000   },
+    11:{cap:1300000,   upgCost:1800000   },
+    12:{cap:1800000,   upgCost:2700000   },
+    13:{cap:2500000,   upgCost:4000000   },
+    14:{cap:3300000,   upgCost:5500000   },
+    15:{cap:4300000,   upgCost:8000000   },
+    16:{cap:5500000,   upgCost:11000000  },
+    17:{cap:7000000,   upgCost:15000000  },
+    18:{cap:8800000,   upgCost:20000000  },
+    19:{cap:11000000,  upgCost:27000000  },
+    20:{cap:14000000,  upgCost:35000000  },
+    21:{cap:17500000,  upgCost:45000000  },
+    22:{cap:22000000,  upgCost:58000000  },
+    23:{cap:28000000,  upgCost:75000000  },
+    24:{cap:35000000,  upgCost:95000000  },
+    25:{cap:44000000,  upgCost:120000000 },
+    26:{cap:55000000,  upgCost:150000000 },
+    27:{cap:70000000,  upgCost:200000000 },
+  },
+  // Fix 5: Added r200 and r500
+  REF_TASKS:{
+    r1  :{n:1,   bam:50,     coins:2   },
+    r5  :{n:5,   bam:250,    coins:10  },
+    r10 :{n:10,  bam:600,    coins:25  },
+    r20 :{n:20,  bam:1500,   coins:60  },
+    r50 :{n:50,  bam:4000,   coins:150 },
+    r70 :{n:70,  bam:6000,   coins:220 },
+    r100:{n:100, bam:10000,  coins:400 },
+    r200:{n:200, bam:20000,  coins:800 },
+    r500:{n:500, bam:50000,  coins:2000},
+  },
+  // Active referrals tasks (users who deposited) — 2x original rewards
+  REF_ACTIVE_TASKS:{
+    ra1  :{n:1,   bam:1000,   coins:4   },
+    ra5  :{n:5,   bam:5000,   coins:20  },
+    ra10 :{n:10,  bam:12000,  coins:50  },
+    ra20 :{n:20,  bam:30000,  coins:120 },
+    ra50 :{n:50,  bam:80000,  coins:300 },
+    ra70 :{n:70,  bam:120000, coins:440 },
+    ra100:{n:100, bam:200000, coins:800 },
+    ra200:{n:200, bam:400000, coins:1600},
+    ra500:{n:500, bam:1000000,coins:4000},
+  },
+  SOC_TASKS:{
+    tg_payouts:1000,  // قناة المدفوعات — مطلوبة
+    tg_news   :500,   // قناة الأخبار — مطلوبة
+    tg_ch     :1000,
+    tg_grp    :500,
+    tg_bot    :300,
+  },
+  BOT_USERNAME:'PandaBamboBot', // Fix 6
+};
 
-console.log('🚀 بدأ تشغيل بوت السحب التلقائي...');
-console.log('⏰ سيعمل كل 30 ثانية تلقائياً');
-console.log('📧 للإشعارات: @payment_proofs');
+// ── Default partner tasks seeded automatically if not present ────
+const DEFAULT_PARTNER_TASKS = [
+  {
+    id: 'partner_payouts',
+    name: 'Join Payouts Channel',
+    type: 'channel',
+    link: 'https://t.me/PandaBambooPayouts',
+    bambooReward: 100,
+    targetUsers: null, // no limit
+    status: 'active',
+    isDefault: true,
+  },
+  {
+    id: 'partner_news',
+    name: 'Join Mining News Channel',
+    type: 'channel',
+    link: 'https://t.me/PandaMiningNews',
+    bambooReward: 100,
+    targetUsers: null, // no limit
+    status: 'active',
+    isDefault: true,
+  },
+];
 
-// 📡 طلب لـ Firebase
-async function firebaseRequest(method, path, data = null) {
-    try {
-        const url = `${FIREBASE_URL}/${path}.json`;
-        let response;
-
-        if (method === 'GET') {
-            response = await axios.get(url, { timeout: 10000 });
-        } else if (method === 'PUT') {
-            response = await axios.put(url, data, { timeout: 10000 });
-        } else if (method === 'DELETE') {
-            response = await axios.delete(url, { timeout: 10000 });
-        } else if (method === 'PATCH') {
-            response = await axios.patch(url, data, { timeout: 10000 });
-        }
-
-        return response.data;
-    } catch (error) {
-        console.log('❌ خطأ في الاتصال بقاعدة البيانات:', error.message);
-        return null;
+// ── Seed partner tasks if missing ────────────────────────────────
+async function seedPartnerTasks(env){
+  try{
+    const tpr = await dbGet(env,'tasks/partner');
+    const existing = tpr.data || {};
+    for(const task of DEFAULT_PARTNER_TASKS){
+      if(!existing[task.id]){
+        const now = Date.now();
+        const taskData = {
+          ...task,
+          completions: 0,
+          completedBy: [],
+          createdAt: now,
+          updatedAt: now,
+        };
+        await dbSet(env, `tasks/partner/${task.id}`, taskData);
+        console.log(`Seeded partner task: ${task.id}`);
+      }
     }
+  }catch(e){console.error('seedPartnerTasks error:',e.message);}
 }
 
-// 📨 إرسال رسالة تليجرام
-async function sendTelegramMessage(chatId, text) {
-    try {
-        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        const response = await axios.post(url, {
-            chat_id: chatId,
-            text: text,
-            parse_mode: 'HTML'
-        }, { timeout: 10000 });
-        
-        return response.data.ok === true;
-    } catch (error) {
-        console.log('❌ خطأ في إرسال رسالة تليجرام:', error.message);
-        return false;
+// ── Send Telegram notification ────────────────────────────────────
+async function sendTgNotification(env, userId, message){
+  try{
+    if(!env.BOT_TOKEN) return;
+    await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        chat_id: userId,
+        text: message,
+        parse_mode: 'HTML',
+      }),
+    });
+  }catch(e){console.error('sendTgNotification error:',e.message);}
+}
+
+const CORS={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, X-Action','Access-Control-Max-Age':'86400'};
+const JSON_CT={'Content-Type':'application/json',...CORS};
+const jRes=(b,s=200)=>new Response(JSON.stringify(b),{status:s,headers:JSON_CT});
+const ok=d=>jRes({success:true,data:d});
+const fail=(m,s=400)=>jRes({success:false,error:m},s);
+
+function sanitise(i){if(!i)return i;return i.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,'').replace(/[<>]/g,m=>m==='<'?'&lt;':'&gt;');}
+
+// ── Firebase helpers ──────────────────────────────────────────────
+function fbUrl(env,path){
+  const b=env.FIREBASE_DATABASE_URL?.replace(/\/$/,'');
+  if(!b)throw new Error('FIREBASE_DATABASE_URL not set');
+  const k=env.FIREBASE_API_KEY;
+  if(!k)throw new Error('FIREBASE_API_KEY not set');
+  return `${b}/${path.replace(/^\//,'')}.json?key=${k}`;
+}
+async function dbGet(env,path){
+  try{const r=await fetch(fbUrl(env,path));if(!r.ok)throw new Error(`GET ${r.status}`);return{success:true,data:await r.json()};}
+  catch(e){console.error('DB GET',path,e.message);return{success:false,error:e.message};}
+}
+async function dbSet(env,path,data){
+  try{const r=await fetch(fbUrl(env,path),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(`SET ${r.status}`);return{success:true};}
+  catch(e){console.error('DB SET',path,e.message);return{success:false,error:e.message};}
+}
+async function dbUpdate(env,path,updates){
+  try{const r=await fetch(fbUrl(env,path),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(updates)});if(!r.ok)throw new Error(`UPDATE ${r.status}`);return{success:true};}
+  catch(e){console.error('DB UPDATE',path,e.message);return{success:false,error:e.message};}
+}
+async function dbPush(env,path,data){
+  try{const r=await fetch(fbUrl(env,path),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(`PUSH ${r.status}`);const j=await r.json();return{success:true,data:{id:j.name}};}
+  catch(e){console.error('DB PUSH',path,e.message);return{success:false,error:e.message};}
+}
+async function dbDelete(env,path){
+  try{const r=await fetch(fbUrl(env,path),{method:'DELETE'});if(!r.ok)throw new Error(`DELETE ${r.status}`);return{success:true};}
+  catch(e){console.error('DB DELETE',path,e.message);return{success:false,error:e.message};}
+}
+
+// ── Rate limiter ──────────────────────────────────────────────────
+const _rl=new Map();
+function rateOk(ip){const now=Date.now();const d=_rl.get(ip)||{c:0,r:now+60000};if(now>d.r){d.c=0;d.r=now+60000;}d.c++;_rl.set(ip,d);return d.c<=60;}
+
+// ── Per-user per-action cooldown (anti-autoclicker) ──────────────
+// Prevents the same user from calling the same action faster than COOLDOWN_MS
+const _userActionTs = new Map();
+const ACTION_COOLDOWNS = {
+  collect      : 2500,
+  buyItem      : 2500,
+  upgradeTank  : 2500,
+  exchange     : 2500,
+  withdraw     : 5000,
+  claimTask    : 2500,
+  verifyTask   : 2500,
+  createTask   : 5000,
+};
+function userActionOk(uid, action){
+  const cd = ACTION_COOLDOWNS[action];
+  if(!cd) return true; // no cooldown for this action
+  const key = `${uid}:${action}`;
+  const now = Date.now();
+  const last = _userActionTs.get(key) || 0;
+  if(now - last < cd) return false;
+  _userActionTs.set(key, now);
+  return true;
+}
+
+// ── Logging System ────────────────────────────────────────────────
+// Saves balance-change events inside each user's own account:
+//   users/{uid}/log/{auto-id}
+// Only records events that ACTUALLY change bamboo, coins, or tonBalance.
+// Fire-and-forget — never blocks the request.
+
+const BALANCE_CHANGE_EVENTS = new Set([
+  'collect','buy_item','upgrade_tank','exchange',
+  'withdraw_request','deposit_completed','claim_task',
+  'verify_task','create_task','admin_set_balance',
+  'admin_confirm_deposit','referral_commission',
+  // NOTE: 'register', 'session_open', 'welcome_bonus_granted', 'deposit_initiated'
+  // are intentionally excluded — they either don't change balances or are noise.
+]);
+
+function log(env, uid, type, details={}, meta={}){
+  if(!BALANCE_CHANGE_EVENTS.has(type)) return;
+  const ts   = Date.now();
+  const date = new Date(ts).toISOString();
+  const entry = { ts, date, type, ...details };
+  dbPush(env, `users/${uid}/log`, entry)
+    .catch(e=>console.error('LOG ERROR:',e.message));
+}
+
+// ── Telegram validation ───────────────────────────────────────────
+async function validateTg(initData,botToken){
+  try{
+    if(!initData)return{valid:false,error:'No init data'};
+    const p=new URLSearchParams(initData);
+    // Extract start_param here — it lives as a top-level initData param
+    const startParam=(p.get('start_param')||'').replace(/\D/g,'');
+    if(!botToken){
+      const u=p.get('user');
+      if(!u)return{valid:false,error:'No user'};
+      return{valid:true,user:JSON.parse(decodeURIComponent(u)),startParam};
     }
+    const hash=p.get('hash');
+    if(!hash)return{valid:false,error:'No hash'};
+    p.delete('hash');
+    const authDate=parseInt(p.get('auth_date')||'0');
+    if(Date.now()/1000-authDate>900)return{valid:false,error:'Expired'};
+    const dc=[...p.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
+    const enc=new TextEncoder();
+    const sec=await crypto.subtle.importKey('raw',enc.encode('WebAppData'),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const kb=await crypto.subtle.sign('HMAC',sec,enc.encode(botToken));
+    const key=await crypto.subtle.importKey('raw',kb,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const sig=await crypto.subtle.sign('HMAC',key,enc.encode(dc));
+    const hex=[...new Uint8Array(sig)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    if(hex!==hash)return{valid:false,error:'Bad hash'};
+    const u=p.get('user');if(!u)return{valid:false,error:'No user'};
+    return{valid:true,user:JSON.parse(decodeURIComponent(u)),startParam};
+  }catch(e){return{valid:false,error:e.message};}
 }
 
-// 🎭 إخفاء جزء من عنوان المحفظة
-function maskAccount(account) {
-    if (!account || account.length < 5) return account;
-    
-    const visibleStart = 2;
-    const visibleEnd = 2;
-    const maskedLength = account.length - visibleStart - visibleEnd;
-    
-    if (maskedLength <= 0) return account;
-    
-    const maskedPart = '*'.repeat(maskedLength);
-    return account.substring(0, visibleStart) + maskedPart + account.substring(account.length - visibleEnd);
+// ── Tank sync ─────────────────────────────────────────────────────
+function syncTank(user){
+  const now=Date.now();const sec=(now-(user.lastSeen||now))/1000;
+  if(sec<=0||!user.miningRate){user.lastSeen=now;return;}
+  const cfg=G.TANK[user.tankLevel||1]||G.TANK[1];
+  const rate=user.miningRate/3600; // no speedBonus
+  user.tankAccrued=Math.min(cfg.cap,(user.tankAccrued||0)+rate*sec);
+  user.lastSeen=now;
+}
+function recalcRate(m){return Object.entries(m||{}).reduce((s,[id,c])=>s+(G.ITEMS[id]?.power||0)*c,0);}
+
+async function registerReferral(env,uid,user,referrerId){
+  try{
+    const rr=await dbGet(env,`users/${referrerId}/referrals`);
+    const refs=rr.data||{};
+    if(!refs[uid]){
+      await dbSet(env,`users/${referrerId}/referrals/${uid}`,{
+        userId:uid,
+        firstName:user.firstName,lastName:user.lastName,
+        username:user.username,photoUrl:user.photoUrl,
+        joinedAt:Date.now(),earned:0,
+      });
+      // ── Dedup notification: only one server should fire it ──────
+      // Use a DB key with 60s TTL window — first server to write wins
+      const notifKey=`notifSent/ref_${uid}_${referrerId}`;
+      const already=await dbGet(env,notifKey);
+      if(!already.data){
+        await dbSet(env,notifKey,{ts:Date.now()});
+        console.log(`Referral registered: ${uid} referred by ${referrerId}`);
+        const refName=(user.firstName||'Someone').slice(0,32);
+        const notifMsg=`🎉 <b>Congratulations!</b> <b>${refName}</b> just registered using your referral link!\n\n🐼 You will automatically earn <b>20% commission</b> on all their Market purchases.\n\n<i>Track your earnings in the Friends section</i>`;
+        sendTgNotification(env,referrerId,notifMsg).catch(()=>{});
+      }
+    }
+  }catch(e){console.error('registerReferral error:',e.message);}
 }
 
-// 💰 معالجة الدفع عبر FaucetPay
-async function processPayment(withdrawal) {
-    try {
-        console.log(`🔧 جاري معالجة: ${withdrawal.amount} TON إلى ${withdrawal.account}`);
-        
-        // 🚫 رفض الحسابات غير الموثقة
-        if (withdrawal.account && withdrawal.account.includes('not verified')) {
-            console.log('🚫 حساب غير موثق - مرفوض');
-            await rejectWithdrawal(withdrawal.id, "This account is not verified");
-            return { success: false, error: "This account is not verified" };
-        }
-        
-        const amountSatoshi = Math.floor(withdrawal.amount * 100000000);
-        
-        const payload = new URLSearchParams({
-            "api_key": API_KEY,
-            "currency": "TON",
-            "amount": amountSatoshi.toString(),
-            "to": withdrawal.account
+function makeUser(uid,tg={},ref=null){
+  return{userId:uid,firstName:(tg.first_name||'').slice(0,64),lastName:(tg.last_name||'').slice(0,64),username:(tg.username||'').slice(0,64),photoUrl:(tg.photo_url||'').slice(0,512),
+    bamboo:G.WELCOME_BAMBOO, coins:G.WELCOME_COINS, miningRate:G.WELCOME_RATE,
+    totalEarned:0,machines:{},tankLevel:1,tankAccrued:0,lastSeen:Date.now(),createdAt:Date.now(),
+    welcomeBonusGiven:true,
+    hasDeposited:false,tonBalance:0,referralCode:String(uid),referredBy:ref||null,completedTasks:[]};
+}
+
+// ── Extract start_param from Telegram initData string ────────────
+function extractStartParam(initDataStr){
+  try{
+    const p=new URLSearchParams(initDataStr||'');
+    // Direct start_param field
+    const sp=p.get('start_param');
+    if(sp) return sp.replace(/\D/g,'');
+    // Sometimes inside user JSON
+    const userRaw=p.get('user');
+    if(userRaw){
+      const u=JSON.parse(decodeURIComponent(userRaw));
+      if(u.start_param) return String(u.start_param).replace(/\D/g,'');
+    }
+  }catch(_){}
+  return '';
+}
+
+// ── Handlers ──────────────────────────────────────────────────────
+async function hGetState(env,uid,tg,data={},_meta={}){
+  try{
+    // _startParam comes directly from initData (most reliable source)
+    const rawRef = (
+      data?._startParam ||
+      extractStartParam(data?._initData||'') ||
+      (data?.start_param||'').toString().replace(/\D/g,'')
+    ).replace(/\D/g,'');
+    const ref = rawRef && rawRef !== uid ? rawRef : null;
+
+    const ur=await dbGet(env,`users/${uid}`);let user=ur.data;
+    // Seed partner tasks if not present (fire-and-forget)
+    seedPartnerTasks(env).catch(e=>console.error('seed:',e.message));
+    // Update leaderboard entry for this user (fire-and-forget)
+    updateLeaderboardEntry(env,uid,user).catch(()=>{});
+
+    if(!user){
+      user=makeUser(uid,tg,ref);
+      if(user.referredBy){
+        await registerReferral(env,uid,user,user.referredBy);
+        // Notification is now sent inside registerReferral with dedup guard
+      }
+      await dbSet(env,`users/${uid}`,user);
+      // NOTE: 'register' is not a balance-change event, not logged in user log
+    }else{
+      syncTank(user);
+      // Fix welcome bonus: grant once if flag not set yet
+      let needsSave=false;
+      if(!user.welcomeBonusGiven){
+        user.coins      = (user.coins||0)      + G.WELCOME_COINS;
+        user.bamboo     = (user.bamboo||0)      + G.WELCOME_BAMBOO;
+        user.miningRate = Math.max(user.miningRate||0, G.WELCOME_RATE);
+        user.welcomeBonusGiven = true;
+        needsSave=true;
+        console.log(`Welcome bonus granted to existing user ${uid}`);
+        log(env,uid,'welcome_bonus_granted',{
+          coins_added:G.WELCOME_COINS, bamboo_added:G.WELCOME_BAMBOO,
+          miningRate_set:G.WELCOME_RATE,
+        },_meta);
+      }
+      if(tg){
+        if(tg.first_name) user.firstName=tg.first_name.slice(0,64);
+        if(tg.last_name)  user.lastName =tg.last_name.slice(0,64);
+        if(tg.username)   user.username =tg.username.slice(0,64);
+        if(tg.photo_url)  user.photoUrl =tg.photo_url.slice(0,512);
+      }
+      await dbUpdate(env,`users/${uid}`,{
+        firstName:user.firstName,lastName:user.lastName,
+        username:user.username,photoUrl:user.photoUrl,
+        tankAccrued:user.tankAccrued,lastSeen:user.lastSeen,
+        ...(needsSave?{
+          coins:user.coins,bamboo:user.bamboo,
+          miningRate:user.miningRate,welcomeBonusGiven:true,
+        }:{}),
+      });
+    }
+    const rr=await dbGet(env,`users/${uid}/referrals`);
+    const refList=Object.values(rr.data||{});
+    // Fetch hasDeposited directly from each referred user's root record (most accurate)
+    const referrals=await Promise.all(refList.map(async r=>{
+      let deposited=r.hasDeposited||false;
+      if(!deposited){
+        const ud=await dbGet(env,`users/${r.userId}/hasDeposited`);
+        deposited=ud.data===true;
+        // Update the referral record so next time we don't need to re-check
+        if(deposited) await dbUpdate(env,`users/${uid}/referrals/${r.userId}`,{hasDeposited:true}).catch(()=>{});
+      }
+      return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasDeposited:deposited};
+    }));
+    // session_open is NOT logged — it does not change any balance
+    const er=await dbGet(env,`users/${uid}/exchHistory`);
+    const exchHistory=er.data?Object.values(er.data).sort((a,b)=>b.ts-a.ts).slice(0,30):[];
+    const wr=await dbGet(env,`users/${uid}/wdHistory`);
+    const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,30):[];
+    const dr=await dbGet(env,`users/${uid}/deposits`);
+    const pendingDeposit=(dr.data?Object.values(dr.data):[]).find(d=>d.status==='pending')||null;
+    // Load tasks from DB
+    const tpr=await dbGet(env,'tasks/partner');
+    const tcr=await dbGet(env,'tasks/community');
+    const tasks={
+      partner  :tpr.data?Object.values(tpr.data).filter(t=>t.status==='active'):[],
+      community:tcr.data?Object.values(tcr.data).filter(t=>t.status==='active'):[],
+    };
+    const lr=await dbGet(env,`users/${uid}/log`);
+    const balanceLog=lr.data?Object.values(lr.data).sort((a,b)=>b.ts-a.ts).slice(0,50):[];
+    return{success:true,data:{user:{bamboo:user.bamboo||0,coins:user.coins||0,miningRate:user.miningRate||0,totalEarned:user.totalEarned||0,machines:user.machines||{},tankLevel:user.tankLevel||1,tankAccrued:user.tankAccrued||0,hasDeposited:user.hasDeposited||false,tonBalance:user.tonBalance||0},referrals,completedTasks:user.completedTasks||[],exchHistory,wdHistory,balanceLog,pendingDeposit,tasks}};
+  }catch(e){console.error('getState',e);return{success:false,error:e.message,errorCode:'GET_STATE_ERROR'};}
+}
+
+async function hCollect(env,uid,data,_meta={}){
+  try{
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    syncTank(user);const actual=Math.floor(user.tankAccrued);
+    if(actual<1)return{success:false,error:'Tank is empty'};
+    const nb=(user.bamboo||0)+actual;
+    await dbUpdate(env,`users/${uid}`,{bamboo:nb,totalEarned:(user.totalEarned||0)+actual,tankAccrued:user.tankAccrued-actual,lastSeen:user.lastSeen});
+    log(env,uid,'collect',{
+      collected:actual,
+      bamboo_before:(user.bamboo||0),
+      bamboo_after:nb,
+      tankLevel:user.tankLevel||1,
+    },_meta);
+    return{success:true,data:{collected:actual,bamboo:nb}};
+  }catch(e){return{success:false,error:e.message};}
+}
+
+async function hBuyItem(env,uid,data,_meta={}){
+  try{
+    const{itemId,qty=1}=data;const item=G.ITEMS[itemId];
+    if(!item)return{success:false,error:'Unknown item'};
+    const q=Math.max(1,Math.min(99,parseInt(qty)||1));const total=item.price*q;
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    if((user.bamboo||0)<total)return{success:false,error:'Not enough Bamboo'};
+    const machines=user.machines||{};machines[itemId]=(machines[itemId]||0)+q;
+    const newRate=recalcRate(machines);const nb=(user.bamboo||0)-total;
+    await dbUpdate(env,`users/${uid}`,{bamboo:nb,machines,miningRate:newRate});
+    log(env,uid,'buy_item',{
+      itemId, qty:q, totalCost:total,
+      bamboo_before:(user.bamboo||0), bamboo_after:nb,
+      miningRate_before:user.miningRate||0, miningRate_after:newRate,
+    },_meta);
+    if(user.referredBy&&user.referredBy!==uid){
+      const comm=Math.floor(total*G.REF_BONUS_PCT/100);
+      const rr=await dbGet(env,`users/${user.referredBy}`);
+      if(rr.data){
+        await dbUpdate(env,`users/${user.referredBy}`,{bamboo:(rr.data.bamboo||0)+comm});
+        await dbPush(env,`users/${user.referredBy}/referralEarnings`,{fromUserId:uid,amount:comm,timestamp:Date.now()});
+        // Update earned in referrals list
+        await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{earned:(rr.data.referrals?.[uid]?.earned||0)+comm});
+        log(env,user.referredBy,'referral_commission',{
+          fromUserId:uid, commission:comm,
+          bamboo_before:(rr.data.bamboo||0), bamboo_after:(rr.data.bamboo||0)+comm,
         });
-
-        const response = await axios.post('https://faucetpay.io/api/v1/send', payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            timeout: 30000
-        });
-
-        const result = response.data;
-        
-        if (result.status === 200) {
-            console.log(`✅ تم الدفع بنجاح! رقم المعاملة: ${result.payment_id}`);
-            
-            // 📧 إرسال إشعار نجاح للمستخدم
-            await sendSuccessNotification(withdrawal, result.payment_id);
-            
-            // 📢 إرسال إشعار للقناة
-            await sendChannelNotification(withdrawal, result.payment_id);
-            
-            return { success: true, transactionId: result.payment_id };
-        } else {
-            console.log(`❌ فشل الدفع: ${result.message}`);
-            
-            // إذا كان الخطأ بسبب حساب غير موثق
-            if (result.message.includes('not verified')) {
-                await rejectWithdrawal(withdrawal.id, result.message);
-            } else {
-                await sendFailureNotification(withdrawal, result.message);
-            }
-            
-            return { success: false, error: result.message };
-        }
-        
-    } catch (error) {
-        console.log(`❌ خطأ في المعالجة: ${error.message}`);
-        return { success: false, error: error.message };
+        // 🔔 Notify referrer about commission earned
+        const buyerName = (user.firstName||'Your friend').slice(0,32);
+        const notifMsg = `💰 <b>Commission earned!</b>\n\n<b>${buyerName}</b> made a purchase from the Market\nYou earned <b>${comm} Bamboo</b> (20% commission) 🎋\n\n<i>Your balance has been updated automatically</i>`;
+        sendTgNotification(env, user.referredBy, notifMsg).catch(()=>{});
+      }
     }
+    return{success:true,data:{bamboo:nb,miningRate:newRate,machines}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// ✅ إرسال إشعار نجاح للمستخدم
-async function sendSuccessNotification(withdrawal, transactionId) {
-    const userDisplay = withdrawal.userName || withdrawal.username || `User ${withdrawal.userId}`;
-    const message = `✅ Withdrawal Successful!\n\nHey ${userDisplay}, your withdrawal of ${withdrawal.amount.toFixed(8)} TON from RealEarnBot_bot has been processed successfully 💸\n\nFunds are on their way — enjoy your crypto rewards and keep mining to reach even higher levels! 🚀\n\nYour consistency pays off — stay active and you might be tomorrow's top withdrawer 🏆`;
-    
-    if (withdrawal.userId) {
-        await sendTelegramMessage(withdrawal.userId, message);
-    }
+async function hUpgradeTank(env,uid,data,_meta={}){
+  try{
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    const cur=user.tankLevel||1;const next=cur+1;
+    if(next>G.MAX_TANK_LVL)return{success:false,error:'Max level'};
+    if(parseInt(data.newLevel)!==next)return{success:false,error:'Level mismatch'};
+    const cost=G.TANK[next].upgCost;
+    if((user.bamboo||0)<cost)return{success:false,error:'Not enough Bamboo'};
+    const nb=(user.bamboo||0)-cost;
+    await dbUpdate(env,`users/${uid}`,{bamboo:nb,tankLevel:next});
+    log(env,uid,'upgrade_tank',{
+      tankLevel_before:cur, tankLevel_after:next,
+      cost, bamboo_before:(user.bamboo||0), bamboo_after:nb,
+      newCap:G.TANK[next].cap,
+      coins_balance:user.coins||0, miningRate:user.miningRate||0,
+    },_meta);
+    return{success:true,data:{tankLevel:next,bamboo:nb}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// 📢 إرسال إشعار للقناة
-async function sendChannelNotification(withdrawal, transactionId) {
-    const userDisplay = withdrawal.userName || withdrawal.username || `User ${withdrawal.userId}`;
-    const maskedAccount = maskAccount(withdrawal.account);
-    const currentTime = new Date().toLocaleString('en-GB');
-    
-    const message = `💰 NEW WITHDRAWAL REQUEST 💰\n\n👤 User Information:\n• Name: ${userDisplay}\n• Username: ${withdrawal.username ? '@' + withdrawal.username : 'N/A'}\n• User ID: ${withdrawal.userId}\n\n💳 Withdrawal Details:\n• Amount: ${withdrawal.amount.toFixed(8)} TON\n• Method: ${withdrawal.method || 'FaucetPay'}\n• Wallet: ${maskedAccount}\n\n📅 Date & Time: ${currentTime}\n🆔 Request ID: ${withdrawal.id}\n\n✅ Status: Success Approval\n\nJoin bot @RealEarnBot_bot`;
-    
-    await sendTelegramMessage("@payment_proofs", message);
+async function hExchange(env,uid,data,_meta={}){
+  try{
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    // Only Bamboo → Coins direction allowed
+    if(data.coinsAmount!==undefined)return{success:false,error:'Coins to Bamboo exchange is disabled'};
+    if(data.bambooAmount===undefined)return{success:false,error:'Specify bambooAmount'};
+    let nb=user.bamboo||0,nc=user.coins||0;
+    const bam=Math.floor(parseInt(data.bambooAmount)||0);
+    if(bam<G.BAMBOO_PER_COIN)return{success:false,error:`Min ${G.BAMBOO_PER_COIN} Bamboo`};
+    if(nb<bam)return{success:false,error:'Not enough Bamboo'};
+    const coins=Math.floor(bam/G.BAMBOO_PER_COIN);
+    nb-=bam; nc+=coins;
+    const entry={bam,coins,dir:'B→C',ts:Date.now()};
+    await dbUpdate(env,`users/${uid}`,{bamboo:nb,coins:nc});
+    await dbPush(env,`users/${uid}/exchHistory`,entry);
+    log(env,uid,'exchange',{
+      bamboo_spent:bam, coins_received:coins,
+      bamboo_before:user.bamboo||0, bamboo_after:nb,
+      coins_before:user.coins||0,   coins_after:nc,
+    },_meta);
+    return{success:true,data:{bamboo:nb,coins:nc,entry}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// ❌ إرسال إشعار فشل للمستخدم
-async function sendFailureNotification(withdrawal, errorMessage) {
-    const userDisplay = withdrawal.userName || withdrawal.username || `User ${withdrawal.userId}`;
-    const message = `❌ Withdrawal Failed\n\nHey ${userDisplay}, your withdrawal of ${withdrawal.amount.toFixed(8)} TON could not be processed.\n\nReason: ${errorMessage}\n\nPlease check your wallet details and try again.`;
-    
-    if (withdrawal.userId) {
-        await sendTelegramMessage(withdrawal.userId, message);
-    }
-}
+async function hWithdraw(env,uid,data,_meta={}){
+  try{
+    const addr=(data.address||'').trim();const amt=parseFloat(data.amount)||0;
+    if(!addr||addr.length<10)return{success:false,error:'Invalid TON address'};
+    if(amt<G.MIN_WITHDRAW)return{success:false,error:`Min ${G.MIN_WITHDRAW} Coins`};
+    if(amt>1000000)return{success:false,error:'Amount too large'};
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    if((user.coins||0)<amt)return{success:false,error:'Not enough Coins'};
+    // ── Idempotency guard: block duplicate withdraw within 10s ──
+    if(Date.now()-(user._lastWdTs||0)<10000)return{success:false,error:'Please wait before submitting another withdrawal'};
 
-// 🚫 رفض السحب نهائياً
-async function rejectWithdrawal(withdrawalId, reason) {
-    try {
-        const withdrawalData = await firebaseRequest('GET', `withdrawals/pending/${withdrawalId}`);
-        
-        if (withdrawalData) {
-            // نقل إلى المرفوضة
-            const rejectedData = {
-                ...withdrawalData,
-                status: 'rejected',
-                rejectionReason: reason,
-                rejectedAt: Date.now(),
-                rejectedBy: 'auto_payment_bot'
-            };
-            
-            await firebaseRequest('PUT', `withdrawals/rejected/${withdrawalId}`, rejectedData);
-            
-            // حذف من المعلقة
-            await firebaseRequest('DELETE', `withdrawals/pending/${withdrawalId}`);
-            
-            console.log(`🚫 تم رفض السحب ${withdrawalId} بسبب: ${reason}`);
-            
-            // إرسال إشعار رفض
-            const userDisplay = withdrawalData.userName || withdrawalData.username || `User ${withdrawalData.userId}`;
-            const rejectionMessage = `🚫 Withdrawal Rejected\n\nHey ${userDisplay}, your withdrawal of ${withdrawalData.amount.toFixed(8)} TON has been rejected.\n\nReason: ${reason}\n\nPlease contact support if you believe this is an error.`;
-            
-            if (withdrawalData.userId) {
-                await sendTelegramMessage(withdrawalData.userId, rejectionMessage);
-            }
+    // ── Device Fingerprint check (free users only — depositors are trusted) ──
+    if(!user.hasDeposited){
+      const fp = (data.deviceFingerprint||'').trim();
+      if(fp && fp.length > 8){
+        const safeKey = fp.replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,120);
+        const fpRec = await dbGet(env,`deviceFingerprints/${safeKey}`);
+        if(fpRec.data && fpRec.data.uid && fpRec.data.uid !== uid){
+          await dbSet(env,`flaggedWithdrawals/fp_${uid}_${Date.now()}`,{
+            userId:uid, reason:'duplicate_device', fingerprint:fp.slice(0,40),
+            existingUser:fpRec.data.uid, amount:amt, ts:Date.now(),
+          });
+          return{success:false,error:'MULTI_ACCOUNT',errorCode:'MULTI_ACCOUNT'};
         }
-    } catch (error) {
-        console.log('❌ خطأ في رفض السحب:', error.message);
+        if(!fpRec.data){
+          await dbSet(env,`deviceFingerprints/${safeKey}`,{uid,ts:Date.now()});
+        }
+      }
     }
+
+    // Partner tasks must be completed before withdrawal
+    const tpr=await dbGet(env,'tasks/partner');
+    const partnerTasks=tpr.data?Object.values(tpr.data).filter(t=>t.status==='active'):[];
+    const completedTasks=user.completedTasks||[];
+    const missingPartner=partnerTasks.filter(t=>!completedTasks.includes(t.id));
+    if(missingPartner.length>0){
+      return{success:false,error:'Complete all partner tasks first',errorCode:'PARTNER_TASKS_REQUIRED',missing:missingPartner.length};
+    }
+    const wdId=`wd_${uid}_${Date.now()}`;const ton=amt*G.TON_PER_COIN;
+    const upd={coins:(user.coins||0)-amt, _lastWdTs:Date.now()};
+    await dbUpdate(env,`users/${uid}`,upd);
+    const rec={wdId,userId:uid,address:addr,amt,ton,status:'pending',ts:Date.now()};
+    await dbSet(env,`users/${uid}/wdHistory/${wdId}`,rec);
+    await dbSet(env,`withdrawQueue/${wdId}`,rec);
+    log(env,uid,'withdraw_request',{
+      wdId, amount_coins:amt, amount_ton:ton, address:addr,
+      coins_before:(user.coins||0), coins_after:upd.coins,
+    },_meta);
+    return{success:true,data:{wdId,coins:upd.coins,status:'pending'}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// 🔄 تحديث حالة السحب
-async function updateWithdrawalStatus(withdrawalId, status, transactionId = null) {
-    try {
-        const withdrawalData = await firebaseRequest('GET', `withdrawals/pending/${withdrawalId}`);
-        
-        if (withdrawalData) {
-            // نقل إلى المكتملة
-            const completedData = {
-                ...withdrawalData,
-                status: status,
-                transactionId: transactionId,
-                processedAt: Date.now(),
-                processedBy: 'auto_payment_bot'
-            };
-            
-            await firebaseRequest('PUT', `withdrawals/completed/${withdrawalId}`, completedData);
-            
-            // حذف من المعلقة
-            await firebaseRequest('DELETE', `withdrawals/pending/${withdrawalId}`);
-            
-            console.log(`✅ تم تحديث حالة السحب ${withdrawalId} إلى ${status}`);
-            return true;
-        }
-        
-        return false;
-        
-    } catch (error) {
-        console.log('❌ خطأ في تحديث حالة السحب:', error.message);
-        return false;
-    }
+async function hDeposit(env,uid,data,_meta={}){
+  try{
+    const amt=parseFloat(data.amount)||0;const txHash=(data.txHash||'').slice(0,256);
+    if(!txHash||amt<G.MIN_DEPOSIT_TON)return{success:false,error:'Invalid deposit data'};
+    const safeHash=txHash.replace(/[^a-zA-Z0-9]/g,'_');
+    const dup=await dbGet(env,`txHashes/${safeHash}`);
+    if(dup.data)return{success:false,error:'Duplicate transaction'};
+    const depId=`dep_${uid}_${Date.now()}`;
+    const rec={depId,userId:uid,txHash,amount:amt,status:'pending',ts:Date.now()};
+    const ur=await dbGet(env,`users/${uid}`);const u=ur.data||{};
+    await dbSet(env,`users/${uid}/deposits/${depId}`,rec);
+    await dbSet(env,`pendingDeposits/${depId}`,rec);
+    await dbSet(env,`txHashes/${safeHash}`,{depId,userId:uid,ts:Date.now()});
+    log(env,uid,'deposit_initiated',{
+      depId, txHash, amount_ton:amt,
+      bamboo_before:(u.bamboo||0), coins_before:(u.coins||0),
+      tonBalance_before:(u.tonBalance||0),
+    },_meta);
+    // Respond immediately — balance credited within 3 minutes by server wallet monitor
+    return{success:true,data:{depositId:depId,message:'Transaction registered. Your balance will be added within 3 minutes.'}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// 📥 جلب السحوبات المعلقة
-async function fetchPendingWithdrawals() {
-    try {
-        const withdrawalsData = await firebaseRequest('GET', 'withdrawals/pending');
-        
-        const pendingWithdrawals = [];
-        
-        if (withdrawalsData) {
-            Object.keys(withdrawalsData).forEach(withdrawalId => {
-                const withdrawal = withdrawalsData[withdrawalId];
-                if (withdrawal.status === 'pending') {
-                    withdrawal.id = withdrawalId;
-                    pendingWithdrawals.push(withdrawal);
-                }
-            });
-            
-            // ترتيب حسب الأقدم
-            pendingWithdrawals.sort((a, b) => a.timestamp - b.timestamp);
+async function hVerifyDeposit(env,uid,data,_meta={}){
+  try{
+    const{depositId,txHash}=data;
+    const dr=await dbGet(env,`users/${uid}/deposits/${depositId}`);const dep=dr.data;
+    if(!dep)return{success:false,error:'Deposit not found'};
+    if(dep.status==='completed')return{success:true,data:{status:'completed',amount:dep.amount}};
+    try{
+      const res=await fetch(`https://toncenter.com/api/v2/getTransaction?hash=${encodeURIComponent(txHash||dep.txHash)}`);
+      if(res.ok){const j=await res.json();if(j.ok&&j.result){
+        const tonAmt=parseFloat(dep.amount);const bamboo=Math.floor(tonAmt*G.TON_TO_BAMBOO);
+        await dbUpdate(env,`users/${uid}/deposits/${depositId}`,{status:'completed',completedAt:Date.now()});
+        const ur=await dbGet(env,`users/${uid}`);const u=ur.data||{};
+        await dbUpdate(env,`users/${uid}`,{bamboo:(u.bamboo||0)+bamboo,tonBalance:(u.tonBalance||0)+tonAmt,hasDeposited:true});
+        // Update referrer's referral record to mark this user as deposited
+        if(u.referredBy){
+          await dbUpdate(env,`users/${u.referredBy}/referrals/${uid}`,{hasDeposited:true}).catch(()=>{});
         }
-        
-        return pendingWithdrawals;
-        
-    } catch (error) {
-        console.log('❌ خطأ في جلب السحوبات:', error.message);
-        return [];
-    }
+        await dbDelete(env,`pendingDeposits/${depositId}`);
+        log(env,uid,'deposit_completed',{
+          depositId, txHash:txHash||dep.txHash,
+          amount_ton:tonAmt, bamboo_added:bamboo,
+          bamboo_before:(u.bamboo||0), bamboo_after:(u.bamboo||0)+bamboo,
+          tonBalance_before:(u.tonBalance||0), tonBalance_after:(u.tonBalance||0)+tonAmt,
+        },_meta);
+        return{success:true,data:{status:'completed',amount:tonAmt,bambooAdded:bamboo}};
+      }}
+    }catch(_){}
+    return{success:true,data:{status:'pending'}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// 🎯 المعالجة الرئيسية لكل السحوبات
-async function processAllWithdrawals() {
-    try {
-        console.log('🔄 جاري فحص السحوبات المعلقة...');
-        
-        const pendingWithdrawals = await fetchPendingWithdrawals();
-        
-        // تصفية السحوبات المؤهلة (FaucetPay + ضمن الحد)
-        const eligibleWithdrawals = pendingWithdrawals.filter(w => 
-            w.method === 'FaucetPay' && 
-            w.amount <= MAX_AMOUNT
-        );
-        
-        if (eligibleWithdrawals.length === 0) {
-            console.log('📭 لا توجد سحوبات مؤهلة للمعالجة');
-            return;
-        }
-        
-        console.log(`🔧 وجدت ${eligibleWithdrawals.length} سحب مؤهل للمعالجة...`);
-        
-        let successfulCount = 0;
-        let failedCount = 0;
-        
-        for (const withdrawal of eligibleWithdrawals) {
-            const result = await processPayment(withdrawal);
-            
-            if (result.success) {
-                await updateWithdrawalStatus(withdrawal.id, 'completed', result.transactionId);
-                successfulCount++;
-                console.log(`✅ تمت بنجاح: ${withdrawal.amount} TON`);
-            } else {
-                failedCount++;
-                console.log(`❌ فشلت: ${withdrawal.amount} TON`);
-            }
-            
-            // انتظار 5 ثواني بين كل عملية
-            await new Promise(resolve => setTimeout(resolve, 5000));
-        }
-        
-        console.log(`📊 النتائج: ${successfulCount} ناجحة - ${failedCount} فاشلة`);
-        
-        // إرسال تقرير نهائي
-        if (successfulCount > 0) {
-            const report = `📊 تقرير المعالجة\n• تم معالجة: ${successfulCount} سحب\n• فشلت: ${failedCount} سحب\n• الوقت: ${new Date().toLocaleString('ar-EG')}`;
-            await sendTelegramMessage("@payment_proofs", report);
-        }
-        
-    } catch (error) {
-        console.log('❌ خطأ في المعالجة الرئيسية:', error.message);
-    }
+async function hClaimTask(env,uid,data,_meta={}){
+  try{
+    const tid=data.taskId;const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    if((user.completedTasks||[]).includes(tid))return{success:false,error:'Already claimed'};
+    let bam=0,coins=0;
+    if(G.REF_TASKS[tid]){
+      const t=G.REF_TASKS[tid];
+      const rr=await dbGet(env,`users/${uid}/referrals`);
+      const rc=rr.data?Object.keys(rr.data).length:0;
+      if(rc<t.n)return{success:false,error:`Need ${t.n} referrals (have ${rc})`};
+      bam=t.bam;coins=t.coins;
+    }else if(G.REF_ACTIVE_TASKS[tid]){
+      // Active referrals = check users/{refId}/hasDeposited directly (most accurate)
+      const t=G.REF_ACTIVE_TASKS[tid];
+      const rr=await dbGet(env,`users/${uid}/referrals`);
+      const refIds=rr.data?Object.keys(rr.data):[];
+      let activeCount=0;
+      for(const refId of refIds){
+        const hdR=await dbGet(env,`users/${refId}/hasDeposited`);
+        if(hdR.data===true) activeCount++;
+      }
+      if(activeCount<t.n)return{success:false,error:`Need ${t.n} active referrals who deposited (have ${activeCount})`};
+      bam=t.bam;coins=t.coins;
+    }else if(G.SOC_TASKS[tid]){bam=G.SOC_TASKS[tid];}
+    else return{success:false,error:'Unknown task'};
+    const nb=(user.bamboo||0)+bam;const nc=(user.coins||0)+coins;
+    await dbUpdate(env,`users/${uid}`,{completedTasks:[...(user.completedTasks||[]),tid],bamboo:nb,coins:nc});
+    log(env,uid,'claim_task',{
+      taskId:tid,
+      bamboo_reward:bam, coins_reward:coins,
+      bamboo_before:(user.bamboo||0), bamboo_after:nb,
+      coins_before:(user.coins||0),   coins_after:nc,
+    },_meta);
+    return{success:true,data:{bamboo:nb,coins:nc,bam,coins}};
+  }catch(e){return{success:false,error:e.message};}
 }
 
-// ⏰ التشغيل التلقائي كل 30 ثانية
-setInterval(processAllWithdrawals, 30000);
+async function hAdmin(env,action,data){
+  switch(action){
+    case 'adminGetUser':{const r=await dbGet(env,`users/${data.userId}`);return{success:true,data:r.data||null};}
+    case 'adminSetBalance':{
+      const r=await dbGet(env,`users/${data.userId}`);if(!r.data)return{success:false,error:'Not found'};
+      const u={};
+      if(data.bamboo!==undefined)u.bamboo=Math.max(0,parseFloat(data.bamboo));
+      if(data.coins!==undefined)u.coins=Math.max(0,parseFloat(data.coins));
+      if(data.tonBalance!==undefined)u.tonBalance=Math.max(0,parseFloat(data.tonBalance));
+      await dbUpdate(env,`users/${data.userId}`,u);
+      log(env,data.userId,'admin_set_balance',{
+        bamboo_set:data.bamboo, coins_set:data.coins, ton_set:data.tonBalance,
+        bamboo_before:r.data.bamboo||0, coins_before:r.data.coins||0,
+        by:'admin',
+      });
+      return{success:true};
+    }
+    case 'adminConfirmDeposit':{
+      const dep=await dbGet(env,`users/${data.userId}/deposits/${data.depositId}`);
+      if(!dep.data)return{success:false,error:'Not found'};
+      const ton=parseFloat(data.amount||dep.data.amount);const bamboo=Math.floor(ton*G.TON_TO_BAMBOO);
+      await dbUpdate(env,`users/${data.userId}/deposits/${data.depositId}`,{status:'completed',completedAt:Date.now()});
+      const u=await dbGet(env,`users/${data.userId}`);
+      if(u.data)await dbUpdate(env,`users/${data.userId}`,{bamboo:(u.data.bamboo||0)+bamboo,tonBalance:(u.data.tonBalance||0)+ton,hasDeposited:true});
+      // Update referrer's referral record
+      if(u.data?.referredBy){
+        await dbUpdate(env,`users/${u.data.referredBy}/referrals/${data.userId}`,{hasDeposited:true}).catch(()=>{});
+      }
+      await dbDelete(env,`pendingDeposits/${data.depositId}`);
+      log(env,data.userId,'admin_confirm_deposit',{
+        depositId:data.depositId, amount_ton:ton, bamboo_added:bamboo, by:'admin',
+      });
+      return{success:true,data:{bambooAdded:bamboo}};
+    }
+    case 'adminApproveWithdraw':{
+      await dbUpdate(env,`users/${data.userId}/wdHistory/${data.wdId}`,{status:'approved',approvedAt:Date.now()});
+      await dbDelete(env,`withdrawQueue/${data.wdId}`);
+      log(env,data.userId,'admin_approve_withdraw',{wdId:data.wdId,by:'admin'});
+      return{success:true};
+    }
+    case 'adminRejectWithdraw':{
+      const wd=await dbGet(env,`users/${data.userId}/wdHistory/${data.wdId}`);
+      if(!wd.data)return{success:false,error:'Not found'};
+      await dbUpdate(env,`users/${data.userId}/wdHistory/${data.wdId}`,{status:'rejected',rejectedAt:Date.now()});
+      if(data.refund){const u=await dbGet(env,`users/${data.userId}`);if(u.data)await dbUpdate(env,`users/${data.userId}`,{coins:(u.data.coins||0)+(wd.data.amt||0)});}
+      await dbDelete(env,`withdrawQueue/${data.wdId}`);
+      log(env,data.userId,'admin_reject_withdraw',{wdId:data.wdId,refund:!!data.refund,amount:wd.data?.amt||0,by:'admin'});
+      return{success:true};
+    }
+    case 'adminGetQueue':{
+      const w=await dbGet(env,'withdrawQueue');const d=await dbGet(env,'pendingDeposits');
+      return{success:true,data:{withdrawals:w.data?Object.values(w.data):[],deposits:d.data?Object.values(d.data):[]}};
+    }
+    default:return{success:false,error:'Unknown admin action'};
+  }
+}
 
-// 🚀 المعالجة الفورية عند البدء
-console.log('🎯 بدء المعالجة الفورية...');
-processAllWithdrawals();
+// ── Check Telegram channel membership ────────────────────────────
+async function checkMembership(env,userId,channelLink){
+  try{
+    if(!env.BOT_TOKEN){console.log('No BOT_TOKEN, skipping check');return true;}
+    let username=channelLink;
+    if(channelLink.includes('t.me/')) username=channelLink.split('t.me/')[1].split('?')[0].split('/')[0];
+    if(username.startsWith('@')) username=username.substring(1);
+    const res=await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/getChatMember`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:`@${username}`,user_id:parseInt(userId)}),
+    });
+    const j=await res.json();
+    if(!j.ok){console.error('TG API:',j);return false;}
+    return['member','administrator','creator'].includes(j.result?.status);
+  }catch(e){console.error('checkMembership:',e.message);return false;}
+}
 
-// 📝 رسالة التأكيد
-console.log('=================================');
-console.log('✅ النظام يعمل بنجاح!');
-console.log('⏰ سيفحص السحوبات كل 30 ثانية');
-console.log('📧 الإشعارات ترسل لـ @payment_proofs');
-console.log('🔧 لا حاجة لأي تدخل يدوي');
-console.log('=================================');
+// ── Verify Task ───────────────────────────────────────────────────
+async function hVerifyTask(env,uid,data,_meta={}){
+  try{
+    const{taskId,taskType,taskCategory}=data;
+    if(!taskId||typeof taskId!=='string'||taskId.length>100) return{success:false,error:'Invalid taskId'};
+    const cat=taskCategory||'community';
+    // Find task
+    let tr=await dbGet(env,`tasks/${cat}/${taskId}`);
+    let task=tr.data, taskCat=cat;
+    if(!task){
+      const other=cat==='community'?'partner':'community';
+      tr=await dbGet(env,`tasks/${other}/${taskId}`);
+      task=tr.data; taskCat=other;
+    }
+    if(!task)return{success:false,error:'Task not found'};
+    if(task.status!=='active')return{success:false,error:'Task is no longer active'};
+    // Fix 1: server-side double-claim guard — check user's completedTasks first
+    const ur=await dbGet(env,`users/${uid}`);const u=ur.data||{};
+    if((u.completedTasks||[]).includes(taskId))return{success:false,error:'Task already completed'};
+    if((task.completedBy||[]).includes(uid))return{success:false,error:'Task already completed'};
+    // Channel: verify membership
+    if(task.type==='channel'){
+      const isMember=await checkMembership(env,uid,task.link);
+      if(!isMember)return{success:false,error:'Not a member of the channel. Join first then try again!'};
+    }
+    const bam=task.bambooReward||500;
+    const newCompletions=(task.completions||0)+1;
+    const newCompletedBy=[...(task.completedBy||[]),uid];
+    const taskUpdates={completions:newCompletions,completedBy:newCompletedBy,updatedAt:Date.now()};
+    // Only mark completed if targetUsers is set (not null/unlimited)
+    if(task.targetUsers!=null && newCompletions>=(task.targetUsers||Infinity)) taskUpdates.status='completed';
+    await dbUpdate(env,`tasks/${taskCat}/${taskId}`,taskUpdates);
+    // Fix 1: mark completed in user BEFORE bamboo so duplicate calls return "already completed"
+    const newCompleted=[...(u.completedTasks||[]),taskId];
+    await dbUpdate(env,`users/${uid}`,{
+      completedTasks:newCompleted,
+      bamboo:(u.bamboo||0)+bam,
+    });
+    log(env,uid,'verify_task',{
+      taskId, taskType:task.type, taskCategory:taskCat,
+      bamboo_reward:bam,
+      bamboo_before:(u.bamboo||0), bamboo_after:(u.bamboo||0)+bam,
+    },_meta);
+    return{success:true,data:{bambooAdded:bam,completions:newCompletions}};
+  }catch(e){console.error('verifyTask:',e);return{success:false,error:e.message};}
+}
 
-// 🛡️ منع إيقاف البرنامج
-process.on('uncaughtException', (error) => {
-    console.log('🛡️ خطأ غير متوقع:', error.message);
-});
+// ── Create Task ───────────────────────────────────────────────────
+async function hCreateTask(env,uid,data,_meta={}){
+  try{
+    const{type,link,targetUsers}=data;
+    if(!['channel','bot'].includes(type)) return{success:false,error:'Invalid type. Must be channel or bot'};
+    const target=parseInt(targetUsers)||0;
+    if(target<100)  return{success:false,error:'Minimum target is 100 users'};
+    if(target>100000) return{success:false,error:'Maximum target is 100,000 users'};
+    if(!link||!link.includes('t.me/')) return{success:false,error:'Valid Telegram link required'};
+    // 60 Coins per target user → 100 users = 6,000 | 500 users = 30,000
+    const COINS_PER_USER=60;
+    const cost=target*COINS_PER_USER;
+    const ur=await dbGet(env,`users/${uid}`);const u=ur.data;
+    if(!u) return{success:false,error:'User not found'};
+    if((u.coins||0)<cost) return{success:false,error:`Insufficient Coins. Need ${cost} Coins`};
+    // Deduct Coins
+    await dbUpdate(env,`users/${uid}`,{coins:(u.coins||0)-cost});
+    // Extract display name from link
+    const username=link.split('t.me/')[1]?.split('?')[0]?.split('/')[0]||link;
+    const now=Date.now();
+    const taskId=`task_${now}_${Math.random().toString(36).substring(2,10)}`;
+    const taskData={
+      id:taskId, creatorId:uid, type, link,
+      name:`@${username}`,
+      targetUsers:target,
+      bambooReward:500,
+      completions:0, completedBy:[],
+      status:'active',
+      createdAt:now,
+      expiresAt:now+(30*24*60*60*1000),
+      updatedAt:now,
+    };
+    await dbSet(env,`tasks/community/${taskId}`,taskData);
+    await dbPush(env,`users/${uid}/transactions`,{type:'create_task',taskId,taskType:type,targetUsers:target,cost,coinsCost:cost,timestamp:now});
+    log(env,uid,'create_task',{
+      taskId, taskType:type, targetUsers:target,
+      coins_spent:cost,
+      coins_before:(u.coins||0)+cost, coins_after:(u.coins||0),
+      taskLink:link,
+    },_meta);
+    return{success:true,data:{taskId,type,targetUsers:target,totalCost:cost,bambooReward:500}};
+  }catch(e){console.error('createTask:',e);return{success:false,error:e.message};}
+}
 
-process.on('unhandledRejection', (reason, promise) => {
-    console.log('🛡️ رفض وعد غير معالج:', reason);
-});
+// ── Main handler ──────────────────────────────────────────────────
+
+// ── Update leaderboard entry ─────────────────────────────────────
+async function updateLeaderboardEntry(env,uid,user){
+  try{
+    const COMP_DURATION_MS = 10*24*60*60*1000;
+    // Get or init competition meta
+    let meta=(await dbGet(env,'competition/meta')).data;
+    if(!meta||!meta.endDate){
+      meta={endDate:Date.now()+COMP_DURATION_MS,startDate:Date.now()};
+      await dbSet(env,'competition/meta',meta);
+    }
+    const compStarted=Date.now()>=meta.startDate;
+    if(!compStarted) return; // competition not started yet
+
+    // Count active referrals (current total)
+    const rr=await dbGet(env,`users/${uid}/referrals`);
+    const refIds=rr.data?Object.keys(rr.data):[];
+    let activeNow=0;
+    for(const refId of refIds){
+      const hd=await dbGet(env,`users/${refId}/hasDeposited`);
+      if(hd.data===true) activeNow++;
+    }
+    const miningNow=Math.round((user.miningRate||0)*24);
+
+    // Get or create snapshot for this user (values AT competition start)
+    const snapKey=`competition/snapshots/${uid}`;
+    let snap=(await dbGet(env,snapKey)).data;
+    if(!snap){
+      // First time this user is seen after comp started — snapshot current values
+      snap={activeRefs:activeNow, miningPerDay:miningNow, ts:meta.startDate};
+      await dbSet(env,snapKey,snap);
+    }
+
+    // Score = growth SINCE competition started (never negative)
+    const activeScore=Math.max(0, activeNow - snap.activeRefs);
+    const miningScore=Math.max(0, miningNow - snap.miningPerDay);
+
+    const entry={
+      userId:uid,
+      name:`${user.firstName||''} ${user.lastName||''}`.trim()||'Panda',
+      photo:user.photoUrl||null,
+      activeScore,   // points earned since comp start
+      miningScore,
+      activeNow,
+      miningNow,
+      ts:Date.now(),
+    };
+    await dbSet(env,`competition/users/${uid}`,entry);
+
+    // Rebuild leaderboard top 50
+    const allr=await dbGet(env,'competition/users');
+    const all=allr.data?Object.values(allr.data):[];
+    const byActive=[...all].sort((a,b)=>b.activeScore-a.activeScore).slice(0,50)
+      .map(u=>({userId:u.userId,name:u.name,photo:u.photo,score:u.activeScore}));
+    const byMining=[...all].sort((a,b)=>b.miningScore-a.miningScore).slice(0,50)
+      .map(u=>({userId:u.userId,name:u.name,photo:u.photo,score:u.miningScore}));
+    await dbSet(env,'competition/leaderboard',{activeRefs:byActive,miningSpeed:byMining,updatedAt:Date.now()});
+  }catch(e){console.error('updateLeaderboardEntry:',e.message);}
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────
+async function hGetLeaderboard(env,uid,_meta={}){
+  try{
+    const COMP_DURATION_MS = 10*24*60*60*1000;
+    let meta=(await dbGet(env,'competition/meta')).data;
+    if(!meta||!meta.endDate){
+      meta={endDate:Date.now()+COMP_DURATION_MS,startDate:Date.now()};
+      await dbSet(env,'competition/meta',meta);
+    }
+    const lbr=await dbGet(env,'competition/leaderboard');
+    const lb=lbr.data||{activeRefs:[],miningSpeed:[]};
+    // Get this user's snapshot so frontend can show their current score
+    const snap=(await dbGet(env,`competition/snapshots/${uid}`)).data||null;
+    return{success:true,data:{
+      endDate:meta.endDate,
+      startDate:meta.startDate,
+      activeRefs:lb.activeRefs||[],
+      miningSpeed:lb.miningSpeed||[],
+      mySnapshot:snap, // {activeRefs, miningPerDay} at comp start
+    }};
+  }catch(e){return{success:false,error:e.message};}
+}
+
+export default {
+  async fetch(request,env){
+    if(request.method==='OPTIONS')return new Response(null,{headers:CORS});
+    const url=new URL(request.url);const path=url.pathname;
+    if(path==='/health')return ok({status:'ok',ts:Date.now(),env:env.ENVIRONMENT||'production'});
+    if(path==='/tonconnect-manifest.json')return jRes({url:'https://pandabambo.vercel.app',name:'PandaBambooBot',iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/87e9d1bd-c053-466a-a29e-40483a009e8f.png',description:'Panda Bamboo Factory'});
+    if(path!=='/api'||request.method!=='POST')return fail('Not found',404);
+
+    const ip=request.headers.get('CF-Connecting-IP')||'unknown';
+    if(!rateOk(ip))return fail('Rate limit exceeded',429);
+
+    let body;
+    try{const raw=await request.text();if(raw.length>10240)return fail('Payload too large',413);body=JSON.parse(sanitise(raw));}
+    catch(_){return fail('Invalid JSON',400);}
+
+    const authHeader=request.headers.get('Authorization')||'';
+    const action=request.headers.get('X-Action')||body.action;
+    const data=body.data||{};
+    if(!action)return fail('Missing action',400);
+
+    const ADMIN_ACTIONS=new Set(['adminGetUser','adminSetBalance','adminConfirmDeposit','adminApproveWithdraw','adminRejectWithdraw','adminGetQueue']);
+    if(ADMIN_ACTIONS.has(action)){
+      const v=await validateTg(authHeader.replace('Telegram ',''),env.BOT_TOKEN);
+      if(!v.valid)return fail('Unauthorized',401);
+      const adminIds=(env.ADMIN_IDS||'').split(',').map(s=>s.trim());
+      if(!adminIds.includes(String(v.user?.id)))return fail('Forbidden',403);
+      return jRes(await hAdmin(env,action,data));
+    }
+
+    if(!authHeader.startsWith('Telegram '))return fail('Telegram authentication required',401);
+    const v=await validateTg(authHeader.replace('Telegram ',''),env.BOT_TOKEN);
+    if(!v.valid){
+      console.error('TG validation failed:',v.error);
+      return jRes({success:false,error:'Invalid Telegram authentication',errorCode:'INVALID_TELEGRAM_AUTH',debug:{hasInitData:!!authHeader,botTokenConfigured:!!env.BOT_TOKEN,environment:env.ENVIRONMENT||'production',validationError:v.error}},401);
+    }
+
+    const uid=String(v.user.id);
+    const _meta={ip, ua:request.headers.get('User-Agent')||''};
+    console.log(`[${new Date().toISOString()}] User:${uid} Action:${action} IP:${ip}`);
+
+    // Per-user per-action cooldown — blocks auto-clicker / rapid replay attacks
+    if(!userActionOk(uid, action)){
+      return fail('Too fast. Please wait a moment before trying again.',429);
+    }
+
+    switch(action){
+      case 'getState'      :return jRes(await hGetState(env,uid,v.user,{...data,_startParam:v.startParam||''},_meta));
+      case 'collect'       :return jRes(await hCollect      (env,uid,data,_meta));
+      case 'buyItem'       :return jRes(await hBuyItem      (env,uid,data,_meta));
+      case 'upgradeTank'   :return jRes(await hUpgradeTank  (env,uid,data,_meta));
+      case 'exchange'      :return jRes(await hExchange     (env,uid,data,_meta));
+      case 'withdraw'      :return jRes(await hWithdraw     (env,uid,data,_meta));
+      case 'deposit'       :return jRes(await hDeposit      (env,uid,data,_meta));
+      case 'verifyDeposit' :return jRes(await hVerifyDeposit(env,uid,data,_meta));
+      case 'claimTask'     :return jRes(await hClaimTask    (env,uid,data,_meta));
+      case 'verifyTask'    :return jRes(await hVerifyTask   (env,uid,data,_meta));
+      case 'createTask'    :return jRes(await hCreateTask   (env,uid,data,_meta));
+      case 'getLeaderboard':return jRes(await hGetLeaderboard(env,uid,_meta));
+      default:return fail('Unknown action',400);
+    }
+  }
+};

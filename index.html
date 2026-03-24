@@ -336,6 +336,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ptc{position:fixed;pointer-events:none;z-index:400;font-size:17px;animation:ptup .9s ease-out forwards}
 @keyframes ptup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-74px) scale(.4);opacity:0}}
 ::-webkit-scrollbar{width:3px}
+@keyframes cup-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes cup-glow{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.15)}}
 @keyframes comp-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,165,0,.7))}50%{filter:drop-shadow(0 0 20px rgba(255,165,0,1))}}
 @keyframes comp-shimmer{0%{opacity:.3;transform:scaleX(.5) translateX(-30%)}50%{opacity:1;transform:scaleX(1) translateX(0)}100%{opacity:.3;transform:scaleX(.5) translateX(30%)}}
 @keyframes podium-rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
@@ -3225,173 +3227,169 @@ function renderCompPane(elId, opt){
   const {title,desc,prizeTotal,endDate,board,myRank,myScore,myScoreLbl,prizes,scoreSuffix,color,colorRgb,T}=opt;
   const isActive = elId.includes('active');
   const scoreIcon = isActive
-    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:15px;height:15px;object-fit:contain;border-radius:50%;vertical-align:middle">`
-    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:15px;height:15px;object-fit:contain;vertical-align:middle">`;
+    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:16px;height:16px;object-fit:contain;border-radius:50%;vertical-align:middle">`
+    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png"  style="width:16px;height:16px;object-fit:contain;vertical-align:middle">`;
   const PODIUM_IMGS = ['https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png','https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png'];
   const myWinning  = myRank>=0 && myRank<20;
   const rankDisp   = myRank>=0 ? `#${myRank+1}` : (T.compUnranked||'Unranked');
-  const rankColor  = myWinning ? '#FFD700' : myRank>=0 ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.2)';
-  const rankShadow = myWinning ? '0 0 20px rgba(255,215,0,.8)' : 'none';
+  const rankColor  = myWinning ? '#FFD700' : myRank>=0 ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.22)';
+  const rankShadow = myWinning ? '0 0 20px rgba(255,215,0,.9)' : 'none';
 
-  /* ══ HERO CARD ══ */
   let html=`
-  <div style="position:relative;border-radius:24px;overflow:hidden;margin-bottom:16px">
-    <!-- bg image blended -->
-    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ff69c85a-e4d7-47fe-8add-2a65d73673b7.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0">
-    <!-- overlay: dark + color tint -->
-    <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(${colorRgb},.18) 0%,rgba(2,6,2,.82) 55%,rgba(2,6,2,.95) 100%);z-index:1"></div>
-    <!-- animated shimmer top -->
-    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(${colorRgb},.9) 50%,transparent 100%);z-index:2;animation:comp-shimmer 3s ease-in-out infinite"></div>
-    <!-- green glow at bottom edge -->
-    <div style="position:absolute;bottom:0;left:10%;right:10%;height:1px;background:rgba(${colorRgb},.35);z-index:2;filter:blur(2px)"></div>
 
-    <div style="position:relative;z-index:3;padding:20px 16px 18px">
-      <!-- title -->
-      <div style="font-size:16px;font-weight:800;color:${color};letter-spacing:.3px;text-shadow:0 0 24px rgba(${colorRgb},.6);margin-bottom:3px">${title}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.42);font-weight:600;margin-bottom:18px">${desc}</div>
+  <!-- ═══ HERO SECTION (cup + timer + top20) ═══ -->
+  <div style="position:relative;padding:0 8px 0;margin-bottom:6px">
 
-      <!-- VISUAL HIERARCHY: Big prize (hero) + 2 small info -->
-      <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:18px">
+    <!-- ambient glow behind cup -->
+    <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:180px;height:180px;background:radial-gradient(circle,rgba(255,215,0,.22) 0%,rgba(124,179,66,.1) 40%,transparent 70%);border-radius:50%;z-index:0;animation:cup-glow 2.5s ease-in-out infinite"></div>
 
-        <!-- HERO: Prize cup — takes 55% width -->
-        <div style="flex:0 0 55%;position:relative;border-radius:18px;overflow:hidden;aspect-ratio:.95/1">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fd38c49f-0b7a-4531-b791-aca220f9802c.png" style="width:100%;height:100%;object-fit:cover;display:block">
-          <!-- gold glow overlay -->
-          <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,rgba(255,215,0,.08) 0%,transparent 70%)"></div>
-        </div>
+    <!-- Center: giant cup -->
+    <div style="display:flex;justify-content:center;position:relative;z-index:1;margin-bottom:4px">
+      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fd38c49f-0b7a-4531-b791-aca220f9802c.png" style="width:190px;height:190px;object-fit:contain;filter:drop-shadow(0 0 24px rgba(255,215,0,.55)) drop-shadow(0 8px 20px rgba(0,0,0,.6));animation:cup-float 3s ease-in-out infinite">
+    </div>
 
-        <!-- Right column: timer + top20 stacked -->
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+    <!-- Row: timer  [cup above]  top20 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-28px;position:relative;z-index:2;padding:0 4px">
 
-          <!-- Timer card -->
-          <div style="flex:1;position:relative;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72px">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17d3a8cd-b9d1-4d12-a478-a0e4764c75ae.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
-            <div style="position:relative;z-index:1;text-align:center;padding:6px 4px">
-              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${T.compEnds||'Ends In'}</div>
-              <div id="cd_${elId}" style="font-size:14px;font-weight:800;color:#fff;text-shadow:0 0 12px rgba(255,120,60,1);letter-spacing:.5px;line-height:1.1">${fmtCountdown(endDate)}</div>
-            </div>
-          </div>
-
-          <!-- Top20 card -->
-          <div style="flex:1;position:relative;border-radius:14px;overflow:hidden;min-height:72px">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d03d5885-157e-4ee9-8ab5-dbe6fc358e33.png" style="width:100%;height:100%;object-fit:cover;display:block">
-          </div>
+      <!-- Timer card (left) -->
+      <div style="position:relative;width:110px;height:75px;border-radius:40px;overflow:hidden;flex-shrink:0">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17d3a8cd-b9d1-4d12-a478-a0e4764c75ae.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.28);border-radius:40px"></div>
+        <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <div id="cd_${elId}" style="font-size:14px;font-weight:800;color:#fff;text-shadow:0 0 10px rgba(255,140,60,.9);letter-spacing:.3px;line-height:1">${fmtCountdown(endDate)}</div>
+          <div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:1px">${T.compEnds||'ENDS IN'}</div>
         </div>
       </div>
 
-      <!-- MY STATS — score + rank -->
-      <div style="background:rgba(0,0,0,.52);border:1px solid rgba(${colorRgb},.22);border-radius:16px;padding:12px 15px;display:flex;align-items:center;gap:0;backdrop-filter:blur(12px)">
-        <div style="flex:1">
-          <div style="font-size:9px;color:rgba(255,255,255,.38);font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px">${T.compMyScore||'Your Score'}</div>
-          <div style="display:flex;align-items:center;gap:7px">
-            ${scoreIcon}
-            <span style="font-size:26px;font-weight:800;color:${color};text-shadow:0 0 16px rgba(${colorRgb},.6);line-height:1">${fmt(myScore)}</span>
-            <span style="font-size:10px;color:rgba(255,255,255,.32);font-weight:600;margin-top:4px">${scoreSuffix}</span>
-          </div>
-        </div>
-        <div style="width:1px;height:44px;background:rgba(255,255,255,.08);margin:0 14px"></div>
-        <div style="text-align:right">
-          <div style="font-size:9px;color:rgba(255,255,255,.38);font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px">${T.compMyRank||'Your Rank'}</div>
-          <div style="font-size:26px;font-weight:800;line-height:1;color:${rankColor};text-shadow:${rankShadow}">${rankDisp}</div>
-        </div>
-      </div>
+      <!-- Spacer (cup is above in flow) -->
+      <div style="flex:1"></div>
 
-      <!-- WINNING BANNER -->
-      ${myWinning ? `
-      <div style="margin-top:10px;padding:11px 16px;background:linear-gradient(135deg,rgba(76,175,80,.16),rgba(255,215,0,.06));border:1px solid rgba(255,215,0,.3);border-radius:14px;display:flex;align-items:center;justify-content:space-between;animation:winning-pulse 2s ease-in-out infinite">
-        <div style="display:flex;align-items:center;gap:7px">
-          <span style="font-size:18px">🐼</span>
-          <span style="font-size:12px;font-weight:800;color:#a5d6a7">${T.compWinning||'You are winning!'}</span>
-        </div>
-        <div style="font-size:17px;font-weight:800;color:#FFD700;text-shadow:0 0 14px rgba(255,215,0,.7)">${prizes[myRank]||0} TON</div>
-      </div>` : ''}
+      <!-- Top20 card (right) -->
+      <div style="position:relative;width:100px;height:70px;border-radius:14px;overflow:hidden;flex-shrink:0">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d03d5885-157e-4ee9-8ab5-dbe6fc358e33.png" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
     </div>
   </div>
 
-  <!-- LEADERBOARD HEADER -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 4px">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="width:4px;height:18px;background:linear-gradient(180deg,${color},transparent);border-radius:2px"></div>
-      <span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.65)">${T.compLeaderboard||'🏅 Leaderboard'}</span>
+  <!-- ═══ MY STATS CARD ═══ -->
+  <div style="margin:10px 8px 8px;background:rgba(0,0,0,.55);border:1px solid rgba(${colorRgb},.28);border-radius:20px;padding:14px 18px;backdrop-filter:blur(14px)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${T.compMyScore||'YOUR SCORE'}</div>
+        <div style="display:flex;align-items:center;gap:7px">
+          ${scoreIcon}
+          <span style="font-size:28px;font-weight:800;color:#fff;line-height:1">${fmt(myScore)}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.38);font-weight:600;margin-top:6px">${scoreSuffix}</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${T.compMyRank||'YOUR RANK'}</div>
+        <div style="font-size:36px;font-weight:800;line-height:1;color:${rankColor};text-shadow:${rankShadow}">${rankDisp}</div>
+      </div>
     </div>
-    <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.85);background:rgba(${colorRgb},.1);border:1px solid rgba(${colorRgb},.22);border-radius:20px;padding:3px 11px">Top 50</div>
-  </div>`;
+  </div>
 
-  /* ══ PODIUM top 3 ══ */
+  <!-- ═══ WINNING BANNER ═══ -->
+  ${myWinning ? `
+  <div style="margin:0 8px 10px;padding:12px 18px;background:linear-gradient(135deg,rgba(15,40,15,.85),rgba(5,20,5,.9));border:1px solid rgba(255,215,0,.3);border-radius:16px;display:flex;align-items:center;justify-content:space-between;animation:winning-pulse 2s ease-in-out infinite;backdrop-filter:blur(8px)">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:22px">🐼</span>
+      <span style="font-size:14px;font-weight:800;color:#c8e6c9">${T.compWinning||'You are winning!'} <span style="font-size:14px">✨</span></span>
+    </div>
+    <div style="font-size:22px;font-weight:800;color:#FFD700;text-shadow:0 0 16px rgba(255,215,0,.8)">${prizes[myRank]||0} TON</div>
+  </div>` : ''}
+
+  <!-- ═══ PODIUM (chairs style) ═══ -->`;
+
   if(board.length>=1){
-    /* order: 2nd (left), 1st (center/tallest), 3rd (right) */
+    /* 2nd left, 1st center (biggest), 3rd right */
     const CONF=[
-      {i:1, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png', colH:'88px', avSize:'44px', fontSize:'11px', mt:'22px'},
-      {i:0, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png', colH:'114px',avSize:'54px', fontSize:'13px', mt:'0'},
-      {i:2, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png', colH:'70px', avSize:'38px', fontSize:'10px', mt:'36px'},
+      {i:1, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ef58f91-8445-48ad-a605-24df120891c7.png', wrapW:'30%', podH:'90px',  avSize:'46px', nameSz:'11px', mt:'30px', crowned:false},
+      {i:0, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1a1f7ec-be74-4951-a392-60aee63b33d6.png', wrapW:'38%', podH:'118px', avSize:'58px', nameSz:'13px', mt:'0',    crowned:true },
+      {i:2, podImg:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9a976d18-be04-449f-81b5-27fd504946dd.png', wrapW:'30%', podH:'75px',  avSize:'38px', nameSz:'10px', mt:'46px', crowned:false},
     ];
-    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;margin-bottom:20px;padding:0 4px">`;
+    const BORDER_COLS=['#FFD700','#C0C0C0','#CD7F32'];
+
+    html+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:6px 4px 0;margin-bottom:18px">`;
     for(const conf of CONF){
       const u=board[conf.i]; if(!u) continue;
       const isMe=u.userId===S.userId;
+      const bCol=BORDER_COLS[conf.i];
       const prizeAmt=prizes[conf.i];
       const av=u.photo
-        ?`<img src="${esc(u.photo)}" style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;object-fit:cover;border:2.5px solid ${conf.i===0?'#FFD700':conf.i===1?'#C0C0C0':'#CD7F32'};box-shadow:0 0 ${conf.i===0?'16px rgba(255,215,0,.5)':'10px rgba(255,255,255,.15)'}" onerror="this.style.display='none'">`
-        :`<div style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;background:rgba(${colorRgb},.12);border:2.5px solid ${conf.i===0?'#FFD700':conf.i===1?'#C0C0C0':'#CD7F32'};display:flex;align-items:center;justify-content:center;font-size:${conf.i===0?'24':'18'}px">🐼</div>`;
-      const medal=conf.i===0?'🥇':conf.i===1?'🥈':'🥉';
+        ?`<img src="${esc(u.photo)}" style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;object-fit:cover;border:2.5px solid ${bCol};box-shadow:0 0 ${conf.i===0?'18px rgba(255,215,0,.6)':'10px rgba(200,200,200,.2)'}"  onerror="this.style.display='none'">`
+        :`<div style="width:${conf.avSize};height:${conf.avSize};border-radius:50%;background:rgba(0,0,0,.5);border:2.5px solid ${bCol};display:flex;align-items:center;justify-content:center;font-size:${conf.i===0?'26':'18'}px">🐼</div>`;
+      const medal=conf.i===0?'👑':conf.i===1?'🥈':'🥉';
+      const glowColor=conf.i===0?'rgba(255,215,0,.7)':conf.i===1?'rgba(192,192,192,.4)':'rgba(205,127,50,.4)';
       html+=`
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:${conf.mt};animation:podium-rise ${0.3+conf.i*0.12}s ease-out both">
-        <div style="font-size:${conf.i===0?'20':'16'}px;margin-bottom:1px">${medal}</div>
-        ${av}
-        <div style="font-size:${conf.fontSize};font-weight:800;color:${isMe?color:'rgba(255,255,255,.9)'};text-align:center;max-width:75px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${isMe?'0 0 10px rgba('+colorRgb+',.5)':'none'}">${esc(u.name||'Panda')}</div>
-        <!-- score chip -->
-        <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.45);border:1px solid rgba(${colorRgb},.28);border-radius:10px;padding:2px 8px">
-          ${scoreIcon}<span style="font-size:10px;font-weight:800;color:${color}">${fmt(u.score)}</span>
+      <div style="width:${conf.wrapW};display:flex;flex-direction:column;align-items:center;margin-top:${conf.mt};animation:podium-rise ${0.2+conf.i*0.15}s ease-out both">
+        <!-- medal -->
+        <div style="font-size:${conf.i===0?'22':'17'}px;margin-bottom:4px;filter:drop-shadow(0 0 6px ${glowColor})">${medal}</div>
+        <!-- avatar -->
+        <div style="position:relative;margin-bottom:5px">
+          ${av}
+          ${isMe?`<div style="position:absolute;inset:-3px;border-radius:50%;border:2px solid ${color};animation:winning-pulse 1.5s ease-in-out infinite"></div>`:''}
         </div>
-        <!-- prize badge — gold glow for 1st -->
-        <div style="background:${conf.i===0?'linear-gradient(135deg,rgba(255,215,0,.25),rgba(255,165,0,.12))':'rgba(0,0,0,.35)'};border:1px solid ${conf.i===0?'rgba(255,215,0,.55)':'rgba(255,255,255,.12)'};border-radius:10px;padding:3px 9px;font-size:11px;font-weight:800;color:${conf.i===0?'#FFD700':'rgba(255,255,255,.65)'};text-shadow:${conf.i===0?'0 0 8px rgba(255,215,0,.6)':'none'};white-space:nowrap">${prizeAmt} TON</div>
-        <!-- podium base image -->
-        <div style="width:100%;position:relative;overflow:hidden;border-radius:10px 10px 0 0">
-          <img src="${conf.podImg}" style="width:100%;height:${conf.colH};object-fit:cover;display:block">
-          ${isMe?`<div style="position:absolute;inset:0;background:rgba(${colorRgb},.12);display:flex;align-items:center;justify-content:center"><span style="font-size:10px;font-weight:800;color:${color};background:rgba(0,0,0,.7);border-radius:6px;padding:2px 7px">YOU ✦</span></div>`:''}</div>
+        <!-- name -->
+        <div style="font-size:${conf.nameSz};font-weight:800;color:${isMe?color:'rgba(255,255,255,.9)'};text-align:center;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${isMe?'0 0 8px rgba('+colorRgb+',.6)':'0 1px 4px rgba(0,0,0,.8)'};margin-bottom:4px">${esc(u.name||'Panda')}</div>
+        <!-- score -->
+        <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.55);border:1px solid rgba(${colorRgb},.3);border-radius:10px;padding:2px 8px;margin-bottom:4px">
+          ${scoreIcon}<span style="font-size:${conf.i===0?'12':'10'}px;font-weight:800;color:${color}">${fmt(u.score)}</span>
+        </div>
+        <!-- prize -->
+        <div style="background:${conf.i===0?'linear-gradient(135deg,rgba(255,215,0,.28),rgba(255,165,0,.14))':'rgba(0,0,0,.4)'};border:1px solid ${conf.i===0?'rgba(255,215,0,.6)':'rgba(255,255,255,.15)'};border-radius:10px;padding:3px 10px;font-size:${conf.i===0?'13':'11'}px;font-weight:800;color:${conf.i===0?'#FFD700':'rgba(255,255,255,.7)'};text-shadow:${conf.i===0?'0 0 10px rgba(255,215,0,.7)':'none'};margin-bottom:5px;white-space:nowrap">${prizeAmt} TON</div>
+        <!-- chair/podium image -->
+        <img src="${conf.podImg}" style="width:100%;height:${conf.podH};object-fit:cover;object-position:top;border-radius:8px 8px 0 0;display:block;filter:drop-shadow(0 -4px 12px ${glowColor})">
       </div>`;
     }
     html+=`</div>`;
   }
 
-  /* ══ ROWS 4-50 ══ */
-  html+=`<div style="display:flex;flex-direction:column;gap:5px">`;
+  <!-- ═══ LEADERBOARD ROWS 4-50 ═══ -->
+  html+=`
+  <div style="padding:0 8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="width:3px;height:16px;background:linear-gradient(180deg,${color} 0%,transparent 100%);border-radius:2px"></div>
+        <span style="font-size:13px;font-weight:800;color:rgba(255,255,255,.6)">${T.compLeaderboard||'🏅 Leaderboard'}</span>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:rgba(${colorRgb},.9);background:rgba(${colorRgb},.12);border:1px solid rgba(${colorRgb},.25);border-radius:20px;padding:3px 11px">Top 50</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px">`;
+
   if(!board.length){
-    html+=`<div style="text-align:center;padding:44px 20px;color:rgba(255,255,255,.25);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
+    html+=`<div style="text-align:center;padding:44px 20px;color:rgba(255,255,255,.22);font-size:13px;font-weight:600">${T.compEmpty||'No participants yet. Be the first!'}</div>`;
   } else {
     board.forEach((u,i)=>{
       if(i<3) return;
       const prize=i<20?prizes[i]:null;
       const isMe=u.userId===S.userId;
       const isTop=i<20;
-      const rowBg   = isMe?`rgba(${colorRgb},.1)` : isTop?'rgba(255,255,255,.04)' : 'rgba(255,255,255,.02)';
-      const rowBord = isMe?`1.5px solid rgba(${colorRgb},.4)` : isTop?'1px solid rgba(255,255,255,.07)':'1px solid rgba(255,255,255,.03)';
-      const rowShad = isMe?`0 0 18px rgba(${colorRgb},.2)`:'none';
+      const rowBg   = isMe?`rgba(${colorRgb},.1)`:isTop?'rgba(255,255,255,.035)':'rgba(255,255,255,.018)';
+      const rowBord = isMe?`1.5px solid rgba(${colorRgb},.42)`:isTop?'1px solid rgba(255,255,255,.07)':'1px solid rgba(255,255,255,.03)';
+      const rowShad = isMe?`0 0 20px rgba(${colorRgb},.18)`:'none';
       const av=u.photo
-        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.5:.1})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:15px\'>🐼</div>'">`
-        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:15px">🐼</div>`;
-      const badgeBg=isTop
-        ?`linear-gradient(135deg,rgba(${colorRgb},.28),rgba(${colorRgb},.1))`
+        ?`<img src="${esc(u.photo)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(${colorRgb},${isMe?.5:.1})" onerror="this.outerHTML='<div style=\'width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:15px\'>🐼</div>'">`
+        :`<div style="width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:15px">🐼</div>`;
+      const badgeBg = isTop
+        ?`linear-gradient(135deg,rgba(${colorRgb},.3),rgba(${colorRgb},.1))`
         :'rgba(255,255,255,.04)';
-      const badgeColor=isTop?color:'rgba(255,255,255,.25)';
-      html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${rowBg};border:${rowBord};border-radius:14px;box-shadow:${rowShad};backdrop-filter:blur(4px)">
-        <div style="min-width:28px;height:28px;border-radius:8px;background:${badgeBg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${badgeColor};flex-shrink:0">${i+1}</div>
+      html+=`<div style="display:flex;align-items:center;gap:9px;padding:9px 12px;background:${rowBg};border:${rowBord};border-radius:14px;box-shadow:${rowShad};backdrop-filter:blur(6px)">
+        <div style="min-width:28px;height:28px;border-radius:8px;background:${badgeBg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${isTop?color:'rgba(255,255,255,.25)'};flex-shrink:0">${i+1}</div>
         ${av}
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.85)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:${isMe?'0 0 8px rgba('+colorRgb+',.4)':'none'}">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
-            ${scoreIcon}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.38)">${fmt(u.score)} ${scoreSuffix}</span>
-          </div>
+          <div style="font-size:13px;font-weight:800;color:${isMe?color:'rgba(255,255,255,.85)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name||'Panda')}${isMe?' ✦':''}</div>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:2px">${scoreIcon}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.38)">${fmt(u.score)} ${scoreSuffix}</span></div>
         </div>
         <div style="text-align:right;flex-shrink:0;min-width:44px">
           ${prize
-            ?`<div style="font-size:13px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.4);line-height:1.1">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(255,215,0,.5)">TON</div>`
-            :`<div style="font-size:20px;color:rgba(255,255,255,.08)">—</div>`}
+            ?`<div style="font-size:13px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.5);line-height:1.1">${prize}</div><div style="font-size:9px;font-weight:600;color:rgba(255,215,0,.5)">TON</div>`
+            :`<div style="font-size:20px;color:rgba(255,255,255,.07)">—</div>`}
         </div>
       </div>`;
     });
   }
-  html+=`</div>`;
+  html+=`</div></div>`;
   document.getElementById(elId).innerHTML=html;
 }
 

@@ -1008,13 +1008,52 @@ const CFG = {
   BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
 };
 
-/* ════ SINGLE SERVER ═══════════════════════════════════════════════
-   🔧 غيّر SERVER_URL لرابط السيرفر الخاص بك
+/* ════ MULTI-SERVER RACE SYSTEM ════════════════════════════════════
+   On first load: race all servers → fastest wins.
+   Winner stored in sessionStorage for the whole session.
+   If sticky server fails → re-race automatically.
+   Dead servers skipped for DEAD_WINDOW_MS before retry.
+   SECURITY: write ops (withdraw, exchange, buy) go to ONE server only.
 ═══════════════════════════════════════════════════════════════════ */
-const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
-const API_TIMEOUT_MS = 8000;
+const SERVERS = [
+  'https://noisy-dust-b9e8.mmrr2872008.workers.dev',
+  'https://little-bush-fcf7.aborabie2777.workers.dev',
+  'https://rough-bar-ac76.aborabie4777.workers.dev',
+  'https://snowy-lab-c342.mohamedmmrr2872008.workers.dev',
+  'https://lucky-paper-a107.aborabie1777.workers.dev',
+  'https://shy-brook-4dd4.rabiebasha2012.workers.dev',
+];
 
-async function _call(url, action, data, authHdr){
+// Actions that MUST go to ONE server only (write ops — prevent double execution)
+const WRITE_ACTIONS = new Set([
+  'withdraw','exchange','buy','upgradeTank','collect',
+  'claimTask','verifyTask','createTask','deposit','verifyDeposit'
+]);
+
+const API_TIMEOUT_MS  = 8000;
+const DEAD_WINDOW_MS  = 12 * 60 * 60 * 1000; // 12h
+const SESS_KEY        = 'panda_active_srv';
+const DEAD_KEY        = 'panda_dead_srvs';
+
+function _getDeadMap(){
+  try{ return JSON.parse(sessionStorage.getItem(DEAD_KEY)||'{}'); }catch(_){ return {}; }
+}
+function _markDead(url){
+  const m=_getDeadMap(); m[url]=Date.now();
+  try{ sessionStorage.setItem(DEAD_KEY,JSON.stringify(m)); }catch(_){}
+}
+function _isDead(url){
+  const m=_getDeadMap(); const t=m[url];
+  return t && (Date.now()-t < DEAD_WINDOW_MS);
+}
+function _getStickyServer(){
+  try{ return sessionStorage.getItem(SESS_KEY)||null; }catch(_){ return null; }
+}
+function _setStickyServer(url){
+  try{ sessionStorage.setItem(SESS_KEY,url); }catch(_){}
+}
+
+async function _callOne(url, action, data, authHdr){
   const heads = {'Content-Type':'application/json'};
   if(authHdr) heads.Authorization = authHdr;
   const ctrl = new AbortController();
@@ -1024,11 +1063,66 @@ async function _call(url, action, data, authHdr){
     clearTimeout(tOut);
     if(!r.ok) throw new Error(`HTTP ${r.status}`);
     return await r.json();
-  }catch(e){
-    clearTimeout(tOut);
-    throw e;
-  }
+  }catch(e){ clearTimeout(tOut); throw e; }
 }
+
+// Race all live servers — used only for read ops at startup
+async function _raceServers(action, data, authHdr){
+  const live = SERVERS.filter(s=>!_isDead(s));
+  if(!live.length){ // all dead — reset and try all
+    try{ sessionStorage.removeItem(DEAD_KEY); }catch(_){}
+    live.push(...SERVERS);
+  }
+  return new Promise((resolve, reject)=>{
+    let done=false, fails=0;
+    live.forEach(url=>{
+      _callOne(url, action, data, authHdr)
+        .then(res=>{
+          if(done) return;
+          done=true;
+          _setStickyServer(url);
+          resolve(res);
+        })
+        .catch(()=>{
+          _markDead(url);
+          fails++;
+          if(fails===live.length && !done) reject(new Error('All servers unreachable'));
+        });
+    });
+  });
+}
+
+// Route call: write ops → sticky server only; read ops → sticky or race
+async function _call(url/*ignored*/, action, data, authHdr){
+  const isWrite = WRITE_ACTIONS.has(action);
+  const sticky  = _getStickyServer();
+
+  if(isWrite){
+    // Write ops MUST use sticky server to prevent duplicate execution
+    const srv = sticky || SERVERS[0];
+    return _callOne(srv, action, data, authHdr);
+  }
+
+  // Read op: try sticky first, fall back to race
+  if(sticky && !_isDead(sticky)){
+    try{
+      const res = await _callOne(sticky, action, data, authHdr);
+      return res;
+    }catch(e){
+      _markDead(sticky);
+      try{ sessionStorage.removeItem(SESS_KEY); }catch(_){}
+    }
+  }
+  // Race to find fastest live server
+  return _raceServers(action, data, authHdr);
+}
+
+// Exposed for loading screen to race servers explicitly at startup
+window._raceServersNow = async function(authHdr){
+  return _raceServers('ping', {}, authHdr).catch(()=>
+    _raceServers('getState', {start_param:'',_initData:''}, authHdr)
+  );
+};
 
 const BAM_URL='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png';
 
@@ -2388,6 +2482,17 @@ async function init(){
   }
   await ldAnimateTo(10, lt('ldConnecting'), 700);
   await new Promise(r=>setTimeout(r,400));
+
+  // Step 1.5: Race servers — find fastest live server
+  await ldAnimateTo(18, '🏎️ Finding fastest server...', 500);
+  try{
+    const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
+    await window._raceServersNow(authHdr);
+    ldProgress(22, '✅ Server connected!');
+  }catch(e){
+    ldProgress(22, '⚠️ Using fallback server...');
+  }
+  await new Promise(r=>setTimeout(r,300));
 
   // Step 2: Preload images
   await ldAnimateTo(20, lt('ldAssets'), 600);

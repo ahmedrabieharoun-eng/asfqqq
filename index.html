@@ -448,6 +448,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .lang-opt{padding:10px 16px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:6px}
 .lang-opt:hover{background:rgba(124,179,66,.15)}
 .lang-opt.active{color:var(--bamboo);background:rgba(124,179,66,.1)}
+@keyframes comp-banner-glow{0%,100%{box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35)}50%{box-shadow:0 0 30px rgba(255,140,0,.35),0 4px 22px rgba(0,0,0,.45)}}
+@keyframes fire-pop{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.12) rotate(3deg)}}
+@keyframes live-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 </style>
 </head>
 <body>
@@ -508,6 +511,22 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 
 <!-- HOME -->
 <div class="sec active" id="sectionHome" style="padding:10px 10px 24px">
+
+  <!-- COMPETITION BANNER -->
+  <div id="compBanner" onclick="document.querySelector('.ni[data-s=sectionComp]')&&document.querySelector('.ni[data-s=sectionComp]').click()" style="cursor:pointer;background:linear-gradient(135deg,rgba(255,60,0,.13),rgba(255,180,0,.10),rgba(255,60,0,.08));border:1.5px solid rgba(255,140,0,.45);border-radius:16px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35);position:relative;overflow:hidden;animation:comp-banner-glow 2.5s ease-in-out infinite">
+    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,200,0,.08),transparent);animation:shim 2.8s infinite;pointer-events:none"></div>
+    <div style="font-size:34px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,140,0,.8));animation:fire-pop 1.6s ease-in-out infinite">🏆</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:10px;font-weight:800;color:rgba(255,80,80,.9);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#ff4444;display:inline-block;animation:live-dot 1s ease-in-out infinite"></span> Live Now</div>
+      <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">Competition Active!</div>
+      <div style="font-size:12px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.5)">💎 Prize Pool: 400 TON</div>
+    </div>
+    <div style="flex-shrink:0;text-align:center;background:rgba(0,0,0,.35);border:1px solid rgba(255,140,0,.3);border-radius:12px;padding:7px 10px;min-width:72px">
+      <div style="font-size:9px;font-weight:700;color:rgba(255,200,80,.7);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Ends in</div>
+      <div id="compCountdown" style="font-size:15px;font-weight:800;color:#FF8C00;text-shadow:0 0 10px rgba(255,140,0,.7);line-height:1.1;letter-spacing:1px">--:--:--</div>
+    </div>
+  </div>
+
   <div class="champion-card">
     <!-- Panda with frame -->
     <div class="panda-frame-wrap">
@@ -1286,6 +1305,35 @@ function updateUI(){
   renderExchHist();
   renderWdHist();
 }
+
+/* ════ COMPETITION COUNTDOWN BANNER ════ */
+(function(){
+  // 🔧 Set your competition end date here (UTC)
+  const END_DATE = new Date('2025-06-01T23:59:59Z');
+  function updateCompCountdown(){
+    const el = document.getElementById('compCountdown');
+    if(!el) return;
+    const now = Date.now();
+    const diff = END_DATE.getTime() - now;
+    if(diff <= 0){
+      el.textContent = 'Ended';
+      const banner = document.getElementById('compBanner');
+      if(banner) banner.style.display = 'none';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if(d > 0){
+      el.textContent = `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    } else {
+      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+  }
+  updateCompCountdown();
+  setInterval(updateCompCountdown, 1000);
+})();
 
 /* ════ TANK ════ */
 function startTank(){

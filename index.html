@@ -751,7 +751,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         </div>
         <div class="swap-balance" id="swapToBal"><span data-i18n="balance">Balance:</span> 0 Coins</div>
       </div>
-      <div class="swap-rate" data-i18n="swapRate">📊 500 Bamboo = 10 Coins</div>
+      <div class="swap-rate" data-i18n="swapRate">📊 100 Bamboo = 10 Coins</div>
       <button class="btn-prim" style="margin-top:10px" onclick="doExchange()" data-i18n="exchangeNow">⚡ Exchange Now</button>
     </div>
     <div class="hist-box" style="margin-top:12px">
@@ -889,11 +889,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         <div style="display:flex;flex-direction:column;gap:6px">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpDepositTON">💎 Deposit TON</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">1 TON = 50,000 Bamboo</span>
+            <span style="font-size:12px;font-weight:800;color:#fff">1 TON = 10,000 Bamboo</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpConvertBamboo">⚡ Convert Bamboo</span>
-            <span style="font-size:12px;font-weight:800;color:var(--coin)">500 Bamboo = 10 Coins</span>
+            <span style="font-size:12px;font-weight:800;color:var(--coin)">100 Bamboo = 10 Coins</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpWithdrawRate">💸 Withdrawal Rate</span>
@@ -994,7 +994,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 const CFG = {
   API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // fallback
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
-  RATE         : 50,
+  RATE         : 10,
   MIN_WD       : 200,
   TON_PER_COIN : 0.00005,
   TON_USD      : 3.5,
@@ -1030,12 +1030,12 @@ const BAM_URL='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f
 
 // Fix 4: rebalanced items — clear ROI progression, higher tier always better per coin
 const ITEMS = [
-  {id:'bamboo_stick',   name:'Bamboo Stick',       icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a995343f-ab46-4c91-9cf2-1140c0bdd6f5.png',  price:7500,    power:50    },
-  {id:'panda_paw',      name:'Panda Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
-  {id:'leaf_fan',       name:'Leaf Fan Cooler',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1657ae3-3927-41e9-a32d-70ab89ddfe3b.png',  price:125000,  power:1200  },
-  {id:'bamboo_energy',  name:'Bamboo Energy Pod',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/73a7e781-107c-4598-9c1a-e9db2c65dbf5.png',  price:625000,  power:7500  },
-  {id:'panda_den',      name:'Panda Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
-  {id:'bamboo_forest',  name:'Bamboo Forest Rig',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/273f8ce0-bfa2-4618-895a-00481620d1d9.png',  price:6500000, power:110000},
+  {id:'bamboo_stick',   name:'Bamboo Stick',       icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a995343f-ab46-4c91-9cf2-1140c0bdd6f5.png',  price:1500,    power:50    },
+  {id:'panda_paw',      name:'Panda Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:5000,    power:200   },
+  {id:'leaf_fan',       name:'Leaf Fan Cooler',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1657ae3-3927-41e9-a32d-70ab89ddfe3b.png',  price:25000,   power:1200  },
+  {id:'bamboo_energy',  name:'Bamboo Energy Pod',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/73a7e781-107c-4598-9c1a-e9db2c65dbf5.png',  price:125000,  power:7500  },
+  {id:'panda_den',      name:'Panda Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:626000,  power:45000 },
+  {id:'bamboo_forest',  name:'Bamboo Forest Rig',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/273f8ce0-bfa2-4618-895a-00481620d1d9.png',  price:1300000, power:110000},
 ];
 // 27 tank levels — capacity only, no speedBonus
 const TANK_LVS = {
@@ -1081,15 +1081,15 @@ const REF_TASKS=[
 ];
 // Active referrals (who deposited) — 2x original rewards
 const REF_ACTIVE_TASKS=[
-  {id:'ra1',  n:1,   bam:10000,   coins:40   },
-  {id:'ra5',  n:5,   bam:50000,   coins:200  },
-  {id:'ra10', n:10,  bam:120000,  coins:500  },
-  {id:'ra20', n:20,  bam:300000,  coins:1200 },
-  {id:'ra50', n:50,  bam:800000,  coins:3000 },
-  {id:'ra70', n:70,  bam:1200000, coins:4400 },
-  {id:'ra100',n:100, bam:2000000, coins:8000 },
-  {id:'ra200',n:200, bam:4000000, coins:16000},
-  {id:'ra500',n:500, bam:10000000,coins:40000},
+  {id:'ra1',  n:1,   bam:1000,   coins:4   },
+  {id:'ra5',  n:5,   bam:5000,   coins:20  },
+  {id:'ra10', n:10,  bam:12000,  coins:50  },
+  {id:'ra20', n:20,  bam:30000,  coins:120 },
+  {id:'ra50', n:50,  bam:80000,  coins:300 },
+  {id:'ra70', n:70,  bam:120000, coins:440 },
+  {id:'ra100',n:100, bam:200000, coins:800 },
+  {id:'ra200',n:200, bam:400000, coins:1600},
+  {id:'ra500',n:500, bam:1000000,coins:4000},
 ];
 const SOC_TASKS=[
   {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/PandaBambooPayouts', bam:1000},
@@ -1308,31 +1308,28 @@ function updateUI(){
 
 /* ════ COMPETITION COUNTDOWN BANNER ════ */
 (function(){
-  // 🔧 Set your competition end date here (UTC)
+  // 🔧 غيّر التاريخ هنا (UTC)
   const END_DATE = new Date('2025-06-01T23:59:59Z');
-  function updateCompCountdown(){
+  function tick(){
     const el = document.getElementById('compCountdown');
     if(!el) return;
-    const now = Date.now();
-    const diff = END_DATE.getTime() - now;
+    const diff = END_DATE.getTime() - Date.now();
     if(diff <= 0){
       el.textContent = 'Ended';
-      const banner = document.getElementById('compBanner');
-      if(banner) banner.style.display = 'none';
+      const b = document.getElementById('compBanner');
+      if(b) b.style.display = 'none';
       return;
     }
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
-    if(d > 0){
-      el.textContent = `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    } else {
-      el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
+    el.textContent = d > 0
+      ? `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+      : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
-  updateCompCountdown();
-  setInterval(updateCompCountdown, 1000);
+  tick();
+  setInterval(tick, 1000);
 })();
 
 /* ════ TANK ════ */
@@ -2083,7 +2080,7 @@ function copyRefLink(){
 }
 
 /* ════ DEPOSIT PREVIEW ════ */
-const TON_TO_BAMBOO=50000;
+const TON_TO_BAMBOO=10000;
 function setDepAmt(v){document.getElementById('depositAmountInput').value=Math.max(1,v);updDepPreview();}
 function updDepPreview(){
   const ton=parseFloat(document.getElementById('depositAmountInput').value)||0;
@@ -2475,7 +2472,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'عنوان محفظة TON',amountCoins:'المبلغ (Coins)',tonValue:'قيمة TON',
     withdrawBtn:'طلب سحب',withdrawHist:'📋 سجل السحب',noWithdrawals:'لا سحوبات بعد',
     swapFrom:'من',swapTo:'إلى',balance:'الرصيد:',maxBtn:'أقصى',
-    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
+    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
     exchangeHist:'📋 سجل التحويل',noConversions:'لا تحويلات بعد',
     helpTitle:'🐼 دليل Panda Bamboo',
     helpPayCh:'قناة\nالمدفوعات',helpNewsCh:'أخبار\nالبوت',helpSupport:'الدعم\nالفني',
@@ -2586,7 +2583,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'TON Wallet Address',amountCoins:'Amount (Coins)',tonValue:'TON Value',
     withdrawBtn:'Request Withdrawal',withdrawHist:'📋 Withdrawal History',noWithdrawals:'No withdrawals yet',
     swapFrom:'FROM',swapTo:'TO',balance:'Balance:',maxBtn:'MAX',
-    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
+    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
     exchangeHist:'📋 Exchange History',noConversions:'No conversions yet',
     helpTitle:'🐼 Panda Bamboo Guide',
     helpPayCh:'Payouts<br>Channel',helpNewsCh:'Bot<br>News',helpSupport:'Technical<br>Support',
@@ -2697,7 +2694,7 @@ const TRANSLATIONS = {
     tonWalletAddr:'Адрес TON-кошелька',amountCoins:'Сумма (Coins)',tonValue:'Стоимость TON',
     withdrawBtn:'Запрос вывода',withdrawHist:'📋 История выводов',noWithdrawals:'Выводов пока нет',
     swapFrom:'ИЗ',swapTo:'В',balance:'Баланс:',maxBtn:'МАКС',
-    swapRate:'📊 500 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
+    swapRate:'📊 100 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
     exchangeHist:'📋 История обменов',noConversions:'Обменов пока нет',
     helpTitle:'🐼 Руководство Panda Bamboo',
     helpPayCh:'Канал<br>выплат',helpNewsCh:'Новости<br>бота',helpSupport:'Тех.<br>поддержка',

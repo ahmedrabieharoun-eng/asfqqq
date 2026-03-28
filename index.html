@@ -701,67 +701,145 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   <!-- NEW SEASON PREP -->
   <div class="ftcont" id="ft-withdraw">
     <style>
-      .sns-hero{background:linear-gradient(135deg,rgba(8,24,8,.97),rgba(4,14,4,.98));border:1px solid rgba(255,215,0,.28);border-radius:22px;padding:22px 16px 18px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
-      .sns-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.07) 0%,transparent 65%);pointer-events:none}
-      .sns-hero-title{font-size:22px;font-weight:800;color:#FFD700;text-shadow:0 0 18px rgba(255,215,0,.45);margin-bottom:4px}
-      .sns-hero-sub{font-size:12px;color:rgba(255,255,255,.45);font-weight:600}
-      .sns-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.4),transparent);margin-top:14px}
-      .sns-row{background:rgba(6,20,6,.88);border:1px solid rgba(124,179,66,.18);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)}
-      .sns-icon{width:48px;height:48px;border-radius:14px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
-      .sns-info{flex:1;min-width:0}
-      .sns-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:3px}
-      .sns-desc{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;line-height:1.4}
-      .sns-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;min-width:80px}
-      .sns-spin{width:18px;height:18px;border:2.5px solid rgba(255,215,0,.2);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
+      /* ═══ NEW SEASON S2 STYLES ═══ */
+      .sns-page{padding:0 0 12px}
+      /* Hero card with background image */
+      .sns-hero-card{
+        position:relative;border-radius:22px;overflow:hidden;
+        margin-bottom:14px;min-height:190px;
+        border:1px solid rgba(255,215,0,.3);
+        box-shadow:0 8px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,215,0,.1);
+      }
+      .sns-hero-bg{
+        position:absolute;inset:0;
+        background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg') center top / cover no-repeat;
+        filter:brightness(.82) saturate(1.1);
+      }
+      .sns-hero-overlay{
+        position:absolute;inset:0;
+        background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(2,10,2,.55) 60%,rgba(2,10,2,.92) 100%);
+      }
+      .sns-hero-content{position:relative;z-index:2;padding:18px 18px 18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:190px}
+      .sns-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.5);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#FFD700;letter-spacing:.5px;margin-bottom:8px;backdrop-filter:blur(8px)}
+      .sns-hero-title{font-size:26px;font-weight:800;color:#FFD700;text-shadow:0 2px 20px rgba(255,215,0,.6),0 0 40px rgba(255,215,0,.3);margin-bottom:3px;text-align:center}
+      .sns-hero-sub{font-size:12px;color:rgba(255,255,255,.6);font-weight:600;text-align:center}
+      /* Allocation rows */
+      .sns-rows-wrap{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+      .sns-row{
+        background:rgba(4,16,4,.92);border:1px solid rgba(124,179,66,.22);
+        border-radius:18px;padding:14px 16px;
+        display:flex;align-items:center;gap:12px;
+        backdrop-filter:blur(10px);
+        box-shadow:0 2px 16px rgba(0,0,0,.35);
+        transition:border-color .2s;
+        position:relative;overflow:hidden;
+      }
+      .sns-row::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.025) 0%,transparent 60%);pointer-events:none}
+      .sns-row.sns-row-ton{border-color:rgba(0,212,255,.3)}
+      .sns-row-icon-wrap{width:50px;height:50px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+      .sns-row-icon-wrap.green{background:linear-gradient(135deg,rgba(124,179,66,.25),rgba(78,122,32,.15));border:1px solid rgba(124,179,66,.3)}
+      .sns-row-icon-wrap.blue{background:linear-gradient(135deg,rgba(66,165,245,.2),rgba(13,71,161,.1));border:1px solid rgba(66,165,245,.25)}
+      .sns-row-icon-wrap.cyan{background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,150,200,.1));border:1px solid rgba(0,212,255,.3)}
+      .sns-row-icon-img{width:34px;height:34px;object-fit:contain}
+      .sns-row-icon-emoji{font-size:24px;line-height:1}
+      .sns-row-body{flex:1;min-width:0}
+      .sns-row-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;line-height:1.2}
+      .sns-row-desc{font-size:10.5px;color:rgba(255,255,255,.38);font-weight:600;line-height:1.4}
+      .sns-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;min-width:88px}
+      .sns-spin{width:20px;height:20px;border:2.5px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
       @keyframes sns-rotate{to{transform:rotate(360deg)}}
-      .sns-coins{font-size:20px;font-weight:800;color:#FFD700;line-height:1;text-align:right}
-      .sns-detail{font-size:10px;color:rgba(255,255,255,.35);font-weight:600;text-align:right;line-height:1.3}
-      .sns-total{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(6,20,6,.95));border:2px solid rgba(255,215,0,.45);border-radius:20px;padding:20px;text-align:center;box-shadow:0 0 28px rgba(255,215,0,.08)}
-      .sns-total-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-      .sns-total-num{font-size:44px;font-weight:800;color:#FFD700;text-shadow:0 0 22px rgba(255,215,0,.55);line-height:1}
-      .sns-total-unit{font-size:13px;color:rgba(255,255,255,.35);margin-top:4px;font-weight:600}
-      .sns-total-ton{font-size:15px;font-weight:700;color:rgba(0,212,255,.75);margin-top:10px}
+      .sns-val-coins{font-size:22px;font-weight:800;color:#FFD700;line-height:1;text-align:right;text-shadow:0 0 12px rgba(255,215,0,.4)}
+      .sns-val-ton{font-size:20px;font-weight:800;color:#00D4FF;line-height:1;text-align:right;text-shadow:0 0 12px rgba(0,212,255,.4)}
+      .sns-val-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(0,242,122,.15);border:1px solid rgba(0,242,122,.3);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:800;color:#00F27A;margin-bottom:2px}
+      .sns-val-sub{font-size:9.5px;color:rgba(255,255,255,.28);font-weight:600;text-align:right;line-height:1.3}
+      /* Deposit bonus row (empty state) */
+      .sns-empty-tag{font-size:11px;color:rgba(255,255,255,.25);font-weight:600;font-style:italic}
+      /* Total card */
+      .sns-total-card{
+        background:linear-gradient(135deg,rgba(2,14,2,.97),rgba(4,18,4,.98));
+        border:2px solid rgba(255,215,0,.4);border-radius:22px;
+        padding:22px 20px;text-align:center;
+        box-shadow:0 0 40px rgba(255,215,0,.08),0 4px 24px rgba(0,0,0,.5);
+        position:relative;overflow:hidden;
+      }
+      .sns-total-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.06) 0%,transparent 60%);pointer-events:none}
+      .sns-total-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+      .sns-total-num{font-size:52px;font-weight:800;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.5),0 2px 4px rgba(0,0,0,.8);line-height:1;margin-bottom:2px}
+      .sns-total-unit{font-size:13px;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:1px;margin-bottom:10px}
+      .sns-total-sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.3),transparent);margin:10px 0}
+      .sns-total-ton-row{display:flex;align-items:center;justify-content:center;gap:8px}
+      .sns-total-ton-num{font-size:18px;font-weight:800;color:#00D4FF;text-shadow:0 0 14px rgba(0,212,255,.4)}
+      .sns-cup-img{position:absolute;right:-10px;bottom:-10px;width:110px;opacity:.18;pointer-events:none}
     </style>
 
-    <!-- Hero -->
-    <div class="sns-hero">
-      <div style="font-size:38px;margin-bottom:6px">🐼🌱</div>
-      <div class="sns-hero-title">New Season Preparation</div>
-      <div class="sns-hero-sub">Your coins allocation for the next season</div>
-      <div class="sns-divider"></div>
-    </div>
+    <div class="sns-page">
 
-    <!-- Allocation rows -->
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
-
-      <div class="sns-row" id="sns-row-coins">
-        <div class="sns-icon">🪙</div>
-        <div class="sns-info">
-          <div class="sns-title">Current Coins Balance</div>
-          <div class="sns-desc">20% of your current coins carry over</div>
+      <!-- Hero Card with background image -->
+      <div class="sns-hero-card">
+        <div class="sns-hero-bg"></div>
+        <div class="sns-hero-overlay"></div>
+        <div class="sns-hero-content">
+          <div class="sns-hero-badge">🌱 Season 2</div>
+          <div class="sns-hero-title">New Season</div>
+          <div class="sns-hero-sub">Your progress continues</div>
         </div>
-        <div class="sns-right"><div class="sns-spin"></div></div>
       </div>
 
-      <div class="sns-row" id="sns-row-refs">
-        <div class="sns-icon">👥</div>
-        <div class="sns-info">
-          <div class="sns-title">Active Referrals Bonus</div>
-          <div class="sns-desc">3,000 coins per active referral</div>
+      <!-- Allocation rows -->
+      <div class="sns-rows-wrap">
+
+        <!-- Row 1: Current Coins -->
+        <div class="sns-row" id="sns-row-coins">
+          <div class="sns-row-icon-wrap green">
+            <span class="sns-row-icon-emoji">🏛️</span>
+          </div>
+          <div class="sns-row-body">
+            <div class="sns-row-title">Current Coins</div>
+            <div class="sns-row-desc">Carry Over: 20%</div>
+          </div>
+          <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
-        <div class="sns-right"><div class="sns-spin"></div></div>
+
+        <!-- Row 2: Referrals -->
+        <div class="sns-row" id="sns-row-refs">
+          <div class="sns-row-icon-wrap blue">
+            <span class="sns-row-icon-emoji">👥</span>
+          </div>
+          <div class="sns-row-body">
+            <div class="sns-row-title">Referrals</div>
+            <div class="sns-row-desc">Active Referrals Bonus</div>
+          </div>
+          <div class="sns-row-right"><div class="sns-spin"></div></div>
+        </div>
+
+        <!-- Row 3: Competition Rank → TON -->
+        <div class="sns-row sns-row-ton" id="sns-row-comp">
+          <div class="sns-row-icon-wrap cyan">
+            <img class="sns-row-icon-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.outerHTML='<span class=\'sns-row-icon-emoji\'>🏆</span>'">
+          </div>
+          <div class="sns-row-body">
+            <div class="sns-row-title">Competition Rank</div>
+            <div class="sns-row-desc" id="sns-comp-desc">Based on your leaderboard position</div>
+          </div>
+          <div class="sns-row-right"><div class="sns-spin"></div></div>
+        </div>
+
+      </div>
+
+      <!-- Total -->
+      <div class="sns-total-card" id="sns-total" style="display:none">
+        <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
+        <div class="sns-total-lbl">🎯 Total Allocation</div>
+        <div class="sns-total-num" id="sns-total-num">0</div>
+        <div class="sns-total-unit">Coins</div>
+        <div class="sns-total-sep"></div>
+        <div class="sns-total-ton-row">
+          <span style="font-size:13px;color:rgba(255,255,255,.35);font-weight:700">≈</span>
+          <span class="sns-total-ton-num" id="sns-total-ton">0.0000 TON</span>
+        </div>
       </div>
 
     </div>
-
-    <!-- Total -->
-    <div class="sns-total" id="sns-total" style="display:none">
-      <div class="sns-total-lbl">🎯 Total Coins Carry-Over</div>
-      <div class="sns-total-num" id="sns-total-num">0</div>
-      <div class="sns-total-unit">Coins</div>
-      <div class="sns-total-ton" id="sns-total-ton">≈ 0.0000 TON</div>
-    </div>
-
   </div>
 
   <!-- EXCHANGE -->
@@ -3597,39 +3675,96 @@ function renderCompPane(elId, opt){
 /* ════ NEW SEASON ALLOCATION ════ */
 const SNS_TON_PER_COIN = 0.00005;
 
-function snsSetRow(id, coins, detail){
+// Competition prizes by rank (1-indexed)
+const SNS_COMP_PRIZES = [50,40,30,20,10,9,8,7,6,5,2,2,2,2,2,1,1,1,1,1];
+
+function snsSetRow(id, rightHtml){
   const el = document.getElementById(id);
   if(!el) return;
-  el.dataset.coins = coins;
-  const right = el.querySelector('.sns-right');
-  right.innerHTML = `<div class="sns-coins">${fmt(coins)}</div><div class="sns-detail">${detail}</div>`;
+  const right = el.querySelector('.sns-row-right');
+  if(right) right.innerHTML = rightHtml;
 }
-function snsRowCoins(id){ return parseInt(document.getElementById(id)?.dataset.coins||0)||0; }
+
+function snsCoinsRight(coins, sub){
+  return `<div class="sns-val-coins">${fmt(coins)}</div><div class="sns-val-sub">${sub}</div>`;
+}
+
+function snsTonRight(ton, rankBadge){
+  if(ton > 0){
+    return `${rankBadge?`<div class="sns-val-badge">🏆 #${rankBadge}</div>`:''}
+    <div class="sns-val-ton">${ton} TON</div><div class="sns-val-sub">Competition Prize</div>`;
+  }
+  return `<div class="sns-empty-tag">Not in top 20</div>`;
+}
 
 async function loadSeasonAlloc(){
-  // Reset rows to loading state
-  ['sns-row-coins','sns-row-refs'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){ el.dataset.coins=0; el.querySelector('.sns-right').innerHTML='<div class="sns-spin"></div>'; }
+  // Reset to loading
+  ['sns-row-coins','sns-row-refs','sns-row-comp'].forEach(id=>{
+    snsSetRow(id,'<div class="sns-spin"></div>');
   });
   document.getElementById('sns-total').style.display='none';
 
-  // 1. Coins balance — 20%
+  // Fetch competition data if not yet loaded
+  if(!_compData){
+    try{
+      const ld = await api('getLeaderboard',{});
+      _compData = ld;
+    }catch(_){}
+  }
+
+  // 1. Coins balance — 20% carry over
   const coins = S.user?.coins || 0;
   const coinsAlloc = Math.floor(coins * 0.20);
-  snsSetRow('sns-row-coins', coinsAlloc, `20% of ${fmt(coins)} coins`);
+  snsSetRow('sns-row-coins', snsCoinsRight(coinsAlloc, `20% of ${fmt(coins)} Coins`));
 
   // 2. Active referrals — 3000 each
   const activeRefs = (S.refs||[]).filter(r=>r.hasDeposited).length;
   const refsAlloc = activeRefs * 3000;
-  snsSetRow('sns-row-refs', refsAlloc, `${activeRefs} active × 3,000`);
+  const refBadge = activeRefs > 0
+    ? `<div class="sns-val-badge">+${fmt(refsAlloc)}</div><div class="sns-val-sub">${activeRefs} active × 3,000</div>`
+    : `<div class="sns-val-coins">0</div><div class="sns-val-sub">No active referrals yet</div>`;
+  snsSetRow('sns-row-refs', refBadge);
 
-  // Total
-  const total = coinsAlloc + refsAlloc;
-  const totalTon = (total * SNS_TON_PER_COIN).toFixed(4);
-  document.getElementById('sns-total-num').textContent = fmt(total);
-  document.getElementById('sns-total-ton').textContent = `≈ ${totalTon} TON`;
+  // 3. Competition rank → TON prize
+  let compTon = 0;
+  let myRank = 0;
+  let compAlloc = 0;
+  try{
+    // Use cached leaderboard data if available, else try to get from _compData
+    const lb = _compData || {};
+    const myId = S.userId;
+    // Find rank in both boards, take best rank
+    ['activeRefs','miningSpeed'].forEach(tab=>{
+      const board = (lb[tab]||[]);
+      const idx = board.findIndex(u=>String(u.userId)===String(myId));
+      if(idx>=0 && idx<20){
+        const rank = idx+1;
+        if(!myRank || rank < myRank) myRank = rank;
+      }
+    });
+    if(myRank > 0 && myRank <= SNS_COMP_PRIZES.length){
+      compTon = SNS_COMP_PRIZES[myRank-1];
+    }
+  }catch(_){}
+
+  // Show competition row
+  const compDesc = document.getElementById('sns-comp-desc');
+  if(compDesc) compDesc.textContent = myRank > 0 ? `Rank #${myRank} in competition` : 'Based on your leaderboard position';
+  snsSetRow('sns-row-comp', snsTonRight(compTon, myRank > 0 ? myRank : null));
+
+  // Total coins (rows 1+2 only, row 3 is TON)
+  const totalCoins = coinsAlloc + refsAlloc;
+  const totalTon   = ((totalCoins * SNS_TON_PER_COIN) + compTon).toFixed(4);
+
+  document.getElementById('sns-total-num').textContent = fmt(totalCoins);
+  document.getElementById('sns-total-ton').textContent = `${totalTon} TON`;
   document.getElementById('sns-total').style.display = 'block';
+
+  // Save to DB (fire-and-forget)
+  api('saveSeasonAlloc',{
+    coinsAlloc, refsAlloc, compAlloc, compRank: myRank, compTon,
+    total: totalCoins, totalTon
+  }).catch(()=>{});
 }
 
 /* ════ END COMPETITION ════ */

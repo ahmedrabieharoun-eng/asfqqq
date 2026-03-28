@@ -453,7 +453,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes live-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 @keyframes comp-btn-glow{0%,100%{box-shadow:0 0 16px rgba(255,140,0,.7),0 0 32px rgba(255,80,0,.4);transform:scale(1)}50%{box-shadow:0 0 28px rgba(255,165,0,1),0 0 55px rgba(255,80,0,.6);transform:scale(1.08)}}
 @keyframes comp-btn-spin{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}}
-#compBanner{display:flex!important}
+#compBanner{display:none!important}
 #compBanner.ended{display:none!important}
 </style>
 </head>
@@ -516,18 +516,39 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <!-- HOME -->
 <div class="sec active" id="sectionHome" style="padding:10px 10px 24px">
 
-  <!-- COMPETITION BANNER -->
-  <div id="compBanner" onclick="openCompPage()" style="cursor:pointer;background:linear-gradient(135deg,rgba(255,60,0,.13),rgba(255,180,0,.10),rgba(255,60,0,.08));border:1.5px solid rgba(255,140,0,.45);border-radius:16px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);box-shadow:0 0 18px rgba(255,120,0,.18),0 4px 16px rgba(0,0,0,.35);position:relative;overflow:hidden;animation:comp-banner-glow 2.5s ease-in-out infinite">
-    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,200,0,.08),transparent);animation:shim 2.8s infinite;pointer-events:none"></div>
-    <div style="font-size:34px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,140,0,.8));animation:fire-pop 1.6s ease-in-out infinite">🏆</div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:10px;font-weight:800;color:rgba(255,80,80,.9);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#ff4444;display:inline-block;animation:live-dot 1s ease-in-out infinite"></span> Live Now</div>
-      <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:4px">Competition Active!</div>
-      <div style="font-size:12px;font-weight:800;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.5)">💎 Prize Pool: 400 TON</div>
-    </div>
-    <div style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,140,0,.3),rgba(255,80,0,.2));border:1px solid rgba(255,140,0,.5);border-radius:12px;padding:8px 12px;text-align:center">
-      <div style="font-size:11px;font-weight:800;color:#fff">Tap to join</div>
-      <div style="font-size:18px;line-height:1.2">👉</div>
+  <!-- SEASON 2 PREPARATION CARD -->
+  <style>
+    @keyframes s2-banner-glow{0%,100%{box-shadow:0 8px 36px rgba(0,0,0,.7),0 0 28px rgba(255,215,0,.15)}50%{box-shadow:0 10px 44px rgba(0,0,0,.8),0 0 48px rgba(255,215,0,.35)}}
+    @keyframes s2-pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+    @keyframes s2-cta-glow{0%,100%{box-shadow:0 0 14px rgba(255,215,0,.5),0 4px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 28px rgba(255,215,0,.9),0 4px 20px rgba(0,0,0,.5)}}
+  </style>
+  <div id="season2Banner" onclick="goToFinanceWithdraw()" style="cursor:pointer;border-radius:20px;margin-bottom:10px;position:relative;overflow:hidden;animation:s2-banner-glow 2.8s ease-in-out infinite">
+    <!-- Background image — tall card -->
+    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg"
+      style="width:100%;height:170px;object-fit:cover;object-position:center top;display:block">
+    <!-- gradient overlay bottom-to-top so text is readable -->
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,2,.08) 0%,rgba(4,14,4,.45) 45%,rgba(2,8,2,.88) 100%)"></div>
+    <!-- shimmer sweep -->
+    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.1),transparent);animation:shim 3.2s infinite;pointer-events:none"></div>
+    <!-- gold border -->
+    <div style="position:absolute;inset:0;border:2px solid rgba(255,215,0,.45);border-radius:20px;pointer-events:none"></div>
+
+    <!-- Bottom content row -->
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+      <!-- Left: badge + title + sub -->
+      <div style="flex:1;min-width:0">
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.5);border-radius:20px;padding:3px 10px;margin-bottom:6px;backdrop-filter:blur(8px)">
+          <span style="width:6px;height:6px;border-radius:50%;background:#FFD700;display:inline-block;animation:s2-pulse-dot 1.2s ease-in-out infinite;box-shadow:0 0 6px #FFD700;flex-shrink:0"></span>
+          <span id="s2BadgeTxt" style="font-size:9px;font-weight:800;color:#FFD700;letter-spacing:.8px;text-transform:uppercase">Coming Soon</span>
+        </div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:3px;text-shadow:0 2px 12px rgba(0,0,0,.9)" id="s2BannerTitle">Season 2 Preparation</div>
+        <div style="font-size:12px;font-weight:700;color:rgba(255,215,0,.85);text-shadow:0 0 10px rgba(255,215,0,.4)" id="s2BannerSub">🎯 Check your allocation →</div>
+      </div>
+      <!-- Right: CTA button -->
+      <div style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,215,0,.35),rgba(255,160,0,.2));border:1.5px solid rgba(255,215,0,.6);border-radius:14px;padding:10px 14px;text-align:center;animation:s2-cta-glow 2s ease-in-out infinite;backdrop-filter:blur(8px)">
+        <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px" id="s2TapTxt">Tap</div>
+        <div style="font-size:22px;line-height:1">👉</div>
+      </div>
     </div>
   </div>
 
@@ -651,7 +672,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <div class="sec" id="sectionFinance">
   <div class="fin-tabs">
     <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌱 New Season</div>
+    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌟 Season 2</div>
     <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
   </div>
 
@@ -736,9 +757,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       /* ── Allocation rows ── */
       .sns-rows-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
       .sns-row{
-        /* glassmorphism: semi-transparent + blur */
-        background:rgba(255,255,255,.06);
-        border:1px solid rgba(255,255,255,.13);
+        /* glassmorphism: semi-dark + blur */
+        background:rgba(6,18,6,.68);
+        border:1px solid rgba(255,255,255,.18);
         border-radius:16px;padding:11px 13px;
         display:flex;align-items:center;gap:10px;
         backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -781,7 +802,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       /* ── Total card — split: Coins + TON ── */
       .sns-total-card{
         /* glassmorphism total */
-        background:rgba(255,255,255,.07);
+        background:rgba(6,18,6,.75);
         border:1.5px solid rgba(255,215,0,.32);
         border-radius:20px;
         backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -821,9 +842,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         <div class="sns-hero-bg"></div>
         <div class="sns-hero-overlay"></div>
         <div class="sns-hero-content">
-          <div class="sns-hero-badge">🌱 Season 2</div>
-          <div class="sns-hero-title">New Season</div>
-          <div class="sns-hero-sub">Your progress continues</div>
+          <div class="sns-hero-badge">🌟 <span data-i18n="snsSeasonBadge">Season 2</span></div>
+          <div class="sns-hero-title" id="sns-hero-main-title">Season 2 Preparation</div>
+          <div class="sns-hero-sub" id="sns-hero-sub-txt">Your progress carries forward</div>
         </div>
       </div>
 
@@ -836,8 +857,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
             <span class="sns-row-icon-emoji">🏛️</span>
           </div>
           <div class="sns-row-body">
-            <div class="sns-row-title">Current Coins</div>
-            <div class="sns-row-desc">Carry Over: 20%</div>
+            <div class="sns-row-title" data-i18n="snsRowCoinsTitle">Current Coins</div>
+            <div class="sns-row-desc" data-i18n="snsRowCoinsDesc">Carry Over: 20%</div>
           </div>
           <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
@@ -848,8 +869,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
             <span class="sns-row-icon-emoji">👥</span>
           </div>
           <div class="sns-row-body">
-            <div class="sns-row-title">Referrals</div>
-            <div class="sns-row-desc">Active Referrals Bonus</div>
+            <div class="sns-row-title" data-i18n="snsRowRefsTitle">Referrals</div>
+            <div class="sns-row-desc" data-i18n="snsRowRefsDesc">Active Referrals Bonus</div>
           </div>
           <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
@@ -860,8 +881,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
             <img class="sns-row-icon-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.outerHTML='<span class=\'sns-row-icon-emoji\'>🏆</span>'">
           </div>
           <div class="sns-row-body">
-            <div class="sns-row-title">Competition Rank</div>
-            <div class="sns-row-desc" id="sns-comp-desc">Based on your leaderboard position</div>
+            <div class="sns-row-title" data-i18n="snsRowCompTitle">Competition Rank</div>
+            <div class="sns-row-desc" id="sns-comp-desc" data-i18n="snsRowCompDesc">Based on your leaderboard position</div>
           </div>
           <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
@@ -871,7 +892,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <!-- Total: two separate columns — Coins | TON -->
       <div class="sns-total-card" id="sns-total" style="display:none">
         <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
-        <div class="sns-total-lbl">🎯 Total Season Allocation</div>
+        <div class="sns-total-lbl" data-i18n="snsTotalLbl">🎯 Total Season Allocation</div>
         <div class="sns-total-cols">
           <!-- Coins column (rows 1+2) -->
           <div class="sns-total-col coins-col">
@@ -2736,7 +2757,7 @@ const TRANSLATIONS = {
     labelCoins:'كوينز',labelBamboo:'بامبو',
     statAccrued:'المتراكم',statRateDay:'المعدل/يوم',statBambooDay:'بامبو/يوم',
     claimBtn:'جمع Bamboo',lvLabel:'مستوى ',
-    tabDeposit:'💰 إيداع',tabWithdraw:'💸 سحب',tabExchange:'⚡ تحويل',
+    tabDeposit:'💰 إيداع',tabWithdraw:'🌟 الموسم 2',tabExchange:'⚡ تحويل',
     tabReferralTxt:'إحالة',tabSocialTxt:'اجتماعي',
     tabPartner:'⭐ شريك',tabCommunity:'🌍 مجتمع',floatAdd:'➕ إضافة مهمة',
     friendsTitle:'الأصدقاء والإحالات',refProgTitle:'برنامج الإحالة',
@@ -2841,13 +2862,19 @@ const TRANSLATIONS = {
     compHelpTitle:'دليل المسابقة',
     compHelpBody:'<b style="color:#ffa726">🏆 كيف تعمل المسابقة؟</b><br><br>📅 مدة كل مسابقة <b>10 أيام</b>.<br>🏅 الفائزون الأوائل <b>20 مستخدماً</b> يحصلون على مكافآت TON.<br><br><b style="color:#00D4FF">💎 مسابقة الإحالات النشطة</b><br>يُحسب عدد الأصدقاء الذين انضموا عبر رابطك <b>وقاموا بإيداع TON</b>.<br><br><b style="color:var(--bamboo)">⚡ مسابقة سرعة التعدين</b><br>يُحسب <b>معدل إنتاجك اليومي</b> من البامبو (Bamboo/يوم).<br><br><b style="color:var(--coin)">🎁 توزيع المكافآت</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON لكل منهم<br>#16–20 → 1 TON لكل منهم',
     newRefNotif:'🎉 دعوت {name}! ستحصل على 20% من مشترياتهم',
+    s2BadgeTxt:'قريباً',s2BannerTitle:'تحضير الموسم 2',s2BannerSub:'🎯 تحقق من مخصصاتك ←',s2TapTxt:'اضغط',
+    snsHeroTitle:'تحضير الموسم 2',snsHeroSub:'تقدمك ينتقل للأمام',
+    snsRowCoinsTitle:'الكوينز الحالية',snsRowCoinsDesc:'ترحيل: 20%',
+    snsRowRefsTitle:'الإحالات',snsRowRefsDesc:'مكافأة الإحالات النشطة',
+    snsRowCompTitle:'ترتيب المسابقة',snsRowCompDesc:'بناءً على مركزك في المتصدرين',
+    snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
   },
   en:{
     navHome:'Home',navMarket:'Market',navTasks:'Tasks',navFriends:'Friends',navFinance:'Finance',
     labelCoins:'Coins',labelBamboo:'Bamboo',
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
-    tabDeposit:'💰 Deposit',tabWithdraw:'💸 Withdraw',tabExchange:'⚡ Exchange',
+    tabDeposit:'💰 Deposit',tabWithdraw:'🌟 Season 2',tabExchange:'⚡ Exchange',
     tabReferralTxt:'Referral',tabSocialTxt:'Social',
     tabPartner:'⭐ Partner',tabCommunity:'🌍 Community',floatAdd:'➕ Add Task',
     friendsTitle:'Friends & Referrals',refProgTitle:'Referral Program',
@@ -2952,13 +2979,19 @@ const TRANSLATIONS = {
     compHelpTitle:'Competition Guide',
     compHelpBody:'<b style="color:#ffa726">🏆 How does it work?</b><br><br>📅 Each competition lasts <b>10 days</b>.<br>🏅 Top <b>20 users</b> win TON prizes.<br><br><b style="color:#00D4FF">💎 Active Referrals Competition</b><br>Counts friends who joined via your link <b>and deposited TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Mining Speed Competition</b><br>Counts your <b>daily Bamboo production rate</b>.<br><br><b style="color:var(--coin)">🎁 Prize Distribution</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON each<br>#16–20 → 1 TON each',
     newRefNotif:'🎉 You invited {name}! You will earn 20% of their purchases',
+    s2BadgeTxt:'Coming Soon',s2BannerTitle:'Season 2 Preparation',s2BannerSub:'🎯 Check your allocation →',s2TapTxt:'Tap',
+    snsHeroTitle:'Season 2 Preparation',snsHeroSub:'Your progress carries forward',
+    snsRowCoinsTitle:'Current Coins',snsRowCoinsDesc:'Carry Over: 20%',
+    snsRowRefsTitle:'Referrals',snsRowRefsDesc:'Active Referrals Bonus',
+    snsRowCompTitle:'Competition Rank',snsRowCompDesc:'Based on your leaderboard position',
+    snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
   },
   ru:{
     navHome:'Главная',navMarket:'Рынок',navTasks:'Задания',navFriends:'Друзья',navFinance:'Финансы',
     labelCoins:'Коины',labelBamboo:'Бамбук',
     statAccrued:'Накоплено',statRateDay:'Темп/день',statBambooDay:'Бамбук/день',
     claimBtn:'Забрать Bamboo',lvLabel:'Ур.',
-    tabDeposit:'💰 Депозит',tabWithdraw:'💸 Вывод',tabExchange:'⚡ Обмен',
+    tabDeposit:'💰 Депозит',tabWithdraw:'🌟 Сезон 2',tabExchange:'⚡ Обмен',
     tabReferralTxt:'Реферал',tabSocialTxt:'Соцсети',
     tabPartner:'⭐ Партнёр',tabCommunity:'🌍 Сообщество',floatAdd:'➕ Добавить задание',
     friendsTitle:'Друзья и рефералы',refProgTitle:'Реферальная программа',
@@ -3063,13 +3096,19 @@ const TRANSLATIONS = {
     compHelpTitle:'Руководство по соревнованиям',
     compHelpBody:'<b style="color:#ffa726">🏆 Как это работает?</b><br><br>📅 Каждое соревнование длится <b>10 дней</b>.<br>🏅 Топ <b>20 участников</b> получают призы в TON.<br><br><b style="color:#00D4FF">💎 Соревнование по активным рефералам</b><br>Считаются друзья, зарегистрировавшиеся по вашей ссылке <b>и пополнившие счёт</b>.<br><br><b style="color:var(--bamboo)">⚡ Соревнование по скорости майнинга</b><br>Считается ваш <b>дневной объём производства Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Распределение призов</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON каждому<br>#16–20 → 1 TON каждому',
     newRefNotif:'🎉 Вы пригласили {name}! Вы получите 20% с их покупок',
+    s2BadgeTxt:'Скоро',s2BannerTitle:'Подготовка к Сезону 2',s2BannerSub:'🎯 Проверить распределение →',s2TapTxt:'Нажми',
+    snsHeroTitle:'Подготовка к Сезону 2',snsHeroSub:'Ваш прогресс переносится',
+    snsRowCoinsTitle:'Текущие монеты',snsRowCoinsDesc:'Перенос: 20%',
+    snsRowRefsTitle:'Рефералы',snsRowRefsDesc:'Бонус за активных рефералов',
+    snsRowCompTitle:'Рейтинг в соревновании',snsRowCompDesc:'По вашей позиции в таблице лидеров',
+    snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
   },
   es:{
     navHome:'Inicio',navMarket:'Mercado',navTasks:'Tareas',navFriends:'Amigos',navFinance:'Finanzas',
     labelCoins:'Monedas',labelBamboo:'Bambú',
     statAccrued:'Acumulado',statRateDay:'Tasa/Día',statBambooDay:'Bambú/día',
     claimBtn:'Reclamar Bamboo',lvLabel:'Nv.',
-    tabDeposit:'💰 Depósito',tabWithdraw:'💸 Retiro',tabExchange:'⚡ Cambio',
+    tabDeposit:'💰 Depósito',tabWithdraw:'🌟 Temporada 2',tabExchange:'⚡ Cambio',
     tabReferralTxt:'Referido',tabSocialTxt:'Social',
     tabPartner:'⭐ Socio',tabCommunity:'🌍 Comunidad',floatAdd:'➕ Añadir tarea',
     friendsTitle:'Amigos y referidos',refProgTitle:'Programa de referidos',
@@ -3174,13 +3213,19 @@ const TRANSLATIONS = {
     compHelpTitle:'Guía de competencias',
     compHelpBody:'<b style="color:#ffa726">🏆 ¿Cómo funciona?</b><br><br>📅 Cada competencia dura <b>10 días</b>.<br>🏅 Los <b>20 mejores usuarios</b> ganan premios en TON.<br><br><b style="color:#00D4FF">💎 Competencia de referidos activos</b><br>Cuenta amigos que se unieron por tu enlace <b>y depositaron TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Competencia de velocidad de minería</b><br>Cuenta tu <b>tasa diaria de producción de Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Distribución de premios</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON c/u<br>#16–20 → 1 TON c/u',
     newRefNotif:'🎉 Invitaste a {name}! Ganarás 20% de sus compras',
+    s2BadgeTxt:'Próximamente',s2BannerTitle:'Preparación Temporada 2',s2BannerSub:'🎯 Ver tu asignación →',s2TapTxt:'Toca',
+    snsHeroTitle:'Preparación Temporada 2',snsHeroSub:'Tu progreso continúa',
+    snsRowCoinsTitle:'Monedas actuales',snsRowCoinsDesc:'Transferencia: 20%',
+    snsRowRefsTitle:'Referidos',snsRowRefsDesc:'Bono referidos activos',
+    snsRowCompTitle:'Rango de competencia',snsRowCompDesc:'Según tu posición en clasificación',
+    snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
   },
   fr:{
     navHome:'Accueil',navMarket:'Marché',navTasks:'Tâches',navFriends:'Amis',navFinance:'Finance',
     labelCoins:'Pièces',labelBamboo:'Bambou',
     statAccrued:'Accumulé',statRateDay:'Taux/Jour',statBambooDay:'Bambou/jour',
     claimBtn:'Réclamer Bamboo',lvLabel:'Nv.',
-    tabDeposit:'💰 Dépôt',tabWithdraw:'💸 Retrait',tabExchange:'⚡ Échange',
+    tabDeposit:'💰 Dépôt',tabWithdraw:'🌟 Saison 2',tabExchange:'⚡ Échange',
     tabReferralTxt:'Parrainage',tabSocialTxt:'Réseaux',
     tabPartner:'⭐ Partenaire',tabCommunity:'🌍 Communauté',floatAdd:'➕ Ajouter tâche',
     friendsTitle:'Amis & Parrainages',refProgTitle:'Programme de parrainage',
@@ -3285,6 +3330,12 @@ const TRANSLATIONS = {
     compHelpTitle:'Guide des compétitions',
     compHelpBody:'<b style="color:#ffa726">🏆 Comment ça marche?</b><br><br>📅 Chaque compétition dure <b>10 jours</b>.<br>🏅 Les <b>20 meilleurs utilisateurs</b> gagnent des prix en TON.<br><br><b style="color:#00D4FF">💎 Compétition de parrainages actifs</b><br>Compte les amis inscrits via votre lien <b>qui ont déposé du TON</b>.<br><br><b style="color:var(--bamboo)">⚡ Compétition de vitesse de minage</b><br>Compte votre <b>taux de production quotidien de Bamboo</b>.<br><br><b style="color:var(--coin)">🎁 Distribution des prix</b><br>🥇 #1 → 50 TON<br>🥈 #2 → 40 TON<br>🥉 #3 → 30 TON<br>#4 → 20 TON | #5 → 10 TON<br>#6 → 9 | #7 → 8 | #8 → 7 | #9 → 6 | #10 → 5 TON<br>#11–15 → 2 TON chacun<br>#16–20 → 1 TON chacun',
     newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 20% de ses achats',
+    s2BadgeTxt:'Bientôt',s2BannerTitle:'Préparation Saison 2',s2BannerSub:'🎯 Voir votre allocation →',s2TapTxt:'Appuyer',
+    snsHeroTitle:'Préparation Saison 2',snsHeroSub:'Votre progression continue',
+    snsRowCoinsTitle:'Pièces actuelles',snsRowCoinsDesc:'Report: 20%',
+    snsRowRefsTitle:'Parrainages',snsRowRefsDesc:'Bonus parrainages actifs',
+    snsRowCompTitle:'Classement compétition',snsRowCompDesc:'Selon votre position au classement',
+    snsTotalLbl:'🎯 Allocation totale saison',snsSeasonBadge:'Saison 2',
   }
 };
 
@@ -3374,6 +3425,16 @@ function applyLang(lang,flag,code){
   // ── Float add task ──
   const floatBtn=document.getElementById('floatAddTask');
   if(floatBtn) floatBtn.innerHTML=`➕ ${t.floatAdd}`;
+
+  // ── Season 2 Banner ──
+  const s2badge=document.getElementById('s2BadgeTxt'); if(s2badge) s2badge.textContent=t.s2BadgeTxt||'Coming Soon';
+  const s2title=document.getElementById('s2BannerTitle'); if(s2title) s2title.textContent=t.s2BannerTitle||'Season 2 Preparation';
+  const s2sub=document.getElementById('s2BannerSub'); if(s2sub) s2sub.textContent=t.s2BannerSub||'🎯 Check your allocation →';
+  const s2tap=document.getElementById('s2TapTxt'); if(s2tap) s2tap.textContent=t.s2TapTxt||'Tap';
+
+  // ── Season 2 Alloc Page Hero ──
+  const snsHeroMain=document.getElementById('sns-hero-main-title'); if(snsHeroMain) snsHeroMain.textContent=t.snsHeroTitle||'Season 2 Preparation';
+  const snsHeroSub=document.getElementById('sns-hero-sub-txt'); if(snsHeroSub) snsHeroSub.textContent=t.snsHeroSub||'Your progress carries forward';
 
   // ── walletAddressDisplay: only if still showing default ──
   const wadEl=document.getElementById('walletAddressDisplay');

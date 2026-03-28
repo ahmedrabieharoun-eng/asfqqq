@@ -702,79 +702,121 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   <div class="ftcont" id="ft-withdraw">
     <style>
       /* ═══ NEW SEASON S2 STYLES ═══ */
-      .sns-page{padding:0 0 12px}
-      /* Hero card with background image */
+      .sns-page{padding:0 0 14px}
+
+      /* ── Hero card ── */
       .sns-hero-card{
-        position:relative;border-radius:22px;overflow:hidden;
-        margin-bottom:14px;min-height:190px;
-        border:1px solid rgba(255,215,0,.3);
-        box-shadow:0 8px 40px rgba(0,0,0,.6),0 0 0 1px rgba(255,215,0,.1);
+        position:relative;border-radius:20px;overflow:hidden;
+        margin-bottom:12px;min-height:170px;
+        border:1px solid rgba(255,215,0,.28);
+        box-shadow:0 6px 32px rgba(0,0,0,.55);
       }
       .sns-hero-bg{
         position:absolute;inset:0;
         background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg') center top / cover no-repeat;
-        filter:brightness(.82) saturate(1.1);
+        filter:brightness(.78) saturate(1.1);
       }
       .sns-hero-overlay{
         position:absolute;inset:0;
-        background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(2,10,2,.55) 60%,rgba(2,10,2,.92) 100%);
+        background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(2,8,2,.5) 55%,rgba(2,8,2,.88) 100%);
       }
-      .sns-hero-content{position:relative;z-index:2;padding:18px 18px 18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:190px}
-      .sns-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.5);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:#FFD700;letter-spacing:.5px;margin-bottom:8px;backdrop-filter:blur(8px)}
-      .sns-hero-title{font-size:26px;font-weight:800;color:#FFD700;text-shadow:0 2px 20px rgba(255,215,0,.6),0 0 40px rgba(255,215,0,.3);margin-bottom:3px;text-align:center}
-      .sns-hero-sub{font-size:12px;color:rgba(255,255,255,.6);font-weight:600;text-align:center}
-      /* Allocation rows */
-      .sns-rows-wrap{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+      .sns-hero-content{
+        position:relative;z-index:2;padding:14px 16px 16px;
+        display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:170px;
+      }
+      .sns-hero-badge{
+        display:inline-flex;align-items:center;gap:5px;
+        background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.45);
+        border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;
+        color:#FFD700;letter-spacing:.4px;margin-bottom:6px;backdrop-filter:blur(8px);
+      }
+      .sns-hero-title{font-size:22px;font-weight:800;color:#FFD700;text-shadow:0 2px 18px rgba(255,215,0,.55);margin-bottom:2px;text-align:center}
+      .sns-hero-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-align:center}
+
+      /* ── Allocation rows ── */
+      .sns-rows-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
       .sns-row{
-        background:rgba(4,16,4,.92);border:1px solid rgba(124,179,66,.22);
-        border-radius:18px;padding:14px 16px;
-        display:flex;align-items:center;gap:12px;
-        backdrop-filter:blur(10px);
-        box-shadow:0 2px 16px rgba(0,0,0,.35);
-        transition:border-color .2s;
+        /* glassmorphism: semi-transparent + blur */
+        background:rgba(255,255,255,.06);
+        border:1px solid rgba(255,255,255,.13);
+        border-radius:16px;padding:11px 13px;
+        display:flex;align-items:center;gap:10px;
+        backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+        box-shadow:0 2px 12px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
         position:relative;overflow:hidden;
       }
-      .sns-row::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.025) 0%,transparent 60%);pointer-events:none}
-      .sns-row.sns-row-ton{border-color:rgba(0,212,255,.3)}
-      .sns-row-icon-wrap{width:50px;height:50px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-      .sns-row-icon-wrap.green{background:linear-gradient(135deg,rgba(124,179,66,.25),rgba(78,122,32,.15));border:1px solid rgba(124,179,66,.3)}
-      .sns-row-icon-wrap.blue{background:linear-gradient(135deg,rgba(66,165,245,.2),rgba(13,71,161,.1));border:1px solid rgba(66,165,245,.25)}
-      .sns-row-icon-wrap.cyan{background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,150,200,.1));border:1px solid rgba(0,212,255,.3)}
-      .sns-row-icon-img{width:34px;height:34px;object-fit:contain}
-      .sns-row-icon-emoji{font-size:24px;line-height:1}
+      .sns-row::before{
+        content:'';position:absolute;inset:0;
+        background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 55%);
+        pointer-events:none;border-radius:16px;
+      }
+      .sns-row.sns-row-ton{border-color:rgba(0,212,255,.22)}
+      .sns-row-icon-wrap{
+        width:42px;height:42px;border-radius:12px;flex-shrink:0;
+        display:flex;align-items:center;justify-content:center;
+      }
+      .sns-row-icon-wrap.green{background:rgba(124,179,66,.18);border:1px solid rgba(124,179,66,.28)}
+      .sns-row-icon-wrap.blue{background:rgba(66,165,245,.15);border:1px solid rgba(66,165,245,.22)}
+      .sns-row-icon-wrap.cyan{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.22)}
+      .sns-row-icon-img{width:28px;height:28px;object-fit:contain}
+      .sns-row-icon-emoji{font-size:20px;line-height:1}
       .sns-row-body{flex:1;min-width:0}
-      .sns-row-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;line-height:1.2}
-      .sns-row-desc{font-size:10.5px;color:rgba(255,255,255,.38);font-weight:600;line-height:1.4}
-      .sns-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;min-width:88px}
-      .sns-spin{width:20px;height:20px;border:2.5px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
+      .sns-row-title{font-size:12px;font-weight:800;color:rgba(255,255,255,.92);margin-bottom:1px;line-height:1.2}
+      .sns-row-desc{font-size:9.5px;color:rgba(255,255,255,.35);font-weight:600;line-height:1.3}
+      .sns-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;min-width:80px}
+      .sns-spin{width:18px;height:18px;border:2px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
       @keyframes sns-rotate{to{transform:rotate(360deg)}}
-      .sns-val-coins{font-size:22px;font-weight:800;color:#FFD700;line-height:1;text-align:right;text-shadow:0 0 12px rgba(255,215,0,.4)}
-      .sns-val-ton{font-size:20px;font-weight:800;color:#00D4FF;line-height:1;text-align:right;text-shadow:0 0 12px rgba(0,212,255,.4)}
-      .sns-val-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(0,242,122,.15);border:1px solid rgba(0,242,122,.3);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:800;color:#00F27A;margin-bottom:2px}
-      .sns-val-sub{font-size:9.5px;color:rgba(255,255,255,.28);font-weight:600;text-align:right;line-height:1.3}
-      /* Deposit bonus row (empty state) */
-      .sns-empty-tag{font-size:11px;color:rgba(255,255,255,.25);font-weight:600;font-style:italic}
-      /* Total card */
-      .sns-total-card{
-        background:linear-gradient(135deg,rgba(2,14,2,.97),rgba(4,18,4,.98));
-        border:2px solid rgba(255,215,0,.4);border-radius:22px;
-        padding:22px 20px;text-align:center;
-        box-shadow:0 0 40px rgba(255,215,0,.08),0 4px 24px rgba(0,0,0,.5);
-        position:relative;overflow:hidden;
+
+      /* value displays */
+      .sns-val-coins{font-size:17px;font-weight:800;color:#FFD700;line-height:1;text-align:right;text-shadow:0 0 10px rgba(255,215,0,.35)}
+      .sns-val-ton{font-size:16px;font-weight:800;color:#00D4FF;line-height:1;text-align:right;text-shadow:0 0 10px rgba(0,212,255,.35)}
+      .sns-val-badge{
+        display:inline-flex;align-items:center;gap:3px;
+        background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.28);
+        border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800;color:#00F27A;margin-bottom:1px;
       }
-      .sns-total-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.06) 0%,transparent 60%);pointer-events:none}
-      .sns-total-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
-      .sns-total-num{font-size:52px;font-weight:800;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.5),0 2px 4px rgba(0,0,0,.8);line-height:1;margin-bottom:2px}
-      .sns-total-unit{font-size:13px;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:1px;margin-bottom:10px}
-      .sns-total-sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.3),transparent);margin:10px 0}
-      .sns-total-ton-row{display:flex;align-items:center;justify-content:center;gap:8px}
-      .sns-total-ton-num{font-size:18px;font-weight:800;color:#00D4FF;text-shadow:0 0 14px rgba(0,212,255,.4)}
-      .sns-cup-img{position:absolute;right:-10px;bottom:-10px;width:110px;opacity:.18;pointer-events:none}
+      .sns-val-sub{font-size:9px;color:rgba(255,255,255,.25);font-weight:600;text-align:right;line-height:1.3}
+      .sns-empty-tag{font-size:10px;color:rgba(255,255,255,.22);font-weight:600;font-style:italic;text-align:right}
+
+      /* ── Total card — split: Coins + TON ── */
+      .sns-total-card{
+        /* glassmorphism total */
+        background:rgba(255,255,255,.07);
+        border:1.5px solid rgba(255,215,0,.32);
+        border-radius:20px;
+        backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+        box-shadow:0 0 30px rgba(255,215,0,.07),0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);
+        position:relative;overflow:hidden;padding:16px 18px 14px;
+      }
+      .sns-total-card::before{
+        content:'';position:absolute;inset:0;
+        background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.06) 0%,transparent 65%);
+        pointer-events:none;
+      }
+      .sns-total-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px;text-align:center}
+      /* two columns side by side */
+      .sns-total-cols{display:flex;gap:8px}
+      .sns-total-col{
+        flex:1;border-radius:13px;padding:11px 10px;text-align:center;
+        background:rgba(255,255,255,.055);
+        border:1px solid rgba(255,255,255,.1);
+        backdrop-filter:blur(8px);
+      }
+      .sns-total-col.coins-col{border-color:rgba(255,215,0,.22)}
+      .sns-total-col.ton-col{border-color:rgba(0,212,255,.22)}
+      .sns-total-col-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+      .sns-total-col-num{font-size:26px;font-weight:800;line-height:1;margin-bottom:2px}
+      .sns-total-col-num.y{color:#FFD700;text-shadow:0 0 18px rgba(255,215,0,.4)}
+      .sns-total-col-num.b{color:#00D4FF;text-shadow:0 0 18px rgba(0,212,255,.4)}
+      .sns-total-col-unit{font-size:10px;font-weight:700;letter-spacing:.8px}
+      .sns-total-col-unit.y{color:rgba(255,215,0,.5)}
+      .sns-total-col-unit.b{color:rgba(0,212,255,.5)}
+      .sns-cup-img{position:absolute;right:-8px;bottom:-8px;width:90px;opacity:.12;pointer-events:none}
     </style>
 
     <div class="sns-page">
 
-      <!-- Hero Card with background image -->
+      <!-- Hero Card -->
       <div class="sns-hero-card">
         <div class="sns-hero-bg"></div>
         <div class="sns-hero-overlay"></div>
@@ -788,7 +830,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
       <!-- Allocation rows -->
       <div class="sns-rows-wrap">
 
-        <!-- Row 1: Current Coins -->
+        <!-- Row 1: Current Coins — outputs COINS -->
         <div class="sns-row" id="sns-row-coins">
           <div class="sns-row-icon-wrap green">
             <span class="sns-row-icon-emoji">🏛️</span>
@@ -800,7 +842,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
           <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
 
-        <!-- Row 2: Referrals -->
+        <!-- Row 2: Referrals — outputs COINS -->
         <div class="sns-row" id="sns-row-refs">
           <div class="sns-row-icon-wrap blue">
             <span class="sns-row-icon-emoji">👥</span>
@@ -812,7 +854,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
           <div class="sns-row-right"><div class="sns-spin"></div></div>
         </div>
 
-        <!-- Row 3: Competition Rank → TON -->
+        <!-- Row 3: Competition Rank — outputs TON only -->
         <div class="sns-row sns-row-ton" id="sns-row-comp">
           <div class="sns-row-icon-wrap cyan">
             <img class="sns-row-icon-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.outerHTML='<span class=\'sns-row-icon-emoji\'>🏆</span>'">
@@ -826,16 +868,23 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 
       </div>
 
-      <!-- Total -->
+      <!-- Total: two separate columns — Coins | TON -->
       <div class="sns-total-card" id="sns-total" style="display:none">
         <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
-        <div class="sns-total-lbl">🎯 Total Allocation</div>
-        <div class="sns-total-num" id="sns-total-num">0</div>
-        <div class="sns-total-unit">Coins</div>
-        <div class="sns-total-sep"></div>
-        <div class="sns-total-ton-row">
-          <span style="font-size:13px;color:rgba(255,255,255,.35);font-weight:700">≈</span>
-          <span class="sns-total-ton-num" id="sns-total-ton">0.0000 TON</span>
+        <div class="sns-total-lbl">🎯 Total Season Allocation</div>
+        <div class="sns-total-cols">
+          <!-- Coins column (rows 1+2) -->
+          <div class="sns-total-col coins-col">
+            <div class="sns-total-col-lbl">🪙 Coins</div>
+            <div class="sns-total-col-num y" id="sns-total-coins-num">0</div>
+            <div class="sns-total-col-unit y">COINS</div>
+          </div>
+          <!-- TON column (row 3 only) -->
+          <div class="sns-total-col ton-col">
+            <div class="sns-total-col-lbl">💎 TON</div>
+            <div class="sns-total-col-num b" id="sns-total-ton-num">0</div>
+            <div class="sns-total-col-unit b">TON</div>
+          </div>
         </div>
       </div>
 
@@ -3673,9 +3722,7 @@ function renderCompPane(elId, opt){
 }
 
 /* ════ NEW SEASON ALLOCATION ════ */
-const SNS_TON_PER_COIN = 0.00005;
-
-// Competition prizes by rank (1-indexed)
+// Competition prizes by rank (1-indexed, ranks 1-20)
 const SNS_COMP_PRIZES = [50,40,30,20,10,9,8,7,6,5,2,2,2,2,2,1,1,1,1,1];
 
 function snsSetRow(id, rightHtml){
@@ -3752,18 +3799,17 @@ async function loadSeasonAlloc(){
   if(compDesc) compDesc.textContent = myRank > 0 ? `Rank #${myRank} in competition` : 'Based on your leaderboard position';
   snsSetRow('sns-row-comp', snsTonRight(compTon, myRank > 0 ? myRank : null));
 
-  // Total coins (rows 1+2 only, row 3 is TON)
+  // Total: Coins (rows 1+2) separately from TON (row 3)
   const totalCoins = coinsAlloc + refsAlloc;
-  const totalTon   = ((totalCoins * SNS_TON_PER_COIN) + compTon).toFixed(4);
 
-  document.getElementById('sns-total-num').textContent = fmt(totalCoins);
-  document.getElementById('sns-total-ton').textContent = `${totalTon} TON`;
+  document.getElementById('sns-total-coins-num').textContent = fmt(totalCoins);
+  document.getElementById('sns-total-ton-num').textContent   = compTon > 0 ? compTon : '0';
   document.getElementById('sns-total').style.display = 'block';
 
   // Save to DB (fire-and-forget)
   api('saveSeasonAlloc',{
-    coinsAlloc, refsAlloc, compAlloc, compRank: myRank, compTon,
-    total: totalCoins, totalTon
+    coinsAlloc, refsAlloc, compAlloc:0, compRank: myRank, compTon,
+    total: totalCoins, totalTon: String(compTon)
   }).catch(()=>{});
 }
 

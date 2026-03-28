@@ -651,7 +651,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <div class="sec" id="sectionFinance">
   <div class="fin-tabs">
     <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">💸 Withdraw</div>
+    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌱 New Season</div>
     <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
   </div>
 
@@ -698,28 +698,46 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     </div>
   </div>
 
-  <!-- WITHDRAW -->
+  <!-- NEW SEASON PREP PAGE -->
   <div class="ftcont" id="ft-withdraw">
-    <div class="wd-form">
-      <label class="flabel" data-i18n="tonWalletAddr">TON Wallet Address</label>
-      <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
-      <label class="flabel" data-i18n="amountCoins">Amount (Coins)</label>
-      <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
-      <div style="font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin:-4px 0 8px 2px" data-i18n="wdMinHint">⚠️ Minimum: 200 Coins</div>
-      <div class="ton-row">
-        <div class="ton-chip">
-          <div class="tcl"><img src="https://i.ibb.co/WNfvBK9h/toncoin-1.webp" alt="TON"> <span data-i18n="tonValue">TON Value</span></div>
-          <div class="tcv" id="wdTonVal">0.0000</div>
-        </div>
-      </div>
-      <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
-        <img src="https://i.ibb.co/WNfvBK9h/toncoin-1.webp" style="width:18px;height:18px;object-fit:contain"> <span data-i18n="withdrawBtn">Request Withdrawal</span>
-      </button>
+    <!-- HERO HEADER -->
+    <div style="background:linear-gradient(135deg,rgba(10,30,10,.95),rgba(5,18,5,.98));border:1px solid rgba(255,215,0,.3);border-radius:22px;padding:20px 16px 16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(255,215,0,.08)">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.08) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="font-size:42px;margin-bottom:6px;filter:drop-shadow(0 0 16px rgba(255,215,0,.6));animation:pf 3s ease-in-out infinite">🐼</div>
+      <div style="font-size:22px;font-weight:800;color:#FFD700;letter-spacing:.5px;text-shadow:0 0 20px rgba(255,215,0,.5)">🌱 New Season Preparation</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px;font-weight:600">Your assets allocation for the next season</div>
+      <!-- Animated glow line -->
+      <div style="height:2px;background:linear-gradient(90deg,transparent,rgba(255,215,0,.6),transparent);border-radius:2px;margin-top:14px;animation:line-shine 2.5s ease-in-out infinite"></div>
     </div>
-    <div class="hist-box">
-      <div class="hist-hdr" data-i18n="withdrawHist">📋 Withdrawal History</div>
-      <div id="wdHist"><div class="hist-empty" data-i18n="noWithdrawals">No withdrawals yet</div></div>
+
+    <!-- ALLOCATION ITEMS -->
+    <div id="seasonAllocList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+      <!-- Rendered by JS -->
+      <div style="text-align:center;padding:30px;color:var(--muted);font-size:14px">⏳ Calculating your allocation...</div>
     </div>
+
+    <!-- TOTAL CARD -->
+    <div id="seasonTotalCard" style="display:none;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(10,30,10,.9));border:2px solid rgba(255,215,0,.5);border-radius:20px;padding:18px 20px;text-align:center;box-shadow:0 0 30px rgba(255,215,0,.1)">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">🎯 Total Coins Carry-Over</div>
+      <div id="seasonTotalCoins" style="font-size:42px;font-weight:800;color:#FFD700;text-shadow:0 0 24px rgba(255,215,0,.6);line-height:1">0</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:600">Coins</div>
+      <div id="seasonTotalTon" style="font-size:14px;font-weight:700;color:rgba(0,212,255,.8);margin-top:8px">≈ 0.0000 TON</div>
+    </div>
+
+    <style>
+    @keyframes line-shine{0%,100%{opacity:.4}50%{opacity:1}}
+    .alloc-row{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px)}
+    .alloc-icon{font-size:28px;flex-shrink:0;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);border-radius:14px;border:1px solid rgba(255,255,255,.08)}
+    .alloc-info{flex:1;min-width:0}
+    .alloc-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:2px}
+    .alloc-desc{font-size:11px;color:var(--muted);font-weight:600}
+    .alloc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:90px}
+    .alloc-loading{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--coin);border-radius:50%;animation:spin-anim .8s linear infinite;flex-shrink:0}
+    @keyframes spin-anim{to{transform:rotate(360deg)}}
+    .alloc-val{font-size:18px;font-weight:800;color:var(--coin);text-align:right;line-height:1}
+    .alloc-pct{font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-align:right}
+    </style>
   </div>
 
   <!-- EXCHANGE -->
@@ -1016,11 +1034,13 @@ const CFG = {
    SECURITY: write ops (withdraw, exchange, buy) go to ONE server only.
 ═══════════════════════════════════════════════════════════════════ */
 const SERVERS = [
-  'https://little-bush-fcf7.aborabie2777.workers.dev',
-  'https://silent-block-bedf.ahmedrabieharoun.workers.dev',
-  'https://snowy-lab-c342.mohamedmmrr2872008.workers.dev',
-  'https://lucky-paper-a107.aborabie1777.workers.dev',
-  'https://shy-brook-4dd4.rabiebasha2012.workers.dev',
+'https://silent-block-bedf.ahmedrabieharoun.workers.dev',
+'https://noisy-dust-b9e8.mmrr2872008.workers.dev',  
+'https://little-bush-fcf7.aborabie2777.workers.dev',  
+'https://rough-bar-ac76.aborabie4777.workers.dev',  
+'https://snowy-lab-c342.mohamedmmrr2872008.workers.dev',  
+'https://lucky-paper-a107.aborabie1777.workers.dev',  
+'https://shy-brook-4dd4.rabiebasha2012.workers.dev',
 ];
 
 // Actions that MUST go to ONE server only (write ops — prevent double execution)
@@ -1351,6 +1371,7 @@ async function loadState(){
     S.wdHist    = d.wdHistory   || [];
     S.balLog    = d.balanceLog  || [];
     S.doneTasks = d.completedTasks || [];
+    S.deposits  = d.deposits || [];
     S.tasks     = d.tasks || { partner:[], community:[] };
     // Active ref count computed in renderTasks from refs[].hasDeposited
     if(d.user && d.user.tankAccrued !== undefined){
@@ -2124,12 +2145,148 @@ function renderWdHist(){
   }).join('');
 }
 
+
+/* ════ NEW SEASON ALLOCATION ════ */
+const TON_TO_BAMBOO = 10000;  // 1 TON = 10,000 bamboo
+const BAMBOO_PER_COIN = 20;   // 20 bamboo = 1 coin (matches server G.BAMBOO_PER_COIN)
+const TON_PER_COIN = 0.00005; // matches server G.TON_PER_COIN
+
+async function loadSeasonAllocation(){
+  const listEl = document.getElementById('seasonAllocList');
+  const totalCard = document.getElementById('seasonTotalCard');
+  if(!listEl) return;
+
+  // Show loading state for each row
+  const rows = [
+    {id:'srow-coins',    icon:'🪙', title:'Current Coins Balance',  desc:'20% of your current coins carry over'},
+    {id:'srow-refs',     icon:'👥', title:'Active Referrals Bonus', desc:'3,000 coins per active referral (who deposited)'},
+    {id:'srow-deposits', icon:'💎', title:'Net Deposit Bonus',       desc:'20% of your net deposit value (deposits minus withdrawals)'},
+  ];
+
+  listEl.innerHTML = rows.map(r=>`
+    <div class="alloc-row" id="${r.id}">
+      <div class="alloc-icon">${r.icon}</div>
+      <div class="alloc-info">
+        <div class="alloc-title">${r.title}</div>
+        <div class="alloc-desc">${r.desc}</div>
+      </div>
+      <div class="alloc-right">
+        <div class="alloc-loading"><div class="spin"></div> <span>Loading...</span></div>
+      </div>
+    </div>
+  `).join('');
+
+  // --- 1. Coins Balance: 20% of current coins ---
+  const currentCoins = S.user?.coins || 0;
+  const coinsAlloc = Math.floor(currentCoins * 0.20);
+  setAllocRow('srow-coins', coinsAlloc, `20% of ${fmt(currentCoins)} coins`);
+
+  // --- 2. Active referrals: 3000 coins each ---
+  const activeRefs = (S.refs||[]).filter(r=>r.hasDeposited).length;
+  const refsAlloc = activeRefs * 3000;
+  setAllocRow('srow-refs', refsAlloc, `${activeRefs} active refs × 3,000`);
+
+  // --- 3. Net deposit: fetch deposits & withdrawals ---
+  setAllocLoading('srow-deposits');
+  try{
+    const depAlloc = await calcDepositAlloc();
+    setAllocRow('srow-deposits', depAlloc.coins, depAlloc.detail);
+  }catch(e){
+    setAllocError('srow-deposits', 'Could not load');
+  }
+  // Recalculate total now that all rows are done
+  updateSeasonTotal();
+
+  // --- Recalculate total after all rows done (deposits is async, rest sync) ---
+  updateSeasonTotal();
+}
+
+function updateSeasonTotal(){
+  const totalCard = document.getElementById('seasonTotalCard');
+  if(!totalCard) return;
+  const coinsRow = getRowCoins('srow-coins');
+  const refsRow  = getRowCoins('srow-refs');
+  const depsRow  = getRowCoins('srow-deposits');
+  const total    = coinsRow + refsRow + depsRow;
+  const totalTon = (total * TON_PER_COIN).toFixed(4);
+  document.getElementById('seasonTotalCoins').textContent = fmt(total);
+  document.getElementById('seasonTotalTon').textContent   = `≈ ${totalTon} TON`;
+  totalCard.style.display = 'block';
+}
+
+function setAllocRow(id, coins, detail){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const right = el.querySelector('.alloc-right');
+  right.innerHTML = `
+    <div class="alloc-val">${fmt(coins)}</div>
+    <div class="alloc-pct">${detail}</div>
+  `;
+  el.dataset.coins = coins;
+}
+function setAllocLoading(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const right = el.querySelector('.alloc-right');
+  right.innerHTML = `<div class="alloc-loading"><div class="spin"></div><span>Loading...</span></div>`;
+  el.dataset.coins = 0;
+}
+function setAllocError(id, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const right = el.querySelector('.alloc-right');
+  right.innerHTML = `<div class="alloc-pct" style="color:#ff8a80">${msg}</div>`;
+  el.dataset.coins = 0;
+}
+function getRowCoins(id){
+  const el = document.getElementById(id);
+  return el ? (parseInt(el.dataset.coins)||0) : 0;
+}
+
+async function calcDepositAlloc(){
+  const uid = S.userId;
+  if(!uid) return {coins:0, detail:'No user'};
+
+  // Fetch deposits from Firebase via server state (already loaded in S)
+  // We need raw Firebase data — call a helper endpoint or use what we have
+  // Strategy: use S.wdHist for withdrawals (already loaded)
+  //           use S.deposits for deposits (may need to load)
+
+  // Total deposits (only 'completed' ones, not pending)
+  let totalDepositTon = 0;
+  if(S.deposits && Array.isArray(S.deposits)){
+    S.deposits.forEach(d=>{
+      if(d.status==='completed'||d.status==='paid'){
+        totalDepositTon += parseFloat(d.amount)||0;
+      }
+    });
+  }
+
+  // Total withdrawals (paid/approved only)
+  let totalWdTon = 0;
+  (S.wdHist||[]).forEach(w=>{
+    const st=(w.status||'').toLowerCase();
+    if(st==='paid'||st==='approved'){
+      totalWdTon += parseFloat(w.ton||0) || parseFloat(w.sentAmount||0) || ((w.amt||0)*TON_PER_COIN);
+    }
+  });
+
+  const netTon  = Math.max(0, totalDepositTon - totalWdTon);
+  const netCoins= Math.floor(netTon * TON_TO_BAMBOO / BAMBOO_PER_COIN); // ton→bamboo→coins
+  const alloc20 = Math.floor(netCoins * 0.20);
+  const detail  = netTon>0
+    ? `20% of ${netCoins.toLocaleString()} coins (${totalDepositTon.toFixed(2)} - ${totalWdTon.toFixed(2)} TON net)`
+    : 'No net deposit found';
+  return {coins: alloc20, detail};
+}
+
 /* ════ FINANCE NAV ════ */
 function switchFinTab(el,t){
   document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.ftcont').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(`ft-${t}`).classList.add('active');
+  if(t==='withdraw') loadSeasonAllocation();
 }
 function goToFinanceDeposit(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -2149,6 +2306,7 @@ function goToFinanceWithdraw(){
   document.getElementById('sectionFinance').classList.add('active');
   const wt=document.querySelector('.ftab[data-ft="withdraw"]');
   if(wt) switchFinTab(wt,'withdraw');
+  loadSeasonAllocation();
 }
 
 /* ════ REFERRAL ════ */
@@ -3215,7 +3373,7 @@ function applyLang(lang,flag,code){
 }
 
 /* ════ COMPETITION ════════════════════════════════════════════════ */
-const COMP_END_DATE = Date.now() + (10 * 24 * 60 * 60 * 1000); // 10 days from now
+// COMP_END_DATE is always fetched from server — never computed locally
 // Prize pool per competition
 const COMP_PRIZES_ACTIVE = [50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1]; // Top 5: 50,40,30,20,10 | 6-10: 9,8,7,6,5 | 11-15: 2 each | 16-20: 1 each = 200 TON
 const COMP_PRIZES_MINING = [50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1];
@@ -3232,7 +3390,7 @@ function openCompPage(){
   window._compCdInt=setInterval(()=>{
     const el=document.getElementById('comp-countdown-hdr');
     if(!el){clearInterval(window._compCdInt);return;}
-    const end=_compData?.endDate||COMP_END_DATE;
+    const end=_compData?.endDate||Date.now()+(10*24*60*60*1000);
     el.textContent=fmtCountdown(end-Date.now());
     // refresh countdown chips inside panes
     ['comp-active-content','comp-mining-content'].forEach(id=>{
@@ -3326,16 +3484,16 @@ function fmtCountdown(ms){
 function renderCompetition(data){
   const lang=localStorage.getItem('pandaLang')||'en';
   const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-  const msLeft = (data.endDate||COMP_END_DATE) - Date.now();
+  const msLeft = (data.endDate||Date.now()+(10*24*60*60*1000)) - Date.now();
   const myUid = S.userId;
   const snap = data.mySnapshot||null; // {activeRefs, miningPerDay} at comp start
 
   // ── Active Refs competition ──
   const activeBoard = (data.activeRefs||[]).slice(0,50);
   const myActiveRank = activeBoard.findIndex(u=>u.userId===myUid);
-  // Score = current active refs MINUS snapshot (growth since comp started)
+  // Score = always from server leaderboard if present, else estimate from snapshot
   const activeNow = S._activeRefCount||0;
-  const activeSnap = snap ? (snap.activeRefs||0) : activeNow; // if no snap yet, score=0
+  const activeSnap = snap ? (snap.activeRefs||0) : activeNow;
   const myActiveScore = myActiveRank>=0
     ? activeBoard[myActiveRank].score
     : Math.max(0, activeNow - activeSnap);
@@ -3359,9 +3517,9 @@ function renderCompetition(data){
   // ── Mining Speed competition ──
   const miningBoard = (data.miningSpeed||[]).slice(0,50);
   const myMiningRank = miningBoard.findIndex(u=>u.userId===myUid);
-  // Score = current mining/day MINUS snapshot (growth since comp started)
+  // Score = always from server leaderboard if present (most accurate)
   const miningNow = Math.round((S.user?.miningRate||0)*24);
-  const miningSnap = snap ? (snap.miningPerDay||0) : miningNow; // if no snap yet, score=0
+  const miningSnap = snap ? (snap.miningPerDay||0) : 0; // default 0 so score = full miningNow
   const myMiningScore = myMiningRank>=0
     ? miningBoard[myMiningRank].score
     : Math.max(0, miningNow - miningSnap);

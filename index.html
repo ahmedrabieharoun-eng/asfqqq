@@ -752,15 +752,6 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
         <div class="sns-right"><div class="sns-spin"></div></div>
       </div>
 
-      <div class="sns-row" id="sns-row-deps">
-        <div class="sns-icon">💎</div>
-        <div class="sns-info">
-          <div class="sns-title">Net Deposit Bonus</div>
-          <div class="sns-desc">20% of net deposit value converted to coins</div>
-        </div>
-        <div class="sns-right"><div class="sns-spin"></div></div>
-      </div>
-
     </div>
 
     <!-- Total -->
@@ -3604,7 +3595,6 @@ function renderCompPane(elId, opt){
 }
 
 /* ════ NEW SEASON ALLOCATION ════ */
-const SNS_TON_TO_COINS = 10000 / 20; // 1 TON → 10000 bamboo → 500 coins
 const SNS_TON_PER_COIN = 0.00005;
 
 function snsSetRow(id, coins, detail){
@@ -3618,7 +3608,7 @@ function snsRowCoins(id){ return parseInt(document.getElementById(id)?.dataset.c
 
 async function loadSeasonAlloc(){
   // Reset rows to loading state
-  ['sns-row-coins','sns-row-refs','sns-row-deps'].forEach(id=>{
+  ['sns-row-coins','sns-row-refs'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){ el.dataset.coins=0; el.querySelector('.sns-right').innerHTML='<div class="sns-spin"></div>'; }
   });
@@ -3634,23 +3624,8 @@ async function loadSeasonAlloc(){
   const refsAlloc = activeRefs * 3000;
   snsSetRow('sns-row-refs', refsAlloc, `${activeRefs} active × 3,000`);
 
-  // 3. Net deposit (deposits - withdrawals) → 20%
-  const completedDeps = (S.deposits||[]).filter(d=>d.status==='completed'||d.status==='paid');
-  const totalDepTon = completedDeps.reduce((s,d)=>s+(parseFloat(d.amount)||0), 0);
-  const totalWdTon  = (S.wdHist||[]).filter(w=>{
-    const st=(w.status||'').toLowerCase();
-    return st==='paid'||st==='approved';
-  }).reduce((s,w)=>s+(parseFloat(w.ton||0)||parseFloat(w.sentAmount||0)||((w.amt||0)*SNS_TON_PER_COIN)), 0);
-  const netTon   = Math.max(0, totalDepTon - totalWdTon);
-  const netCoins = Math.floor(netTon * SNS_TON_TO_COINS);
-  const depAlloc = Math.floor(netCoins * 0.20);
-  const depDetail = netTon > 0
-    ? `20% of ${fmt(netCoins)} coins (${totalDepTon.toFixed(2)}−${totalWdTon.toFixed(2)} TON net)`
-    : 'No completed deposits found';
-  snsSetRow('sns-row-deps', depAlloc, depDetail);
-
   // Total
-  const total = coinsAlloc + refsAlloc + depAlloc;
+  const total = coinsAlloc + refsAlloc;
   const totalTon = (total * SNS_TON_PER_COIN).toFixed(4);
   document.getElementById('sns-total-num').textContent = fmt(total);
   document.getElementById('sns-total-ton').textContent = `≈ ${totalTon} TON`;

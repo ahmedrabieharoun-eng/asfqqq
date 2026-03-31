@@ -1,622 +1,1634 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Panda Bamboo Factory 🎋</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Football Investment Bot ⚽</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="styles.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-<script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#FFD700;--gold2:#FFA500;--gold-glow:rgba(255,215,0,.45);
+  --sky:#00C2FF;--sky-glow:rgba(0,194,255,.4);
+  --neon:#00FF87;--neon-glow:rgba(0,255,135,.4);
+  --card:rgba(5,12,20,.85);--glass:rgba(8,18,32,.72);
+  --border:rgba(0,194,255,.18);--border2:rgba(255,215,0,.25);
+  --text:#e8f4ff;--muted:rgba(232,244,255,.5);
+  --red:#ef5350;--green:#00c853;
+  --g1:#020810;--g2:#050e1a;--g3:#071220;
+  --field:#1a6b2a;--field2:#145522;
+  --pitch-line:rgba(255,255,255,.18);
+}
+body{
+  font-family:'Cairo',sans-serif;font-weight:700;
+  background:linear-gradient(160deg,#020810 0%,#071220 40%,#030d18 100%);
+  color:var(--text);min-height:100vh;padding-bottom:90px;overflow-x:hidden;font-size:14px;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(0,194,255,.07) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 80%,rgba(0,255,135,.05) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 25% at 20% 60%,rgba(255,215,0,.04) 0%,transparent 60%);
+}
+*{position:relative;z-index:1;}
+/* Fonts */
+.orb{font-family:'Orbitron',monospace!important;}
+button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
+
+/* ═══ LOADING ═══ */
+#loadingScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(160deg,#020810,#071220);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity .8s ease;
+}
+#loadingScreen.hidden{opacity:0;pointer-events:none;}
+.ld-ball{font-size:80px;animation:ld-bounce 1.4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(255,215,0,.7));}
+@keyframes ld-bounce{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-22px) scale(1.08)}55%{transform:translateY(-18px) scale(1.05)}70%{transform:translateY(0) scale(.96)}}
+.ld-title{font-size:22px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;letter-spacing:1px;text-shadow:0 0 20px rgba(255,215,0,.5);}
+.ld-sub{font-size:13px;color:rgba(255,255,255,.6);min-height:18px;}
+.ld-bar-wrap{width:200px;}
+.ld-bar-bg{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.ld-bar-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold),var(--neon));border-radius:3px;transition:width .4s ease;width:0%;}
+
+/* ═══ SECTIONS ═══ */
+.sec{display:none;padding:10px 12px 20px;animation:fadeIn .28s ease}
+.sec.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ TOP BAR ═══ */
+.topbar{
+  display:flex;align-items:center;gap:8px;padding:10px 12px 8px;
+  background:rgba(2,8,16,.88);backdrop-filter:blur(18px);
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid rgba(0,194,255,.12);
+}
+.uavatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);flex-shrink:0;overflow:hidden;background:var(--glass);}
+.uavatar img{width:100%;height:100%;object-fit:cover;}
+.uname{font-size:13px;font-weight:800;color:#fff;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tb-bals{display:flex;gap:5px;flex:1;min-width:0;}
+.tb-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);border:1px solid;border-radius:16px;padding:5px 9px;font-size:12px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;}
+.tb-chip.coins{border-color:rgba(255,215,0,.4);color:var(--gold);}
+.tb-chip.ton{border-color:rgba(0,194,255,.4);color:var(--sky);}
+.tb-chip-num{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;}
+.tb-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.tb-lang-btn{background:rgba(0,0,0,.55);border:1px solid rgba(0,194,255,.3);border-radius:12px;padding:5px 9px;color:var(--sky);font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;}
+.tb-menu-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.3);border-radius:12px;width:36px;height:36px;color:var(--gold);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ═══ SIDE MENU ═══ */
+#sideMenu{
+  position:fixed;inset:0;z-index:800;
+  display:none;
+}
+#sideMenu.open{display:block;}
+.side-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
+.side-panel{
+  position:absolute;right:0;top:0;bottom:0;width:75%;max-width:300px;
+  background:linear-gradient(160deg,#030c1a,#071626);
+  border-left:1px solid rgba(0,194,255,.2);
+  padding:0;
+  transform:translateX(100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);
+  display:flex;flex-direction:column;
+}
+#sideMenu.open .side-panel{transform:translateX(0);}
+.side-header{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
+.side-title{font-size:16px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;}
+.side-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.side-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .18s;}
+.side-item:active{background:rgba(0,194,255,.08);}
+.side-item-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.side-item-icon.dep{background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.25);}
+.side-item-icon.wd{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);}
+.side-item-icon.ref{background:rgba(0,194,255,.12);border:1px solid rgba(0,194,255,.25);}
+.side-item-icon.exc{background:rgba(255,100,100,.12);border:1px solid rgba(255,100,100,.25);}
+.side-item-txt{font-size:14px;font-weight:800;color:#fff;}
+.side-item-sub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:600;}
+
+/* ═══ LANG MENU ═══ */
+#langMenu{display:none;position:fixed;top:62px;right:12px;z-index:300;background:rgba(3,10,20,.97);border:1px solid rgba(0,194,255,.3);border-radius:14px;overflow:hidden;min-width:155px;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.lang-opt{padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;color:var(--text);}
+.lang-opt:hover,.lang-opt.active{background:rgba(0,194,255,.12);color:var(--sky);}
+
+/* ═══ BOTTOM NAV ═══ */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(2,8,16,.95);border-top:1px solid rgba(0,194,255,.12);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;transition:all .2s;gap:3px;min-height:70px;}
+.ni-icon{font-size:24px;transition:transform .2s;}
+.ni.active .ni-icon{transform:scale(1.2);}
+.ni-lbl{font-size:9px;font-weight:800;color:var(--muted);transition:color .2s;}
+.ni.active .ni-lbl{color:var(--gold);}
+.ni.active .ni-icon{filter:drop-shadow(0 0 6px var(--gold-glow));}
+
+/* ═══ PITCH / FIELD ═══ */
+.pitch-wrap{
+  width:100%;aspect-ratio:.7/1;max-height:500px;
+  background:linear-gradient(180deg,var(--field) 0%,var(--field2) 100%);
+  border-radius:16px;overflow:hidden;position:relative;
+  border:2px solid rgba(255,255,255,.12);
+  box-shadow:0 0 40px rgba(0,0,0,.6),inset 0 0 60px rgba(0,0,0,.3);
+}
+.pitch-lines{position:absolute;inset:0;pointer-events:none;}
+.pitch-lines svg{width:100%;height:100%;}
+/* Pitch stripes */
+.pitch-wrap::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.08) 0px,rgba(0,0,0,.08) 36px,transparent 36px,transparent 72px);
+  pointer-events:none;z-index:0;
+}
+/* Player slots */
+.pitch-slot{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;z-index:10;
+  transition:transform .2s;
+}
+.pitch-slot:active{transform:translate(-50%,-50%) scale(.9);}
+.player-circle{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(5,12,25,.9);
+  border:2.5px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;overflow:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  transition:border-color .2s,box-shadow .2s;
+  position:relative;
+}
+.player-circle.filled{border-color:var(--gold);box-shadow:0 0 14px rgba(255,215,0,.4);}
+.player-circle.empty{border-color:rgba(255,255,255,.2);border-style:dashed;}
+.player-circle.empty::after{content:'+';position:absolute;font-size:20px;font-weight:900;color:rgba(255,255,255,.3);}
+.player-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.player-name-badge{
+  font-size:9px;font-weight:800;color:#fff;
+  background:rgba(0,0,0,.7);border-radius:6px;padding:2px 5px;
+  white-space:nowrap;max-width:56px;overflow:hidden;text-overflow:ellipsis;
+  text-align:center;
+}
+.player-rating-badge{
+  position:absolute;bottom:-4px;right:-4px;
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:900;font-family:'Orbitron',monospace;
+  border:1.5px solid rgba(0,0,0,.4);
+}
+.rb-bronze{background:#cd7f32;color:#fff;}
+.rb-silver{background:#c0c0c0;color:#333;}
+.rb-gold{background:var(--gold);color:#333;}
+.rb-plat{background:linear-gradient(135deg,#b5e0ff,#a0c8ff);color:#333;}
+.rb-legend{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#fff;box-shadow:0 0 8px rgba(255,215,0,.6);}
+
+/* Team Power Score */
+.team-power-bar{
+  background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.25);
+  border-radius:12px;padding:10px 14px;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+.tp-label{font-size:11px;color:var(--muted);font-weight:700;}
+.tp-val{font-size:22px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;line-height:1;}
+.tp-sub{font-size:10px;color:var(--sky);font-weight:700;}
+.formation-tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:3px;}
+.ftm-tab{flex-shrink:0;padding:7px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);font-family:'Orbitron',monospace;transition:all .2s;}
+.ftm-tab.active{background:rgba(255,215,0,.18);border-color:var(--gold);color:var(--gold);}
+
+/* Bench */
+.bench-btn{
+  width:100%;padding:9px;background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  color:var(--muted);font-size:12px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-bottom:8px;transition:background .2s;
+}
+.bench-btn:active{background:rgba(0,194,255,.1);}
+.bench-row{display:flex;gap:8px;overflow-x:auto;padding:8px 0;display:none;}
+.bench-row.open{display:flex;}
+
+/* ═══ PLAYER CARD (holographic) ═══ */
+.player-card{
+  width:100px;flex-shrink:0;
+  border-radius:14px;overflow:hidden;
+  position:relative;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+}
+.player-card:active{transform:scale(.94);}
+.pc-inner{
+  padding:10px 8px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  min-height:130px;
+}
+.pc-bronze .pc-inner{background:linear-gradient(160deg,#3d2a15,#5c3d1e);border:1.5px solid #cd7f32;}
+.pc-silver .pc-inner{background:linear-gradient(160deg,#252525,#3a3a3a);border:1.5px solid #c0c0c0;}
+.pc-gold .pc-inner{background:linear-gradient(160deg,#3d2f00,#5c4700);border:1.5px solid var(--gold);}
+.pc-plat .pc-inner{background:linear-gradient(160deg,#0d2240,#1a3a60);border:1.5px solid #a0c8ff;}
+.pc-legend .pc-inner{
+  background:linear-gradient(160deg,#2d1b00,#4a2e00);
+  border:1.5px solid var(--gold);
+  box-shadow:inset 0 0 30px rgba(255,215,0,.12);
+}
+/* Holographic shimmer */
+.player-card::after{
+  content:'';position:absolute;inset:0;border-radius:14px;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.08) 40%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.08) 60%,transparent 80%);
+  background-size:200% 200%;animation:holo-shift 3s linear infinite;pointer-events:none;
+}
+@keyframes holo-shift{0%{background-position:0% 0%}100%{background-position:200% 200%}}
+.pc-rating{font-size:22px;font-weight:900;font-family:'Orbitron',monospace;line-height:1;}
+.pc-bronze .pc-rating{color:#cd7f32;}
+.pc-silver .pc-rating{color:#c0c0c0;}
+.pc-gold .pc-rating{color:var(--gold);}
+.pc-plat .pc-rating{color:#a0c8ff;}
+.pc-legend .pc-rating{color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,.7);}
+.pc-pos{font-size:9px;font-weight:800;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);border-radius:5px;padding:1px 5px;letter-spacing:.5px;}
+.pc-img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2);}
+.pc-img-emoji{font-size:36px;line-height:1;}
+.pc-name{font-size:10px;font-weight:800;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.pc-club{font-size:9px;color:rgba(255,255,255,.45);font-weight:600;}
+
+/* ═══ MARKET ═══ */
+.mkt-filter-bar{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;}
+.mkt-filter-chip{flex-shrink:0;padding:6px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .18s;}
+.mkt-filter-chip.active{background:rgba(0,194,255,.15);border-color:var(--sky);color:var(--sky);}
+.mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mkt-card{
+  background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:10px;cursor:pointer;
+  transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;
+}
+.mkt-card:active{transform:scale(.97);}
+.mkt-card.ton-card{border-color:rgba(255,215,0,.2);}
+.mkt-card::before{
+  content:'';position:absolute;inset:0;border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+.mkt-player-img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);margin:0 auto 6px;display:block;font-size:40px;text-align:center;line-height:64px;}
+.mkt-player-name{font-size:13px;font-weight:900;color:#fff;text-align:center;margin-bottom:2px;}
+.mkt-player-pos{font-size:10px;color:var(--muted);text-align:center;font-weight:700;margin-bottom:4px;}
+.mkt-player-rating{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  font-size:11px;font-weight:800;margin-bottom:6px;
+}
+.mkt-price{
+  width:100%;padding:7px;background:rgba(0,0,0,.4);
+  border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;
+  cursor:pointer;font-family:'Cairo',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:background .2s;
+}
+.mkt-price.coins-btn{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);color:var(--gold);}
+.mkt-price.ton-btn{background:rgba(0,194,255,.15);border:1px solid rgba(0,194,255,.3);color:var(--sky);}
+.mkt-price:active{filter:brightness(1.2);}
+.mkt-owned-badge{position:absolute;top:7px;right:7px;background:rgba(0,255,135,.2);border:1px solid rgba(0,255,135,.4);border-radius:8px;padding:2px 7px;font-size:10px;font-weight:800;color:var(--neon);}
+
+/* ═══ MATCH ═══ */
+.match-locked{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:300px;gap:16px;text-align:center;
+}
+.match-lock-icon{font-size:64px;filter:drop-shadow(0 0 20px rgba(255,215,0,.4));}
+.match-lock-title{font-size:18px;font-weight:900;color:#fff;}
+.match-lock-desc{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;max-width:260px;}
+.match-req-bar{
+  width:100%;max-width:280px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.2);
+  border-radius:14px;padding:12px 16px;
+}
+.mrb-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;text-align:center;}
+.mrb-track{height:12px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-bottom:5px;}
+.mrb-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold));border-radius:6px;transition:width .5s ease;}
+.mrb-nums{display:flex;justify-content:space-between;font-size:10px;font-weight:800;font-family:'Orbitron',monospace;}
+
+/* ═══ REWARDS / MISSIONS ═══ */
+.missions-tabs{display:flex;gap:7px;margin-bottom:12px;}
+.mtab{flex:1;padding:10px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
+.mtab.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold);}
+.mtcont{display:none;}.mtcont.active{display:block;}
+.mission-item{
+  background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:10px;
+  margin-bottom:8px;backdrop-filter:blur(6px);
+  transition:border-color .2s;
+}
+.mission-item.unlocked{border-color:rgba(0,255,135,.2);}
+.mission-item.completed{border-color:rgba(255,255,255,.06);opacity:.65;}
+.mi-icon{font-size:28px;flex-shrink:0;min-width:40px;text-align:center;}
+.mi-info{flex:1;}
+.mi-name{font-weight:800;font-size:13px;margin-bottom:3px;}
+.mi-req{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px;}
+.mi-reward{font-size:11px;font-weight:800;color:var(--gold);}
+.mi-progress{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:5px;}
+.mi-progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--neon));border-radius:3px;transition:width .5s;}
+.mi-btn{border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Cairo',sans-serif;}
+.mi-btn.locked{background:rgba(255,255,255,.06);color:var(--muted);cursor:default;}
+.mi-btn.claim{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0900;box-shadow:0 0 12px var(--gold-glow);animation:pulse-claim 1.8s ease-in-out infinite;}
+@keyframes pulse-claim{0%,100%{box-shadow:0 0 12px var(--gold-glow)}50%{box-shadow:0 0 24px rgba(255,215,0,.75)}}
+.mi-btn.done{background:rgba(0,255,135,.1);color:var(--neon);border:1px solid rgba(0,255,135,.25);cursor:default;}
+
+/* ═══ PACKAGES ═══ */
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pkg-card{
+  background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:14px;cursor:pointer;
+  transition:transform .18s;position:relative;overflow:hidden;text-align:center;
+}
+.pkg-card:active{transform:scale(.96);}
+.pkg-card.featured{border-color:rgba(255,215,0,.3);box-shadow:0 0 20px rgba(255,215,0,.1);}
+.pkg-card.legend{border-color:rgba(0,194,255,.4);box-shadow:0 0 20px rgba(0,194,255,.12);}
+.pkg-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none;}
+.pkg-icon{font-size:42px;margin-bottom:6px;display:block;}
+.pkg-name{font-size:14px;font-weight:900;color:#fff;margin-bottom:3px;}
+.pkg-players{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.pkg-prob{font-size:11px;font-weight:800;margin-bottom:8px;}
+.pkg-price{
+  padding:8px 12px;border-radius:10px;border:none;
+  font-size:13px;font-weight:900;cursor:pointer;width:100%;
+  font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.pkg-price.coins{background:rgba(255,215,0,.18);border:1px solid rgba(255,215,0,.35);color:var(--gold);}
+.pkg-price.ton{background:rgba(0,194,255,.18);border:1px solid rgba(0,194,255,.35);color:var(--sky);}
+.pkg-info-btn{
+  position:absolute;top:8px;right:8px;
+  background:rgba(255,255,255,.08);border:none;border-radius:8px;
+  padding:3px 8px;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;
+}
+
+/* ═══ MODAL ═══ */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);}
+.modal.active{display:flex;}
+.modal-box{
+  background:linear-gradient(160deg,#050e1a,#030b16);
+  border:1px solid rgba(0,194,255,.15);border-radius:22px 22px 0 0;
+  padding:18px;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;
+  animation:slide-up .3s ease;
+}
+@keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.modal-title{font-size:16px;font-weight:900;color:var(--gold);}
+.modal-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:14px;}
+
+/* Package open animation */
+#packOpenModal .modal-box{text-align:center;}
+.pack-opening{font-size:80px;animation:pack-spin 1s ease-in-out;display:block;margin:0 auto 10px;}
+@keyframes pack-spin{0%{transform:scale(.5) rotate(-20deg);opacity:0}50%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+.pack-result-card{
+  display:inline-flex;flex-direction:column;align-items:center;gap:6px;
+  padding:20px 24px;border-radius:18px;margin:10px auto;
+  animation:result-appear .5s .8s both ease;
+}
+@keyframes result-appear{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Player detail modal */
+.pd-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+.pd-img{width:70px;height:70px;border-radius:14px;object-fit:cover;font-size:48px;line-height:70px;text-align:center;flex-shrink:0;}
+.pd-info .pd-name{font-size:18px;font-weight:900;color:#fff;margin-bottom:3px;}
+.pd-info .pd-club{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px;}
+.pd-info .pd-rating-big{font-size:32px;font-weight:900;font-family:'Orbitron',monospace;}
+.pd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;}
+.pd-stat{background:rgba(0,0,0,.4);border-radius:10px;padding:8px;text-align:center;}
+.pd-stat-val{font-size:16px;font-weight:900;font-family:'Orbitron',monospace;}
+.pd-stat-lbl{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px;}
+
+/* Exchange/Finance */
+.fin-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.ftab{flex:1;padding:9px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
+.ftab.active{background:rgba(0,194,255,.15);border-color:var(--sky);color:var(--sky);}
+.ftcont{display:none;}.ftcont.active{display:block;}
+.fin-bal-card{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;margin-bottom:12px;display:flex;gap:0;}
+.fb-item{flex:1;text-align:center;}
+.fb-sep{width:1px;background:rgba(255,255,255,.06);}
+.fb-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;}
+.fb-val{font-size:20px;font-weight:900;font-family:'Orbitron',monospace;}
+.form-card{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;}
+.flabel{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block;}
+.finput{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#fff;font-size:14px;font-weight:700;margin-bottom:8px;font-family:'Cairo',sans-serif;}
+.finput:focus{outline:none;border-color:var(--sky);}
+.preset-row{display:flex;gap:5px;margin-bottom:10px;}
+.prbtn{flex:1;padding:7px;text-align:center;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;color:var(--sky);}
+.prbtn:active{background:rgba(0,194,255,.22);}
+.rate-note{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px;padding:8px;background:rgba(0,194,255,.05);border-radius:10px;font-weight:600;}
+.rate-note strong{color:var(--sky);}
+.btn-prim{width:100%;padding:13px;background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 16px var(--sky-glow);font-family:'Cairo',sans-serif;}
+.btn-prim:disabled{opacity:.4;cursor:default;box-shadow:none;}
+.btn-gold{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:#1a0900;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 16px var(--gold-glow);font-family:'Cairo',sans-serif;}
+.btn-gold:disabled{opacity:.4;cursor:default;box-shadow:none;}
+.hist-box{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;}
+.hist-hdr{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;}
+.hist-row{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;}
+.hist-row:last-child{border-bottom:none;}
+.hist-l{font-size:12px;color:var(--muted);font-weight:600;}
+.hist-r{font-size:12px;font-weight:800;color:var(--gold);}
+.hist-empty{padding:20px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;}
+
+/* Wallet */
+.wal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:10px 12px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:12px;}
+.wl-inf .wll{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;}
+.wl-inf .wla{font-size:12px;font-weight:700;color:var(--sky);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-conn{background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:10px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
+
+/* Referral */
+.ref-card{background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.15);border-radius:18px;padding:14px;margin-bottom:10px;}
+.ref-bonus-badge{display:flex;align-items:center;gap:8px;background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.18);border-radius:12px;padding:10px 12px;margin-bottom:11px;}
+.rbb-pct{font-size:26px;font-weight:900;color:var(--sky);line-height:1;font-family:'Orbitron',monospace;}
+.rbb-txt{font-size:12px;color:var(--muted);font-weight:600;line-height:1.4;}
+.ref-link-row{display:flex;gap:6px;margin-bottom:4px;}
+.ref-inp{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;color:var(--text);font-size:11px;font-weight:600;font-family:'Cairo',sans-serif;}
+.btn-copy{background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:10px;padding:8px 13px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.ref-list-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);}
+.ref-list-item:last-child{border-bottom:none;}
+.rli-av{width:34px;height:34px;border-radius:50%;background:var(--glass);border:2px solid var(--sky);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0;}
+.rli-av img{width:100%;height:100%;object-fit:cover;}
+.rli-name{font-size:13px;font-weight:800;}
+.rli-date{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;}
+.rli-earn{font-size:12px;font-weight:800;color:var(--gold);}
+
+/* Stat badges */
+.stat-badge{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:800;}
+.sb-pending{background:rgba(255,202,40,.12);color:#FFD740;border:1px solid rgba(255,202,40,.25);}
+.sb-done{background:rgba(0,255,135,.12);color:var(--neon);border:1px solid rgba(0,255,135,.25);}
+.sb-rejected{background:rgba(239,83,80,.12);color:#ff8a80;border:1px solid rgba(239,83,80,.25);}
+
+/* TX status */
+.tx-status{display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:12px;text-align:center;}
+.tx-status.visible{display:block;}
+.txsi{font-size:22px;margin-bottom:4px;}
+.txsm{font-size:13px;font-weight:800;margin-bottom:3px;}
+.txsd{font-size:11px;color:var(--muted);font-weight:500;}
+
+/* Pg title */
+.pg-title{font-size:18px;font-weight:900;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+
+/* Toast */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(5,12,25,.95);border:1px solid rgba(0,194,255,.3);border-radius:14px;padding:10px 20px;font-size:13px;font-weight:800;color:#fff;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px);}
+#toast.show{opacity:1;}
+
+/* Player select modal */
+.player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px;}
+</style>
 </head>
 <body>
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
-  <img class="ld-logo"
-    src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/17ae25b3-ef08-4156-a126-02972d3e8367.png"
-    alt="Panda">
-  <div class="ld-title" id="ldTitle">Panda Bamboo Factory</div>
-  <div class="ld-sub" id="ldStatus">Loading...</div>
+  <div class="ld-ball">⚽</div>
+  <div class="ld-title orb">FOOTBALL BOT</div>
+  <div class="ld-sub" id="ldSub">جاري تحميل الفريق...</div>
   <div class="ld-bar-wrap">
-    <div class="ld-segments" id="ldSegs">
-      <!-- 10 bamboo segments, filled by JS -->
-      <div class="ld-seg"></div><div class="ld-seg"></div><div class="ld-seg"></div>
-      <div class="ld-seg"></div><div class="ld-seg"></div><div class="ld-seg"></div>
-      <div class="ld-seg"></div><div class="ld-seg"></div><div class="ld-seg"></div>
-      <div class="ld-seg"></div>
-    </div>
-    <div class="ld-pct" id="ldPct">0%</div>
+    <div class="ld-bar-bg"><div class="ld-bar-fill" id="ldBar"></div></div>
   </div>
 </div>
 
-<!-- TOPBAR -->
-<div class="topbar-main">
-  <div class="uavatar" id="uavatar"><div class="ap">🐼</div></div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="uavatar" id="topAvatar">
+    <div class="ap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:1px;min-width:0;">
+    <div class="uname" id="topName">اللاعب</div>
+    <div style="font-size:9px;color:var(--muted);font-weight:700;" id="topTeamPower">⚡ قوة: 0</div>
+  </div>
   <div class="tb-bals">
-    <div class="tb-chip coin">
-      <span><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:42px;height:42px;object-fit:contain;vertical-align:middle;border-radius:50%"></span>
-      <div style="display:flex;flex-direction:column;line-height:1.1"><span data-i18n="labelCoins" style="font-size:9px;opacity:.7;font-weight:600">Coins</span><span class="tb-chip-num" id="tbCoins">0</span></div>
+    <div class="tb-chip coins">
+      <span>🪙</span>
+      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">COINS</span><span class="tb-chip-num orb" id="tbCoins">0</span></div>
     </div>
-    <div class="tb-chip bam">
-      <span><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:42px;height:42px;object-fit:contain;vertical-align:middle"></span>
-      <div style="display:flex;flex-direction:column;line-height:1.1"><span data-i18n="labelBamboo" style="font-size:9px;opacity:.7;font-weight:600">Bamboo</span><span class="tb-chip-num" id="tbBamboo">0</span></div>
+    <div class="tb-chip ton">
+      <span>💎</span>
+      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">TON</span><span class="tb-chip-num orb" id="tbTon">0.00</span></div>
     </div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:center">
-    <div style="display:flex;gap:6px;align-items:center">
-      <button onclick="goToFinanceDeposit()" style="background:none;border:none;color:#66bb6a;font-size:28px;font-weight:800;cursor:pointer;line-height:1;padding:0 3px;animation:plus-throb 2s ease-in-out infinite;text-shadow:0 0 10px rgba(102,187,106,.6)">+</button>
-      <button onclick="goToFinanceWithdraw()" style="background:none;border:none;color:#ffca28;font-size:28px;font-weight:800;cursor:pointer;line-height:1;padding:0 3px;animation:minus-throb 2s ease-in-out infinite .6s;text-shadow:0 0 10px rgba(255,202,40,.6)">−</button>
-    </div>
-    <button id="langBtn" onclick="toggleLangMenu()" style="background:rgba(0,0,0,.45);border:1px solid rgba(124,179,66,.35);border-radius:14px;padding:3px 8px;color:var(--bamboo);font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;backdrop-filter:blur(8px)">
-      <span id="langFlag">🌐</span><span id="langCode">EN</span><span style="font-size:9px;opacity:.7">▾</span>
-    </button>
+  <div class="tb-actions">
+    <button class="tb-lang-btn" onclick="toggleLangMenu()"><span id="langFlag">🌐</span><span id="langCode">AR</span></button>
+    <button class="tb-menu-btn" onclick="openSideMenu()">☰</button>
   </div>
 </div>
 
-<!-- LANGUAGE MENU -->
-<div id="langMenu" style="display:none;position:fixed;top:64px;right:12px;z-index:300;background:rgba(6,20,6,.97);border:1px solid rgba(124,179,66,.35);border-radius:16px;overflow:hidden;min-width:160px;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.6);">
-  <div style="padding:6px 0">
-    <div class="lang-opt" data-lang="ar" data-flag="🇸🇦" data-label="العربية" onclick="setLang('ar','🇸🇦','AR')">🇸🇦 &nbsp;العربية</div>
-    <div class="lang-opt" data-lang="en" data-flag="🇬🇧" data-label="English"  onclick="setLang('en','🇬🇧','EN')">🇬🇧 &nbsp;English</div>
-    <div class="lang-opt" data-lang="ru" data-flag="🇷🇺" data-label="Русский"  onclick="setLang('ru','🇷🇺','RU')">🇷🇺 &nbsp;Русский</div>
-    <div class="lang-opt" data-lang="es" data-flag="🇪🇸" data-label="Español"  onclick="setLang('es','🇪🇸','ES')">🇪🇸 &nbsp;Español</div>
-    <div class="lang-opt" data-lang="fr" data-flag="🇫🇷" data-label="Français" onclick="setLang('fr','🇫🇷','FR')">🇫🇷 &nbsp;Français</div>
+<!-- LANG MENU -->
+<div id="langMenu">
+  <div style="padding:6px 0;">
+    <div class="lang-opt" onclick="setLang('ar','🇸🇦','AR')">🇸🇦 &nbsp;العربية</div>
+    <div class="lang-opt" onclick="setLang('en','🇬🇧','EN')">🇬🇧 &nbsp;English</div>
+    <div class="lang-opt" onclick="setLang('ru','🇷🇺','RU')">🇷🇺 &nbsp;Русский</div>
+    <div class="lang-opt" onclick="setLang('es','🇪🇸','ES')">🇪🇸 &nbsp;Español</div>
+    <div class="lang-opt" onclick="setLang('fr','🇫🇷','FR')">🇫🇷 &nbsp;Français</div>
   </div>
 </div>
 
-<!-- HOME -->
-<div class="sec active" id="sectionHome" style="padding:10px 10px 24px">
-
-  <!-- SEASON 2 PREPARATION CARD -->
-  <div id="season2Banner" onclick="goToFinanceWithdraw()" style="cursor:pointer;border-radius:16px;margin-bottom:8px;position:relative;overflow:hidden;animation:s2-banner-glow 2.8s ease-in-out infinite">
-    <!-- Background image — reduced height -->
-    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg"
-      style="width:100%;height:120px;object-fit:cover;object-position:center top;display:block">
-    <!-- gradient overlay -->
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,2,.08) 0%,rgba(4,14,4,.45) 45%,rgba(2,8,2,.88) 100%)"></div>
-    <!-- shimmer sweep -->
-    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.1),transparent);animation:shim 3.2s infinite;pointer-events:none"></div>
-    <!-- gold border -->
-    <div style="position:absolute;inset:0;border:2px solid rgba(255,215,0,.45);border-radius:16px;pointer-events:none"></div>
-
-    <!-- Bottom content row -->
-    <div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <!-- Left: badge + title + sub -->
-      <div style="flex:1;min-width:0">
-        <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.5);border-radius:20px;padding:2px 8px;margin-bottom:3px;backdrop-filter:blur(8px)">
-          <span style="width:5px;height:5px;border-radius:50%;background:#FFD700;display:inline-block;animation:s2-pulse-dot 1.2s ease-in-out infinite;box-shadow:0 0 6px #FFD700;flex-shrink:0"></span>
-          <span id="s2BadgeTxt" style="font-size:8px;font-weight:800;color:#FFD700;letter-spacing:.8px;text-transform:uppercase">Coming Soon</span>
-        </div>
-        <div style="font-size:14px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:1px;text-shadow:0 2px 12px rgba(0,0,0,.9)" id="s2BannerTitle">Season 2 Preparation</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(255,215,0,.85);text-shadow:0 0 10px rgba(255,215,0,.4)" id="s2BannerSub">🎯 Check your allocation →</div>
-      </div>
-      <!-- Right: CTA button -->
-      <div style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,215,0,.35),rgba(255,160,0,.2));border:1.5px solid rgba(255,215,0,.6);border-radius:11px;padding:6px 10px;text-align:center;animation:s2-cta-glow 2s ease-in-out infinite;backdrop-filter:blur(8px)">
-        <div style="font-size:8px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.5px;text-transform:uppercase;margin-bottom:1px" id="s2TapTxt">Tap</div>
-        <div style="font-size:18px;line-height:1">👉</div>
-      </div>
+<!-- SIDE MENU -->
+<div id="sideMenu">
+  <div class="side-overlay" onclick="closeSideMenu()"></div>
+  <div class="side-panel">
+    <div class="side-header">
+      <div class="side-title">MENU</div>
+      <button class="side-close" onclick="closeSideMenu()">✕</button>
     </div>
-  </div>
-
-  <div class="champion-card">
-    <!-- Panda with frame -->
-    <div class="panda-frame-wrap">
-      <div class="panda-frame-inner">
-        <div id="pandaChar" onclick="pandaClick()" style="cursor:pointer;user-select:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a12ebc07-aa51-4ea7-b3ca-cefe4dce2a9e.png"
-            style="width:138px;height:auto;object-fit:contain;display:block;animation:pf 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)) drop-shadow(0 0 18px rgba(80,255,120,.35))"
-            draggable="false">
-        </div>
-      </div>
+    <div class="side-item" onclick="goToDeposit()">
+      <div class="side-item-icon dep">💳</div>
+      <div><div class="side-item-txt">إيداع</div><div class="side-item-sub">أضف TON لرصيدك</div></div>
     </div>
-    <div class="champ-stats" style="margin-bottom:12px">
-      <div class="champ-stat-box">
-        <div class="csb-lbl" data-i18n="statAccrued">Accrued</div>
-        <div class="csb-val" id="champAccrued">0.000000</div>
-        <div class="csb-unit">Bamboo</div>
-      </div>
-      <div class="champ-stat-sep"></div>
-      <div class="champ-stat-box">
-        <div class="csb-lbl" data-i18n="statRateDay">Rate/Day</div>
-        <div class="csb-val" id="champRateDay">0</div>
-        <div class="csb-unit" data-i18n="statBambooDay">Bamboo/day</div>
-      </div>
+    <div class="side-item" onclick="goToWithdraw()">
+      <div class="side-item-icon wd">🏦</div>
+      <div><div class="side-item-txt">سحب</div><div class="side-item-sub">اسحب أرباحك</div></div>
     </div>
-    <div class="claim-wrap">
-      <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <button class="claim-btn" id="collectBtn" onclick="collectBamboo()" disabled style="flex:1">
-          <span id="claimBtnTxt"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:5px"> Claim Bamboo</span>
-          <span class="claim-pct" id="claimPct">0%</span>
-        </button>
-        <button onclick="openModal('upgradeModal')" style="width:44px;height:44px;border-radius:12px;background:rgba(255,215,0,.12);border:2px solid rgba(255,215,0,.38);color:var(--coin);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;gap:1px;transition:background .2s" title="Upgrade Storage">
-          <span style="font-size:20px;line-height:1">↑</span>
-          <span style="font-size:8px;font-weight:800;line-height:1"><span data-i18n="lvLabel">Lv.</span><span id="tankLvDisp">1</span></span>
-        </button>
-      </div>
+    <div class="side-item" onclick="goToInvite()">
+      <div class="side-item-icon ref">👥</div>
+      <div><div class="side-item-txt">دعوة صديق</div><div class="side-item-sub">اكسب 200 كوينز لكل صديق</div></div>
+    </div>
+    <div class="side-item" onclick="goToExchange()">
+      <div class="side-item-icon exc">🔄</div>
+      <div><div class="side-item-txt">تحويل العملة</div><div class="side-item-sub">Coins ↔ TON</div></div>
     </div>
   </div>
 </div>
 
-<!-- FRIENDS -->
-<div class="sec" id="sectionFriends">
-  <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="friendsTitle">Friends & Referrals</span></div>
-  <div class="ref-prog-card">
-    <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="refProgTitle">Referral Program</span></div>
-    <div class="ref-bonus-badge">
-      <span class="rbb-pct">20%</span>
-      <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
-    </div>
-    <div class="ref-link-row">
-      <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
-      <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
+<!-- ══ SECTION: HOME (PITCH) ══ -->
+<div class="sec active" id="sectionHome">
+
+  <!-- Formation tabs -->
+  <div class="formation-tabs">
+    <div class="ftm-tab active" onclick="setFormation('4-3-3',this)">4-3-3</div>
+    <div class="ftm-tab" onclick="setFormation('4-2-3-1',this)">4-2-3-1</div>
+    <div class="ftm-tab" onclick="setFormation('4-4-2',this)">4-4-2</div>
+    <div class="ftm-tab" onclick="setFormation('3-5-2',this)">3-5-2</div>
+    <div class="ftm-tab" onclick="setFormation('4-1-1-4',this)">4-1-1-4</div>
   </div>
-  <div class="hist-box" style="margin-bottom:10px">
-    <div class="hist-hdr" style="justify-content:space-between">
-      <span><i class="fas fa-history"></i> <span data-i18n="recentRefs">Recent Referrals</span></span>
-      <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
+
+  <!-- Team Power -->
+  <div class="team-power-bar">
+    <div>
+      <div class="tp-label">⚡ قوة الفريق</div>
+      <div class="tp-sub" id="homeFormation">4-3-3</div>
     </div>
-    <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
+    <div style="text-align:center;">
+      <div class="tp-val orb" id="teamPowerVal">0</div>
+      <div style="font-size:9px;color:var(--muted);font-weight:600;">نقطة</div>
+    </div>
+    <div style="text-align:left;">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;">اللاعبون</div>
+      <div style="font-size:14px;font-weight:900;color:var(--sky);" id="playersCount"><span id="pcFilled">0</span>/11</div>
+    </div>
   </div>
+
+  <!-- PITCH -->
+  <div class="pitch-wrap" id="pitchWrap">
+    <!-- SVG lines -->
+    <svg class="pitch-lines" viewBox="0 0 280 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;">
+      <!-- Border -->
+      <rect x="10" y="10" width="260" height="380" rx="4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+      <!-- Center line -->
+      <line x1="10" y1="200" x2="270" y2="200" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+      <!-- Center circle -->
+      <circle cx="140" cy="200" r="40" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+      <circle cx="140" cy="200" r="3" fill="rgba(255,255,255,0.3)"/>
+      <!-- Penalty areas -->
+      <rect x="60" y="10" width="160" height="60" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+      <rect x="60" y="330" width="160" height="60" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
+      <!-- Goal boxes -->
+      <rect x="95" y="10" width="90" height="28" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" fill="none"/>
+      <rect x="95" y="362" width="90" height="28" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" fill="none"/>
+      <!-- Penalty dots -->
+      <circle cx="140" cy="60" r="2.5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="140" cy="340" r="2.5" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+    <!-- Player slots rendered by JS -->
+    <div id="pitchSlots" style="position:absolute;inset:0;z-index:5;"></div>
+  </div>
+
+  <!-- Bench toggle -->
+  <button class="bench-btn" onclick="toggleBench()">🪑 اللاعبون الاحتياطيون <span id="benchCount">(0)</span> ▾</button>
+  <div class="bench-row" id="benchRow"></div>
+
 </div>
 
-<!-- MARKET -->
+<!-- ══ SECTION: MARKET ══ -->
 <div class="sec" id="sectionMarket">
-  <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:38px;height:38px;object-fit:contain"> <span data-i18n="marketTitle">Mining Market</span></div>
-  <div class="mkt-list" id="marketList"></div>
+  <div class="pg-title">🛒 سوق اللاعبين</div>
+
+  <!-- Filter chips -->
+  <div class="mkt-filter-bar">
+    <div class="mkt-filter-chip active" onclick="filterMarket('all',this)">الكل</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('gk',this)">حارس</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('def',this)">دفاع</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('mid',this)">وسط</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('att',this)">هجوم</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('coins',this)">🪙 كوينز</div>
+    <div class="mkt-filter-chip" onclick="filterMarket('ton',this)">💎 TON</div>
+  </div>
+
+  <div class="mkt-grid" id="marketGrid"></div>
 </div>
 
-<!-- TASKS -->
-<div class="sec" id="sectionTasks">
-  <div class="task-tabs">
-    <div class="ttab active" data-t="referral" onclick="switchTTab(this,'referral')">👥 <span data-i18n="tabReferralTxt">Referral</span></div>
-    <div class="ttab" data-t="social"    onclick="switchTTab(this,'social')">📢 <span data-i18n="tabSocialTxt">Social</span></div>
-  </div>
-  <div class="tcont active" id="tcReferral">
-    <!-- Stats card -->
-    <div id="refStatsCard" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;gap:0;backdrop-filter:blur(8px)">
-      <div style="flex:1;text-align:center;border-right:1px solid var(--border);padding-right:12px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px" data-i18n="refTotalLabel">👥 Total Referrals</div>
-        <div id="refTotalCount" style="font-size:26px;font-weight:800;color:var(--bamboo)">0</div>
-      </div>
-      <div style="flex:1;text-align:center;padding-left:12px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px" data-i18n="refActiveLabel">💎 Active (Deposited)</div>
-        <div id="refActiveCount" style="font-size:26px;font-weight:800;color:var(--coin)">0</div>
+<!-- ══ SECTION: MATCH ══ -->
+<div class="sec" id="sectionMatch">
+  <div class="pg-title">⚔️ المباريات</div>
+  <div class="match-locked" id="matchLocked">
+    <div class="match-lock-icon">🔒</div>
+    <div class="match-lock-title">المباريات قريبًا</div>
+    <div class="match-lock-desc">ابنِ فريقًا بقوة 100 نقطة على الأقل لفتح المباريات</div>
+    <div class="match-req-bar">
+      <div class="mrb-label">قوة الفريق المطلوبة</div>
+      <div class="mrb-track"><div class="mrb-fill" id="matchPowerFill" style="width:0%"></div></div>
+      <div class="mrb-nums">
+        <span class="orb" id="matchPowerCurrent" style="color:var(--sky);">0</span>
+        <span class="orb" style="color:var(--muted);">100</span>
       </div>
     </div>
-    <!-- Sub-tabs: Active first, Regular second -->
-    <div style="display:flex;gap:6px;margin-bottom:12px">
-      <div id="rtab-active"  style="flex:1;font-size:12px;padding:9px;text-align:center;background:rgba(255,193,7,.18);border:2px solid rgba(255,193,7,.55);border-radius:12px;font-weight:800;cursor:pointer;color:var(--coin);transition:all .2s" onclick="switchRefTab('active')"  data-i18n="tabActiveRef">💎 Active</div>
-      <div id="rtab-regular" style="flex:1;font-size:12px;padding:9px;text-align:center;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-weight:800;cursor:pointer;color:rgba(255,255,255,.4);transition:all .2s" onclick="switchRefTab('regular')" data-i18n="tabRegularRef">👥 Referrals</div>
-    </div>
-    <div id="refActivePane"><div id="refActiveTaskList"></div></div>
-    <div id="refRegularPane" style="display:none"><div id="refTaskList"></div></div>
-  </div>
-  <div class="tcont" id="tcSocial">
-    <!-- Sub-tabs: Partner / Community -->
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <div class="ttab active" id="stab-partner"   style="flex:1;font-size:11px" onclick="switchSocTab('partner')">⭐ Partner</div>
-      <div class="ttab"        id="stab-community" style="flex:1;font-size:11px" onclick="switchSocTab('community')">🌍 Community</div>
-    </div>
-    <div id="socPartnerList"></div>
-    <div id="socCommunityList" style="display:none;padding-bottom:80px"></div>
   </div>
 </div>
-<!-- Floating Add Task Button — fixed bottom center, only visible on Tasks section -->
-<button id="floatAddTask" onclick="openModal('addTaskModal')" style="
-  position:fixed;bottom:120px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
-  border:none;border-radius:28px;padding:13px 30px;
-  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 20px var(--bamboo-glow);
-  display:none;align-items:center;gap:8px;
-  z-index:150;white-space:nowrap;
-">➕ <span data-i18n="floatAdd">Add Task</span></button>
 
-<!-- FINANCE -->
+<!-- ══ SECTION: REWARDS ══ -->
+<div class="sec" id="sectionRewards">
+  <div class="pg-title">🎁 المهام والمكافآت</div>
+
+  <div class="missions-tabs">
+    <div class="mtab active" onclick="switchMissionTab('daily',this)">📅 يومي</div>
+    <div class="mtab" onclick="switchMissionTab('weekly',this)">📆 أسبوعي</div>
+  </div>
+
+  <div class="mtcont active" id="missionDaily"></div>
+  <div class="mtcont" id="missionWeekly"></div>
+</div>
+
+<!-- ══ SECTION: PACKAGES ══ -->
+<div class="sec" id="sectionPackages">
+  <div class="pg-title">📦 الباكجات</div>
+  <div class="pkg-grid" id="pkgGrid"></div>
+</div>
+
+<!-- ══ SECTION: FINANCE (hidden, opened from side menu) ══ -->
 <div class="sec" id="sectionFinance">
   <div class="fin-tabs">
-    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌟 Season 2</div>
-    <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
+    <div class="ftab active" onclick="switchFinTab('deposit',this)">💳 إيداع</div>
+    <div class="ftab" onclick="switchFinTab('withdraw',this)">🏦 سحب</div>
+    <div class="ftab" onclick="switchFinTab('exchange',this)">🔄 تحويل</div>
   </div>
 
   <!-- DEPOSIT -->
   <div class="ftcont active" id="ft-deposit">
-    <div class="wd-form">
+    <div class="fin-bal-card">
+      <div class="fb-item">
+        <div class="fb-lbl">💎 رصيد TON</div>
+        <div class="fb-val orb" id="fin-ton-bal" style="color:var(--sky);">0.00</div>
+      </div>
+      <div class="fb-sep"></div>
+      <div class="fb-item">
+        <div class="fb-lbl">🪙 رصيد COINS</div>
+        <div class="fb-val orb" id="fin-coins-bal" style="color:var(--gold);">0</div>
+      </div>
+    </div>
+    <div class="form-card">
       <div class="wal-row">
         <div class="wl-inf">
-          <div class="wll" data-i18n="labelWallet">Wallet</div>
-          <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
+          <div class="wll">المحفظة</div>
+          <div class="wla" id="walletAddressDisplay">غير متصل</div>
         </div>
-        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
+        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
       </div>
-      <div class="dep-warn">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div class="dep-warn-txt">
-          <strong data-i18n="important">IMPORTANT:</strong> <span data-i18n="depositWarning1">Your User ID</span>
-          <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
-          <span data-i18n="depositWarning2">must be the ONLY comment in the transaction.</span>
-        </div>
+      <div style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:700;display:flex;align-items:flex-start;gap:8px;">
+        <i class="fas fa-exclamation-triangle" style="margin-top:2px;flex-shrink:0;"></i>
+        <span>يجب وضع <strong style="background:rgba(255,255,255,.14);padding:1px 6px;border-radius:8px;" id="depositUserIdDisplay">ID</strong> كتعليق في المعاملة</span>
       </div>
-      <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
-      <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="1" oninput="updDepPreview()">
-      <div class="preset-row" style="margin-bottom:8px">
+      <label class="flabel">المبلغ (TON)</label>
+      <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="0.5" oninput="updDepPreview()">
+      <div class="preset-row">
+        <span class="prbtn" onclick="setDepAmt(.5)">.5</span>
         <span class="prbtn" onclick="setDepAmt(1)">1</span>
         <span class="prbtn" onclick="setDepAmt(2)">2</span>
         <span class="prbtn" onclick="setDepAmt(5)">5</span>
-        <span class="prbtn" onclick="setDepAmt(10)">10</span>
       </div>
-      <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 <span data-i18n="rateLabel">Rate:</span> <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:12px;color:var(--muted);font-weight:600" data-i18n="youWillReceive">You will receive:</span>
-          <span id="depBambooPreview" style="font-size:16px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:5px">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain"> 0 Bamboo
-          </span>
+      <div style="background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.15);border-radius:10px;padding:9px 12px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px;">📊 السعر: <strong style="color:var(--sky);">1 TON = 1,000 Coins</strong></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:var(--muted);font-weight:600;">ستحصل على:</span>
+          <span id="depCoinsPreview" style="font-size:16px;font-weight:900;color:var(--gold);">0 🪙</span>
         </div>
       </div>
-      <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
+      <button class="btn-prim" id="submitDepositBtn" disabled onclick="initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
       <div class="tx-status" id="depositStatus">
-        <div class="txsi">⏳</div><div class="txsm" data-i18n="processingDeposit">Processing deposit...</div>
+        <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
         <div class="txsd" id="depositStatusDetail"></div>
       </div>
     </div>
   </div>
 
-  <!-- NEW SEASON PREP -->
+  <!-- WITHDRAW -->
   <div class="ftcont" id="ft-withdraw">
-
-    <div class="sns-page">
-
-      <!-- Hero Card -->
-      <div class="sns-hero-card">
-        <div class="sns-hero-bg"></div>
-        <div class="sns-hero-overlay"></div>
-        <div class="sns-hero-content">
-          <div class="sns-hero-badge">🌟 <span data-i18n="snsSeasonBadge">Season 2</span></div>
-          <div class="sns-hero-title" id="sns-hero-main-title">Season 2 Preparation</div>
-          <div class="sns-hero-sub" id="sns-hero-sub-txt">Your progress carries forward</div>
-        </div>
+    <div class="form-card">
+      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:13px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;">رصيد قابل للسحب</div>
+        <div class="orb" style="font-size:28px;font-weight:900;color:var(--gold);" id="wdCoinsDisp">0 🪙</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;">الحد الأدنى: 2,000 كوينز (= 2 TON)</div>
       </div>
-
-      <!-- Allocation rows -->
-      <div class="sns-rows-wrap">
-
-        <!-- Row 1: Current Coins — outputs COINS -->
-        <div class="sns-row" id="sns-row-coins">
-          <div class="sns-row-icon-wrap green">
-            <span class="sns-row-icon-emoji">🏛️</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowCoinsTitle">Current Coins</div>
-            <div class="sns-row-desc" data-i18n="snsRowCoinsDesc">Carry Over: 20%</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
-        <!-- Row 2: Referrals — outputs COINS -->
-        <div class="sns-row" id="sns-row-refs">
-          <div class="sns-row-icon-wrap blue">
-            <span class="sns-row-icon-emoji">👥</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowRefsTitle">Referrals</div>
-            <div class="sns-row-desc" data-i18n="snsRowRefsDesc">Active Referrals Bonus</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
-        <!-- Row 3: Competition Rank — outputs TON only -->
-        <div class="sns-row sns-row-ton" id="sns-row-comp">
-          <div class="sns-row-icon-wrap cyan">
-            <img class="sns-row-icon-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.outerHTML='<span class=\'sns-row-icon-emoji\'>🏆</span>'">
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowCompTitle">Competition Rank</div>
-            <div class="sns-row-desc" id="sns-comp-desc" data-i18n="snsRowCompDesc">Based on your leaderboard position</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
+      <label class="flabel">عنوان محفظة TON</label>
+      <input type="text" id="wdAddressInput" class="finput" placeholder="UQ...">
+      <label class="flabel">المبلغ (كوينز)</label>
+      <input type="number" id="wdAmountInput" class="finput" placeholder="2000" oninput="updWdPreview()">
+      <div id="wdPreview" style="font-size:13px;color:var(--sky);font-weight:800;text-align:center;margin-bottom:10px;"></div>
+      <div style="font-size:11px;color:rgba(255,100,100,.8);text-align:center;margin-bottom:10px;font-weight:600;">⚠️ رسوم السحب 10%</div>
+      <button class="btn-gold" id="wdSubmitBtn" onclick="submitWithdraw()">🏦 سحب Coins</button>
+      <div class="hist-box" style="margin-top:12px;">
+        <div class="hist-hdr">📜 سجل السحوبات</div>
+        <div id="wdHistList"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
       </div>
-
-      <!-- Total: two separate columns — Coins | TON -->
-      <div class="sns-total-card" id="sns-total" style="display:none">
-        <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
-        <div class="sns-total-lbl" data-i18n="snsTotalLbl">🎯 Total Season Allocation</div>
-        <div class="sns-total-cols">
-          <!-- Coins column (rows 1+2) -->
-          <div class="sns-total-col coins-col">
-            <div class="sns-total-col-lbl">🪙 Coins</div>
-            <div class="sns-total-col-num y" id="sns-total-coins-num">0</div>
-            <div class="sns-total-col-unit y">COINS</div>
-          </div>
-          <!-- TON column (row 3 only) -->
-          <div class="sns-total-col ton-col">
-            <div class="sns-total-col-lbl">💎 TON</div>
-            <div class="sns-total-col-num b" id="sns-total-ton-num">0</div>
-            <div class="sns-total-col-unit b">TON</div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <!-- EXCHANGE -->
   <div class="ftcont" id="ft-exchange">
-    <div class="swap-card">
-      <!-- FROM: Bamboo (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapFrom">FROM</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
-            <span class="swap-currency-name">Bamboo</span>
-          </div>
-          <div class="swap-input-wrap">
-            <input type="number" class="swap-input" id="swapFromAmt" placeholder="0" oninput="updSwapCalc()">
-            <button class="swap-max-btn" onclick="swapMax()" data-i18n="maxBtn">MAX</button>
-          </div>
-        </div>
-        <div class="swap-balance" id="swapFromBal"><span data-i18n="balance">Balance:</span> 0 Bamboo</div>
+    <div class="form-card">
+      <div class="rate-note">⚡ سعر الصرف: <strong>1 TON = 1,000 🪙 Coins</strong><br><span style="font-size:10px;color:rgba(255,100,100,.8);">التحويل Coins → TON: رسوم 10%</span></div>
+      <!-- TON → COINS -->
+      <div style="margin-bottom:14px;">
+        <label class="flabel">💎 TON إلى 🪙 Coins</label>
+        <input type="number" id="exchTonInput" class="finput" placeholder="1 TON" step="0.1" min="0.1" oninput="updExchPreview('ton')">
+        <div id="exchTonPreview" style="font-size:13px;color:var(--gold);font-weight:800;text-align:center;margin-bottom:8px;"></div>
+        <button class="btn-prim" onclick="doExchange('ton')">تحويل TON → Coins</button>
       </div>
-      <div class="swap-divider">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid var(--card);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:14px;">
+        <label class="flabel">🪙 Coins إلى 💎 TON (رسوم 10%)</label>
+        <input type="number" id="exchCoinsInput" class="finput" placeholder="500 Coins" step="100" min="500" oninput="updExchPreview('coins')">
+        <div id="exchCoinsPreview" style="font-size:13px;color:var(--sky);font-weight:800;text-align:center;margin-bottom:8px;"></div>
+        <button class="btn-gold" onclick="doExchange('coins')">تحويل Coins → TON</button>
       </div>
-      <!-- TO: Coins (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapTo">TO</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:38px;height:38px;object-fit:contain;border-radius:50%">
-            <span class="swap-currency-name">Coins</span>
-          </div>
-          <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt">0</div></div>
-        </div>
-        <div class="swap-balance" id="swapToBal"><span data-i18n="balance">Balance:</span> 0 Coins</div>
-      </div>
-      <div class="swap-rate" data-i18n="swapRate">📊 300 Bamboo = 10 Coins</div>
-      <button class="btn-prim" style="margin-top:10px" onclick="doExchange()" data-i18n="exchangeNow">⚡ Exchange Now</button>
-    </div>
-    <div class="hist-box" style="margin-top:12px">
-      <div class="hist-hdr" data-i18n="exchangeHist">📋 Exchange History</div>
-      <div id="exchHist"><div class="hist-empty" data-i18n="noConversions">No conversions yet</div></div>
     </div>
   </div>
 </div>
 
-<!-- COMPETITION BUTTON -->
-<button id="compBtn" onclick="openCompPage()" style="position:fixed;bottom:130px;right:10px;z-index:190;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle,rgba(255,165,0,.25),rgba(255,80,0,.1));border:2px solid rgba(255,165,0,.7);padding:0;cursor:pointer;animation:comp-btn-glow 1.8s ease-in-out infinite;filter:drop-shadow(0 0 12px rgba(255,140,0,.9))"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:46px;height:46px;object-fit:contain;border-radius:50%;animation:comp-btn-spin 3s ease-in-out infinite"></button>
-
-<!-- COMPETITION PAGE -->
-<div id="compPage" style="display:none;position:fixed;inset:0;z-index:500;overflow-y:auto;padding-bottom:30px">
-
-  <!-- Full-page background image -->
-  <div style="position:fixed;inset:0;z-index:0;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9c018283-eb53-45b3-8e34-2cf11f3c6119.png') center/cover no-repeat;pointer-events:none"></div>
-  <!-- Dark overlay for readability -->
-  <div style="position:fixed;inset:0;z-index:1;background:rgba(2,8,2,.72);pointer-events:none"></div>
-
-  <!-- ── STICKY HEADER ── -->
-  <div style="position:sticky;top:0;z-index:20;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);background:rgba(3,10,3,.82);border-bottom:1px solid rgba(255,165,0,.22)">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95444c4c-a9d5-4b8f-a553-19e1262baeeb.png" style="width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,165,0,.6));animation:comp-pulse 2.5s ease-in-out infinite">
-        <div>
-          <div style="font-size:16px;font-weight:800;color:#ffa726;line-height:1.1" data-i18n="compTitle">Competition</div>
-          <div id="comp-countdown-hdr" style="font-size:10px;font-weight:700;color:rgba(255,165,0,.55);line-height:1.3;letter-spacing:.3px"></div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button onclick="openCompHelp()" style="width:33px;height:33px;border-radius:50%;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.38);color:#ffa726;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center">?</button>
-        <button onclick="closeCompPage()" style="width:33px;height:33px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-      </div>
+<!-- ══ SECTION: INVITE ══ -->
+<div class="sec" id="sectionInvite">
+  <div class="pg-title">👥 دعوة أصدقاء</div>
+  <div class="ref-card">
+    <div class="ref-bonus-badge">
+      <div class="rbb-pct">200</div>
+      <div class="rbb-txt">كوينز مجانية لك ولصديقك عند التسجيل<br><strong style="color:var(--sky);">+5% من أول إيداع صديقك!</strong></div>
     </div>
-    <!-- Tab bar -->
-    <div style="display:flex;padding:0 12px 11px;gap:8px">
-      <button id="ctab-active" onclick="switchCompTab('active')" style="flex:1;padding:10px 8px;border-radius:14px;border:2px solid rgba(255,193,7,.65);background:rgba(255,193,7,.14);color:var(--coin);font-size:12px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px" data-i18n="compTabActive">💎 Active Refs</button>
-      <button id="ctab-mining" onclick="switchCompTab('mining')" style="flex:1;padding:10px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.35);font-size:12px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:5px" data-i18n="compTabMining">⚡ Mining Speed</button>
+    <div class="ref-link-row">
+      <input class="ref-inp" id="refLinkInp" readonly placeholder="رابط الإحالة...">
+      <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> نسخ</button>
     </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">📤 شارك الرابط مع أصدقائك</div>
   </div>
-
-  <!-- Panes -->
-  <div id="cpane-active" style="position:relative;z-index:2"><div id="comp-active-content" style="padding:14px 12px 6px"></div></div>
-  <div id="cpane-mining"  style="position:relative;z-index:2;display:none"><div id="comp-mining-content" style="padding:14px 12px 6px"></div></div>
-
-  <!-- ── HELP MODAL ── -->
-  <div id="compHelpModal" onclick="if(event.target===this)closeCompHelp()" style="display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);padding:20px">
-    <div id="compHelpBox" style="background:linear-gradient(145deg,rgba(6,16,6,.99),rgba(3,8,3,.99));border:1px solid rgba(255,165,0,.35);border-radius:26px;padding:22px 18px;max-width:360px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 0 60px rgba(255,165,0,.12)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:800;color:#ffa726;display:flex;align-items:center;gap:7px">ℹ️ <span data-i18n="compHelpTitle">Competition Guide</span></div>
-        <button onclick="closeCompHelp()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:28px;height:28px;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-      </div>
-      <div id="compHelpContent"></div>
+  <div class="hist-box">
+    <div class="hist-hdr" style="justify-content:space-between;">
+      <span><i class="fas fa-users"></i> أصدقاؤك</span>
+      <span style="background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.25);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:800;color:var(--neon);" id="totalRefsDisp">0</span>
     </div>
+    <div id="refList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
   </div>
 </div>
 
-<!-- HELP BUTTON -->
-<button id="helpBtn" onclick="openModal('helpModal')" style="position:fixed;bottom:84px;right:14px;z-index:190;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));border:2px solid rgba(124,179,66,.55);color:var(--bamboo);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(124,179,66,.35),0 4px 16px rgba(0,0,0,.5);transition:transform .18s;">?</button>
-
-<!-- NAV -->
+<!-- BOTTOM NAV -->
 <nav class="bnav">
-  <div class="ni active" data-s="sectionHome"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Home</div></div>
-  <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Market</div></div>
-  <div class="ni" data-s="sectionTasks"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/31752193-26ac-4df8-b717-96af866765c6.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Tasks</div></div>
-  <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Friends</div></div>
-  <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Finance</div></div>
+  <div class="ni active" onclick="goSec('Home',this)">
+    <div class="ni-icon">🏠</div>
+    <div class="ni-lbl">الرئيسية</div>
+  </div>
+  <div class="ni" onclick="goSec('Market',this)">
+    <div class="ni-icon">🛒</div>
+    <div class="ni-lbl">الماركت</div>
+  </div>
+  <div class="ni" onclick="goSec('Match',this)">
+    <div class="ni-icon">⚔️</div>
+    <div class="ni-lbl">مباراة</div>
+  </div>
+  <div class="ni" onclick="goSec('Rewards',this)">
+    <div class="ni-icon">🎁</div>
+    <div class="ni-lbl">مكافآت</div>
+  </div>
+  <div class="ni" onclick="goSec('Packages',this)">
+    <div class="ni-icon">📦</div>
+    <div class="ni-lbl">باكجات</div>
+  </div>
 </nav>
 
-<!-- HELP MODAL -->
-<div class="modal" id="helpModal">
-  <div class="modal-box" style="max-height:88vh;overflow-y:auto;padding:0;border-radius:22px 22px 0 0">
-    <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0a1f0a,#061206);border-bottom:1px solid rgba(124,179,66,.18);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:22px 22px 0 0">
-      <div style="font-size:17px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:8px" data-i18n="helpTitle">🐼 Panda Bamboo Guide</div>
-      <button class="mclose" onclick="closeModal('helpModal')"><i class="fas fa-times"></i></button>
+<!-- ══ MODALS ══ -->
+<!-- Player Details -->
+<div class="modal" id="playerDetailModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title" id="pdModalTitle">تفاصيل اللاعب</div>
+      <button class="modal-close" onclick="closeModal('playerDetailModal')">✕</button>
     </div>
-    <!-- Channel / Support links -->
-    <div style="padding:14px 14px 0">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:4px">
-        <a href="https://t.me/PandaBambooPayouts" target="_blank" style="text-decoration:none;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
-          <span style="font-size:20px">💸</span>
-          <span style="font-size:10px;font-weight:800;color:#00D4FF;line-height:1.2" data-i18n="helpPayCh">Payouts<br>Channel</span>
-        </a>
-        <a href="https://t.me/PandaMiningNews" target="_blank" style="text-decoration:none;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
-          <span style="font-size:20px">📢</span>
-          <span style="font-size:10px;font-weight:800;color:var(--bamboo);line-height:1.2" data-i18n="helpNewsCh">Bot<br>News</span>
-        </a>
-        <a href="https://t.me/PandaSupport01" target="_blank" style="text-decoration:none;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
-          <span style="font-size:20px">🛟</span>
-          <span style="font-size:10px;font-weight:800;color:var(--coin);line-height:1.2" data-i18n="helpSupport">Technical<br>Support</span>
-        </a>
-      </div>
-    </div>
-    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:12px">
-      <!-- Welcome bonus -->
-      <div style="background:linear-gradient(135deg,rgba(0,242,122,.08),rgba(0,0,0,.4));border:1px solid rgba(0,242,122,.25);border-radius:16px;padding:13px">
-        <div style="font-size:14px;font-weight:800;color:var(--neon-green);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWelcomeTitle">🎁 Free Welcome Bonus</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.8" data-i18n="helpWelcomeBody">When you register for the first time you automatically receive:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — main withdrawal currency<br><span style="color:#fff;font-weight:800">• 100 Bamboo/day</span> — free mining power starts immediately</div>
-      </div>
-      <!-- Main idea -->
-      <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
-        <div style="font-size:14px;font-weight:800;color:var(--bamboo);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpIdeaTitle">💡 Main Concept</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
-      </div>
-      <!-- Pages explanation -->
-      <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
-        <div style="font-size:14px;font-weight:800;color:var(--bamboo);margin-bottom:10px;display:flex;align-items:center;gap:6px" data-i18n="helpPagesTitle">🗂 Pages Guide</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:20px;flex-shrink:0">🏠</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageHome">Home</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageHomeDesc">View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.</div></div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:20px;flex-shrink:0">🛒</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageMarket">Market</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageMarketDesc">Buy mining machines with Bamboo. Each machine increases your daily output. The more expensive the machine, the higher the return.</div></div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:20px;flex-shrink:0">✅</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageTasks">Tasks</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageTasksDesc">Complete tasks for extra Bamboo. Referral tasks reward you with Bamboo + Coins when inviting friends.</div></div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:20px;flex-shrink:0">👥</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageFriends">Friends</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageFriendsDesc">Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">20%</span> commission on every purchase your friend makes from the Market.</div></div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:20px;flex-shrink:0">💰</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageFinance">Finance</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageFinanceDesc">Convert Bamboo → Coins, deposit TON, and withdraw Coins to your wallet.</div></div>
-          </div>
-        </div>
-      </div>
-      <!-- Prices -->
-      <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
-        <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:10px;display:flex;align-items:center;gap:6px" data-i18n="helpPricesTitle">💲 Rates & Conversions</div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpDepositTON">💎 Deposit TON</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">1 TON = 10,000 Bamboo</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpConvertBamboo">⚡ Convert Bamboo</span>
-            <span style="font-size:12px;font-weight:800;color:var(--coin)">300 Bamboo = 10 Coins</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpWithdrawRate">💸 Withdrawal Rate</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">1 Coin = 0.00005 TON</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpMinWithdraw">📦 Minimum Withdrawal</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">2,000 Coins (0.1 TON)</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpRefCommission">👥 Referral Commission</span>
-            <span style="font-size:12px;font-weight:800;color:var(--bamboo)" data-i18n="helpRefCommissionVal">20% of friend's purchases</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
-            <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpAddTask">➕ Add Task (100 members)</span>
-            <span style="font-size:12px;font-weight:800;color:var(--coin)">6,000 Coins</span>
-          </div>
-        </div>
-      </div>
-      <!-- Withdrawal conditions -->
-      <div style="background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,0,0,.4));border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:13px">
-        <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWdTitle">📤 Withdrawal Conditions</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
-      </div>
-    </div>
-    <div style="height:12px"></div>
+    <div id="playerDetailContent"></div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div class="modal" id="upgradeModal">
+<!-- Select Player for slot -->
+<div class="modal" id="selectPlayerModal">
   <div class="modal-box">
-    <div class="mhdr"><div class="mtitle" data-i18n="upgTitle">⬆️ Upgrade Tank</div><button class="mclose" onclick="closeModal('upgradeModal')"><i class="fas fa-times"></i></button></div>
-    <div id="upgradeContent"></div>
+    <div class="modal-hdr">
+      <div class="modal-title">اختر لاعبًا</div>
+      <button class="modal-close" onclick="closeModal('selectPlayerModal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600;" id="selectSlotInfo"></div>
+    <div class="player-select-list" id="playerSelectList"></div>
   </div>
 </div>
-<div class="modal" id="infoModal">
-  <div class="modal-box">
-    <div class="mhdr"><div class="mtitle" data-i18n="miningInfoTitle">⚡ Mining Info</div><button class="mclose" onclick="closeModal('infoModal')"><i class="fas fa-times"></i></button></div>
-    <div id="infoContent"></div>
-  </div>
-</div>
-<div class="modal" id="addTaskModal">
-  <div class="modal-box">
-    <div class="mhdr">
-      <div class="mtitle" data-i18n="addTaskTitle">➕ Add Community Task</div>
-      <button class="mclose" onclick="closeModal('addTaskModal')"><i class="fas fa-times"></i></button>
-    </div>
-    <!-- Cost info -->
-    <div style="background:rgba(124,179,66,.08);border:1px solid rgba(124,179,66,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--muted);font-weight:600">
-      💡 <span data-i18n="taskCostFormula">Cost = <strong style="color:var(--coin)">Target Users × 60 Coins</strong></span><br>
-      <span style="font-size:11px" data-i18n="taskCostNote">Min target: 100 users | 100 users = 6,000 Coins</span>
-    </div>
-    <!-- Type -->
-    <div style="display:flex;gap:7px;margin-bottom:10px">
-      <button id="atTypeChannel" onclick="setTaskType('channel')"
-        style="flex:1;padding:9px;border-radius:10px;border:2px solid var(--bamboo);background:rgba(124,179,66,.2);color:var(--bamboo);font-size:13px;font-weight:800;cursor:pointer">
-        📢 <span data-i18n="taskTypeChannel">Channel</span>
-      </button>
-      <button id="atTypeBot" onclick="setTaskType('bot')"
-        style="flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:800;cursor:pointer">
-        🤖 <span data-i18n="taskTypeBot">Bot</span>
-      </button>
-    </div>
-    <!-- Bot admin hint -->
-    <div id="atBotHint" style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.22);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600">
-      ⚠️ <span data-i18n="taskBotHint">Add our bot as admin in your channel first:</span><br>
-      <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px">@PandaBambooBot</span>
-    </div>
-    <!-- Link -->
-    <label class="flabel" data-i18n="taskLinkLabel">Telegram Link</label>
-    <input type="text" id="atLink" class="finput" data-i18n-ph="taskLinkPh" placeholder="https://t.me/yourchannel">
-    <!-- Target -->
-    <label class="flabel" data-i18n="taskTargetLabel">Target Users (min 100)</label>
-    <input type="number" id="atTarget" class="finput" placeholder="100" min="100" oninput="updAtCost()">
-    <!-- Preset -->
-    <div class="preset-row" style="margin-bottom:10px">
-      <span class="prbtn" onclick="setAtTarget(100)">100</span>
-      <span class="prbtn" onclick="setAtTarget(500)">500</span>
-      <span class="prbtn" onclick="setAtTarget(1000)">1K</span>
-      <span class="prbtn" onclick="setAtTarget(5000)">5K</span>
-    </div>
-    <!-- Cost preview -->
-    <div style="background:rgba(0,0,0,.3);border-radius:10px;padding:10px 13px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:var(--muted);font-weight:600" data-i18n="taskTotalCost">Total Cost:</span>
-      <span id="atCostPreview" style="font-size:16px;font-weight:800;color:var(--coin)">0 Coins</span>
-    </div>
-    <button class="btn-prim" onclick="submitAddTask()" data-i18n="taskCreateBtn">✅ Create Task</button>
-    <div id="atStatus" style="margin-top:8px;font-size:12px;text-align:center;display:none"></div>
-  </div>
-</div>
-<div id="notif"></div>
 
-<script src="app.js"></script>
+<!-- Package info -->
+<div class="modal" id="pkgInfoModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title" id="pkgInfoTitle">معلومات الباكج</div>
+      <button class="modal-close" onclick="closeModal('pkgInfoModal')">✕</button>
+    </div>
+    <div id="pkgInfoContent"></div>
+  </div>
+</div>
+
+<!-- Pack opening animation -->
+<div class="modal" id="packOpenModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title">🎉 فتح الباكج!</div>
+      <button class="modal-close" onclick="closeModal('packOpenModal')">✕</button>
+    </div>
+    <div id="packOpenContent" style="text-align:center;padding:10px 0;"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  FOOTBALL INVESTMENT BOT — Frontend
+// ════════════════════════════════════════════
+
+// ── Config ──
+const API_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // update to your server
+const S = {
+  user: null,
+  userId: null,
+  coins: 0,
+  ton: 0,
+  squad: [],       // array of player objects in starting 11 (index 0-10)
+  bench: [],       // substitutes
+  formation: '4-3-3',
+  ownedPlayers: [], // all owned player ids
+  completedMissions: [],
+  refs: [],
+};
+let _initData = '';
+let _walletConnected = false;
+let _walletAddress = '';
+let _tonConnectUI = null;
+let _currentLang = 'ar';
+
+// ── Languages ──
+const LANGS = {
+  ar: { home:'الرئيسية', market:'الماركت', match:'مباراة', rewards:'مكافآت', packages:'باكجات' },
+  en: { home:'Home', market:'Market', match:'Match', rewards:'Rewards', packages:'Packs' },
+  ru: { home:'Главная', market:'Рынок', match:'Матч', rewards:'Награды', packages:'Паки' },
+  es: { home:'Inicio', market:'Mercado', match:'Partido', rewards:'Premios', packages:'Sobres' },
+  fr: { home:'Accueil', market:'Marché', match:'Match', rewards:'Récomp.', packages:'Packs' },
+};
+
+// ── Players Database ──
+const PLAYERS_DB = [
+  // Bronze (50-65)
+  {id:'p001',name:'محمد علي',pos:'GK',posKey:'gk',rating:62,tier:'bronze',club:'الاتحاد',country:'SA',league:'SPL',price:800,currency:'coins',emoji:'🧤'},
+  {id:'p002',name:'كارلوس رودريجز',pos:'CB',posKey:'def',rating:58,tier:'bronze',club:'ريال مدريد B',country:'ES',league:'LaLiga',price:600,currency:'coins',emoji:'🛡️'},
+  {id:'p003',name:'محمود حسن',pos:'LB',posKey:'def',rating:60,tier:'bronze',club:'الزمالك',country:'EG',league:'EPL',price:700,currency:'coins',emoji:'⚽'},
+  {id:'p004',name:'أحمد طارق',pos:'CM',posKey:'mid',rating:63,tier:'bronze',club:'النصر',country:'SA',league:'SPL',price:900,currency:'coins',emoji:'🎯'},
+  {id:'p005',name:'يوسف إبراهيم',pos:'ST',posKey:'att',rating:65,tier:'bronze',club:'المصري',country:'EG',league:'EPL',price:1200,currency:'coins',emoji:'⚡'},
+  {id:'p006',name:'ميكل سانشيز',pos:'RW',posKey:'att',rating:61,tier:'bronze',club:'بيلباو',country:'ES',league:'LaLiga',price:800,currency:'coins',emoji:'🌟'},
+  {id:'p007',name:'توماس فيشر',pos:'RB',posKey:'def',rating:59,tier:'bronze',club:'هامبورغ',country:'DE',league:'BL',price:700,currency:'coins',emoji:'🔵'},
+  {id:'p008',name:'إيفان بيتروف',pos:'CDM',posKey:'mid',rating:64,tier:'bronze',club:'سبارتاك',country:'RU',league:'RPL',price:1000,currency:'coins',emoji:'💪'},
+  {id:'p009',name:'لوكاس مارتن',pos:'CAM',posKey:'mid',rating:62,tier:'bronze',club:'ليون',country:'FR',league:'L1',price:900,currency:'coins',emoji:'🎪'},
+  {id:'p010',name:'أندريه سيلفا',pos:'LW',posKey:'att',rating:63,tier:'bronze',club:'بورتو',country:'PT',league:'PL',price:1100,currency:'coins',emoji:'🚀'},
+  // Silver (66-75)
+  {id:'p011',name:'عمر عبدالله',pos:'GK',posKey:'gk',rating:72,tier:'silver',club:'الهلال',country:'SA',league:'SPL',price:3500,currency:'coins',emoji:'🧤'},
+  {id:'p012',name:'فرناندو لوبيز',pos:'CB',posKey:'def',rating:70,tier:'silver',club:'أتلتيكو',country:'ES',league:'LaLiga',price:3000,currency:'coins',emoji:'🏰'},
+  {id:'p013',name:'خالد الغامدي',pos:'CM',posKey:'mid',rating:74,tier:'silver',club:'الاتحاد',country:'SA',league:'SPL',price:5000,currency:'coins',emoji:'🎩'},
+  {id:'p014',name:'مارتن هوفمان',pos:'ST',posKey:'att',rating:73,tier:'silver',club:'دورتموند',country:'DE',league:'BL',price:6000,currency:'coins',emoji:'⚽'},
+  {id:'p015',name:'ديفيد مورو',pos:'LW',posKey:'att',rating:71,tier:'silver',club:'ليل',country:'FR',league:'L1',price:4500,currency:'coins',emoji:'🌪️'},
+  {id:'p016',name:'سامي الجابر',pos:'CAM',posKey:'mid',rating:75,tier:'silver',club:'الاتحاد',country:'SA',league:'SPL',price:7500,currency:'coins',emoji:'👑'},
+  {id:'p017',name:'نيكولاس فيرا',pos:'RB',posKey:'def',rating:69,tier:'silver',club:'إنتر ميلان',country:'IT',league:'SA',price:3200,currency:'coins',emoji:'🔴'},
+  {id:'p018',name:'بيلال الحسن',pos:'CDM',posKey:'mid',rating:71,tier:'silver',club:'الأهلي',country:'EG',league:'EPL',price:3800,currency:'coins',emoji:'💎'},
+  // Gold (76-85)
+  {id:'p019',name:'ليونيل',pos:'CAM',posKey:'mid',rating:84,tier:'gold',club:'النصر',country:'SA',league:'SPL',price:1.5,currency:'ton',emoji:'🌟'},
+  {id:'p020',name:'الفريدو',pos:'ST',posKey:'att',rating:82,tier:'gold',club:'برشلونة',country:'ES',league:'LaLiga',price:1.2,currency:'ton',emoji:'🔥'},
+  {id:'p021',name:'ماركو رويز',pos:'CM',posKey:'mid',rating:80,tier:'gold',club:'يوفنتوس',country:'IT',league:'SA',price:0.8,currency:'ton',emoji:'⚡'},
+  {id:'p022',name:'ثيو مولر',pos:'LW',posKey:'att',rating:81,tier:'gold',club:'بايرن',country:'DE',league:'BL',price:1.0,currency:'ton',emoji:'💫'},
+  {id:'p023',name:'رافائيل سانتوس',pos:'GK',posKey:'gk',rating:83,tier:'gold',club:'برازيل',country:'BR',league:'CBF',price:1.3,currency:'ton',emoji:'🧤'},
+  {id:'p024',name:'ياسين بن علي',pos:'CB',posKey:'def',rating:79,tier:'gold',club:'المغرب',country:'MA',league:'CAF',price:0.9,currency:'ton',emoji:'🛡️'},
+  // Platinum (86-92)
+  {id:'p025',name:'فينيسيوس',pos:'LW',posKey:'att',rating:91,tier:'plat',club:'ريال مدريد',country:'BR',league:'LaLiga',price:3.5,currency:'ton',emoji:'🚀'},
+  {id:'p026',name:'بيدري',pos:'CM',posKey:'mid',rating:89,tier:'plat',club:'برشلونة',country:'ES',league:'LaLiga',price:3.0,currency:'ton',emoji:'🎯'},
+  {id:'p027',name:'هالاند',pos:'ST',posKey:'att',rating:92,tier:'plat',club:'مانشستر',country:'NO',league:'PL',price:4.5,currency:'ton',emoji:'⚡'},
+  {id:'p028',name:'الريسون',pos:'GK',posKey:'gk',rating:90,tier:'plat',club:'ليفربول',country:'BR',league:'PL',price:3.2,currency:'ton',emoji:'🧤'},
+  {id:'p029',name:'روبيغرافوس',pos:'CB',posKey:'def',rating:88,tier:'plat',club:'سيتي',country:'PT',league:'PL',price:2.8,currency:'ton',emoji:'🏰'},
+  // Legend (93-99)
+  {id:'p030',name:'رونالدو',pos:'ST',posKey:'att',rating:99,tier:'legend',club:'النصر',country:'PT',league:'SPL',price:12,currency:'ton',emoji:'🌟'},
+  {id:'p031',name:'ميسي',pos:'CAM',posKey:'mid',rating:98,tier:'legend',club:'إنتر ميامي',country:'AR',league:'MLS',price:11,currency:'ton',emoji:'👑'},
+  {id:'p032',name:'نيمار',pos:'LW',posKey:'att',rating:95,tier:'legend',club:'الهلال',country:'BR',league:'SPL',price:8,currency:'ton',emoji:'💎'},
+  {id:'p033',name:'مبابي',pos:'ST',posKey:'att',rating:97,tier:'legend',club:'ريال مدريد',country:'FR',league:'LaLiga',price:13,currency:'ton',emoji:'⚡'},
+  {id:'p034',name:'دي بروين',pos:'CM',posKey:'mid',rating:94,tier:'legend',club:'سيتي',country:'BE',league:'PL',price:7,currency:'ton',emoji:'🎩'},
+];
+
+const FORMATIONS = {
+  '4-3-3':  [{pos:'GK',x:50,y:90},{pos:'RB',x:80,y:73},{pos:'CB',x:62,y:75},{pos:'CB',x:38,y:75},{pos:'LB',x:20,y:73},{pos:'CM',x:68,y:55},{pos:'CM',x:50,y:52},{pos:'CM',x:32,y:55},{pos:'RW',x:80,y:33},{pos:'ST',x:50,y:28},{pos:'LW',x:20,y:33}],
+  '4-2-3-1':[{pos:'GK',x:50,y:90},{pos:'RB',x:80,y:73},{pos:'CB',x:62,y:75},{pos:'CB',x:38,y:75},{pos:'LB',x:20,y:73},{pos:'CDM',x:63,y:58},{pos:'CDM',x:37,y:58},{pos:'RM',x:78,y:42},{pos:'CAM',x:50,y:42},{pos:'LM',x:22,y:42},{pos:'ST',x:50,y:22}],
+  '4-4-2':  [{pos:'GK',x:50,y:90},{pos:'RB',x:80,y:73},{pos:'CB',x:62,y:75},{pos:'CB',x:38,y:75},{pos:'LB',x:20,y:73},{pos:'RM',x:80,y:55},{pos:'CM',x:60,y:55},{pos:'CM',x:40,y:55},{pos:'LM',x:20,y:55},{pos:'ST',x:65,y:28},{pos:'ST',x:35,y:28}],
+  '3-5-2':  [{pos:'GK',x:50,y:90},{pos:'CB',x:70,y:76},{pos:'CB',x:50,y:78},{pos:'CB',x:30,y:76},{pos:'RM',x:83,y:55},{pos:'CM',x:65,y:52},{pos:'CM',x:50,y:50},{pos:'CM',x:35,y:52},{pos:'LM',x:17,y:55},{pos:'ST',x:65,y:26},{pos:'ST',x:35,y:26}],
+  '4-1-1-4':[{pos:'GK',x:50,y:90},{pos:'RB',x:80,y:73},{pos:'CB',x:62,y:75},{pos:'CB',x:38,y:75},{pos:'LB',x:20,y:73},{pos:'CDM',x:50,y:60},{pos:'CAM',x:50,y:46},{pos:'RW',x:82,y:30},{pos:'ST',x:62,y:24},{pos:'ST',x:38,y:24},{pos:'LW',x:18,y:30}],
+};
+
+const DAILY_MISSIONS = [
+  {id:'d1',name:'تدريب يومي',req:10,reward:50,icon:'⚽'},
+  {id:'d2',name:'تحليل تكتيكي',req:20,reward:100,icon:'📊'},
+  {id:'d3',name:'مباراة ودية',req:30,reward:200,icon:'🏟️'},
+  {id:'d4',name:'بطولة صغيرة',req:50,reward:350,icon:'🏆'},
+  {id:'d5',name:'كأس المنطقة',req:75,reward:500,icon:'🥇'},
+  {id:'d6',name:'الدوري المحلي',req:100,reward:750,icon:'⭐'},
+  {id:'d7',name:'بطولة الأبطال',req:150,reward:1000,icon:'👑',bonus:'مكافأة خاصة'},
+];
+const WEEKLY_MISSIONS = [
+  {id:'w1',name:'أسبوع التدريب',req:50,reward:1000,icon:'💪'},
+  {id:'w2',name:'مرحلة المجموعات',req:100,reward:2500,icon:'🎯'},
+  {id:'w3',name:'ربع النهائي',req:200,reward:5000,icon:'🏆'},
+  {id:'w4',name:'نصف النهائي',req:350,reward:10000,icon:'🌟'},
+  {id:'w5',name:'النهائي الكبير',req:500,reward:'0.5 TON',rewardTon:true,icon:'👑'},
+];
+const PACKAGES = [
+  {id:'pkg1',name:'ستارتر',icon:'⚡',players:1,goldChance:'5%',price:200,currency:'coins',desc:'باكج البداية — لاعب واحد عشوائي'},
+  {id:'pkg2',name:'برونز باك',icon:'🔥',players:3,goldChance:'15%',price:1000,currency:'coins',desc:'3 لاعبين — فرصة للحصول على ذهبي'},
+  {id:'pkg3',name:'فضي باك',icon:'⭐',players:3,goldChance:'40%',price:3000,currency:'coins',desc:'3 لاعبين — احتمال ذهبي أعلى',featured:true},
+  {id:'pkg4',name:'بريميوم',icon:'👑',players:5,goldChance:'70%',price:1,currency:'ton',desc:'5 لاعبين — احتمال ذهبي عالي جداً',featured:true},
+  {id:'pkg5',name:'ليجند باك',icon:'💎',players:5,goldChance:'أسطوري مضمون',price:3,currency:'ton',desc:'5 لاعبين — لاعب أسطوري مضمون!',legend:true},
+];
+
+// ── Helpers ──
+function fmt(n){if(n===null||n===undefined)return'0';n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n).toLocaleString();}
+function fmtTon(n){return parseFloat(n||0).toFixed(2);}
+function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function openModal(id){document.getElementById(id).classList.add('active');}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+function esc(s){return String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));}
+function tierColor(tier){return{bronze:'#cd7f32',silver:'#c0c0c0',gold:'var(--gold)',plat:'#a0c8ff',legend:'var(--gold)'}[tier]||'#fff';}
+function ratingBadgeClass(rating){if(rating>=93)return 'rb-legend';if(rating>=86)return 'rb-plat';if(rating>=76)return 'rb-gold';if(rating>=66)return 'rb-silver';return 'rb-bronze';}
+function pcClass(tier){return{bronze:'pc-bronze',silver:'pc-silver',gold:'pc-gold',plat:'pc-plat',legend:'pc-legend'}[tier]||'pc-bronze';}
+
+// ── Section navigation ──
+function goSec(name, el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('section'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  closeSideMenu();
+  if(name==='Match') updateMatchSection();
+  if(name==='Rewards') renderMissions();
+  if(name==='Packages') renderPackages();
+  if(name==='Market') renderMarket();
+}
+function goToDeposit(){closeSideMenu();goSec('Finance',null);switchFinTab('deposit',null);}
+function goToWithdraw(){closeSideMenu();goSec('Finance',null);switchFinTab('withdraw',null);}
+function goToInvite(){closeSideMenu();goSec('Invite',null);}
+function goToExchange(){closeSideMenu();goSec('Finance',null);switchFinTab('exchange',null);}
+
+// ── Side menu ──
+function openSideMenu(){document.getElementById('sideMenu').classList.add('open');}
+function closeSideMenu(){document.getElementById('sideMenu').classList.remove('open');}
+
+// ── Lang menu ──
+function toggleLangMenu(){const m=document.getElementById('langMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none';}
+document.addEventListener('click',e=>{if(!e.target.closest('#langMenu')&&!e.target.closest('.tb-lang-btn'))document.getElementById('langMenu').style.display='none';});
+function setLang(lang,flag,code){_currentLang=lang;document.getElementById('langFlag').textContent=flag;document.getElementById('langCode').textContent=code;document.getElementById('langMenu').style.display='none';const L=LANGS[lang]||LANGS.ar;const lbl=document.querySelectorAll('.ni-lbl');const keys=['home','market','match','rewards','packages'];lbl.forEach((l,i)=>{if(keys[i])l.textContent=L[keys[i]];});}
+
+// ── Finance tabs ──
+function switchFinTab(tab, el){
+  document.querySelectorAll('#sectionFinance .ftab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#sectionFinance .ftcont').forEach(c=>c.classList.remove('active'));
+  document.getElementById('ft-'+tab).classList.add('active');
+  if(el) el.classList.add('active');
+  else{document.querySelectorAll('#sectionFinance .ftab').forEach(t=>{if(t.textContent.includes(tab==='deposit'?'إيداع':tab==='withdraw'?'سحب':'تحويل'))t.classList.add('active');});}
+  if(tab==='withdraw') updWdDisp();
+}
+
+// ── Mission tabs ──
+function switchMissionTab(tab, el){
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.mtcont').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('mission'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+}
+
+// ── Team Power ──
+const POSITION_GROUPS = {
+  GK:['GK'],
+  def:['CB','LB','RB','SW','LWB','RWB'],
+  mid:['CM','CDM','CAM','LM','RM','DM','AM'],
+  att:['ST','LW','RW','CF','SS','F'],
+};
+function getPosKey(pos){for(const[k,v] of Object.entries(POSITION_GROUPS))if(v.includes(pos.toUpperCase()))return k;return null;}
+function calcTeamPower(){
+  let total=0, count=0;
+  S.squad.forEach((p,i)=>{
+    if(!p) return;
+    const slotDef = (FORMATIONS[S.formation]||FORMATIONS['4-3-3'])[i];
+    const slotPosKey = getPosKey(slotDef?.pos||'');
+    const playerPosKey = p.posKey;
+    let factor = 0.6;
+    if(playerPosKey===slotPosKey) factor=1.0;
+    else if((playerPosKey==='mid'&&slotPosKey==='att')||(playerPosKey==='att'&&slotPosKey==='mid')||(playerPosKey==='def'&&slotPosKey==='mid')) factor=0.8;
+    total += (p.rating||50)*factor;
+    count++;
+  });
+  // Tactical bonus 0-5%
+  const inPos = S.squad.filter((p,i)=>p&&getPosKey(p.pos||'')===getPosKey((FORMATIONS[S.formation]||[])[i]?.pos||'')).length;
+  const tactBonus = count>0?(inPos/count)*5/100:0;
+  return Math.floor(total*(1+tactBonus));
+}
+function updatePowerDisplay(){
+  const power = calcTeamPower();
+  document.getElementById('teamPowerVal').textContent = power;
+  document.getElementById('topTeamPower').textContent = '⚡ قوة: '+power;
+  const filled = S.squad.filter(Boolean).length;
+  document.getElementById('pcFilled').textContent = filled;
+  // match bar
+  const pct = Math.min(100,power);
+  const mf = document.getElementById('matchPowerFill');
+  if(mf) mf.style.width = pct+'%';
+  const mc = document.getElementById('matchPowerCurrent');
+  if(mc) mc.textContent = power;
+}
+
+// ── Pitch rendering ──
+function renderPitch(){
+  const slots = document.getElementById('pitchSlots');
+  const formation = FORMATIONS[S.formation]||FORMATIONS['4-3-3'];
+  let html='';
+  formation.forEach((slot,i)=>{
+    const player = S.squad[i];
+    const x=slot.x, y=slot.y;
+    if(player){
+      const rc = ratingBadgeClass(player.rating);
+      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%;" onclick="showSlotOptions(${i})">
+        <div class="player-circle filled">
+          <span style="font-size:22px;">${player.emoji||'👤'}</span>
+          <div class="player-rating-badge ${rc}">${player.rating}</div>
+        </div>
+        <div class="player-name-badge">${esc(player.name.split(' ')[0])}</div>
+      </div>`;
+    } else {
+      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%;" onclick="openSelectPlayer(${i})">
+        <div class="player-circle empty"></div>
+        <div class="player-name-badge" style="color:rgba(255,255,255,.3);">${slot.pos}</div>
+      </div>`;
+    }
+  });
+  slots.innerHTML=html;
+  updatePowerDisplay();
+}
+
+function setFormation(f, el){
+  S.formation=f;
+  document.getElementById('homeFormation').textContent=f;
+  document.querySelectorAll('.ftm-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderPitch();
+}
+
+function showSlotOptions(slotIdx){
+  const player = S.squad[slotIdx];
+  if(!player){openSelectPlayer(slotIdx);return;}
+  // Show player detail with option to swap
+  const html=`
+    <div class="pd-header">
+      <div class="pd-img">${player.emoji||'👤'}</div>
+      <div class="pd-info">
+        <div class="pd-name">${esc(player.name)}</div>
+        <div class="pd-club">${esc(player.club)} • ${esc(player.pos)}</div>
+        <div class="pd-rating-big" style="color:${tierColor(player.tier)}">${player.rating}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="removeFromSquad(${slotIdx});closeModal('playerDetailModal');" style="flex:1;padding:10px;background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);border-radius:10px;color:#ff8a80;font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;">❌ إزالة</button>
+      <button onclick="closeModal('playerDetailModal');openSelectPlayer(${slotIdx});" style="flex:1;padding:10px;background:rgba(0,194,255,.15);border:1px solid rgba(0,194,255,.3);border-radius:10px;color:var(--sky);font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;">🔄 استبدال</button>
+    </div>`;
+  document.getElementById('pdModalTitle').textContent = player.name;
+  document.getElementById('playerDetailContent').innerHTML = html;
+  openModal('playerDetailModal');
+}
+
+function removeFromSquad(slotIdx){
+  if(S.squad[slotIdx]) S.bench.push(S.squad[slotIdx]);
+  S.squad[slotIdx]=null;
+  renderPitch();
+  renderBench();
+}
+
+function openSelectPlayer(slotIdx){
+  const slot = (FORMATIONS[S.formation]||[])[slotIdx];
+  document.getElementById('selectSlotInfo').textContent = `مركز: ${slot?.pos||''} — اختر لاعباً من فريقك`;
+  const available = S.bench.concat(S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id)&&!S.bench.some(b=>b.id===p.id)));
+  let html='';
+  if(!available.length){html='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-weight:600;">لا يوجد لاعبون متاحون<br>اشتر لاعبين من الماركت أو الباكجات</div>';}
+  available.forEach(p=>{
+    html+=`<div onclick="assignToSlot(${slotIdx},'${p.id}')" style="background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:background .18s;" onmouseover="this.style.background='rgba(0,194,255,.1)'" onmouseout="this.style.background='rgba(5,12,25,.9)'">
+      <div style="font-size:32px;">${p.emoji||'👤'}</div>
+      <div style="font-size:12px;font-weight:800;color:#fff;text-align:center;">${esc(p.name.split(' ')[0])}</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:600;">${p.pos}</div>
+      <div style="font-size:14px;font-weight:900;font-family:'Orbitron',monospace;color:${tierColor(p.tier)}">${p.rating}</div>
+    </div>`;
+  });
+  document.getElementById('playerSelectList').innerHTML=html;
+  openModal('selectPlayerModal');
+}
+
+function assignToSlot(slotIdx, playerId){
+  const player = findPlayer(playerId);
+  if(!player) return;
+  // Remove from bench if there
+  const bi = S.bench.findIndex(b=>b.id===playerId);
+  if(bi>=0) S.bench.splice(bi,1);
+  // If slot had player, move to bench
+  if(S.squad[slotIdx]) S.bench.push(S.squad[slotIdx]);
+  S.squad[slotIdx]=player;
+  closeModal('selectPlayerModal');
+  renderPitch();
+  renderBench();
+}
+
+function findPlayer(id){ return S.ownedPlayers.find(p=>p.id===id)||S.bench.find(p=>p.id===id)||S.squad.find(p=>p&&p.id===id)||null; }
+
+function toggleBench(){const row=document.getElementById('benchRow');row.classList.toggle('open');}
+function renderBench(){
+  const bc = document.getElementById('benchCount');
+  bc.textContent='('+S.bench.length+')';
+  const row = document.getElementById('benchRow');
+  if(!S.bench.length){row.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px;font-weight:600;">لا يوجد احتياطيون</div>';return;}
+  row.innerHTML = S.bench.map(p=>`
+    <div class="player-card ${pcClass(p.tier)}" onclick="showBenchPlayer('${p.id}')">
+      <div class="pc-inner">
+        <div class="pc-rating">${p.rating}</div>
+        <div class="pc-pos">${p.pos}</div>
+        <div class="pc-img-emoji">${p.emoji||'👤'}</div>
+        <div class="pc-name">${esc(p.name.split(' ')[0])}</div>
+      </div>
+    </div>`).join('');
+}
+
+function showBenchPlayer(id){
+  const p=findPlayer(id);
+  if(!p)return;
+  document.getElementById('pdModalTitle').textContent=p.name;
+  document.getElementById('playerDetailContent').innerHTML=`
+    <div class="pd-header">
+      <div class="pd-img">${p.emoji||'👤'}</div>
+      <div class="pd-info">
+        <div class="pd-name">${esc(p.name)}</div>
+        <div class="pd-club">${esc(p.club)} • ${esc(p.pos)}</div>
+        <div class="pd-rating-big" style="color:${tierColor(p.tier)}">${p.rating}</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;font-weight:600;">اضغط على مركز فارغ في الملعب لإضافة هذا اللاعب</div>`;
+  openModal('playerDetailModal');
+}
+
+// ── Market ──
+let _mktFilter='all';
+function filterMarket(f, el){
+  _mktFilter=f;
+  document.querySelectorAll('.mkt-filter-chip').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMarket();
+}
+function renderMarket(){
+  let players = PLAYERS_DB.filter(p=>{
+    if(_mktFilter==='all') return true;
+    if(_mktFilter==='coins') return p.currency==='coins';
+    if(_mktFilter==='ton') return p.currency==='ton';
+    return p.posKey===_mktFilter;
+  });
+  const owned = S.ownedPlayers.map(p=>p.id);
+  const grid = document.getElementById('marketGrid');
+  if(!players.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:13px;font-weight:600;">لا توجد لاعبون في هذه الفئة</div>';return;}
+  grid.innerHTML=players.map(p=>{
+    const isOwned = owned.includes(p.id);
+    const priceStr = p.currency==='ton'?`${p.price} TON`:`${fmt(p.price)} 🪙`;
+    const btnClass = p.currency==='ton'?'ton-btn':'coins-btn';
+    return `<div class="mkt-card${p.currency==='ton'?' ton-card':''}">
+      ${isOwned?'<div class="mkt-owned-badge">مملوك ✓</div>':''}
+      <div style="font-size:52px;text-align:center;margin-bottom:6px;">${p.emoji||'👤'}</div>
+      <div class="mkt-player-name">${esc(p.name)}</div>
+      <div class="mkt-player-pos">${p.pos} • ${p.tier==='legend'?'أسطوري':p.tier==='plat'?'بلاتيني':p.tier==='gold'?'ذهبي':p.tier==='silver'?'فضي':'برونزي'}</div>
+      <div class="mkt-player-rating">
+        <span style="font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:${tierColor(p.tier)}">${p.rating}</span>
+        <span style="font-size:10px;color:var(--muted);font-weight:700;">نقطة</span>
+      </div>
+      ${isOwned
+        ?`<button class="mkt-price" style="background:rgba(0,255,135,.1);border:1px solid rgba(0,255,135,.25);color:var(--neon);cursor:default;">✓ مملوك</button>`
+        :`<button class="mkt-price ${btnClass}" onclick="buyPlayer('${p.id}')">${priceStr}</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function buyPlayer(playerId){
+  const p = PLAYERS_DB.find(x=>x.id===playerId);
+  if(!p) return;
+  if(S.ownedPlayers.some(x=>x.id===playerId)){showToast('اللاعب مملوك بالفعل ✓');return;}
+  if(p.currency==='coins'){
+    if(S.coins<p.price){showToast('رصيد كوينز غير كافٍ 🪙');return;}
+    S.coins-=p.price;
+    addPlayer(p);
+    updateBalances();
+    showToast(`تم شراء ${p.name} مقابل ${fmt(p.price)} 🪙`);
+    renderMarket();
+    api('buyPlayer',{playerId,currency:'coins',price:p.price}).catch(()=>{});
+  } else {
+    if(S.ton<p.price){showToast('رصيد TON غير كافٍ 💎');return;}
+    S.ton-=p.price;
+    addPlayer(p);
+    updateBalances();
+    showToast(`تم شراء ${p.name} مقابل ${p.price} TON 💎`);
+    renderMarket();
+    api('buyPlayer',{playerId,currency:'ton',price:p.price}).catch(()=>{});
+  }
+}
+
+function addPlayer(p){
+  S.ownedPlayers.push({...p});
+  S.bench.push({...p});
+  renderBench();
+}
+
+// ── Match section ──
+function updateMatchSection(){
+  const power = calcTeamPower();
+  const mf = document.getElementById('matchPowerFill');
+  if(mf) mf.style.width=Math.min(100,power)+'%';
+  const mc = document.getElementById('matchPowerCurrent');
+  if(mc) mc.textContent=power;
+}
+
+// ── Missions ──
+function renderMissions(){
+  const power = calcTeamPower();
+  const comp = S.completedMissions||[];
+  // Daily
+  let dHtml = DAILY_MISSIONS.map(m=>{
+    const unlocked = power>=m.req;
+    const done = comp.includes(m.id);
+    const pct = Math.min(100,(power/m.req)*100);
+    let btnHtml='';
+    if(done) btnHtml=`<button class="mi-btn done">✓ تم</button>`;
+    else if(unlocked) btnHtml=`<button class="mi-btn claim" onclick="claimMission('${m.id}',${typeof m.reward==='number'?m.reward:0})">استلام</button>`;
+    else btnHtml=`<button class="mi-btn locked">🔒 مقفل</button>`;
+    return `<div class="mission-item ${unlocked&&!done?'unlocked':''} ${done?'completed':''}">
+      <div class="mi-icon">${m.icon}</div>
+      <div class="mi-info">
+        <div class="mi-name">${m.name}</div>
+        <div class="mi-req">متطلب: <span style="color:var(--sky);font-weight:900;">${m.req} نقطة</span></div>
+        <div class="mi-reward">+${typeof m.reward==='number'?fmt(m.reward)+' 🪙':m.reward}</div>
+        <div class="mi-progress"><div class="mi-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${btnHtml}
+    </div>`;
+  }).join('');
+  document.getElementById('missionDaily').innerHTML=dHtml;
+
+  // Weekly
+  let wHtml = WEEKLY_MISSIONS.map(m=>{
+    const unlocked = power>=m.req;
+    const done = comp.includes(m.id);
+    const pct = Math.min(100,(power/m.req)*100);
+    let btnHtml='';
+    if(done) btnHtml=`<button class="mi-btn done">✓ تم</button>`;
+    else if(unlocked) btnHtml=`<button class="mi-btn claim" onclick="claimMission('${m.id}',${typeof m.reward==='number'?m.reward:0},${!!m.rewardTon})">استلام</button>`;
+    else btnHtml=`<button class="mi-btn locked">🔒 مقفل</button>`;
+    return `<div class="mission-item ${unlocked&&!done?'unlocked':''} ${done?'completed':''}">
+      <div class="mi-icon">${m.icon}</div>
+      <div class="mi-info">
+        <div class="mi-name">${m.name}</div>
+        <div class="mi-req">متطلب: <span style="color:var(--sky);font-weight:900;">${m.req} نقطة</span></div>
+        <div class="mi-reward">+${typeof m.reward==='number'?fmt(m.reward)+' 🪙':m.reward}</div>
+        <div class="mi-progress"><div class="mi-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${btnHtml}
+    </div>`;
+  }).join('');
+  document.getElementById('missionWeekly').innerHTML=wHtml;
+}
+
+function claimMission(id, rewardCoins, isTon=false){
+  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
+  S.completedMissions.push(id);
+  if(isTon){S.ton+=0.5;showToast('🎉 حصلت على 0.5 TON!');}
+  else{S.coins+=rewardCoins;showToast(`🎉 حصلت على ${fmt(rewardCoins)} كوينز!`);}
+  updateBalances();
+  renderMissions();
+  api('claimMission',{missionId:id}).catch(()=>{});
+}
+
+// ── Packages ──
+function renderPackages(){
+  document.getElementById('pkgGrid').innerHTML=PACKAGES.map(p=>`
+    <div class="pkg-card ${p.featured?'featured':''} ${p.legend?'legend':''}">
+      <button class="pkg-info-btn" onclick="showPkgInfo('${p.id}')">ℹ️</button>
+      <span class="pkg-icon">${p.icon}</span>
+      <div class="pkg-name">${p.name}</div>
+      <div class="pkg-players">${p.players} لاعب${p.players>1?'ين/لاعبون':''}</div>
+      <div class="pkg-prob" style="color:${p.currency==='ton'?'var(--gold)':'var(--sky)'}">🎯 ذهبي: ${p.goldChance}</div>
+      <button class="pkg-price ${p.currency==='ton'?'ton':'coins'}" onclick="openPack('${p.id}')">
+        ${p.currency==='ton'?`💎 ${p.price} TON`:`🪙 ${fmt(p.price)}`}
+      </button>
+    </div>`).join('');
+}
+
+function showPkgInfo(pkgId){
+  const p=PACKAGES.find(x=>x.id===pkgId);
+  if(!p)return;
+  document.getElementById('pkgInfoTitle').textContent=p.icon+' '+p.name;
+  document.getElementById('pkgInfoContent').innerHTML=`
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6;font-weight:600;">${p.desc}</p>
+    <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">عدد اللاعبين</span>
+        <span style="font-size:13px;font-weight:900;color:#fff;">${p.players}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">احتمال ذهبي+</span>
+        <span style="font-size:13px;font-weight:900;color:var(--gold);">${p.goldChance}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;">
+        <span style="font-size:12px;color:var(--muted);font-weight:700;">السعر</span>
+        <span style="font-size:13px;font-weight:900;color:${p.currency==='ton'?'var(--sky)':'var(--gold)'};">${p.currency==='ton'?p.price+' TON':fmt(p.price)+' Coins'}</span>
+      </div>
+    </div>`;
+  openModal('pkgInfoModal');
+}
+
+function openPack(pkgId){
+  const pkg=PACKAGES.find(x=>x.id===pkgId);
+  if(!pkg)return;
+  // Check balance
+  if(pkg.currency==='coins'&&S.coins<pkg.price){showToast('رصيد كوينز غير كافٍ 🪙');return;}
+  if(pkg.currency==='ton'&&S.ton<pkg.price){showToast('رصيد TON غير كافٍ 💎');return;}
+  // Deduct
+  if(pkg.currency==='coins') S.coins-=pkg.price;
+  else S.ton-=pkg.price;
+  updateBalances();
+  // Generate players
+  const won=[];
+  for(let i=0;i<pkg.players;i++){
+    won.push(getRandomPlayerForPack(pkg));
+  }
+  // Animation
+  let html=`<div class="pack-opening">${pkg.icon}</div>`;
+  html+=`<div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:12px;">حصلت على ${pkg.players} لاعب${pkg.players>1?'ين':''}!</div>`;
+  html+=`<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">`;
+  won.forEach(p=>{
+    if(p){
+      if(!S.ownedPlayers.some(x=>x.id===p.id)){S.ownedPlayers.push({...p});S.bench.push({...p});}
+      html+=`<div class="player-card ${pcClass(p.tier)}" style="width:88px;">
+        <div class="pc-inner">
+          <div class="pc-rating">${p.rating}</div>
+          <div class="pc-pos">${p.pos}</div>
+          <div class="pc-img-emoji" style="font-size:32px">${p.emoji||'👤'}</div>
+          <div class="pc-name">${esc(p.name.split(' ')[0])}</div>
+        </div>
+      </div>`;
+    }
+  });
+  html+=`</div>`;
+  html+=`<button onclick="closeModal('packOpenModal')" style="margin-top:14px;width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:#1a0900;font-size:14px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;">رائع! 🎉</button>`;
+  document.getElementById('packOpenContent').innerHTML=html;
+  renderBench();
+  openModal('packOpenModal');
+  api('buyPack',{packId:pkgId}).catch(()=>{});
+}
+
+function getRandomPlayerForPack(pkg){
+  // Determine tier based on pack probabilities
+  const r=Math.random()*100;
+  let tiers=[];
+  if(pkg.id==='pkg5') tiers=['legend','plat','gold'];
+  else if(pkg.id==='pkg4'){tiers=r<70?['gold','plat','legend']:r<85?['silver']:['bronze'];}
+  else if(pkg.id==='pkg3'){tiers=r<40?['gold','plat']:r<70?['silver']:['bronze'];}
+  else if(pkg.id==='pkg2'){tiers=r<15?['gold']:r<50?['silver']:['bronze'];}
+  else{tiers=r<5?['gold']:r<30?['silver']:['bronze'];}
+  // Must have legend for pkg5
+  if(pkg.id==='pkg5'&&tiers.includes('legend')){
+    const legs=PLAYERS_DB.filter(p=>p.tier==='legend');
+    return legs[Math.floor(Math.random()*legs.length)];
+  }
+  const pool=PLAYERS_DB.filter(p=>tiers.includes(p.tier));
+  if(!pool.length) return PLAYERS_DB[0];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// ── Finance ──
+function updDepPreview(){
+  const v=parseFloat(document.getElementById('depositAmountInput').value)||0;
+  document.getElementById('depCoinsPreview').textContent=fmt(v*1000)+' 🪙';
+  document.getElementById('submitDepositBtn').disabled=v<0.5;
+}
+function setDepAmt(v){document.getElementById('depositAmountInput').value=v;updDepPreview();}
+function updWdDisp(){document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';}
+function updWdPreview(){
+  const v=parseFloat(document.getElementById('wdAmountInput').value)||0;
+  const ton=(v*0.9)/1000;
+  document.getElementById('wdPreview').textContent=v>0?`ستحصل على: ${ton.toFixed(3)} TON (بعد رسوم 10%)`:'';
+}
+function updExchPreview(dir){
+  if(dir==='ton'){const v=parseFloat(document.getElementById('exchTonInput').value)||0;document.getElementById('exchTonPreview').textContent=v>0?`ستحصل على: ${fmt(v*1000)} 🪙`:'';
+  }else{const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;const ton=(v*0.9)/1000;document.getElementById('exchCoinsPreview').textContent=v>0?`ستحصل على: ${ton.toFixed(3)} TON`:'';}}
+
+function doExchange(dir){
+  if(dir==='ton'){
+    const v=parseFloat(document.getElementById('exchTonInput').value)||0;
+    if(v<0.1){showToast('الحد الأدنى 0.1 TON');return;}
+    if(S.ton<v){showToast('رصيد TON غير كافٍ');return;}
+    S.ton-=v;S.coins+=v*1000;updateBalances();showToast(`تم تحويل ${v} TON إلى ${fmt(v*1000)} 🪙`);
+    api('exchange',{dir:'ton_to_coins',amount:v}).catch(()=>{});
+  } else {
+    const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;
+    if(v<500){showToast('الحد الأدنى 500 كوينز');return;}
+    if(S.coins<v){showToast('رصيد كوينز غير كافٍ');return;}
+    S.coins-=v;const ton=(v*0.9)/1000;S.ton+=ton;updateBalances();showToast(`تم تحويل ${fmt(v)} 🪙 إلى ${ton.toFixed(3)} TON`);
+    api('exchange',{dir:'coins_to_ton',amount:v}).catch(()=>{});
+  }
+}
+
+function submitWithdraw(){
+  const addr=(document.getElementById('wdAddressInput').value||'').trim();
+  const amt=parseFloat(document.getElementById('wdAmountInput').value)||0;
+  if(!addr||addr.length<10){showToast('أدخل عنوان محفظة صحيح');return;}
+  if(amt<2000){showToast('الحد الأدنى للسحب 2,000 كوينز');return;}
+  if(S.coins<amt){showToast('رصيد غير كافٍ');return;}
+  S.coins-=amt;updateBalances();showToast('تم إرسال طلب السحب ✓');
+  updWdDisp();
+  api('withdraw',{address:addr,amount:amt}).catch(()=>{});
+}
+
+// ── Wallet ──
+async function connectWallet(){
+  if(_tonConnectUI){
+    try{await _tonConnectUI.openModal();}catch(e){showToast('يرجى تثبيت محفظة TON');}
+  }
+}
+
+// ── Referral ──
+function copyRefLink(){
+  const v=document.getElementById('refLinkInp').value;
+  if(!v)return;
+  navigator.clipboard.writeText(v).then(()=>showToast('تم نسخ الرابط ✓')).catch(()=>{});
+}
+
+// ── Update Balances ──
+function updateBalances(){
+  document.getElementById('tbCoins').textContent=fmt(S.coins);
+  document.getElementById('tbTon').textContent=fmtTon(S.ton);
+  if(document.getElementById('fin-coins-bal')) document.getElementById('fin-coins-bal').textContent=fmt(S.coins);
+  if(document.getElementById('fin-ton-bal')) document.getElementById('fin-ton-bal').textContent=fmtTon(S.ton);
+  if(document.getElementById('wdCoinsDisp')) document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';
+  updatePowerDisplay();
+}
+
+// ── API ──
+async function api(action, data={}){
+  try{
+    const r=await fetch(API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Telegram '+_initData,'X-Action':action},
+      body:JSON.stringify({action,data}),
+    });
+    return await r.json();
+  }catch(e){console.error('API error:',e);return{success:false,error:e.message};}
+}
+
+// ── Init ──
+async function init(){
+  // Loading animation
+  const msgs=['جاري تحميل الفريق...','جلب بيانات اللاعبين...','تحضير الملعب...','جاهز!'];
+  let mi=0;
+  const li=setInterval(()=>{
+    const sub=document.getElementById('ldSub');const bar=document.getElementById('ldBar');
+    if(sub) sub.textContent=msgs[Math.min(mi,msgs.length-1)];
+    if(bar) bar.style.width=Math.min(100,(mi+1)*25)+'%';
+    mi++;if(mi>=msgs.length)clearInterval(li);
+  },600);
+
+  // Telegram init
+  const tg=window.Telegram?.WebApp;
+  if(tg){
+    tg.ready();tg.expand();tg.disableVerticalSwipes?.();
+    _initData=tg.initData||'';
+    const u=tg.initDataUnsafe?.user;
+    if(u){
+      S.userId=String(u.id);
+      S.user=u;
+      document.getElementById('topName').textContent=u.first_name||'لاعب';
+      if(document.getElementById('depositUserIdDisplay')) document.getElementById('depositUserIdDisplay').textContent=u.id;
+      if(u.photo_url){
+        document.getElementById('topAvatar').innerHTML=`<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='<div class=ap style=font-size:20px>👤</div>'">`;
+      }
+      // Referral link
+      const refLink=`https://t.me/FootballInvestBot?start=${u.id}`;
+      const ri=document.getElementById('refLinkInp');if(ri) ri.value=refLink;
+    }
+  }
+
+  // TON Connect
+  try{
+    _tonConnectUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://football-bot.up.railway.app/tonconnect-manifest.json',buttonRootId:null});
+    _tonConnectUI.onStatusChange(w=>{
+      _walletConnected=!!w;
+      _walletAddress=w?.account?.address||'';
+      const wd=document.getElementById('walletAddressDisplay');
+      const cb=document.getElementById('connectWalletBtn');
+      if(_walletConnected){
+        if(wd) wd.textContent=_walletAddress.slice(0,8)+'...'+_walletAddress.slice(-6);
+        if(cb){cb.textContent='مفصول';cb.onclick=()=>_tonConnectUI.disconnect();}
+      } else {
+        if(wd) wd.textContent='غير متصل';
+        if(cb){cb.textContent='ربط';cb.onclick=connectWallet;}
+      }
+    });
+  }catch(e){console.log('TonConnect init failed:',e.message);}
+
+  // Load state from server
+  try{
+    const res=await api('getState',{});
+    if(res.success&&res.data){
+      const d=res.data;
+      S.coins=d.coins||0;
+      S.ton=d.tonBalance||0;
+      S.completedMissions=d.completedMissions||[];
+      S.refs=d.refs||[];
+      // Load owned players
+      if(d.ownedPlayers&&Array.isArray(d.ownedPlayers)){
+        d.ownedPlayers.forEach(pid=>{
+          const p=PLAYERS_DB.find(x=>x.id===pid);
+          if(p&&!S.ownedPlayers.some(x=>x.id===pid)) S.ownedPlayers.push({...p});
+        });
+      }
+      // Load squad
+      if(d.squad&&Array.isArray(d.squad)){
+        d.squad.forEach((pid,i)=>{
+          if(pid){const p=PLAYERS_DB.find(x=>x.id===pid);if(p) S.squad[i]={...p};}
+          else S.squad[i]=null;
+        });
+      } else {for(let i=0;i<11;i++) S.squad[i]=null;}
+      S.bench=S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id));
+      // Refs
+      if(d.refs) renderRefs(d.refs);
+    } else {
+      for(let i=0;i<11;i++) S.squad[i]=null;
+    }
+  }catch(e){
+    console.log('Failed to load state, using defaults');
+    for(let i=0;i<11;i++) S.squad[i]=null;
+  }
+
+  updateBalances();
+  renderPitch();
+  renderBench();
+  renderMarket();
+
+  // Hide loading after delay
+  setTimeout(()=>{
+    document.getElementById('loadingScreen').classList.add('hidden');
+    setTimeout(()=>{document.getElementById('loadingScreen').style.display='none';},800);
+  },2600);
+}
+
+function renderRefs(refs){
+  const list=document.getElementById('refList');
+  const counter=document.getElementById('totalRefsDisp');
+  if(!refs||!refs.length){if(list) list.innerHTML='<div class="hist-empty">لا توجد إحالات بعد</div>';return;}
+  if(counter) counter.textContent=refs.length;
+  if(list) list.innerHTML=refs.map(r=>`
+    <div class="ref-list-item">
+      <div class="rli-av"><img src="${r.photoUrl||''}" onerror="this.parentElement.innerHTML='👤'" alt=""></div>
+      <div style="flex:1;"><div class="rli-name">${esc(r.firstName||'لاعب')}</div><div class="rli-date">${r.hasDeposited?'💎 مودع':'👤 مسجل'}</div></div>
+      <div class="rli-earn">${r.hasDeposited?'+5% ✓':'+200 🪙'}</div>
+    </div>`).join('');
+}
+
+async function initiateDeposit(){
+  const amt=parseFloat(document.getElementById('depositAmountInput').value)||0;
+  if(amt<0.5){showToast('الحد الأدنى 0.5 TON');return;}
+  if(!_walletConnected){showToast('يرجى ربط المحفظة أولاً');return;}
+  const statusDiv=document.getElementById('depositStatus');
+  statusDiv.classList.add('visible');
+  document.getElementById('submitDepositBtn').disabled=true;
+  try{
+    // In real implementation, initiate TON transaction
+    statusDiv.innerHTML='<div class="txsi">⏳</div><div class="txsm">انتظر تأكيد المعاملة...</div><div class="txsd">سيتم إضافة رصيدك خلال 3 دقائق</div>';
+    showToast('تم إرسال طلب الإيداع ✓');
+  }catch(e){
+    statusDiv.innerHTML='<div class="txsi">❌</div><div class="txsm">فشل الإيداع</div><div class="txsd">'+e.message+'</div>';
+    document.getElementById('submitDepositBtn').disabled=false;
+  }
+}
+
+window.addEventListener('load',init);
+</script>
 </body>
 </html>

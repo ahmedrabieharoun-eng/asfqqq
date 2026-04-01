@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -859,7 +858,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 // ════════════════════════════════════════════
 
 // ── Config ──
-const API_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev'; // update to your server
+const API_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev/api';
 const S = {
   user: null,
   userId: null,
@@ -1537,7 +1536,7 @@ async function init(){
 
   // TON Connect
   try{
-    _tonConnectUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://football-bot.up.railway.app/tonconnect-manifest.json',buttonRootId:null});
+    _tonConnectUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://silent-block-bedf.ahmedrabieharoun.workers.dev/tonconnect-manifest.json',buttonRootId:null});
     _tonConnectUI.onStatusChange(w=>{
       _walletConnected=!!w;
       _walletAddress=w?.account?.address||'';

@@ -466,6 +466,46 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 
 /* Player select modal */
 .player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px;}
+
+/* ══ WITHDRAW BANNERS ══ */
+.wd-err-banner{display:none;padding:9px 12px;border-radius:10px;margin-bottom:9px;font-size:12px;gap:8px;align-items:flex-start;}
+.wd-err-banner.show{display:flex}
+.wd-err-banner.trial{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);color:var(--gold)}
+.wd-err-banner.depreq{background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.25);color:#ff8a80}
+/* ══ SWAP CARD (exchange) ══ */
+.swap-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:16px;backdrop-filter:blur(8px);}
+.swap-section{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;}
+.swap-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.swap-currency-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.swap-currency-info{display:flex;align-items:center;gap:8px}
+.swap-currency-name{font-size:16px;font-weight:800;color:#fff}
+.swap-input-wrap{display:flex;align-items:center;gap:6px;flex:1;justify-content:flex-end}
+.swap-input{width:120px;background:transparent;border:none;color:#fff;font-size:20px;font-weight:800;text-align:right;outline:none;}
+.swap-input::placeholder{color:rgba(255,255,255,.2)}
+.swap-max-btn{background:rgba(0,194,255,.2);border:1px solid rgba(0,194,255,.4);border-radius:8px;padding:3px 9px;color:var(--sky);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.swap-output-wrap{flex:1;text-align:right}
+.swap-output{font-size:22px;font-weight:800;color:var(--gold)}
+.swap-balance{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
+.swap-divider{display:flex;align-items:center;justify-content:center;padding:8px 0;}
+.swap-rate{margin-top:12px;padding:8px 12px;background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.16);border-radius:10px;font-size:12px;color:var(--muted);text-align:center;font-weight:600;}
+/* ══ MISSION TASK ITEMS ══ */
+.task-tabs{display:flex;gap:7px;margin-bottom:12px}
+.ttab{flex:1;padding:9px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
+.ttab.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold)}
+.tcont{display:none}.tcont.active{display:block}
+.task-item{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:9px;margin-bottom:7px;backdrop-filter:blur(6px);}
+.ticon{font-size:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;min-width:44px}
+.tinfo{flex:1}
+.tname{font-weight:800;font-size:13px;margin-bottom:2px;color:#fff}
+.trew{font-size:11px;color:var(--gold);font-weight:700}
+.tstat{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
+.tbtn{border:none;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Cairo',sans-serif;}
+.tbtn.go{background:linear-gradient(135deg,#1976d2,#0d47a1);color:#fff}
+.tbtn.claim-t{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0900}
+.tbtn.done{background:rgba(255,255,255,.07);color:var(--muted);cursor:default}
+/* ══ REF PROG CARD ══ */
+.ref-prog-card{background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.15);border-radius:18px;padding:14px;margin-bottom:10px;backdrop-filter:blur(8px);}
+
 </style>
 </head>
 <body>
@@ -641,14 +681,21 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 <!-- ══ SECTION: REWARDS ══ -->
 <div class="sec" id="sectionRewards">
   <div class="pg-title">🎁 المهام والمكافآت</div>
-
-  <div class="missions-tabs">
-    <div class="mtab active" onclick="switchMissionTab('daily',this)">📅 يومي</div>
-    <div class="mtab" onclick="switchMissionTab('weekly',this)">📆 أسبوعي</div>
+  <div class="task-tabs">
+    <div class="ttab active" data-t="referral" onclick="switchTaskTab(this,'referral')">👥 إحالة</div>
+    <div class="ttab" data-t="social" onclick="switchTaskTab(this,'social')">📢 اجتماعي</div>
+    <div class="ttab" data-t="daily" onclick="switchTaskTab(this,'daily')">📅 يومي</div>
   </div>
-
-  <div class="mtcont active" id="missionDaily"></div>
-  <div class="mtcont" id="missionWeekly"></div>
+  <div class="tcont active" id="tcReferral"><div id="refTaskList"></div></div>
+  <div class="tcont" id="tcSocial"><div id="socialTaskList"></div></div>
+  <div class="tcont" id="tcDaily">
+    <div class="missions-tabs">
+      <div class="mtab active" onclick="switchMissionTab('daily',this)">📅 يومي</div>
+      <div class="mtab" onclick="switchMissionTab('weekly',this)">📆 أسبوعي</div>
+    </div>
+    <div class="mtcont active" id="missionDaily"></div>
+    <div class="mtcont" id="missionWeekly"></div>
+  </div>
 </div>
 
 <!-- ══ SECTION: PACKAGES ══ -->
@@ -657,27 +704,16 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   <div class="pkg-grid" id="pkgGrid"></div>
 </div>
 
-<!-- ══ SECTION: FINANCE (hidden, opened from side menu) ══ -->
+<!-- ══ SECTION: FINANCE ══ -->
 <div class="sec" id="sectionFinance">
   <div class="fin-tabs">
-    <div class="ftab active" onclick="switchFinTab('deposit',this)">💳 إيداع</div>
-    <div class="ftab" onclick="switchFinTab('withdraw',this)">🏦 سحب</div>
-    <div class="ftab" onclick="switchFinTab('exchange',this)">🔄 تحويل</div>
+    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💳 إيداع</div>
+    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🏦 سحب</div>
+    <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">🔄 تحويل</div>
   </div>
 
   <!-- DEPOSIT -->
   <div class="ftcont active" id="ft-deposit">
-    <div class="fin-bal-card">
-      <div class="fb-item">
-        <div class="fb-lbl">💎 رصيد TON</div>
-        <div class="fb-val orb" id="fin-ton-bal" style="color:var(--sky);">0.00</div>
-      </div>
-      <div class="fb-sep"></div>
-      <div class="fb-item">
-        <div class="fb-lbl">🪙 رصيد COINS</div>
-        <div class="fb-val orb" id="fin-coins-bal" style="color:var(--gold);">0</div>
-      </div>
-    </div>
     <div class="form-card">
       <div class="wal-row">
         <div class="wl-inf">
@@ -686,26 +722,27 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
         </div>
         <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
       </div>
-      <div style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:700;display:flex;align-items:flex-start;gap:8px;">
+      <div class="dep-warn" style="display:flex;align-items:flex-start;gap:8px;padding:8px 11px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600;">
         <i class="fas fa-exclamation-triangle" style="margin-top:2px;flex-shrink:0;"></i>
-        <span>يجب وضع <strong style="background:rgba(255,255,255,.14);padding:1px 6px;border-radius:8px;" id="depositUserIdDisplay">ID</strong> كتعليق في المعاملة</span>
+        <div>هام: يجب كتابة معرفك <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:8px;font-weight:800;"></span> كتعليق وحيد في المعاملة</div>
       </div>
       <label class="flabel">المبلغ (TON)</label>
-      <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="0.5" oninput="updDepPreview()">
+      <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
       <div class="preset-row">
-        <span class="prbtn" onclick="setDepAmt(.5)">.5</span>
+        <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
         <span class="prbtn" onclick="setDepAmt(1)">1</span>
         <span class="prbtn" onclick="setDepAmt(2)">2</span>
         <span class="prbtn" onclick="setDepAmt(5)">5</span>
+        <span class="prbtn" onclick="setDepAmt(10)">10</span>
       </div>
       <div style="background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.15);border-radius:10px;padding:9px 12px;margin-bottom:10px;">
         <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px;">📊 السعر: <strong style="color:var(--sky);">1 TON = 1,000 Coins</strong></div>
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <span style="font-size:12px;color:var(--muted);font-weight:600;">ستحصل على:</span>
-          <span id="depCoinsPreview" style="font-size:16px;font-weight:900;color:var(--gold);">0 🪙</span>
+          <span id="depCoinsPreview" style="font-size:16px;font-weight:800;color:var(--gold);">0 🪙</span>
         </div>
       </div>
-      <button class="btn-prim" id="submitDepositBtn" disabled onclick="initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+      <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
       <div class="tx-status" id="depositStatus">
         <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
         <div class="txsd" id="depositStatusDetail"></div>
@@ -716,20 +753,28 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   <!-- WITHDRAW -->
   <div class="ftcont" id="ft-withdraw">
     <div class="form-card">
+      <div class="wd-err-banner trial" id="wdBannerTrial">
+        <i class="fas fa-gift"></i>
+        <div>🎉 <strong>سحب مجاني:</strong> سحب واحد مجاني حتى 200 Coins. أودع للحصول على سحب غير محدود.</div>
+      </div>
+      <div class="wd-err-banner depreq" id="wdBannerDepReq">
+        <i class="fas fa-lock"></i>
+        <div>انتهى السحب المجاني. يرجى <strong>الإيداع</strong> للاستمرار في السحب.</div>
+      </div>
       <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:13px;text-align:center;margin-bottom:12px;">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;">رصيد قابل للسحب</div>
         <div class="orb" style="font-size:28px;font-weight:900;color:var(--gold);" id="wdCoinsDisp">0 🪙</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;">الحد الأدنى: 2,000 كوينز (= 2 TON)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;">الحد الأدنى: 200 كوينز</div>
       </div>
       <label class="flabel">عنوان محفظة TON</label>
       <input type="text" id="wdAddressInput" class="finput" placeholder="UQ...">
       <label class="flabel">المبلغ (كوينز)</label>
-      <input type="number" id="wdAmountInput" class="finput" placeholder="2000" oninput="updWdPreview()">
+      <input type="number" id="wdAmountInput" class="finput" placeholder="200" min="200" oninput="updWdPreview()">
       <div id="wdPreview" style="font-size:13px;color:var(--sky);font-weight:800;text-align:center;margin-bottom:10px;"></div>
-      <div style="font-size:11px;color:rgba(255,100,100,.8);text-align:center;margin-bottom:10px;font-weight:600;">⚠️ رسوم السحب 10%</div>
-      <button class="btn-gold" id="wdSubmitBtn" onclick="submitWithdraw()">🏦 سحب Coins</button>
+      <div style="font-size:11px;color:rgba(255,100,100,.8);text-align:center;margin-bottom:10px;font-weight:600;">⚠️ رسوم السحب 10% | 1 Coin = 0.00005 TON</div>
+      <button class="btn-gold" id="wdSubmitBtn" onclick="submitWithdraw()">🏦 طلب سحب Coins</button>
       <div class="hist-box" style="margin-top:12px;">
-        <div class="hist-hdr">📜 سجل السحوبات</div>
+        <div class="hist-hdr">📋 سجل السحوبات</div>
         <div id="wdHistList"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
       </div>
     </div>
@@ -737,32 +782,91 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 
   <!-- EXCHANGE -->
   <div class="ftcont" id="ft-exchange">
-    <div class="form-card">
-      <div class="rate-note">⚡ سعر الصرف: <strong>1 TON = 1,000 🪙 Coins</strong><br><span style="font-size:10px;color:rgba(255,100,100,.8);">التحويل Coins → TON: رسوم 10%</span></div>
-      <!-- TON → COINS -->
-      <div style="margin-bottom:14px;">
-        <label class="flabel">💎 TON إلى 🪙 Coins</label>
-        <input type="number" id="exchTonInput" class="finput" placeholder="1 TON" step="0.1" min="0.1" oninput="updExchPreview('ton')">
-        <div id="exchTonPreview" style="font-size:13px;color:var(--gold);font-weight:800;text-align:center;margin-bottom:8px;"></div>
-        <button class="btn-prim" onclick="doExchange('ton')">تحويل TON → Coins</button>
+    <div class="swap-card">
+      <div class="swap-section">
+        <div class="swap-label">من</div>
+        <div class="swap-currency-row">
+          <div class="swap-currency-info">
+            <span style="font-size:28px;">💎</span>
+            <span class="swap-currency-name">TON</span>
+          </div>
+          <div class="swap-input-wrap">
+            <input type="number" class="swap-input" id="exchTonInput" placeholder="0" oninput="updExchCalc('ton')">
+            <button class="swap-max-btn" onclick="exchMax('ton')">MAX</button>
+          </div>
+        </div>
+        <div class="swap-balance" id="exchTonBal">رصيد: 0.00 TON</div>
       </div>
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:14px;">
-        <label class="flabel">🪙 Coins إلى 💎 TON (رسوم 10%)</label>
-        <input type="number" id="exchCoinsInput" class="finput" placeholder="500 Coins" step="100" min="500" oninput="updExchPreview('coins')">
-        <div id="exchCoinsPreview" style="font-size:13px;color:var(--sky);font-weight:800;text-align:center;margin-bottom:8px;"></div>
-        <button class="btn-gold" onclick="doExchange('coins')">تحويل Coins → TON</button>
+      <div class="swap-divider">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--sky),#0097c8);border:3px solid var(--glass);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--sky-glow);">↓</div>
       </div>
+      <div class="swap-section">
+        <div class="swap-label">إلى</div>
+        <div class="swap-currency-row">
+          <div class="swap-currency-info">
+            <span style="font-size:28px;">🪙</span>
+            <span class="swap-currency-name">Coins</span>
+          </div>
+          <div class="swap-output-wrap">
+            <div class="swap-output" id="exchToOutput">0</div>
+          </div>
+        </div>
+        <div class="swap-balance" id="exchCoinsBal">رصيد: 0 Coins</div>
+      </div>
+      <div class="swap-rate">📊 1 TON = 1,000 🪙 Coins &nbsp;|&nbsp; <span style="color:rgba(255,100,100,.8);font-size:11px;">رسوم Coins → TON: 10%</span></div>
+      <button class="btn-prim" style="margin-top:10px;" onclick="doExchangeTon()">⚡ تحويل الآن</button>
+    </div>
+
+    <!-- Coins → TON -->
+    <div class="swap-card" style="margin-top:10px;">
+      <div class="swap-section">
+        <div class="swap-label">من</div>
+        <div class="swap-currency-row">
+          <div class="swap-currency-info">
+            <span style="font-size:28px;">🪙</span>
+            <span class="swap-currency-name">Coins</span>
+          </div>
+          <div class="swap-input-wrap">
+            <input type="number" class="swap-input" id="exchCoinsInput" placeholder="0" oninput="updExchCalc('coins')">
+            <button class="swap-max-btn" onclick="exchMax('coins')">MAX</button>
+          </div>
+        </div>
+        <div class="swap-balance" id="exchCoinsBalFrom">رصيد: 0 Coins</div>
+      </div>
+      <div class="swap-divider">
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:3px solid var(--glass);color:#1a0900;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--gold-glow);">↓</div>
+      </div>
+      <div class="swap-section">
+        <div class="swap-label">إلى</div>
+        <div class="swap-currency-row">
+          <div class="swap-currency-info">
+            <span style="font-size:28px;">💎</span>
+            <span class="swap-currency-name">TON</span>
+          </div>
+          <div class="swap-output-wrap">
+            <div class="swap-output" style="color:var(--sky);" id="exchToTon">0.0000</div>
+          </div>
+        </div>
+        <div class="swap-balance" id="exchTonBalTo">رصيد: 0.00 TON</div>
+      </div>
+      <div class="swap-rate">📊 رسوم 10% | 1,000 🪙 = 0.9 💎 TON</div>
+      <button class="btn-gold" style="margin-top:10px;" onclick="doExchangeCoins()">🔄 تحويل Coins → TON</button>
+    </div>
+
+    <div class="hist-box" style="margin-top:12px;">
+      <div class="hist-hdr">📋 سجل التحويلات</div>
+      <div id="exchHistList"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
     </div>
   </div>
 </div>
 
 <!-- ══ SECTION: INVITE ══ -->
 <div class="sec" id="sectionInvite">
-  <div class="pg-title">👥 دعوة أصدقاء</div>
-  <div class="ref-card">
+  <div class="pg-title">👥 الإحالات والأصدقاء</div>
+  <div class="ref-prog-card">
     <div class="ref-bonus-badge">
-      <div class="rbb-pct">200</div>
-      <div class="rbb-txt">كوينز مجانية لك ولصديقك عند التسجيل<br><strong style="color:var(--sky);">+5% من أول إيداع صديقك!</strong></div>
+      <div class="rbb-pct">20%</div>
+      <div class="rbb-txt">عمولة عندما يشتري أصدقاؤك من الماركت!<br><strong style="color:var(--sky);">+ 200 كوينز مجانية عند التسجيل</strong></div>
     </div>
     <div class="ref-link-row">
       <input class="ref-inp" id="refLinkInp" readonly placeholder="رابط الإحالة...">
@@ -772,8 +876,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   </div>
   <div class="hist-box">
     <div class="hist-hdr" style="justify-content:space-between;">
-      <span><i class="fas fa-users"></i> أصدقاؤك</span>
-      <span style="background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.25);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:800;color:var(--neon);" id="totalRefsDisp">0</span>
+      <span><i class="fas fa-users"></i> الأصدقاء المدعوون</span>
+      <span class="stat-badge sb-done" id="totalRefsDisp">0 أصدقاء</span>
     </div>
     <div id="refList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
   </div>
@@ -980,14 +1084,14 @@ function goSec(name, el){
   if(el) el.classList.add('active');
   closeSideMenu();
   if(name==='Match') updateMatchSection();
-  if(name==='Rewards') renderMissions();
+  if(name==='Rewards'){renderMissions();renderRefTasks();}
   if(name==='Packages') renderPackages();
   if(name==='Market') renderMarket();
 }
-function goToDeposit(){closeSideMenu();goSec('Finance',null);switchFinTab('deposit',null);}
-function goToWithdraw(){closeSideMenu();goSec('Finance',null);switchFinTab('withdraw',null);}
+function goToDeposit(){closeSideMenu();goSec('Finance',null);const dt=document.querySelector('.ftab[data-ft="deposit"]');if(dt)switchFinTab(dt,'deposit');}
+function goToWithdraw(){closeSideMenu();goSec('Finance',null);const wt=document.querySelector('.ftab[data-ft="withdraw"]');if(wt)switchFinTab(wt,'withdraw');}
 function goToInvite(){closeSideMenu();goSec('Invite',null);}
-function goToExchange(){closeSideMenu();goSec('Finance',null);switchFinTab('exchange',null);}
+function goToExchange(){closeSideMenu();goSec('Finance',null);const et=document.querySelector('.ftab[data-ft="exchange"]');if(et)switchFinTab(et,'exchange');}
 
 // ── Side menu ──
 function openSideMenu(){document.getElementById('sideMenu').classList.add('open');}
@@ -999,13 +1103,17 @@ document.addEventListener('click',e=>{if(!e.target.closest('#langMenu')&&!e.targ
 function setLang(lang,flag,code){_currentLang=lang;document.getElementById('langFlag').textContent=flag;document.getElementById('langCode').textContent=code;document.getElementById('langMenu').style.display='none';const L=LANGS[lang]||LANGS.ar;const lbl=document.querySelectorAll('.ni-lbl');const keys=['home','market','match','rewards','packages'];lbl.forEach((l,i)=>{if(keys[i])l.textContent=L[keys[i]];});}
 
 // ── Finance tabs ──
-function switchFinTab(tab, el){
+function switchFinTab(el, tab){
   document.querySelectorAll('#sectionFinance .ftab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('#sectionFinance .ftcont').forEach(c=>c.classList.remove('active'));
   document.getElementById('ft-'+tab).classList.add('active');
   if(el) el.classList.add('active');
-  else{document.querySelectorAll('#sectionFinance .ftab').forEach(t=>{if(t.textContent.includes(tab==='deposit'?'إيداع':tab==='withdraw'?'سحب':'تحويل'))t.classList.add('active');});}
-  if(tab==='withdraw') updWdDisp();
+  if(tab==='withdraw'){
+    document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';
+  }
+  if(tab==='exchange'){
+    updExchCalc('ton'); updExchCalc('coins');
+  }
 }
 
 // ── Mission tabs ──
@@ -1266,7 +1374,97 @@ function updateMatchSection(){
   if(mc) mc.textContent=power;
 }
 
-// ── Missions ──
+// ── Task System ──
+const REF_TASKS_DATA = [
+  {id:'r1',  n:1,   coins:10,  label:'ادعُ صديقاً واحداً'},
+  {id:'r5',  n:5,   coins:50,  label:'ادعُ 5 أصدقاء'},
+  {id:'r10', n:10,  coins:100, label:'ادعُ 10 أصدقاء'},
+  {id:'r20', n:20,  coins:200, label:'ادعُ 20 صديقاً'},
+  {id:'r50', n:50,  coins:500, label:'ادعُ 50 صديقاً'},
+  {id:'r100',n:100, coins:1000,label:'ادعُ 100 صديق'},
+];
+const SOC_TASKS_DATA = [
+  {id:'tg_ch', name:'انضم لقناة التيليجرام',   icon:'📢', link:'https://t.me/YOUR_CHANNEL', coins:100},
+  {id:'tg_grp',name:'انضم للمجموعة',            icon:'👥', link:'https://t.me/YOUR_GROUP',   coins:50 },
+  {id:'tg_bot',name:'شغّل البوت',               icon:'🤖', link:'https://t.me/FootballInvestBot', coins:30},
+];
+
+let _taskInflight=new Set();
+
+function switchTaskTab(el,t){
+  document.querySelectorAll('.task-tabs .ttab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#sectionRewards .tcont').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tc'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');
+  if(t==='referral') renderRefTasks();
+  else if(t==='social') renderSocTasks();
+  else if(t==='daily') renderMissions();
+}
+
+function renderRefTasks(){
+  const refCount = (S.refs||[]).length;
+  document.getElementById('refTaskList').innerHTML=REF_TASKS_DATA.map(t=>{
+    const done=(S.completedMissions||[]).includes(t.id);
+    const can=refCount>=t.n&&!done;
+    return`<div class="task-item">
+      <div class="ticon">👥</div>
+      <div class="tinfo">
+        <div class="tname">${t.label}</div>
+        <div class="trew">+${fmt(t.coins)} 🪙 Coins</div>
+        <div class="tstat">${refCount}/${t.n} أصدقاء</div>
+      </div>
+      ${done?`<button class="tbtn done">✅ تم</button>`:can?`<button class="tbtn claim-t" onclick="claimRefTask('${t.id}',${t.coins})">استلام</button>`:`<button class="tbtn done">${refCount}/${t.n}</button>`}
+    </div>`;
+  }).join('');
+}
+
+function claimRefTask(id, coins){
+  if(_taskInflight.has(id)) return;
+  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
+  _taskInflight.add(id);
+  S.completedMissions=S.completedMissions||[];
+  S.completedMissions.push(id);
+  S.coins=(S.coins||0)+coins;
+  updateBalances(); renderRefTasks();
+  showToast('🎉 حصلت على '+fmt(coins)+' 🪙');
+  api('claimMission',{missionId:id}).catch(()=>{});
+  _taskInflight.delete(id);
+}
+
+function renderSocTasks(){
+  document.getElementById('socialTaskList').innerHTML=SOC_TASKS_DATA.map(t=>{
+    const done=(S.completedMissions||[]).includes(t.id);
+    const inf=_taskInflight.has(t.id);
+    return`<div class="task-item">
+      <div class="ticon">${t.icon}</div>
+      <div class="tinfo">
+        <div class="tname">${t.name}</div>
+        <div class="trew">+${fmt(t.coins)} 🪙 Coins</div>
+      </div>
+      ${done?`<button class="tbtn done">✅ تم</button>`:inf?`<button class="tbtn done" style="opacity:.6">⏳</button>`:`<button class="tbtn go" onclick="doSocTask('${t.id}','${t.link}',${t.coins})">اذهب →</button>`}
+    </div>`;
+  }).join('');
+}
+
+function doSocTask(id,link,coins){
+  if(_taskInflight.has(id)) return;
+  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
+  _taskInflight.add(id);
+  renderSocTasks();
+  if(link) window.open(link,'_blank','noopener');
+  showToast('⏳ جاري التحقق...');
+  setTimeout(()=>{
+    S.completedMissions=S.completedMissions||[];
+    S.completedMissions.push(id);
+    S.coins=(S.coins||0)+coins;
+    updateBalances(); renderSocTasks();
+    showToast('🎉 حصلت على '+fmt(coins)+' 🪙');
+    api('claimMission',{missionId:id}).catch(()=>{});
+    _taskInflight.delete(id);
+  },3000);
+}
+
+// ── Missions (Daily/Weekly) ──
 function renderMissions(){
   const power = calcTeamPower();
   const comp = S.completedMissions||[];
@@ -1423,49 +1621,127 @@ function getRandomPlayerForPack(pkg){
 }
 
 // ── Finance ──
+const CFG_FIN = {
+  MIN_WD: 200,
+  TON_PER_COIN: 0.00005,
+  FREE_WD_LIMIT: 200,
+};
+
 function updDepPreview(){
   const v=parseFloat(document.getElementById('depositAmountInput').value)||0;
   document.getElementById('depCoinsPreview').textContent=fmt(v*1000)+' 🪙';
-  document.getElementById('submitDepositBtn').disabled=v<0.5;
+  document.getElementById('submitDepositBtn').disabled=v<0.1;
 }
 function setDepAmt(v){document.getElementById('depositAmountInput').value=v;updDepPreview();}
-function updWdDisp(){document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';}
+
 function updWdPreview(){
   const v=parseFloat(document.getElementById('wdAmountInput').value)||0;
-  const ton=(v*0.9)/1000;
-  document.getElementById('wdPreview').textContent=v>0?`ستحصل على: ${ton.toFixed(3)} TON (بعد رسوم 10%)`:'';
+  const ton=(v*0.9)*CFG_FIN.TON_PER_COIN;
+  document.getElementById('wdPreview').textContent=v>0?'ستحصل على: '+ton.toFixed(4)+' TON (بعد رسوم 10%)':'';
+  document.getElementById('wdBannerTrial').classList.remove('show');
+  document.getElementById('wdBannerDepReq').classList.remove('show');
 }
-function updExchPreview(dir){
-  if(dir==='ton'){const v=parseFloat(document.getElementById('exchTonInput').value)||0;document.getElementById('exchTonPreview').textContent=v>0?`ستحصل على: ${fmt(v*1000)} 🪙`:'';
-  }else{const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;const ton=(v*0.9)/1000;document.getElementById('exchCoinsPreview').textContent=v>0?`ستحصل على: ${ton.toFixed(3)} TON`:'';}}
 
-function doExchange(dir){
+function updExchCalc(dir){
   if(dir==='ton'){
     const v=parseFloat(document.getElementById('exchTonInput').value)||0;
-    if(v<0.1){showToast('الحد الأدنى 0.1 TON');return;}
-    if(S.ton<v){showToast('رصيد TON غير كافٍ');return;}
-    S.ton-=v;S.coins+=v*1000;updateBalances();showToast(`تم تحويل ${v} TON إلى ${fmt(v*1000)} 🪙`);
-    api('exchange',{dir:'ton_to_coins',amount:v}).catch(()=>{});
+    document.getElementById('exchToOutput').textContent=fmt(v*1000);
+    document.getElementById('exchTonBal').textContent='رصيد: '+fmtTon(S.ton)+' TON';
+    document.getElementById('exchCoinsBal').textContent='رصيد: '+fmt(S.coins)+' Coins';
   } else {
     const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;
-    if(v<500){showToast('الحد الأدنى 500 كوينز');return;}
-    if(S.coins<v){showToast('رصيد كوينز غير كافٍ');return;}
-    S.coins-=v;const ton=(v*0.9)/1000;S.ton+=ton;updateBalances();showToast(`تم تحويل ${fmt(v)} 🪙 إلى ${ton.toFixed(3)} TON`);
-    api('exchange',{dir:'coins_to_ton',amount:v}).catch(()=>{});
+    const ton=(v*0.9)/1000;
+    document.getElementById('exchToTon').textContent=ton.toFixed(4);
+    document.getElementById('exchCoinsBalFrom').textContent='رصيد: '+fmt(S.coins)+' Coins';
+    document.getElementById('exchTonBalTo').textContent='رصيد: '+fmtTon(S.ton)+' TON';
   }
 }
 
-function submitWithdraw(){
+function exchMax(dir){
+  if(dir==='ton'){document.getElementById('exchTonInput').value=parseFloat(S.ton||0).toFixed(2);updExchCalc('ton');}
+  else{document.getElementById('exchCoinsInput').value=Math.floor(S.coins||0);updExchCalc('coins');}
+}
+
+function doExchangeTon(){
+  const v=parseFloat(document.getElementById('exchTonInput').value)||0;
+  if(v<0.1){showToast('الحد الأدنى 0.1 TON');return;}
+  if(S.ton<v){showToast('رصيد TON غير كافٍ');return;}
+  S.ton-=v; S.coins+=v*1000;
+  S._exchHist=S._exchHist||[];
+  S._exchHist.unshift({dir:'TON→Coins',from:v+' TON',to:fmt(v*1000)+' 🪙',d:new Date().toLocaleDateString()});
+  updateBalances(); updExchCalc('ton');
+  document.getElementById('exchTonInput').value='';
+  document.getElementById('exchToOutput').textContent='0';
+  renderExchHist();
+  showToast('تم تحويل '+v+' TON إلى '+fmt(v*1000)+' 🪙');
+  api('exchange',{dir:'ton_to_coins',amount:v}).catch(()=>{});
+}
+
+function doExchangeCoins(){
+  const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;
+  if(v<500){showToast('الحد الأدنى 500 كوينز');return;}
+  if(S.coins<v){showToast('رصيد كوينز غير كافٍ');return;}
+  S.coins-=v; const ton=(v*0.9)/1000; S.ton+=ton;
+  S._exchHist=S._exchHist||[];
+  S._exchHist.unshift({dir:'Coins→TON',from:fmt(v)+' 🪙',to:ton.toFixed(4)+' TON',d:new Date().toLocaleDateString()});
+  updateBalances(); updExchCalc('coins');
+  document.getElementById('exchCoinsInput').value='';
+  document.getElementById('exchToTon').textContent='0.0000';
+  renderExchHist();
+  showToast('تم تحويل '+fmt(v)+' 🪙 إلى '+ton.toFixed(4)+' TON');
+  api('exchange',{dir:'coins_to_ton',amount:v}).catch(()=>{});
+}
+
+function renderExchHist(){
+  const el=document.getElementById('exchHistList'); if(!el) return;
+  const hist=S._exchHist||[];
+  if(!hist.length){el.innerHTML='<div class="hist-empty">لا توجد تحويلات بعد</div>';return;}
+  el.innerHTML=hist.slice(0,20).map(function(h){
+    return '<div class="hist-row" style="flex-direction:column;gap:2px;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><span class="hist-l">'+esc(h.dir)+' · '+esc(h.d||'')+'</span><span class="hist-r">'+esc(h.to)+'</span></div><span style="font-size:11px;color:var(--muted)">من: '+esc(h.from)+'</span></div>';
+  }).join('');
+}
+
+async function submitWithdraw(){
   const addr=(document.getElementById('wdAddressInput').value||'').trim();
   const amt=parseFloat(document.getElementById('wdAmountInput').value)||0;
+  document.getElementById('wdBannerTrial').classList.remove('show');
+  document.getElementById('wdBannerDepReq').classList.remove('show');
   if(!addr||addr.length<10){showToast('أدخل عنوان محفظة صحيح');return;}
-  if(amt<2000){showToast('الحد الأدنى للسحب 2,000 كوينز');return;}
+  if(amt<CFG_FIN.MIN_WD){showToast('الحد الأدنى للسحب '+CFG_FIN.MIN_WD+' كوينز');return;}
   if(S.coins<amt){showToast('رصيد غير كافٍ');return;}
-  S.coins-=amt;updateBalances();showToast('تم إرسال طلب السحب ✓');
-  updWdDisp();
+  if(!S._hasDeposited){
+    if(S._freeWdUsed){
+      document.getElementById('wdBannerDepReq').classList.add('show');
+      showToast('❌ يجب الإيداع للاستمرار في السحب');
+      setTimeout(function(){goToDeposit();},3000); return;
+    }
+    if(amt>CFG_FIN.FREE_WD_LIMIT){
+      document.getElementById('wdBannerTrial').classList.add('show');
+      showToast('❌ حد السحب المجاني '+CFG_FIN.FREE_WD_LIMIT+' Coins');
+      setTimeout(function(){goToDeposit();},3000); return;
+    }
+  }
+  S.coins-=amt;
+  if(!S._hasDeposited) S._freeWdUsed=true;
+  S._wdHist=S._wdHist||[];
+  S._wdHist.unshift({amt:amt,addr:addr,d:new Date().toLocaleDateString(),status:'pending'});
+  updateBalances(); renderWdHist();
+  document.getElementById('wdAddressInput').value='';
+  document.getElementById('wdAmountInput').value='';
+  updWdPreview();
+  showToast('تم إرسال طلب السحب ✓');
   api('withdraw',{address:addr,amount:amt}).catch(()=>{});
 }
 
+function renderWdHist(){
+  const el=document.getElementById('wdHistList'); if(!el) return;
+  const hist=S._wdHist||[];
+  if(!hist.length){el.innerHTML='<div class="hist-empty">لا توجد سحوبات بعد</div>';return;}
+  el.innerHTML=hist.slice(0,20).map(function(h){
+    var sc={approved:'sb-done',pending:'sb-pending',rejected:'sb-rejected'}[h.status||'pending'];
+    return '<div class="hist-row" style="flex-direction:column;gap:4px;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><span style="font-size:13px;font-weight:800;color:var(--gold)">'+fmt(h.amt)+' 🪙</span><span class="stat-badge '+sc+'">'+(h.status==='approved'?'✓ مكتمل':h.status==='rejected'?'مرفوض':'⏳ قيد المعالجة')+'</span></div><div style="font-size:10px;color:var(--muted)">'+((h.amt||0)*0.9*CFG_FIN.TON_PER_COIN).toFixed(4)+' TON · '+esc(h.d||'')+' · '+esc((h.addr||'').substring(0,12))+'...</div></div>';
+  }).join('');
+}
 // ── Wallet ──
 async function connectWallet(){
   if(_tonConnectUI){
@@ -1484,9 +1760,12 @@ function copyRefLink(){
 function updateBalances(){
   document.getElementById('tbCoins').textContent=fmt(S.coins);
   document.getElementById('tbTon').textContent=fmtTon(S.ton);
-  if(document.getElementById('fin-coins-bal')) document.getElementById('fin-coins-bal').textContent=fmt(S.coins);
-  if(document.getElementById('fin-ton-bal')) document.getElementById('fin-ton-bal').textContent=fmtTon(S.ton);
   if(document.getElementById('wdCoinsDisp')) document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';
+  // exchange swaps
+  if(document.getElementById('exchTonBal')) document.getElementById('exchTonBal').textContent='رصيد: '+fmtTon(S.ton)+' TON';
+  if(document.getElementById('exchCoinsBal')) document.getElementById('exchCoinsBal').textContent='رصيد: '+fmt(S.coins)+' Coins';
+  if(document.getElementById('exchCoinsBalFrom')) document.getElementById('exchCoinsBalFrom').textContent='رصيد: '+fmt(S.coins)+' Coins';
+  if(document.getElementById('exchTonBalTo')) document.getElementById('exchTonBalTo').textContent='رصيد: '+fmtTon(S.ton)+' TON';
   updatePowerDisplay();
 }
 
@@ -1601,29 +1880,53 @@ async function init(){
 function renderRefs(refs){
   const list=document.getElementById('refList');
   const counter=document.getElementById('totalRefsDisp');
-  if(!refs||!refs.length){if(list) list.innerHTML='<div class="hist-empty">لا توجد إحالات بعد</div>';return;}
-  if(counter) counter.textContent=refs.length;
+  S.refs = refs||[];
+  if(!refs||!refs.length){
+    if(list) list.innerHTML='<div class="hist-empty">لا توجد إحالات بعد</div>';
+    if(counter) counter.textContent='0 أصدقاء';
+    return;
+  }
+  if(counter) counter.textContent=refs.length+' أصدقاء';
   if(list) list.innerHTML=refs.map(r=>`
     <div class="ref-list-item">
-      <div class="rli-av"><img src="${r.photoUrl||''}" onerror="this.parentElement.innerHTML='👤'" alt=""></div>
-      <div style="flex:1;"><div class="rli-name">${esc(r.firstName||'لاعب')}</div><div class="rli-date">${r.hasDeposited?'💎 مودع':'👤 مسجل'}</div></div>
-      <div class="rli-earn">${r.hasDeposited?'+5% ✓':'+200 🪙'}</div>
+      <div class="rli-av">${r.photoUrl?`<img src="${esc(r.photoUrl)}" onerror="this.parentElement.innerHTML='👤'" alt="">` :'👤'}</div>
+      <div style="flex:1;">
+        <div class="rli-name">${esc(r.firstName||'لاعب')}</div>
+        <div class="rli-date">${r.hasDeposited?'💎 مودع':'👤 مسجل'}</div>
+      </div>
+      <div class="rli-earn" style="color:var(--gold);">${r.hasDeposited?'+20% ✓':'+200 🪙'}</div>
     </div>`).join('');
 }
 
 async function initiateDeposit(){
   const amt=parseFloat(document.getElementById('depositAmountInput').value)||0;
-  if(amt<0.5){showToast('الحد الأدنى 0.5 TON');return;}
+  if(amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
   if(!_walletConnected){showToast('يرجى ربط المحفظة أولاً');return;}
   const statusDiv=document.getElementById('depositStatus');
   statusDiv.classList.add('visible');
   document.getElementById('submitDepositBtn').disabled=true;
   try{
-    // In real implementation, initiate TON transaction
-    statusDiv.innerHTML='<div class="txsi">⏳</div><div class="txsm">انتظر تأكيد المعاملة...</div><div class="txsd">سيتم إضافة رصيدك خلال 3 دقائق</div>';
-    showToast('تم إرسال طلب الإيداع ✓');
+    const comment=String(S.userId||'');
+    const nano=String(Math.floor(amt*1e9));
+    let payload=undefined;
+    if(window.TonWeb){
+      try{
+        const TW=window.TonWeb; new TW();
+        const cell=new TW.boc.Cell();
+        cell.bits.writeUint(0,32); cell.bits.writeString(comment);
+        const boc=await cell.toBoc(false);
+        payload=TW.utils.bytesToBase64(boc);
+      }catch(e){console.warn('TonWeb payload:',e);}
+    }
+    const tx={validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',amount:nano,...(payload?{payload}:{})}]};
+    const result=await _tonConnectUI.sendTransaction(tx);
+    statusDiv.innerHTML='<div class="txsi">⏳</div><div class="txsm">تم إرسال المعاملة!</div><div class="txsd">انتظر التأكيد (~1 دقيقة)...</div>';
+    showToast('✅ تم إرسال المعاملة! سيتم إضافة رصيدك خلال دقيقة');
+    S._hasDeposited=true;
+    // Notify server
+    api('deposit',{amount:amt,txHash:result?.boc||'',comment}).catch(()=>{});
   }catch(e){
-    statusDiv.innerHTML='<div class="txsi">❌</div><div class="txsm">فشل الإيداع</div><div class="txsd">'+e.message+'</div>';
+    statusDiv.innerHTML='<div class="txsi">❌</div><div class="txsm">'+(e.message?.includes('rejected')?'تم رفض المعاملة':'فشل الإيداع')+'</div><div class="txsd">'+esc(e.message||'حاول مرة أخرى')+'</div>';
     document.getElementById('submitDepositBtn').disabled=false;
   }
 }

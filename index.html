@@ -104,6 +104,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .side-item-icon.wd{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);}
 .side-item-icon.ref{background:rgba(0,194,255,.12);border:1px solid rgba(0,194,255,.25);}
 .side-item-icon.exc{background:rgba(255,100,100,.12);border:1px solid rgba(255,100,100,.25);}
+.side-item-icon.tsk{background:rgba(124,179,66,.12);border:1px solid rgba(124,179,66,.25);}
 .side-item-txt{font-size:14px;font-weight:800;color:#fff;}
 .side-item-sub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:600;}
 
@@ -346,6 +347,22 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 /* Toast */
 #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(6,22,6,.97);border:1px solid var(--border);border-radius:22px;padding:10px 18px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px);max-width:84vw;text-align:center;}
 #toast.show{opacity:1;}
+/* ═══ TASK TABS ═══ */
+.task-tabs{display:flex;gap:7px;margin-bottom:12px;}
+.ttab{flex:1;padding:9px;text-align:center;background:rgba(0,0,0,.42);border:1px solid var(--border);border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--muted);}
+.ttab.active{background:rgba(124,179,66,.2);border-color:var(--bamboo);color:var(--bamboo);}
+.tcont{display:none;}.tcont.active{display:block;}
+.task-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:9px;margin-bottom:7px;backdrop-filter:blur(6px);}
+.ticon{font-size:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;min-width:44px;}
+.tinfo{flex:1;}
+.tname{font-weight:800;font-size:13px;margin-bottom:2px;}
+.trew{font-size:11px;color:var(--bamboo);font-weight:700;}
+.tstat{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500;}
+.tbtn{border:none;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.tbtn.go{background:linear-gradient(135deg,#1976d2,#0d47a1);color:#fff;}
+.tbtn.claim{background:linear-gradient(135deg,var(--bamboo),#4e7a20);color:#fff;}
+.tbtn.done{background:rgba(255,255,255,.07);color:var(--muted);cursor:default;}
+
 /* Save toast */
 #saveToast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,var(--bamboo),#4e7a20);border-radius:20px;padding:10px 20px;font-size:13px;font-weight:800;color:#fff;z-index:999;transition:transform .3s ease;box-shadow:0 4px 20px var(--bamboo-glow);pointer-events:none;}
 #saveToast.show{transform:translateX(-50%) translateY(0);}
@@ -412,6 +429,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
     <div class="side-item" onclick="goSec('Referral');closeSideMenu()">
       <div class="side-item-icon ref">👥</div>
       <div><div class="side-item-txt">الإحالات</div><div class="side-item-sub">اكسب بدعوة أصدقاء</div></div>
+    </div>
+    <div class="side-item" onclick="goSec('Tasks');closeSideMenu()">
+      <div class="side-item-icon tsk">✅</div>
+      <div><div class="side-item-txt">المهام</div><div class="side-item-sub">أكمل مهام واكسب مكافآت</div></div>
     </div>
   </div>
 </div>
@@ -650,6 +671,32 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   </div>
 </div>
 
+<!-- ══ SECTION: TASKS ══ -->
+<div class="sec" id="sectionTasks">
+  <div class="fin-page-title">✅ المهام</div>
+
+  <!-- Sub tabs -->
+  <div class="task-tabs">
+    <div class="ttab active" id="ttab-referral" onclick="switchTTab('referral')">👥 إحالة</div>
+    <div class="ttab" id="ttab-social" onclick="switchTTab('social')">📢 سوشيال</div>
+  </div>
+
+  <!-- Referral tasks -->
+  <div class="tcont active" id="tcReferral">
+    <div id="refTaskList"></div>
+  </div>
+
+  <!-- Social tasks -->
+  <div class="tcont" id="tcSocial">
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <div class="ttab active" id="stab-partner" style="flex:1;font-size:11px" onclick="switchSocTab('partner')">⭐ شركاء</div>
+      <div class="ttab" id="stab-community" style="flex:1;font-size:11px" onclick="switchSocTab('community')">🌍 مجتمع</div>
+    </div>
+    <div id="socPartnerList"></div>
+    <div id="socCommunityList" style="display:none;padding-bottom:80px"></div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bnav">
   <div class="ni active" data-s="sectionHome" onclick="goNav(this)">
@@ -828,32 +875,52 @@ async function api(action, data={}){
 async function loadState(){
   try{
     const d=await api('getState',{start_param:S.startParam||'',_initData:S.tg?.initData||''});
-    S.user=d.user||S.user;
-    S.refs=d.referrals||[];
+    if(!d) throw new Error('Empty response');
+    if(d.user){
+      S.user=d.user;
+      if(d.user.tankAccrued!==undefined) S.tankProgress=parseFloat(d.user.tankAccrued)||0;
+    }
+    S.refs=d.referrals||d.refs||[];
     S.exchHist=d.exchHistory||[];
     S.wdHist=d.wdHistory||[];
     S.doneTasks=d.completedTasks||[];
     S.tasks=d.tasks||{partner:[],community:[]};
-    if(d.user&&d.user.tankAccrued!==undefined) S.tankProgress=parseFloat(d.user.tankAccrued)||0;
-    // Load owned players & squad
     if(d.ownedPlayers&&Array.isArray(d.ownedPlayers)){
       S.ownedPlayers=[];
-      d.ownedPlayers.forEach(pid=>{const p=PLAYERS_DB.find(x=>x.id===pid);if(p)S.ownedPlayers.push({...p});});
+      d.ownedPlayers.forEach(pid=>{
+        const p=PLAYERS_DB.find(x=>x.id===pid);
+        if(p&&!S.ownedPlayers.some(x=>x.id===pid)) S.ownedPlayers.push({...p});
+      });
     }
     if(d.squad&&Array.isArray(d.squad)){
-      d.squad.forEach((pid,i)=>{if(pid){const p=PLAYERS_DB.find(x=>x.id===pid);if(p)S.squad[i]={...p};}else S.squad[i]=null;});
+      for(let i=0;i<11;i++){
+        const pid=d.squad[i];
+        if(pid){const p=PLAYERS_DB.find(x=>x.id===pid);S.squad[i]=p?{...p}:null;}
+        else S.squad[i]=null;
+      }
     }
+    if(d.formation) S.formation=d.formation;
     S.bench=S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id));
     if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId,d.pendingDeposit.txHash);
-  }catch(e){console.warn('loadState:',e.message);}
+    console.log('State OK — Coins:'+S.user.coins+' Bamboo:'+S.user.bamboo+' Refs:'+S.refs.length);
+  }catch(e){console.warn('loadState error:',e.message);}
   updateUI();
 }
 
 // ════ UPDATE UI ════
 function updateUI(){
   const u=S.user;
-  document.getElementById('tbCoins').textContent=fmt(u.coins||0);
-  document.getElementById('tbBamboo').textContent=fmt(u.bamboo||0);
+  // ── Top bar balances ──
+  const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(u.coins||0);
+  const tb=document.getElementById('tbBamboo');if(tb)tb.textContent=fmt(u.bamboo||0);
+  // ── Withdraw banners ──
+  const bt=document.getElementById('wdBannerTrial');
+  const bd=document.getElementById('wdBannerDepReq');
+  if(bt) bt.classList.toggle('show',!u.hasDeposited&&!u.freeWdUsed);
+  if(bd) bd.classList.toggle('show',!u.hasDeposited&&!!u.freeWdUsed);
+  // ── Deposit submit button ──
+  const sb=document.getElementById('submitDepositBtn');
+  if(sb) sb.disabled=!S.wallet;
   updSwapBals();
   updateRefUI();
   renderExchHist();
@@ -1056,18 +1123,40 @@ function renderMarket(filter='all'){
 async function buyPlayer(id){
   const p=PLAYERS_DB.find(x=>x.id===id);if(!p)return;
   if(S.ownedPlayers.some(x=>x.id===id)){showToast('اللاعب مملوك بالفعل ✓');return;}
-  if(p.currency==='coins'){
-    const price=p.price;
-    if((S.user.coins||0)<price){showToast(`تحتاج ${fmt(price)} Coins!`);return;}
-    S.user.coins-=price;
-    S.ownedPlayers.push({...p});
-    S.bench.push({...p});
-    api('buyPlayer',{playerId:id}).catch(()=>{});
+  if(p.currency==='ton'){showToast('الدفع بـ TON قيد التطوير');return;}
+  const price=p.price;
+  if((S.user.coins||0)<price){showToast(`تحتاج ${fmt(price)} Coins! رصيدك: ${fmt(S.user.coins)}`);return;}
+  // Optimistic update
+  S.user.coins-=price;
+  S.ownedPlayers.push({...p});
+  S.bench.push({...p});
+  const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(S.user.coins);
+  renderMarket(_currentFilter);renderBench();
+  showToast(`✅ تم شراء ${p.name}!`);
+  // Sync with server
+  try{
+    const res=await api('buyPlayer',{playerId:id});
+    if(res&&res.coins!==undefined){
+      S.user.coins=res.coins;
+      if(tc)tc.textContent=fmt(S.user.coins);
+    }
+    if(res&&res.ownedPlayers){
+      S.ownedPlayers=[];
+      res.ownedPlayers.forEach(pid=>{
+        const pl=PLAYERS_DB.find(x=>x.id===pid);
+        if(pl)S.ownedPlayers.push({...pl});
+      });
+      S.bench=S.ownedPlayers.filter(pl=>!S.squad.some(s=>s&&s.id===pl.id));
+      renderMarket(_currentFilter);renderBench();
+    }
+  }catch(e){
+    // Rollback on error
+    S.user.coins+=price;
+    S.ownedPlayers=S.ownedPlayers.filter(x=>x.id!==id);
+    S.bench=S.bench.filter(x=>x.id!==id);
+    if(tc)tc.textContent=fmt(S.user.coins);
     renderMarket(_currentFilter);renderBench();
-    document.getElementById('tbCoins').textContent=fmt(S.user.coins);
-    showToast(`✅ تم شراء ${p.name}!`);
-  }else{
-    showToast('الدفع بـ TON قيد التطوير');
+    showToast('❌ فشل الشراء: '+e.message);
   }
 }
 
@@ -1271,6 +1360,131 @@ function startDepVerify(depId,txHash){
 // Close modals on backdrop click
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('active');}));
 
+
+// ════ TASKS ════
+const REF_TASKS=[
+  {id:'r1',  n:1,   bam:500,    coins:2   },
+  {id:'r5',  n:5,   bam:2500,   coins:10  },
+  {id:'r10', n:10,  bam:6000,   coins:25  },
+  {id:'r20', n:20,  bam:15000,  coins:60  },
+  {id:'r50', n:50,  bam:40000,  coins:150 },
+  {id:'r70', n:70,  bam:60000,  coins:220 },
+  {id:'r100',n:100, bam:100000, coins:400 },
+  {id:'r200',n:200, bam:200000, coins:800 },
+  {id:'r500',n:500, bam:500000, coins:2000},
+];
+const BAM_IMG='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">';
+let _socTab='partner';
+const _taskInFlight=new Set();
+
+function switchTTab(t){
+  document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tcont').forEach(x=>x.classList.remove('active'));
+  const tab=document.getElementById('ttab-'+t);
+  if(tab)tab.classList.add('active');
+  const cont=document.getElementById('tc'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(cont)cont.classList.add('active');
+}
+
+function switchSocTab(tab){
+  _socTab=tab;
+  const ep=document.getElementById('stab-partner');
+  const ec=document.getElementById('stab-community');
+  if(ep)ep.className='ttab'+(tab==='partner'?' active':'');
+  if(ec)ec.className='ttab'+(tab==='community'?' active':'');
+  const pl=document.getElementById('socPartnerList');
+  const cl=document.getElementById('socCommunityList');
+  if(pl)pl.style.display=tab==='partner'?'block':'none';
+  if(cl)cl.style.display=tab==='community'?'block':'none';
+}
+
+function renderTasks(){
+  const el=document.getElementById('refTaskList');
+  if(!el)return;
+  el.innerHTML=REF_TASKS.map(t=>{
+    const done=S.doneTasks.includes(t.id);
+    const can=S.refs.length>=t.n&&!done;
+    return`<div class="task-item">
+      <div class="ticon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:44px;height:44px;object-fit:contain"></div>
+      <div class="tinfo">
+        <div class="tname">ادعُ ${t.n} صديق${t.n>1?'ًا':''}</div>
+        <div class="trew">${BAM_IMG} ${fmt(t.bam)} Bamboo + 🪙 ${t.coins} Coins</div>
+        <div class="tstat">${S.refs.length}/${t.n} صديق</div>
+      </div>
+      ${done
+        ?'<button class="tbtn done">✅ تم</button>'
+        :can
+          ?`<button class="tbtn claim" onclick="claimRefTask('${t.id}')">استلام</button>`
+          :`<button class="tbtn done">${S.refs.length}/${t.n}</button>`
+      }
+    </div>`;
+  }).join('');
+  renderSocTasks();
+}
+
+function buildTaskCard(t,cat){
+  const tid=t.id,done=S.doneTasks.includes(tid),inFlight=_taskInFlight.has(tid);
+  const icon=t.type==='channel'?'📢':'🤖';
+  const name=esc(t.name||('@'+(t.link?.split('t.me/')[1]?.split('/')[0]||'Task')));
+  const bam=t.bambooReward||500;
+  const link=esc(t.link||'');
+  return`<div class="task-item">
+    <div class="ticon">${icon}</div>
+    <div class="tinfo">
+      <div class="tname">${name}</div>
+      <div class="trew">${BAM_IMG} ${fmt(bam)} Bamboo</div>
+      ${t.completions!==undefined?`<div class="tstat">${t.completions||0}/${t.targetUsers||'∞'} أكملوا</div>`:''}
+    </div>
+    ${done?'<button class="tbtn done">✅ تم</button>'
+      :inFlight?'<button class="tbtn done" style="opacity:.6">⏳</button>'
+      :`<button class="tbtn go" onclick="doSocTask('${tid}','${link}','${t.type||'bot'}','${cat}')">انضم</button>`}
+  </div>`;
+}
+
+function renderSocTasks(){
+  const p=S.tasks?.partner||[],c=S.tasks?.community||[];
+  const pl=document.getElementById('socPartnerList');
+  const cl=document.getElementById('socCommunityList');
+  if(pl)pl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):'<div class="hist-empty">لا توجد مهام شركاء</div>';
+  if(cl)cl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):'<div class="hist-empty">لا توجد مهام مجتمع</div>';
+}
+
+async function claimRefTask(id){
+  if(_taskInFlight.has(id))return;
+  _taskInFlight.add(id);
+  try{
+    const t=REF_TASKS.find(x=>x.id===id);if(!t)return;
+    api('claimTask',{taskId:id}).catch(()=>{});
+    S.doneTasks.push(id);
+    S.user.bamboo=(S.user.bamboo||0)+t.bam;
+    S.user.coins=(S.user.coins||0)+t.coins;
+    updateUI();renderTasks();
+    showToast(`🎉 +${fmt(t.bam)} Bamboo +${t.coins} Coins`);
+  }finally{_taskInFlight.delete(id);}
+}
+
+async function doSocTask(tid,link,type,cat){
+  if(_taskInFlight.has(tid)){showToast('⏳ جاري التحقق...');return;}
+  _taskInFlight.add(tid);
+  renderSocTasks();
+  if(link&&link.startsWith('https://t.me/')) window.open(link,'_blank','noopener');
+  showToast('⏳ جاري التحقق من الانضمام...');
+  setTimeout(async()=>{
+    try{
+      const r=await api('verifyTask',{taskId:tid,taskType:type,taskCategory:cat});
+      S.doneTasks.push(tid);
+      if(r.bambooAdded) S.user.bamboo=(S.user.bamboo||0)+r.bambooAdded;
+      updateUI();renderTasks();
+      showToast(`🎉 +${fmt(r.bambooAdded||0)} Bamboo`);
+    }catch(e){
+      showToast(`❌ ${e.message||'فشل التحقق'}`);
+    }finally{
+      _taskInFlight.delete(tid);
+      renderSocTasks();
+    }
+  },3000);
+}
+
 // ════ INIT ════
 async function init(){
   const msgs=['جاري تحميل الفريق...','جلب بيانات اللاعبين...','تحضير الملعب...','جاهز!'];
@@ -1290,7 +1504,6 @@ async function init(){
     const u=S.tg.initDataUnsafe?.user;
     if(u){
       S.userId=String(u.id);
-      S.user=S.user;
       document.getElementById('topName').textContent=u.first_name||'اللاعب';
       if(document.getElementById('depositUserIdDisplay'))document.getElementById('depositUserIdDisplay').textContent=u.id;
       if(u.photo_url){
@@ -1306,15 +1519,26 @@ async function init(){
   // TON Connect
   setTimeout(()=>initTON(),600);
 
-  // Load state
-  try{
-    await loadState();
-  }catch(e){
-    console.log('Failed to load state:',e);
-    for(let i=0;i<11;i++)S.squad[i]=null;
+  // Load state — retry up to 3 times
+  let loaded=false;
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      await loadState();
+      loaded=true;
+      break;
+    }catch(e){
+      console.warn('loadState attempt',attempt,'failed:',e.message);
+      if(attempt<3) await new Promise(r=>setTimeout(r,1500));
+    }
+  }
+  if(!loaded){
+    console.warn('Could not load state — showing defaults');
+    for(let i=0;i<11;i++) S.squad[i]=null;
+    updateUI();
   }
 
   renderMarket('all');
+  renderTasks();
   renderPitch();
   renderBench();
   updatePowerDisplay();
@@ -1324,7 +1548,7 @@ async function init(){
   setTimeout(()=>{
     const ls=document.getElementById('loadingScreen');
     if(ls){ls.classList.add('hidden');setTimeout(()=>ls.style.display='none',800);}
-  },3000);
+  },3200);
 }
 
 window.addEventListener('load',init);

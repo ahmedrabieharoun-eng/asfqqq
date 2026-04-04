@@ -60,24 +60,60 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .sec.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ═══ TOP BAR ═══ */
+/* ═══ TOP BAR — eFootball Style ═══ */
 .topbar{
-  display:flex;align-items:center;gap:8px;padding:10px 12px 8px;
-  background:rgba(6,18,6,.92);backdrop-filter:blur(18px);
-  position:sticky;top:0;z-index:100;
-  border-bottom:1px solid rgba(124,179,66,.15);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px 6px;
+  background:linear-gradient(180deg,rgba(10,10,25,.98) 0%,rgba(8,8,20,.94) 100%);
+  backdrop-filter:blur(20px);
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  height:52px;
+  transition:transform .3s ease, opacity .3s ease;
 }
-.uavatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--bamboo);flex-shrink:0;overflow:hidden;background:var(--glass);}
-.uavatar img{width:100%;height:100%;object-fit:cover;}
-.uname{font-size:13px;font-weight:800;color:#fff;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tb-bals{display:flex;gap:5px;flex:1;min-width:0;}
-.tb-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);border:1px solid;border-radius:16px;padding:5px 9px;font-size:12px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;}
-.tb-chip.coins{border-color:rgba(255,215,0,.4);color:var(--coin);}
-.tb-chip.bam{border-color:rgba(124,179,66,.4);color:var(--bamboo);}
-.tb-chip-num{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;}
-.tb-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.tb-menu-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.3);border-radius:12px;width:38px;height:38px;color:var(--coin);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;flex-shrink:0;}
-.tb-menu-btn .bar{width:18px;height:2px;background:var(--coin);border-radius:2px;transition:all .2s;}
+.topbar.hidden-bar{transform:translateY(-100%);opacity:0;pointer-events:none;}
+.tb-currencies{display:flex;align-items:center;gap:8px;}
+.tb-cur{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;}
+.tb-cur-icon{font-size:15px;line-height:1;flex-shrink:0;}
+.tb-cur-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#fff;}
+.tb-icons{display:flex;align-items:center;gap:5px;}
+.tb-ico{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:18px;}
+.tb-ico:active{background:rgba(255,255,255,.18);}
+.tb-ico .badge{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;border-radius:8px;background:#e53935;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #0a0a19;}
+.tb-center{position:absolute;left:50%;transform:translateX(-50%);}
+.tb-center-ico{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#fff;}
+/* OLD CHIPS hidden */
+.uavatar,.uname,.tb-bals,.tb-menu-btn,.tb-chip,.tb-chip-num,.tb-actions{display:none!important;}
+
+/* ═══ BOTTOM NAV — eFootball Style ═══ */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:linear-gradient(0deg,rgba(5,5,15,.97),rgba(8,8,22,.92));
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:flex-end;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px)) 8px;
+  gap:5px;
+  transition:transform .3s ease, opacity .3s ease;
+}
+.bnav.hidden-bar{transform:translateY(100%);opacity:0;pointer-events:none;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.ni-tile{width:100%;aspect-ratio:1/1;max-height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;}
+.ni-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 60%);pointer-events:none;}
+.ni:active .ni-tile{transform:scale(.88);}
+.ni.active .ni-tile{box-shadow:0 0 0 2.5px #fff,0 4px 16px rgba(0,0,0,.5);}
+.ni[data-s="sectionLanding"] .ni-tile{background:linear-gradient(145deg,#00b4d8,#0077b6);}
+.ni[data-s="sectionHome"]    .ni-tile{background:linear-gradient(145deg,#e63946,#b5152c);}
+.ni[data-s="sectionContracts"].ni-tile{background:linear-gradient(145deg,#c77dff,#7b2fff);}
+.ni[data-s="sectionTasks"]   .ni-tile{background:linear-gradient(145deg,#52b788,#2d6a4f);}
+.ni[data-s="sectionMarket"]  .ni-tile{background:linear-gradient(145deg,#f4a261,#e76f51);}
+/* Center "فريقي" raised button */
+.ni-center .ni-tile{max-height:60px;border-radius:16px;box-shadow:0 -6px 22px rgba(230,57,70,.55);}
+.ni-center::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#e63946;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));}
+.ni-center{position:relative;}
+.ni-center.active .ni-tile{box-shadow:0 0 0 2.5px #fff,0 -6px 22px rgba(230,57,70,.6);}
+.ni-lbl{font-size:9.5px;font-weight:800;color:rgba(255,255,255,.55);white-space:nowrap;}
+.ni.active .ni-lbl{color:#fff;}
 
 /* ═══ SIDE MENU ═══ */
 #sideMenu{
@@ -624,6 +660,103 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .ni{min-height:56px;}
   .ni-icon img{width:32px!important;height:32px!important;}
 }
+
+/* ═══ BODY PADDING for fixed bars ═══ */
+body{padding-top:52px !important;padding-bottom:90px !important;}
+
+/* ═══ LANDING PAGE ═══ */
+/* Tab bar */
+.efb-tab-bar{
+  display:flex;gap:0;background:rgba(0,0,0,.5);border-radius:24px;
+  padding:3px;margin:10px 12px 12px;border:1px solid rgba(255,255,255,.08);
+  overflow:hidden;
+}
+.efb-tab{
+  flex:1;text-align:center;padding:8px 6px;font-size:12px;font-weight:700;
+  color:rgba(255,255,255,.45);border-radius:20px;cursor:pointer;transition:all .2s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.efb-tab.active{background:rgba(255,255,255,.12);color:#fff;font-weight:900;}
+
+/* Main Banner */
+.efb-banner{
+  margin:0 12px 16px;
+  background:linear-gradient(135deg,rgba(0,10,40,.95) 0%,rgba(5,20,60,.9) 50%,rgba(0,30,70,.95) 100%);
+  border:1px solid rgba(0,180,255,.25);border-radius:16px;overflow:hidden;
+  padding:14px 12px;display:flex;gap:10px;align-items:flex-start;
+  position:relative;
+}
+.efb-banner::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,180,255,.07) 0%,transparent 60%);
+  pointer-events:none;
+}
+.efb-banner-card{flex-shrink:0;width:72px;}
+.efb-bc-inner{
+  width:72px;height:88px;border-radius:10px;position:relative;overflow:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.7),0 0 0 1.5px rgba(255,255,255,.2);
+}
+.efb-banner-text{flex:1;min-width:0;}
+.efb-banner-title{font-size:15px;font-weight:900;color:#fff;margin-bottom:2px;
+  text-shadow:0 0 20px rgba(0,200,255,.5);}
+.efb-banner-sub{font-size:11px;font-weight:800;margin-bottom:5px;}
+.efb-banner-timer{font-size:11px;color:rgba(255,255,255,.7);font-weight:700;margin-bottom:8px;}
+.efb-banner-desc{font-size:10px;color:rgba(255,255,255,.5);font-weight:600;margin-top:6px;}
+
+/* Mini cards row in banner */
+.efb-mini-cards{display:flex;gap:5px;}
+.efb-mini-card{
+  width:48px;height:58px;border-radius:8px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:4px 3px 3px;
+  box-shadow:0 3px 10px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.15);
+}
+.efb-mini-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(180,20,20,.5),transparent 45%);z-index:1;}
+.efb-mini-card > *{position:relative;z-index:2;}
+
+/* Package grid */
+.efb-pkg-title{font-size:14px;font-weight:900;color:#fff;padding:0 12px 8px;display:flex;align-items:center;gap:6px;}
+.efb-pkg-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 12px 16px;
+}
+.efb-pkg{
+  border-radius:16px;overflow:hidden;position:relative;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 18px rgba(0,0,0,.5);
+}
+.efb-pkg:active{transform:scale(.96);}
+.efb-pkg-bg{
+  padding:14px 12px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.efb-pkg.pkg-bronze .efb-pkg-bg{background:linear-gradient(145deg,#3d2a15,#6b4520);}
+.efb-pkg.pkg-silver .efb-pkg-bg{background:linear-gradient(145deg,#1e1e1e,#383838);}
+.efb-pkg.pkg-gold   .efb-pkg-bg{background:linear-gradient(145deg,#3d2f00,#7a5c00);}
+.efb-pkg.pkg-plat   .efb-pkg-bg{background:linear-gradient(145deg,#0d2240,#1a3f70);}
+.efb-pkg.pkg-legend .efb-pkg-bg{background:linear-gradient(145deg,#3a1500,#7a3000);}
+.efb-pkg::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.10),transparent 50%);pointer-events:none;}
+.efb-pkg-icon{font-size:42px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+.efb-pkg-name{font-size:13px;font-weight:900;color:#fff;text-align:center;}
+.efb-pkg-cards{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;}
+.efb-pkg-price{
+  width:100%;padding:8px;text-align:center;border-radius:10px;
+  font-size:12px;font-weight:900;color:#fff;margin-top:2px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
+}
+.efb-pkg.pkg-bronze .efb-pkg-price{border-color:#cd7f32;color:#cd7f32;}
+.efb-pkg.pkg-silver .efb-pkg-price{border-color:#c0c0c0;color:#c0c0c0;}
+.efb-pkg.pkg-gold   .efb-pkg-price{border-color:#FFD700;color:#FFD700;}
+.efb-pkg.pkg-plat   .efb-pkg-price{border-color:#7ec8ff;color:#7ec8ff;}
+.efb-pkg.pkg-legend .efb-pkg-price{border-color:#FFA500;color:#FFA500;}
+.efb-pkg-badge{position:absolute;top:8px;right:8px;background:#e63946;color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:20px;}
+
+/* Landscape responsive */
+@media(orientation:landscape){
+  .efb-pkg-grid{grid-template-columns:repeat(4,1fr);}
+  .efb-banner{flex-direction:row;}
+}
+
 </style>
 </head>
 <body>
@@ -655,31 +788,34 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   </div>
 </div>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="uavatar" id="uavatar">
-    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">🐼</div>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex-shrink:0;">
-    <div class="uname" id="topName">اللاعب</div>
-    <div style="font-size:9px;color:var(--muted);font-weight:700;" id="topTeamPower">⚡ قوة: 0</div>
-  </div>
-  <div class="tb-bals">
-    <div class="tb-chip coins">
-      <span>🪙</span>
-      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">COINS</span><span class="tb-chip-num orb" id="tbCoins">0</span></div>
+<!-- TOP BAR — eFootball Style -->
+<div class="topbar" id="mainTopbar">
+  <!-- Currencies left -->
+  <div class="tb-currencies">
+    <div class="tb-cur">
+      <span class="tb-cur-icon">🪙</span>
+      <span class="tb-cur-val orb" id="tbCoins">0</span>
     </div>
-    <div class="tb-chip bam">
-      <span><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;"></span>
-      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">BAMBOO</span><span class="tb-chip-num orb" id="tbBamboo">0</span></div>
+    <div class="tb-cur">
+      <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
+      <span class="tb-cur-val orb" id="tbBamboo">0</span>
     </div>
   </div>
-  <button class="tb-menu-btn" onclick="openSideMenu()">
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-  </button>
+  <!-- Centre info -->
+  <div class="tb-center">
+    <div class="tb-center-ico" onclick="goSec('Landing')">ℹ️</div>
+  </div>
+  <!-- Right icons -->
+  <div class="tb-icons">
+    <div class="tb-ico">👤</div>
+    <div class="tb-ico">🎁<span class="badge">3</span></div>
+    <div class="tb-ico">🔔<span class="badge">11</span></div>
+  </div>
 </div>
+<!-- hidden refs for legacy code -->
+<span id="topName" style="display:none">اللاعب</span>
+<span id="topTeamPower" style="display:none"></span>
+<div id="uavatar" style="display:none"></div>
 
 <!-- SIDE MENU -->
 <div id="sideMenu">
@@ -712,8 +848,55 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   </div>
 </div>
 
+
+<!-- ══ SECTION: LANDING (Home page like eFootball) ══ -->
+<div class="sec active" id="sectionLanding">
+
+  <!-- Tab bar under topbar -->
+  <div class="efb-tab-bar">
+    <div class="efb-tab active">الصفحة الرئيسية</div>
+    <div class="efb-tab" onclick="goNav(document.querySelector('[data-s=sectionTasks]'))">أكاديمية</div>
+    <div class="efb-tab" onclick="goNav(document.querySelector('[data-s=sectionMarket]'))">متجر</div>
+    <div class="efb-tab" onclick="goSec('Deposit')">إضافات</div>
+  </div>
+
+  <!-- Main Banner -->
+  <div class="efb-banner">
+    <!-- Featured card left -->
+    <div class="efb-banner-card">
+      <div class="efb-bc-inner tier-legend">
+        <div class="efb-pos" style="font-size:6px">RMF</div>
+        <div class="efb-rating" style="font-size:11px">100</div>
+        <div class="efb-face"><div class="efb-face-emoji" style="font-size:42px">🌟</div></div>
+        <div class="efb-bottom-bar"></div>
+      </div>
+      <div style="font-size:8px;color:rgba(255,255,255,.7);text-align:center;margin-top:4px;font-weight:700;">بطل الشهر</div>
+    </div>
+
+    <!-- Banner text -->
+    <div class="efb-banner-text">
+      <div class="efb-banner-title">Panda Monthly MVP</div>
+      <div class="efb-banner-sub" style="color:#00e5ff">Show Time</div>
+      <div class="efb-banner-timer">⏰ ينتهي في: <span id="bannerTimer">2 أيام 11 ساعة</span></div>
+      <!-- Mini cards row -->
+      <div class="efb-mini-cards">
+        <div class="efb-mini-card tier-gold"><div style="font-size:7px;font-weight:900;color:#fff">AMF<br>101</div><div style="font-size:18px">🎯</div></div>
+        <div class="efb-mini-card tier-plat"><div style="font-size:7px;font-weight:900;color:#fff">CF<br>99</div><div style="font-size:18px">⚡</div></div>
+        <div class="efb-mini-card tier-legend"><div style="font-size:7px;font-weight:900;color:#fff">CF<br>102</div><div style="font-size:18px">🌟</div></div>
+        <div class="efb-mini-card tier-plat"><div style="font-size:7px;font-weight:900;color:#fff">GK<br>99</div><div style="font-size:18px">🧤</div></div>
+      </div>
+      <div class="efb-banner-desc">للاعبي Panda أصحاب أعلى نقاط!</div>
+    </div>
+  </div>
+
+  <!-- Packages grid -->
+  <div class="efb-pkg-title">📦 الباكجات المتاحة</div>
+  <div class="efb-pkg-grid" id="pkgGrid"></div>
+
+</div>
+
 <!-- ══ SECTION: HOME (PITCH) ══ -->
-<div class="sec active" id="sectionHome">
+<div class="sec" id="sectionHome">
 
   <!-- Formation tabs -->
   <div class="formation-tabs">
@@ -973,19 +1156,27 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
-<nav class="bnav">
-  <div class="ni active" data-s="sectionHome" onclick="goNav(this)">
-    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:42px;height:42px;object-fit:contain"></div>
+<!-- BOTTOM NAV — eFootball Style -->
+<nav class="bnav" id="mainBnav">
+  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
+    <div class="ni-tile">⚽</div>
+    <div class="ni-lbl">المباراة</div>
+  </div>
+  <div class="ni active" data-s="sectionLanding" id="navLanding" onclick="goNav(this)">
+    <div class="ni-tile">🛡️</div>
     <div class="ni-lbl">الرئيسية</div>
   </div>
-  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
-    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:42px;height:42px;object-fit:contain"></div>
-    <div class="ni-lbl">الماركت</div>
+  <div class="ni ni-center" data-s="sectionHome" onclick="goNav(this)">
+    <div class="ni-tile">👤</div>
+    <div class="ni-lbl">فريقي</div>
   </div>
-  <div class="ni" data-s="sectionFriends" onclick="goNav(this)">
-    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:42px;height:42px;object-fit:contain"></div>
-    <div class="ni-lbl">الأصدقاء</div>
+  <div class="ni" data-s="sectionTasks" onclick="goNav(this)">
+    <div class="ni-tile">🏅</div>
+    <div class="ni-lbl">مهمات</div>
+  </div>
+  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
+    <div class="ni-tile">🎯</div>
+    <div class="ni-lbl">محاولات يومية</div>
   </div>
 </nav>
 
@@ -1122,6 +1313,15 @@ function goNav(el){
   const sName = el.dataset.s;
   document.getElementById(sName).classList.add('active');
   if(sName==='sectionMarket') renderMarket(_currentFilter);
+  // Show/hide top+bottom bars: only on Landing page
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  const isHome=(sName==='sectionLanding');
+  if(tb) tb.classList.toggle('hidden-bar',!isHome);
+  if(bn) bn.classList.toggle('hidden-bar',!isHome);
+  // Fix body padding
+  document.body.style.paddingTop  = isHome ? '52px' : '0';
+  document.body.style.paddingBottom = isHome ? '90px' : '0';
 }
 
 function goSec(name){
@@ -1129,7 +1329,16 @@ function goSec(name){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.getElementById('section'+name).classList.add('active');
   if(name==='Deposit') document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
+  // Hide bars when going to inner pages
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  if(tb) tb.classList.add('hidden-bar');
+  if(bn) bn.classList.add('hidden-bar');
+  document.body.style.paddingTop='0';
+  document.body.style.paddingBottom='0';
 }
+
+
 
 function openSideMenu(){document.getElementById('sideMenu').classList.add('open');}
 function closeSideMenu(){document.getElementById('sideMenu').classList.remove('open');}
@@ -1801,6 +2010,64 @@ async function init(){
   // TON Connect
   setTimeout(()=>initTON(),600);
 
+  
+// ════ PACKAGES ════
+const PACKAGES = [
+  {id:'pk1',name:'باكج برونزي',tier:'bronze',icon:'📦',cards:3,guaranteed:'برونزي مضمون',price:500,currency:'coins',badge:''},
+  {id:'pk2',name:'باكج فضي',tier:'silver',icon:'🎁',cards:5,guaranteed:'فضي مضمون',price:1500,currency:'coins',badge:'جديد'},
+  {id:'pk3',name:'باكج ذهبي',tier:'gold',icon:'💰',cards:5,guaranteed:'ذهبي مضمون',price:5000,currency:'coins',badge:''},
+  {id:'pk4',name:'باكج بلاتيني',tier:'plat',icon:'💎',cards:5,guaranteed:'بلاتيني مضمون',price:15000,currency:'coins',badge:'نادر'},
+  {id:'pk5',name:'باكج أسطوري',tier:'legend',icon:'👑',cards:5,guaranteed:'أسطوري مضمون',price:2.5,currency:'ton',badge:'حصري'},
+  {id:'pk6',name:'باكج شامبيون',tier:'legend',icon:'🏆',cards:10,guaranteed:'أسطوري مضمون',price:5.0,currency:'ton',badge:''},
+];
+function renderPackages(){
+  const grid=document.getElementById('pkgGrid');if(!grid)return;
+  grid.innerHTML=PACKAGES.map(pk=>{
+    const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
+    return`<div class="efb-pkg pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
+      ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
+      <div class="efb-pkg-bg">
+        <div class="efb-pkg-icon">${pk.icon}</div>
+        <div class="efb-pkg-name">${pk.name}</div>
+        <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
+        <div class="efb-pkg-price">${priceStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openPkg(id){
+  const pk=PACKAGES.find(p=>p.id===id);if(!pk)return;
+  document.getElementById('pkgInfoTitle').textContent=pk.name;
+  const priceStr=pk.currency==='ton'?`${pk.price} TON`:`${fmt(pk.price)} Coins`;
+  document.getElementById('pkgInfoContent').innerHTML=`
+    <div style="text-align:center;padding:16px 0;">
+      <div style="font-size:60px;margin-bottom:8px;">${pk.icon}</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:4px;">${pk.name}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">${pk.cards} بطاقات · ${pk.guaranteed}</div>
+      <button class="btn-prim" onclick="buyPkg('${pk.id}');closeModal('pkgInfoModal')">
+        💳 شراء بـ ${priceStr}
+      </button>
+    </div>`;
+  openModal('pkgInfoModal');
+}
+async function buyPkg(id){
+  const pk=PACKAGES.find(p=>p.id===id);if(!pk)return;
+  if(pk.currency==='ton'){showToast('الدفع بـ TON قيد التطوير');return;}
+  if((S.user.coins||0)<pk.price){showToast(`تحتاج ${fmt(pk.price)} Coins!`);return;}
+  S.user.coins-=pk.price;
+  document.getElementById('tbCoins').textContent=fmt(S.user.coins);
+  showToast(`✅ تم شراء ${pk.name}! فتح ${pk.cards} بطاقات...`);
+  // Give random players from DB based on tier
+  const tierOrder={bronze:0,silver:1,gold:2,plat:3,legend:4};
+  const minTier=tierOrder[pk.tier]||0;
+  const pool=PLAYERS_DB.filter(p=>tierOrder[p.tier]>=minTier&&!S.ownedPlayers.some(o=>o.id===p.id));
+  const shuffle=arr=>{for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;};
+  const picked=shuffle(pool).slice(0,Math.min(pk.cards,pool.length));
+  picked.forEach(p=>{if(!S.ownedPlayers.some(o=>o.id===p.id)){S.ownedPlayers.push({...p});S.bench.push({...p});}});
+  try{await api('buyPlayer',{playerId:picked.map(p=>p.id)});}catch(_){}
+  renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+}
+
   // Load state — retry up to 3 times
   let loaded=false;
   for(let attempt=1;attempt<=3;attempt++){
@@ -1820,6 +2087,7 @@ async function init(){
   }
 
   renderMarket('all');
+  renderPackages();
   renderTasks();
   renderPitch();
   renderBench();

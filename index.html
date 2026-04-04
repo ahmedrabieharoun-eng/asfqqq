@@ -381,11 +381,23 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 @keyframes od-spin{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
 .od-title{font-size:20px;font-weight:900;color:#fff;}
 .od-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.6;max-width:280px;}
-.od-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-.od-btn{padding:12px 22px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;transition:opacity .2s;}
-.od-btn:active{opacity:.8;}
-.od-btn.primary{background:linear-gradient(135deg,var(--bamboo),#4e7a20);color:#fff;box-shadow:0 0 16px var(--bamboo-glow);}
-.od-btn.secondary{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;}
+.od-btns{display:flex;gap:14px;justify-content:center;}
+.od-btn{
+  padding:14px 28px;border-radius:16px;font-size:14px;font-weight:800;
+  cursor:pointer;border:none;transition:all .2s;min-width:110px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.od-btn:active{transform:scale(.95);opacity:.85;}
+.od-btn.primary{
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  color:#fff;box-shadow:0 0 20px var(--bamboo-glow);
+}
+.od-btn.secondary{
+  background:rgba(0,194,255,.15);
+  border:1px solid rgba(0,194,255,.35);
+  color:var(--sky);
+  box-shadow:0 0 16px rgba(0,194,255,.2);
+}
 
 /* ════════════════════════════════════════════
    LANDSCAPE MODE — كل حاجة مكيفة
@@ -546,12 +558,18 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 
 <!-- ORIENTATION DIALOG -->
 <div id="orientDialog">
-  <div class="od-icon">📱</div>
-  <div class="od-title">اختر وضع العرض</div>
-  <div class="od-sub">تريد تستخدم التطبيق بالطول أو بالعرض؟</div>
+  <div class="od-icon">🎮</div>
+  <div class="od-title">كيف تريد العرض؟</div>
+  <div class="od-sub">اختر وضع عرض الشاشة<br><span style="font-size:11px;opacity:.7;">وضع العرض الأفقي يخفي شريط الهاتف</span></div>
   <div class="od-btns">
-    <button class="od-btn primary" onclick="chooseOrientation('portrait')">📱 بالطول</button>
-    <button class="od-btn secondary" onclick="chooseOrientation('landscape')">📺 بالعرض</button>
+    <button class="od-btn primary" onclick="chooseOrientation('portrait')">
+      <span style="font-size:22px;display:block;margin-bottom:4px;">📱</span>
+      بالطول
+    </button>
+    <button class="od-btn secondary" onclick="chooseOrientation('landscape')">
+      <span style="font-size:22px;display:block;margin-bottom:4px;">📺</span>
+      بالعرض
+    </button>
   </div>
 </div>
 
@@ -1740,56 +1758,86 @@ async function init(){
 // ════════════════════════════════════════════
 //  ORIENTATION SYSTEM
 // ════════════════════════════════════════════
-let _orientPref = localStorage.getItem('orientPref') || null; // 'portrait' | 'landscape' | null
-let _orientAsked = false;
+// ════════════════════════════════════════════
+//  ORIENTATION SYSTEM — يسأل كل مرة
+// ════════════════════════════════════════════
+let _orientPref = null; // لا نحفظ — نسأل كل مرة
 
-function chooseOrientation(pref){
-  _orientPref = pref;
-  localStorage.setItem('orientPref', pref);
-  document.getElementById('orientDialog').classList.remove('show');
-  applyOrientation(pref);
-}
-
-function applyOrientation(pref){
-  const html = document.documentElement;
-  if(pref === 'landscape'){
-    // Try native Screen Orientation API first
-    if(screen.orientation && screen.orientation.lock){
-      screen.orientation.lock('landscape').catch(()=>{
-        // Fallback: CSS transform trick for browsers that block lock()
-        applyLandscapeTransform();
-      });
-    } else {
-      applyLandscapeTransform();
-    }
-    document.body.classList.add('force-landscape');
-    document.body.classList.remove('force-portrait');
-    showToast('📺 تم التبديل للعرض الأفقي');
-  } else {
-    // Portrait
-    if(screen.orientation && screen.orientation.lock){
-      screen.orientation.lock('portrait').catch(()=>{});
-    }
-    removeLandscapeTransform();
-    document.body.classList.add('force-portrait');
-    document.body.classList.remove('force-landscape');
-    showToast('📱 تم التبديل للعرض الرأسي');
+// ── Fullscreen (يخفي شريط الحالة) ──
+async function enterFullscreen(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen
+             || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if(req){
+    try{ await req.call(el); }catch(e){ console.log('Fullscreen blocked:',e.message); }
+  }
+  // Telegram WebApp: lock orientation نفسها تخفي الشريط في بعض الأجهزة
+  if(window.Telegram?.WebApp?.requestFullscreen){
+    try{ window.Telegram.WebApp.requestFullscreen(); }catch(_){}
   }
 }
 
-// CSS transform fallback — يدور الشاشة بـ CSS لو المتصفح مش بيدعم lock()
+function exitFullscreen(){
+  const ex = document.exitFullscreen || document.webkitExitFullscreen
+           || document.mozCancelFullScreen || document.msExitFullscreen;
+  if(ex) try{ ex.call(document); }catch(_){}
+}
+
+// ── الاختيار من الديالوج ──
+async function chooseOrientation(pref){
+  _orientPref = pref;
+  document.getElementById('orientDialog').classList.remove('show');
+
+  if(pref === 'landscape'){
+    await enterFullscreen();        // إخفاء شريط الحالة
+    await applyOrientation('landscape');
+  } else {
+    exitFullscreen();
+    await applyOrientation('portrait');
+  }
+}
+
+// ── تطبيق الاتجاه ──
+async function applyOrientation(pref){
+  if(pref === 'landscape'){
+    // 1. جرب Screen Orientation API
+    let locked = false;
+    if(screen.orientation && screen.orientation.lock){
+      try{
+        await screen.orientation.lock('landscape-primary');
+        locked = true;
+      }catch(e){ console.log('orientation.lock failed:', e.message); }
+    }
+    // 2. Fallback: CSS transform لو مفيش lock
+    if(!locked) applyLandscapeTransform();
+
+    document.body.classList.add('force-landscape');
+    document.body.classList.remove('force-portrait');
+  } else {
+    // Portrait
+    if(screen.orientation && screen.orientation.unlock){
+      try{ screen.orientation.unlock(); }catch(_){}
+    }
+    removeLandscapeTransform();
+    exitFullscreen();
+    document.body.classList.remove('force-landscape');
+    document.body.classList.add('force-portrait');
+  }
+}
+
+// ── CSS Transform Fallback ──
 function applyLandscapeTransform(){
   if(window.innerHeight > window.innerWidth){
-    // الجهاز رأسي فعلاً — نطبق التحويل
     const W = window.innerHeight;
     const H = window.innerWidth;
     document.body.style.cssText = `
       transform: rotate(-90deg) translateX(-${W}px);
       transform-origin: top left;
-      width: ${W}px;
-      height: ${H}px;
+      width: ${W}px !important;
+      height: ${H}px !important;
       overflow: hidden;
       position: fixed;
+      top: 0; left: 0;
     `;
     document.documentElement.style.overflow = 'hidden';
   }
@@ -1800,45 +1848,32 @@ function removeLandscapeTransform(){
   document.documentElement.style.overflow = '';
 }
 
-// Check on load & orientation change
-function checkOrientation(){
-  const isLandscape = window.innerWidth > window.innerHeight;
+// ── إظهار الديالوج كل مرة ──
+function showOrientDialog(){
+  // أظهر بعد 600ms عشان شاشة التحميل تظهر الأول
+  setTimeout(()=>{
+    document.getElementById('orientDialog').classList.add('show');
+  }, 600);
+}
 
-  // If user already chose landscape and device is portrait → apply transform
+// ── مراقبة تغيير الاتجاه الفعلي للجهاز ──
+function onDeviceOrientationChange(){
+  if(!_orientPref) return;
+  const isLandscape = window.innerWidth > window.innerHeight;
   if(_orientPref === 'landscape' && !isLandscape){
     applyLandscapeTransform();
-  }
-  // If user already chose portrait and device is landscape → remove transform
-  if(_orientPref === 'portrait' && isLandscape){
+  } else if(_orientPref === 'portrait' && isLandscape){
     removeLandscapeTransform();
   }
 }
 
-function maybeAskOrientation(){
-  // Show dialog only once on first visit
-  if(!_orientPref && !_orientAsked){
-    _orientAsked = true;
-    // Small delay so loading screen appears first
-    setTimeout(()=>{
-      // Only ask if not already landscape (no need to ask if they opened sideways)
-      if(window.innerWidth <= window.innerHeight){
-        document.getElementById('orientDialog').classList.add('show');
-      } else {
-        // Already landscape — save that pref silently
-        _orientPref = 'landscape';
-        localStorage.setItem('orientPref','landscape');
-        document.body.classList.add('force-landscape');
-      }
-    }, 800);
-  } else if(_orientPref){
-    applyOrientation(_orientPref);
-  }
-}
+window.addEventListener('orientationchange', ()=>{ setTimeout(onDeviceOrientationChange, 300); });
+window.addEventListener('resize',            ()=>{ setTimeout(onDeviceOrientationChange, 200); });
 
-window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 300); });
-window.addEventListener('resize', ()=>{ setTimeout(checkOrientation, 200); });
-
-window.addEventListener('load', async function(){ maybeAskOrientation(); await init(); });
+window.addEventListener('load', async function(){
+  showOrientDialog();
+  await init();
+});
 </script>
 </body>
 </html>

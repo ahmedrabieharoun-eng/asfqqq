@@ -3,58 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Football Investment Bot ⚽</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<title>Panda Bamboo Factory 🎋</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Fredoka:wght@400;500;600;700;800&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
+  --bamboo:#7cb342;--bamboo2:#9ccc40;--bamboo-glow:rgba(124,179,66,.5);
+  --coin:#FFD700;--coin-glow:rgba(255,215,0,.4);
+  --card:rgba(6,20,6,.82);--glass:rgba(8,28,8,.68);
+  --border:rgba(124,179,66,.2);--border2:rgba(124,179,66,.38);
+  --text:#e8f5e9;--muted:rgba(232,245,233,.52);
+  --red:#ef5350;--blue:#42a5f5;--cyan:#26c6da;
+  --g1:#061206;--g2:#0a1f0a;--g3:#0d2810;
+  --primary-pink:#FF5CA8;--pink-glow:rgba(255,92,168,.4);
+  --neon-green:#00F27A;--green-glow:rgba(0,242,122,.4);
+  --crystal-blue:#00D4FF;--blue-glow:rgba(0,212,255,.4);
+  --text-secondary:rgba(255,255,255,.85);
+  --glass-border:rgba(255,255,255,.08);
+  /* Football theme additions */
   --gold:#FFD700;--gold2:#FFA500;--gold-glow:rgba(255,215,0,.45);
   --sky:#00C2FF;--sky-glow:rgba(0,194,255,.4);
   --neon:#00FF87;--neon-glow:rgba(0,255,135,.4);
-  --card:rgba(5,12,20,.85);--glass:rgba(8,18,32,.72);
-  --border:rgba(0,194,255,.18);--border2:rgba(255,215,0,.25);
-  --text:#e8f4ff;--muted:rgba(232,244,255,.5);
-  --red:#ef5350;--green:#00c853;
-  --g1:#020810;--g2:#050e1a;--g3:#071220;
   --field:#1a6b2a;--field2:#145522;
   --pitch-line:rgba(255,255,255,.18);
 }
 body{
   font-family:'Cairo',sans-serif;font-weight:700;
-  background:linear-gradient(160deg,#020810 0%,#071220 40%,#030d18 100%);
-  color:var(--text);min-height:100vh;padding-bottom:90px;overflow-x:hidden;font-size:14px;
-  position:relative;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat fixed;
+  color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
 }
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(0,194,255,.07) 0%,transparent 70%),
-    radial-gradient(ellipse 60% 30% at 80% 80%,rgba(0,255,135,.05) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 25% at 20% 60%,rgba(255,215,0,.04) 0%,transparent 60%);
-}
-*{position:relative;z-index:1;}
-/* Fonts */
+button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-serif!important;}
 .orb{font-family:'Orbitron',monospace!important;}
-button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 
 /* ═══ LOADING ═══ */
 #loadingScreen{
   position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(160deg,#020810,#071220);
+  background:linear-gradient(160deg,#061206,#0a1f0a);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
   transition:opacity .8s ease;
 }
 #loadingScreen.hidden{opacity:0;pointer-events:none;}
-.ld-ball{font-size:80px;animation:ld-bounce 1.4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(255,215,0,.7));}
+.ld-ball{font-size:80px;animation:ld-bounce 1.4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,179,66,.7));}
 @keyframes ld-bounce{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-22px) scale(1.08)}55%{transform:translateY(-18px) scale(1.05)}70%{transform:translateY(0) scale(.96)}}
-.ld-title{font-size:22px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;letter-spacing:1px;text-shadow:0 0 20px rgba(255,215,0,.5);}
+.ld-title{font-size:22px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;letter-spacing:1px;text-shadow:0 0 20px rgba(124,179,66,.5);}
 .ld-sub{font-size:13px;color:rgba(255,255,255,.6);min-height:18px;}
 .ld-bar-wrap{width:200px;}
 .ld-bar-bg{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
-.ld-bar-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold),var(--neon));border-radius:3px;transition:width .4s ease;width:0%;}
+.ld-bar-fill{height:100%;background:linear-gradient(90deg,var(--bamboo),var(--coin),var(--neon));border-radius:3px;transition:width .4s ease;width:0%;}
 
 /* ═══ SECTIONS ═══ */
 .sec{display:none;padding:10px 12px 20px;animation:fadeIn .28s ease}
@@ -64,21 +63,21 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 /* ═══ TOP BAR ═══ */
 .topbar{
   display:flex;align-items:center;gap:8px;padding:10px 12px 8px;
-  background:rgba(2,8,16,.88);backdrop-filter:blur(18px);
+  background:rgba(6,18,6,.92);backdrop-filter:blur(18px);
   position:sticky;top:0;z-index:100;
-  border-bottom:1px solid rgba(0,194,255,.12);
+  border-bottom:1px solid rgba(124,179,66,.15);
 }
-.uavatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);flex-shrink:0;overflow:hidden;background:var(--glass);}
+.uavatar{width:42px;height:42px;border-radius:50%;border:2px solid var(--bamboo);flex-shrink:0;overflow:hidden;background:var(--glass);}
 .uavatar img{width:100%;height:100%;object-fit:cover;}
-.uname{font-size:13px;font-weight:800;color:#fff;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.uname{font-size:13px;font-weight:800;color:#fff;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .tb-bals{display:flex;gap:5px;flex:1;min-width:0;}
 .tb-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);border:1px solid;border-radius:16px;padding:5px 9px;font-size:12px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;}
-.tb-chip.coins{border-color:rgba(255,215,0,.4);color:var(--gold);}
-.tb-chip.ton{border-color:rgba(0,194,255,.4);color:var(--sky);}
+.tb-chip.coins{border-color:rgba(255,215,0,.4);color:var(--coin);}
+.tb-chip.bam{border-color:rgba(124,179,66,.4);color:var(--bamboo);}
 .tb-chip-num{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;}
 .tb-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.tb-lang-btn{background:rgba(0,0,0,.55);border:1px solid rgba(0,194,255,.3);border-radius:12px;padding:5px 9px;color:var(--sky);font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;}
-.tb-menu-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.3);border-radius:12px;width:36px;height:36px;color:var(--gold);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.tb-menu-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.3);border-radius:12px;width:38px;height:38px;color:var(--coin);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;flex-shrink:0;}
+.tb-menu-btn .bar{width:18px;height:2px;background:var(--coin);border-radius:2px;transition:all .2s;}
 
 /* ═══ SIDE MENU ═══ */
 #sideMenu{
@@ -88,19 +87,18 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 #sideMenu.open{display:block;}
 .side-overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
 .side-panel{
-  position:absolute;right:0;top:0;bottom:0;width:75%;max-width:300px;
-  background:linear-gradient(160deg,#030c1a,#071626);
-  border-left:1px solid rgba(0,194,255,.2);
-  padding:0;
+  position:absolute;right:0;top:0;bottom:0;width:78%;max-width:300px;
+  background:linear-gradient(160deg,#061206,#0d2010);
+  border-left:1px solid rgba(124,179,66,.2);
   transform:translateX(100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);
   display:flex;flex-direction:column;
 }
 #sideMenu.open .side-panel{transform:translateX(0);}
 .side-header{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;}
-.side-title{font-size:16px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;}
+.side-title{font-size:16px;font-weight:900;color:var(--bamboo);font-family:'Orbitron',monospace;}
 .side-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
 .side-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .18s;}
-.side-item:active{background:rgba(0,194,255,.08);}
+.side-item:active{background:rgba(124,179,66,.08);}
 .side-item-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .side-item-icon.dep{background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.25);}
 .side-item-icon.wd{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);}
@@ -109,23 +107,20 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 .side-item-txt{font-size:14px;font-weight:800;color:#fff;}
 .side-item-sub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:600;}
 
-/* ═══ LANG MENU ═══ */
-#langMenu{display:none;position:fixed;top:62px;right:12px;z-index:300;background:rgba(3,10,20,.97);border:1px solid rgba(0,194,255,.3);border-radius:14px;overflow:hidden;min-width:155px;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.6);}
-.lang-opt{padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;color:var(--text);}
-.lang-opt:hover,.lang-opt.active{background:rgba(0,194,255,.12);color:var(--sky);}
-
 /* ═══ BOTTOM NAV ═══ */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(2,8,16,.95);border-top:1px solid rgba(0,194,255,.12);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(0,0,0,.88);border-top:1px solid rgba(124,179,66,.15);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;transition:all .2s;gap:3px;min-height:70px;}
 .ni-icon{font-size:24px;transition:transform .2s;}
 .ni.active .ni-icon{transform:scale(1.2);}
 .ni-lbl{font-size:9px;font-weight:800;color:var(--muted);transition:color .2s;}
-.ni.active .ni-lbl{color:var(--gold);}
-.ni.active .ni-icon{filter:drop-shadow(0 0 6px var(--gold-glow));}
+.ni.active .ni-lbl{color:var(--bamboo);}
+.ni.active .ni-icon{filter:drop-shadow(0 0 6px var(--bamboo-glow));}
+@keyframes nav-bounce{0%,100%{transform:scale(1.2) translateY(0)}50%{transform:scale(1.2) translateY(-4px)}}
+.ni.active .ni-icon{animation:nav-bounce 1.8s ease-in-out infinite;}
 
 /* ═══ PITCH / FIELD ═══ */
 .pitch-wrap{
-  width:100%;aspect-ratio:.7/1;max-height:500px;
+  width:100%;aspect-ratio:.7/1;max-height:480px;
   background:linear-gradient(180deg,var(--field) 0%,var(--field2) 100%);
   border-radius:16px;overflow:hidden;position:relative;
   border:2px solid rgba(255,255,255,.12);
@@ -133,18 +128,15 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 }
 .pitch-lines{position:absolute;inset:0;pointer-events:none;}
 .pitch-lines svg{width:100%;height:100%;}
-/* Pitch stripes */
 .pitch-wrap::before{
   content:'';position:absolute;inset:0;
   background:repeating-linear-gradient(180deg,rgba(0,0,0,.08) 0px,rgba(0,0,0,.08) 36px,transparent 36px,transparent 72px);
   pointer-events:none;z-index:0;
 }
-/* Player slots */
 .pitch-slot{
   position:absolute;transform:translate(-50%,-50%);
   display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;z-index:10;
-  transition:transform .2s;
+  cursor:pointer;z-index:10;transition:transform .2s;
 }
 .pitch-slot:active{transform:translate(-50%,-50%) scale(.9);}
 .player-circle{
@@ -157,15 +149,14 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   transition:border-color .2s,box-shadow .2s;
   position:relative;
 }
-.player-circle.filled{border-color:var(--gold);box-shadow:0 0 14px rgba(255,215,0,.4);}
+.player-circle.filled{border-color:var(--bamboo);box-shadow:0 0 14px var(--bamboo-glow);}
 .player-circle.empty{border-color:rgba(255,255,255,.2);border-style:dashed;}
 .player-circle.empty::after{content:'+';position:absolute;font-size:20px;font-weight:900;color:rgba(255,255,255,.3);}
 .player-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .player-name-badge{
   font-size:9px;font-weight:800;color:#fff;
   background:rgba(0,0,0,.7);border-radius:6px;padding:2px 5px;
-  white-space:nowrap;max-width:56px;overflow:hidden;text-overflow:ellipsis;
-  text-align:center;
+  white-space:nowrap;max-width:56px;overflow:hidden;text-overflow:ellipsis;text-align:center;
 }
 .player-rating-badge{
   position:absolute;bottom:-4px;right:-4px;
@@ -180,21 +171,22 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 .rb-plat{background:linear-gradient(135deg,#b5e0ff,#a0c8ff);color:#333;}
 .rb-legend{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#fff;box-shadow:0 0 8px rgba(255,215,0,.6);}
 
-/* Team Power Score */
+/* ═══ TEAM POWER BAR ═══ */
 .team-power-bar{
-  background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.25);
+  background:rgba(5,12,25,.85);border:1px solid rgba(124,179,66,.2);
   border-radius:12px;padding:10px 14px;margin-bottom:10px;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:8px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
 }
 .tp-label{font-size:11px;color:var(--muted);font-weight:700;}
-.tp-val{font-size:22px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;line-height:1;}
+.tp-val{font-size:22px;font-weight:900;color:var(--bamboo);font-family:'Orbitron',monospace;line-height:1;}
 .tp-sub{font-size:10px;color:var(--sky);font-weight:700;}
+
+/* ═══ FORMATION TABS ═══ */
 .formation-tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:3px;}
 .ftm-tab{flex-shrink:0;padding:7px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);font-family:'Orbitron',monospace;transition:all .2s;}
-.ftm-tab.active{background:rgba(255,215,0,.18);border-color:var(--gold);color:var(--gold);}
+.ftm-tab.active{background:rgba(124,179,66,.18);border-color:var(--bamboo);color:var(--bamboo);}
 
-/* Bench */
+/* ═══ BENCH ═══ */
 .bench-btn{
   width:100%;padding:9px;background:rgba(0,0,0,.5);
   border:1px solid rgba(255,255,255,.1);border-radius:10px;
@@ -202,45 +194,38 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   display:flex;align-items:center;justify-content:center;gap:6px;
   margin-bottom:8px;transition:background .2s;
 }
-.bench-btn:active{background:rgba(0,194,255,.1);}
+.bench-btn:active{background:rgba(124,179,66,.1);}
 .bench-row{display:flex;gap:8px;overflow-x:auto;padding:8px 0;display:none;}
 .bench-row.open{display:flex;}
 
-/* ═══ PLAYER CARD (holographic) ═══ */
+/* ═══ SAVE FORMATION BUTTON ═══ */
+.save-formation-btn{
+  width:100%;padding:11px;margin-bottom:10px;
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:0 0 14px var(--bamboo-glow);
+  transition:opacity .2s;
+}
+.save-formation-btn:active{opacity:.8;}
+
+/* ═══ PLAYER CARD ═══ */
 .player-card{
-  width:100px;flex-shrink:0;
-  border-radius:14px;overflow:hidden;
-  position:relative;cursor:pointer;
-  transition:transform .2s,box-shadow .2s;
+  width:100px;flex-shrink:0;border-radius:14px;overflow:hidden;
+  position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s;
 }
 .player-card:active{transform:scale(.94);}
-.pc-inner{
-  padding:10px 8px 8px;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  min-height:130px;
-}
+.pc-inner{padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:130px;}
 .pc-bronze .pc-inner{background:linear-gradient(160deg,#3d2a15,#5c3d1e);border:1.5px solid #cd7f32;}
 .pc-silver .pc-inner{background:linear-gradient(160deg,#252525,#3a3a3a);border:1.5px solid #c0c0c0;}
 .pc-gold .pc-inner{background:linear-gradient(160deg,#3d2f00,#5c4700);border:1.5px solid var(--gold);}
 .pc-plat .pc-inner{background:linear-gradient(160deg,#0d2240,#1a3a60);border:1.5px solid #a0c8ff;}
-.pc-legend .pc-inner{
-  background:linear-gradient(160deg,#2d1b00,#4a2e00);
-  border:1.5px solid var(--gold);
-  box-shadow:inset 0 0 30px rgba(255,215,0,.12);
-}
-/* Holographic shimmer */
-.player-card::after{
-  content:'';position:absolute;inset:0;border-radius:14px;
-  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.08) 40%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.08) 60%,transparent 80%);
-  background-size:200% 200%;animation:holo-shift 3s linear infinite;pointer-events:none;
-}
+.pc-legend .pc-inner{background:linear-gradient(160deg,#2d1b00,#4a2e00);border:1.5px solid var(--gold);box-shadow:inset 0 0 30px rgba(255,215,0,.12);}
+.player-card::after{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.08) 40%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.08) 60%,transparent 80%);background-size:200% 200%;animation:holo-shift 3s linear infinite;pointer-events:none;}
 @keyframes holo-shift{0%{background-position:0% 0%}100%{background-position:200% 200%}}
 .pc-rating{font-size:22px;font-weight:900;font-family:'Orbitron',monospace;line-height:1;}
-.pc-bronze .pc-rating{color:#cd7f32;}
-.pc-silver .pc-rating{color:#c0c0c0;}
-.pc-gold .pc-rating{color:var(--gold);}
-.pc-plat .pc-rating{color:#a0c8ff;}
-.pc-legend .pc-rating{color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,.7);}
+.pc-bronze .pc-rating{color:#cd7f32;}.pc-silver .pc-rating{color:#c0c0c0;}.pc-gold .pc-rating{color:var(--gold);}
+.pc-plat .pc-rating{color:#a0c8ff;}.pc-legend .pc-rating{color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,.7);}
 .pc-pos{font-size:9px;font-weight:800;color:rgba(255,255,255,.6);background:rgba(0,0,0,.4);border-radius:5px;padding:1px 5px;letter-spacing:.5px;}
 .pc-img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2);}
 .pc-img-emoji{font-size:36px;line-height:1;}
@@ -248,9 +233,10 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 .pc-club{font-size:9px;color:rgba(255,255,255,.45);font-weight:600;}
 
 /* ═══ MARKET ═══ */
+.pg-title{font-size:18px;font-weight:900;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
 .mkt-filter-bar{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;}
 .mkt-filter-chip{flex-shrink:0;padding:6px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .18s;}
-.mkt-filter-chip.active{background:rgba(0,194,255,.15);border-color:var(--sky);color:var(--sky);}
+.mkt-filter-chip.active{background:rgba(124,179,66,.15);border-color:var(--bamboo);color:var(--bamboo);}
 .mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .mkt-card{
   background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);
@@ -259,22 +245,15 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 }
 .mkt-card:active{transform:scale(.97);}
 .mkt-card.ton-card{border-color:rgba(255,215,0,.2);}
-.mkt-card::before{
-  content:'';position:absolute;inset:0;border-radius:14px;
-  background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);
-  pointer-events:none;
-}
+.mkt-card::before{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none;}
 .mkt-player-img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.15);margin:0 auto 6px;display:block;font-size:40px;text-align:center;line-height:64px;}
 .mkt-player-name{font-size:13px;font-weight:900;color:#fff;text-align:center;margin-bottom:2px;}
 .mkt-player-pos{font-size:10px;color:var(--muted);text-align:center;font-weight:700;margin-bottom:4px;}
-.mkt-player-rating{
-  display:flex;align-items:center;justify-content:center;gap:4px;
-  font-size:11px;font-weight:800;margin-bottom:6px;
-}
+.mkt-player-rating{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:800;margin-bottom:6px;}
 .mkt-price{
   width:100%;padding:7px;background:rgba(0,0,0,.4);
   border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;
-  cursor:pointer;font-family:'Cairo',sans-serif;
+  cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:5px;
   transition:background .2s;
 }
@@ -283,197 +262,49 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 .mkt-price:active{filter:brightness(1.2);}
 .mkt-owned-badge{position:absolute;top:7px;right:7px;background:rgba(0,255,135,.2);border:1px solid rgba(0,255,135,.4);border-radius:8px;padding:2px 7px;font-size:10px;font-weight:800;color:var(--neon);}
 
-/* ═══ MATCH ═══ */
-.match-locked{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:300px;gap:16px;text-align:center;
-}
-.match-lock-icon{font-size:64px;filter:drop-shadow(0 0 20px rgba(255,215,0,.4));}
-.match-lock-title{font-size:18px;font-weight:900;color:#fff;}
-.match-lock-desc{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;max-width:260px;}
-.match-req-bar{
-  width:100%;max-width:280px;
-  background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.2);
-  border-radius:14px;padding:12px 16px;
-}
-.mrb-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;text-align:center;}
-.mrb-track{height:12px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-bottom:5px;}
-.mrb-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--gold));border-radius:6px;transition:width .5s ease;}
-.mrb-nums{display:flex;justify-content:space-between;font-size:10px;font-weight:800;font-family:'Orbitron',monospace;}
-
-/* ═══ REWARDS / MISSIONS ═══ */
-.missions-tabs{display:flex;gap:7px;margin-bottom:12px;}
-.mtab{flex:1;padding:10px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
-.mtab.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold);}
-.mtcont{display:none;}.mtcont.active{display:block;}
-.mission-item{
-  background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);
-  border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:10px;
-  margin-bottom:8px;backdrop-filter:blur(6px);
-  transition:border-color .2s;
-}
-.mission-item.unlocked{border-color:rgba(0,255,135,.2);}
-.mission-item.completed{border-color:rgba(255,255,255,.06);opacity:.65;}
-.mi-icon{font-size:28px;flex-shrink:0;min-width:40px;text-align:center;}
-.mi-info{flex:1;}
-.mi-name{font-weight:800;font-size:13px;margin-bottom:3px;}
-.mi-req{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px;}
-.mi-reward{font-size:11px;font-weight:800;color:var(--gold);}
-.mi-progress{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:5px;}
-.mi-progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--neon));border-radius:3px;transition:width .5s;}
-.mi-btn{border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Cairo',sans-serif;}
-.mi-btn.locked{background:rgba(255,255,255,.06);color:var(--muted);cursor:default;}
-.mi-btn.claim{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0900;box-shadow:0 0 12px var(--gold-glow);animation:pulse-claim 1.8s ease-in-out infinite;}
-@keyframes pulse-claim{0%,100%{box-shadow:0 0 12px var(--gold-glow)}50%{box-shadow:0 0 24px rgba(255,215,0,.75)}}
-.mi-btn.done{background:rgba(0,255,135,.1);color:var(--neon);border:1px solid rgba(0,255,135,.25);cursor:default;}
-
-/* ═══ PACKAGES ═══ */
-.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.pkg-card{
-  background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;padding:14px;cursor:pointer;
-  transition:transform .18s;position:relative;overflow:hidden;text-align:center;
-}
-.pkg-card:active{transform:scale(.96);}
-.pkg-card.featured{border-color:rgba(255,215,0,.3);box-shadow:0 0 20px rgba(255,215,0,.1);}
-.pkg-card.legend{border-color:rgba(0,194,255,.4);box-shadow:0 0 20px rgba(0,194,255,.12);}
-.pkg-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none;}
-.pkg-icon{font-size:42px;margin-bottom:6px;display:block;}
-.pkg-name{font-size:14px;font-weight:900;color:#fff;margin-bottom:3px;}
-.pkg-players{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;}
-.pkg-prob{font-size:11px;font-weight:800;margin-bottom:8px;}
-.pkg-price{
-  padding:8px 12px;border-radius:10px;border:none;
-  font-size:13px;font-weight:900;cursor:pointer;width:100%;
-  font-family:'Cairo',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;
-}
-.pkg-price.coins{background:rgba(255,215,0,.18);border:1px solid rgba(255,215,0,.35);color:var(--gold);}
-.pkg-price.ton{background:rgba(0,194,255,.18);border:1px solid rgba(0,194,255,.35);color:var(--sky);}
-.pkg-info-btn{
-  position:absolute;top:8px;right:8px;
-  background:rgba(255,255,255,.08);border:none;border-radius:8px;
-  padding:3px 8px;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;
-}
-
-/* ═══ MODAL ═══ */
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);}
-.modal.active{display:flex;}
-.modal-box{
-  background:linear-gradient(160deg,#050e1a,#030b16);
-  border:1px solid rgba(0,194,255,.15);border-radius:22px 22px 0 0;
-  padding:18px;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;
-  animation:slide-up .3s ease;
-}
-@keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.modal-title{font-size:16px;font-weight:900;color:var(--gold);}
-.modal-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:14px;}
-
-/* Package open animation */
-#packOpenModal .modal-box{text-align:center;}
-.pack-opening{font-size:80px;animation:pack-spin 1s ease-in-out;display:block;margin:0 auto 10px;}
-@keyframes pack-spin{0%{transform:scale(.5) rotate(-20deg);opacity:0}50%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
-.pack-result-card{
-  display:inline-flex;flex-direction:column;align-items:center;gap:6px;
-  padding:20px 24px;border-radius:18px;margin:10px auto;
-  animation:result-appear .5s .8s both ease;
-}
-@keyframes result-appear{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-
-/* Player detail modal */
-.pd-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
-.pd-img{width:70px;height:70px;border-radius:14px;object-fit:cover;font-size:48px;line-height:70px;text-align:center;flex-shrink:0;}
-.pd-info .pd-name{font-size:18px;font-weight:900;color:#fff;margin-bottom:3px;}
-.pd-info .pd-club{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px;}
-.pd-info .pd-rating-big{font-size:32px;font-weight:900;font-family:'Orbitron',monospace;}
-.pd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;}
-.pd-stat{background:rgba(0,0,0,.4);border-radius:10px;padding:8px;text-align:center;}
-.pd-stat-val{font-size:16px;font-weight:900;font-family:'Orbitron',monospace;}
-.pd-stat-lbl{font-size:9px;color:var(--muted);font-weight:700;margin-top:2px;}
-
-/* Exchange/Finance */
-.fin-tabs{display:flex;gap:6px;margin-bottom:12px;}
-.ftab{flex:1;padding:9px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
-.ftab.active{background:rgba(0,194,255,.15);border-color:var(--sky);color:var(--sky);}
-.ftcont{display:none;}.ftcont.active{display:block;}
-.fin-bal-card{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;margin-bottom:12px;display:flex;gap:0;}
-.fb-item{flex:1;text-align:center;}
-.fb-sep{width:1px;background:rgba(255,255,255,.06);}
-.fb-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;}
-.fb-val{font-size:20px;font-weight:900;font-family:'Orbitron',monospace;}
-.form-card{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;}
-.flabel{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block;}
-.finput{width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#fff;font-size:14px;font-weight:700;margin-bottom:8px;font-family:'Cairo',sans-serif;}
-.finput:focus{outline:none;border-color:var(--sky);}
-.preset-row{display:flex;gap:5px;margin-bottom:10px;}
-.prbtn{flex:1;padding:7px;text-align:center;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.2);border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;color:var(--sky);}
-.prbtn:active{background:rgba(0,194,255,.22);}
-.rate-note{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px;padding:8px;background:rgba(0,194,255,.05);border-radius:10px;font-weight:600;}
-.rate-note strong{color:var(--sky);}
-.btn-prim{width:100%;padding:13px;background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 16px var(--sky-glow);font-family:'Cairo',sans-serif;}
-.btn-prim:disabled{opacity:.4;cursor:default;box-shadow:none;}
-.btn-gold{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:#1a0900;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 16px var(--gold-glow);font-family:'Cairo',sans-serif;}
-.btn-gold:disabled{opacity:.4;cursor:default;box-shadow:none;}
-.hist-box{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;}
-.hist-hdr{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;}
-.hist-row{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;}
-.hist-row:last-child{border-bottom:none;}
-.hist-l{font-size:12px;color:var(--muted);font-weight:600;}
-.hist-r{font-size:12px;font-weight:800;color:var(--gold);}
-.hist-empty{padding:20px;text-align:center;color:var(--muted);font-size:12px;font-weight:600;}
-
-/* Wallet */
-.wal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:10px 12px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:12px;}
-.wl-inf .wll{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;}
-.wl-inf .wla{font-size:12px;font-weight:700;color:var(--sky);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.btn-conn{background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:10px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
-
-/* Referral */
-.ref-card{background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.15);border-radius:18px;padding:14px;margin-bottom:10px;}
-.ref-bonus-badge{display:flex;align-items:center;gap:8px;background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.18);border-radius:12px;padding:10px 12px;margin-bottom:11px;}
-.rbb-pct{font-size:26px;font-weight:900;color:var(--sky);line-height:1;font-family:'Orbitron',monospace;}
-.rbb-txt{font-size:12px;color:var(--muted);font-weight:600;line-height:1.4;}
-.ref-link-row{display:flex;gap:6px;margin-bottom:4px;}
-.ref-inp{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;color:var(--text);font-size:11px;font-weight:600;font-family:'Cairo',sans-serif;}
-.btn-copy{background:linear-gradient(135deg,var(--sky),#0097c8);border:none;border-radius:10px;padding:8px 13px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;}
-.ref-list-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);}
-.ref-list-item:last-child{border-bottom:none;}
-.rli-av{width:34px;height:34px;border-radius:50%;background:var(--glass);border:2px solid var(--sky);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0;}
-.rli-av img{width:100%;height:100%;object-fit:cover;}
-.rli-name{font-size:13px;font-weight:800;}
-.rli-date{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px;}
-.rli-earn{font-size:12px;font-weight:800;color:var(--gold);}
-
-/* Stat badges */
-.stat-badge{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:800;}
-.sb-pending{background:rgba(255,202,40,.12);color:#FFD740;border:1px solid rgba(255,202,40,.25);}
-.sb-done{background:rgba(0,255,135,.12);color:var(--neon);border:1px solid rgba(0,255,135,.25);}
-.sb-rejected{background:rgba(239,83,80,.12);color:#ff8a80;border:1px solid rgba(239,83,80,.25);}
-
-/* TX status */
-.tx-status{display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:12px;text-align:center;}
-.tx-status.visible{display:block;}
-.txsi{font-size:22px;margin-bottom:4px;}
-.txsm{font-size:13px;font-weight:800;margin-bottom:3px;}
-.txsd{font-size:11px;color:var(--muted);font-weight:500;}
-
-/* Pg title */
-.pg-title{font-size:18px;font-weight:900;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
-
-/* Toast */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(5,12,25,.95);border:1px solid rgba(0,194,255,.3);border-radius:14px;padding:10px 20px;font-size:13px;font-weight:800;color:#fff;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px);}
-#toast.show{opacity:1;}
-
-/* Player select modal */
-.player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px;}
-
-/* ══ WITHDRAW BANNERS ══ */
+/* ═══ FINANCE PAGES ═══ */
+.fin-page-title{font-size:17px;font-weight:800;color:var(--bamboo);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.finput{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-weight:600;margin-bottom:7px;}
+.finput:focus{outline:none;border-color:var(--bamboo)}
+.flabel{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block}
+.preset-row{display:flex;gap:5px;margin-bottom:9px}
+.prbtn{flex:1;padding:7px;text-align:center;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--bamboo);}
+.prbtn:active{background:rgba(124,179,66,.28)}
+.btn-prim{width:100%;padding:12px;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 0 14px var(--bamboo-glow);}
+.btn-prim:disabled{opacity:.42;cursor:default;box-shadow:none}
+.btn-wd{width:100%;padding:13px;background:linear-gradient(135deg,#b8860b,var(--coin),#b8860b);border:none;border-radius:12px;color:#1a0a00;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 0 14px var(--coin-glow);display:flex;align-items:center;justify-content:center;gap:7px;}
+.btn-wd:disabled{opacity:.42;cursor:default;box-shadow:none}
+.hist-box{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;backdrop-filter:blur(6px)}
+.hist-hdr{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px}
+.hist-row{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center}
+.hist-row:last-child{border-bottom:none}
+.hist-l{font-size:12px;color:var(--muted);font-weight:500}
+.hist-r{font-size:12px;font-weight:800;color:var(--coin)}
+.hist-empty{padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:500}
 .wd-err-banner{display:none;padding:9px 12px;border-radius:10px;margin-bottom:9px;font-size:12px;gap:8px;align-items:flex-start;}
 .wd-err-banner.show{display:flex}
-.wd-err-banner.trial{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);color:var(--gold)}
+.wd-err-banner.trial{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);color:var(--coin)}
 .wd-err-banner.depreq{background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.25);color:#ff8a80}
-/* ══ SWAP CARD (exchange) ══ */
-.swap-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:16px;backdrop-filter:blur(8px);}
+.stat-badge{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:800}
+.sb-pending{background:rgba(255,202,40,.12);color:#FFD740;border:1px solid rgba(255,202,40,.25)}
+.sb-approved{background:rgba(0,242,122,.12);color:var(--neon-green);border:1px solid rgba(0,242,122,.25)}
+.sb-rejected{background:rgba(239,83,80,.12);color:#ff8a80;border:1px solid rgba(239,83,80,.25)}
+.wal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:10px 12px;background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:12px;}
+.wl-inf .wll{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.wl-inf .wla{font-size:12px;font-weight:700;color:var(--cyan);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-conn{background:linear-gradient(135deg,var(--crystal-blue),#0097b2);border:none;border-radius:10px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.dep-warn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600;}
+.tx-status{display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;text-align:center;}
+.tx-status.visible{display:block}
+.txsi{font-size:22px;margin-bottom:4px}
+.txsm{font-size:13px;font-weight:800;margin-bottom:3px}
+.txsd{font-size:11px;color:var(--muted);font-weight:500}
+.ton-row{display:flex;gap:7px;margin-bottom:11px}
+.ton-chip{flex:1;background:rgba(0,0,0,.24);border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}
+.ton-chip .tcl{font-size:10px;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:4px;font-weight:500}
+.ton-chip .tcv{font-size:15px;font-weight:800;color:var(--cyan)}
+/* Exchange */
+.swap-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,.4);}
 .swap-section{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;}
 .swap-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .swap-currency-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -482,30 +313,42 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 .swap-input-wrap{display:flex;align-items:center;gap:6px;flex:1;justify-content:flex-end}
 .swap-input{width:120px;background:transparent;border:none;color:#fff;font-size:20px;font-weight:800;text-align:right;outline:none;}
 .swap-input::placeholder{color:rgba(255,255,255,.2)}
-.swap-max-btn{background:rgba(0,194,255,.2);border:1px solid rgba(0,194,255,.4);border-radius:8px;padding:3px 9px;color:var(--sky);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.swap-max-btn{background:rgba(124,179,66,.2);border:1px solid rgba(124,179,66,.4);border-radius:8px;padding:3px 9px;color:var(--bamboo);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;}
 .swap-output-wrap{flex:1;text-align:right}
-.swap-output{font-size:22px;font-weight:800;color:var(--gold)}
+.swap-output{font-size:22px;font-weight:800;color:var(--coin)}
 .swap-balance{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
 .swap-divider{display:flex;align-items:center;justify-content:center;padding:8px 0;}
-.swap-rate{margin-top:12px;padding:8px 12px;background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.16);border-radius:10px;font-size:12px;color:var(--muted);text-align:center;font-weight:600;}
-/* ══ MISSION TASK ITEMS ══ */
-.task-tabs{display:flex;gap:7px;margin-bottom:12px}
-.ttab{flex:1;padding:9px;text-align:center;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .2s;}
-.ttab.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold)}
-.tcont{display:none}.tcont.active{display:block}
-.task-item{background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:9px;margin-bottom:7px;backdrop-filter:blur(6px);}
-.ticon{font-size:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;min-width:44px}
-.tinfo{flex:1}
-.tname{font-weight:800;font-size:13px;margin-bottom:2px;color:#fff}
-.trew{font-size:11px;color:var(--gold);font-weight:700}
-.tstat{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600}
-.tbtn{border:none;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:'Cairo',sans-serif;}
-.tbtn.go{background:linear-gradient(135deg,#1976d2,#0d47a1);color:#fff}
-.tbtn.claim-t{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0900}
-.tbtn.done{background:rgba(255,255,255,.07);color:var(--muted);cursor:default}
-/* ══ REF PROG CARD ══ */
-.ref-prog-card{background:rgba(5,12,25,.9);border:1px solid rgba(0,194,255,.15);border-radius:18px;padding:14px;margin-bottom:10px;backdrop-filter:blur(8px);}
-
+.swap-rate{margin-top:12px;padding:8px 12px;background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;font-size:12px;color:var(--muted);text-align:center;font-weight:600;}
+/* Referral */
+.ref-bonus-badge{display:flex;align-items:center;gap:8px;background:rgba(124,179,66,.08);border:1px solid rgba(124,179,66,.18);border-radius:12px;padding:9px 12px;margin-bottom:11px;}
+.rbb-pct{font-size:28px;font-weight:800;color:var(--bamboo);line-height:1}
+.rbb-txt{font-size:12px;color:var(--muted);font-weight:600;line-height:1.4}
+.ref-link-row{display:flex;gap:6px;margin-bottom:4px}
+.ref-inp{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:8px 10px;color:var(--text);font-size:11px;font-weight:600}
+.btn-copy{background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:8px 13px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.ref-count-badge{background:rgba(0,242,122,.12);border:1px solid rgba(0,242,122,.25);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:800;color:var(--neon-green);}
+.ref-list-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.04);}
+.ref-list-item:last-child{border-bottom:none}
+.rli-av{width:34px;height:34px;border-radius:50%;background:var(--glass);border:2px solid var(--bamboo);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0}
+.rli-av img{width:100%;height:100%;object-fit:cover}
+.rli-name{font-size:13px;font-weight:800}
+.rli-date{font-size:10px;color:var(--muted);font-weight:600;margin-top:1px}
+.rli-earn{font-size:12px;font-weight:800;color:var(--bamboo);white-space:nowrap}
+/* Modals */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal.active{display:flex}
+.modal-box{background:linear-gradient(160deg,#0d1f0d,#0a1a0a);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:18px;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;animation:su .3s ease;}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal-title{font-size:16px;font-weight:800;color:var(--bamboo)}
+.modal-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px;}
+/* Toast */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(6,22,6,.97);border:1px solid var(--border);border-radius:22px;padding:10px 18px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px);max-width:84vw;text-align:center;}
+#toast.show{opacity:1;}
+/* Save toast */
+#saveToast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,var(--bamboo),#4e7a20);border-radius:20px;padding:10px 20px;font-size:13px;font-weight:800;color:#fff;z-index:999;transition:transform .3s ease;box-shadow:0 4px 20px var(--bamboo-glow);pointer-events:none;}
+#saveToast.show{transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -513,8 +356,8 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
   <div class="ld-ball">⚽</div>
-  <div class="ld-title orb">FOOTBALL BOT</div>
-  <div class="ld-sub" id="ldSub">جاري تحميل الفريق...</div>
+  <div class="ld-title orb">PANDA FOOTBALL</div>
+  <div class="ld-sub" id="ldSub">جاري التحميل...</div>
   <div class="ld-bar-wrap">
     <div class="ld-bar-bg"><div class="ld-bar-fill" id="ldBar"></div></div>
   </div>
@@ -522,10 +365,10 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="uavatar" id="topAvatar">
-    <div class="ap" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>
+  <div class="uavatar" id="uavatar">
+    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">🐼</div>
   </div>
-  <div style="display:flex;flex-direction:column;gap:1px;min-width:0;">
+  <div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex-shrink:0;">
     <div class="uname" id="topName">اللاعب</div>
     <div style="font-size:9px;color:var(--muted);font-weight:700;" id="topTeamPower">⚡ قوة: 0</div>
   </div>
@@ -534,26 +377,16 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
       <span>🪙</span>
       <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">COINS</span><span class="tb-chip-num orb" id="tbCoins">0</span></div>
     </div>
-    <div class="tb-chip ton">
-      <span>💎</span>
-      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">TON</span><span class="tb-chip-num orb" id="tbTon">0.00</span></div>
+    <div class="tb-chip bam">
+      <span><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;"></span>
+      <div style="display:flex;flex-direction:column;line-height:1.1;"><span style="font-size:8px;opacity:.7;font-weight:600;">BAMBOO</span><span class="tb-chip-num orb" id="tbBamboo">0</span></div>
     </div>
   </div>
-  <div class="tb-actions">
-    <button class="tb-lang-btn" onclick="toggleLangMenu()"><span id="langFlag">🌐</span><span id="langCode">AR</span></button>
-    <button class="tb-menu-btn" onclick="openSideMenu()">☰</button>
-  </div>
-</div>
-
-<!-- LANG MENU -->
-<div id="langMenu">
-  <div style="padding:6px 0;">
-    <div class="lang-opt" onclick="setLang('ar','🇸🇦','AR')">🇸🇦 &nbsp;العربية</div>
-    <div class="lang-opt" onclick="setLang('en','🇬🇧','EN')">🇬🇧 &nbsp;English</div>
-    <div class="lang-opt" onclick="setLang('ru','🇷🇺','RU')">🇷🇺 &nbsp;Русский</div>
-    <div class="lang-opt" onclick="setLang('es','🇪🇸','ES')">🇪🇸 &nbsp;Español</div>
-    <div class="lang-opt" onclick="setLang('fr','🇫🇷','FR')">🇫🇷 &nbsp;Français</div>
-  </div>
+  <button class="tb-menu-btn" onclick="openSideMenu()">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </button>
 </div>
 
 <!-- SIDE MENU -->
@@ -564,21 +397,21 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
       <div class="side-title">MENU</div>
       <button class="side-close" onclick="closeSideMenu()">✕</button>
     </div>
-    <div class="side-item" onclick="goToDeposit()">
+    <div class="side-item" onclick="goSec('Deposit');closeSideMenu()">
       <div class="side-item-icon dep">💳</div>
       <div><div class="side-item-txt">إيداع</div><div class="side-item-sub">أضف TON لرصيدك</div></div>
     </div>
-    <div class="side-item" onclick="goToWithdraw()">
+    <div class="side-item" onclick="goSec('Withdraw');closeSideMenu()">
       <div class="side-item-icon wd">🏦</div>
       <div><div class="side-item-txt">سحب</div><div class="side-item-sub">اسحب أرباحك</div></div>
     </div>
-    <div class="side-item" onclick="goToInvite()">
-      <div class="side-item-icon ref">👥</div>
-      <div><div class="side-item-txt">دعوة صديق</div><div class="side-item-sub">اكسب 200 كوينز لكل صديق</div></div>
-    </div>
-    <div class="side-item" onclick="goToExchange()">
+    <div class="side-item" onclick="goSec('Exchange');closeSideMenu()">
       <div class="side-item-icon exc">🔄</div>
-      <div><div class="side-item-txt">تحويل العملة</div><div class="side-item-sub">Coins ↔ TON</div></div>
+      <div><div class="side-item-txt">تحويل العملة</div><div class="side-item-sub">Bamboo ↔ Coins</div></div>
+    </div>
+    <div class="side-item" onclick="goSec('Referral');closeSideMenu()">
+      <div class="side-item-icon ref">👥</div>
+      <div><div class="side-item-txt">الإحالات</div><div class="side-item-sub">اكسب بدعوة أصدقاء</div></div>
     </div>
   </div>
 </div>
@@ -607,34 +440,31 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
     </div>
     <div style="text-align:left;">
       <div style="font-size:11px;color:var(--muted);font-weight:700;">اللاعبون</div>
-      <div style="font-size:14px;font-weight:900;color:var(--sky);" id="playersCount"><span id="pcFilled">0</span>/11</div>
+      <div style="font-size:14px;font-weight:900;color:var(--sky);"><span id="pcFilled">0</span>/11</div>
     </div>
   </div>
 
   <!-- PITCH -->
   <div class="pitch-wrap" id="pitchWrap">
-    <!-- SVG lines -->
     <svg class="pitch-lines" viewBox="0 0 280 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;">
-      <!-- Border -->
       <rect x="10" y="10" width="260" height="380" rx="4" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
-      <!-- Center line -->
       <line x1="10" y1="200" x2="270" y2="200" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-      <!-- Center circle -->
       <circle cx="140" cy="200" r="40" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
       <circle cx="140" cy="200" r="3" fill="rgba(255,255,255,0.3)"/>
-      <!-- Penalty areas -->
       <rect x="60" y="10" width="160" height="60" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
       <rect x="60" y="330" width="160" height="60" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none"/>
-      <!-- Goal boxes -->
       <rect x="95" y="10" width="90" height="28" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" fill="none"/>
       <rect x="95" y="362" width="90" height="28" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" fill="none"/>
-      <!-- Penalty dots -->
       <circle cx="140" cy="60" r="2.5" fill="rgba(255,255,255,0.3)"/>
       <circle cx="140" cy="340" r="2.5" fill="rgba(255,255,255,0.3)"/>
     </svg>
-    <!-- Player slots rendered by JS -->
     <div id="pitchSlots" style="position:absolute;inset:0;z-index:5;"></div>
   </div>
+
+  <!-- Save Formation -->
+  <button class="save-formation-btn" onclick="saveFormation()">
+    💾 حفظ التشكيلة
+  </button>
 
   <!-- Bench toggle -->
   <button class="bench-btn" onclick="toggleBench()">🪑 اللاعبون الاحتياطيون <span id="benchCount">(0)</span> ▾</button>
@@ -646,7 +476,6 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
 <div class="sec" id="sectionMarket">
   <div class="pg-title">🛒 سوق اللاعبين</div>
 
-  <!-- Filter chips -->
   <div class="mkt-filter-bar">
     <div class="mkt-filter-chip active" onclick="filterMarket('all',this)">الكل</div>
     <div class="mkt-filter-chip" onclick="filterMarket('gk',this)">حارس</div>
@@ -660,255 +489,184 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   <div class="mkt-grid" id="marketGrid"></div>
 </div>
 
-<!-- ══ SECTION: MATCH ══ -->
-<div class="sec" id="sectionMatch">
-  <div class="pg-title">⚔️ المباريات</div>
-  <div class="match-locked" id="matchLocked">
-    <div class="match-lock-icon">🔒</div>
-    <div class="match-lock-title">المباريات قريبًا</div>
-    <div class="match-lock-desc">ابنِ فريقًا بقوة 100 نقطة على الأقل لفتح المباريات</div>
-    <div class="match-req-bar">
-      <div class="mrb-label">قوة الفريق المطلوبة</div>
-      <div class="mrb-track"><div class="mrb-fill" id="matchPowerFill" style="width:0%"></div></div>
-      <div class="mrb-nums">
-        <span class="orb" id="matchPowerCurrent" style="color:var(--sky);">0</span>
-        <span class="orb" style="color:var(--muted);">100</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SECTION: REWARDS ══ -->
-<div class="sec" id="sectionRewards">
-  <div class="pg-title">🎁 المهام والمكافآت</div>
-  <div class="task-tabs">
-    <div class="ttab active" data-t="referral" onclick="switchTaskTab(this,'referral')">👥 إحالة</div>
-    <div class="ttab" data-t="social" onclick="switchTaskTab(this,'social')">📢 اجتماعي</div>
-    <div class="ttab" data-t="daily" onclick="switchTaskTab(this,'daily')">📅 يومي</div>
-  </div>
-  <div class="tcont active" id="tcReferral"><div id="refTaskList"></div></div>
-  <div class="tcont" id="tcSocial"><div id="socialTaskList"></div></div>
-  <div class="tcont" id="tcDaily">
-    <div class="missions-tabs">
-      <div class="mtab active" onclick="switchMissionTab('daily',this)">📅 يومي</div>
-      <div class="mtab" onclick="switchMissionTab('weekly',this)">📆 أسبوعي</div>
-    </div>
-    <div class="mtcont active" id="missionDaily"></div>
-    <div class="mtcont" id="missionWeekly"></div>
-  </div>
-</div>
-
-<!-- ══ SECTION: PACKAGES ══ -->
-<div class="sec" id="sectionPackages">
-  <div class="pg-title">📦 الباكجات</div>
-  <div class="pkg-grid" id="pkgGrid"></div>
-</div>
-
-<!-- ══ SECTION: FINANCE ══ -->
-<div class="sec" id="sectionFinance">
-  <div class="fin-tabs">
-    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💳 إيداع</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🏦 سحب</div>
-    <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">🔄 تحويل</div>
-  </div>
-
-  <!-- DEPOSIT -->
-  <div class="ftcont active" id="ft-deposit">
-    <div class="form-card">
-      <div class="wal-row">
-        <div class="wl-inf">
-          <div class="wll">المحفظة</div>
-          <div class="wla" id="walletAddressDisplay">غير متصل</div>
-        </div>
-        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
-      </div>
-      <div class="dep-warn" style="display:flex;align-items:flex-start;gap:8px;padding:8px 11px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600;">
-        <i class="fas fa-exclamation-triangle" style="margin-top:2px;flex-shrink:0;"></i>
-        <div>هام: يجب كتابة معرفك <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:8px;font-weight:800;"></span> كتعليق وحيد في المعاملة</div>
-      </div>
-      <label class="flabel">المبلغ (TON)</label>
-      <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
-      <div class="preset-row">
-        <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
-        <span class="prbtn" onclick="setDepAmt(1)">1</span>
-        <span class="prbtn" onclick="setDepAmt(2)">2</span>
-        <span class="prbtn" onclick="setDepAmt(5)">5</span>
-        <span class="prbtn" onclick="setDepAmt(10)">10</span>
-      </div>
-      <div style="background:rgba(0,194,255,.07);border:1px solid rgba(0,194,255,.15);border-radius:10px;padding:9px 12px;margin-bottom:10px;">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px;">📊 السعر: <strong style="color:var(--sky);">1 TON = 1,000 Coins</strong></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;color:var(--muted);font-weight:600;">ستحصل على:</span>
-          <span id="depCoinsPreview" style="font-size:16px;font-weight:800;color:var(--gold);">0 🪙</span>
-        </div>
-      </div>
-      <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
-      <div class="tx-status" id="depositStatus">
-        <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
-        <div class="txsd" id="depositStatusDetail"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WITHDRAW -->
-  <div class="ftcont" id="ft-withdraw">
-    <div class="form-card">
-      <div class="wd-err-banner trial" id="wdBannerTrial">
-        <i class="fas fa-gift"></i>
-        <div>🎉 <strong>سحب مجاني:</strong> سحب واحد مجاني حتى 200 Coins. أودع للحصول على سحب غير محدود.</div>
-      </div>
-      <div class="wd-err-banner depreq" id="wdBannerDepReq">
-        <i class="fas fa-lock"></i>
-        <div>انتهى السحب المجاني. يرجى <strong>الإيداع</strong> للاستمرار في السحب.</div>
-      </div>
-      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:13px;text-align:center;margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;">رصيد قابل للسحب</div>
-        <div class="orb" style="font-size:28px;font-weight:900;color:var(--gold);" id="wdCoinsDisp">0 🪙</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;">الحد الأدنى: 200 كوينز</div>
-      </div>
-      <label class="flabel">عنوان محفظة TON</label>
-      <input type="text" id="wdAddressInput" class="finput" placeholder="UQ...">
-      <label class="flabel">المبلغ (كوينز)</label>
-      <input type="number" id="wdAmountInput" class="finput" placeholder="200" min="200" oninput="updWdPreview()">
-      <div id="wdPreview" style="font-size:13px;color:var(--sky);font-weight:800;text-align:center;margin-bottom:10px;"></div>
-      <div style="font-size:11px;color:rgba(255,100,100,.8);text-align:center;margin-bottom:10px;font-weight:600;">⚠️ رسوم السحب 10% | 1 Coin = 0.00005 TON</div>
-      <button class="btn-gold" id="wdSubmitBtn" onclick="submitWithdraw()">🏦 طلب سحب Coins</button>
-      <div class="hist-box" style="margin-top:12px;">
-        <div class="hist-hdr">📋 سجل السحوبات</div>
-        <div id="wdHistList"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXCHANGE -->
-  <div class="ftcont" id="ft-exchange">
-    <div class="swap-card">
-      <div class="swap-section">
-        <div class="swap-label">من</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <span style="font-size:28px;">💎</span>
-            <span class="swap-currency-name">TON</span>
-          </div>
-          <div class="swap-input-wrap">
-            <input type="number" class="swap-input" id="exchTonInput" placeholder="0" oninput="updExchCalc('ton')">
-            <button class="swap-max-btn" onclick="exchMax('ton')">MAX</button>
-          </div>
-        </div>
-        <div class="swap-balance" id="exchTonBal">رصيد: 0.00 TON</div>
-      </div>
-      <div class="swap-divider">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--sky),#0097c8);border:3px solid var(--glass);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--sky-glow);">↓</div>
-      </div>
-      <div class="swap-section">
-        <div class="swap-label">إلى</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <span style="font-size:28px;">🪙</span>
-            <span class="swap-currency-name">Coins</span>
-          </div>
-          <div class="swap-output-wrap">
-            <div class="swap-output" id="exchToOutput">0</div>
-          </div>
-        </div>
-        <div class="swap-balance" id="exchCoinsBal">رصيد: 0 Coins</div>
-      </div>
-      <div class="swap-rate">📊 1 TON = 1,000 🪙 Coins &nbsp;|&nbsp; <span style="color:rgba(255,100,100,.8);font-size:11px;">رسوم Coins → TON: 10%</span></div>
-      <button class="btn-prim" style="margin-top:10px;" onclick="doExchangeTon()">⚡ تحويل الآن</button>
-    </div>
-
-    <!-- Coins → TON -->
-    <div class="swap-card" style="margin-top:10px;">
-      <div class="swap-section">
-        <div class="swap-label">من</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <span style="font-size:28px;">🪙</span>
-            <span class="swap-currency-name">Coins</span>
-          </div>
-          <div class="swap-input-wrap">
-            <input type="number" class="swap-input" id="exchCoinsInput" placeholder="0" oninput="updExchCalc('coins')">
-            <button class="swap-max-btn" onclick="exchMax('coins')">MAX</button>
-          </div>
-        </div>
-        <div class="swap-balance" id="exchCoinsBalFrom">رصيد: 0 Coins</div>
-      </div>
-      <div class="swap-divider">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:3px solid var(--glass);color:#1a0900;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--gold-glow);">↓</div>
-      </div>
-      <div class="swap-section">
-        <div class="swap-label">إلى</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <span style="font-size:28px;">💎</span>
-            <span class="swap-currency-name">TON</span>
-          </div>
-          <div class="swap-output-wrap">
-            <div class="swap-output" style="color:var(--sky);" id="exchToTon">0.0000</div>
-          </div>
-        </div>
-        <div class="swap-balance" id="exchTonBalTo">رصيد: 0.00 TON</div>
-      </div>
-      <div class="swap-rate">📊 رسوم 10% | 1,000 🪙 = 0.9 💎 TON</div>
-      <button class="btn-gold" style="margin-top:10px;" onclick="doExchangeCoins()">🔄 تحويل Coins → TON</button>
-    </div>
-
-    <div class="hist-box" style="margin-top:12px;">
-      <div class="hist-hdr">📋 سجل التحويلات</div>
-      <div id="exchHistList"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SECTION: INVITE ══ -->
-<div class="sec" id="sectionInvite">
-  <div class="pg-title">👥 الإحالات والأصدقاء</div>
-  <div class="ref-prog-card">
+<!-- ══ SECTION: FRIENDS ══ -->
+<div class="sec" id="sectionFriends">
+  <div class="pg-title">👥 الأصدقاء</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
     <div class="ref-bonus-badge">
-      <div class="rbb-pct">20%</div>
-      <div class="rbb-txt">عمولة عندما يشتري أصدقاؤك من الماركت!<br><strong style="color:var(--sky);">+ 200 كوينز مجانية عند التسجيل</strong></div>
+      <span class="rbb-pct">20%</span>
+      <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
     </div>
     <div class="ref-link-row">
       <input class="ref-inp" id="refLinkInp" readonly placeholder="رابط الإحالة...">
       <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> نسخ</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;">📤 شارك الرابط مع أصدقائك</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">📤 شارك الرابط مع أصدقائك</div>
   </div>
   <div class="hist-box">
-    <div class="hist-hdr" style="justify-content:space-between;">
-      <span><i class="fas fa-users"></i> الأصدقاء المدعوون</span>
-      <span class="stat-badge sb-done" id="totalRefsDisp">0 أصدقاء</span>
+    <div class="hist-hdr" style="justify-content:space-between">
+      <span><i class="fas fa-history"></i> الإحالات الأخيرة</span>
+      <span class="ref-count-badge" id="totalRefsDisp">0 أصدقاء</span>
     </div>
-    <div id="refList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
+    <div id="recentRefsList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
+  </div>
+</div>
+
+<!-- ══ SECTION: DEPOSIT ══ -->
+<div class="sec" id="sectionDeposit">
+  <div class="fin-page-title">💰 إيداع TON</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
+    <div class="wal-row">
+      <div class="wl-inf">
+        <div class="wll">المحفظة</div>
+        <div class="wla" id="walletAddressDisplay">غير متصل</div>
+      </div>
+      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
+    </div>
+    <div class="dep-warn">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+        <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+        التعليق الوحيد في المعاملة.
+      </div>
+    </div>
+    <label class="flabel">المبلغ (TON)</label>
+    <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
+    <div class="preset-row" style="margin-bottom:8px">
+      <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
+      <span class="prbtn" onclick="setDepAmt(1)">1</span>
+      <span class="prbtn" onclick="setDepAmt(2)">2</span>
+      <span class="prbtn" onclick="setDepAmt(5)">5</span>
+      <span class="prbtn" onclick="setDepAmt(10)">10</span>
+    </div>
+    <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 المعدل: <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--muted);font-weight:600">ستحصل على:</span>
+        <span id="depBambooPreview" style="font-size:16px;font-weight:800;color:var(--bamboo)">0 Bamboo</span>
+      </div>
+    </div>
+    <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+    <div class="tx-status" id="depositStatus">
+      <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
+      <div class="txsd" id="depositStatusDetail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION: WITHDRAW ══ -->
+<div class="sec" id="sectionWithdraw">
+  <div class="fin-page-title">💸 سحب</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
+    <div class="wd-err-banner trial" id="wdBannerTrial">
+      <i class="fas fa-gift"></i>
+      <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins. أودع لإلغاء القيد.</div>
+    </div>
+    <div class="wd-err-banner depreq" id="wdBannerDepReq">
+      <i class="fas fa-lock"></i>
+      <div>التجربة المجانية مستخدمة. يرجى <strong>الإيداع</strong> لمتابعة السحب.</div>
+    </div>
+    <label class="flabel">عنوان محفظة TON</label>
+    <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
+    <label class="flabel">المبلغ (Coins)</label>
+    <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
+    <div class="ton-row">
+      <div class="ton-chip">
+        <div class="tcl">💎 قيمة TON</div>
+        <div class="tcv" id="wdTonVal">0.0000</div>
+      </div>
+    </div>
+    <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
+      💎 طلب السحب
+    </button>
+  </div>
+  <div class="hist-box">
+    <div class="hist-hdr">📋 سجل السحوبات</div>
+    <div id="wdHist"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
+  </div>
+</div>
+
+<!-- ══ SECTION: EXCHANGE ══ -->
+<div class="sec" id="sectionExchange">
+  <div class="fin-page-title">🔄 تحويل العملة</div>
+  <div class="swap-card">
+    <div class="swap-section">
+      <div class="swap-label">من</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
+          <span class="swap-currency-name">Bamboo</span>
+        </div>
+        <div class="swap-input-wrap">
+          <input type="number" class="swap-input" id="swapFromAmt" placeholder="0" oninput="updSwapCalc()">
+          <button class="swap-max-btn" onclick="swapMax()">MAX</button>
+        </div>
+      </div>
+      <div class="swap-balance" id="swapFromBal">رصيد: 0 Bamboo</div>
+    </div>
+    <div class="swap-divider">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid rgba(6,20,6,.9);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
+    </div>
+    <div class="swap-section">
+      <div class="swap-label">إلى</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <span style="font-size:32px;">🪙</span>
+          <span class="swap-currency-name">Coins</span>
+        </div>
+        <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt">0</div></div>
+      </div>
+      <div class="swap-balance" id="swapToBal">رصيد: 0 Coins</div>
+    </div>
+    <div class="swap-rate">📊 100 Bamboo = 10 Coins</div>
+    <button class="btn-prim" style="margin-top:10px" onclick="doExchange()">⚡ تحويل الآن</button>
+  </div>
+  <div class="hist-box" style="margin-top:12px">
+    <div class="hist-hdr">📋 سجل التحويلات</div>
+    <div id="exchHist"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
+  </div>
+</div>
+
+<!-- ══ SECTION: REFERRAL ══ -->
+<div class="sec" id="sectionReferral">
+  <div class="fin-page-title">👥 برنامج الإحالة</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
+    <div class="ref-bonus-badge">
+      <span class="rbb-pct">20%</span>
+      <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
+    </div>
+    <div class="ref-link-row">
+      <input class="ref-inp" id="refLinkInp2" readonly placeholder="رابط الإحالة...">
+      <button class="btn-copy" onclick="copyRefLink2()"><i class="fas fa-copy"></i> نسخ</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">📤 شارك الرابط مع أصدقائك</div>
+  </div>
+  <div class="hist-box">
+    <div class="hist-hdr" style="justify-content:space-between">
+      <span><i class="fas fa-users"></i> قائمة الإحالات</span>
+      <span class="ref-count-badge" id="totalRefsDisp2">0 أصدقاء</span>
+    </div>
+    <div id="refListFull"><div class="hist-empty">لا توجد إحالات بعد</div></div>
   </div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bnav">
-  <div class="ni active" onclick="goSec('Home',this)">
-    <div class="ni-icon">🏠</div>
+  <div class="ni active" data-s="sectionHome" onclick="goNav(this)">
+    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:42px;height:42px;object-fit:contain"></div>
     <div class="ni-lbl">الرئيسية</div>
   </div>
-  <div class="ni" onclick="goSec('Market',this)">
-    <div class="ni-icon">🛒</div>
+  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
+    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:42px;height:42px;object-fit:contain"></div>
     <div class="ni-lbl">الماركت</div>
   </div>
-  <div class="ni" onclick="goSec('Match',this)">
-    <div class="ni-icon">⚔️</div>
-    <div class="ni-lbl">مباراة</div>
-  </div>
-  <div class="ni" onclick="goSec('Rewards',this)">
-    <div class="ni-icon">🎁</div>
-    <div class="ni-lbl">مكافآت</div>
-  </div>
-  <div class="ni" onclick="goSec('Packages',this)">
-    <div class="ni-icon">📦</div>
-    <div class="ni-lbl">باكجات</div>
+  <div class="ni" data-s="sectionFriends" onclick="goNav(this)">
+    <div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:42px;height:42px;object-fit:contain"></div>
+    <div class="ni-lbl">الأصدقاء</div>
   </div>
 </nav>
 
-<!-- ══ MODALS ══ -->
-<!-- Player Details -->
+<!-- PLAYER DETAIL MODAL -->
 <div class="modal" id="playerDetailModal">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -919,7 +677,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   </div>
 </div>
 
-<!-- Select Player for slot -->
+<!-- SELECT PLAYER MODAL -->
 <div class="modal" id="selectPlayerModal">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -931,7 +689,7 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   </div>
 </div>
 
-<!-- Package info -->
+<!-- PACKAGE INFO MODAL -->
 <div class="modal" id="pkgInfoModal">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -942,95 +700,56 @@ button,input,select,textarea{font-family:'Cairo',sans-serif!important;}
   </div>
 </div>
 
-<!-- Pack opening animation -->
-<div class="modal" id="packOpenModal">
-  <div class="modal-box">
-    <div class="modal-hdr">
-      <div class="modal-title">🎉 فتح الباكج!</div>
-      <button class="modal-close" onclick="closeModal('packOpenModal')">✕</button>
-    </div>
-    <div id="packOpenContent" style="text-align:center;padding:10px 0;"></div>
-  </div>
-</div>
-
-<!-- Toast -->
 <div id="toast"></div>
+<div id="saveToast">✅ تم حفظ التشكيلة!</div>
 
 <script>
 // ════════════════════════════════════════════
-//  FOOTBALL INVESTMENT BOT — Frontend
+//  CONFIG
 // ════════════════════════════════════════════
-
-// ── Config ──
-const API_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev/api';
-const S = {
-  user: null,
-  userId: null,
-  coins: 0,
-  ton: 0,
-  squad: [],       // array of player objects in starting 11 (index 0-10)
-  bench: [],       // substitutes
-  formation: '4-3-3',
-  ownedPlayers: [], // all owned player ids
-  completedMissions: [],
-  refs: [],
-};
-let _initData = '';
-let _walletConnected = false;
-let _walletAddress = '';
-let _tonConnectUI = null;
-let _currentLang = 'ar';
-
-// ── Languages ──
-const LANGS = {
-  ar: { home:'الرئيسية', market:'الماركت', match:'مباراة', rewards:'مكافآت', packages:'باكجات' },
-  en: { home:'Home', market:'Market', match:'Match', rewards:'Rewards', packages:'Packs' },
-  ru: { home:'Главная', market:'Рынок', match:'Матч', rewards:'Награды', packages:'Паки' },
-  es: { home:'Inicio', market:'Mercado', match:'Partido', rewards:'Premios', packages:'Sobres' },
-  fr: { home:'Accueil', market:'Marché', match:'Match', rewards:'Récomp.', packages:'Packs' },
+const CFG = {
+  API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev',
+  DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
+  RATE         : 10,
+  MIN_WD       : 200,
+  TON_PER_COIN : 0.00005,
+  FREE_WD_LIMIT: 200,
+  BOT_USERNAME : 'PandaBamboBot',
+  BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
 };
 
-// ── Players Database ──
+// ════ PLAYERS DB ════
 const PLAYERS_DB = [
-  // Bronze (50-65)
-  {id:'p001',name:'محمد علي',pos:'GK',posKey:'gk',rating:62,tier:'bronze',club:'الاتحاد',country:'SA',league:'SPL',price:800,currency:'coins',emoji:'🧤'},
-  {id:'p002',name:'كارلوس رودريجز',pos:'CB',posKey:'def',rating:58,tier:'bronze',club:'ريال مدريد B',country:'ES',league:'LaLiga',price:600,currency:'coins',emoji:'🛡️'},
-  {id:'p003',name:'محمود حسن',pos:'LB',posKey:'def',rating:60,tier:'bronze',club:'الزمالك',country:'EG',league:'EPL',price:700,currency:'coins',emoji:'⚽'},
-  {id:'p004',name:'أحمد طارق',pos:'CM',posKey:'mid',rating:63,tier:'bronze',club:'النصر',country:'SA',league:'SPL',price:900,currency:'coins',emoji:'🎯'},
-  {id:'p005',name:'يوسف إبراهيم',pos:'ST',posKey:'att',rating:65,tier:'bronze',club:'المصري',country:'EG',league:'EPL',price:1200,currency:'coins',emoji:'⚡'},
-  {id:'p006',name:'ميكل سانشيز',pos:'RW',posKey:'att',rating:61,tier:'bronze',club:'بيلباو',country:'ES',league:'LaLiga',price:800,currency:'coins',emoji:'🌟'},
-  {id:'p007',name:'توماس فيشر',pos:'RB',posKey:'def',rating:59,tier:'bronze',club:'هامبورغ',country:'DE',league:'BL',price:700,currency:'coins',emoji:'🔵'},
-  {id:'p008',name:'إيفان بيتروف',pos:'CDM',posKey:'mid',rating:64,tier:'bronze',club:'سبارتاك',country:'RU',league:'RPL',price:1000,currency:'coins',emoji:'💪'},
-  {id:'p009',name:'لوكاس مارتن',pos:'CAM',posKey:'mid',rating:62,tier:'bronze',club:'ليون',country:'FR',league:'L1',price:900,currency:'coins',emoji:'🎪'},
-  {id:'p010',name:'أندريه سيلفا',pos:'LW',posKey:'att',rating:63,tier:'bronze',club:'بورتو',country:'PT',league:'PL',price:1100,currency:'coins',emoji:'🚀'},
-  // Silver (66-75)
-  {id:'p011',name:'عمر عبدالله',pos:'GK',posKey:'gk',rating:72,tier:'silver',club:'الهلال',country:'SA',league:'SPL',price:3500,currency:'coins',emoji:'🧤'},
-  {id:'p012',name:'فرناندو لوبيز',pos:'CB',posKey:'def',rating:70,tier:'silver',club:'أتلتيكو',country:'ES',league:'LaLiga',price:3000,currency:'coins',emoji:'🏰'},
-  {id:'p013',name:'خالد الغامدي',pos:'CM',posKey:'mid',rating:74,tier:'silver',club:'الاتحاد',country:'SA',league:'SPL',price:5000,currency:'coins',emoji:'🎩'},
-  {id:'p014',name:'مارتن هوفمان',pos:'ST',posKey:'att',rating:73,tier:'silver',club:'دورتموند',country:'DE',league:'BL',price:6000,currency:'coins',emoji:'⚽'},
-  {id:'p015',name:'ديفيد مورو',pos:'LW',posKey:'att',rating:71,tier:'silver',club:'ليل',country:'FR',league:'L1',price:4500,currency:'coins',emoji:'🌪️'},
-  {id:'p016',name:'سامي الجابر',pos:'CAM',posKey:'mid',rating:75,tier:'silver',club:'الاتحاد',country:'SA',league:'SPL',price:7500,currency:'coins',emoji:'👑'},
-  {id:'p017',name:'نيكولاس فيرا',pos:'RB',posKey:'def',rating:69,tier:'silver',club:'إنتر ميلان',country:'IT',league:'SA',price:3200,currency:'coins',emoji:'🔴'},
-  {id:'p018',name:'بيلال الحسن',pos:'CDM',posKey:'mid',rating:71,tier:'silver',club:'الأهلي',country:'EG',league:'EPL',price:3800,currency:'coins',emoji:'💎'},
-  // Gold (76-85)
-  {id:'p019',name:'ليونيل',pos:'CAM',posKey:'mid',rating:84,tier:'gold',club:'النصر',country:'SA',league:'SPL',price:1.5,currency:'ton',emoji:'🌟'},
-  {id:'p020',name:'الفريدو',pos:'ST',posKey:'att',rating:82,tier:'gold',club:'برشلونة',country:'ES',league:'LaLiga',price:1.2,currency:'ton',emoji:'🔥'},
-  {id:'p021',name:'ماركو رويز',pos:'CM',posKey:'mid',rating:80,tier:'gold',club:'يوفنتوس',country:'IT',league:'SA',price:0.8,currency:'ton',emoji:'⚡'},
-  {id:'p022',name:'ثيو مولر',pos:'LW',posKey:'att',rating:81,tier:'gold',club:'بايرن',country:'DE',league:'BL',price:1.0,currency:'ton',emoji:'💫'},
-  {id:'p023',name:'رافائيل سانتوس',pos:'GK',posKey:'gk',rating:83,tier:'gold',club:'برازيل',country:'BR',league:'CBF',price:1.3,currency:'ton',emoji:'🧤'},
-  {id:'p024',name:'ياسين بن علي',pos:'CB',posKey:'def',rating:79,tier:'gold',club:'المغرب',country:'MA',league:'CAF',price:0.9,currency:'ton',emoji:'🛡️'},
-  // Platinum (86-92)
-  {id:'p025',name:'فينيسيوس',pos:'LW',posKey:'att',rating:91,tier:'plat',club:'ريال مدريد',country:'BR',league:'LaLiga',price:3.5,currency:'ton',emoji:'🚀'},
-  {id:'p026',name:'بيدري',pos:'CM',posKey:'mid',rating:89,tier:'plat',club:'برشلونة',country:'ES',league:'LaLiga',price:3.0,currency:'ton',emoji:'🎯'},
-  {id:'p027',name:'هالاند',pos:'ST',posKey:'att',rating:92,tier:'plat',club:'مانشستر',country:'NO',league:'PL',price:4.5,currency:'ton',emoji:'⚡'},
-  {id:'p028',name:'الريسون',pos:'GK',posKey:'gk',rating:90,tier:'plat',club:'ليفربول',country:'BR',league:'PL',price:3.2,currency:'ton',emoji:'🧤'},
-  {id:'p029',name:'روبيغرافوس',pos:'CB',posKey:'def',rating:88,tier:'plat',club:'سيتي',country:'PT',league:'PL',price:2.8,currency:'ton',emoji:'🏰'},
-  // Legend (93-99)
-  {id:'p030',name:'رونالدو',pos:'ST',posKey:'att',rating:99,tier:'legend',club:'النصر',country:'PT',league:'SPL',price:12,currency:'ton',emoji:'🌟'},
-  {id:'p031',name:'ميسي',pos:'CAM',posKey:'mid',rating:98,tier:'legend',club:'إنتر ميامي',country:'AR',league:'MLS',price:11,currency:'ton',emoji:'👑'},
-  {id:'p032',name:'نيمار',pos:'LW',posKey:'att',rating:95,tier:'legend',club:'الهلال',country:'BR',league:'SPL',price:8,currency:'ton',emoji:'💎'},
-  {id:'p033',name:'مبابي',pos:'ST',posKey:'att',rating:97,tier:'legend',club:'ريال مدريد',country:'FR',league:'LaLiga',price:13,currency:'ton',emoji:'⚡'},
-  {id:'p034',name:'دي بروين',pos:'CM',posKey:'mid',rating:94,tier:'legend',club:'سيتي',country:'BE',league:'PL',price:7,currency:'ton',emoji:'🎩'},
+  {id:'p001',name:'محمد علي',pos:'GK',posKey:'gk',rating:62,tier:'bronze',club:'الاتحاد',country:'SA',price:800,currency:'coins',emoji:'🧤'},
+  {id:'p002',name:'كارلوس رودريجز',pos:'CB',posKey:'def',rating:58,tier:'bronze',club:'ريال مدريد B',country:'ES',price:600,currency:'coins',emoji:'🛡️'},
+  {id:'p003',name:'محمود حسن',pos:'LB',posKey:'def',rating:60,tier:'bronze',club:'الزمالك',country:'EG',price:700,currency:'coins',emoji:'⚽'},
+  {id:'p004',name:'أحمد طارق',pos:'CM',posKey:'mid',rating:63,tier:'bronze',club:'النصر',country:'SA',price:900,currency:'coins',emoji:'🎯'},
+  {id:'p005',name:'يوسف إبراهيم',pos:'ST',posKey:'att',rating:65,tier:'bronze',club:'المصري',country:'EG',price:1200,currency:'coins',emoji:'⚡'},
+  {id:'p006',name:'ميكل سانشيز',pos:'RW',posKey:'att',rating:61,tier:'bronze',club:'بيلباو',country:'ES',price:800,currency:'coins',emoji:'🌟'},
+  {id:'p007',name:'توماس فيشر',pos:'RB',posKey:'def',rating:59,tier:'bronze',club:'هامبورغ',country:'DE',price:700,currency:'coins',emoji:'🔵'},
+  {id:'p008',name:'إيفان بيتروف',pos:'CDM',posKey:'mid',rating:64,tier:'bronze',club:'سبارتاك',country:'RU',price:1000,currency:'coins',emoji:'💪'},
+  {id:'p009',name:'لوكاس مارتن',pos:'CAM',posKey:'mid',rating:62,tier:'bronze',club:'ليون',country:'FR',price:900,currency:'coins',emoji:'🎪'},
+  {id:'p010',name:'أندريه سيلفا',pos:'LW',posKey:'att',rating:63,tier:'bronze',club:'بورتو',country:'PT',price:1100,currency:'coins',emoji:'🚀'},
+  {id:'p011',name:'عمر عبدالله',pos:'GK',posKey:'gk',rating:72,tier:'silver',club:'الهلال',country:'SA',price:3500,currency:'coins',emoji:'🧤'},
+  {id:'p012',name:'فرناندو لوبيز',pos:'CB',posKey:'def',rating:70,tier:'silver',club:'أتلتيكو',country:'ES',price:3000,currency:'coins',emoji:'🏰'},
+  {id:'p013',name:'خالد الغامدي',pos:'CM',posKey:'mid',rating:74,tier:'silver',club:'الاتحاد',country:'SA',price:5000,currency:'coins',emoji:'🎩'},
+  {id:'p014',name:'مارتن هوفمان',pos:'ST',posKey:'att',rating:73,tier:'silver',club:'دورتموند',country:'DE',price:6000,currency:'coins',emoji:'⚽'},
+  {id:'p015',name:'ديفيد مورو',pos:'LW',posKey:'att',rating:71,tier:'silver',club:'ليل',country:'FR',price:4500,currency:'coins',emoji:'🌪️'},
+  {id:'p016',name:'رامون فلوريس',pos:'GK',posKey:'gk',rating:80,tier:'gold',club:'برشلونة',country:'ES',price:15000,currency:'coins',emoji:'🧤'},
+  {id:'p017',name:'ماركوس كلاين',pos:'CB',posKey:'def',rating:82,tier:'gold',club:'بايرن',country:'DE',price:20000,currency:'coins',emoji:'🛡️'},
+  {id:'p018',name:'سيرجيو أورتيز',pos:'CM',posKey:'mid',rating:81,tier:'gold',club:'يوفنتوس',country:'IT',price:25000,currency:'coins',emoji:'👑'},
+  {id:'p019',name:'أليكس هنتر',pos:'ST',posKey:'att',rating:83,tier:'gold',club:'PSG',country:'FR',price:30000,currency:'coins',emoji:'⭐'},
+  {id:'p020',name:'يوسيف الحارثي',pos:'CAM',posKey:'mid',rating:80,tier:'gold',club:'الأهلي',country:'SA',price:22000,currency:'coins',emoji:'🎯'},
+  {id:'p021',name:'كريم منصور',pos:'ST',posKey:'att',rating:87,tier:'plat',club:'ريال مدريد',country:'EG',price:1.5,currency:'ton',emoji:'🌟'},
+  {id:'p022',name:'ديميتري فولكوف',pos:'CM',posKey:'mid',rating:85,tier:'plat',club:'مانشستر سيتي',country:'RU',price:1.2,currency:'ton',emoji:'💎'},
+  {id:'p023',name:'جوناس باير',pos:'GK',posKey:'gk',rating:86,tier:'plat',club:'ليفربول',country:'DE',price:1.8,currency:'ton',emoji:'🏆'},
+  {id:'p024',name:'فابيو ريبيرو',pos:'LW',posKey:'att',rating:88,tier:'plat',club:'مانشستر يونايتد',country:'BR',price:2.5,currency:'ton',emoji:'⚡'},
+  {id:'p025',name:'روبيغرافوس',pos:'CB',posKey:'def',rating:88,tier:'plat',club:'سيتي',country:'PT',price:2.8,currency:'ton',emoji:'🏰'},
+  {id:'p026',name:'رونالدو',pos:'ST',posKey:'att',rating:99,tier:'legend',club:'النصر',country:'PT',price:12,currency:'ton',emoji:'🌟'},
+  {id:'p027',name:'ميسي',pos:'CAM',posKey:'mid',rating:98,tier:'legend',club:'إنتر ميامي',country:'AR',price:11,currency:'ton',emoji:'👑'},
+  {id:'p028',name:'نيمار',pos:'LW',posKey:'att',rating:95,tier:'legend',club:'الهلال',country:'BR',price:8,currency:'ton',emoji:'💎'},
+  {id:'p029',name:'مبابي',pos:'ST',posKey:'att',rating:97,tier:'legend',club:'ريال مدريد',country:'FR',price:13,currency:'ton',emoji:'⚡'},
+  {id:'p030',name:'دي بروين',pos:'CM',posKey:'mid',rating:94,tier:'legend',club:'سيتي',country:'BE',price:7,currency:'ton',emoji:'🎩'},
 ];
 
 const FORMATIONS = {
@@ -1041,894 +760,571 @@ const FORMATIONS = {
   '4-1-1-4':[{pos:'GK',x:50,y:90},{pos:'RB',x:80,y:73},{pos:'CB',x:62,y:75},{pos:'CB',x:38,y:75},{pos:'LB',x:20,y:73},{pos:'CDM',x:50,y:60},{pos:'CAM',x:50,y:46},{pos:'RW',x:82,y:30},{pos:'ST',x:62,y:24},{pos:'ST',x:38,y:24},{pos:'LW',x:18,y:30}],
 };
 
-const DAILY_MISSIONS = [
-  {id:'d1',name:'تدريب يومي',req:10,reward:50,icon:'⚽'},
-  {id:'d2',name:'تحليل تكتيكي',req:20,reward:100,icon:'📊'},
-  {id:'d3',name:'مباراة ودية',req:30,reward:200,icon:'🏟️'},
-  {id:'d4',name:'بطولة صغيرة',req:50,reward:350,icon:'🏆'},
-  {id:'d5',name:'كأس المنطقة',req:75,reward:500,icon:'🥇'},
-  {id:'d6',name:'الدوري المحلي',req:100,reward:750,icon:'⭐'},
-  {id:'d7',name:'بطولة الأبطال',req:150,reward:1000,icon:'👑',bonus:'مكافأة خاصة'},
-];
-const WEEKLY_MISSIONS = [
-  {id:'w1',name:'أسبوع التدريب',req:50,reward:1000,icon:'💪'},
-  {id:'w2',name:'مرحلة المجموعات',req:100,reward:2500,icon:'🎯'},
-  {id:'w3',name:'ربع النهائي',req:200,reward:5000,icon:'🏆'},
-  {id:'w4',name:'نصف النهائي',req:350,reward:10000,icon:'🌟'},
-  {id:'w5',name:'النهائي الكبير',req:500,reward:'0.5 TON',rewardTon:true,icon:'👑'},
-];
-const PACKAGES = [
-  {id:'pkg1',name:'ستارتر',icon:'⚡',players:1,goldChance:'5%',price:200,currency:'coins',desc:'باكج البداية — لاعب واحد عشوائي'},
-  {id:'pkg2',name:'برونز باك',icon:'🔥',players:3,goldChance:'15%',price:1000,currency:'coins',desc:'3 لاعبين — فرصة للحصول على ذهبي'},
-  {id:'pkg3',name:'فضي باك',icon:'⭐',players:3,goldChance:'40%',price:3000,currency:'coins',desc:'3 لاعبين — احتمال ذهبي أعلى',featured:true},
-  {id:'pkg4',name:'بريميوم',icon:'👑',players:5,goldChance:'70%',price:1,currency:'ton',desc:'5 لاعبين — احتمال ذهبي عالي جداً',featured:true},
-  {id:'pkg5',name:'ليجند باك',icon:'💎',players:5,goldChance:'أسطوري مضمون',price:3,currency:'ton',desc:'5 لاعبين — لاعب أسطوري مضمون!',legend:true},
-];
+// ════ STATE ════
+const S = {
+  userId: null,
+  startParam: '',
+  user: {coins:0, bamboo:0, miningRate:0, totalEarned:0, machines:{}, tankLevel:1, hasDeposited:false, freeWdUsed:false, tonBalance:0},
+  refs: [], exchHist: [], wdHist: [], doneTasks: [],
+  tasks: {partner:[], community:[]},
+  tankProgress: 0, tankInt: null,
+  tg: null, tonUI: null, wallet: null, depCheckInt: null,
+  squad: new Array(11).fill(null),
+  bench: [],
+  ownedPlayers: [],
+  formation: '4-3-3',
+  _collectCooldown: false,
+};
+let _apiInFlight = 0;
+let _initData = '';
+let _benchOpen = false;
+let _currentFilter = 'all';
 
-// ── Helpers ──
-function fmt(n){if(n===null||n===undefined)return'0';n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n).toLocaleString();}
+// ════ HELPERS ════
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function fmt(n){n=Math.floor(n||0);if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toString();}
 function fmtTon(n){return parseFloat(n||0).toFixed(2);}
 function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function openModal(id){document.getElementById(id).classList.add('active');}
 function closeModal(id){document.getElementById(id).classList.remove('active');}
-function esc(s){return String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));}
-function tierColor(tier){return{bronze:'#cd7f32',silver:'#c0c0c0',gold:'var(--gold)',plat:'#a0c8ff',legend:'var(--gold)'}[tier]||'#fff';}
-function ratingBadgeClass(rating){if(rating>=93)return 'rb-legend';if(rating>=86)return 'rb-plat';if(rating>=76)return 'rb-gold';if(rating>=66)return 'rb-silver';return 'rb-bronze';}
-function pcClass(tier){return{bronze:'pc-bronze',silver:'pc-silver',gold:'pc-gold',plat:'pc-plat',legend:'pc-legend'}[tier]||'pc-bronze';}
+function tierColor(t){return{bronze:'#cd7f32',silver:'#c0c0c0',gold:'var(--gold)',plat:'#a0c8ff',legend:'var(--gold)'}[t]||'#fff';}
+function ratingBadgeClass(r){if(r>=93)return 'rb-legend';if(r>=86)return 'rb-plat';if(r>=76)return 'rb-gold';if(r>=66)return 'rb-silver';return 'rb-bronze';}
+function pcClass(t){return{bronze:'pc-bronze',silver:'pc-silver',gold:'pc-gold',plat:'pc-plat',legend:'pc-legend'}[t]||'pc-bronze';}
 
-// ── Section navigation ──
-function goSec(name, el){
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+// ════ NAVIGATION ════
+function goNav(el){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.getElementById('section'+name).classList.add('active');
-  if(el) el.classList.add('active');
-  closeSideMenu();
-  if(name==='Match') updateMatchSection();
-  if(name==='Rewards'){renderMissions();renderRefTasks();}
-  if(name==='Packages') renderPackages();
-  if(name==='Market') renderMarket();
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  const sName = el.dataset.s;
+  document.getElementById(sName).classList.add('active');
+  if(sName==='sectionMarket') renderMarket(_currentFilter);
 }
-function goToDeposit(){closeSideMenu();goSec('Finance',null);const dt=document.querySelector('.ftab[data-ft="deposit"]');if(dt)switchFinTab(dt,'deposit');}
-function goToWithdraw(){closeSideMenu();goSec('Finance',null);const wt=document.querySelector('.ftab[data-ft="withdraw"]');if(wt)switchFinTab(wt,'withdraw');}
-function goToInvite(){closeSideMenu();goSec('Invite',null);}
-function goToExchange(){closeSideMenu();goSec('Finance',null);const et=document.querySelector('.ftab[data-ft="exchange"]');if(et)switchFinTab(et,'exchange');}
 
-// ── Side menu ──
+function goSec(name){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section'+name).classList.add('active');
+  if(name==='Deposit') document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
+}
+
 function openSideMenu(){document.getElementById('sideMenu').classList.add('open');}
 function closeSideMenu(){document.getElementById('sideMenu').classList.remove('open');}
 
-// ── Lang menu ──
-function toggleLangMenu(){const m=document.getElementById('langMenu');m.style.display=m.style.display==='none'||!m.style.display?'block':'none';}
-document.addEventListener('click',e=>{if(!e.target.closest('#langMenu')&&!e.target.closest('.tb-lang-btn'))document.getElementById('langMenu').style.display='none';});
-function setLang(lang,flag,code){_currentLang=lang;document.getElementById('langFlag').textContent=flag;document.getElementById('langCode').textContent=code;document.getElementById('langMenu').style.display='none';const L=LANGS[lang]||LANGS.ar;const lbl=document.querySelectorAll('.ni-lbl');const keys=['home','market','match','rewards','packages'];lbl.forEach((l,i)=>{if(keys[i])l.textContent=L[keys[i]];});}
-
-// ── Finance tabs ──
-function switchFinTab(el, tab){
-  document.querySelectorAll('#sectionFinance .ftab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('#sectionFinance .ftcont').forEach(c=>c.classList.remove('active'));
-  document.getElementById('ft-'+tab).classList.add('active');
-  if(el) el.classList.add('active');
-  if(tab==='withdraw'){
-    document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';
-  }
-  if(tab==='exchange'){
-    updExchCalc('ton'); updExchCalc('coins');
-  }
+// ════ API ════
+async function api(action, data={}){
+  if(_apiInFlight>8) throw new Error('Too many requests');
+  _apiInFlight++;
+  try{
+    const h={'Content-Type':'application/json'};
+    if(S.tg?.initData) h.Authorization=`Telegram ${S.tg.initData}`;
+    const r=await fetch(`${CFG.API_URL}/api`,{method:'POST',headers:h,body:JSON.stringify({action,data})});
+    const j=await r.json();
+    if(!j.success) throw new Error(j.error||'API error');
+    return j.data;
+  }finally{_apiInFlight--;}
 }
 
-// ── Mission tabs ──
-function switchMissionTab(tab, el){
-  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.mtcont').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('mission'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+async function loadState(){
+  try{
+    const d=await api('getState',{start_param:S.startParam||'',_initData:S.tg?.initData||''});
+    S.user=d.user||S.user;
+    S.refs=d.referrals||[];
+    S.exchHist=d.exchHistory||[];
+    S.wdHist=d.wdHistory||[];
+    S.doneTasks=d.completedTasks||[];
+    S.tasks=d.tasks||{partner:[],community:[]};
+    if(d.user&&d.user.tankAccrued!==undefined) S.tankProgress=parseFloat(d.user.tankAccrued)||0;
+    // Load owned players & squad
+    if(d.ownedPlayers&&Array.isArray(d.ownedPlayers)){
+      S.ownedPlayers=[];
+      d.ownedPlayers.forEach(pid=>{const p=PLAYERS_DB.find(x=>x.id===pid);if(p)S.ownedPlayers.push({...p});});
+    }
+    if(d.squad&&Array.isArray(d.squad)){
+      d.squad.forEach((pid,i)=>{if(pid){const p=PLAYERS_DB.find(x=>x.id===pid);if(p)S.squad[i]={...p};}else S.squad[i]=null;});
+    }
+    S.bench=S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id));
+    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId,d.pendingDeposit.txHash);
+  }catch(e){console.warn('loadState:',e.message);}
+  updateUI();
 }
 
-// ── Team Power ──
-const POSITION_GROUPS = {
-  GK:['GK'],
-  def:['CB','LB','RB','SW','LWB','RWB'],
-  mid:['CM','CDM','CAM','LM','RM','DM','AM'],
-  att:['ST','LW','RW','CF','SS','F'],
-};
-function getPosKey(pos){for(const[k,v] of Object.entries(POSITION_GROUPS))if(v.includes(pos.toUpperCase()))return k;return null;}
+// ════ UPDATE UI ════
+function updateUI(){
+  const u=S.user;
+  document.getElementById('tbCoins').textContent=fmt(u.coins||0);
+  document.getElementById('tbBamboo').textContent=fmt(u.bamboo||0);
+  updSwapBals();
+  updateRefUI();
+  renderExchHist();
+  renderWdHist();
+  renderPitch();
+  renderBench();
+  updatePowerDisplay();
+}
+
+// ════ POWER ════
+const POS_GROUPS={GK:['GK'],def:['CB','LB','RB','SW','LWB','RWB'],mid:['CM','CDM','CAM','LM','RM','DM','AM'],att:['ST','LW','RW','CF','SS','F']};
+function getPosKey(pos){for(const[k,v] of Object.entries(POS_GROUPS))if(v.includes((pos||'').toUpperCase()))return k;return null;}
 function calcTeamPower(){
-  let total=0, count=0;
+  let total=0;
   S.squad.forEach((p,i)=>{
-    if(!p) return;
-    const slotDef = (FORMATIONS[S.formation]||FORMATIONS['4-3-3'])[i];
-    const slotPosKey = getPosKey(slotDef?.pos||'');
-    const playerPosKey = p.posKey;
-    let factor = 0.6;
-    if(playerPosKey===slotPosKey) factor=1.0;
-    else if((playerPosKey==='mid'&&slotPosKey==='att')||(playerPosKey==='att'&&slotPosKey==='mid')||(playerPosKey==='def'&&slotPosKey==='mid')) factor=0.8;
-    total += (p.rating||50)*factor;
-    count++;
+    if(!p)return;
+    const slotDef=(FORMATIONS[S.formation]||FORMATIONS['4-3-3'])[i];
+    const slotPosKey=getPosKey(slotDef?.pos||'');
+    const playerPosKey=p.posKey;
+    let factor=0.6;
+    if(playerPosKey===slotPosKey)factor=1.0;
+    else if((playerPosKey==='mid'&&slotPosKey==='att')||(playerPosKey==='att'&&slotPosKey==='mid'))factor=0.8;
+    total+=(p.rating||50)*factor;
   });
-  // Tactical bonus 0-5%
-  const inPos = S.squad.filter((p,i)=>p&&getPosKey(p.pos||'')===getPosKey((FORMATIONS[S.formation]||[])[i]?.pos||'')).length;
-  const tactBonus = count>0?(inPos/count)*5/100:0;
+  const inPos=S.squad.filter((p,i)=>p&&getPosKey(p.pos||'')===getPosKey((FORMATIONS[S.formation]||[])[i]?.pos||'')).length;
+  const count=S.squad.filter(Boolean).length;
+  const tactBonus=count>0?(inPos/count)*5/100:0;
   return Math.floor(total*(1+tactBonus));
 }
 function updatePowerDisplay(){
-  const power = calcTeamPower();
-  document.getElementById('teamPowerVal').textContent = power;
-  document.getElementById('topTeamPower').textContent = '⚡ قوة: '+power;
-  const filled = S.squad.filter(Boolean).length;
-  document.getElementById('pcFilled').textContent = filled;
-  // match bar
-  const pct = Math.min(100,power);
-  const mf = document.getElementById('matchPowerFill');
-  if(mf) mf.style.width = pct+'%';
-  const mc = document.getElementById('matchPowerCurrent');
-  if(mc) mc.textContent = power;
+  const power=calcTeamPower();
+  const el=document.getElementById('teamPowerVal');if(el)el.textContent=power;
+  const tp=document.getElementById('topTeamPower');if(tp)tp.textContent='⚡ قوة: '+power;
+  const filled=S.squad.filter(Boolean).length;
+  const pf=document.getElementById('pcFilled');if(pf)pf.textContent=filled;
 }
 
-// ── Pitch rendering ──
+// ════ PITCH ════
 function renderPitch(){
-  const slots = document.getElementById('pitchSlots');
-  const formation = FORMATIONS[S.formation]||FORMATIONS['4-3-3'];
+  const slots=document.getElementById('pitchSlots');
+  if(!slots)return;
+  const formation=FORMATIONS[S.formation]||FORMATIONS['4-3-3'];
   let html='';
   formation.forEach((slot,i)=>{
-    const player = S.squad[i];
-    const x=slot.x, y=slot.y;
+    const player=S.squad[i];
+    const x=slot.x,y=slot.y;
     if(player){
-      const rc = ratingBadgeClass(player.rating);
-      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%;" onclick="showSlotOptions(${i})">
+      const rc=ratingBadgeClass(player.rating);
+      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%" onclick="openSlotModal(${i})">
         <div class="player-circle filled">
-          <span style="font-size:22px;">${player.emoji||'👤'}</span>
+          <span style="font-size:22px;">${esc(player.emoji||'⚽')}</span>
           <div class="player-rating-badge ${rc}">${player.rating}</div>
         </div>
         <div class="player-name-badge">${esc(player.name.split(' ')[0])}</div>
       </div>`;
-    } else {
-      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%;" onclick="openSelectPlayer(${i})">
-        <div class="player-circle empty"></div>
-        <div class="player-name-badge" style="color:rgba(255,255,255,.3);">${slot.pos}</div>
+    }else{
+      html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%" onclick="openSlotModal(${i})">
+        <div class="player-circle empty"><span style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);">${esc(slot.pos)}</span></div>
       </div>`;
     }
   });
   slots.innerHTML=html;
+  document.getElementById('homeFormation').textContent=S.formation;
+}
+
+function renderBench(){
+  const bench=document.getElementById('benchRow');
+  if(!bench)return;
+  document.getElementById('benchCount').textContent=`(${S.bench.length})`;
+  if(!S.bench.length){bench.innerHTML='<div style="padding:10px;color:var(--muted);font-size:12px;">لا يوجد لاعبون احتياطيون</div>';return;}
+  bench.innerHTML=S.bench.map(p=>{
+    const cc=pcClass(p.tier);
+    return`<div class="player-card ${cc}" onclick="showPlayerDetail('${p.id}')">
+      <div class="pc-inner">
+        <div class="pc-rating">${p.rating}</div>
+        <div class="pc-pos">${esc(p.pos)}</div>
+        <div class="pc-img-emoji">${esc(p.emoji||'⚽')}</div>
+        <div class="pc-name">${esc(p.name)}</div>
+        <div class="pc-club">${esc(p.club||'')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleBench(){
+  _benchOpen=!_benchOpen;
+  const row=document.getElementById('benchRow');
+  if(_benchOpen)row.classList.add('open');else row.classList.remove('open');
+}
+
+function setFormation(f,el){
+  S.formation=f;
+  document.querySelectorAll('.ftm-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderPitch();
   updatePowerDisplay();
 }
 
-function setFormation(f, el){
-  S.formation=f;
-  document.getElementById('homeFormation').textContent=f;
-  document.querySelectorAll('.ftm-tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderPitch();
+function saveFormation(){
+  const squadIds=S.squad.map(p=>p?p.id:null);
+  api('saveSquad',{squad:squadIds,formation:S.formation}).catch(()=>{});
+  const toast=document.getElementById('saveToast');
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),2500);
 }
 
-function showSlotOptions(slotIdx){
-  const player = S.squad[slotIdx];
-  if(!player){openSelectPlayer(slotIdx);return;}
-  // Show player detail with option to swap
-  const html=`
-    <div class="pd-header">
-      <div class="pd-img">${player.emoji||'👤'}</div>
-      <div class="pd-info">
-        <div class="pd-name">${esc(player.name)}</div>
-        <div class="pd-club">${esc(player.club)} • ${esc(player.pos)}</div>
-        <div class="pd-rating-big" style="color:${tierColor(player.tier)}">${player.rating}</div>
+// ════ SLOT MODAL ════
+let _activeSlot=-1;
+function openSlotModal(i){
+  _activeSlot=i;
+  const slot=(FORMATIONS[S.formation]||FORMATIONS['4-3-3'])[i];
+  const info=document.getElementById('selectSlotInfo');
+  if(info)info.textContent=`المركز: ${slot.pos}`;
+  const list=document.getElementById('playerSelectList');
+  if(!S.bench.length&&!S.squad[i]){list.innerHTML='<div style="padding:10px;color:var(--muted);">اشترِ لاعبين من الماركت أولاً</div>';openModal('selectPlayerModal');return;}
+  const options=[...(S.squad[i]?[{...S.squad[i],_current:true}]:[]),...S.bench];
+  list.innerHTML=options.map(p=>{
+    const cc=pcClass(p.tier);
+    return`<div class="player-card ${cc}" onclick="assignPlayer('${p.id}')">
+      <div class="pc-inner">
+        <div class="pc-rating">${p.rating}</div>
+        <div class="pc-pos">${esc(p.pos)}</div>
+        <div class="pc-img-emoji">${esc(p.emoji||'⚽')}</div>
+        <div class="pc-name">${esc(p.name)}</div>
+        ${p._current?'<div style="font-size:9px;color:var(--neon);font-weight:800;">✓ مُعيَّن</div>':''}
       </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button onclick="removeFromSquad(${slotIdx});closeModal('playerDetailModal');" style="flex:1;padding:10px;background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.3);border-radius:10px;color:#ff8a80;font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;">❌ إزالة</button>
-      <button onclick="closeModal('playerDetailModal');openSelectPlayer(${slotIdx});" style="flex:1;padding:10px;background:rgba(0,194,255,.15);border:1px solid rgba(0,194,255,.3);border-radius:10px;color:var(--sky);font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;">🔄 استبدال</button>
     </div>`;
-  document.getElementById('pdModalTitle').textContent = player.name;
-  document.getElementById('playerDetailContent').innerHTML = html;
-  openModal('playerDetailModal');
-}
-
-function removeFromSquad(slotIdx){
-  if(S.squad[slotIdx]) S.bench.push(S.squad[slotIdx]);
-  S.squad[slotIdx]=null;
-  renderPitch();
-  renderBench();
-}
-
-function openSelectPlayer(slotIdx){
-  const slot = (FORMATIONS[S.formation]||[])[slotIdx];
-  document.getElementById('selectSlotInfo').textContent = `مركز: ${slot?.pos||''} — اختر لاعباً من فريقك`;
-  const available = S.bench.concat(S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id)&&!S.bench.some(b=>b.id===p.id)));
-  let html='';
-  if(!available.length){html='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-weight:600;">لا يوجد لاعبون متاحون<br>اشتر لاعبين من الماركت أو الباكجات</div>';}
-  available.forEach(p=>{
-    html+=`<div onclick="assignToSlot(${slotIdx},'${p.id}')" style="background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:background .18s;" onmouseover="this.style.background='rgba(0,194,255,.1)'" onmouseout="this.style.background='rgba(5,12,25,.9)'">
-      <div style="font-size:32px;">${p.emoji||'👤'}</div>
-      <div style="font-size:12px;font-weight:800;color:#fff;text-align:center;">${esc(p.name.split(' ')[0])}</div>
-      <div style="font-size:10px;color:var(--muted);font-weight:600;">${p.pos}</div>
-      <div style="font-size:14px;font-weight:900;font-family:'Orbitron',monospace;color:${tierColor(p.tier)}">${p.rating}</div>
-    </div>`;
-  });
-  document.getElementById('playerSelectList').innerHTML=html;
+  }).join('');
   openModal('selectPlayerModal');
 }
 
-function assignToSlot(slotIdx, playerId){
-  const player = findPlayer(playerId);
-  if(!player) return;
-  // Remove from bench if there
-  const bi = S.bench.findIndex(b=>b.id===playerId);
-  if(bi>=0) S.bench.splice(bi,1);
-  // If slot had player, move to bench
-  if(S.squad[slotIdx]) S.bench.push(S.squad[slotIdx]);
-  S.squad[slotIdx]=player;
-  closeModal('selectPlayerModal');
-  renderPitch();
-  renderBench();
-}
-
-function findPlayer(id){ return S.ownedPlayers.find(p=>p.id===id)||S.bench.find(p=>p.id===id)||S.squad.find(p=>p&&p.id===id)||null; }
-
-function toggleBench(){const row=document.getElementById('benchRow');row.classList.toggle('open');}
-function renderBench(){
-  const bc = document.getElementById('benchCount');
-  bc.textContent='('+S.bench.length+')';
-  const row = document.getElementById('benchRow');
-  if(!S.bench.length){row.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px;font-weight:600;">لا يوجد احتياطيون</div>';return;}
-  row.innerHTML = S.bench.map(p=>`
-    <div class="player-card ${pcClass(p.tier)}" onclick="showBenchPlayer('${p.id}')">
-      <div class="pc-inner">
-        <div class="pc-rating">${p.rating}</div>
-        <div class="pc-pos">${p.pos}</div>
-        <div class="pc-img-emoji">${p.emoji||'👤'}</div>
-        <div class="pc-name">${esc(p.name.split(' ')[0])}</div>
-      </div>
-    </div>`).join('');
-}
-
-function showBenchPlayer(id){
-  const p=findPlayer(id);
+function assignPlayer(playerId){
+  const i=_activeSlot;
+  if(i<0)return;
+  const p=PLAYERS_DB.find(x=>x.id===playerId);
   if(!p)return;
+  // Remove from other slot if already placed
+  S.squad.forEach((sq,si)=>{if(sq&&sq.id===playerId&&si!==i)S.squad[si]=null;});
+  S.squad[i]={...p};
+  S.bench=S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id));
+  renderPitch();renderBench();updatePowerDisplay();
+  closeModal('selectPlayerModal');
+}
+
+function showPlayerDetail(id){
+  const p=PLAYERS_DB.find(x=>x.id===id);if(!p)return;
   document.getElementById('pdModalTitle').textContent=p.name;
   document.getElementById('playerDetailContent').innerHTML=`
-    <div class="pd-header">
-      <div class="pd-img">${p.emoji||'👤'}</div>
-      <div class="pd-info">
-        <div class="pd-name">${esc(p.name)}</div>
-        <div class="pd-club">${esc(p.club)} • ${esc(p.pos)}</div>
-        <div class="pd-rating-big" style="color:${tierColor(p.tier)}">${p.rating}</div>
-      </div>
+    <div style="text-align:center;padding:10px 0 16px;">
+      <div style="font-size:60px;">${esc(p.emoji||'⚽')}</div>
+      <div style="font-size:28px;font-weight:900;color:${tierColor(p.tier)};font-family:'Orbitron',monospace;">${p.rating}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px;">${esc(p.pos)} · ${esc(p.club||'')} · ${esc(p.country||'')}</div>
     </div>
-    <div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;font-weight:600;">اضغط على مركز فارغ في الملعب لإضافة هذا اللاعب</div>`;
+    <div style="background:rgba(0,0,0,.28);border-radius:12px;padding:12px;font-size:12px;color:var(--muted);">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span>التصنيف</span><span style="color:${tierColor(p.tier)};font-weight:800;">${p.tier}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span>المركز</span><span style="color:#fff;font-weight:800;">${esc(p.pos)}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>السعر</span><span style="color:var(--bamboo);font-weight:800;">${p.currency==='ton'?p.price+' TON':fmt(p.price)+' Coins'}</span></div>
+    </div>`;
   openModal('playerDetailModal');
 }
 
-// ── Market ──
-let _mktFilter='all';
-function filterMarket(f, el){
-  _mktFilter=f;
+// ════ MARKET ════
+function filterMarket(filter, el){
+  _currentFilter=filter;
   document.querySelectorAll('.mkt-filter-chip').forEach(c=>c.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderMarket();
+  if(el)el.classList.add('active');
+  renderMarket(filter);
 }
-function renderMarket(){
-  let players = PLAYERS_DB.filter(p=>{
-    if(_mktFilter==='all') return true;
-    if(_mktFilter==='coins') return p.currency==='coins';
-    if(_mktFilter==='ton') return p.currency==='ton';
-    return p.posKey===_mktFilter;
-  });
-  const owned = S.ownedPlayers.map(p=>p.id);
-  const grid = document.getElementById('marketGrid');
-  if(!players.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:13px;font-weight:600;">لا توجد لاعبون في هذه الفئة</div>';return;}
+
+function renderMarket(filter='all'){
+  const grid=document.getElementById('marketGrid');
+  if(!grid)return;
+  let players=PLAYERS_DB;
+  if(filter==='gk')players=players.filter(p=>p.posKey==='gk');
+  else if(filter==='def')players=players.filter(p=>p.posKey==='def');
+  else if(filter==='mid')players=players.filter(p=>p.posKey==='mid');
+  else if(filter==='att')players=players.filter(p=>p.posKey==='att');
+  else if(filter==='coins')players=players.filter(p=>p.currency==='coins');
+  else if(filter==='ton')players=players.filter(p=>p.currency==='ton');
+  const owned=new Set(S.ownedPlayers.map(p=>p.id));
   grid.innerHTML=players.map(p=>{
-    const isOwned = owned.includes(p.id);
-    const priceStr = p.currency==='ton'?`${p.price} TON`:`${fmt(p.price)} 🪙`;
-    const btnClass = p.currency==='ton'?'ton-btn':'coins-btn';
-    return `<div class="mkt-card${p.currency==='ton'?' ton-card':''}">
-      ${isOwned?'<div class="mkt-owned-badge">مملوك ✓</div>':''}
-      <div style="font-size:52px;text-align:center;margin-bottom:6px;">${p.emoji||'👤'}</div>
+    const isOwned=owned.has(p.id);
+    const isTon=p.currency==='ton';
+    return`<div class="mkt-card ${isTon?'ton-card':''}" onclick="buyPlayer('${p.id}')">
+      ${isOwned?'<div class="mkt-owned-badge">✓ مملوك</div>':''}
+      <div class="mkt-player-img">${esc(p.emoji||'⚽')}</div>
       <div class="mkt-player-name">${esc(p.name)}</div>
-      <div class="mkt-player-pos">${p.pos} • ${p.tier==='legend'?'أسطوري':p.tier==='plat'?'بلاتيني':p.tier==='gold'?'ذهبي':p.tier==='silver'?'فضي':'برونزي'}</div>
+      <div class="mkt-player-pos">${esc(p.pos)}</div>
       <div class="mkt-player-rating">
-        <span style="font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:${tierColor(p.tier)}">${p.rating}</span>
-        <span style="font-size:10px;color:var(--muted);font-weight:700;">نقطة</span>
+        <span style="font-size:16px;font-weight:900;font-family:'Orbitron',monospace;color:${tierColor(p.tier)};">${p.rating}</span>
+        <span style="font-size:9px;padding:2px 5px;border-radius:5px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);">${esc(p.tier)}</span>
       </div>
-      ${isOwned
-        ?`<button class="mkt-price" style="background:rgba(0,255,135,.1);border:1px solid rgba(0,255,135,.25);color:var(--neon);cursor:default;">✓ مملوك</button>`
-        :`<button class="mkt-price ${btnClass}" onclick="buyPlayer('${p.id}')">${priceStr}</button>`
-      }
-    </div>`;
-  }).join('');
-}
-
-function buyPlayer(playerId){
-  const p = PLAYERS_DB.find(x=>x.id===playerId);
-  if(!p) return;
-  if(S.ownedPlayers.some(x=>x.id===playerId)){showToast('اللاعب مملوك بالفعل ✓');return;}
-  if(p.currency==='coins'){
-    if(S.coins<p.price){showToast('رصيد كوينز غير كافٍ 🪙');return;}
-    S.coins-=p.price;
-    addPlayer(p);
-    updateBalances();
-    showToast(`تم شراء ${p.name} مقابل ${fmt(p.price)} 🪙`);
-    renderMarket();
-    api('buyPlayer',{playerId,currency:'coins',price:p.price}).catch(()=>{});
-  } else {
-    if(S.ton<p.price){showToast('رصيد TON غير كافٍ 💎');return;}
-    S.ton-=p.price;
-    addPlayer(p);
-    updateBalances();
-    showToast(`تم شراء ${p.name} مقابل ${p.price} TON 💎`);
-    renderMarket();
-    api('buyPlayer',{playerId,currency:'ton',price:p.price}).catch(()=>{});
-  }
-}
-
-function addPlayer(p){
-  S.ownedPlayers.push({...p});
-  S.bench.push({...p});
-  renderBench();
-}
-
-// ── Match section ──
-function updateMatchSection(){
-  const power = calcTeamPower();
-  const mf = document.getElementById('matchPowerFill');
-  if(mf) mf.style.width=Math.min(100,power)+'%';
-  const mc = document.getElementById('matchPowerCurrent');
-  if(mc) mc.textContent=power;
-}
-
-// ── Task System ──
-const REF_TASKS_DATA = [
-  {id:'r1',  n:1,   coins:10,  label:'ادعُ صديقاً واحداً'},
-  {id:'r5',  n:5,   coins:50,  label:'ادعُ 5 أصدقاء'},
-  {id:'r10', n:10,  coins:100, label:'ادعُ 10 أصدقاء'},
-  {id:'r20', n:20,  coins:200, label:'ادعُ 20 صديقاً'},
-  {id:'r50', n:50,  coins:500, label:'ادعُ 50 صديقاً'},
-  {id:'r100',n:100, coins:1000,label:'ادعُ 100 صديق'},
-];
-const SOC_TASKS_DATA = [
-  {id:'tg_ch', name:'انضم لقناة التيليجرام',   icon:'📢', link:'https://t.me/YOUR_CHANNEL', coins:100},
-  {id:'tg_grp',name:'انضم للمجموعة',            icon:'👥', link:'https://t.me/YOUR_GROUP',   coins:50 },
-  {id:'tg_bot',name:'شغّل البوت',               icon:'🤖', link:'https://t.me/FootballInvestBot', coins:30},
-];
-
-let _taskInflight=new Set();
-
-function switchTaskTab(el,t){
-  document.querySelectorAll('.task-tabs .ttab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('#sectionRewards .tcont').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tc'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');
-  if(t==='referral') renderRefTasks();
-  else if(t==='social') renderSocTasks();
-  else if(t==='daily') renderMissions();
-}
-
-function renderRefTasks(){
-  const refCount = (S.refs||[]).length;
-  document.getElementById('refTaskList').innerHTML=REF_TASKS_DATA.map(t=>{
-    const done=(S.completedMissions||[]).includes(t.id);
-    const can=refCount>=t.n&&!done;
-    return`<div class="task-item">
-      <div class="ticon">👥</div>
-      <div class="tinfo">
-        <div class="tname">${t.label}</div>
-        <div class="trew">+${fmt(t.coins)} 🪙 Coins</div>
-        <div class="tstat">${refCount}/${t.n} أصدقاء</div>
-      </div>
-      ${done?`<button class="tbtn done">✅ تم</button>`:can?`<button class="tbtn claim-t" onclick="claimRefTask('${t.id}',${t.coins})">استلام</button>`:`<button class="tbtn done">${refCount}/${t.n}</button>`}
-    </div>`;
-  }).join('');
-}
-
-function claimRefTask(id, coins){
-  if(_taskInflight.has(id)) return;
-  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
-  _taskInflight.add(id);
-  S.completedMissions=S.completedMissions||[];
-  S.completedMissions.push(id);
-  S.coins=(S.coins||0)+coins;
-  updateBalances(); renderRefTasks();
-  showToast('🎉 حصلت على '+fmt(coins)+' 🪙');
-  api('claimMission',{missionId:id}).catch(()=>{});
-  _taskInflight.delete(id);
-}
-
-function renderSocTasks(){
-  document.getElementById('socialTaskList').innerHTML=SOC_TASKS_DATA.map(t=>{
-    const done=(S.completedMissions||[]).includes(t.id);
-    const inf=_taskInflight.has(t.id);
-    return`<div class="task-item">
-      <div class="ticon">${t.icon}</div>
-      <div class="tinfo">
-        <div class="tname">${t.name}</div>
-        <div class="trew">+${fmt(t.coins)} 🪙 Coins</div>
-      </div>
-      ${done?`<button class="tbtn done">✅ تم</button>`:inf?`<button class="tbtn done" style="opacity:.6">⏳</button>`:`<button class="tbtn go" onclick="doSocTask('${t.id}','${t.link}',${t.coins})">اذهب →</button>`}
-    </div>`;
-  }).join('');
-}
-
-function doSocTask(id,link,coins){
-  if(_taskInflight.has(id)) return;
-  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
-  _taskInflight.add(id);
-  renderSocTasks();
-  if(link) window.open(link,'_blank','noopener');
-  showToast('⏳ جاري التحقق...');
-  setTimeout(()=>{
-    S.completedMissions=S.completedMissions||[];
-    S.completedMissions.push(id);
-    S.coins=(S.coins||0)+coins;
-    updateBalances(); renderSocTasks();
-    showToast('🎉 حصلت على '+fmt(coins)+' 🪙');
-    api('claimMission',{missionId:id}).catch(()=>{});
-    _taskInflight.delete(id);
-  },3000);
-}
-
-// ── Missions (Daily/Weekly) ──
-function renderMissions(){
-  const power = calcTeamPower();
-  const comp = S.completedMissions||[];
-  // Daily
-  let dHtml = DAILY_MISSIONS.map(m=>{
-    const unlocked = power>=m.req;
-    const done = comp.includes(m.id);
-    const pct = Math.min(100,(power/m.req)*100);
-    let btnHtml='';
-    if(done) btnHtml=`<button class="mi-btn done">✓ تم</button>`;
-    else if(unlocked) btnHtml=`<button class="mi-btn claim" onclick="claimMission('${m.id}',${typeof m.reward==='number'?m.reward:0})">استلام</button>`;
-    else btnHtml=`<button class="mi-btn locked">🔒 مقفل</button>`;
-    return `<div class="mission-item ${unlocked&&!done?'unlocked':''} ${done?'completed':''}">
-      <div class="mi-icon">${m.icon}</div>
-      <div class="mi-info">
-        <div class="mi-name">${m.name}</div>
-        <div class="mi-req">متطلب: <span style="color:var(--sky);font-weight:900;">${m.req} نقطة</span></div>
-        <div class="mi-reward">+${typeof m.reward==='number'?fmt(m.reward)+' 🪙':m.reward}</div>
-        <div class="mi-progress"><div class="mi-progress-fill" style="width:${pct}%"></div></div>
-      </div>
-      ${btnHtml}
-    </div>`;
-  }).join('');
-  document.getElementById('missionDaily').innerHTML=dHtml;
-
-  // Weekly
-  let wHtml = WEEKLY_MISSIONS.map(m=>{
-    const unlocked = power>=m.req;
-    const done = comp.includes(m.id);
-    const pct = Math.min(100,(power/m.req)*100);
-    let btnHtml='';
-    if(done) btnHtml=`<button class="mi-btn done">✓ تم</button>`;
-    else if(unlocked) btnHtml=`<button class="mi-btn claim" onclick="claimMission('${m.id}',${typeof m.reward==='number'?m.reward:0},${!!m.rewardTon})">استلام</button>`;
-    else btnHtml=`<button class="mi-btn locked">🔒 مقفل</button>`;
-    return `<div class="mission-item ${unlocked&&!done?'unlocked':''} ${done?'completed':''}">
-      <div class="mi-icon">${m.icon}</div>
-      <div class="mi-info">
-        <div class="mi-name">${m.name}</div>
-        <div class="mi-req">متطلب: <span style="color:var(--sky);font-weight:900;">${m.req} نقطة</span></div>
-        <div class="mi-reward">+${typeof m.reward==='number'?fmt(m.reward)+' 🪙':m.reward}</div>
-        <div class="mi-progress"><div class="mi-progress-fill" style="width:${pct}%"></div></div>
-      </div>
-      ${btnHtml}
-    </div>`;
-  }).join('');
-  document.getElementById('missionWeekly').innerHTML=wHtml;
-}
-
-function claimMission(id, rewardCoins, isTon=false){
-  if((S.completedMissions||[]).includes(id)){showToast('تم الاستلام سابقاً');return;}
-  S.completedMissions.push(id);
-  if(isTon){S.ton+=0.5;showToast('🎉 حصلت على 0.5 TON!');}
-  else{S.coins+=rewardCoins;showToast(`🎉 حصلت على ${fmt(rewardCoins)} كوينز!`);}
-  updateBalances();
-  renderMissions();
-  api('claimMission',{missionId:id}).catch(()=>{});
-}
-
-// ── Packages ──
-function renderPackages(){
-  document.getElementById('pkgGrid').innerHTML=PACKAGES.map(p=>`
-    <div class="pkg-card ${p.featured?'featured':''} ${p.legend?'legend':''}">
-      <button class="pkg-info-btn" onclick="showPkgInfo('${p.id}')">ℹ️</button>
-      <span class="pkg-icon">${p.icon}</span>
-      <div class="pkg-name">${p.name}</div>
-      <div class="pkg-players">${p.players} لاعب${p.players>1?'ين/لاعبون':''}</div>
-      <div class="pkg-prob" style="color:${p.currency==='ton'?'var(--gold)':'var(--sky)'}">🎯 ذهبي: ${p.goldChance}</div>
-      <button class="pkg-price ${p.currency==='ton'?'ton':'coins'}" onclick="openPack('${p.id}')">
-        ${p.currency==='ton'?`💎 ${p.price} TON`:`🪙 ${fmt(p.price)}`}
+      <button class="mkt-price ${isTon?'ton-btn':'coins-btn'}" onclick="event.stopPropagation();buyPlayer('${p.id}')">
+        ${isTon?'💎 '+p.price+' TON':'🪙 '+fmt(p.price)+' Coins'}
       </button>
-    </div>`).join('');
-}
-
-function showPkgInfo(pkgId){
-  const p=PACKAGES.find(x=>x.id===pkgId);
-  if(!p)return;
-  document.getElementById('pkgInfoTitle').textContent=p.icon+' '+p.name;
-  document.getElementById('pkgInfoContent').innerHTML=`
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6;font-weight:600;">${p.desc}</p>
-    <div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;">
-      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">عدد اللاعبين</span>
-        <span style="font-size:13px;font-weight:900;color:#fff;">${p.players}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">احتمال ذهبي+</span>
-        <span style="font-size:13px;font-weight:900;color:var(--gold);">${p.goldChance}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:6px 0;">
-        <span style="font-size:12px;color:var(--muted);font-weight:700;">السعر</span>
-        <span style="font-size:13px;font-weight:900;color:${p.currency==='ton'?'var(--sky)':'var(--gold)'};">${p.currency==='ton'?p.price+' TON':fmt(p.price)+' Coins'}</span>
-      </div>
     </div>`;
-  openModal('pkgInfoModal');
+  }).join('');
 }
 
-function openPack(pkgId){
-  const pkg=PACKAGES.find(x=>x.id===pkgId);
-  if(!pkg)return;
-  // Check balance
-  if(pkg.currency==='coins'&&S.coins<pkg.price){showToast('رصيد كوينز غير كافٍ 🪙');return;}
-  if(pkg.currency==='ton'&&S.ton<pkg.price){showToast('رصيد TON غير كافٍ 💎');return;}
-  // Deduct
-  if(pkg.currency==='coins') S.coins-=pkg.price;
-  else S.ton-=pkg.price;
-  updateBalances();
-  // Generate players
-  const won=[];
-  for(let i=0;i<pkg.players;i++){
-    won.push(getRandomPlayerForPack(pkg));
+async function buyPlayer(id){
+  const p=PLAYERS_DB.find(x=>x.id===id);if(!p)return;
+  if(S.ownedPlayers.some(x=>x.id===id)){showToast('اللاعب مملوك بالفعل ✓');return;}
+  if(p.currency==='coins'){
+    const price=p.price;
+    if((S.user.coins||0)<price){showToast(`تحتاج ${fmt(price)} Coins!`);return;}
+    S.user.coins-=price;
+    S.ownedPlayers.push({...p});
+    S.bench.push({...p});
+    api('buyPlayer',{playerId:id}).catch(()=>{});
+    renderMarket(_currentFilter);renderBench();
+    document.getElementById('tbCoins').textContent=fmt(S.user.coins);
+    showToast(`✅ تم شراء ${p.name}!`);
+  }else{
+    showToast('الدفع بـ TON قيد التطوير');
   }
-  // Animation
-  let html=`<div class="pack-opening">${pkg.icon}</div>`;
-  html+=`<div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:12px;">حصلت على ${pkg.players} لاعب${pkg.players>1?'ين':''}!</div>`;
-  html+=`<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">`;
-  won.forEach(p=>{
-    if(p){
-      if(!S.ownedPlayers.some(x=>x.id===p.id)){S.ownedPlayers.push({...p});S.bench.push({...p});}
-      html+=`<div class="player-card ${pcClass(p.tier)}" style="width:88px;">
-        <div class="pc-inner">
-          <div class="pc-rating">${p.rating}</div>
-          <div class="pc-pos">${p.pos}</div>
-          <div class="pc-img-emoji" style="font-size:32px">${p.emoji||'👤'}</div>
-          <div class="pc-name">${esc(p.name.split(' ')[0])}</div>
-        </div>
-      </div>`;
-    }
-  });
-  html+=`</div>`;
-  html+=`<button onclick="closeModal('packOpenModal')" style="margin-top:14px;width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:#1a0900;font-size:14px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;">رائع! 🎉</button>`;
-  document.getElementById('packOpenContent').innerHTML=html;
-  renderBench();
-  openModal('packOpenModal');
-  api('buyPack',{packId:pkgId}).catch(()=>{});
 }
 
-function getRandomPlayerForPack(pkg){
-  // Determine tier based on pack probabilities
-  const r=Math.random()*100;
-  let tiers=[];
-  if(pkg.id==='pkg5') tiers=['legend','plat','gold'];
-  else if(pkg.id==='pkg4'){tiers=r<70?['gold','plat','legend']:r<85?['silver']:['bronze'];}
-  else if(pkg.id==='pkg3'){tiers=r<40?['gold','plat']:r<70?['silver']:['bronze'];}
-  else if(pkg.id==='pkg2'){tiers=r<15?['gold']:r<50?['silver']:['bronze'];}
-  else{tiers=r<5?['gold']:r<30?['silver']:['bronze'];}
-  // Must have legend for pkg5
-  if(pkg.id==='pkg5'&&tiers.includes('legend')){
-    const legs=PLAYERS_DB.filter(p=>p.tier==='legend');
-    return legs[Math.floor(Math.random()*legs.length)];
-  }
-  const pool=PLAYERS_DB.filter(p=>tiers.includes(p.tier));
-  if(!pool.length) return PLAYERS_DB[0];
-  return pool[Math.floor(Math.random()*pool.length)];
+// ════ REFERRAL ════
+function updateRefUI(){
+  const link=`${CFG.BOT_APP_LINK}?startapp=${encodeURIComponent(S.userId||'000')}`;
+  const r1=document.getElementById('refLinkInp');if(r1)r1.value=link;
+  const r2=document.getElementById('refLinkInp2');if(r2)r2.value=link;
+  const c1=document.getElementById('totalRefsDisp');if(c1)c1.textContent=`${S.refs.length} أصدقاء`;
+  const c2=document.getElementById('totalRefsDisp2');if(c2)c2.textContent=`${S.refs.length} أصدقاء`;
+  const refsHtml=!S.refs.length?'<div class="hist-empty">لا توجد إحالات بعد</div>':S.refs.slice(0,20).map(r=>`
+    <div class="ref-list-item">
+      <div class="rli-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🐼'">`:'🐼'}</div>
+      <div style="flex:1;"><div class="rli-name">${esc(r.name||'صديق')}</div><div class="rli-date">${esc(r.date||'انضم مؤخراً')}</div></div>
+      <div class="rli-earn">+${fmt(r.earned||0)} 🎋</div>
+    </div>`).join('');
+  const l1=document.getElementById('recentRefsList');if(l1)l1.innerHTML=refsHtml;
+  const l2=document.getElementById('refListFull');if(l2)l2.innerHTML=refsHtml;
 }
+function copyRefLink(){const v=document.getElementById('refLinkInp').value;navigator.clipboard.writeText(v).then(()=>showToast('✅ تم نسخ الرابط!')).catch(()=>{});}
+function copyRefLink2(){const v=document.getElementById('refLinkInp2').value;navigator.clipboard.writeText(v).then(()=>showToast('✅ تم نسخ الرابط!')).catch(()=>{});}
 
-// ── Finance ──
-const CFG_FIN = {
-  MIN_WD: 200,
-  TON_PER_COIN: 0.00005,
-  FREE_WD_LIMIT: 200,
-};
-
-function updDepPreview(){
-  const v=parseFloat(document.getElementById('depositAmountInput').value)||0;
-  document.getElementById('depCoinsPreview').textContent=fmt(v*1000)+' 🪙';
-  document.getElementById('submitDepositBtn').disabled=v<0.1;
-}
+// ════ DEPOSIT ════
+const TON_TO_BAMBOO=10000;
 function setDepAmt(v){document.getElementById('depositAmountInput').value=v;updDepPreview();}
-
-function updWdPreview(){
-  const v=parseFloat(document.getElementById('wdAmountInput').value)||0;
-  const ton=(v*0.9)*CFG_FIN.TON_PER_COIN;
-  document.getElementById('wdPreview').textContent=v>0?'ستحصل على: '+ton.toFixed(4)+' TON (بعد رسوم 10%)':'';
-  document.getElementById('wdBannerTrial').classList.remove('show');
-  document.getElementById('wdBannerDepReq').classList.remove('show');
+function updDepPreview(){
+  const ton=parseFloat(document.getElementById('depositAmountInput').value)||0;
+  const el=document.getElementById('depBambooPreview');
+  if(el)el.textContent=fmt(Math.floor(ton*TON_TO_BAMBOO))+' Bamboo';
 }
 
-function updExchCalc(dir){
-  if(dir==='ton'){
-    const v=parseFloat(document.getElementById('exchTonInput').value)||0;
-    document.getElementById('exchToOutput').textContent=fmt(v*1000);
-    document.getElementById('exchTonBal').textContent='رصيد: '+fmtTon(S.ton)+' TON';
-    document.getElementById('exchCoinsBal').textContent='رصيد: '+fmt(S.coins)+' Coins';
-  } else {
-    const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;
-    const ton=(v*0.9)/1000;
-    document.getElementById('exchToTon').textContent=ton.toFixed(4);
-    document.getElementById('exchCoinsBalFrom').textContent='رصيد: '+fmt(S.coins)+' Coins';
-    document.getElementById('exchTonBalTo').textContent='رصيد: '+fmtTon(S.ton)+' TON';
-  }
+// ════ EXCHANGE ════
+function swapMax(){document.getElementById('swapFromAmt').value=Math.floor(S.user.bamboo||0);updSwapCalc();}
+function updSwapCalc(){const a=parseInt(document.getElementById('swapFromAmt').value)||0;document.getElementById('swapToAmt').textContent=fmt(Math.floor(a/CFG.RATE));}
+function updSwapBals(){
+  const fb=document.getElementById('swapFromBal');if(fb)fb.textContent=`رصيد: ${fmt(S.user.bamboo||0)} Bamboo`;
+  const tb=document.getElementById('swapToBal');if(tb)tb.textContent=`رصيد: ${fmt(S.user.coins||0)} Coins`;
 }
-
-function exchMax(dir){
-  if(dir==='ton'){document.getElementById('exchTonInput').value=parseFloat(S.ton||0).toFixed(2);updExchCalc('ton');}
-  else{document.getElementById('exchCoinsInput').value=Math.floor(S.coins||0);updExchCalc('coins');}
-}
-
-function doExchangeTon(){
-  const v=parseFloat(document.getElementById('exchTonInput').value)||0;
-  if(v<0.1){showToast('الحد الأدنى 0.1 TON');return;}
-  if(S.ton<v){showToast('رصيد TON غير كافٍ');return;}
-  S.ton-=v; S.coins+=v*1000;
-  S._exchHist=S._exchHist||[];
-  S._exchHist.unshift({dir:'TON→Coins',from:v+' TON',to:fmt(v*1000)+' 🪙',d:new Date().toLocaleDateString()});
-  updateBalances(); updExchCalc('ton');
-  document.getElementById('exchTonInput').value='';
-  document.getElementById('exchToOutput').textContent='0';
-  renderExchHist();
-  showToast('تم تحويل '+v+' TON إلى '+fmt(v*1000)+' 🪙');
-  api('exchange',{dir:'ton_to_coins',amount:v}).catch(()=>{});
-}
-
-function doExchangeCoins(){
-  const v=parseFloat(document.getElementById('exchCoinsInput').value)||0;
-  if(v<500){showToast('الحد الأدنى 500 كوينز');return;}
-  if(S.coins<v){showToast('رصيد كوينز غير كافٍ');return;}
-  S.coins-=v; const ton=(v*0.9)/1000; S.ton+=ton;
-  S._exchHist=S._exchHist||[];
-  S._exchHist.unshift({dir:'Coins→TON',from:fmt(v)+' 🪙',to:ton.toFixed(4)+' TON',d:new Date().toLocaleDateString()});
-  updateBalances(); updExchCalc('coins');
-  document.getElementById('exchCoinsInput').value='';
-  document.getElementById('exchToTon').textContent='0.0000';
-  renderExchHist();
-  showToast('تم تحويل '+fmt(v)+' 🪙 إلى '+ton.toFixed(4)+' TON');
-  api('exchange',{dir:'coins_to_ton',amount:v}).catch(()=>{});
-}
-
-function renderExchHist(){
-  const el=document.getElementById('exchHistList'); if(!el) return;
-  const hist=S._exchHist||[];
-  if(!hist.length){el.innerHTML='<div class="hist-empty">لا توجد تحويلات بعد</div>';return;}
-  el.innerHTML=hist.slice(0,20).map(function(h){
-    return '<div class="hist-row" style="flex-direction:column;gap:2px;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><span class="hist-l">'+esc(h.dir)+' · '+esc(h.d||'')+'</span><span class="hist-r">'+esc(h.to)+'</span></div><span style="font-size:11px;color:var(--muted)">من: '+esc(h.from)+'</span></div>';
-  }).join('');
-}
-
-async function submitWithdraw(){
-  const addr=(document.getElementById('wdAddressInput').value||'').trim();
-  const amt=parseFloat(document.getElementById('wdAmountInput').value)||0;
-  document.getElementById('wdBannerTrial').classList.remove('show');
-  document.getElementById('wdBannerDepReq').classList.remove('show');
-  if(!addr||addr.length<10){showToast('أدخل عنوان محفظة صحيح');return;}
-  if(amt<CFG_FIN.MIN_WD){showToast('الحد الأدنى للسحب '+CFG_FIN.MIN_WD+' كوينز');return;}
-  if(S.coins<amt){showToast('رصيد غير كافٍ');return;}
-  if(!S._hasDeposited){
-    if(S._freeWdUsed){
-      document.getElementById('wdBannerDepReq').classList.add('show');
-      showToast('❌ يجب الإيداع للاستمرار في السحب');
-      setTimeout(function(){goToDeposit();},3000); return;
-    }
-    if(amt>CFG_FIN.FREE_WD_LIMIT){
-      document.getElementById('wdBannerTrial').classList.add('show');
-      showToast('❌ حد السحب المجاني '+CFG_FIN.FREE_WD_LIMIT+' Coins');
-      setTimeout(function(){goToDeposit();},3000); return;
-    }
-  }
-  S.coins-=amt;
-  if(!S._hasDeposited) S._freeWdUsed=true;
-  S._wdHist=S._wdHist||[];
-  S._wdHist.unshift({amt:amt,addr:addr,d:new Date().toLocaleDateString(),status:'pending'});
-  updateBalances(); renderWdHist();
-  document.getElementById('wdAddressInput').value='';
-  document.getElementById('wdAmountInput').value='';
-  updWdPreview();
-  showToast('تم إرسال طلب السحب ✓');
-  api('withdraw',{address:addr,amount:amt}).catch(()=>{});
-}
-
-function renderWdHist(){
-  const el=document.getElementById('wdHistList'); if(!el) return;
-  const hist=S._wdHist||[];
-  if(!hist.length){el.innerHTML='<div class="hist-empty">لا توجد سحوبات بعد</div>';return;}
-  el.innerHTML=hist.slice(0,20).map(function(h){
-    var sc={approved:'sb-done',pending:'sb-pending',rejected:'sb-rejected'}[h.status||'pending'];
-    return '<div class="hist-row" style="flex-direction:column;gap:4px;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><span style="font-size:13px;font-weight:800;color:var(--gold)">'+fmt(h.amt)+' 🪙</span><span class="stat-badge '+sc+'">'+(h.status==='approved'?'✓ مكتمل':h.status==='rejected'?'مرفوض':'⏳ قيد المعالجة')+'</span></div><div style="font-size:10px;color:var(--muted)">'+((h.amt||0)*0.9*CFG_FIN.TON_PER_COIN).toFixed(4)+' TON · '+esc(h.d||'')+' · '+esc((h.addr||'').substring(0,12))+'...</div></div>';
-  }).join('');
-}
-// ── Wallet ──
-async function connectWallet(){
-  if(_tonConnectUI){
-    try{await _tonConnectUI.openModal();}catch(e){showToast('يرجى تثبيت محفظة TON');}
-  }
-}
-
-// ── Referral ──
-function copyRefLink(){
-  const v=document.getElementById('refLinkInp').value;
-  if(!v)return;
-  navigator.clipboard.writeText(v).then(()=>showToast('تم نسخ الرابط ✓')).catch(()=>{});
-}
-
-// ── Update Balances ──
-function updateBalances(){
-  document.getElementById('tbCoins').textContent=fmt(S.coins);
-  document.getElementById('tbTon').textContent=fmtTon(S.ton);
-  if(document.getElementById('wdCoinsDisp')) document.getElementById('wdCoinsDisp').textContent=fmt(S.coins)+' 🪙';
-  // exchange swaps
-  if(document.getElementById('exchTonBal')) document.getElementById('exchTonBal').textContent='رصيد: '+fmtTon(S.ton)+' TON';
-  if(document.getElementById('exchCoinsBal')) document.getElementById('exchCoinsBal').textContent='رصيد: '+fmt(S.coins)+' Coins';
-  if(document.getElementById('exchCoinsBalFrom')) document.getElementById('exchCoinsBalFrom').textContent='رصيد: '+fmt(S.coins)+' Coins';
-  if(document.getElementById('exchTonBalTo')) document.getElementById('exchTonBalTo').textContent='رصيد: '+fmtTon(S.ton)+' TON';
-  updatePowerDisplay();
-}
-
-// ── API ──
-async function api(action, data={}){
+let _exchInFlight=false;
+async function doExchange(){
+  if(_exchInFlight)return;
+  const a=parseInt(document.getElementById('swapFromAmt').value)||0;
+  if(a<=0){showToast('أدخل مبلغاً!');return;}
+  if(a<CFG.RATE){showToast(`الحد الأدنى ${CFG.RATE} Bamboo!`);return;}
+  if(a>(S.user.bamboo||0)){showToast('رصيد Bamboo غير كافٍ!');return;}
+  const coins=Math.floor(a/CFG.RATE);
+  _exchInFlight=true;
   try{
-    const r=await fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Telegram '+_initData,'X-Action':action},
-      body:JSON.stringify({action,data}),
-    });
-    return await r.json();
-  }catch(e){console.error('API error:',e);return{success:false,error:e.message};}
+    await api('exchange',{bambooAmount:a});
+    S.user.bamboo-=a;S.user.coins=(S.user.coins||0)+coins;
+    S.exchHist.unshift({b:a,c:coins,dir:'B→C',ts:Date.now()});
+    document.getElementById('swapFromAmt').value='';document.getElementById('swapToAmt').textContent='0';
+    updateUI();renderExchHist();
+    showToast(`⚡ ${fmt(a)} Bamboo → ${fmt(coins)} Coins`);
+  }catch(e){showToast(`❌ ${e.message||'فشل'}`)}
+  finally{_exchInFlight=false;}
+}
+function renderExchHist(){
+  const el=document.getElementById('exchHist');if(!el)return;
+  if(!S.exchHist.length){el.innerHTML='<div class="hist-empty">لا توجد تحويلات بعد</div>';return;}
+  el.innerHTML=S.exchHist.slice(0,30).map(h=>{
+    const ba=h.b!==undefined?h.b:(h.bam||0),ca=h.c!==undefined?h.c:(h.coins||0);
+    const date=h.d||(h.ts?new Date(h.ts).toLocaleDateString():'');
+    return`<div class="hist-row" style="flex-direction:column;align-items:flex-start;gap:2px">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span class="hist-l">B→C · ${esc(date)}</span>
+        <span style="font-size:12px;font-weight:800;color:var(--bamboo)">${fmt(ca)} Coins</span>
+      </div>
+      <span style="font-size:11px;color:var(--muted);font-weight:500">من: ${fmt(ba)} Bamboo</span>
+    </div>`;
+  }).join('');
 }
 
-// ── Init ──
+// ════ WITHDRAW ════
+function updWdPrev(){
+  const a=parseFloat(document.getElementById('wdAmt').value)||0;
+  document.getElementById('wdTonVal').textContent=(a*CFG.TON_PER_COIN).toFixed(4);
+  document.getElementById('wdBannerTrial').classList.remove('show');
+  document.getElementById('wdBannerDepReq').classList.remove('show');
+}
+async function doWithdraw(){
+  const addr=(document.getElementById('wdAddr').value||'').trim();
+  const amt=parseFloat(document.getElementById('wdAmt').value)||0;
+  const u=S.user;
+  document.getElementById('wdBannerTrial').classList.remove('show');
+  document.getElementById('wdBannerDepReq').classList.remove('show');
+  if(!addr||addr.length<10){showToast('أدخل عنوان TON صالح!');return;}
+  if(amt<CFG.MIN_WD){showToast(`الحد الأدنى ${CFG.MIN_WD} Coins!`);return;}
+  if(amt>(u.coins||0)){showToast('رصيد Coins غير كافٍ!');return;}
+  if(!u.hasDeposited){
+    if(u.freeWdUsed){document.getElementById('wdBannerDepReq').classList.add('show');showToast('❌ يلزم الإيداع للسحب!');return;}
+    if(amt>CFG.FREE_WD_LIMIT){document.getElementById('wdBannerTrial').classList.add('show');showToast(`❌ الحد التجريبي: ${CFG.FREE_WD_LIMIT} Coins`);return;}
+  }
+  try{
+    await api('withdraw',{address:addr,amount:amt});
+    u.coins-=amt;if(!u.hasDeposited)u.freeWdUsed=true;
+    S.wdHist.unshift({amt,addr,d:new Date().toLocaleDateString(),status:'pending'});
+    document.getElementById('wdAddr').value='';document.getElementById('wdAmt').value='';
+    updWdPrev();updateUI();renderWdHist();
+    showToast(`✅ طلب سحب: ${fmt(amt)} Coins`);
+  }catch(e){showToast(`❌ ${e.message||'فشل'}`);}
+}
+function renderWdHist(){
+  const el=document.getElementById('wdHist');if(!el)return;
+  if(!S.wdHist.length){el.innerHTML='<div class="hist-empty">لا توجد سحوبات بعد</div>';return;}
+  el.innerHTML=S.wdHist.slice(0,20).map(h=>{
+    const sc={approved:'sb-approved',pending:'sb-pending',rejected:'sb-rejected'}[h.status||'pending'];
+    return`<div class="hist-row" style="flex-direction:column;gap:4px;align-items:flex-start">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span style="font-size:13px;font-weight:800;color:var(--coin)">${fmt(h.amt)} Coins</span>
+        <span class="stat-badge ${sc}">${esc(h.status||'pending')}</span>
+      </div>
+      <div style="font-size:10px;color:var(--muted)">${((h.amt||0)*CFG.TON_PER_COIN).toFixed(4)} TON · ${esc(h.d||'')} · ${esc((h.addr||'').substring(0,12))}...</div>
+    </div>`;
+  }).join('');
+}
+
+// ════ TON CONNECT ════
+async function initTON(){
+  try{
+    if(window.TON_CONNECT_UI){
+      S.tonUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:`${CFG.API_URL}/tonconnect-manifest.json`,uiPreferences:{theme:'DARK'}});
+      S.tonUI.onStatusChange(w=>w?onWConn(w):onWDisc());
+    }
+  }catch(e){console.error('TON:',e);}
+}
+function onWConn(w){
+  S.wallet={address:w.account.address,chain:w.account.chain,appName:w.device.appName};
+  const sh=`${S.wallet.address.substring(0,6)}...${S.wallet.address.slice(-4)}`;
+  document.getElementById('walletAddressDisplay').textContent=`${sh} · ${S.wallet.appName}`;
+  const cb=document.getElementById('connectWalletBtn');
+  if(cb){cb.innerHTML='<i class="fas fa-unlink"></i> قطع';cb.onclick=disconnectWallet;}
+  const sb=document.getElementById('submitDepositBtn');if(sb)sb.disabled=false;
+}
+function onWDisc(){
+  S.wallet=null;
+  document.getElementById('walletAddressDisplay').textContent='غير متصل';
+  const cb=document.getElementById('connectWalletBtn');
+  if(cb){cb.innerHTML='<i class="fas fa-plug"></i> ربط';cb.onclick=connectWallet;}
+  const sb=document.getElementById('submitDepositBtn');if(sb)sb.disabled=true;
+}
+async function connectWallet(){if(S.tonUI)await S.tonUI.openModal();}
+async function disconnectWallet(){if(S.tonUI)await S.tonUI.disconnect();}
+
+window.initiateDeposit=async function(){
+  if(!S.wallet){showToast('اربط المحفظة أولاً');return;}
+  const amt=parseFloat(document.getElementById('depositAmountInput').value);
+  if(!amt||amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
+  if(amt>1000){showToast('المبلغ كبير جداً');return;}
+  try{
+    const comment=String(S.userId);
+    const nano=String(Math.floor(amt*1e9));
+    if(!window.TonWeb)throw new Error('TonWeb not loaded');
+    const TW=window.TonWeb;new TW();
+    const cell=new TW.boc.Cell();
+    cell.bits.writeUint(0,32);cell.bits.writeString(comment);
+    const boc=await cell.toBoc(false);
+    const payload=TW.utils.bytesToBase64(boc);
+    const tx={validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:CFG.DEPOSIT_WALLET,amount:nano,payload}]};
+    const result=await S.tonUI.sendTransaction(tx);
+    showToast('✅ تم إرسال المعاملة! ~دقيقة للتأكيد');
+    await handleDepOk(result,amt,comment);
+  }catch(e){
+    const sd=document.getElementById('depositStatus');
+    sd.classList.add('visible');
+    sd.querySelector('.txsi').innerHTML='❌';
+    sd.querySelector('.txsm').innerHTML=e.message?.includes('rejected')?'تم رفض المعاملة':'فشلت المعاملة';
+    document.getElementById('depositStatusDetail').textContent=e.message||'حاول مجدداً';
+  }
+};
+async function handleDepOk(result,amt,comment){
+  try{
+    const d=await api('deposit',{amount:amt,txHash:result.boc,comment});
+    const sd=document.getElementById('depositStatus');sd.classList.add('visible');
+    sd.querySelector('.txsi').innerHTML='⏳';sd.querySelector('.txsm').innerHTML='تم إرسال المعاملة!';
+    document.getElementById('depositStatusDetail').textContent='في انتظار التأكيد (~دقيقة)...';
+    startDepVerify(d.depositId,result.boc);
+  }catch(e){console.error(e);}
+}
+function startDepVerify(depId,txHash){
+  if(S.depCheckInt)clearInterval(S.depCheckInt);
+  if(!depId||!txHash)return;
+  let attempts=0;
+  S.depCheckInt=setInterval(async()=>{
+    attempts++;
+    try{
+      const r=await api('verifyDeposit',{depositId:depId,txHash});
+      if(r.status==='completed'){
+        clearInterval(S.depCheckInt);
+        const sd=document.getElementById('depositStatus');
+        sd.querySelector('.txsi').innerHTML='✅';sd.querySelector('.txsm').innerHTML='تم تأكيد الإيداع!';
+        document.getElementById('depositStatusDetail').textContent=`${r.amount} TON أُضيف`;
+        showToast(`💰 ${r.amount} TON تم إيداعه!`);
+        S.user.hasDeposited=true;S.user.tonBalance=(S.user.tonBalance||0)+(r.amount||0);
+        loadState();setTimeout(()=>sd.classList.remove('visible'),3000);
+      }
+    }catch(e){if(attempts>=18)clearInterval(S.depCheckInt);}
+  },10000);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('active');}));
+
+// ════ INIT ════
 async function init(){
-  // Loading animation
   const msgs=['جاري تحميل الفريق...','جلب بيانات اللاعبين...','تحضير الملعب...','جاهز!'];
   let mi=0;
   const li=setInterval(()=>{
-    const sub=document.getElementById('ldSub');const bar=document.getElementById('ldBar');
-    if(sub) sub.textContent=msgs[Math.min(mi,msgs.length-1)];
-    if(bar) bar.style.width=Math.min(100,(mi+1)*25)+'%';
+    const sub=document.getElementById('ldSub'),bar=document.getElementById('ldBar');
+    if(sub)sub.textContent=msgs[Math.min(mi,msgs.length-1)];
+    if(bar)bar.style.width=Math.min(100,(mi+1)*25)+'%';
     mi++;if(mi>=msgs.length)clearInterval(li);
-  },600);
+  },700);
 
   // Telegram init
-  const tg=window.Telegram?.WebApp;
-  if(tg){
-    tg.ready();tg.expand();tg.disableVerticalSwipes?.();
-    _initData=tg.initData||'';
-    const u=tg.initDataUnsafe?.user;
+  if(window.Telegram?.WebApp){
+    S.tg=window.Telegram.WebApp;
+    S.tg.ready();S.tg.expand();S.tg.disableVerticalSwipes?.();
+    _initData=S.tg.initData||'';
+    const u=S.tg.initDataUnsafe?.user;
     if(u){
       S.userId=String(u.id);
-      S.user=u;
-      document.getElementById('topName').textContent=u.first_name||'لاعب';
-      if(document.getElementById('depositUserIdDisplay')) document.getElementById('depositUserIdDisplay').textContent=u.id;
+      S.user=S.user;
+      document.getElementById('topName').textContent=u.first_name||'اللاعب';
+      if(document.getElementById('depositUserIdDisplay'))document.getElementById('depositUserIdDisplay').textContent=u.id;
       if(u.photo_url){
-        document.getElementById('topAvatar').innerHTML=`<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='<div class=ap style=font-size:20px>👤</div>'">`;
+        document.getElementById('uavatar').innerHTML=`<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='<div style=font-size:20px>🐼</div>'" style="width:100%;height:100%;object-fit:cover;">`;
       }
-      // Referral link
-      const refLink=`https://t.me/FootballInvestBot?start=${u.id}`;
-      const ri=document.getElementById('refLinkInp');if(ri) ri.value=refLink;
+      const refLink=`${CFG.BOT_APP_LINK}?startapp=${u.id}`;
+      const r1=document.getElementById('refLinkInp');if(r1)r1.value=refLink;
+      const r2=document.getElementById('refLinkInp2');if(r2)r2.value=refLink;
     }
+    S.startParam=(S.tg.initDataUnsafe?.start_param||'').toString().replace(/\D/g,'');
   }
 
   // TON Connect
-  try{
-    _tonConnectUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://silent-block-bedf.ahmedrabieharoun.workers.dev/tonconnect-manifest.json',buttonRootId:null});
-    _tonConnectUI.onStatusChange(w=>{
-      _walletConnected=!!w;
-      _walletAddress=w?.account?.address||'';
-      const wd=document.getElementById('walletAddressDisplay');
-      const cb=document.getElementById('connectWalletBtn');
-      if(_walletConnected){
-        if(wd) wd.textContent=_walletAddress.slice(0,8)+'...'+_walletAddress.slice(-6);
-        if(cb){cb.textContent='مفصول';cb.onclick=()=>_tonConnectUI.disconnect();}
-      } else {
-        if(wd) wd.textContent='غير متصل';
-        if(cb){cb.textContent='ربط';cb.onclick=connectWallet;}
-      }
-    });
-  }catch(e){console.log('TonConnect init failed:',e.message);}
+  setTimeout(()=>initTON(),600);
 
-  // Load state from server
+  // Load state
   try{
-    const res=await api('getState',{});
-    if(res.success&&res.data){
-      const d=res.data;
-      S.coins=d.coins||0;
-      S.ton=d.tonBalance||0;
-      S.completedMissions=d.completedMissions||[];
-      S.refs=d.refs||[];
-      // Load owned players
-      if(d.ownedPlayers&&Array.isArray(d.ownedPlayers)){
-        d.ownedPlayers.forEach(pid=>{
-          const p=PLAYERS_DB.find(x=>x.id===pid);
-          if(p&&!S.ownedPlayers.some(x=>x.id===pid)) S.ownedPlayers.push({...p});
-        });
-      }
-      // Load squad
-      if(d.squad&&Array.isArray(d.squad)){
-        d.squad.forEach((pid,i)=>{
-          if(pid){const p=PLAYERS_DB.find(x=>x.id===pid);if(p) S.squad[i]={...p};}
-          else S.squad[i]=null;
-        });
-      } else {for(let i=0;i<11;i++) S.squad[i]=null;}
-      S.bench=S.ownedPlayers.filter(p=>!S.squad.some(s=>s&&s.id===p.id));
-      // Refs
-      if(d.refs) renderRefs(d.refs);
-    } else {
-      for(let i=0;i<11;i++) S.squad[i]=null;
-    }
+    await loadState();
   }catch(e){
-    console.log('Failed to load state, using defaults');
-    for(let i=0;i<11;i++) S.squad[i]=null;
+    console.log('Failed to load state:',e);
+    for(let i=0;i<11;i++)S.squad[i]=null;
   }
 
-  updateBalances();
+  renderMarket('all');
   renderPitch();
   renderBench();
-  renderMarket();
+  updatePowerDisplay();
+  setInterval(()=>loadState(),30000);
 
-  // Hide loading after delay
+  // Hide loading
   setTimeout(()=>{
-    document.getElementById('loadingScreen').classList.add('hidden');
-    setTimeout(()=>{document.getElementById('loadingScreen').style.display='none';},800);
-  },2600);
-}
-
-function renderRefs(refs){
-  const list=document.getElementById('refList');
-  const counter=document.getElementById('totalRefsDisp');
-  S.refs = refs||[];
-  if(!refs||!refs.length){
-    if(list) list.innerHTML='<div class="hist-empty">لا توجد إحالات بعد</div>';
-    if(counter) counter.textContent='0 أصدقاء';
-    return;
-  }
-  if(counter) counter.textContent=refs.length+' أصدقاء';
-  if(list) list.innerHTML=refs.map(r=>`
-    <div class="ref-list-item">
-      <div class="rli-av">${r.photoUrl?`<img src="${esc(r.photoUrl)}" onerror="this.parentElement.innerHTML='👤'" alt="">` :'👤'}</div>
-      <div style="flex:1;">
-        <div class="rli-name">${esc(r.firstName||'لاعب')}</div>
-        <div class="rli-date">${r.hasDeposited?'💎 مودع':'👤 مسجل'}</div>
-      </div>
-      <div class="rli-earn" style="color:var(--gold);">${r.hasDeposited?'+20% ✓':'+200 🪙'}</div>
-    </div>`).join('');
-}
-
-async function initiateDeposit(){
-  const amt=parseFloat(document.getElementById('depositAmountInput').value)||0;
-  if(amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
-  if(!_walletConnected){showToast('يرجى ربط المحفظة أولاً');return;}
-  const statusDiv=document.getElementById('depositStatus');
-  statusDiv.classList.add('visible');
-  document.getElementById('submitDepositBtn').disabled=true;
-  try{
-    const comment=String(S.userId||'');
-    const nano=String(Math.floor(amt*1e9));
-    let payload=undefined;
-    if(window.TonWeb){
-      try{
-        const TW=window.TonWeb; new TW();
-        const cell=new TW.boc.Cell();
-        cell.bits.writeUint(0,32); cell.bits.writeString(comment);
-        const boc=await cell.toBoc(false);
-        payload=TW.utils.bytesToBase64(boc);
-      }catch(e){console.warn('TonWeb payload:',e);}
-    }
-    const tx={validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',amount:nano,...(payload?{payload}:{})}]};
-    const result=await _tonConnectUI.sendTransaction(tx);
-    statusDiv.innerHTML='<div class="txsi">⏳</div><div class="txsm">تم إرسال المعاملة!</div><div class="txsd">انتظر التأكيد (~1 دقيقة)...</div>';
-    showToast('✅ تم إرسال المعاملة! سيتم إضافة رصيدك خلال دقيقة');
-    S._hasDeposited=true;
-    // Notify server
-    api('deposit',{amount:amt,txHash:result?.boc||'',comment}).catch(()=>{});
-  }catch(e){
-    statusDiv.innerHTML='<div class="txsi">❌</div><div class="txsm">'+(e.message?.includes('rejected')?'تم رفض المعاملة':'فشل الإيداع')+'</div><div class="txsd">'+esc(e.message||'حاول مرة أخرى')+'</div>';
-    document.getElementById('submitDepositBtn').disabled=false;
-  }
+    const ls=document.getElementById('loadingScreen');
+    if(ls){ls.classList.add('hidden');setTimeout(()=>ls.style.display='none',800);}
+  },3000);
 }
 
 window.addEventListener('load',init);

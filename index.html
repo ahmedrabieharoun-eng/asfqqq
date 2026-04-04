@@ -121,44 +121,84 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 
 /* ═══ PITCH / FIELD ═══ */
 .pitch-wrap{
-  width:100%;aspect-ratio:.7/1;max-height:480px;
-  background:linear-gradient(180deg,var(--field) 0%,var(--field2) 100%);
+  width:100%;aspect-ratio:.7/1;max-height:520px;
+  background:linear-gradient(180deg,#1a7a2e 0%,#155c22 50%,#1a7a2e 100%);
   border-radius:16px;overflow:hidden;position:relative;
-  border:2px solid rgba(255,255,255,.12);
-  box-shadow:0 0 40px rgba(0,0,0,.6),inset 0 0 60px rgba(0,0,0,.3);
+  border:2px solid rgba(255,255,255,.15);
+  box-shadow:0 0 40px rgba(0,0,0,.7),inset 0 0 60px rgba(0,0,0,.2);
 }
 .pitch-lines{position:absolute;inset:0;pointer-events:none;}
 .pitch-lines svg{width:100%;height:100%;}
+/* Alternating stripes */
 .pitch-wrap::before{
   content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(180deg,rgba(0,0,0,.08) 0px,rgba(0,0,0,.08) 36px,transparent 36px,transparent 72px);
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.03) 0px,rgba(255,255,255,.03) 40px,transparent 40px,transparent 80px);
   pointer-events:none;z-index:0;
 }
+
+/* ═══ PLAYER SLOT (eFootball-style card) ═══ */
 .pitch-slot{
   position:absolute;transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;z-index:10;transition:transform .2s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;z-index:10;transition:transform .18s,filter .18s;
 }
-.pitch-slot:active{transform:translate(-50%,-50%) scale(.9);}
+.pitch-slot:active{transform:translate(-50%,-50%) scale(.88);filter:brightness(1.15);}
+
+/* The card container */
 .player-circle{
-  width:44px;height:44px;border-radius:50%;
-  background:rgba(5,12,25,.9);
-  border:2.5px solid rgba(255,255,255,.35);
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;overflow:hidden;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  width:52px;height:64px;border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:0;overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,.6);
   transition:border-color .2s,box-shadow .2s;
   position:relative;
+  padding:3px 2px 2px;
+  gap:1px;
 }
-.player-circle.filled{border-color:var(--bamboo);box-shadow:0 0 14px var(--bamboo-glow);}
-.player-circle.empty{border-color:rgba(255,255,255,.2);border-style:dashed;}
-.player-circle.empty::after{content:'+';position:absolute;font-size:20px;font-weight:900;color:rgba(255,255,255,.3);}
-.player-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+/* Tier-based gradient backgrounds */
+.player-circle.filled.tier-bronze{background:linear-gradient(170deg,#3d2a15,#6b4520);border:1.5px solid #cd7f32;}
+.player-circle.filled.tier-silver{background:linear-gradient(170deg,#252525,#444);border:1.5px solid #c0c0c0;}
+.player-circle.filled.tier-gold{background:linear-gradient(170deg,#3d2f00,#6b5200);border:1.5px solid var(--gold);}
+.player-circle.filled.tier-plat{background:linear-gradient(170deg,#0d2240,#1e4a7a);border:1.5px solid #7ec8ff;}
+.player-circle.filled.tier-legend{background:linear-gradient(170deg,#2d1b00,#5a3600);border:2px solid var(--gold);box-shadow:0 0 12px rgba(255,215,0,.5);}
+/* Default filled */
+.player-circle.filled{background:linear-gradient(170deg,#1a3020,#2a5030);border:1.5px solid var(--bamboo);box-shadow:0 0 10px var(--bamboo-glow);}
+
+/* Top: rating number */
+.pc-slot-rating{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:900;
+  color:#fff;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.8);
+}
+/* Middle: emoji */
+.pc-slot-emoji{font-size:22px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
+/* Bottom: position badge */
+.pc-slot-pos{
+  font-size:7.5px;font-weight:900;letter-spacing:.4px;
+  background:rgba(0,0,0,.55);border-radius:3px;padding:1px 4px;color:rgba(255,255,255,.9);
+}
+
+/* Empty slot */
+.player-circle.empty{
+  width:52px;height:64px;border-radius:10px;
+  border:1.5px dashed rgba(255,255,255,.25);
+  background:rgba(0,0,0,.22);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.player-circle.empty::after{
+  content:'+';font-size:22px;font-weight:900;
+  color:rgba(255,255,255,.25);line-height:1;
+}
+
+/* Name badge below card */
 .player-name-badge{
-  font-size:9px;font-weight:800;color:#fff;
-  background:rgba(0,0,0,.7);border-radius:6px;padding:2px 5px;
-  white-space:nowrap;max-width:56px;overflow:hidden;text-overflow:ellipsis;text-align:center;
+  font-size:8.5px;font-weight:800;color:#fff;
+  background:rgba(0,0,0,.75);border-radius:5px;padding:2px 5px;
+  white-space:nowrap;max-width:62px;overflow:hidden;text-overflow:ellipsis;text-align:center;
+  backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.08);
 }
+
+/* Legacy rating badge (not used on pitch anymore but kept for bench) */
 .player-rating-badge{
   position:absolute;bottom:-4px;right:-4px;
   width:18px;height:18px;border-radius:50%;
@@ -472,10 +512,12 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .pc-name{font-size:8px;}
   .pc-club{font-size:7px;}
 
-  /* Player circles على الملعب */
-  .player-circle{width:32px;height:32px;font-size:16px;}
-  .player-name-badge{font-size:7px;max-width:40px;padding:1px 3px;}
-  .player-rating-badge{width:13px;height:13px;font-size:6px;}
+  /* Player cards على الملعب */
+  .player-circle{width:38px;height:48px;border-radius:7px;}
+  .pc-slot-rating{font-size:9px;}
+  .pc-slot-emoji{font-size:16px;}
+  .pc-slot-pos{font-size:6px;}
+  .player-name-badge{font-size:7px;max-width:46px;padding:1px 3px;}
 
   /* ── MARKET ── */
   .mkt-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
@@ -1162,6 +1204,7 @@ function updatePowerDisplay(){
 }
 
 // ════ PITCH ════
+function tierClass(t){return{bronze:'tier-bronze',silver:'tier-silver',gold:'tier-gold',plat:'tier-plat',legend:'tier-legend'}[t]||'';}
 function renderPitch(){
   const slots=document.getElementById('pitchSlots');
   if(!slots)return;
@@ -1171,17 +1214,19 @@ function renderPitch(){
     const player=S.squad[i];
     const x=slot.x,y=slot.y;
     if(player){
-      const rc=ratingBadgeClass(player.rating);
+      const tc=tierClass(player.tier);
       html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%" onclick="openSlotModal(${i})">
-        <div class="player-circle filled">
-          <span style="font-size:22px;">${esc(player.emoji||'⚽')}</span>
-          <div class="player-rating-badge ${rc}">${player.rating}</div>
+        <div class="player-circle filled ${tc}">
+          <div class="pc-slot-rating">${player.rating}</div>
+          <div class="pc-slot-emoji">${esc(player.emoji||'\u26BD')}</div>
+          <div class="pc-slot-pos">${esc(slot.pos)}</div>
         </div>
         <div class="player-name-badge">${esc(player.name.split(' ')[0])}</div>
       </div>`;
     }else{
       html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%" onclick="openSlotModal(${i})">
-        <div class="player-circle empty"><span style="font-size:10px;font-weight:800;color:rgba(255,255,255,.4);">${esc(slot.pos)}</span></div>
+        <div class="player-circle empty"></div>
+        <div class="player-name-badge" style="opacity:.5;">${esc(slot.pos)}</div>
       </div>`;
     }
   });

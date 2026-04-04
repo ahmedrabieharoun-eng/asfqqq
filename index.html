@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=no, viewport-fit=cover">
 <title>Panda Bamboo Factory 🎋</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Fredoka:wght@400;500;600;700;800&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -366,9 +366,194 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 /* Save toast */
 #saveToast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,var(--bamboo),#4e7a20);border-radius:20px;padding:10px 20px;font-size:13px;font-weight:800;color:#fff;z-index:999;transition:transform .3s ease;box-shadow:0 4px 20px var(--bamboo-glow);pointer-events:none;}
 #saveToast.show{transform:translateX(-50%) translateY(0);}
+
+/* ════════════════════════════════════════════
+   ORIENTATION DIALOG
+════════════════════════════════════════════ */
+#orientDialog{
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(0,0,0,.92);backdrop-filter:blur(16px);
+  flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  padding:24px;text-align:center;
+}
+#orientDialog.show{display:flex;}
+.od-icon{font-size:64px;animation:od-spin 2s ease-in-out infinite;}
+@keyframes od-spin{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
+.od-title{font-size:20px;font-weight:900;color:#fff;}
+.od-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.6;max-width:280px;}
+.od-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.od-btn{padding:12px 22px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;border:none;transition:opacity .2s;}
+.od-btn:active{opacity:.8;}
+.od-btn.primary{background:linear-gradient(135deg,var(--bamboo),#4e7a20);color:#fff;box-shadow:0 0 16px var(--bamboo-glow);}
+.od-btn.secondary{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;}
+
+/* ════════════════════════════════════════════
+   LANDSCAPE MODE — كل حاجة مكيفة
+════════════════════════════════════════════ */
+@media (orientation:landscape) and (max-height:500px){
+
+  /* Body */
+  body{font-size:11px;padding-bottom:58px;}
+
+  /* Top bar */
+  .topbar{padding:5px 10px 4px;}
+  .uavatar{width:30px;height:30px;}
+  .uname{font-size:10px;max-width:60px;}
+  .tb-chip{padding:3px 7px;font-size:10px;border-radius:12px;}
+  .tb-chip-num{font-size:10px;}
+  .tb-menu-btn{width:30px;height:30px;}
+  .tb-menu-btn .bar{width:14px;}
+
+  /* Bottom nav */
+  .bnav{flex-direction:row;}
+  .ni{min-height:50px;padding:4px 2px 6px;gap:2px;}
+  .ni-icon img{width:28px!important;height:28px!important;}
+  .ni-lbl{font-size:8px;}
+
+  /* Sections */
+  .sec{padding:6px 8px 12px;}
+  .fin-page-title{font-size:13px;margin-bottom:8px;}
+  .pg-title{font-size:14px;margin-bottom:8px;}
+
+  /* ── HOME: Pitch landscape layout ──
+     الملعب يصير أفقي بدل رأسي */
+  #sectionHome{
+    display:grid!important;
+    grid-template-columns:1fr 280px;
+    grid-template-rows:auto;
+    gap:8px;
+    align-items:start;
+  }
+  /* الملعب في اليسار */
+  .pitch-wrap{
+    aspect-ratio:1.4/1!important;
+    max-height:calc(100vh - 120px)!important;
+    grid-row:1/4;
+    grid-column:1;
+  }
+  /* التابز والباور والحفظ في اليمين */
+  .formation-tabs{
+    grid-column:2;grid-row:1;
+    flex-wrap:wrap;gap:4px;margin-bottom:6px;
+  }
+  .ftm-tab{padding:4px 7px;font-size:9px;}
+  .team-power-bar{
+    grid-column:2;grid-row:2;
+    padding:7px 10px;margin-bottom:6px;
+  }
+  .tp-val{font-size:16px;}
+  .tp-label{font-size:9px;}
+  .tp-sub{font-size:8px;}
+  .save-formation-btn{
+    grid-column:2;grid-row:3;
+    padding:7px;font-size:11px;margin-bottom:6px;
+  }
+  .bench-btn{
+    grid-column:1/-1;grid-row:4;
+    padding:6px;font-size:10px;margin-bottom:4px;
+  }
+  .bench-row{grid-column:1/-1;grid-row:5;}
+  .player-card{width:72px;}
+  .pc-inner{min-height:90px;padding:6px 5px 5px;}
+  .pc-rating{font-size:16px;}
+  .pc-img-emoji{font-size:26px;}
+  .pc-name{font-size:8px;}
+  .pc-club{font-size:7px;}
+
+  /* Player circles على الملعب */
+  .player-circle{width:32px;height:32px;font-size:16px;}
+  .player-name-badge{font-size:7px;max-width:40px;padding:1px 3px;}
+  .player-rating-badge{width:13px;height:13px;font-size:6px;}
+
+  /* ── MARKET ── */
+  .mkt-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .mkt-card{padding:7px;}
+  .mkt-player-img{width:44px;height:44px;line-height:44px;font-size:28px;margin-bottom:4px;}
+  .mkt-player-name{font-size:10px;}
+  .mkt-player-pos{font-size:8px;margin-bottom:2px;}
+  .mkt-player-rating{font-size:9px;margin-bottom:4px;}
+  .mkt-price{padding:5px;font-size:10px;}
+  .mkt-filter-chip{padding:4px 8px;font-size:9px;}
+
+  /* ── FINANCE / TASKS ── */
+  .finput{padding:7px 10px;font-size:12px;margin-bottom:5px;}
+  .flabel{font-size:10px;margin-bottom:3px;}
+  .btn-prim,.btn-wd,.save-formation-btn{padding:9px;font-size:13px;}
+  .prbtn{padding:5px;font-size:10px;}
+  .preset-row{gap:4px;margin-bottom:6px;}
+  .hist-hdr{padding:8px 12px;font-size:11px;}
+  .hist-row{padding:6px 12px;}
+
+  /* ── SIDE MENU ── */
+  .side-panel{width:55%;max-width:220px;}
+  .side-item{padding:10px 12px;}
+  .side-item-icon{width:32px;height:32px;font-size:16px;}
+  .side-item-txt{font-size:12px;}
+  .side-item-sub{font-size:9px;}
+  .side-header{padding:12px 12px 10px;}
+  .side-title{font-size:13px;}
+
+  /* ── TASKS ── */
+  .task-tabs{gap:5px;margin-bottom:8px;}
+  .ttab{padding:6px;font-size:11px;}
+  .task-item{padding:8px 10px;gap:7px;margin-bottom:5px;}
+  .ticon{font-size:24px;min-width:34px;}
+  .tname{font-size:11px;}
+  .trew{font-size:10px;}
+  .tbtn{padding:5px 9px;font-size:10px;}
+
+  /* ── REFERRAL ── */
+  .ref-bonus-badge{padding:7px 10px;margin-bottom:8px;}
+  .rbb-pct{font-size:22px;}
+  .rbb-txt{font-size:10px;}
+  .ref-inp{padding:6px 8px;font-size:10px;}
+  .btn-copy{padding:6px 10px;font-size:10px;}
+
+  /* ── MODALS ── */
+  .modal-box{max-height:88vh;padding:14px;}
+  .modal-title{font-size:14px;}
+
+  /* ── SWAP ── */
+  .swap-card{padding:10px;}
+  .swap-section{padding:8px 10px;}
+  .swap-input{font-size:16px;width:90px;}
+  .swap-output{font-size:17px;}
+  .swap-currency-name{font-size:13px;}
+  .swap-label{font-size:8px;}
+  .swap-rate{font-size:10px;padding:5px 8px;margin-top:8px;}
+}
+
+/* Larger landscape screens (tablets) */
+@media (orientation:landscape) and (min-height:501px) and (max-height:768px){
+  body{font-size:12px;}
+  .mkt-grid{grid-template-columns:repeat(3,1fr);}
+  .pitch-wrap{aspect-ratio:1.2/1!important;max-height:calc(100vh - 130px)!important;}
+  #sectionHome{display:grid!important;grid-template-columns:1fr 300px;gap:10px;align-items:start;}
+  .pitch-wrap{grid-row:1/4;grid-column:1;}
+  .formation-tabs{grid-column:2;grid-row:1;}
+  .team-power-bar{grid-column:2;grid-row:2;}
+  .save-formation-btn{grid-column:2;grid-row:3;}
+  .bench-btn{grid-column:1/-1;grid-row:4;}
+  .bench-row{grid-column:1/-1;grid-row:5;}
+  .player-circle{width:38px;height:38px;}
+  .player-name-badge{font-size:8px;}
+  .ni{min-height:56px;}
+  .ni-icon img{width:32px!important;height:32px!important;}
+}
 </style>
 </head>
 <body>
+
+<!-- ORIENTATION DIALOG -->
+<div id="orientDialog">
+  <div class="od-icon">📱</div>
+  <div class="od-title">اختر وضع العرض</div>
+  <div class="od-sub">تريد تستخدم التطبيق بالطول أو بالعرض؟</div>
+  <div class="od-btns">
+    <button class="od-btn primary" onclick="chooseOrientation('portrait')">📱 بالطول</button>
+    <button class="od-btn secondary" onclick="chooseOrientation('landscape')">📺 بالعرض</button>
+  </div>
+</div>
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
@@ -1551,7 +1736,109 @@ async function init(){
   },3200);
 }
 
-window.addEventListener('load',init);
+
+// ════════════════════════════════════════════
+//  ORIENTATION SYSTEM
+// ════════════════════════════════════════════
+let _orientPref = localStorage.getItem('orientPref') || null; // 'portrait' | 'landscape' | null
+let _orientAsked = false;
+
+function chooseOrientation(pref){
+  _orientPref = pref;
+  localStorage.setItem('orientPref', pref);
+  document.getElementById('orientDialog').classList.remove('show');
+  applyOrientation(pref);
+}
+
+function applyOrientation(pref){
+  const html = document.documentElement;
+  if(pref === 'landscape'){
+    // Try native Screen Orientation API first
+    if(screen.orientation && screen.orientation.lock){
+      screen.orientation.lock('landscape').catch(()=>{
+        // Fallback: CSS transform trick for browsers that block lock()
+        applyLandscapeTransform();
+      });
+    } else {
+      applyLandscapeTransform();
+    }
+    document.body.classList.add('force-landscape');
+    document.body.classList.remove('force-portrait');
+    showToast('📺 تم التبديل للعرض الأفقي');
+  } else {
+    // Portrait
+    if(screen.orientation && screen.orientation.lock){
+      screen.orientation.lock('portrait').catch(()=>{});
+    }
+    removeLandscapeTransform();
+    document.body.classList.add('force-portrait');
+    document.body.classList.remove('force-landscape');
+    showToast('📱 تم التبديل للعرض الرأسي');
+  }
+}
+
+// CSS transform fallback — يدور الشاشة بـ CSS لو المتصفح مش بيدعم lock()
+function applyLandscapeTransform(){
+  if(window.innerHeight > window.innerWidth){
+    // الجهاز رأسي فعلاً — نطبق التحويل
+    const W = window.innerHeight;
+    const H = window.innerWidth;
+    document.body.style.cssText = `
+      transform: rotate(-90deg) translateX(-${W}px);
+      transform-origin: top left;
+      width: ${W}px;
+      height: ${H}px;
+      overflow: hidden;
+      position: fixed;
+    `;
+    document.documentElement.style.overflow = 'hidden';
+  }
+}
+
+function removeLandscapeTransform(){
+  document.body.style.cssText = '';
+  document.documentElement.style.overflow = '';
+}
+
+// Check on load & orientation change
+function checkOrientation(){
+  const isLandscape = window.innerWidth > window.innerHeight;
+
+  // If user already chose landscape and device is portrait → apply transform
+  if(_orientPref === 'landscape' && !isLandscape){
+    applyLandscapeTransform();
+  }
+  // If user already chose portrait and device is landscape → remove transform
+  if(_orientPref === 'portrait' && isLandscape){
+    removeLandscapeTransform();
+  }
+}
+
+function maybeAskOrientation(){
+  // Show dialog only once on first visit
+  if(!_orientPref && !_orientAsked){
+    _orientAsked = true;
+    // Small delay so loading screen appears first
+    setTimeout(()=>{
+      // Only ask if not already landscape (no need to ask if they opened sideways)
+      if(window.innerWidth <= window.innerHeight){
+        document.getElementById('orientDialog').classList.add('show');
+      } else {
+        // Already landscape — save that pref silently
+        _orientPref = 'landscape';
+        localStorage.setItem('orientPref','landscape');
+        document.body.classList.add('force-landscape');
+      }
+    }, 800);
+  } else if(_orientPref){
+    applyOrientation(_orientPref);
+  }
+}
+
+window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 300); });
+window.addEventListener('resize', ()=>{ setTimeout(checkOrientation, 200); });
+
+window.addEventListener('load', async function(){ maybeAskOrientation(); await init(); });
 </script>
 </body>
 </html>

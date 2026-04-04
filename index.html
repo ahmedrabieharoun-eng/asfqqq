@@ -56,24 +56,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ld-bar-fill{height:100%;background:linear-gradient(90deg,var(--bamboo),var(--coin),var(--neon));border-radius:3px;transition:width .4s ease;width:0%;}
 
 /* ═══ SECTIONS ═══ */
-.sec{
-  display:none;
-  position:fixed;inset:0;
-  overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:10px 12px 20px;
-  animation:fadeIn .25s ease;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat;
-}
-.sec.active{display:block;}
-/* Landing page needs top+bottom padding for bars */
-#sectionLanding{padding-top:62px;padding-bottom:96px;}
-/* Inner pages: full screen, no bar padding */
-#sectionHome,#sectionMarket,#sectionFriends,#sectionDeposit,
-#sectionWithdraw,#sectionExchange,#sectionReferral,#sectionTasks{
-  padding-top:64px;padding-bottom:24px;
-}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sec{display:none;padding:10px 12px 20px;animation:fadeIn .28s ease}
+.sec.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ═══ TOP BAR — eFootball Style ═══ */
 .topbar{
@@ -676,8 +661,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .ni-icon img{width:32px!important;height:32px!important;}
 }
 
-/* ═══ BODY PADDING — sections handle their own padding ═══ */
-body{padding-top:0!important;padding-bottom:0!important;}
+/* ═══ BODY PADDING for fixed bars ═══ */
+body{padding-top:52px !important;padding-bottom:90px !important;}
 
 /* ═══ LANDING PAGE ═══ */
 /* Tab bar */
@@ -772,40 +757,6 @@ body{padding-top:0!important;padding-bottom:0!important;}
   .efb-banner{flex-direction:row;}
 }
 
-
-/* ═══ BACK BUTTON — inner pages ═══ */
-.page-header{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px 12px;
-  position:sticky;top:0;z-index:50;
-  background:linear-gradient(180deg,rgba(5,5,15,.96) 0%,rgba(5,5,15,.80) 100%);
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid rgba(255,255,255,.06);
-  margin:-10px -12px 14px;
-}
-.back-btn{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:18px;color:#fff;
-  transition:background .15s;-webkit-tap-highlight-color:transparent;
-}
-.back-btn:active{background:rgba(255,255,255,.22);}
-.page-title-txt{
-  font-size:16px;font-weight:900;color:#fff;flex:1;
-  text-shadow:0 1px 4px rgba(0,0,0,.5);
-}
-
-
-/* ═══ TOP BAR avatar ═══ */
-.tb-left{display:flex;align-items:center;gap:8px;}
-.tb-avatar{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;
-  border:2px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.tb-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-
 </style>
 </head>
 <body>
@@ -839,20 +790,15 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- TOP BAR — eFootball Style -->
 <div class="topbar" id="mainTopbar">
-  <!-- User avatar + Currencies left -->
-  <div class="tb-left">
-    <div class="tb-avatar" id="tbAvatar">
-      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,255,255,.08);border-radius:50%;">🐼</div>
+  <!-- Currencies left -->
+  <div class="tb-currencies">
+    <div class="tb-cur">
+      <span class="tb-cur-icon">🪙</span>
+      <span class="tb-cur-val orb" id="tbCoins">0</span>
     </div>
-    <div class="tb-currencies">
-      <div class="tb-cur">
-        <span class="tb-cur-icon">🪙</span>
-        <span class="tb-cur-val orb" id="tbCoins">0</span>
-      </div>
-      <div class="tb-cur">
-        <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
-        <span class="tb-cur-val orb" id="tbBamboo">0</span>
-      </div>
+    <div class="tb-cur">
+      <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
+      <span class="tb-cur-val orb" id="tbBamboo">0</span>
     </div>
   </div>
   <!-- Centre info -->
@@ -952,11 +898,6 @@ body{padding-top:0!important;padding-bottom:0!important;}
 <!-- ══ SECTION: HOME (PITCH) ══ -->
 <div class="sec" id="sectionHome">
 
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">👤 فريقي — التشكيلة</div>
-  </div>
-
   <!-- Formation tabs -->
   <div class="formation-tabs">
     <div class="ftm-tab active" onclick="setFormation('4-3-3',this)">4-3-3</div>
@@ -1013,12 +954,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: MARKET ══ -->
 <div class="sec" id="sectionMarket">
+  <div class="pg-title">🛒 سوق اللاعبين</div>
 
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">🛒 سوق اللاعبين</div>
-  </div>
-  
   <div class="mkt-filter-bar">
     <div class="mkt-filter-chip active" onclick="filterMarket('all',this)">الكل</div>
     <div class="mkt-filter-chip" onclick="filterMarket('gk',this)">حارس</div>
@@ -1034,12 +971,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: FRIENDS ══ -->
 <div class="sec" id="sectionFriends">
-
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">👥 الأصدقاء</div>
-  </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
+  <div class="pg-title">👥 الأصدقاء</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
     <div class="ref-bonus-badge">
       <span class="rbb-pct">20%</span>
       <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
@@ -1061,12 +994,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: DEPOSIT ══ -->
 <div class="sec" id="sectionDeposit">
-
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">💰 إيداع TON</div>
-  </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
+  <div class="fin-page-title">💰 إيداع TON</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
     <div class="wal-row">
       <div class="wl-inf">
         <div class="wll">المحفظة</div>
@@ -1107,12 +1036,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: WITHDRAW ══ -->
 <div class="sec" id="sectionWithdraw">
-
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">💸 سحب</div>
-  </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
+  <div class="fin-page-title">💸 سحب</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
     <div class="wd-err-banner trial" id="wdBannerTrial">
       <i class="fas fa-gift"></i>
       <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins. أودع لإلغاء القيد.</div>
@@ -1143,12 +1068,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: EXCHANGE ══ -->
 <div class="sec" id="sectionExchange">
-
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">🔄 تحويل العملة</div>
-  </div>
-    <div class="swap-card">
+  <div class="fin-page-title">🔄 تحويل العملة</div>
+  <div class="swap-card">
     <div class="swap-section">
       <div class="swap-label">من</div>
       <div class="swap-currency-row">
@@ -1188,12 +1109,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: REFERRAL ══ -->
 <div class="sec" id="sectionReferral">
-
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">👥 برنامج الإحالة</div>
-  </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
+  <div class="fin-page-title">👥 برنامج الإحالة</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
     <div class="ref-bonus-badge">
       <span class="rbb-pct">20%</span>
       <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
@@ -1215,12 +1132,8 @@ body{padding-top:0!important;padding-bottom:0!important;}
 
 <!-- ══ SECTION: TASKS ══ -->
 <div class="sec" id="sectionTasks">
+  <div class="fin-page-title">✅ المهام</div>
 
-  <div class="page-header">
-    <div class="back-btn" onclick="goBackHome()">&#8592;</div>
-    <div class="page-title-txt">✅ المهام</div>
-  </div>
-  
   <!-- Sub tabs -->
   <div class="task-tabs">
     <div class="ttab active" id="ttab-referral" onclick="switchTTab('referral')">👥 إحالة</div>
@@ -1424,20 +1337,6 @@ function goSec(name){
   document.body.style.paddingTop='0';
   document.body.style.paddingBottom='0';
 }
-
-function goBackHome(){
-  // Go back to landing page and show bars
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.getElementById('sectionLanding').classList.add('active');
-  const landing = document.querySelector('[data-s="sectionLanding"]');
-  if(landing) landing.classList.add('active');
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  if(tb) tb.classList.remove('hidden-bar');
-  if(bn) bn.classList.remove('hidden-bar');
-}
-
 
 
 
@@ -2099,11 +1998,7 @@ async function init(){
       document.getElementById('topName').textContent=u.first_name||'اللاعب';
       if(document.getElementById('depositUserIdDisplay'))document.getElementById('depositUserIdDisplay').textContent=u.id;
       if(u.photo_url){
-        const av1=document.getElementById('uavatar');
-        const av2=document.getElementById('tbAvatar');
-        const imgHtml=`<img src="${u.photo_url}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        if(av1) av1.innerHTML=imgHtml;
-        if(av2) av2.innerHTML=imgHtml;
+        document.getElementById('uavatar').innerHTML=`<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='<div style=font-size:20px>🐼</div>'" style="width:100%;height:100%;object-fit:cover;">`;
       }
       const refLink=`${CFG.BOT_APP_LINK}?startapp=${u.id}`;
       const r1=document.getElementById('refLinkInp');if(r1)r1.value=refLink;
@@ -2193,9 +2088,6 @@ async function buyPkg(id){
 
   renderMarket('all');
   renderPackages();
-  // Activate landing nav item by default
-  const landingNav=document.querySelector('[data-s="sectionLanding"]');
-  if(landingNav) landingNav.classList.add('active');
   renderTasks();
   renderPitch();
   renderBench();

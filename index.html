@@ -107,6 +107,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ni[data-s="sectionContracts"].ni-tile{background:linear-gradient(145deg,#c77dff,#7b2fff);}
 .ni[data-s="sectionTasks"]   .ni-tile{background:linear-gradient(145deg,#52b788,#2d6a4f);}
 .ni[data-s="sectionMarket"]  .ni-tile{background:linear-gradient(145deg,#f4a261,#e76f51);}
+.ni[data-s="sectionMatch"]   .ni-tile{background:linear-gradient(145deg,#4fc3f7,#0288d1);}
 /* Center "فريقي" raised button */
 .ni-center .ni-tile{max-height:60px;border-radius:16px;box-shadow:0 -6px 22px rgba(230,57,70,.55);}
 .ni-center::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#e63946;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));}
@@ -662,7 +663,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 }
 
 /* ═══ BODY PADDING for fixed bars ═══ */
-body{padding-top:52px !important;padding-bottom:90px !important;}
+body{padding-top:58px !important;padding-bottom:90px !important;}
 
 /* ═══ LANDING PAGE ═══ */
 /* Tab bar */
@@ -751,32 +752,197 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
 .efb-pkg.pkg-legend .efb-pkg-price{border-color:#FFA500;color:#FFA500;}
 .efb-pkg-badge{position:absolute;top:8px;right:8px;background:#e63946;color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:20px;}
 
-/* Landscape responsive */
-@media(orientation:landscape){
-  .efb-pkg-grid{grid-template-columns:repeat(4,1fr);}
-  .efb-banner{flex-direction:row;}
+
+/* ═══ NEW TOPBAR STYLES ═══ */
+.topbar{
+  padding: 6px 54px 6px 54px; /* مسافة للأزرار الجانبية التيليجرام */
+  justify-content: space-between;
+  height: 58px;
 }
+.tb-currencies{
+  display:flex;align-items:center;gap:8px;
+  /* ازاحة للوسط قليلاً ناحية اليسار */
+  margin-right: auto;
+  padding-right: 10px;
+}
+.tb-cur{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:22px;padding:5px 13px;
+}
+.tb-cur-icon{font-size:17px;line-height:1;flex-shrink:0;}
+.tb-cur-val{font-family:'Orbitron',monospace;font-size:14px;font-weight:800;color:#fff;}
+.tb-right-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tb-lang-btn{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:5px 10px;cursor:pointer;color:#fff;
+  font-size:12px;font-weight:800;font-family:'Cairo',sans-serif;
+}
+.tb-lang-btn:active{background:rgba(255,255,255,.2);}
+.tb-user-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  overflow:hidden;flex-shrink:0;
+}
+.tb-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+/* Language Menu */
+.lang-menu-overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+.lang-menu-overlay.open{display:flex;}
+.lang-menu-box{
+  background:linear-gradient(160deg,#0d1f0d,#0a1a0a);
+  border:1px solid rgba(124,179,66,.25);border-radius:20px;
+  padding:20px;width:260px;
+}
+.lang-menu-title{font-size:16px;font-weight:900;color:#fff;text-align:center;margin-bottom:14px;}
+.lang-opts{display:flex;flex-direction:column;gap:8px;}
+.lang-opt{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;
+  transition:background .18s;
+}
+.lang-opt:active{background:rgba(124,179,66,.15);}
+.lang-opt span:first-child{font-size:22px;}
+.lang-opt.active-lang{background:rgba(124,179,66,.18);border-color:var(--bamboo);}
+
+/* ═══ PACKAGES CAROUSEL ═══ */
+.pkg-carousel-wrap{
+  position:relative;width:100%;overflow:hidden;padding:0 12px 16px;
+}
+.pkg-carousel{
+  display:flex;gap:0;
+  transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+  will-change:transform;
+}
+.efb-pkg{
+  min-width:calc(100% - 0px);width:calc(100% - 0px);
+  flex-shrink:0;
+}
+.pkg-dots{
+  display:flex;justify-content:center;gap:7px;margin-top:10px;
+}
+.pkg-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.2);transition:all .3s;
+  cursor:pointer;
+}
+.pkg-dot.active{background:#fff;width:22px;border-radius:4px;}
+
+/* ═══ MATCH SECTION ═══ */
+.match-lock-card{
+  background:linear-gradient(160deg,rgba(10,10,25,.95),rgba(8,8,20,.9));
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  padding:28px 20px;text-align:center;
+}
+.mlc-icon{font-size:64px;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(255,215,0,.4));}
+.mlc-title{font-size:18px;font-weight:900;color:#fff;margin-bottom:6px;}
+.mlc-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:18px;line-height:1.6;}
+.mlc-rating-bar{
+  height:8px;background:rgba(255,255,255,.1);border-radius:4px;
+  overflow:hidden;margin-bottom:6px;
+}
+.mlc-rating-fill{
+  height:100%;background:linear-gradient(90deg,var(--bamboo),var(--coin));
+  border-radius:4px;transition:width .5s ease;
+}
+.mlc-rating-text{font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:18px;}
+.mlc-build-btn{
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  border:none;border-radius:14px;padding:13px 28px;
+  color:#fff;font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 0 20px var(--bamboo-glow);
+}
+.match-ready-card{
+  background:linear-gradient(160deg,rgba(0,30,60,.95),rgba(0,20,40,.9));
+  border:1px solid rgba(0,180,255,.2);border-radius:20px;overflow:hidden;
+}
+.match-field-preview{
+  background:linear-gradient(135deg,#1a6b2a,#145522);
+  padding:24px;text-align:center;position:relative;
+}
+.mfp-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(0,255,135,.15),transparent 70%);
+}
+.mfp-icon{font-size:56px;position:relative;z-index:1;filter:drop-shadow(0 0 20px rgba(0,255,135,.5));}
+.mfp-title{font-size:16px;font-weight:900;color:#fff;position:relative;z-index:1;margin-top:6px;}
+.match-vs-info{
+  display:flex;align-items:center;justify-content:space-around;
+  padding:20px 12px;
+}
+.match-team-box{text-align:center;}
+.mtb-avatar{font-size:44px;margin-bottom:6px;}
+.mtb-name{font-size:12px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:4px;}
+.mtb-rating{font-size:22px;font-weight:900;color:var(--bamboo);font-family:'Orbitron',monospace;}
+.match-vs-center{
+  font-size:24px;font-weight:900;color:rgba(255,255,255,.5);
+  font-family:'Orbitron',monospace;
+}
+.match-play-btn{
+  width:calc(100% - 24px);margin:0 12px 16px;display:block;
+  background:linear-gradient(135deg,#e63946,#b5152c);
+  border:none;border-radius:14px;padding:14px;
+  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
+  box-shadow:0 0 20px rgba(230,57,70,.4);
+}
+
+/* ═══ BACK BUTTON (fixed bottom-left) ═══ */
+#globalBackBtn{
+  position:fixed;bottom:calc(100px + env(safe-area-inset-bottom,0px));
+  left:14px;z-index:300;
+  width:42px;height:42px;border-radius:50%;
+  background:rgba(0,0,0,.75);border:1.5px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+  font-size:18px;color:#fff;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  transition:opacity .2s;
+}
+#globalBackBtn.visible{display:flex;}
+#globalBackBtn:active{opacity:.7;}
+
+/* ═══ FORCE LANDSCAPE ═══ */
+#forceRotateOverlay{
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(0,0,0,.97);
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  text-align:center;padding:20px;
+}
+#forceRotateOverlay.show{display:flex;}
+.fro-icon{font-size:72px;animation:fro-spin 2s ease-in-out infinite;}
+@keyframes fro-spin{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+.fro-title{font-size:20px;font-weight:900;color:#fff;}
+.fro-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;max-width:260px;line-height:1.6;}
+
+/* ni-center arrow fix */
+.ni-center::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#e63946;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));}
+
+/* ═══ LANDING TAB CONTENT ═══ */
+.landing-tab-content{display:none;}
+.landing-tab-content.active{display:block;}
 
 </style>
 </head>
 <body>
 
-<!-- ORIENTATION DIALOG -->
-<div id="orientDialog">
-  <div class="od-icon">🎮</div>
-  <div class="od-title">كيف تريد العرض؟</div>
-  <div class="od-sub">اختر وضع عرض الشاشة<br><span style="font-size:11px;opacity:.7;">وضع العرض الأفقي يخفي شريط الهاتف</span></div>
-  <div class="od-btns">
-    <button class="od-btn primary" onclick="chooseOrientation('portrait')">
-      <span style="font-size:22px;display:block;margin-bottom:4px;">📱</span>
-      بالطول
-    </button>
-    <button class="od-btn secondary" onclick="chooseOrientation('landscape')">
-      <span style="font-size:22px;display:block;margin-bottom:4px;">📺</span>
-      بالعرض
-    </button>
-  </div>
+<!-- ORIENTATION DIALOG - REMOVED, replaced by force landscape -->
+<!-- FORCE ROTATE OVERLAY -->
+<div id="forceRotateOverlay">
+  <div class="fro-icon">📱</div>
+  <div class="fro-title">يرجى تدوير الهاتف</div>
+  <div class="fro-sub">هذا التطبيق يعمل بالعرض الأفقي فقط للحصول على تجربة أفضل</div>
 </div>
+
+<!-- GLOBAL BACK BUTTON -->
+<div id="globalBackBtn" onclick="goBack()">◀</div>
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
@@ -788,9 +954,9 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
   </div>
 </div>
 
-<!-- TOP BAR — eFootball Style -->
+<!-- TOP BAR — New Design -->
 <div class="topbar" id="mainTopbar">
-  <!-- Currencies left -->
+  <!-- Left: currencies (center-left) -->
   <div class="tb-currencies">
     <div class="tb-cur">
       <span class="tb-cur-icon">🪙</span>
@@ -801,15 +967,27 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
       <span class="tb-cur-val orb" id="tbBamboo">0</span>
     </div>
   </div>
-  <!-- Centre info -->
-  <div class="tb-center">
-    <div class="tb-center-ico" onclick="goSec('Landing')">ℹ️</div>
+  <!-- Right: user avatar + lang btn -->
+  <div class="tb-right-group">
+    <button class="tb-lang-btn" onclick="openLangMenu()">
+      <span id="tbLangFlag">🌍</span>
+      <span id="tbLangCode">AR</span>
+    </button>
+    <div class="tb-user-avatar" id="tbUserAvatar">🐼</div>
   </div>
-  <!-- Right icons -->
-  <div class="tb-icons">
-    <div class="tb-ico">👤</div>
-    <div class="tb-ico">🎁<span class="badge">3</span></div>
-    <div class="tb-ico">🔔<span class="badge">11</span></div>
+</div>
+
+<!-- Language Menu -->
+<div id="langMenu" class="lang-menu-overlay" onclick="if(event.target===this)closeLangMenu()">
+  <div class="lang-menu-box">
+    <div class="lang-menu-title">اختر اللغة</div>
+    <div class="lang-opts">
+      <div class="lang-opt" onclick="setLang('ar')"><span>🇸🇦</span><span>العربية</span></div>
+      <div class="lang-opt" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
+      <div class="lang-opt" onclick="setLang('ru')"><span>🇷🇺</span><span>Русский</span></div>
+      <div class="lang-opt" onclick="setLang('fr')"><span>🇫🇷</span><span>Français</span></div>
+      <div class="lang-opt" onclick="setLang('de')"><span>🇩🇪</span><span>Deutsch</span></div>
+    </div>
   </div>
 </div>
 <!-- hidden refs for legacy code -->
@@ -854,12 +1032,14 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
 
   <!-- Tab bar under topbar -->
   <div class="efb-tab-bar">
-    <div class="efb-tab active">الصفحة الرئيسية</div>
-    <div class="efb-tab" onclick="goNav(document.querySelector('[data-s=sectionTasks]'))">أكاديمية</div>
-    <div class="efb-tab" onclick="goNav(document.querySelector('[data-s=sectionMarket]'))">متجر</div>
-    <div class="efb-tab" onclick="goSec('Deposit')">إضافات</div>
+    <div class="efb-tab active" id="landingTabHome" onclick="switchLandingTab('home')"><span data-i18n="home">الرئيسية</span></div>
+    <div class="efb-tab" id="landingTabDeposit" onclick="switchLandingTab('deposit')"><span data-i18n="deposit">الإيداع</span></div>
+    <div class="efb-tab" id="landingTabExchange" onclick="switchLandingTab('exchange')"><span data-i18n="exchange">تحويل العملة</span></div>
+    <div class="efb-tab" id="landingTabWithdraw" onclick="switchLandingTab('withdraw')"><span data-i18n="withdraw">السحب</span></div>
   </div>
 
+  <!-- Landing Tab: Home content -->
+  <div class="landing-tab-content active" id="ltHome">
   <!-- Main Banner -->
   <div class="efb-banner">
     <!-- Featured card left -->
@@ -889,9 +1069,107 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
     </div>
   </div>
 
-  <!-- Packages grid -->
-  <div class="efb-pkg-title">📦 الباكجات المتاحة</div>
-  <div class="efb-pkg-grid" id="pkgGrid"></div>
+  <!-- Packages Carousel -->
+  <div class="efb-pkg-title">📦 <span data-i18n="packages">الباكجات المتاحة</span></div>
+  <div class="pkg-carousel-wrap">
+    <div class="pkg-carousel" id="pkgGrid"></div>
+    <div class="pkg-dots" id="pkgDots"></div>
+  </div>
+  </div><!-- end ltHome -->
+
+  <!-- Landing Tab: Deposit -->
+  <div class="landing-tab-content" id="ltDeposit">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
+    <div class="wal-row">
+      <div class="wl-inf">
+        <div class="wll">المحفظة</div>
+        <div class="wla" id="walletAddressDisplay2">غير متصل</div>
+      </div>
+      <button class="btn-conn" id="connectWalletBtn2" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
+    </div>
+    <div class="dep-warn">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+        <span id="depositUserIdDisplay2" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+        التعليق الوحيد في المعاملة.
+      </div>
+    </div>
+    <label class="flabel">المبلغ (TON)</label>
+    <input type="number" id="depositAmountInput2" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview2()">
+    <div class="preset-row" style="margin-bottom:8px">
+      <span class="prbtn" onclick="setDepAmt2(0.5)">0.5</span>
+      <span class="prbtn" onclick="setDepAmt2(1)">1</span>
+      <span class="prbtn" onclick="setDepAmt2(2)">2</span>
+      <span class="prbtn" onclick="setDepAmt2(5)">5</span>
+      <span class="prbtn" onclick="setDepAmt2(10)">10</span>
+    </div>
+    <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 المعدل: <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--muted);font-weight:600">ستحصل على:</span>
+        <span id="depBambooPreview2" style="font-size:16px;font-weight:800;color:var(--bamboo)">0 Bamboo</span>
+      </div>
+    </div>
+    <button class="btn-prim" id="submitDepositBtn2" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+  </div>
+  </div><!-- end ltDeposit -->
+
+  <!-- Landing Tab: Exchange -->
+  <div class="landing-tab-content" id="ltExchange">
+  <div class="swap-card">
+    <div class="swap-section">
+      <div class="swap-label">من</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
+          <span class="swap-currency-name">Bamboo</span>
+        </div>
+        <div class="swap-input-wrap">
+          <input type="number" class="swap-input" id="swapFromAmt2" placeholder="0" oninput="updSwapCalc2()">
+          <button class="swap-max-btn" onclick="swapMax2()">MAX</button>
+        </div>
+      </div>
+      <div class="swap-balance" id="swapFromBal2">رصيد: 0 Bamboo</div>
+    </div>
+    <div class="swap-divider">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid rgba(6,20,6,.9);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
+    </div>
+    <div class="swap-section">
+      <div class="swap-label">إلى</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <span style="font-size:32px;">🪙</span>
+          <span class="swap-currency-name">Coins</span>
+        </div>
+        <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt2">0</div></div>
+      </div>
+      <div class="swap-balance" id="swapToBal2">رصيد: 0 Coins</div>
+    </div>
+    <div class="swap-rate">📊 100 Bamboo = 10 Coins</div>
+    <button class="btn-prim" style="margin-top:10px" onclick="doExchange()">⚡ تحويل الآن</button>
+  </div>
+  </div><!-- end ltExchange -->
+
+  <!-- Landing Tab: Withdraw -->
+  <div class="landing-tab-content" id="ltWithdraw">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
+    <div class="wd-err-banner trial" id="wdBannerTrial2">
+      <i class="fas fa-gift"></i>
+      <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins.</div>
+    </div>
+    <label class="flabel">عنوان محفظة TON</label>
+    <input type="text" class="finput" id="wdAddr2" placeholder="UQ...">
+    <label class="flabel">المبلغ (Coins)</label>
+    <input type="number" class="finput" id="wdAmt2" placeholder="200" min="200" oninput="updWdPrev2()">
+    <div class="ton-row">
+      <div class="ton-chip">
+        <div class="tcl">💎 قيمة TON</div>
+        <div class="tcv" id="wdTonVal2">0.0000</div>
+      </div>
+    </div>
+    <button class="btn-wd" id="wdBtn2" onclick="doWithdraw2()">💎 طلب السحب</button>
+  </div>
+  </div><!-- end ltWithdraw -->
 
 </div>
 
@@ -1156,31 +1434,71 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
   </div>
 </div>
 
-<!-- BOTTOM NAV — eFootball Style -->
+<!-- BOTTOM NAV — Updated -->
 <nav class="bnav" id="mainBnav">
-  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
+  <div class="ni" data-s="sectionMatch" onclick="goNav(this)">
     <div class="ni-tile">⚽</div>
-    <div class="ni-lbl">المباراة</div>
+    <div class="ni-lbl" data-i18n="match">المباراة</div>
   </div>
   <div class="ni active" data-s="sectionLanding" id="navLanding" onclick="goNav(this)">
     <div class="ni-tile">🛡️</div>
-    <div class="ni-lbl">الرئيسية</div>
+    <div class="ni-lbl" data-i18n="navHome">الرئيسية</div>
   </div>
   <div class="ni ni-center" data-s="sectionHome" onclick="goNav(this)">
     <div class="ni-tile">👤</div>
-    <div class="ni-lbl">فريقي</div>
+    <div class="ni-lbl" data-i18n="myTeam">فريقي</div>
   </div>
   <div class="ni" data-s="sectionTasks" onclick="goNav(this)">
     <div class="ni-tile">🏅</div>
-    <div class="ni-lbl">مهمات</div>
+    <div class="ni-lbl" data-i18n="tasks">مهمات</div>
   </div>
   <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
-    <div class="ni-tile">🎯</div>
-    <div class="ni-lbl">محاولات يومية</div>
+    <div class="ni-tile">🛒</div>
+    <div class="ni-lbl" data-i18n="market">ماركت</div>
   </div>
 </nav>
 
-<!-- PLAYER DETAIL MODAL -->
+<!-- ══ SECTION: MATCH ══ -->
+<div class="sec" id="sectionMatch">
+  <div class="pg-title">⚽ <span data-i18n="match">المباراة</span></div>
+  <div class="match-lock-card" id="matchLockCard">
+    <div class="mlc-icon">🔒</div>
+    <div class="mlc-title" data-i18n="matchLockTitle">للعب المباراة مع الآخرين</div>
+    <div class="mlc-sub" data-i18n="matchLockSub">يجب أن تمتلك خطة بـ <strong>1000 رايتينج</strong> أو أكثر</div>
+    <div class="mlc-rating-bar">
+      <div class="mlc-rating-fill" id="matchRatingFill" style="width:0%"></div>
+    </div>
+    <div class="mlc-rating-text"><span id="matchCurrentRating">0</span> / 1000 رايتينج</div>
+    <button class="mlc-build-btn" onclick="goNav(document.getElementById('navLanding'))">
+      🛒 <span data-i18n="buildTeam">بناء فريقك</span>
+    </button>
+  </div>
+  <div class="match-ready-card" id="matchReadyCard" style="display:none">
+    <div class="match-field-preview">
+      <div class="mfp-glow"></div>
+      <div class="mfp-icon">⚽</div>
+      <div class="mfp-title" data-i18n="readyToPlay">جاهز للعب!</div>
+    </div>
+    <div class="match-vs-info">
+      <div class="match-team-box">
+        <div class="mtb-avatar">🛡️</div>
+        <div class="mtb-name" data-i18n="yourTeam">فريقك</div>
+        <div class="mtb-rating" id="matchMyRating">0</div>
+      </div>
+      <div class="match-vs-center">VS</div>
+      <div class="match-team-box">
+        <div class="mtb-avatar">🤖</div>
+        <div class="mtb-name" data-i18n="opponent">المنافس</div>
+        <div class="mtb-rating">???</div>
+      </div>
+    </div>
+    <button class="match-play-btn" onclick="startMatch()">
+      ▶ <span data-i18n="startMatch">ابدأ المباراة</span>
+    </button>
+  </div>
+</div>
+
+
 <div class="modal" id="playerDetailModal">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -1215,7 +1533,7 @@ body{padding-top:52px !important;padding-bottom:90px !important;}
 </div>
 
 <div id="toast"></div>
-<div id="saveToast">✅ تم حفظ التشكيلة!</div>
+<div id="saveToast" style="display:none!important"></div>
 
 <script>
 // ════════════════════════════════════════════
@@ -1306,37 +1624,9 @@ function ratingBadgeClass(r){if(r>=93)return 'rb-legend';if(r>=86)return 'rb-pla
 function pcClass(t){return{bronze:'pc-bronze',silver:'pc-silver',gold:'pc-gold',plat:'pc-plat',legend:'pc-legend'}[t]||'pc-bronze';}
 
 // ════ NAVIGATION ════
-function goNav(el){
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  const sName = el.dataset.s;
-  document.getElementById(sName).classList.add('active');
-  if(sName==='sectionMarket') renderMarket(_currentFilter);
-  // Show/hide top+bottom bars: only on Landing page
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  const isHome=(sName==='sectionLanding');
-  if(tb) tb.classList.toggle('hidden-bar',!isHome);
-  if(bn) bn.classList.toggle('hidden-bar',!isHome);
-  // Fix body padding
-  document.body.style.paddingTop  = isHome ? '52px' : '0';
-  document.body.style.paddingBottom = isHome ? '90px' : '0';
-}
+function goNav_OLD_REPLACED(el){ /* replaced */ }
 
-function goSec(name){
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.getElementById('section'+name).classList.add('active');
-  if(name==='Deposit') document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
-  // Hide bars when going to inner pages
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  if(tb) tb.classList.add('hidden-bar');
-  if(bn) bn.classList.add('hidden-bar');
-  document.body.style.paddingTop='0';
-  document.body.style.paddingBottom='0';
-}
+function goSec_OLD_REPLACED(name){ /* replaced */ }
 
 
 
@@ -1407,6 +1697,7 @@ function updateUI(){
   const sb=document.getElementById('submitDepositBtn');
   if(sb) sb.disabled=!S.wallet;
   updSwapBals();
+  updSwapBals2();
   updateRefUI();
   renderExchHist();
   renderWdHist();
@@ -1513,9 +1804,7 @@ function setFormation(f,el){
 function saveFormation(){
   const squadIds=S.squad.map(p=>p?p.id:null);
   api('saveSquad',{squad:squadIds,formation:S.formation}).catch(()=>{});
-  const toast=document.getElementById('saveToast');
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),2500);
+  showToast(i18n('formationSaved','✅ تم حفظ التشكيلة'));
 }
 
 // ════ SLOT MODAL ════
@@ -2020,21 +2309,10 @@ const PACKAGES = [
   {id:'pk5',name:'باكج أسطوري',tier:'legend',icon:'👑',cards:5,guaranteed:'أسطوري مضمون',price:2.5,currency:'ton',badge:'حصري'},
   {id:'pk6',name:'باكج شامبيون',tier:'legend',icon:'🏆',cards:10,guaranteed:'أسطوري مضمون',price:5.0,currency:'ton',badge:''},
 ];
-function renderPackages(){
-  const grid=document.getElementById('pkgGrid');if(!grid)return;
-  grid.innerHTML=PACKAGES.map(pk=>{
-    const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
-    return`<div class="efb-pkg pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
-      ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
-      <div class="efb-pkg-bg">
-        <div class="efb-pkg-icon">${pk.icon}</div>
-        <div class="efb-pkg-name">${pk.name}</div>
-        <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
-        <div class="efb-pkg-price">${priceStr}</div>
-      </div>
-    </div>`;
-  }).join('');
+function renderPackages_OLD_REPLACED(){
+  // replaced by carousel version in new JS block
 }
+
 function openPkg(id){
   const pk=PACKAGES.find(p=>p.id===id);if(!pk)return;
   document.getElementById('pkgInfoTitle').textContent=pk.name;
@@ -2087,7 +2365,7 @@ async function buyPkg(id){
   }
 
   renderMarket('all');
-  renderPackages();
+  // renderPackages called from window.load
   renderTasks();
   renderPitch();
   renderBench();
@@ -2102,124 +2380,347 @@ async function buyPkg(id){
 }
 
 
-// ════════════════════════════════════════════
-//  ORIENTATION SYSTEM
-// ════════════════════════════════════════════
-// ════════════════════════════════════════════
-//  ORIENTATION SYSTEM — يسأل كل مرة
-// ════════════════════════════════════════════
-let _orientPref = null; // لا نحفظ — نسأل كل مرة
 
-// ── Fullscreen (يخفي شريط الحالة) ──
-async function enterFullscreen(){
-  const el = document.documentElement;
-  const req = el.requestFullscreen || el.webkitRequestFullscreen
-             || el.mozRequestFullScreen || el.msRequestFullscreen;
-  if(req){
-    try{ await req.call(el); }catch(e){ console.log('Fullscreen blocked:',e.message); }
+// ════════════════════════════════════════════
+//  i18n LANGUAGE SYSTEM
+// ════════════════════════════════════════════
+const LANGS = {
+  ar:{
+    home:'الرئيسية', deposit:'الإيداع', exchange:'تحويل العملة', withdraw:'السحب',
+    packages:'الباكجات المتاحة', match:'المباراة', myTeam:'فريقي', tasks:'مهمات',
+    market:'ماركت', navHome:'الرئيسية', matchLockTitle:'للعب مع الآخرين',
+    matchLockSub:'يجب أن تمتلك فريق بـ 1000 رايتينج أو أكثر',
+    buildTeam:'بناء فريقك', readyToPlay:'جاهز للعب!', yourTeam:'فريقك',
+    opponent:'المنافس', startMatch:'ابدأ المباراة', formationSaved:'✅ تم حفظ التشكيلة',
+    dir:'rtl', langCode:'AR', langFlag:'🌍'
+  },
+  en:{
+    home:'Home', deposit:'Deposit', exchange:'Exchange', withdraw:'Withdraw',
+    packages:'Available Packages', match:'Match', myTeam:'My Team', tasks:'Tasks',
+    market:'Market', navHome:'Home', matchLockTitle:'Play Against Others',
+    matchLockSub:'You need a team with 1000+ rating to play',
+    buildTeam:'Build Your Team', readyToPlay:'Ready to Play!', yourTeam:'Your Team',
+    opponent:'Opponent', startMatch:'Start Match', formationSaved:'✅ Formation Saved',
+    dir:'ltr', langCode:'EN', langFlag:'🇬🇧'
+  },
+  ru:{
+    home:'Главная', deposit:'Депозит', exchange:'Обмен', withdraw:'Вывод',
+    packages:'Доступные пакеты', match:'Матч', myTeam:'Моя команда', tasks:'Задания',
+    market:'Рынок', navHome:'Главная', matchLockTitle:'Играть с другими',
+    matchLockSub:'Вам нужна команда с рейтингом 1000+',
+    buildTeam:'Создай команду', readyToPlay:'Готов к игре!', yourTeam:'Твоя команда',
+    opponent:'Соперник', startMatch:'Начать матч', formationSaved:'✅ Состав сохранён',
+    dir:'ltr', langCode:'RU', langFlag:'🇷🇺'
+  },
+  fr:{
+    home:'Accueil', deposit:'Dépôt', exchange:'Échange', withdraw:'Retrait',
+    packages:'Packs disponibles', match:'Match', myTeam:'Mon équipe', tasks:'Tâches',
+    market:'Marché', navHome:'Accueil', matchLockTitle:'Jouer contre d\'autres',
+    matchLockSub:'Vous avez besoin d\'une équipe avec 1000+ de classement',
+    buildTeam:'Construire l\'équipe', readyToPlay:'Prêt à jouer!', yourTeam:'Votre équipe',
+    opponent:'Adversaire', startMatch:'Commencer', formationSaved:'✅ Formation sauvegardée',
+    dir:'ltr', langCode:'FR', langFlag:'🇫🇷'
+  },
+  de:{
+    home:'Startseite', deposit:'Einzahlung', exchange:'Tausch', withdraw:'Auszahlung',
+    packages:'Verfügbare Pakete', match:'Spiel', myTeam:'Mein Team', tasks:'Aufgaben',
+    market:'Markt', navHome:'Startseite', matchLockTitle:'Gegen andere spielen',
+    matchLockSub:'Du brauchst ein Team mit 1000+ Bewertung',
+    buildTeam:'Team aufbauen', readyToPlay:'Bereit zu spielen!', yourTeam:'Dein Team',
+    opponent:'Gegner', startMatch:'Spiel starten', formationSaved:'✅ Aufstellung gespeichert',
+    dir:'ltr', langCode:'DE', langFlag:'🇩🇪'
   }
-  // Telegram WebApp: lock orientation نفسها تخفي الشريط في بعض الأجهزة
-  if(window.Telegram?.WebApp?.requestFullscreen){
-    try{ window.Telegram.WebApp.requestFullscreen(); }catch(_){}
-  }
+};
+let _currentLang = 'ar';
+
+function i18n(key, fallback=''){
+  return (LANGS[_currentLang]||LANGS.ar)[key]||fallback||key;
 }
 
-function exitFullscreen(){
-  const ex = document.exitFullscreen || document.webkitExitFullscreen
-           || document.mozCancelFullScreen || document.msExitFullscreen;
-  if(ex) try{ ex.call(document); }catch(_){}
+function setLang(lang){
+  _currentLang = lang;
+  const L = LANGS[lang]||LANGS.ar;
+  // Update flag/code in topbar
+  const flag = document.getElementById('tbLangFlag');
+  const code = document.getElementById('tbLangCode');
+  if(flag) flag.textContent = L.langFlag;
+  if(code) code.textContent = L.langCode;
+  // Update direction
+  document.documentElement.lang = lang;
+  document.documentElement.dir = L.dir;
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(L[key]) el.textContent = L[key];
+  });
+  closeLangMenu();
+  // Update active lang
+  document.querySelectorAll('.lang-opt').forEach((opt,i)=>{
+    const langs=['ar','en','ru','fr','de'];
+    opt.classList.toggle('active-lang', langs[i]===lang);
+  });
 }
 
-// ── الاختيار من الديالوج ──
-async function chooseOrientation(pref){
-  _orientPref = pref;
-  document.getElementById('orientDialog').classList.remove('show');
-
-  if(pref === 'landscape'){
-    await enterFullscreen();        // إخفاء شريط الحالة
-    await applyOrientation('landscape');
-  } else {
-    exitFullscreen();
-    await applyOrientation('portrait');
-  }
+function openLangMenu(){
+  document.getElementById('langMenu').classList.add('open');
+}
+function closeLangMenu(){
+  document.getElementById('langMenu').classList.remove('open');
 }
 
-// ── تطبيق الاتجاه ──
-async function applyOrientation(pref){
-  if(pref === 'landscape'){
-    // 1. جرب Screen Orientation API
-    let locked = false;
-    if(screen.orientation && screen.orientation.lock){
-      try{
-        await screen.orientation.lock('landscape-primary');
-        locked = true;
-      }catch(e){ console.log('orientation.lock failed:', e.message); }
+// ════════════════════════════════════════════
+//  NAVIGATION — BACK BUTTON
+// ════════════════════════════════════════════
+let _navHistory = [];
+
+function goBack(){
+  if(_navHistory.length > 1){
+    _navHistory.pop();
+    const prev = _navHistory[_navHistory.length-1];
+    if(prev && prev.type === 'nav'){
+      const el = document.querySelector(`.ni[data-s="${prev.id}"]`);
+      if(el) goNav(el, true);
+    } else if(prev && prev.type === 'sec'){
+      goSec(prev.id, true);
     }
-    // 2. Fallback: CSS transform لو مفيش lock
-    if(!locked) applyLandscapeTransform();
-
-    document.body.classList.add('force-landscape');
-    document.body.classList.remove('force-portrait');
   } else {
-    // Portrait
-    if(screen.orientation && screen.orientation.unlock){
-      try{ screen.orientation.unlock(); }catch(_){}
-    }
-    removeLandscapeTransform();
-    exitFullscreen();
-    document.body.classList.remove('force-landscape');
-    document.body.classList.add('force-portrait');
+    // Go to landing
+    const el = document.getElementById('navLanding');
+    if(el) goNav(el, true);
   }
 }
 
-// ── CSS Transform Fallback ──
-function applyLandscapeTransform(){
+function _pushHistory(type, id){
+  _navHistory.push({type, id});
+  if(_navHistory.length > 20) _navHistory.shift();
+}
+
+function _updateBackBtn(show){
+  const btn = document.getElementById('globalBackBtn');
+  if(btn) btn.classList.toggle('visible', show);
+}
+
+// Override goNav
+const _origGoNav = goNav;
+function goNav(el, _fromBack=false){
+  const sName = el.dataset.s;
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(sName).classList.add('active');
+  if(sName==='sectionMarket') renderMarket(_currentFilter);
+  if(sName==='sectionMatch') updateMatchSection();
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  const isHome=(sName==='sectionLanding');
+  if(tb) tb.classList.toggle('hidden-bar',!isHome);
+  if(bn) bn.classList.toggle('hidden-bar',!isHome);
+  document.body.style.paddingTop  = isHome ? '58px' : '0';
+  document.body.style.paddingBottom = isHome ? '90px' : '0';
+  if(!_fromBack) _pushHistory('nav', sName);
+  _updateBackBtn(!isHome);
+}
+
+// Override goSec
+const _origGoSec = goSec;
+function goSec(name, _fromBack=false){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section'+name).classList.add('active');
+  if(name==='Deposit') document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  if(tb) tb.classList.add('hidden-bar');
+  if(bn) bn.classList.add('hidden-bar');
+  document.body.style.paddingTop='0';
+  document.body.style.paddingBottom='0';
+  if(!_fromBack) _pushHistory('sec', name);
+  _updateBackBtn(true);
+}
+
+// ════════════════════════════════════════════
+//  LANDING TABS
+// ════════════════════════════════════════════
+function switchLandingTab(tab){
+  ['home','deposit','exchange','withdraw'].forEach(t=>{
+    const tabEl = document.getElementById('landingTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    const contEl = document.getElementById('lt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(tabEl) tabEl.classList.toggle('active', t===tab);
+    if(contEl) contEl.classList.toggle('active', t===tab);
+  });
+  if(tab==='deposit'){
+    const uid = document.getElementById('depositUserIdDisplay2');
+    if(uid) uid.textContent = S.userId||'???';
+  }
+  if(tab==='exchange') updSwapBals2();
+  if(tab==='withdraw') updWdPrev2();
+}
+
+// Deposit tab helpers
+function setDepAmt2(v){document.getElementById('depositAmountInput2').value=v;updDepPreview2();}
+function updDepPreview2(){
+  const ton=parseFloat(document.getElementById('depositAmountInput2').value)||0;
+  const el=document.getElementById('depBambooPreview2');
+  if(el)el.textContent=fmt(Math.floor(ton*10000))+' Bamboo';
+}
+// Exchange tab helpers
+function swapMax2(){document.getElementById('swapFromAmt2').value=Math.floor(S.user.bamboo||0);updSwapCalc2();}
+function updSwapCalc2(){const a=parseInt(document.getElementById('swapFromAmt2').value)||0;const el=document.getElementById('swapToAmt2');if(el)el.textContent=fmt(Math.floor(a/CFG.RATE));}
+function updSwapBals2(){
+  const fb=document.getElementById('swapFromBal2');if(fb)fb.textContent=`رصيد: ${fmt(S.user.bamboo||0)} Bamboo`;
+  const tb=document.getElementById('swapToBal2');if(tb)tb.textContent=`رصيد: ${fmt(S.user.coins||0)} Coins`;
+}
+// Withdraw tab helpers
+function updWdPrev2(){
+  const a=parseFloat(document.getElementById('wdAmt2').value)||0;
+  const el=document.getElementById('wdTonVal2');if(el)el.textContent=(a*CFG.TON_PER_COIN).toFixed(4);
+}
+async function doWithdraw2(){
+  const addr=(document.getElementById('wdAddr2').value||'').trim();
+  const amt=parseFloat(document.getElementById('wdAmt2').value)||0;
+  if(!addr||addr.length<10){showToast('أدخل عنوان TON صالح!');return;}
+  if(amt<CFG.MIN_WD){showToast(`الحد الأدنى ${CFG.MIN_WD} Coins!`);return;}
+  if(amt>(S.user.coins||0)){showToast('رصيد Coins غير كافٍ!');return;}
+  try{
+    await api('withdraw',{address:addr,amount:amt});
+    S.user.coins-=amt;
+    showToast(`✅ طلب سحب: ${fmt(amt)} Coins`);
+    updateUI();
+  }catch(e){showToast(`❌ ${e.message||'فشل'}`);}
+}
+
+// ════════════════════════════════════════════
+//  PACKAGES CAROUSEL
+// ════════════════════════════════════════════
+let _pkgIdx = 0;
+let _pkgTotal = 0;
+let _pkgStartX = 0;
+let _pkgDragging = false;
+
+function renderPackages(){
+  const grid=document.getElementById('pkgGrid');
+  const dots=document.getElementById('pkgDots');
+  if(!grid)return;
+  _pkgTotal = PACKAGES.length;
+  grid.innerHTML=PACKAGES.map(pk=>{
+    const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
+    return`<div class="efb-pkg pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
+      ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
+      <div class="efb-pkg-bg">
+        <div class="efb-pkg-icon">${pk.icon}</div>
+        <div class="efb-pkg-name">${pk.name}</div>
+        <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
+        <div class="efb-pkg-price">${priceStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+  if(dots){
+    dots.innerHTML=PACKAGES.map((_,i)=>`<div class="pkg-dot${i===0?' active':''}" onclick="goToPkg(${i})"></div>`).join('');
+  }
+  // Touch/swipe support
+  grid.addEventListener('touchstart',e=>{_pkgStartX=e.touches[0].clientX;_pkgDragging=true;},{passive:true});
+  grid.addEventListener('touchend',e=>{
+    if(!_pkgDragging)return;
+    const dx=e.changedTouches[0].clientX-_pkgStartX;
+    if(dx< -40) goToPkg(Math.min(_pkgIdx+1,_pkgTotal-1));
+    else if(dx>40) goToPkg(Math.max(_pkgIdx-1,0));
+    _pkgDragging=false;
+  },{passive:true});
+  goToPkg(0);
+}
+
+function goToPkg(idx){
+  _pkgIdx=idx;
+  const grid=document.getElementById('pkgGrid');
+  if(grid) grid.style.transform=`translateX(-${idx*100}%)`;
+  document.querySelectorAll('.pkg-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+// ════════════════════════════════════════════
+//  MATCH SECTION
+// ════════════════════════════════════════════
+function updateMatchSection(){
+  const power = calcTeamPower();
+  const required = 1000;
+  const pct = Math.min(100, (power/required)*100);
+  const lockCard = document.getElementById('matchLockCard');
+  const readyCard = document.getElementById('matchReadyCard');
+  const fill = document.getElementById('matchRatingFill');
+  const cur = document.getElementById('matchCurrentRating');
+  const myR = document.getElementById('matchMyRating');
+  if(fill) fill.style.width = pct+'%';
+  if(cur) cur.textContent = power;
+  if(myR) myR.textContent = power;
+  if(power >= required){
+    if(lockCard) lockCard.style.display='none';
+    if(readyCard) readyCard.style.display='block';
+  } else {
+    if(lockCard) lockCard.style.display='block';
+    if(readyCard) readyCard.style.display='none';
+  }
+}
+
+function startMatch(){
+  showToast('⚽ جاري البحث عن منافس...');
+  setTimeout(()=>showToast('🎮 ميزة المباراة قادمة قريباً!'),2000);
+}
+
+// ════════════════════════════════════════════
+//  FORCE LANDSCAPE SYSTEM
+// ════════════════════════════════════════════
+async function forceLandscape(){
+  // Try Screen Orientation API
+  if(screen.orientation && screen.orientation.lock){
+    try{
+      await screen.orientation.lock('landscape-primary');
+      return true;
+    }catch(e){ console.log('orientation lock failed:', e.message); }
+  }
+  // Fallback: CSS transform
   if(window.innerHeight > window.innerWidth){
-    const W = window.innerHeight;
-    const H = window.innerWidth;
-    document.body.style.cssText = `
-      transform: rotate(-90deg) translateX(-${W}px);
-      transform-origin: top left;
-      width: ${W}px !important;
-      height: ${H}px !important;
-      overflow: hidden;
-      position: fixed;
-      top: 0; left: 0;
+    const W=window.innerHeight, H=window.innerWidth;
+    document.body.style.cssText=`
+      transform:rotate(-90deg) translateX(-${W}px);
+      transform-origin:top left;
+      width:${W}px!important;height:${H}px!important;
+      overflow:hidden;position:fixed;top:0;left:0;
     `;
-    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflow='hidden';
+    return true;
   }
+  return true;
 }
 
-function removeLandscapeTransform(){
-  document.body.style.cssText = '';
-  document.documentElement.style.overflow = '';
-}
-
-// ── إظهار الديالوج كل مرة ──
-function showOrientDialog(){
-  // أظهر بعد 600ms عشان شاشة التحميل تظهر الأول
-  setTimeout(()=>{
-    document.getElementById('orientDialog').classList.add('show');
-  }, 600);
-}
-
-// ── مراقبة تغيير الاتجاه الفعلي للجهاز ──
-function onDeviceOrientationChange(){
-  if(!_orientPref) return;
+function checkOrientation(){
+  const overlay = document.getElementById('forceRotateOverlay');
+  if(!overlay) return;
   const isLandscape = window.innerWidth > window.innerHeight;
-  if(_orientPref === 'landscape' && !isLandscape){
-    applyLandscapeTransform();
-  } else if(_orientPref === 'portrait' && isLandscape){
-    removeLandscapeTransform();
-  }
+  overlay.classList.toggle('show', !isLandscape);
 }
 
-window.addEventListener('orientationchange', ()=>{ setTimeout(onDeviceOrientationChange, 300); });
-window.addEventListener('resize',            ()=>{ setTimeout(onDeviceOrientationChange, 200); });
+window.addEventListener('orientationchange',()=>setTimeout(checkOrientation,300));
+window.addEventListener('resize',()=>setTimeout(checkOrientation,200));
 
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
 window.addEventListener('load', async function(){
-  showOrientDialog();
+  // Force landscape
+  try{ await forceLandscape(); }catch(_){}
+  // Check immediately
+  setTimeout(checkOrientation, 500);
+
+  // Init avatar from Telegram
+  if(window.Telegram?.WebApp){
+    const u = window.Telegram.WebApp.initDataUnsafe?.user;
+    if(u && u.photo_url){
+      const av = document.getElementById('tbUserAvatar');
+      if(av) av.innerHTML = `<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='🐼'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    }
+  }
+
   await init();
+  renderPackages();
 });
 </script>
 </body>

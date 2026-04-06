@@ -31,15 +31,98 @@
   --field:#1a6b2a;--field2:#145522;
   --pitch-line:rgba(255,255,255,.18);
 }
+/* ═══ SECTIONS — Full screen fit, no scroll (except market) ═══ */
 body{
   font-family:'Cairo',sans-serif;font-weight:700;
   background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat fixed;
-  color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
+  color:var(--text);height:100dvh;overflow:hidden;font-size:14px;
+  margin:0;padding:0;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-serif!important;}
 .orb{font-family:'Orbitron',monospace!important;}
 
-/* ═══ LOADING ═══ */
+/* All sections: fixed, fill between top/bottom bars by default */
+.sec{
+  display:none;
+  position:fixed;
+  left:0;right:0;
+  top:0;bottom:0;
+  overflow:hidden;
+  flex-direction:column;
+  animation:fadeIn .25s ease;
+}
+.sec.active{display:flex;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Landing: space for topbar + bottomnav */
+#sectionLanding{
+  top:58px;bottom:80px;
+  overflow-y:auto;overflow-x:hidden;
+}
+
+/* Market: allow scroll */
+#sectionMarket{
+  top:0;bottom:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding:50px 12px 20px;
+}
+
+/* Home (pitch): no scroll, content scales */
+#sectionHome{
+  top:0;bottom:0;
+  overflow:hidden;
+  padding:0;
+  gap:0;
+}
+
+/* Tasks, Match, Friends, Referral, Deposit, Withdraw, Exchange: fill screen */
+#sectionTasks,#sectionMatch,#sectionFriends,#sectionReferral,
+#sectionDeposit,#sectionWithdraw,#sectionExchange{
+  top:0;bottom:0;
+  overflow-y:auto;overflow-x:hidden;
+  padding:50px 12px 20px;
+}
+
+/* ═══ PITCH page fluid layout ═══ */
+#sectionHome .team-power-bar{
+  flex-shrink:0;
+  margin:4px 8px;
+  padding:6px 10px;
+}
+.tp-val{font-size:18px;font-weight:900;color:var(--bamboo);font-family:'Orbitron',monospace;line-height:1;}
+#sectionHome .pitch-wrap{
+  flex:1;
+  min-height:0;
+  aspect-ratio:unset!important;
+  max-height:unset!important;
+  width:100%;
+  margin:0;
+  border-radius:0;
+  border-left:none;border-right:none;
+}
+#sectionHome .save-formation-btn{
+  flex-shrink:0;margin:4px 8px;padding:8px;font-size:13px;
+}
+#sectionHome .bench-btn{
+  flex-shrink:0;margin:0 8px 4px;padding:6px;font-size:12px;
+}
+#sectionHome .bench-row{
+  flex-shrink:0;max-height:110px;overflow-x:auto;
+}
+
+/* ═══ MATCH page fluid ═══ */
+#sectionMatch{
+  justify-content:center;
+  padding:20px 14px;
+}
+.match-lock-card{
+  width:100%;max-width:460px;align-self:center;
+}
+.match-ready-card{
+  width:100%;max-width:460px;align-self:center;
+}
+
+
 #loadingScreen{
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(160deg,#061206,#0a1f0a);
@@ -55,43 +138,29 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ld-bar-bg{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
 .ld-bar-fill{height:100%;background:linear-gradient(90deg,var(--bamboo),var(--coin),var(--neon));border-radius:3px;transition:width .4s ease;width:0%;}
 
-/* ═══ SECTIONS ═══ */
-.sec{display:none;padding:10px 12px 20px;animation:fadeIn .28s ease;}
-.sec.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
 /* ═══ TOP BAR — eFootball Style ═══ */
 .topbar{
-  display:flex;align-items:center;justify-content:center;
-  padding:6px 52px 5px;
+  display:flex;align-items:center;
   background:linear-gradient(180deg,rgba(10,10,25,.98) 0%,rgba(8,8,20,.94) 100%);
   backdrop-filter:blur(20px);
   position:fixed;top:0;left:0;right:0;z-index:200;
   border-bottom:1px solid rgba(255,255,255,.07);
-  height:60px;
+  height:58px;
   transition:transform .3s ease, opacity .3s ease;
 }
 .topbar.hidden-bar{transform:translateY(-100%);opacity:0;pointer-events:none;}
-.tb-main-center{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:420px;}
-.tb-currencies{display:flex;align-items:center;gap:7px;}
-.tb-cur{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:22px;padding:6px 13px;}
-.tb-cur-icon{font-size:18px;line-height:1;flex-shrink:0;}
-.tb-cur-val{font-family:'Orbitron',monospace;font-size:15px;font-weight:800;color:#fff;}
-.tb-avatar-wrap{display:flex;align-items:center;gap:6px;}
-.tb-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.tb-avatar img{width:100%;height:100%;object-fit:cover;}
-.tb-change-btn{background:rgba(124,179,66,.18);border:1px solid rgba(124,179,66,.4);border-radius:16px;padding:5px 10px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;}
-.tb-change-btn:active{background:rgba(124,179,66,.35);}
-/* Language switcher */
-.tb-lang-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:5px 9px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;}
-.tb-lang-btn:active{background:rgba(255,255,255,.18);}
-.lang-menu{position:fixed;top:64px;right:8px;background:rgba(12,18,32,.97);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:4px;z-index:500;display:none;box-shadow:0 8px 32px rgba(0,0,0,.6);min-width:130px;}
-.lang-menu.open{display:block;}
-.lang-item{padding:9px 14px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;border-radius:10px;display:flex;align-items:center;gap:8px;}
-.lang-item:hover,.lang-item:active{background:rgba(124,179,66,.15);}
-.lang-item.active{color:var(--bamboo);}
+.tb-currencies{display:flex;align-items:center;gap:8px;}
+.tb-cur{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;}
+.tb-cur-icon{font-size:15px;line-height:1;flex-shrink:0;}
+.tb-cur-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#fff;}
+.tb-icons{display:flex;align-items:center;gap:5px;}
+.tb-ico{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:18px;}
+.tb-ico:active{background:rgba(255,255,255,.18);}
+.tb-ico .badge{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;border-radius:8px;background:#e53935;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #0a0a19;}
+.tb-center{position:absolute;left:50%;transform:translateX(-50%);}
+.tb-center-ico{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#fff;}
 /* OLD CHIPS hidden */
-.uavatar,.uname,.tb-bals,.tb-menu-btn,.tb-chip,.tb-chip-num,.tb-actions,.tb-icons,.tb-center{display:none!important;}
+.uavatar,.uname,.tb-bals,.tb-menu-btn,.tb-chip,.tb-chip-num,.tb-actions{display:none!important;}
 
 /* ═══ BOTTOM NAV — eFootball Style ═══ */
 .bnav{
@@ -115,7 +184,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ni[data-s="sectionContracts"].ni-tile{background:linear-gradient(145deg,#c77dff,#7b2fff);}
 .ni[data-s="sectionTasks"]   .ni-tile{background:linear-gradient(145deg,#52b788,#2d6a4f);}
 .ni[data-s="sectionMarket"]  .ni-tile{background:linear-gradient(145deg,#f4a261,#e76f51);}
-.ni[data-s="sectionMatch"]   .ni-tile{background:linear-gradient(145deg,#43e97b,#38f9d7);}
+.ni[data-s="sectionMatch"]   .ni-tile{background:linear-gradient(145deg,#4fc3f7,#0288d1);}
 /* Center "فريقي" raised button */
 .ni-center .ni-tile{max-height:60px;border-radius:16px;box-shadow:0 -6px 22px rgba(230,57,70,.55);}
 .ni-center::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#e63946;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));}
@@ -154,7 +223,15 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .side-item-sub{font-size:11px;color:var(--muted);margin-top:1px;font-weight:600;}
 
 /* ═══ BOTTOM NAV ═══ */
-/* legacy bnav css removed */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(0,0,0,.88);border-top:1px solid rgba(124,179,66,.15);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;transition:all .2s;gap:3px;min-height:70px;}
+.ni-icon{font-size:24px;transition:transform .2s;}
+.ni.active .ni-icon{transform:scale(1.2);}
+.ni-lbl{font-size:9px;font-weight:800;color:var(--muted);transition:color .2s;}
+.ni.active .ni-lbl{color:var(--bamboo);}
+.ni.active .ni-icon{filter:drop-shadow(0 0 6px var(--bamboo-glow));}
+@keyframes nav-bounce{0%,100%{transform:scale(1.2) translateY(0)}50%{transform:scale(1.2) translateY(-4px)}}
+.ni.active .ni-icon{animation:nav-bounce 1.8s ease-in-out infinite;}
 
 /* ═══ PITCH / FIELD — eFootball Style ═══ */
 .pitch-wrap{
@@ -662,8 +739,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .ni-icon img{width:32px!important;height:32px!important;}
 }
 
-/* ═══ BODY PADDING for fixed bars ═══ */
-body{padding-top:60px !important;padding-bottom:90px !important;}
+/* ═══ BODY PADDING — managed by JS per section ═══ */
+/* body padding removed; sections use position:fixed with top/bottom */
 
 /* ═══ LANDING PAGE ═══ */
 /* Tab bar */
@@ -752,220 +829,239 @@ body{padding-top:60px !important;padding-bottom:90px !important;}
 .efb-pkg.pkg-legend .efb-pkg-price{border-color:#FFA500;color:#FFA500;}
 .efb-pkg-badge{position:absolute;top:8px;right:8px;background:#e63946;color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:20px;}
 
-/* Landscape responsive */
-@media(orientation:landscape){
-  .efb-pkg-grid{grid-template-columns:repeat(4,1fr);}
-  .efb-banner{flex-direction:row;}
+
+/* ═══ NEW TOPBAR STYLES ═══ */
+.topbar{
+  padding: 6px 8px;
+  justify-content: center;
+  height: 58px;
+  position: fixed;top:0;left:0;right:0;z-index:200;
 }
-
-
-/* ══ LANGUAGE SWITCHER ══ */
-/* already in topbar CSS above */
-
-/* ══ FIT-TO-SCREEN for all sections ══ */
-.sec{
-  position:fixed;
-  top:60px;
-  left:0;right:0;
-  bottom:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding:10px 12px 20px;
-  box-sizing:border-box;
-  -webkit-overflow-scrolling:touch;
+/* الأرصدة في المنتصف مع إزاحة يسار خفيفة */
+.tb-currencies{
+  display:flex;align-items:center;gap:10px;
+  position:absolute;left:50%;transform:translateX(-55%);
 }
-.sec.active{display:block;}
-/* Market is the only one that can scroll naturally */
-#sectionMarket{overflow-y:auto;}
-/* Home has pitch - fill screen */
-#sectionHome{
-  padding:8px 10px 10px;
-  display:flex!important;
-  flex-direction:column;
-  overflow-y:auto;
+.tb-cur{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:22px;padding:6px 14px;
 }
-/* Landing fills but scrolls */
-#sectionLanding{overflow-y:auto;}
+.tb-cur-icon{font-size:18px;line-height:1;flex-shrink:0;}
+.tb-cur-val{font-family:'Orbitron',monospace;font-size:15px;font-weight:800;color:#fff;}
+/* صورة المستخدم + زر اللغة على اليمين */
+.tb-right-group{
+  display:flex;align-items:center;gap:8px;
+  position:absolute;right:60px;/* ابعد عن حافة تيليجرام */
+}
+.tb-lang-btn{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:5px 10px;cursor:pointer;color:#fff;
+  font-size:12px;font-weight:800;font-family:'Cairo',sans-serif;
+}
+.tb-lang-btn:active{background:rgba(255,255,255,.2);}
+.tb-user-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  overflow:hidden;flex-shrink:0;
+}
+.tb-user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 
-/* ══ BACK BUTTON — fixed bottom left ══ */
-.back-btn-fixed{
-  position:fixed;
-  bottom:calc(90px + env(safe-area-inset-bottom,0px) + 12px);
-  left:14px;
-  z-index:300;
-  width:40px;height:40px;
-  border-radius:50%;
-  background:rgba(0,0,0,.72);
-  border:1px solid rgba(255,255,255,.2);
-  color:#fff;font-size:20px;
-  display:none;
+/* Language Menu */
+.lang-menu-overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
   align-items:center;justify-content:center;
-  cursor:pointer;
-  backdrop-filter:blur(8px);
-  box-shadow:0 4px 14px rgba(0,0,0,.5);
 }
-.back-btn-fixed.visible{display:flex;}
-
-/* ══ BOTTOM NAV arrow on الرئيسية (index 1) ══ */
-/* Remove arrow from ni-center */
-.ni-center::before{display:none;}
-/* Add arrow above الرئيسية button via JS class */
-.ni.nav-home-arrow .ni-tile::after{
-  content:'▼';
-  position:absolute;
-  top:-18px;left:50%;transform:translateX(-50%);
-  color:#e63946;font-size:13px;font-style:normal;
-  filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));
-  font-family:sans-serif;
+.lang-menu-overlay.open{display:flex;}
+.lang-menu-box{
+  background:linear-gradient(160deg,#0d1f0d,#0a1a0a);
+  border:1px solid rgba(124,179,66,.25);border-radius:20px;
+  padding:20px;width:260px;
 }
+.lang-menu-title{font-size:16px;font-weight:900;color:#fff;text-align:center;margin-bottom:14px;}
+.lang-opts{display:flex;flex-direction:column;gap:8px;}
+.lang-opt{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;
+  transition:background .18s;
+}
+.lang-opt:active{background:rgba(124,179,66,.15);}
+.lang-opt span:first-child{font-size:22px;}
+.lang-opt.active-lang{background:rgba(124,179,66,.18);border-color:var(--bamboo);}
 
-/* ══ PACKAGES CAROUSEL ══ */
+/* ═══ PACKAGES CAROUSEL ═══ */
 .pkg-carousel-wrap{
-  padding:0 12px 16px;
-  position:relative;
+  position:relative;width:100%;overflow:hidden;padding:0 12px 16px;
 }
 .pkg-carousel{
-  display:flex;
-  overflow:hidden;
-  width:100%;
+  display:flex;gap:0;
+  transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+  will-change:transform;
 }
-.pkg-slide{
-  min-width:100%;
-  transition:transform .35s cubic-bezier(.4,0,.2,1);
+.efb-pkg{
+  min-width:calc(100% - 0px);width:calc(100% - 0px);
+  flex-shrink:0;
 }
 .pkg-dots{
-  display:flex;justify-content:center;gap:6px;margin-top:10px;
+  display:flex;justify-content:center;gap:7px;margin-top:10px;
 }
 .pkg-dot{
   width:8px;height:8px;border-radius:50%;
-  background:rgba(255,255,255,.25);transition:background .2s;
-}
-.pkg-dot.active{background:#fff;}
-.pkg-nav{
-  display:flex;justify-content:space-between;
-  position:absolute;top:50%;transform:translateY(-50%);
-  left:4px;right:4px;pointer-events:none;
-}
-.pkg-nav-btn{
-  pointer-events:all;
-  width:34px;height:34px;border-radius:50%;
-  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);
-  color:#fff;font-size:22px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.2);transition:all .3s;
   cursor:pointer;
 }
-.efb-pkg-single{
-  border-radius:16px;overflow:hidden;position:relative;cursor:pointer;
-  transition:transform .15s,box-shadow .15s;
-  box-shadow:0 4px 18px rgba(0,0,0,.5);
-  margin:0 8px;
-}
-.efb-pkg-single:active{transform:scale(.97);}
-.efb-pkg-single .efb-pkg-bg{
-  padding:22px 16px 16px;
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-}
-.efb-pkg-single.pkg-bronze .efb-pkg-bg{background:linear-gradient(145deg,#3d2a15,#6b4520);}
-.efb-pkg-single.pkg-silver .efb-pkg-bg{background:linear-gradient(145deg,#1e1e1e,#383838);}
-.efb-pkg-single.pkg-gold   .efb-pkg-bg{background:linear-gradient(145deg,#3d2f00,#7a5c00);}
-.efb-pkg-single.pkg-plat   .efb-pkg-bg{background:linear-gradient(145deg,#0d2240,#1a3f70);}
-.efb-pkg-single.pkg-legend .efb-pkg-bg{background:linear-gradient(145deg,#3a1500,#7a3000);}
-.efb-pkg-single::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.10),transparent 50%);pointer-events:none;}
-.efb-pkg-single .efb-pkg-icon{font-size:60px;}
-.efb-pkg-single .efb-pkg-name{font-size:20px;font-weight:900;color:#fff;}
-.efb-pkg-single .efb-pkg-cards{font-size:13px;color:rgba(255,255,255,.65);}
-.efb-pkg-single .efb-pkg-price{
-  width:100%;padding:12px;text-align:center;border-radius:12px;
-  font-size:16px;font-weight:900;color:#fff;margin-top:4px;
-  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
-}
-.efb-pkg-single.pkg-bronze .efb-pkg-price{border-color:#cd7f32;color:#cd7f32;}
-.efb-pkg-single.pkg-silver .efb-pkg-price{border-color:#c0c0c0;color:#c0c0c0;}
-.efb-pkg-single.pkg-gold   .efb-pkg-price{border-color:#FFD700;color:#FFD700;}
-.efb-pkg-single.pkg-plat   .efb-pkg-price{border-color:#7ec8ff;color:#7ec8ff;}
-.efb-pkg-single.pkg-legend .efb-pkg-price{border-color:#FFA500;color:#FFA500;}
-.efb-pkg-badge{position:absolute;top:10px;right:10px;background:#e63946;color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:20px;}
+.pkg-dot.active{background:#fff;width:22px;border-radius:4px;}
 
-/* ══ MATCH PAGE ══ */
-.match-page{padding:0 0 20px;}
-.match-hero{
-  text-align:center;padding:30px 16px 20px;position:relative;overflow:hidden;
-  background:linear-gradient(160deg,rgba(0,50,100,.6),rgba(0,100,50,.4));
-  border-radius:18px;margin-bottom:16px;
+/* ═══ MATCH SECTION ═══ */
+.match-lock-card{
+  background:linear-gradient(160deg,rgba(10,10,25,.95),rgba(8,8,20,.9));
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  padding:28px 20px;text-align:center;
 }
-.match-hero-glow{
+.mlc-icon{font-size:64px;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(255,215,0,.4));}
+.mlc-title{font-size:18px;font-weight:900;color:#fff;margin-bottom:6px;}
+.mlc-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:18px;line-height:1.6;}
+.mlc-rating-bar{
+  height:8px;background:rgba(255,255,255,.1);border-radius:4px;
+  overflow:hidden;margin-bottom:6px;
+}
+.mlc-rating-fill{
+  height:100%;background:linear-gradient(90deg,var(--bamboo),var(--coin));
+  border-radius:4px;transition:width .5s ease;
+}
+.mlc-rating-text{font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:18px;}
+.mlc-build-btn{
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  border:none;border-radius:14px;padding:13px 28px;
+  color:#fff;font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 0 20px var(--bamboo-glow);
+}
+.match-ready-card{
+  background:linear-gradient(160deg,rgba(0,30,60,.95),rgba(0,20,40,.9));
+  border:1px solid rgba(0,180,255,.2);border-radius:20px;overflow:hidden;
+}
+.match-field-preview{
+  background:linear-gradient(135deg,#1a6b2a,#145522);
+  padding:24px;text-align:center;position:relative;
+}
+.mfp-glow{
   position:absolute;inset:0;
-  background:radial-gradient(circle at 50% 30%,rgba(0,255,135,.15),transparent 70%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(0,255,135,.15),transparent 70%);
 }
-.match-hero-icon{font-size:64px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(0,255,135,.5));}
-.match-hero-title{font-size:24px;font-weight:900;color:#fff;margin-bottom:6px;}
-.match-hero-sub{font-size:13px;color:rgba(255,255,255,.65);}
-.match-req-card{
-  background:rgba(5,12,25,.9);border:1px solid rgba(255,100,100,.25);
-  border-radius:18px;padding:20px 16px;text-align:center;
+.mfp-icon{font-size:56px;position:relative;z-index:1;filter:drop-shadow(0 0 20px rgba(0,255,135,.5));}
+.mfp-title{font-size:16px;font-weight:900;color:#fff;position:relative;z-index:1;margin-top:6px;}
+.match-vs-info{
+  display:flex;align-items:center;justify-content:space-around;
+  padding:20px 12px;
 }
-.match-req-icon{font-size:48px;margin-bottom:10px;}
-.match-req-title{font-size:20px;font-weight:900;color:#fff;margin-bottom:8px;}
-.match-req-desc{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:16px;}
-.match-power-display{
-  background:rgba(0,0,0,.35);border-radius:14px;padding:14px;margin-bottom:16px;
+.match-team-box{text-align:center;}
+.mtb-avatar{font-size:44px;margin-bottom:6px;}
+.mtb-name{font-size:12px;color:rgba(255,255,255,.6);font-weight:700;margin-bottom:4px;}
+.mtb-rating{font-size:22px;font-weight:900;color:var(--bamboo);font-family:'Orbitron',monospace;}
+.match-vs-center{
+  font-size:24px;font-weight:900;color:rgba(255,255,255,.5);
+  font-family:'Orbitron',monospace;
 }
-.mpd-label{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:4px;}
-.mpd-val{font-size:32px;font-weight:900;color:var(--neon);margin-bottom:8px;}
-.mpd-bar-bg{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin-bottom:5px;}
-.mpd-bar-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--bamboo));border-radius:4px;transition:width .6s ease;}
-.mpd-hint{font-size:10px;color:rgba(255,255,255,.4);}
-.match-upgrade-btn{
-  width:100%;padding:14px;background:linear-gradient(135deg,var(--bamboo),#4e7a20);
-  border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:800;
-  cursor:pointer;font-family:'Cairo',sans-serif;
-}
-.match-modes{display:flex;gap:10px;margin-top:16px;}
-.match-mode-card{flex:1;background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;text-align:center;}
-.mmc-icon{font-size:36px;margin-bottom:8px;}
-.mmc-title{font-size:15px;font-weight:900;color:#fff;margin-bottom:4px;}
-.mmc-desc{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:12px;}
-.mmc-btn{width:100%;padding:9px;background:rgba(124,179,66,.2);border:1px solid rgba(124,179,66,.4);border-radius:10px;color:var(--bamboo);font-size:13px;font-weight:800;cursor:pointer;font-family:'Cairo',sans-serif;}
-
-/* ══ FIX sections fitting screen - no scroll on non-market pages ══ */
-/* Sections are position:fixed fill screen, only market scrolls */
-/* For deposit/withdraw/exchange pages - same */
-#sectionDeposit,#sectionWithdraw,#sectionExchange,#sectionReferral,#sectionTasks,#sectionFriends,#sectionMatch,#sectionHome{
-  overflow-y:auto;
+.match-play-btn{
+  width:calc(100% - 24px);margin:0 12px 16px;display:block;
+  background:linear-gradient(135deg,#e63946,#b5152c);
+  border:none;border-radius:14px;padding:14px;
+  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
+  box-shadow:0 0 20px rgba(230,57,70,.4);
 }
 
-/* ══ SAVE TOAST fix ══ */
-#saveToast{
-  position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px) + 60px);
-  left:50%;transform:translateX(-50%);
-  background:rgba(20,80,20,.95);border:1px solid var(--bamboo);
-  color:#fff;padding:10px 20px;border-radius:14px;
-  font-size:14px;font-weight:800;
-  opacity:0;transition:opacity .3s;pointer-events:none;
-  white-space:nowrap;z-index:600;
+/* ═══ BACK BUTTON (fixed bottom-left) ═══ */
+#globalBackBtn{
+  position:fixed;bottom:20px;
+  left:14px;z-index:300;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.8);border:1.5px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+  transition:opacity .2s;
 }
-#saveToast.show{opacity:1;}
+#globalBackBtn.visible{display:flex;}
+#globalBackBtn:active{opacity:.7;}
 
-/* ══ Fix topbar padding in goNav ══ */
-/* These pages show topbar+bnav */
-/* These pages hide topbar+bnav */
+/* ═══ ORIENTATION DIALOG (restored) ═══ */
+#orientDialog{
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(0,0,0,.92);backdrop-filter:blur(16px);
+  flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  padding:24px;text-align:center;
+}
+#orientDialog.show{display:flex;}
+.od-icon{font-size:64px;animation:od-spin 2s ease-in-out infinite;}
+@keyframes od-spin{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-90deg)}}
+.od-title{font-size:20px;font-weight:900;color:#fff;}
+.od-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.6;max-width:280px;}
+.od-btns{display:flex;gap:14px;justify-content:center;}
+.od-btn{
+  padding:14px 28px;border-radius:16px;font-size:14px;font-weight:800;
+  cursor:pointer;border:none;transition:all .2s;min-width:110px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.od-btn:active{transform:scale(.95);opacity:.85;}
+.od-btn.primary{
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  color:#fff;box-shadow:0 0 20px var(--bamboo-glow);
+}
+.od-btn.secondary{
+  background:rgba(0,194,255,.15);
+  border:1px solid rgba(0,194,255,.35);
+  color:var(--sky);
+  box-shadow:0 0 16px rgba(0,194,255,.2);
+}
 
-/* ══ Responsive: all elements scale to viewport ══ */
-html,body{width:100%;max-width:100vw;}
-.sec{font-size:clamp(11px,3.5vw,16px);}
-.efb-card{width:clamp(40px,14vw,60px);height:clamp(50px,17vw,74px);}
-.pitch-wrap{
-  width:100%;
-  aspect-ratio:.68/1;
-  max-height:calc(100vh - 180px);
+/* ni-center arrow fix */
+.ni-center::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#e63946;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(230,57,70,.7));}
+
+/* ═══ INNER PAGE TOP HEADER (shows on non-landing pages) ═══ */
+.inner-hdr{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(180deg,rgba(5,5,15,.97),rgba(8,8,22,.0));
+  padding:10px 12px 6px;
   flex-shrink:0;
 }
+.inner-hdr-back{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;flex-shrink:0;color:#fff;
+}
+.inner-hdr-back:active{background:rgba(255,255,255,.2);}
+.inner-hdr-title{font-size:16px;font-weight:900;color:#fff;flex:1;}
+
+/* ═══ Market special header ═══ */
+#sectionMarket .inner-hdr{
+  position:sticky;top:0;
+  background:linear-gradient(180deg,rgba(5,5,15,.97) 80%,transparent);
+}
+
+/* ═══ Landing tab-bar sticky ═══ */
+.efb-tab-bar{
+  position:sticky;top:0;z-index:10;
+  background:rgba(5,5,15,.9);
+  backdrop-filter:blur(10px);
+}
+
+/* ═══ LANDING TAB CONTENT ═══ */
+.landing-tab-content{display:none;}
+.landing-tab-content.active{display:block;}
 
 </style>
 </head>
 <body>
 
-<!-- ORIENTATION DIALOG -->
+<!-- ORIENTATION DIALOG (restored) -->
 <div id="orientDialog">
   <div class="od-icon">🎮</div>
   <div class="od-title">كيف تريد العرض؟</div>
@@ -982,6 +1078,9 @@ html,body{width:100%;max-width:100vw;}
   </div>
 </div>
 
+<!-- Global back button (hidden - each page has inner header back) -->
+<div id="globalBackBtn" onclick="goBack()" style="display:none!important"></div>
+
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
   <div class="ld-ball">⚽</div>
@@ -992,35 +1091,41 @@ html,body{width:100%;max-width:100vw;}
   </div>
 </div>
 
-<!-- TOP BAR — New Style -->
+<!-- TOP BAR — New Design -->
 <div class="topbar" id="mainTopbar">
-  <div class="tb-main-center">
-    <!-- Balances -->
-    <div class="tb-currencies">
-      <div class="tb-cur">
-        <span class="tb-cur-icon">🪙</span>
-        <span class="tb-cur-val orb" id="tbCoins">0</span>
-      </div>
-      <div class="tb-cur">
-        <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
-        <span class="tb-cur-val orb" id="tbBamboo">0</span>
-      </div>
+  <!-- Left: currencies (center-left) -->
+  <div class="tb-currencies">
+    <div class="tb-cur">
+      <span class="tb-cur-icon">🪙</span>
+      <span class="tb-cur-val orb" id="tbCoins">0</span>
     </div>
-    <!-- Avatar + buttons -->
-    <div class="tb-avatar-wrap">
-      <div class="tb-avatar" id="tbAvatar">🐼</div>
-      <button class="tb-change-btn" onclick="openSideMenu()">⚙️ تغيير</button>
-      <button class="tb-lang-btn" onclick="toggleLangMenu()" id="langBtn">🌐 <span id="curLangLabel">AR</span></button>
+    <div class="tb-cur">
+      <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
+      <span class="tb-cur-val orb" id="tbBamboo">0</span>
     </div>
   </div>
+  <!-- Right: user avatar + lang btn -->
+  <div class="tb-right-group">
+    <button class="tb-lang-btn" onclick="openLangMenu()">
+      <span id="tbLangFlag">🌍</span>
+      <span id="tbLangCode">AR</span>
+    </button>
+    <div class="tb-user-avatar" id="tbUserAvatar">🐼</div>
+  </div>
 </div>
-<!-- Language menu -->
-<div class="lang-menu" id="langMenu">
-  <div class="lang-item active" onclick="setLang('ar')">🇸🇦 العربية</div>
-  <div class="lang-item" onclick="setLang('ru')">🇷🇺 Русский</div>
-  <div class="lang-item" onclick="setLang('en')">🇬🇧 English</div>
-  <div class="lang-item" onclick="setLang('fr')">🇫🇷 Français</div>
-  <div class="lang-item" onclick="setLang('de')">🇩🇪 Deutsch</div>
+
+<!-- Language Menu -->
+<div id="langMenu" class="lang-menu-overlay" onclick="if(event.target===this)closeLangMenu()">
+  <div class="lang-menu-box">
+    <div class="lang-menu-title">اختر اللغة</div>
+    <div class="lang-opts">
+      <div class="lang-opt" onclick="setLang('ar')"><span>🇸🇦</span><span>العربية</span></div>
+      <div class="lang-opt" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
+      <div class="lang-opt" onclick="setLang('ru')"><span>🇷🇺</span><span>Русский</span></div>
+      <div class="lang-opt" onclick="setLang('fr')"><span>🇫🇷</span><span>Français</span></div>
+      <div class="lang-opt" onclick="setLang('de')"><span>🇩🇪</span><span>Deutsch</span></div>
+    </div>
+  </div>
 </div>
 <!-- hidden refs for legacy code -->
 <span id="topName" style="display:none">اللاعب</span>
@@ -1064,12 +1169,14 @@ html,body{width:100%;max-width:100vw;}
 
   <!-- Tab bar under topbar -->
   <div class="efb-tab-bar">
-    <div class="efb-tab active">الصفحة الرئيسية</div>
-    <div class="efb-tab" onclick="goSec('Deposit')">الإيداع</div>
-    <div class="efb-tab" onclick="goSec('Exchange')">تحويل العملة</div>
-    <div class="efb-tab" onclick="goSec('Withdraw')">السحب</div>
+    <div class="efb-tab active" id="landingTabHome" onclick="switchLandingTab('home')"><span data-i18n="home">الرئيسية</span></div>
+    <div class="efb-tab" id="landingTabDeposit" onclick="switchLandingTab('deposit')"><span data-i18n="deposit">الإيداع</span></div>
+    <div class="efb-tab" id="landingTabExchange" onclick="switchLandingTab('exchange')"><span data-i18n="exchange">تحويل العملة</span></div>
+    <div class="efb-tab" id="landingTabWithdraw" onclick="switchLandingTab('withdraw')"><span data-i18n="withdraw">السحب</span></div>
   </div>
 
+  <!-- Landing Tab: Home content -->
+  <div class="landing-tab-content active" id="ltHome">
   <!-- Main Banner -->
   <div class="efb-banner">
     <!-- Featured card left -->
@@ -1099,30 +1206,135 @@ html,body{width:100%;max-width:100vw;}
     </div>
   </div>
 
-  <!-- Packages carousel -->
-  <div class="efb-pkg-title">📦 الباكجات المتاحة</div>
+  <!-- Packages Carousel -->
+  <div class="efb-pkg-title">📦 <span data-i18n="packages">الباكجات المتاحة</span></div>
   <div class="pkg-carousel-wrap">
-    <div class="pkg-carousel" id="pkgCarousel"></div>
+    <div class="pkg-carousel" id="pkgGrid"></div>
     <div class="pkg-dots" id="pkgDots"></div>
-    <div class="pkg-nav">
-      <button class="pkg-nav-btn" onclick="pkgPrev()">&#8249;</button>
-      <button class="pkg-nav-btn" onclick="pkgNext()">&#8250;</button>
-    </div>
   </div>
+  </div><!-- end ltHome -->
+
+  <!-- Landing Tab: Deposit -->
+  <div class="landing-tab-content" id="ltDeposit">
+  <div class="inner-hdr" style="position:sticky;top:0;z-index:10;background:rgba(5,5,15,.95);backdrop-filter:blur(10px);">
+    <div class="inner-hdr-back" onclick="switchLandingTab('home')">◀</div>
+    <div class="inner-hdr-title">💰 الإيداع</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
+    <div class="wal-row">
+      <div class="wl-inf">
+        <div class="wll">المحفظة</div>
+        <div class="wla" id="walletAddressDisplay2">غير متصل</div>
+      </div>
+      <button class="btn-conn" id="connectWalletBtn2" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
+    </div>
+    <div class="dep-warn">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+        <span id="depositUserIdDisplay2" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+        التعليق الوحيد في المعاملة.
+      </div>
+    </div>
+    <label class="flabel">المبلغ (TON)</label>
+    <input type="number" id="depositAmountInput2" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview2()">
+    <div class="preset-row" style="margin-bottom:8px">
+      <span class="prbtn" onclick="setDepAmt2(0.5)">0.5</span>
+      <span class="prbtn" onclick="setDepAmt2(1)">1</span>
+      <span class="prbtn" onclick="setDepAmt2(2)">2</span>
+      <span class="prbtn" onclick="setDepAmt2(5)">5</span>
+      <span class="prbtn" onclick="setDepAmt2(10)">10</span>
+    </div>
+    <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 المعدل: <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--muted);font-weight:600">ستحصل على:</span>
+        <span id="depBambooPreview2" style="font-size:16px;font-weight:800;color:var(--bamboo)">0 Bamboo</span>
+      </div>
+    </div>
+    <button class="btn-prim" id="submitDepositBtn2" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+  </div>
+  </div><!-- end ltDeposit -->
+
+  <!-- Landing Tab: Exchange -->
+  <div class="landing-tab-content" id="ltExchange">
+  <div class="inner-hdr" style="position:sticky;top:0;z-index:10;background:rgba(5,5,15,.95);backdrop-filter:blur(10px);">
+    <div class="inner-hdr-back" onclick="switchLandingTab('home')">◀</div>
+    <div class="inner-hdr-title">🔄 تحويل العملة</div>
+  </div>
+  <div class="swap-card">
+    <div class="swap-section">
+      <div class="swap-label">من</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
+          <span class="swap-currency-name">Bamboo</span>
+        </div>
+        <div class="swap-input-wrap">
+          <input type="number" class="swap-input" id="swapFromAmt2" placeholder="0" oninput="updSwapCalc2()">
+          <button class="swap-max-btn" onclick="swapMax2()">MAX</button>
+        </div>
+      </div>
+      <div class="swap-balance" id="swapFromBal2">رصيد: 0 Bamboo</div>
+    </div>
+    <div class="swap-divider">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid rgba(6,20,6,.9);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
+    </div>
+    <div class="swap-section">
+      <div class="swap-label">إلى</div>
+      <div class="swap-currency-row">
+        <div class="swap-currency-info">
+          <span style="font-size:32px;">🪙</span>
+          <span class="swap-currency-name">Coins</span>
+        </div>
+        <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt2">0</div></div>
+      </div>
+      <div class="swap-balance" id="swapToBal2">رصيد: 0 Coins</div>
+    </div>
+    <div class="swap-rate">📊 100 Bamboo = 10 Coins</div>
+    <button class="btn-prim" style="margin-top:10px" onclick="doExchange()">⚡ تحويل الآن</button>
+  </div>
+  </div><!-- end ltExchange -->
+
+  <!-- Landing Tab: Withdraw -->
+  <div class="landing-tab-content" id="ltWithdraw">
+  <div class="inner-hdr" style="position:sticky;top:0;z-index:10;background:rgba(5,5,15,.95);backdrop-filter:blur(10px);">
+    <div class="inner-hdr-back" onclick="switchLandingTab('home')">◀</div>
+    <div class="inner-hdr-title">💸 السحب</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
+    <div class="wd-err-banner trial" id="wdBannerTrial2">
+      <i class="fas fa-gift"></i>
+      <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins.</div>
+    </div>
+    <label class="flabel">عنوان محفظة TON</label>
+    <input type="text" class="finput" id="wdAddr2" placeholder="UQ...">
+    <label class="flabel">المبلغ (Coins)</label>
+    <input type="number" class="finput" id="wdAmt2" placeholder="200" min="200" oninput="updWdPrev2()">
+    <div class="ton-row">
+      <div class="ton-chip">
+        <div class="tcl">💎 قيمة TON</div>
+        <div class="tcv" id="wdTonVal2">0.0000</div>
+      </div>
+    </div>
+    <button class="btn-wd" id="wdBtn2" onclick="doWithdraw2()">💎 طلب السحب</button>
+  </div>
+  </div><!-- end ltWithdraw -->
 
 </div>
 
 <!-- ══ SECTION: HOME (PITCH) ══ -->
 <div class="sec" id="sectionHome">
-
-  <!-- Formation tabs -->
-  <div class="formation-tabs">
+  <!-- Top row: back + formation tabs -->
+  <div style="display:flex;align-items:center;gap:6px;padding:6px 8px 4px;flex-shrink:0;background:rgba(0,0,0,.4);">
+    <div class="inner-hdr-back" onclick="goBack()" style="flex-shrink:0;">◀</div>
+    <div class="formation-tabs" style="flex:1;margin:0;padding:0;overflow-x:auto;">
     <div class="ftm-tab active" onclick="setFormation('4-3-3',this)">4-3-3</div>
     <div class="ftm-tab" onclick="setFormation('4-2-3-1',this)">4-2-3-1</div>
     <div class="ftm-tab" onclick="setFormation('4-4-2',this)">4-4-2</div>
     <div class="ftm-tab" onclick="setFormation('3-5-2',this)">3-5-2</div>
     <div class="ftm-tab" onclick="setFormation('4-1-1-4',this)">4-1-1-4</div>
-  </div>
+    </div><!-- end formation-tabs -->
+  </div><!-- end top-row -->
 
   <!-- Team Power -->
   <div class="team-power-bar">
@@ -1171,7 +1383,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: MARKET ══ -->
 <div class="sec" id="sectionMarket">
-  <div class="pg-title">🛒 سوق اللاعبين</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">🛒 سوق اللاعبين</div></div>
 
   <div class="mkt-filter-bar">
     <div class="mkt-filter-chip active" onclick="filterMarket('all',this)">الكل</div>
@@ -1188,7 +1400,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: FRIENDS ══ -->
 <div class="sec" id="sectionFriends">
-  <div class="pg-title">👥 الأصدقاء</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">👥 الأصدقاء</div></div>
   <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
     <div class="ref-bonus-badge">
       <span class="rbb-pct">20%</span>
@@ -1211,7 +1423,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: DEPOSIT ══ -->
 <div class="sec" id="sectionDeposit">
-  <div class="fin-page-title">💰 إيداع TON</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">💰 إيداع TON</div></div>
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
     <div class="wal-row">
       <div class="wl-inf">
@@ -1253,7 +1465,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: WITHDRAW ══ -->
 <div class="sec" id="sectionWithdraw">
-  <div class="fin-page-title">💸 سحب</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">💸 سحب</div></div>
   <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
     <div class="wd-err-banner trial" id="wdBannerTrial">
       <i class="fas fa-gift"></i>
@@ -1285,7 +1497,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: EXCHANGE ══ -->
 <div class="sec" id="sectionExchange">
-  <div class="fin-page-title">🔄 تحويل العملة</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">🔄 تحويل العملة</div></div>
   <div class="swap-card">
     <div class="swap-section">
       <div class="swap-label">من</div>
@@ -1326,7 +1538,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: REFERRAL ══ -->
 <div class="sec" id="sectionReferral">
-  <div class="fin-page-title">👥 برنامج الإحالة</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">👥 برنامج الإحالة</div></div>
   <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
     <div class="ref-bonus-badge">
       <span class="rbb-pct">20%</span>
@@ -1349,7 +1561,7 @@ html,body{width:100%;max-width:100vw;}
 
 <!-- ══ SECTION: TASKS ══ -->
 <div class="sec" id="sectionTasks">
-  <div class="fin-page-title">✅ المهام</div>
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">✅ المهام</div></div>
 
   <!-- Sub tabs -->
   <div class="task-tabs">
@@ -1373,76 +1585,71 @@ html,body{width:100%;max-width:100vw;}
   </div>
 </div>
 
-
-<!-- ══ SECTION: MATCH ══ -->
-<div class="sec" id="sectionMatch">
-  <div class="match-page">
-    <div class="match-hero">
-      <div class="match-hero-glow"></div>
-      <div class="match-hero-icon">⚽</div>
-      <div class="match-hero-title">ساحة المباريات</div>
-      <div class="match-hero-sub">تحدى لاعبين آخرين وأثبت قوة فريقك</div>
-    </div>
-
-    <!-- Rating requirement -->
-    <div class="match-req-card" id="matchReqCard">
-      <div class="match-req-icon">🔒</div>
-      <div class="match-req-title">يلزم 1000 تقييم</div>
-      <div class="match-req-desc">لتتمكن من اللعب مع الآخرين، يجب أن يمتلك فريقك خطة <strong>ب</strong> بتقييم لا يقل عن <strong>1000 نقطة</strong></div>
-      <div class="match-power-display">
-        <div class="mpd-label">قوة فريقك الحالية</div>
-        <div class="mpd-val orb" id="matchPowerVal">0</div>
-        <div class="mpd-bar-bg"><div class="mpd-bar-fill" id="matchPowerBar" style="width:0%"></div></div>
-        <div class="mpd-hint">من 1000 المطلوبة</div>
-      </div>
-      <button class="match-upgrade-btn" onclick="goNav(document.querySelector('[data-s=sectionHome]'))">
-        🏋️ تطوير فريقي
-      </button>
-    </div>
-
-    <!-- Match modes (locked until 1000) -->
-    <div class="match-modes" id="matchModes" style="display:none">
-      <div class="match-mode-card">
-        <div class="mmc-icon">⚡</div>
-        <div class="mmc-title">مباراة سريعة</div>
-        <div class="mmc-desc">العب ضد لاعب عشوائي</div>
-        <button class="mmc-btn">ابدأ</button>
-      </div>
-      <div class="match-mode-card">
-        <div class="mmc-icon">🏆</div>
-        <div class="mmc-title">دوري المتحدين</div>
-        <div class="mmc-desc">تصعد في الترتيب</div>
-        <button class="mmc-btn">انضم</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- BOTTOM NAV — New -->
+<!-- BOTTOM NAV — Updated -->
 <nav class="bnav" id="mainBnav">
   <div class="ni" data-s="sectionMatch" onclick="goNav(this)">
     <div class="ni-tile">⚽</div>
-    <div class="ni-lbl">المباراة</div>
+    <div class="ni-lbl" data-i18n="match">المباراة</div>
   </div>
   <div class="ni active" data-s="sectionLanding" id="navLanding" onclick="goNav(this)">
     <div class="ni-tile">🛡️</div>
-    <div class="ni-lbl">الرئيسية</div>
+    <div class="ni-lbl" data-i18n="navHome">الرئيسية</div>
   </div>
   <div class="ni ni-center" data-s="sectionHome" onclick="goNav(this)">
     <div class="ni-tile">👤</div>
-    <div class="ni-lbl">فريقي</div>
+    <div class="ni-lbl" data-i18n="myTeam">فريقي</div>
   </div>
   <div class="ni" data-s="sectionTasks" onclick="goNav(this)">
     <div class="ni-tile">🏅</div>
-    <div class="ni-lbl">مهمات</div>
+    <div class="ni-lbl" data-i18n="tasks">مهمات</div>
   </div>
   <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
     <div class="ni-tile">🛒</div>
-    <div class="ni-lbl">ماركت</div>
+    <div class="ni-lbl" data-i18n="market">ماركت</div>
   </div>
 </nav>
 
-<!-- PLAYER DETAIL MODAL -->
+<!-- ══ SECTION: MATCH ══ -->
+<div class="sec" id="sectionMatch">
+  <div class="inner-hdr"><div class="inner-hdr-back" onclick="goBack()">◀</div><div class="inner-hdr-title">⚽ المباراة</div></div>
+  <div class="match-lock-card" id="matchLockCard">
+    <div class="mlc-icon">🔒</div>
+    <div class="mlc-title" data-i18n="matchLockTitle">للعب المباراة مع الآخرين</div>
+    <div class="mlc-sub" data-i18n="matchLockSub">يجب أن تمتلك خطة بـ <strong>1000 رايتينج</strong> أو أكثر</div>
+    <div class="mlc-rating-bar">
+      <div class="mlc-rating-fill" id="matchRatingFill" style="width:0%"></div>
+    </div>
+    <div class="mlc-rating-text"><span id="matchCurrentRating">0</span> / 1000 رايتينج</div>
+    <button class="mlc-build-btn" onclick="goNav(document.getElementById('navLanding'))">
+      🛒 <span data-i18n="buildTeam">بناء فريقك</span>
+    </button>
+  </div>
+  <div class="match-ready-card" id="matchReadyCard" style="display:none">
+    <div class="match-field-preview">
+      <div class="mfp-glow"></div>
+      <div class="mfp-icon">⚽</div>
+      <div class="mfp-title" data-i18n="readyToPlay">جاهز للعب!</div>
+    </div>
+    <div class="match-vs-info">
+      <div class="match-team-box">
+        <div class="mtb-avatar">🛡️</div>
+        <div class="mtb-name" data-i18n="yourTeam">فريقك</div>
+        <div class="mtb-rating" id="matchMyRating">0</div>
+      </div>
+      <div class="match-vs-center">VS</div>
+      <div class="match-team-box">
+        <div class="mtb-avatar">🤖</div>
+        <div class="mtb-name" data-i18n="opponent">المنافس</div>
+        <div class="mtb-rating">???</div>
+      </div>
+    </div>
+    <button class="match-play-btn" onclick="startMatch()">
+      ▶ <span data-i18n="startMatch">ابدأ المباراة</span>
+    </button>
+  </div>
+</div>
+
+
 <div class="modal" id="playerDetailModal">
   <div class="modal-box">
     <div class="modal-hdr">
@@ -1476,11 +1683,8 @@ html,body{width:100%;max-width:100vw;}
   </div>
 </div>
 
-
-<!-- Back button (fixed) -->
-<button class="back-btn-fixed" id="backBtnFixed" onclick="goBack()">‹</button>
 <div id="toast"></div>
-<div id="saveToast" style="display:none">✅ تم حفظ التشكيلة!</div>
+<div id="saveToast" style="display:none!important"></div>
 
 <script>
 // ════════════════════════════════════════════
@@ -1571,49 +1775,9 @@ function ratingBadgeClass(r){if(r>=93)return 'rb-legend';if(r>=86)return 'rb-pla
 function pcClass(t){return{bronze:'pc-bronze',silver:'pc-silver',gold:'pc-gold',plat:'pc-plat',legend:'pc-legend'}[t]||'pc-bronze';}
 
 // ════ NAVIGATION ════
-function goNav(el){
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s=>{s.classList.remove('active');s.style.display='none';});
-  el.classList.add('active');
-  const sName = el.dataset.s;
-  const sec=document.getElementById(sName);
-  if(sec){sec.classList.add('active');sec.style.display='block';}
-  if(sName==='sectionMarket') renderMarket(_currentFilter);
-  if(sName==='sectionMatch') updateMatchPage();
-  // Show/hide top+bottom bars for bottom-nav pages
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  const showBars=(sName==='sectionLanding'||sName==='sectionHome'||sName==='sectionMarket'||sName==='sectionTasks'||sName==='sectionMatch');
-  if(tb) tb.classList.toggle('hidden-bar',!showBars);
-  if(bn) bn.classList.toggle('hidden-bar',!showBars);
-  document.body.style.paddingTop  = showBars ? '60px' : '0';
-  document.body.style.paddingBottom = showBars ? '90px' : '0';
-  // Back button
-  const bb=document.getElementById('backBtnFixed');
-  if(bb) bb.classList.toggle('visible', sName!=='sectionLanding');
-  // Arrow on home button
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('nav-home-arrow'));
-  const homeNav=document.getElementById('navLanding');
-  if(homeNav&&sName==='sectionLanding') homeNav.classList.add('nav-home-arrow');
-}
+function goNav_OLD_REPLACED(el){ /* replaced */ }
 
-function goSec(name){
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s=>{s.classList.remove('active');s.style.display='none';});
-  const sec=document.getElementById('section'+name);
-  if(sec){sec.classList.add('active');sec.style.display='block';}
-  if(name==='Deposit') document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
-  // Hide bars when going to inner pages
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  if(tb) tb.classList.add('hidden-bar');
-  if(bn) bn.classList.add('hidden-bar');
-  document.body.style.paddingTop='0';
-  document.body.style.paddingBottom='0';
-  // show back button
-  const bb=document.getElementById('backBtnFixed');
-  if(bb) bb.classList.add('visible');
-}
+function goSec_OLD_REPLACED(name){ /* replaced */ }
 
 
 
@@ -1684,6 +1848,7 @@ function updateUI(){
   const sb=document.getElementById('submitDepositBtn');
   if(sb) sb.disabled=!S.wallet;
   updSwapBals();
+  updSwapBals2();
   updateRefUI();
   renderExchHist();
   renderWdHist();
@@ -1790,7 +1955,7 @@ function setFormation(f,el){
 function saveFormation(){
   const squadIds=S.squad.map(p=>p?p.id:null);
   api('saveSquad',{squad:squadIds,formation:S.formation}).catch(()=>{});
-  showToast('✅ تم حفظ التشكيلة!');
+  showToast(i18n('formationSaved','✅ تم حفظ التشكيلة'));
 }
 
 // ════ SLOT MODAL ════
@@ -2295,21 +2460,10 @@ const PACKAGES = [
   {id:'pk5',name:'باكج أسطوري',tier:'legend',icon:'👑',cards:5,guaranteed:'أسطوري مضمون',price:2.5,currency:'ton',badge:'حصري'},
   {id:'pk6',name:'باكج شامبيون',tier:'legend',icon:'🏆',cards:10,guaranteed:'أسطوري مضمون',price:5.0,currency:'ton',badge:''},
 ];
-function renderPackages(){
-  const grid=document.getElementById('pkgGrid');if(!grid)return;
-  grid.innerHTML=PACKAGES.map(pk=>{
-    const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
-    return`<div class="efb-pkg pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
-      ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
-      <div class="efb-pkg-bg">
-        <div class="efb-pkg-icon">${pk.icon}</div>
-        <div class="efb-pkg-name">${pk.name}</div>
-        <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
-        <div class="efb-pkg-price">${priceStr}</div>
-      </div>
-    </div>`;
-  }).join('');
+function renderPackages_OLD_REPLACED(){
+  // replaced by carousel version in new JS block
 }
+
 function openPkg(id){
   const pk=PACKAGES.find(p=>p.id===id);if(!pk)return;
   document.getElementById('pkgInfoTitle').textContent=pk.name;
@@ -2362,14 +2516,12 @@ async function buyPkg(id){
   }
 
   renderMarket('all');
-  renderPackagesCarousel();
+  // renderPackages called from window.load
   renderTasks();
   renderPitch();
   renderBench();
   updatePowerDisplay();
   setInterval(()=>loadState(),30000);
-  initAvatar();
-  initNavArrow();
 
   // Hide loading
   setTimeout(()=>{
@@ -2380,305 +2532,359 @@ async function buyPkg(id){
 
 
 
-// ════ BACK BUTTON ════
-function goBack(){
-  // Go back to landing page
-  const homeNav=document.getElementById('navLanding');
-  if(homeNav) goNav(homeNav);
+// ════════════════════════════════════════════
+//  i18n LANGUAGE SYSTEM
+// ════════════════════════════════════════════
+const LANGS = {
+  ar:{
+    home:'الرئيسية', deposit:'الإيداع', exchange:'تحويل العملة', withdraw:'السحب',
+    packages:'الباكجات المتاحة', match:'المباراة', myTeam:'فريقي', tasks:'مهمات',
+    market:'ماركت', navHome:'الرئيسية', matchLockTitle:'للعب مع الآخرين',
+    matchLockSub:'يجب أن تمتلك فريق بـ 1000 رايتينج أو أكثر',
+    buildTeam:'بناء فريقك', readyToPlay:'جاهز للعب!', yourTeam:'فريقك',
+    opponent:'المنافس', startMatch:'ابدأ المباراة', formationSaved:'✅ تم حفظ التشكيلة',
+    dir:'rtl', langCode:'AR', langFlag:'🌍'
+  },
+  en:{
+    home:'Home', deposit:'Deposit', exchange:'Exchange', withdraw:'Withdraw',
+    packages:'Available Packages', match:'Match', myTeam:'My Team', tasks:'Tasks',
+    market:'Market', navHome:'Home', matchLockTitle:'Play Against Others',
+    matchLockSub:'You need a team with 1000+ rating to play',
+    buildTeam:'Build Your Team', readyToPlay:'Ready to Play!', yourTeam:'Your Team',
+    opponent:'Opponent', startMatch:'Start Match', formationSaved:'✅ Formation Saved',
+    dir:'ltr', langCode:'EN', langFlag:'🇬🇧'
+  },
+  ru:{
+    home:'Главная', deposit:'Депозит', exchange:'Обмен', withdraw:'Вывод',
+    packages:'Доступные пакеты', match:'Матч', myTeam:'Моя команда', tasks:'Задания',
+    market:'Рынок', navHome:'Главная', matchLockTitle:'Играть с другими',
+    matchLockSub:'Вам нужна команда с рейтингом 1000+',
+    buildTeam:'Создай команду', readyToPlay:'Готов к игре!', yourTeam:'Твоя команда',
+    opponent:'Соперник', startMatch:'Начать матч', formationSaved:'✅ Состав сохранён',
+    dir:'ltr', langCode:'RU', langFlag:'🇷🇺'
+  },
+  fr:{
+    home:'Accueil', deposit:'Dépôt', exchange:'Échange', withdraw:'Retrait',
+    packages:'Packs disponibles', match:'Match', myTeam:'Mon équipe', tasks:'Tâches',
+    market:'Marché', navHome:'Accueil', matchLockTitle:'Jouer contre d\'autres',
+    matchLockSub:'Vous avez besoin d\'une équipe avec 1000+ de classement',
+    buildTeam:'Construire l\'équipe', readyToPlay:'Prêt à jouer!', yourTeam:'Votre équipe',
+    opponent:'Adversaire', startMatch:'Commencer', formationSaved:'✅ Formation sauvegardée',
+    dir:'ltr', langCode:'FR', langFlag:'🇫🇷'
+  },
+  de:{
+    home:'Startseite', deposit:'Einzahlung', exchange:'Tausch', withdraw:'Auszahlung',
+    packages:'Verfügbare Pakete', match:'Spiel', myTeam:'Mein Team', tasks:'Aufgaben',
+    market:'Markt', navHome:'Startseite', matchLockTitle:'Gegen andere spielen',
+    matchLockSub:'Du brauchst ein Team mit 1000+ Bewertung',
+    buildTeam:'Team aufbauen', readyToPlay:'Bereit zu spielen!', yourTeam:'Dein Team',
+    opponent:'Gegner', startMatch:'Spiel starten', formationSaved:'✅ Aufstellung gespeichert',
+    dir:'ltr', langCode:'DE', langFlag:'🇩🇪'
+  }
+};
+let _currentLang = 'ar';
+
+function i18n(key, fallback=''){
+  return (LANGS[_currentLang]||LANGS.ar)[key]||fallback||key;
 }
 
-// ════ LANGUAGE ════
-const LANGS={
-  ar:{dir:'rtl',label:'AR',home:'الرئيسية',team:'فريقي',tasks:'مهمات',market:'ماركت',match:'المباراة',deposit:'إيداع',withdraw:'سحب',exchange:'تحويل'},
-  ru:{dir:'ltr',label:'RU',home:'Главная',team:'Команда',tasks:'Задачи',market:'Магазин',match:'Матч',deposit:'Депозит',withdraw:'Вывод',exchange:'Обмен'},
-  en:{dir:'ltr',label:'EN',home:'Home',team:'My Team',tasks:'Tasks',market:'Market',match:'Match',deposit:'Deposit',withdraw:'Withdraw',exchange:'Exchange'},
-  fr:{dir:'ltr',label:'FR',home:'Accueil',team:'Mon Équipe',tasks:'Tâches',market:'Marché',match:'Match',deposit:'Dépôt',withdraw:'Retrait',exchange:'Échange'},
-  de:{dir:'ltr',label:'DE',home:'Startseite',team:'Mein Team',tasks:'Aufgaben',market:'Markt',match:'Spiel',deposit:'Einzahlung',withdraw:'Auszahlung',exchange:'Tausch'},
-};
-let _curLang='ar';
-function toggleLangMenu(){
-  const m=document.getElementById('langMenu');
-  m.classList.toggle('open');
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('#langMenu')&&!e.target.closest('#langBtn')){
-    document.getElementById('langMenu')?.classList.remove('open');
-  }
-});
-function setLang(code){
-  _curLang=code;
-  const L=LANGS[code];
-  document.documentElement.lang=code;
-  document.documentElement.dir=L.dir;
-  document.getElementById('curLangLabel').textContent=L.label;
-  // Update nav labels
-  const niLabels=document.querySelectorAll('.ni-lbl');
-  const navKeys=['match','home','team','tasks','market'];
-  niLabels.forEach((lbl,i)=>{if(LANGS[code][navKeys[i]])lbl.textContent=LANGS[code][navKeys[i]];});
-  // Update lang menu active
-  document.querySelectorAll('.lang-item').forEach(item=>{
-    item.classList.toggle('active',item.textContent.includes(L.label)||(code==='ar'&&item.textContent.includes('AR'))||(code==='ar'&&item.textContent.includes('العربية')));
+function setLang(lang){
+  _currentLang = lang;
+  const L = LANGS[lang]||LANGS.ar;
+  // Update flag/code in topbar
+  const flag = document.getElementById('tbLangFlag');
+  const code = document.getElementById('tbLangCode');
+  if(flag) flag.textContent = L.langFlag;
+  if(code) code.textContent = L.langCode;
+  // Update direction
+  document.documentElement.lang = lang;
+  document.documentElement.dir = L.dir;
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(L[key]) el.textContent = L[key];
   });
+  closeLangMenu();
+  // Update active lang
+  document.querySelectorAll('.lang-opt').forEach((opt,i)=>{
+    const langs=['ar','en','ru','fr','de'];
+    opt.classList.toggle('active-lang', langs[i]===lang);
+  });
+}
+
+function openLangMenu(){
+  document.getElementById('langMenu').classList.add('open');
+}
+function closeLangMenu(){
   document.getElementById('langMenu').classList.remove('open');
 }
 
-// ════ MATCH PAGE ════
-function updateMatchPage(){
-  const power=calcTeamPower();
-  const val=document.getElementById('matchPowerVal');
-  const bar=document.getElementById('matchPowerBar');
-  const req=document.getElementById('matchReqCard');
-  const modes=document.getElementById('matchModes');
-  if(val) val.textContent=power;
-  if(bar) bar.style.width=Math.min(100,(power/1000)*100)+'%';
-  if(power>=1000){
-    if(req) req.style.display='none';
-    if(modes) modes.style.display='flex';
+// ════════════════════════════════════════════
+//  NAVIGATION — BACK BUTTON
+// ════════════════════════════════════════════
+let _navHistory = [];
+
+function goBack(){
+  if(_navHistory.length > 1){
+    _navHistory.pop();
+    const prev = _navHistory[_navHistory.length-1];
+    if(prev && prev.type === 'nav'){
+      const el = document.querySelector(`.ni[data-s="${prev.id}"]`);
+      if(el) goNav(el, true);
+    } else if(prev && prev.type === 'sec'){
+      goSec(prev.id, true);
+    }
   } else {
-    if(req) req.style.display='block';
-    if(modes) modes.style.display='none';
+    // Go to landing
+    const el = document.getElementById('navLanding');
+    if(el) goNav(el, true);
   }
 }
 
-// ════ PACKAGES CAROUSEL ════
-let _pkgIdx=0;
-let _pkgTotal=0;
-function renderPackagesCarousel(){
-  const wrap=document.getElementById('pkgCarousel');
+function _pushHistory(type, id){
+  _navHistory.push({type, id});
+  if(_navHistory.length > 20) _navHistory.shift();
+}
+
+function _updateBackBtn(show){
+  const btn = document.getElementById('globalBackBtn');
+  if(btn) btn.classList.toggle('visible', show);
+}
+
+// Override goNav
+function goNav(el, _fromBack=false){
+  const sName = el.dataset.s;
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(sName).classList.add('active');
+
+  if(sName==='sectionMarket') renderMarket(_currentFilter);
+  if(sName==='sectionMatch') updateMatchSection();
+
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  const isLanding=(sName==='sectionLanding');
+
+  if(isLanding){
+    if(tb) tb.classList.remove('hidden-bar');
+    if(bn) bn.classList.remove('hidden-bar');
+  } else {
+    if(tb) tb.classList.add('hidden-bar');
+    if(bn) bn.classList.add('hidden-bar');
+  }
+
+  if(!_fromBack) _pushHistory('nav', sName);
+  _updateBackBtn(!isLanding);
+}
+
+// Override goSec (inner pages - no bars)
+function goSec(name, _fromBack=false){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  const sec = document.getElementById('section'+name);
+  if(!sec) return;
+  sec.classList.add('active');
+
+  if(name==='Deposit'){
+    const uid=document.getElementById('depositUserIdDisplay');
+    if(uid) uid.textContent=S.userId||'???';
+  }
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  if(tb) tb.classList.add('hidden-bar');
+  if(bn) bn.classList.add('hidden-bar');
+
+  if(!_fromBack) _pushHistory('sec', name);
+  _updateBackBtn(true);
+}
+
+// ════════════════════════════════════════════
+//  LANDING TABS
+// ════════════════════════════════════════════
+function switchLandingTab(tab){
+  ['home','deposit','exchange','withdraw'].forEach(t=>{
+    const tabEl = document.getElementById('landingTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    const contEl = document.getElementById('lt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(tabEl) tabEl.classList.toggle('active', t===tab);
+    if(contEl) contEl.classList.toggle('active', t===tab);
+  });
+
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  const sec=document.getElementById('sectionLanding');
+
+  if(tab==='home'){
+    if(tb) tb.classList.remove('hidden-bar');
+    if(bn) bn.classList.remove('hidden-bar');
+    // Restore landing bounds
+    if(sec){ sec.style.top='58px'; sec.style.bottom='80px'; }
+    _updateBackBtn(false);
+  } else {
+    if(tb) tb.classList.add('hidden-bar');
+    if(bn) bn.classList.add('hidden-bar');
+    // Full screen for inner tabs
+    if(sec){ sec.style.top='0'; sec.style.bottom='0'; }
+    _updateBackBtn(true);
+  }
+
+  if(tab==='deposit'){
+    const uid = document.getElementById('depositUserIdDisplay2');
+    if(uid) uid.textContent = S.userId||'???';
+  }
+  if(tab==='exchange') updSwapBals2();
+  if(tab==='withdraw') updWdPrev2();
+}
+
+// Deposit tab helpers
+function setDepAmt2(v){document.getElementById('depositAmountInput2').value=v;updDepPreview2();}
+function updDepPreview2(){
+  const ton=parseFloat(document.getElementById('depositAmountInput2').value)||0;
+  const el=document.getElementById('depBambooPreview2');
+  if(el)el.textContent=fmt(Math.floor(ton*10000))+' Bamboo';
+}
+// Exchange tab helpers
+function swapMax2(){document.getElementById('swapFromAmt2').value=Math.floor(S.user.bamboo||0);updSwapCalc2();}
+function updSwapCalc2(){const a=parseInt(document.getElementById('swapFromAmt2').value)||0;const el=document.getElementById('swapToAmt2');if(el)el.textContent=fmt(Math.floor(a/CFG.RATE));}
+function updSwapBals2(){
+  const fb=document.getElementById('swapFromBal2');if(fb)fb.textContent=`رصيد: ${fmt(S.user.bamboo||0)} Bamboo`;
+  const tb=document.getElementById('swapToBal2');if(tb)tb.textContent=`رصيد: ${fmt(S.user.coins||0)} Coins`;
+}
+// Withdraw tab helpers
+function updWdPrev2(){
+  const a=parseFloat(document.getElementById('wdAmt2').value)||0;
+  const el=document.getElementById('wdTonVal2');if(el)el.textContent=(a*CFG.TON_PER_COIN).toFixed(4);
+}
+async function doWithdraw2(){
+  const addr=(document.getElementById('wdAddr2').value||'').trim();
+  const amt=parseFloat(document.getElementById('wdAmt2').value)||0;
+  if(!addr||addr.length<10){showToast('أدخل عنوان TON صالح!');return;}
+  if(amt<CFG.MIN_WD){showToast(`الحد الأدنى ${CFG.MIN_WD} Coins!`);return;}
+  if(amt>(S.user.coins||0)){showToast('رصيد Coins غير كافٍ!');return;}
+  try{
+    await api('withdraw',{address:addr,amount:amt});
+    S.user.coins-=amt;
+    showToast(`✅ طلب سحب: ${fmt(amt)} Coins`);
+    updateUI();
+  }catch(e){showToast(`❌ ${e.message||'فشل'}`);}
+}
+
+// ════════════════════════════════════════════
+//  PACKAGES CAROUSEL
+// ════════════════════════════════════════════
+let _pkgIdx = 0;
+let _pkgTotal = 0;
+let _pkgStartX = 0;
+let _pkgDragging = false;
+
+function renderPackages(){
+  const grid=document.getElementById('pkgGrid');
   const dots=document.getElementById('pkgDots');
-  if(!wrap)return;
-  _pkgTotal=PACKAGES.length;
-  wrap.innerHTML=PACKAGES.map((pk,i)=>{
+  if(!grid)return;
+  _pkgTotal = PACKAGES.length;
+  grid.innerHTML=PACKAGES.map(pk=>{
     const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
-    return`<div class="pkg-slide">
-      <div class="efb-pkg-single pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
-        ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
-        <div class="efb-pkg-bg">
-          <div class="efb-pkg-icon">${pk.icon}</div>
-          <div class="efb-pkg-name">${pk.name}</div>
-          <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
-          <div class="efb-pkg-price">${priceStr}</div>
-        </div>
+    return`<div class="efb-pkg pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
+      ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
+      <div class="efb-pkg-bg">
+        <div class="efb-pkg-icon">${pk.icon}</div>
+        <div class="efb-pkg-name">${pk.name}</div>
+        <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
+        <div class="efb-pkg-price">${priceStr}</div>
       </div>
     </div>`;
   }).join('');
   if(dots){
-    dots.innerHTML=PACKAGES.map((_,i)=>`<div class="pkg-dot ${i===0?'active':''}" onclick="goToPkg(${i})"></div>`).join('');
+    dots.innerHTML=PACKAGES.map((_,i)=>`<div class="pkg-dot${i===0?' active':''}" onclick="goToPkg(${i})"></div>`).join('');
   }
-  updateCarousel();
-  // Touch swipe
-  let startX=0;
-  wrap.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;},{passive:true});
-  wrap.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-startX;
-    if(Math.abs(dx)>40){dx>0?pkgPrev():pkgNext();}
-  });
-}
-function updateCarousel(){
-  const slides=document.querySelectorAll('.pkg-slide');
-  slides.forEach((s,i)=>{s.style.transform=`translateX(${(i-_pkgIdx)*100}%)`;});
-  document.querySelectorAll('.pkg-dot').forEach((d,i)=>d.classList.toggle('active',i===_pkgIdx));
-}
-function pkgNext(){_pkgIdx=(_pkgIdx+1)%_pkgTotal;updateCarousel();}
-function pkgPrev(){_pkgIdx=(_pkgIdx-1+_pkgTotal)%_pkgTotal;updateCarousel();}
-function goToPkg(i){_pkgIdx=i;updateCarousel();}
-
-// ════ AVATAR INIT ════
-function initAvatar(){
-  const tgUser=S.tg?.initDataUnsafe?.user;
-  const av=document.getElementById('tbAvatar');
-  if(!av)return;
-  if(tgUser?.photo_url){
-    av.innerHTML=`<img src="${tgUser.photo_url}" onerror="this.parentElement.innerHTML='🐼'" style="width:100%;height:100%;object-fit:cover;">`;
-  }
+  // Touch/swipe support
+  grid.addEventListener('touchstart',e=>{_pkgStartX=e.touches[0].clientX;_pkgDragging=true;},{passive:true});
+  grid.addEventListener('touchend',e=>{
+    if(!_pkgDragging)return;
+    const dx=e.changedTouches[0].clientX-_pkgStartX;
+    if(dx< -40) goToPkg(Math.min(_pkgIdx+1,_pkgTotal-1));
+    else if(dx>40) goToPkg(Math.max(_pkgIdx-1,0));
+    _pkgDragging=false;
+  },{passive:true});
+  goToPkg(0);
 }
 
-// ════ INIT LANDING NAV ARROW ════
-function initNavArrow(){
-  const homeNav=document.getElementById('navLanding');
-  if(homeNav) homeNav.classList.add('nav-home-arrow');
+function goToPkg(idx){
+  _pkgIdx=idx;
+  const grid=document.getElementById('pkgGrid');
+  if(grid) grid.style.transform=`translateX(-${idx*100}%)`;
+  document.querySelectorAll('.pkg-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 }
 
 // ════════════════════════════════════════════
-//  ORIENTATION SYSTEM
+//  MATCH SECTION
 // ════════════════════════════════════════════
-
-// ════ BACK BUTTON ════
-function goBack(){
-  // Go back to landing page
-  const homeNav=document.getElementById('navLanding');
-  if(homeNav) goNav(homeNav);
-}
-
-// ════ LANGUAGE ════
-const LANGS={
-  ar:{dir:'rtl',label:'AR',home:'الرئيسية',team:'فريقي',tasks:'مهمات',market:'ماركت',match:'المباراة',deposit:'إيداع',withdraw:'سحب',exchange:'تحويل'},
-  ru:{dir:'ltr',label:'RU',home:'Главная',team:'Команда',tasks:'Задачи',market:'Магазин',match:'Матч',deposit:'Депозит',withdraw:'Вывод',exchange:'Обмен'},
-  en:{dir:'ltr',label:'EN',home:'Home',team:'My Team',tasks:'Tasks',market:'Market',match:'Match',deposit:'Deposit',withdraw:'Withdraw',exchange:'Exchange'},
-  fr:{dir:'ltr',label:'FR',home:'Accueil',team:'Mon Équipe',tasks:'Tâches',market:'Marché',match:'Match',deposit:'Dépôt',withdraw:'Retrait',exchange:'Échange'},
-  de:{dir:'ltr',label:'DE',home:'Startseite',team:'Mein Team',tasks:'Aufgaben',market:'Markt',match:'Spiel',deposit:'Einzahlung',withdraw:'Auszahlung',exchange:'Tausch'},
-};
-let _curLang='ar';
-function toggleLangMenu(){
-  const m=document.getElementById('langMenu');
-  m.classList.toggle('open');
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('#langMenu')&&!e.target.closest('#langBtn')){
-    document.getElementById('langMenu')?.classList.remove('open');
-  }
-});
-function setLang(code){
-  _curLang=code;
-  const L=LANGS[code];
-  document.documentElement.lang=code;
-  document.documentElement.dir=L.dir;
-  document.getElementById('curLangLabel').textContent=L.label;
-  // Update nav labels
-  const niLabels=document.querySelectorAll('.ni-lbl');
-  const navKeys=['match','home','team','tasks','market'];
-  niLabels.forEach((lbl,i)=>{if(LANGS[code][navKeys[i]])lbl.textContent=LANGS[code][navKeys[i]];});
-  // Update lang menu active
-  document.querySelectorAll('.lang-item').forEach(item=>{
-    item.classList.toggle('active',item.textContent.includes(L.label)||(code==='ar'&&item.textContent.includes('AR'))||(code==='ar'&&item.textContent.includes('العربية')));
-  });
-  document.getElementById('langMenu').classList.remove('open');
-}
-
-// ════ MATCH PAGE ════
-function updateMatchPage(){
-  const power=calcTeamPower();
-  const val=document.getElementById('matchPowerVal');
-  const bar=document.getElementById('matchPowerBar');
-  const req=document.getElementById('matchReqCard');
-  const modes=document.getElementById('matchModes');
-  if(val) val.textContent=power;
-  if(bar) bar.style.width=Math.min(100,(power/1000)*100)+'%';
-  if(power>=1000){
-    if(req) req.style.display='none';
-    if(modes) modes.style.display='flex';
+function updateMatchSection(){
+  const power = calcTeamPower();
+  const required = 1000;
+  const pct = Math.min(100, (power/required)*100);
+  const lockCard = document.getElementById('matchLockCard');
+  const readyCard = document.getElementById('matchReadyCard');
+  const fill = document.getElementById('matchRatingFill');
+  const cur = document.getElementById('matchCurrentRating');
+  const myR = document.getElementById('matchMyRating');
+  if(fill) fill.style.width = pct+'%';
+  if(cur) cur.textContent = power;
+  if(myR) myR.textContent = power;
+  if(power >= required){
+    if(lockCard) lockCard.style.display='none';
+    if(readyCard) readyCard.style.display='block';
   } else {
-    if(req) req.style.display='block';
-    if(modes) modes.style.display='none';
+    if(lockCard) lockCard.style.display='block';
+    if(readyCard) readyCard.style.display='none';
   }
 }
 
-// ════ PACKAGES CAROUSEL ════
-let _pkgIdx=0;
-let _pkgTotal=0;
-function renderPackagesCarousel(){
-  const wrap=document.getElementById('pkgCarousel');
-  const dots=document.getElementById('pkgDots');
-  if(!wrap)return;
-  _pkgTotal=PACKAGES.length;
-  wrap.innerHTML=PACKAGES.map((pk,i)=>{
-    const priceStr=pk.currency==='ton'?`💎 ${pk.price} TON`:`🪙 ${fmt(pk.price)} Coins`;
-    return`<div class="pkg-slide">
-      <div class="efb-pkg-single pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
-        ${pk.badge?`<div class="efb-pkg-badge">${pk.badge}</div>`:''}
-        <div class="efb-pkg-bg">
-          <div class="efb-pkg-icon">${pk.icon}</div>
-          <div class="efb-pkg-name">${pk.name}</div>
-          <div class="efb-pkg-cards">${pk.cards} بطاقات — ${pk.guaranteed}</div>
-          <div class="efb-pkg-price">${priceStr}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  if(dots){
-    dots.innerHTML=PACKAGES.map((_,i)=>`<div class="pkg-dot ${i===0?'active':''}" onclick="goToPkg(${i})"></div>`).join('');
-  }
-  updateCarousel();
-  // Touch swipe
-  let startX=0;
-  wrap.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;},{passive:true});
-  wrap.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-startX;
-    if(Math.abs(dx)>40){dx>0?pkgPrev():pkgNext();}
-  });
-}
-function updateCarousel(){
-  const slides=document.querySelectorAll('.pkg-slide');
-  slides.forEach((s,i)=>{s.style.transform=`translateX(${(i-_pkgIdx)*100}%)`;});
-  document.querySelectorAll('.pkg-dot').forEach((d,i)=>d.classList.toggle('active',i===_pkgIdx));
-}
-function pkgNext(){_pkgIdx=(_pkgIdx+1)%_pkgTotal;updateCarousel();}
-function pkgPrev(){_pkgIdx=(_pkgIdx-1+_pkgTotal)%_pkgTotal;updateCarousel();}
-function goToPkg(i){_pkgIdx=i;updateCarousel();}
-
-// ════ AVATAR INIT ════
-function initAvatar(){
-  const tgUser=S.tg?.initDataUnsafe?.user;
-  const av=document.getElementById('tbAvatar');
-  if(!av)return;
-  if(tgUser?.photo_url){
-    av.innerHTML=`<img src="${tgUser.photo_url}" onerror="this.parentElement.innerHTML='🐼'" style="width:100%;height:100%;object-fit:cover;">`;
-  }
-}
-
-// ════ INIT LANDING NAV ARROW ════
-function initNavArrow(){
-  const homeNav=document.getElementById('navLanding');
-  if(homeNav) homeNav.classList.add('nav-home-arrow');
+function startMatch(){
+  showToast('⚽ جاري البحث عن منافس...');
+  setTimeout(()=>showToast('🎮 ميزة المباراة قادمة قريباً!'),2000);
 }
 
 // ════════════════════════════════════════════
-//  ORIENTATION SYSTEM — يسأل كل مرة
+//  ORIENTATION SYSTEM (restored original)
 // ════════════════════════════════════════════
-let _orientPref = null; // لا نحفظ — نسأل كل مرة
+let _orientPref = null;
 
-// ── Fullscreen (يخفي شريط الحالة) ──
 async function enterFullscreen(){
   const el = document.documentElement;
   const req = el.requestFullscreen || el.webkitRequestFullscreen
              || el.mozRequestFullScreen || el.msRequestFullscreen;
-  if(req){
-    try{ await req.call(el); }catch(e){ console.log('Fullscreen blocked:',e.message); }
-  }
-  // Telegram WebApp: lock orientation نفسها تخفي الشريط في بعض الأجهزة
+  if(req){ try{ await req.call(el); }catch(e){} }
   if(window.Telegram?.WebApp?.requestFullscreen){
     try{ window.Telegram.WebApp.requestFullscreen(); }catch(_){}
   }
 }
-
 function exitFullscreen(){
   const ex = document.exitFullscreen || document.webkitExitFullscreen
            || document.mozCancelFullScreen || document.msExitFullscreen;
   if(ex) try{ ex.call(document); }catch(_){}
 }
-
-// ── الاختيار من الديالوج ──
 async function chooseOrientation(pref){
   _orientPref = pref;
   document.getElementById('orientDialog').classList.remove('show');
-
   if(pref === 'landscape'){
-    await enterFullscreen();        // إخفاء شريط الحالة
+    await enterFullscreen();
     await applyOrientation('landscape');
   } else {
     exitFullscreen();
     await applyOrientation('portrait');
   }
 }
-
-// ── تطبيق الاتجاه ──
 async function applyOrientation(pref){
   if(pref === 'landscape'){
-    // 1. جرب Screen Orientation API
     let locked = false;
     if(screen.orientation && screen.orientation.lock){
-      try{
-        await screen.orientation.lock('landscape-primary');
-        locked = true;
-      }catch(e){ console.log('orientation.lock failed:', e.message); }
+      try{ await screen.orientation.lock('landscape-primary'); locked = true; }catch(e){}
     }
-    // 2. Fallback: CSS transform لو مفيش lock
     if(!locked) applyLandscapeTransform();
-
     document.body.classList.add('force-landscape');
     document.body.classList.remove('force-portrait');
   } else {
-    // Portrait
     if(screen.orientation && screen.orientation.unlock){
       try{ screen.orientation.unlock(); }catch(_){}
     }
@@ -2688,59 +2894,51 @@ async function applyOrientation(pref){
     document.body.classList.add('force-portrait');
   }
 }
-
-// ── CSS Transform Fallback ──
 function applyLandscapeTransform(){
   if(window.innerHeight > window.innerWidth){
-    const W = window.innerHeight;
-    const H = window.innerWidth;
+    const W = window.innerHeight, H = window.innerWidth;
     document.body.style.cssText = `
       transform: rotate(-90deg) translateX(-${W}px);
       transform-origin: top left;
-      width: ${W}px !important;
-      height: ${H}px !important;
-      overflow: hidden;
-      position: fixed;
-      top: 0; left: 0;
+      width: ${W}px !important; height: ${H}px !important;
+      overflow: hidden; position: fixed; top: 0; left: 0;
     `;
     document.documentElement.style.overflow = 'hidden';
   }
 }
-
 function removeLandscapeTransform(){
   document.body.style.cssText = '';
   document.documentElement.style.overflow = '';
 }
-
-// ── إظهار الديالوج كل مرة ──
 function showOrientDialog(){
-  // أظهر بعد 600ms عشان شاشة التحميل تظهر الأول
-  setTimeout(()=>{
-    document.getElementById('orientDialog').classList.add('show');
-  }, 600);
+  setTimeout(()=>{ document.getElementById('orientDialog').classList.add('show'); }, 600);
 }
-
-// ── مراقبة تغيير الاتجاه الفعلي للجهاز ──
 function onDeviceOrientationChange(){
   if(!_orientPref) return;
   const isLandscape = window.innerWidth > window.innerHeight;
-  if(_orientPref === 'landscape' && !isLandscape){
-    applyLandscapeTransform();
-  } else if(_orientPref === 'portrait' && isLandscape){
-    removeLandscapeTransform();
-  }
+  if(_orientPref === 'landscape' && !isLandscape) applyLandscapeTransform();
+  else if(_orientPref === 'portrait' && isLandscape) removeLandscapeTransform();
 }
-
 window.addEventListener('orientationchange', ()=>{ setTimeout(onDeviceOrientationChange, 300); });
 window.addEventListener('resize',            ()=>{ setTimeout(onDeviceOrientationChange, 200); });
 
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
 window.addEventListener('load', async function(){
-  // Hide all sections initially
-  document.querySelectorAll('.sec').forEach(s=>{s.style.display='none';});
-  const landing=document.getElementById('sectionLanding');
-  if(landing){landing.style.display='block';landing.classList.add('active');}
   showOrientDialog();
+
+  // Init avatar from Telegram
+  if(window.Telegram?.WebApp){
+    const u = window.Telegram.WebApp.initDataUnsafe?.user;
+    if(u && u.photo_url){
+      const av = document.getElementById('tbUserAvatar');
+      if(av) av.innerHTML = `<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='🐼'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    }
+  }
+
   await init();
+  renderPackages();
 });
 </script>
 </body>

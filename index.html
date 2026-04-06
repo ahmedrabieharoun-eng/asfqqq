@@ -58,7 +58,18 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 /* ═══ SECTIONS — full viewport fit ═══ */
 .sec{display:none;animation:fadeIn .28s ease}
 .sec.active{display:block}
+/* CRITICAL: ensure hidden sections never overlay anything */
+.sec:not(.active){
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Add background to all active sections so they cover content below */
+.sec.active{
+  background: url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat;
+}
 
 /* Landing section: sits between topbar (58px) and bottom nav (90px) */
 #sectionLanding.active{
@@ -67,6 +78,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   top:58px;left:0;right:0;bottom:90px;
   overflow:hidden;
   padding:0;
+  z-index:1;
 }
 #sectionLanding .efb-tab-bar{flex-shrink:0;margin:8px 12px 6px;}
 .landing-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 10px;-webkit-overflow-scrolling:touch;}
@@ -78,6 +90,13 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   overflow:hidden;
   padding:10px 12px 10px;
   gap:6px;
+  z-index:1;
+}
+/* Make sure non-active sections don't overlap */
+.sec:not(.active){
+  display:none!important;
+  pointer-events:none!important;
+  z-index:0!important;
 }
 #sectionHome.active .pitch-wrap{
   flex:1;min-height:0;
@@ -98,8 +117,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   position:fixed;inset:0;
   overflow-y:auto;
   overflow-x:hidden;
-  padding:16px 12px 80px;
+  padding:16px 12px 100px;
   -webkit-overflow-scrolling:touch;
+  z-index:1;
 }
 
 /* Market: fixed inset, scrollable */
@@ -110,6 +130,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   overflow-x:hidden;
   padding:10px 12px 24px;
   -webkit-overflow-scrolling:touch;
+  z-index:1;
 }
 
 /* ─── NEW TOPBAR ─── */
@@ -332,7 +353,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 }
 .match-skip-btn:active{background:rgba(255,255,255,.2);}
 
-/* body top padding managed by JS */
+/* sectionFriends is the new home page — needs topbar + bnav spacing */
+#sectionFriends.active{
+  padding-top: calc(58px + 16px) !important;
+  padding-bottom: 100px !important;
+}
 
 
 /* ═══ BOTTOM NAV — eFootball Style ═══ */
@@ -353,6 +378,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ni:active .ni-tile{transform:scale(.88);}
 .ni.active .ni-tile{box-shadow:0 0 0 2.5px #fff,0 4px 16px rgba(0,0,0,.5);}
 .ni[data-s="sectionLanding"] .ni-tile{background:linear-gradient(145deg,#00b4d8,#0077b6);}
+.ni[data-s="sectionFriends"] .ni-tile{background:linear-gradient(145deg,#00b4d8,#0077b6);}
 .ni[data-s="sectionHome"]    .ni-tile{background:linear-gradient(145deg,#e63946,#b5152c);}
 .ni[data-s="sectionContracts"].ni-tile{background:linear-gradient(145deg,#c77dff,#7b2fff);}
 .ni[data-s="sectionTasks"]   .ni-tile{background:linear-gradient(145deg,#52b788,#2d6a4f);}
@@ -361,9 +387,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .ni-center .ni-tile{max-height:60px;border-radius:16px;box-shadow:0 -6px 22px rgba(230,57,70,.55);}
 .ni-center{position:relative;}
 .ni-center.active .ni-tile{box-shadow:0 0 0 2.5px #fff,0 -6px 22px rgba(230,57,70,.6);}
-/* Arrow indicator above الرئيسية (navLanding) when active */
-.ni[data-s="sectionLanding"].active::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#00b4d8;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(0,180,216,.7));}
-.ni[data-s="sectionLanding"]{position:relative;}
+/* Arrow indicator above دعوة (navLanding) when active */
+.ni[data-s="sectionFriends"].active::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#00b4d8;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(0,180,216,.7));}
+.ni[data-s="sectionFriends"]{position:relative;}
 .ni-lbl{font-size:9.5px;font-weight:800;color:rgba(255,255,255,.55);white-space:nowrap;}
 .ni.active .ni-lbl{color:#fff;}
 
@@ -406,6 +432,25 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   border:2px solid rgba(255,255,255,.12);
   box-shadow:0 6px 32px rgba(0,0,0,.7);
   aspect-ratio:.68/1;max-height:540px;
+}
+
+/* Landscape: pitch should be wider than tall */
+@media (orientation:landscape){
+  .pitch-wrap{
+    aspect-ratio:unset!important;
+    max-height:none!important;
+    width:auto!important;
+    height:100%!important;
+  }
+  #sectionHome.active .pitch-wrap{
+    flex:1;
+    min-height:0;
+    min-width:0;
+    height:100%!important;
+    width:auto!important;
+    aspect-ratio:unset!important;
+    max-height:none!important;
+  }
 }
 /* Grass stripes exactly like eFootball */
 .pitch-bg{
@@ -793,19 +838,23 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 
   /* ── HOME: Pitch landscape layout ──
      الملعب يصير أفقي بدل رأسي */
-  #sectionHome{
+  #sectionHome.active{
     display:grid!important;
     grid-template-columns:1fr 280px;
     grid-template-rows:auto;
     gap:8px;
     align-items:start;
+    padding:6px 8px!important;
   }
   /* الملعب في اليسار */
   .pitch-wrap{
-    aspect-ratio:1.4/1!important;
+    aspect-ratio:unset!important;
     max-height:calc(100vh - 120px)!important;
+    height:calc(100vh - 120px)!important;
+    width:auto!important;
     grid-row:1/4;
     grid-column:1;
+    align-self:stretch;
   }
   /* التابز والباور والحفظ في اليمين */
   .formation-tabs{
@@ -905,8 +954,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 @media (orientation:landscape) and (min-height:501px) and (max-height:768px){
   body{font-size:12px;}
   .mkt-grid{grid-template-columns:repeat(3,1fr);}
-  .pitch-wrap{aspect-ratio:1.2/1!important;max-height:calc(100vh - 130px)!important;}
-  #sectionHome{display:grid!important;grid-template-columns:1fr 300px;gap:10px;align-items:start;}
+  .pitch-wrap{aspect-ratio:unset!important;max-height:calc(100vh - 130px)!important;height:calc(100vh - 130px)!important;width:auto!important;}
+  #sectionHome.active{display:grid!important;grid-template-columns:1fr 300px;gap:10px;align-items:start;}
   .pitch-wrap{grid-row:1/4;grid-column:1;}
   .formation-tabs{grid-column:2;grid-row:1;}
   .team-power-bar{grid-column:2;grid-row:2;}
@@ -1442,9 +1491,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
     <div class="ni-tile">⚽</div>
     <div class="ni-lbl">المباراة</div>
   </div>
-  <div class="ni active" data-s="sectionLanding" id="navLanding" onclick="goNav(this)">
-    <div class="ni-tile">🛡️</div>
-    <div class="ni-lbl" data-i18n="nav_home">الرئيسية</div>
+  <div class="ni active" data-s="sectionFriends" id="navLanding" onclick="goNav(this)">
+    <div class="ni-tile">👥</div>
+    <div class="ni-lbl">دعوة</div>
   </div>
   <div class="ni ni-center" data-s="sectionHome" onclick="goNav(this)">
     <div class="ni-tile">👤</div>
@@ -1690,15 +1739,14 @@ function goNav(el){
   const tb=document.getElementById('mainTopbar');
   const bn=document.getElementById('mainBnav');
   const bb=document.getElementById('globalBackBtn');
-  const isLanding=(sName==='sectionLanding');
+  // sectionFriends is now the home/landing page
+  const isLanding=(sName==='sectionLanding'||sName==='sectionFriends');
   if(tb) tb.classList.toggle('hidden-bar',!isLanding);
   if(bn) bn.classList.toggle('hidden-bar',!isLanding);
-  // Show back button on non-landing nav pages (team, tasks, market)
   if(bb){
     if(!isLanding) bb.classList.add('visible');
     else bb.classList.remove('visible');
   }
-  // No body padding needed - sections are position:fixed
 }
 
 function goSec(name){
@@ -1716,9 +1764,16 @@ function goSec(name){
 }
 
 function goBackToHome(){
-  // Back button goes to Landing
-  const navLanding=document.getElementById('navLanding');
-  if(navLanding) goNav(navLanding);
+  // Back button goes to Landing (startup page)
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sectionLanding').classList.add('active');
+  const tb=document.getElementById('mainTopbar');
+  const bn=document.getElementById('mainBnav');
+  const bb=document.getElementById('globalBackBtn');
+  if(tb) tb.classList.remove('hidden-bar');
+  if(bn) bn.classList.remove('hidden-bar');
+  if(bb) bb.classList.remove('visible');
 }
 
 
@@ -2877,10 +2932,7 @@ function endMatch(h,a,reward){
     document.getElementById('matchGateBlock').style.display='block';
     document.getElementById('matchSimBlock').style.display='none';
     // Return to landing
-    setTimeout(()=>{
-      const navLanding=document.getElementById('navLanding');
-      if(navLanding)goNav(navLanding);
-    },2000);
+    setTimeout(()=>{ goBackToHome(); },2000);
   },800);
 }
 

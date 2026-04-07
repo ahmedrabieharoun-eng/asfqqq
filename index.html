@@ -33,11 +33,91 @@
 }
 body{
   font-family:'Cairo',sans-serif;font-weight:700;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat fixed;
+  background:url('back main page.jpg') center center / cover no-repeat fixed;
   color:var(--text);height:100vh;overflow:hidden;font-size:14px;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-serif!important;}
 .orb{font-family:'Orbitron',monospace!important;}
+
+/* ═══ INTRO VIDEO ═══ */
+#introVideoScreen{
+  position:fixed;inset:0;z-index:10000;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:1;transition:opacity .6s ease;
+}
+#introVideoScreen.hidden{opacity:0;pointer-events:none;}
+#introVideoEl{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+#introSkipBtn{
+  position:absolute;bottom:24px;right:20px;
+  background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;font-size:13px;font-weight:800;font-family:'Cairo',sans-serif;
+  padding:8px 20px;border-radius:24px;cursor:pointer;
+  backdrop-filter:blur(6px);
+  transition:background .18s;
+  display:flex;align-items:center;gap:6px;
+}
+#introSkipBtn:active{background:rgba(255,255,255,.2);}
+#introSkipTimer{
+  font-family:'Orbitron',monospace;font-size:13px;
+  color:rgba(255,255,255,.75);
+}
+
+/* ═══ SPLASH SCREEN (بعد الفيديو) ═══ */
+#splashScreen{
+  position:fixed;inset:0;z-index:9998;
+  background:url('back groud.jpg') center center / cover no-repeat;
+  display:none;
+  flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:60px;
+  opacity:0;
+  transition:opacity .5s ease;
+}
+#splashScreen.show{
+  display:flex;
+  opacity:1;
+}
+#splashScreen.fade-out{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ═══ CIRCULAR PLAY BUTTON — eFootball Style ═══ */
+#splashPlayBtn{
+  position:relative;
+  margin-top:auto;
+  margin-bottom:0;
+  width:64px;
+  height:64px;
+  border:none;
+  cursor:pointer;
+  border-radius:50%;
+  background:transparent;
+  padding:0;
+  flex-shrink:0;
+  animation:efb-pulse 2s ease-in-out infinite;
+}
+@keyframes efb-pulse{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.08);opacity:.85;}
+}
+.splash-btn-glow{display:none;}
+.splash-btn-bg{display:none;}
+.splash-btn-inner{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:2.5px solid rgba(255,255,255,1);
+  background:rgba(0,0,0,0.18);
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(2px);
+}
+.splash-btn-icon{display:none;}
+.splash-btn-text{display:none;}
+.splash-btn-arrow{display:none;}
 
 /* ═══ LOADING ═══ */
 #loadingScreen{
@@ -68,7 +148,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 
 /* Add background to all active sections so they cover content below */
 .sec.active{
-  background: url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat;
+  background: url('back main page.jpg') center center / cover no-repeat;
 }
 
 /* Landing section: sits between topbar (58px) and bottom nav (90px) */
@@ -1066,6 +1146,22 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 </style>
 </head>
 <body>
+
+<!-- ═══ INTRO VIDEO SCREEN ═══ -->
+<div id="introVideoScreen" style="display:none;">
+  <video id="introVideoEl" src="video intro.mp4" muted playsinline preload="auto"></video>
+  <button id="introSkipBtn" onclick="skipIntroVideo()">
+    تخطي &nbsp;<span id="introSkipTimer">10</span>
+  </button>
+</div>
+
+<!-- ═══ SPLASH SCREEN — صورة اللاند بعد الفيديو ═══ -->
+<div id="splashScreen">
+  <button id="splashPlayBtn" onclick="hideSplashScreen()">
+    <div class="splash-btn-inner"></div>
+    </div>
+  </button>
+</div>
 
 <!-- ORIENTATION DIALOG -->
 <div id="orientDialog">
@@ -2583,12 +2679,91 @@ async function chooseOrientation(pref){
   document.getElementById('orientDialog').classList.remove('show');
 
   if(pref === 'landscape'){
-    await enterFullscreen();        // إخفاء شريط الحالة
+    await enterFullscreen();
     await applyOrientation('landscape');
   } else {
     exitFullscreen();
     await applyOrientation('portrait');
   }
+
+  // ── شغّل فيديو الانترو بعد الاختيار ──
+  showIntroVideo();
+}
+
+// ════════════════════════════════════
+//  INTRO VIDEO
+// ════════════════════════════════════
+let _introTimerInterval = null;
+
+function showIntroVideo(){
+  const screen = document.getElementById('introVideoScreen');
+  const video  = document.getElementById('introVideoEl');
+  const timer  = document.getElementById('introSkipTimer');
+  if(!screen || !video) { showSplashScreen(); return; }
+
+  screen.style.display = 'flex';
+  video.currentTime = 0;
+  video.play().catch(()=>{ /* autoplay blocked — skip straight to splash */ hideIntroVideo(); });
+
+  let remaining = 10;
+  timer.textContent = remaining;
+
+  _introTimerInterval = setInterval(()=>{
+    remaining--;
+    timer.textContent = remaining;
+    if(remaining <= 0){
+      clearInterval(_introTimerInterval);
+      hideIntroVideo();
+    }
+  }, 1000);
+
+  video.onended = ()=>{
+    clearInterval(_introTimerInterval);
+    hideIntroVideo();
+  };
+}
+
+function hideIntroVideo(){
+  const screen = document.getElementById('introVideoScreen');
+  const video  = document.getElementById('introVideoEl');
+  if(!screen) { showSplashScreen(); return; }
+  if(video) video.pause();
+  screen.style.opacity = '0';
+  screen.style.transition = 'opacity .5s ease';
+  setTimeout(()=>{
+    screen.style.display = 'none';
+    screen.style.opacity = '';
+    screen.style.transition = '';
+    showSplashScreen();
+  }, 520);
+}
+
+function skipIntroVideo(){
+  if(_introTimerInterval) clearInterval(_introTimerInterval);
+  hideIntroVideo();
+}
+
+// ════════════════════════════════════
+//  SPLASH SCREEN (صورة اللاند + الزر)
+// ════════════════════════════════════
+function showSplashScreen(){
+  const splash = document.getElementById('splashScreen');
+  if(!splash) return;
+  splash.style.display = 'flex';
+  // micro-delay للـ transition
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{ splash.classList.add('show'); });
+  });
+}
+
+function hideSplashScreen(){
+  const splash = document.getElementById('splashScreen');
+  if(!splash) return;
+  splash.classList.add('fade-out');
+  setTimeout(()=>{
+    splash.style.display = 'none';
+    splash.classList.remove('show','fade-out');
+  }, 520);
 }
 
 // ── تطبيق الاتجاه ──

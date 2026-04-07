@@ -45,9 +45,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   background:#000;
   display:flex;align-items:center;justify-content:center;
   opacity:1;transition:opacity .6s ease;
+  width:100vw;height:100vh;
 }
 #introVideoScreen.hidden{opacity:0;pointer-events:none;}
 #introVideoEl{
+  position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;
   display:block;
@@ -55,22 +57,25 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 #introSkipBtn{
   position:absolute;bottom:24px;right:20px;
   background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.3);
-  color:#fff;font-size:13px;font-weight:800;font-family:'Cairo',sans-serif;
-  padding:8px 20px;border-radius:24px;cursor:pointer;
+  color:#fff;font-size:14px;font-weight:800;font-family:'Cairo',sans-serif;
+  padding:9px 22px;border-radius:24px;cursor:pointer;
   backdrop-filter:blur(6px);
-  transition:background .18s;
-  display:flex;align-items:center;gap:6px;
+  transition:background .18s, opacity .3s;
+  z-index:2;
+  opacity:0;
+  animation:skipBtnFadeIn .4s ease .8s forwards;
 }
+@keyframes skipBtnFadeIn{to{opacity:1;}}
 #introSkipBtn:active{background:rgba(255,255,255,.2);}
-#introSkipTimer{
-  font-family:'Orbitron',monospace;font-size:13px;
-  color:rgba(255,255,255,.75);
-}
+#introSkipTimer{display:none;}
 
 /* ═══ SPLASH SCREEN (بعد الفيديو) ═══ */
 #splashScreen{
   position:fixed;inset:0;z-index:9998;
   background:url('back groud.jpg') center center / cover no-repeat;
+  background-size:cover;
+  background-position:center center;
+  width:100vw;height:100vh;
   display:none;
   flex-direction:column;align-items:center;justify-content:flex-end;
   padding-bottom:60px;
@@ -1147,19 +1152,96 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 </head>
 <body>
 
+<!-- preload splash bg during video -->
+<link rel="preload" as="image" href="back groud.jpg">
+
+<!-- ═══ MEDIA CACHE SYSTEM ═══ -->
+<script>
+(function(){
+  const CACHE_NAME = 'panda-media-v1';
+  const ASSETS_TO_CACHE = ['video intro.mp4', 'back groud.jpg', 'back main page.jpg'];
+
+  // Register Service Worker for caching
+  if('serviceWorker' in navigator){
+    const swCode = `
+const CACHE_NAME='panda-media-v1';
+const ASSETS=['video intro.mp4','back groud.jpg','back main page.jpg'];
+self.addEventListener('install',e=>{
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())
+  );
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(
+    caches.keys().then(keys=>Promise.all(
+      keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))
+    )).then(()=>self.clients.claim())
+  );
+});
+self.addEventListener('fetch',e=>{
+  const url = new URL(e.request.url);
+  const fname = decodeURIComponent(url.pathname.split('/').pop());
+  if(ASSETS.includes(fname)){
+    e.respondWith(
+      caches.open(CACHE_NAME).then(c=>
+        c.match(e.request).then(cached=>{
+          if(cached) return cached;
+          return fetch(e.request).then(res=>{
+            if(res.ok) c.put(e.request, res.clone());
+            return res;
+          });
+        })
+      )
+    );
+  }
+});
+`;
+    const blob = new Blob([swCode], {type:'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }
+
+  // Fallback: preload via fetch + blob URL for video if SW not available
+  window._mediaReady = false;
+  window._videoSrc = 'video intro.mp4';
+  window._splashSrc = 'back groud.jpg';
+
+  function preloadMedia(){
+    // Preload splash image
+    const img = new Image();
+    img.src = window._splashSrc;
+
+    // Try to preload video using fetch (gets cached by SW automatically)
+    if('caches' in window){
+      caches.open('panda-media-v1').then(cache=>{
+        cache.match('video intro.mp4').then(match=>{
+          if(!match){
+            fetch('video intro.mp4').catch(()=>{});
+          }
+        });
+      }).catch(()=>{});
+    }
+  }
+
+  // Start preloading immediately
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', preloadMedia);
+  } else {
+    preloadMedia();
+  }
+})();
+</script>
+
 <!-- ═══ INTRO VIDEO SCREEN ═══ -->
 <div id="introVideoScreen" style="display:none;">
-  <video id="introVideoEl" src="video intro.mp4" muted playsinline preload="auto"></video>
-  <button id="introSkipBtn" onclick="skipIntroVideo()">
-    تخطي &nbsp;<span id="introSkipTimer">10</span>
-  </button>
+  <video id="introVideoEl" src="video intro.mp4" muted playsinline preload="auto" webkit-playsinline x5-playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+  <button id="introSkipBtn" onclick="skipIntroVideo()">تخطي ✕</button>
 </div>
 
 <!-- ═══ SPLASH SCREEN — صورة اللاند بعد الفيديو ═══ -->
 <div id="splashScreen">
   <button id="splashPlayBtn" onclick="hideSplashScreen()">
     <div class="splash-btn-inner"></div>
-    </div>
   </button>
 </div>
 
@@ -2693,41 +2775,27 @@ async function chooseOrientation(pref){
 // ════════════════════════════════════
 //  INTRO VIDEO
 // ════════════════════════════════════
-let _introTimerInterval = null;
 
 function showIntroVideo(){
   const screen = document.getElementById('introVideoScreen');
   const video  = document.getElementById('introVideoEl');
-  const timer  = document.getElementById('introSkipTimer');
   if(!screen || !video) { showSplashScreen(); return; }
 
   screen.style.display = 'flex';
   video.currentTime = 0;
-  video.play().catch(()=>{ /* autoplay blocked — skip straight to splash */ hideIntroVideo(); });
 
-  let remaining = 10;
-  timer.textContent = remaining;
+  // Play — if blocked, go straight to splash
+  video.play().catch(()=>{ hideIntroVideo(); });
 
-  _introTimerInterval = setInterval(()=>{
-    remaining--;
-    timer.textContent = remaining;
-    if(remaining <= 0){
-      clearInterval(_introTimerInterval);
-      hideIntroVideo();
-    }
-  }, 1000);
-
-  video.onended = ()=>{
-    clearInterval(_introTimerInterval);
-    hideIntroVideo();
-  };
+  // When video ends naturally → go to splash
+  video.onended = ()=>{ hideIntroVideo(); };
 }
 
 function hideIntroVideo(){
   const screen = document.getElementById('introVideoScreen');
   const video  = document.getElementById('introVideoEl');
   if(!screen) { showSplashScreen(); return; }
-  if(video) video.pause();
+  if(video){ video.pause(); video.onended = null; }
   screen.style.opacity = '0';
   screen.style.transition = 'opacity .5s ease';
   setTimeout(()=>{
@@ -2739,7 +2807,6 @@ function hideIntroVideo(){
 }
 
 function skipIntroVideo(){
-  if(_introTimerInterval) clearInterval(_introTimerInterval);
   hideIntroVideo();
 }
 
@@ -2760,9 +2827,19 @@ function hideSplashScreen(){
   const splash = document.getElementById('splashScreen');
   if(!splash) return;
   splash.classList.add('fade-out');
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     splash.style.display = 'none';
     splash.classList.remove('show','fade-out');
+    // ── شغّل التطبيق بعد ما الزر يتضغط ──
+    await init();
+    applyLang(_currentLang);
+    setTimeout(()=>renderPackageCarousel(), 200);
+    const tb=document.getElementById('mainTopbar');
+    const bn=document.getElementById('mainBnav');
+    const bb=document.getElementById('globalBackBtn');
+    if(tb) tb.classList.remove('hidden-bar');
+    if(bn) bn.classList.remove('hidden-bar');
+    if(bb) bb.classList.remove('visible');
   }, 520);
 }
 
@@ -3114,18 +3191,9 @@ function endMatch(h,a,reward){
 // Patch: override renderPackages to use carousel instead
 function renderPackages(){ renderPackageCarousel(); }
 
-window.addEventListener('load', async function(){
+window.addEventListener('load', function(){
+  // فقط شغّل ديالوج الاتجاه — التطبيق يبدأ بعد ضغط زر العب
   showOrientDialog();
-  await init();
-  applyLang(_currentLang);
-  setTimeout(()=>renderPackageCarousel(), 200);
-  // Ensure initial state: Landing visible, bars shown, back btn hidden
-  const tb=document.getElementById('mainTopbar');
-  const bn=document.getElementById('mainBnav');
-  const bb=document.getElementById('globalBackBtn');
-  if(tb) tb.classList.remove('hidden-bar');
-  if(bn) bn.classList.remove('hidden-bar');
-  if(bb) bb.classList.remove('visible');
 });
 </script>
 </body>

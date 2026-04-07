@@ -3072,30 +3072,26 @@ function renderPackageCarousel(){
   const dots = document.getElementById('pkgCarouselDots');
   if(!track || !dots) return;
 
-  const PACKAGES = [
-    {id:'bronze',name:'برونزي',icon:'🟤',cards:3,price:500,priceCur:'Coins',tier:'bronze',badge:null},
-    {id:'silver',name:'فضي',icon:'⚪',cards:5,price:1500,priceCur:'Coins',tier:'silver',badge:'شائع'},
-    {id:'gold',name:'ذهبي',icon:'🟡',cards:5,price:5000,priceCur:'Coins',tier:'gold',badge:'🔥 الأفضل'},
-    {id:'platinum',name:'بلاتيني',icon:'💎',cards:5,price:2,priceCur:'TON',tier:'plat',badge:null},
-    {id:'legend',name:'أسطوري',icon:'🌟',cards:5,price:5,priceCur:'TON',tier:'legend',badge:'⭐ نادر'},
-  ];
-  _pkgSlides = PACKAGES;
+  const pkgs = (window.PACKAGES || (typeof PACKAGES!=='undefined'?PACKAGES:[])) || [];
+  _pkgSlides = pkgs;
 
-  track.innerHTML = PACKAGES.map((pk,i)=>`
+  track.innerHTML = pkgs.map((pk,i)=>`
     <div class="pkg-carousel-slide">
-      <div class="pkg-single-card pkg-${pk.tier}" onclick="buyPackage('${pk.id}')">
+      <div class="pkg-single-card pkg-${pk.tier}" onclick="openPkg('${pk.id}')">
         ${pk.badge?`<div class="pkg-single-badge">${pk.badge}</div>`:''}
         <div class="pkg-single-bg">
-          <div class="pkg-single-icon">${pk.icon}</div>
+          <div style="width:100%;aspect-ratio:1.7/1;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);">
+            <img src="${esc(pk.packImg||'')}" style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
           <div class="pkg-single-name">${pk.name}</div>
-          <div class="pkg-single-cards">${pk.cards} بطاقات لاعبين</div>
-          <div class="pkg-single-price">${pk.price.toLocaleString()} ${pk.priceCur}</div>
+          <div class="pkg-single-cards">${pk.guaranteed||''}</div>
+          <div class="pkg-single-price">${fmt(pk.price)} Coins</div>
         </div>
       </div>
     </div>
   `).join('');
 
-  dots.innerHTML = PACKAGES.map((_,i)=>`<div class="pkg-dot${i===0?' active':''}" onclick="pkgGoTo(${i})"></div>`).join('');
+  dots.innerHTML = pkgs.map((_,i)=>`<div class="pkg-dot${i===0?' active':''}" onclick="pkgGoTo(${i})"></div>`).join('');
   pkgGoTo(0);
 
   // Touch swipe support

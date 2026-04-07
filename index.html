@@ -128,9 +128,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 #loadingScreen{
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(160deg,#061206,#0a1f0a);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;
   transition:opacity .8s ease;
+  opacity:1;
 }
+#loadingScreen.visible{display:flex;}
 #loadingScreen.hidden{opacity:0;pointer-events:none;}
 .ld-ball{font-size:80px;animation:ld-bounce 1.4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,179,66,.7));}
 @keyframes ld-bounce{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-22px) scale(1.08)}55%{transform:translateY(-18px) scale(1.05)}70%{transform:translateY(0) scale(.96)}}
@@ -1159,16 +1161,20 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 <script>
 (function(){
   const CACHE_NAME = 'panda-media-v1';
-  const ASSETS_TO_CACHE = ['video intro.mp4', 'back groud.jpg', 'back main page.jpg'];
+  const VIDEO_FILE = 'video intro.mp4';
+  const IMAGES = ['back groud.jpg', 'back main page.jpg'];
+  const ALL_ASSETS = [VIDEO_FILE, ...IMAGES];
 
-  // Register Service Worker for caching
+  // ── Register inline Service Worker (caches all assets on first load) ──
   if('serviceWorker' in navigator){
     const swCode = `
 const CACHE_NAME='panda-media-v1';
-const ASSETS=['video intro.mp4','back groud.jpg','back main page.jpg'];
+const ASSETS=${JSON.stringify(ALL_ASSETS)};
 self.addEventListener('install',e=>{
   e.waitUntil(
-    caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())
+    caches.open(CACHE_NAME).then(c=>{
+      return Promise.allSettled(ASSETS.map(a=>c.add(a)));
+    }).then(()=>self.skipWaiting())
   );
 });
 self.addEventListener('activate',e=>{
@@ -1179,15 +1185,15 @@ self.addEventListener('activate',e=>{
   );
 });
 self.addEventListener('fetch',e=>{
-  const url = new URL(e.request.url);
-  const fname = decodeURIComponent(url.pathname.split('/').pop());
-  if(ASSETS.includes(fname)){
+  const url=new URL(e.request.url);
+  const fname=decodeURIComponent(url.pathname.split('/').pop());
+  if(ASSETS.some(a=>fname===a||fname.endsWith('/'+a))){
     e.respondWith(
       caches.open(CACHE_NAME).then(c=>
         c.match(e.request).then(cached=>{
           if(cached) return cached;
           return fetch(e.request).then(res=>{
-            if(res.ok) c.put(e.request, res.clone());
+            if(res&&res.ok) c.put(e.request,res.clone());
             return res;
           });
         })
@@ -1196,38 +1202,63 @@ self.addEventListener('fetch',e=>{
   }
 });
 `;
-    const blob = new Blob([swCode], {type:'application/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).catch(()=>{});
+    try{
+      const blob = new Blob([swCode],{type:'application/javascript'});
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(()=>{});
+    }catch(_){}
   }
 
-  // Fallback: preload via fetch + blob URL for video if SW not available
-  window._mediaReady = false;
-  window._videoSrc = 'video intro.mp4';
-  window._splashSrc = 'back groud.jpg';
-
-  function preloadMedia(){
-    // Preload splash image
-    const img = new Image();
-    img.src = window._splashSrc;
-
-    // Try to preload video using fetch (gets cached by SW automatically)
-    if('caches' in window){
-      caches.open('panda-media-v1').then(cache=>{
-        cache.match('video intro.mp4').then(match=>{
-          if(!match){
-            fetch('video intro.mp4').catch(()=>{});
+  // ── Apply cached images as blob URLs so browser uses memory cache ──
+  async function applyCachedImages(){
+    if(!('caches' in window)) return;
+    try{
+      const cache = await caches.open(CACHE_NAME);
+      for(const img of IMAGES){
+        const match = await cache.match(img).catch(()=>null);
+        if(match){
+          const blob = await match.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          // Apply to splash screen background
+          if(img === 'back groud.jpg'){
+            const splash = document.getElementById('splashScreen');
+            if(splash) splash.style.backgroundImage = `url('${blobUrl}')`;
           }
-        });
-      }).catch(()=>{});
-    }
+          // Apply to body and section backgrounds
+          if(img === 'back main page.jpg'){
+            document.body.style.backgroundImage = `url('${blobUrl}')`;
+            // Store for later use by active sections
+            window._mainBgUrl = blobUrl;
+          }
+        } else {
+          // Not in cache yet — fetch and cache it, then apply
+          try{
+            const res = await fetch(img);
+            if(res.ok){
+              const clone = res.clone();
+              cache.put(img, clone);
+              const blob = await res.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              if(img === 'back groud.jpg'){
+                const splash = document.getElementById('splashScreen');
+                if(splash) splash.style.backgroundImage = `url('${blobUrl}')`;
+              }
+              if(img === 'back main page.jpg'){
+                document.body.style.backgroundImage = `url('${blobUrl}')`;
+                window._mainBgUrl = blobUrl;
+              }
+            }
+          }catch(_){}
+        }
+      }
+    }catch(_){}
   }
 
-  // Start preloading immediately
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', preloadMedia);
+  // Run after DOM ready
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', applyCachedImages);
   } else {
-    preloadMedia();
+    applyCachedImages();
   }
 })();
 </script>
@@ -2722,7 +2753,10 @@ async function buyPkg(id){
   // Hide loading
   setTimeout(()=>{
     const ls=document.getElementById('loadingScreen');
-    if(ls){ls.classList.add('hidden');setTimeout(()=>ls.style.display='none',800);}
+    if(ls){
+      ls.classList.add('hidden');
+      setTimeout(()=>{ ls.classList.remove('visible','hidden'); ls.style.display='none'; },800);
+    }
   },3200);
 }
 
@@ -2830,6 +2864,11 @@ function hideSplashScreen(){
   setTimeout(async ()=>{
     splash.style.display = 'none';
     splash.classList.remove('show','fade-out');
+
+    // ── أظهر شاشة التحميل أثناء init() ──
+    const ls = document.getElementById('loadingScreen');
+    if(ls){ ls.classList.add('visible'); ls.style.opacity='1'; }
+
     // ── شغّل التطبيق بعد ما الزر يتضغط ──
     await init();
     applyLang(_currentLang);

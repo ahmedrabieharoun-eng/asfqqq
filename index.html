@@ -39,35 +39,7 @@ body{
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-serif!important;}
 .orb{font-family:'Orbitron',monospace!important;}
 
-/* ═══ INTRO VIDEO ═══ */
-#introVideoScreen{
-  position:fixed;inset:0;z-index:10000;
-  background:#000;
-  display:flex;align-items:center;justify-content:center;
-  opacity:1;transition:opacity .6s ease;
-  width:100vw;height:100vh;
-}
-#introVideoScreen.hidden{opacity:0;pointer-events:none;}
-#introVideoEl{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;
-  display:block;
-}
-#introSkipBtn{
-  position:absolute;bottom:24px;right:20px;
-  background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.3);
-  color:#fff;font-size:14px;font-weight:800;font-family:'Cairo',sans-serif;
-  padding:9px 22px;border-radius:24px;cursor:pointer;
-  backdrop-filter:blur(6px);
-  transition:background .18s, opacity .3s;
-  z-index:2;
-  opacity:0;
-  animation:skipBtnFadeIn .4s ease .8s forwards;
-}
-@keyframes skipBtnFadeIn{to{opacity:1;}}
-#introSkipBtn:active{background:rgba(255,255,255,.2);}
-#introSkipTimer{display:none;}
+
 
 /* ═══ INTRO VIDEO + PLAY BUTTON ═══ */
 #introVideoScreen{
@@ -2715,7 +2687,7 @@ function exitFullscreen(){
 }
 
 // ── الاختيار من الديالوج ──
-async function chooseOrientation(pref){
+async async function chooseOrientation(pref){
   _orientPref = pref;
   document.getElementById('orientDialog').classList.remove('show');
 
@@ -3068,7 +3040,7 @@ function showPkgInfo(id){
     <div style="text-align:center;padding:6px 0 10px;">
       <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:8px;">اضغط على الباكج لشراء لاعب عشوائي بـ ${fmt(pk.price)} 🪙</div>
     </div>
-    <div class="pkg-players-grid">
+    <div class="pkg-players-grid" style="max-height:60vh;overflow-y:auto;">
       ${pk.players.map(p=>`
         <div class="pkg-player-mini">
           <div class="pkg-player-mini-bg" style="background-image:url('${cardImg}')"></div>

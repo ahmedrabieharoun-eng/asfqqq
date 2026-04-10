@@ -162,7 +162,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 #sectionLanding.active{
   display:flex;flex-direction:column;
   position:fixed;
-  top:58px;left:0;right:0;bottom:90px;
+  top:62px;left:0;right:0;bottom:90px;
   overflow:hidden;
   padding:0;
   z-index:1;
@@ -225,10 +225,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   display:flex;align-items:center;justify-content:space-between;
   padding:6px 10px 5px;
   background:url('https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/db0d449f-240b-4384-a470-fa2fa006abd3.png') center/cover no-repeat, linear-gradient(180deg,rgba(10,10,25,.92) 0%,rgba(8,8,20,.88) 100%);
-  backdrop-filter:blur(20px);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
   position:fixed;top:0;left:0;right:0;z-index:200;
-  border-bottom:1px solid rgba(255,255,255,.07);
-  height:58px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  height:62px;
   transition:transform .3s ease, opacity .3s ease;
 }
 .topbar.hidden-bar{transform:translateY(-100%);opacity:0;pointer-events:none;}
@@ -240,19 +241,22 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 }
 .tb-currencies{display:flex;align-items:center;gap:7px;}
 .tb-cur{
-  display:flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
-  border-radius:22px;padding:5px 12px;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:22px;padding:6px 14px;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
-.tb-cur-icon{font-size:13px;line-height:1;flex-shrink:0;}
-.tb-cur-val{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:#fff;}
+.tb-cur-icon{font-size:15px;line-height:1;flex-shrink:0;}
+.tb-cur-val{font-family:'Orbitron',monospace;font-size:13px;font-weight:800;color:#fff;letter-spacing:.5px;}
 .tb-user-avatar{
-  width:36px;height:36px;border-radius:50%;
+  width:42px;height:42px;border-radius:50%;
   background:linear-gradient(135deg,var(--bamboo),#4e7a20);
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;cursor:pointer;flex-shrink:0;
+  font-size:22px;cursor:pointer;flex-shrink:0;
   position:relative;overflow:visible;
-  box-shadow:0 0 12px var(--bamboo-glow);
+  box-shadow:0 0 14px var(--bamboo-glow);
 }
 .tb-user-avatar::after{
   content:'';position:absolute;inset:-3px;
@@ -466,7 +470,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 }
 .bnav.hidden-bar{transform:translateY(100%);opacity:0;pointer-events:none;}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.ni-tile{width:100%;aspect-ratio:1/1;max-height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;}
+.ni-tile{width:100%;aspect-ratio:1/1;max-height:58px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;}
 .ni-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 60%);pointer-events:none;}
 .ni:active .ni-tile{transform:scale(.88);}
 .ni.active .ni-tile{box-shadow:0 0 0 2.5px #fff,0 4px 16px rgba(0,0,0,.5);}
@@ -483,10 +487,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 /* Arrow indicator above دعوة (navLanding) when active */
 .ni[data-s="sectionFriends"].active::before{content:'▼';position:absolute;top:-17px;left:50%;transform:translateX(-50%);color:#00b4d8;font-size:13px;filter:drop-shadow(0 -2px 4px rgba(0,180,216,.7));}
 .ni[data-s="sectionFriends"]{position:relative;}
-.ni-lbl{font-size:8px;font-weight:800;color:rgba(255,255,255,.55);white-space:nowrap;}
+.ni-lbl{font-size:9px;font-weight:800;color:rgba(255,255,255,.55);white-space:nowrap;}
 .ni.active .ni-lbl{color:#fff;}
 .ni-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
-.ni-icon img{width:30px;height:30px;object-fit:contain;filter:brightness(.75);transition:filter .15s;}
+.ni-icon img{width:46px;height:46px;object-fit:contain;filter:brightness(.75);transition:filter .15s;}
 .ni.active .ni-icon img{filter:brightness(1) drop-shadow(0 0 6px rgba(255,255,255,.5));}
 
 /* ═══ SIDE MENU ═══ */
@@ -659,6 +663,13 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   text-shadow:0 1px 2px rgba(0,0,0,.8);
 }
 
+/* Player face image in pitch card */
+.efb-face-img{
+  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:90%;height:72%;object-fit:contain;z-index:3;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.8));
+}
+
 /* Legacy — bench only */
 .player-circle{display:none;}
 .player-rating-badge{display:none;}
@@ -730,12 +741,15 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .mkt-filter-bar{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;}
 .mkt-filter-chip{flex-shrink:0;padding:6px 11px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;color:var(--muted);transition:all .18s;}
 .mkt-filter-chip.active{background:rgba(124,179,66,.15);border-color:var(--bamboo);color:var(--bamboo);}
-.mkt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mkt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .mkt-card{
   background:rgba(5,12,25,.9);border:1px solid rgba(255,255,255,.08);
-  border-radius:14px;padding:10px;cursor:pointer;
+  border-radius:14px;cursor:pointer;
   transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;
 }
+.mkt-card-v2{border-radius:14px;overflow:hidden;}
+.mkt-card-v2:active{transform:scale(.96);}
+.mkt-card.mkt-owned-card{border-color:rgba(0,255,135,.3);}
 .mkt-card:active{transform:scale(.97);}
 .mkt-card.ton-card{border-color:rgba(255,215,0,.2);}
 .mkt-card::before{content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none;}
@@ -753,7 +767,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .mkt-price.coins-btn{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);color:var(--gold);}
 .mkt-price.ton-btn{background:rgba(0,194,255,.15);border:1px solid rgba(0,194,255,.3);color:var(--sky);}
 .mkt-price:active{filter:brightness(1.2);}
-.mkt-owned-badge{position:absolute;top:7px;right:7px;background:rgba(0,255,135,.2);border:1px solid rgba(0,255,135,.4);border-radius:8px;padding:2px 7px;font-size:10px;font-weight:800;color:var(--neon);}
+.mkt-owned-badge{position:absolute;top:7px;right:7px;background:rgba(0,255,135,.2);border:1px solid rgba(0,255,135,.4);border-radius:8px;padding:2px 7px;font-size:10px;font-weight:800;color:var(--neon);z-index:10;}
 
 /* ═══ FINANCE PAGES ═══ */
 .fin-page-title{font-size:17px;font-weight:800;color:var(--bamboo);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
@@ -924,7 +938,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   /* Bottom nav */
   .bnav{flex-direction:row;}
   .ni{min-height:50px;padding:4px 2px 6px;gap:2px;}
-  .ni-icon img{width:28px!important;height:28px!important;}
+  .ni-icon img{width:34px!important;height:34px!important;}
   .ni-lbl{font-size:8px;}
 
   /* Sections */
@@ -989,7 +1003,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .player-name-badge{font-size:7px;max-width:46px;padding:1px 3px;}
 
   /* ── MARKET ── */
-  .mkt-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .mkt-grid{grid-template-columns:repeat(5,1fr);gap:6px;}
   .mkt-card{padding:7px;}
   .mkt-player-img{width:44px;height:44px;line-height:44px;font-size:28px;margin-bottom:4px;}
   .mkt-player-name{font-size:10px;}
@@ -1061,7 +1075,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
   .player-circle{width:38px;height:38px;}
   .player-name-badge{font-size:8px;}
   .ni{min-height:56px;}
-  .ni-icon img{width:32px!important;height:32px!important;}
+  .ni-icon img{width:38px!important;height:38px!important;}
 }
 
 /* ═══ BODY PADDING for fixed bars — replaced below ═══ */
@@ -1439,7 +1453,7 @@ self.addEventListener('fetch',e=>{
     <!-- Currencies -->
     <div class="tb-currencies">
       <div class="tb-cur">
-        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"></span>
+        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:26px;height:26px;object-fit:contain;vertical-align:middle"></span>
         <span class="tb-cur-val orb" id="tbCoins">0</span>
       </div>
       <div class="tb-cur">
@@ -1642,51 +1656,46 @@ self.addEventListener('fetch',e=>{
 <!-- ══ SECTION: DEPOSIT ══ -->
 <div class="sec" id="sectionDeposit">
   <div class="fin-page-title">💰 إيداع TON</div>
-  <!-- Hero card image with blur -->
-  <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;height:140px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="width:100%;height:100%;object-fit:cover;display:block;">
-    <div style="position:absolute;inset:0;backdrop-filter:blur(3px);background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.55) 100%);display:flex;align-items:flex-end;padding:12px 16px;">
-      <div>
-        <div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7);">إيداع TON</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600;">1 TON = 10,000 Bamboo 🎋</div>
+  <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:10px;">
+    <!-- صورة الخلفية مع blur قوي علشان البيانات تظهر -->
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <!-- المحتوى فوق الصورة -->
+    <div style="position:relative;z-index:1;padding:13px;backdrop-filter:blur(0px);">
+      <div class="wal-row">
+        <div class="wl-inf">
+          <div class="wll">المحفظة</div>
+          <div class="wla" id="walletAddressDisplay">غير متصل</div>
+        </div>
+        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
       </div>
-    </div>
-  </div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px)">
-    <div class="wal-row">
-      <div class="wl-inf">
-        <div class="wll">المحفظة</div>
-        <div class="wla" id="walletAddressDisplay">غير متصل</div>
+      <div class="dep-warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+          <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+          التعليق الوحيد في المعاملة.
+        </div>
       </div>
-      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
-    </div>
-    <div class="dep-warn">
-      <i class="fas fa-exclamation-triangle"></i>
-      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
-        <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
-        التعليق الوحيد في المعاملة.
+      <label class="flabel">المبلغ (TON)</label>
+      <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
+      <div class="preset-row" style="margin-bottom:8px">
+        <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
+        <span class="prbtn" onclick="setDepAmt(1)">1</span>
+        <span class="prbtn" onclick="setDepAmt(2)">2</span>
+        <span class="prbtn" onclick="setDepAmt(5)">5</span>
+        <span class="prbtn" onclick="setDepAmt(10)">10</span>
       </div>
-    </div>
-    <label class="flabel">المبلغ (TON)</label>
-    <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
-    <div class="preset-row" style="margin-bottom:8px">
-      <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
-      <span class="prbtn" onclick="setDepAmt(1)">1</span>
-      <span class="prbtn" onclick="setDepAmt(2)">2</span>
-      <span class="prbtn" onclick="setDepAmt(5)">5</span>
-      <span class="prbtn" onclick="setDepAmt(10)">10</span>
-    </div>
-    <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
-      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 المعدل: <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:12px;color:var(--muted);font-weight:600">ستحصل على:</span>
-        <span id="depBambooPreview" style="font-size:16px;font-weight:800;color:var(--bamboo)">0 Bamboo</span>
+      <div style="background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px">📊 المعدل: <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--muted);font-weight:600">ستحصل على:</span>
+          <span id="depBambooPreview" style="font-size:16px;font-weight:800;color:var(--bamboo)">0 Bamboo</span>
+        </div>
       </div>
-    </div>
-    <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
-    <div class="tx-status" id="depositStatus">
-      <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
-      <div class="txsd" id="depositStatusDetail"></div>
+      <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+      <div class="tx-status" id="depositStatus">
+        <div class="txsi">⏳</div><div class="txsm">جاري معالجة الإيداع...</div>
+        <div class="txsd" id="depositStatusDetail"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1694,48 +1703,49 @@ self.addEventListener('fetch',e=>{
 <!-- ══ SECTION: WITHDRAW ══ -->
 <div class="sec" id="sectionWithdraw">
   <div class="fin-page-title">💸 سحب</div>
-  <!-- Hero card image with blur -->
-  <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;height:140px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="width:100%;height:100%;object-fit:cover;display:block;">
-    <div style="position:absolute;inset:0;backdrop-filter:blur(3px);background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.55) 100%);display:flex;align-items:flex-end;padding:12px 16px;">
-      <div>
-        <div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7);">سحب Coins</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600;">الحد الأدنى 200 Coins 💎</div>
+  <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:10px;">
+    <!-- صورة الخلفية مع blur قوي علشان البيانات تظهر -->
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <!-- المحتوى فوق الصورة -->
+    <div style="position:relative;z-index:1;padding:13px;">
+      <div class="wd-err-banner trial" id="wdBannerTrial">
+        <i class="fas fa-gift"></i>
+        <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins. أودع لإلغاء القيد.</div>
       </div>
+      <div class="wd-err-banner depreq" id="wdBannerDepReq">
+        <i class="fas fa-lock"></i>
+        <div>التجربة المجانية مستخدمة. يرجى <strong>الإيداع</strong> لمتابعة السحب.</div>
+      </div>
+      <label class="flabel">عنوان محفظة TON</label>
+      <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
+      <label class="flabel">المبلغ (Coins)</label>
+      <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
+      <div class="ton-row">
+        <div class="ton-chip">
+          <div class="tcl">💎 قيمة TON</div>
+          <div class="tcv" id="wdTonVal">0.0000</div>
+        </div>
+      </div>
+      <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
+        💎 طلب السحب
+      </button>
     </div>
   </div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;backdrop-filter:blur(6px);margin-bottom:10px;">
-    <div class="wd-err-banner trial" id="wdBannerTrial">
-      <i class="fas fa-gift"></i>
-      <div>🎉 <strong>تجربة مجانية:</strong> سحب مجاني واحد حتى 200 Coins. أودع لإلغاء القيد.</div>
-    </div>
-    <div class="wd-err-banner depreq" id="wdBannerDepReq">
-      <i class="fas fa-lock"></i>
-      <div>التجربة المجانية مستخدمة. يرجى <strong>الإيداع</strong> لمتابعة السحب.</div>
-    </div>
-    <label class="flabel">عنوان محفظة TON</label>
-    <input type="text" class="finput" id="wdAddr" placeholder="UQ...">
-    <label class="flabel">المبلغ (Coins)</label>
-    <input type="number" class="finput" id="wdAmt" placeholder="200" min="200" oninput="updWdPrev()">
-    <div class="ton-row">
-      <div class="ton-chip">
-        <div class="tcl">💎 قيمة TON</div>
-        <div class="tcv" id="wdTonVal">0.0000</div>
-      </div>
-    </div>
-    <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
-      💎 طلب السحب
-    </button>
-  </div>
-  <div class="hist-box">
+  <div class="hist-box" style="margin-top:10px;position:relative;overflow:hidden;border-radius:16px;">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(10px) brightness(.25) saturate(0.5);z-index:0;transform:scale(1.08);">
+    <div style="position:relative;z-index:1;">
     <div class="hist-hdr">📋 سجل السحوبات</div>
     <div id="wdHist"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
+    </div>
   </div>
 </div>
 
 <!-- ══ SECTION: EXCHANGE ══ -->
 <div class="sec" id="sectionExchange">
   <div class="fin-page-title">🔄 تحويل العملة</div>
+  <div style="position:relative;border-radius:20px;overflow:hidden;margin-bottom:10px;">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <div style="position:relative;z-index:1;">
   <div class="swap-card">
     <div class="swap-section">
       <div class="swap-label">من</div>
@@ -1768,9 +1778,14 @@ self.addEventListener('fetch',e=>{
     <div class="swap-rate">📊 100 Bamboo = 10 Coins</div>
     <button class="btn-prim" style="margin-top:10px" onclick="doExchange()">⚡ تحويل الآن</button>
   </div>
-  <div class="hist-box" style="margin-top:12px">
-    <div class="hist-hdr">📋 سجل التحويلات</div>
-    <div id="exchHist"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
+    </div>
+  </div>
+  <div style="position:relative;border-radius:16px;overflow:hidden;margin-top:10px;">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(10px) brightness(.25) saturate(0.5);z-index:0;transform:scale(1.08);">
+    <div class="hist-box" style="position:relative;z-index:1;background:transparent;border:1px solid rgba(255,255,255,.1);">
+      <div class="hist-hdr">📋 سجل التحويلات</div>
+      <div id="exchHist"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
+    </div>
   </div>
 </div>
 
@@ -1826,11 +1841,11 @@ self.addEventListener('fetch',e=>{
 <!-- BOTTOM NAV — eFootball Style -->
 <nav class="bnav" id="mainBnav">
   <div class="ni" data-s="sectionMatch" onclick="openMatchSection()">
-    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b7763a97-f170-4259-b905-3c6d2b001e33.png" style="width:30px;height:30px;object-fit:contain"></div></div>
+    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b7763a97-f170-4259-b905-3c6d2b001e33.png" style="width:46px;height:46px;object-fit:contain"></div></div>
     <div class="ni-lbl">المباراة</div>
   </div>
   <div class="ni active" data-s="sectionFriends" id="navLanding" onclick="goNav(this)">
-    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/3d7a1323-3d5d-4115-9a15-54ed9372fdb2.png" style="width:30px;height:30px;object-fit:contain"></div></div>
+    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/3d7a1323-3d5d-4115-9a15-54ed9372fdb2.png" style="width:46px;height:46px;object-fit:contain"></div></div>
     <div class="ni-lbl">دعوة</div>
   </div>
   <div class="ni ni-center" data-s="sectionHome" onclick="goNav(this)">
@@ -1838,11 +1853,11 @@ self.addEventListener('fetch',e=>{
     <div class="ni-lbl" data-i18n="nav_team">فريقي</div>
   </div>
   <div class="ni" data-s="sectionTasks" onclick="goNav(this)">
-    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b7397279-6be3-48e7-aa86-6836c6c25d9f.png" style="width:30px;height:30px;object-fit:contain"></div></div>
+    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b7397279-6be3-48e7-aa86-6836c6c25d9f.png" style="width:46px;height:46px;object-fit:contain"></div></div>
     <div class="ni-lbl" data-i18n="nav_tasks">مهمات</div>
   </div>
   <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
-    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/4b663d2f-a369-42cd-9bc1-a5c26eeeedbf.png" style="width:30px;height:30px;object-fit:contain"></div></div>
+    <div class="ni-tile"><div class="ni-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/4b663d2f-a369-42cd-9bc1-a5c26eeeedbf.png" style="width:46px;height:46px;object-fit:contain"></div></div>
     <div class="ni-lbl">ماركت</div>
   </div>
 </nav>
@@ -2248,11 +2263,17 @@ function renderPitch(){
     const x=slot.x,y=slot.y;
     if(player){
       const tc=tierClass(player.tier);
+      const faceHtml=player.imageUrl
+        ?`<img class="efb-face-img" src="${player.imageUrl}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+        :``;
+      const fallbackEmoji=player.imageUrl
+        ?`<div class="efb-face" style="display:none"><div class="efb-face-emoji">${esc(player.emoji||'\u26BD')}</div></div>`
+        :`<div class="efb-face"><div class="efb-face-emoji">${esc(player.emoji||'\u26BD')}</div></div>`;
       html+=`<div class="pitch-slot" style="left:${x}%;top:${y}%" onclick="openSlotModal(${i})">
         <div class="efb-card ${tc}">
           <div class="efb-pos">${esc(slot.pos)}</div>
           <div class="efb-rating">${player.rating}</div>
-          <div class="efb-face"><div class="efb-face-emoji">${esc(player.emoji||'\u26BD')}</div></div>
+          ${faceHtml}${fallbackEmoji}
           <div class="efb-bottom-bar"></div>
         </div>
         <div class="player-name-badge">${esc(player.name.split(' ')[0])}</div>
@@ -2373,6 +2394,13 @@ function filterMarket(filter, el){
   renderMarket(filter);
 }
 
+// Card images by rating tier
+function getCardImg(rating){
+  if(rating>=80) return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png'; // gold
+  if(rating>=70) return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5588678a-3c18-49df-8a36-1739a6a90038.png'; // bronze (70-80)
+  return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e953feaa-9aa7-4298-968a-f21df3a38c06.png'; // silver (<70)
+}
+
 function renderMarket(filter='all'){
   const grid=document.getElementById('marketGrid');
   if(!grid)return;
@@ -2384,24 +2412,38 @@ function renderMarket(filter='all'){
   else if(filter==='coins')players=players.filter(p=>p.currency==='coins');
   else if(filter==='ton')players=players.filter(p=>p.currency==='ton');
   const owned=new Set(S.ownedPlayers.map(p=>p.id));
-  // Use first card image as default
-  const defaultCard=NEW_PACKAGES[0].cardImg;
   grid.innerHTML=players.map(p=>{
     const isOwned=owned.has(p.id);
-    const isTon=p.currency==='ton';
-    return`<div class="mkt-card" onclick="showPlayerDetail('${p.id}')" style="position:relative;overflow:hidden;">
+    const cardImg=getCardImg(p.rating);
+    // Country flag: use emoji if it's a flag emoji, otherwise show text
+    const countryHtml=p.country?`<span style="font-size:18px;line-height:1;">${p.country}</span>`:'';
+    // Club logo: use thesportsdb or a flag; show club name as fallback badge
+    const clubHtml=p.club?`<span style="font-size:9px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:1px 5px;color:rgba(255,255,255,.85);font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;">${esc(p.club)}</span>`:'';
+    return`<div class="mkt-card mkt-card-v2 ${isOwned?'mkt-owned-card':''}" onclick="showPlayerDetail('${p.id}')" style="padding:0;overflow:hidden;position:relative;">
       ${isOwned?'<div class="mkt-owned-badge">✓ مملوك</div>':''}
-      ${p.imageUrl?`<img class="mkt-player-photo" src="${p.imageUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" alt="${esc(p.name)}"><div class="mkt-player-img" style="display:none">${esc(p.emoji||'⚽')}</div>`
-        :`<div class="mkt-player-img">${esc(p.emoji||'⚽')}</div>`}
-      <div class="mkt-player-name">${esc(p.name)}</div>
-      <div class="mkt-player-pos">${esc(p.pos)} ${p.country||''}</div>
-      <div class="mkt-player-rating">
-        <span style="font-size:16px;font-weight:900;font-family:'Orbitron',monospace;color:${tierColor(p.tier)};">${p.rating}</span>
-        <span style="font-size:9px;padding:2px 5px;border-radius:5px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);">${esc(p.tier)}</span>
+      <!-- Card background image -->
+      <div style="position:relative;width:100%;padding-bottom:130%;overflow:hidden;">
+        <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;" alt="">
+        <!-- Player image — fills upper 65% -->
+        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:32%;left:50%;transform:translateX(-50%);height:58%;object-fit:contain;z-index:2;filter:drop-shadow(0 3px 8px rgba(0,0,0,.8));" onerror="this.style.display='none'">`:''}
+        <!-- Rating top-left -->
+        <div style="position:absolute;top:6px;left:8px;z-index:4;">
+          <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.9);">${p.rating}</div>
+          <div style="font-size:8px;font-weight:800;color:rgba(255,255,255,.8);text-align:center;margin-top:1px;">${esc(p.pos)}</div>
+        </div>
+        <!-- Country + Club top-right -->
+        <div style="position:absolute;top:5px;right:6px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          ${countryHtml}
+          ${clubHtml}
+        </div>
+        <!-- Bottom info bar -->
+        <div style="position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);padding:5px 7px 6px;">
+          <div style="font-size:11px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</div>
+          <button class="mkt-price coins-btn" onclick="event.stopPropagation();buyPlayer('${p.id}')" style="margin-top:4px;width:100%;padding:5px;font-size:10px;">
+            🪙 ${fmt(p.price)} Coins
+          </button>
+        </div>
       </div>
-      <button class="mkt-price coins-btn" onclick="event.stopPropagation();buyPlayer('${p.id}')">
-        🪙 ${fmt(p.price)} Coins
-      </button>
     </div>`;
   }).join('');
 }
@@ -3116,9 +3158,46 @@ async function chooseOrientation(pref){
 //  INTRO VIDEO
 // ════════════════════════════════════
 
-function preloadGameData(){
-  // Start loading data during video
-  setTimeout(()=>{ setDataReady(); }, 2000);
+async function preloadGameData(){
+  // Start loading data during video — init fully before showing play button
+  try {
+    // Telegram init
+    if(window.Telegram?.WebApp){
+      S.tg=window.Telegram.WebApp;
+      S.tg.ready();S.tg.expand();S.tg.disableVerticalSwipes?.();
+      _initData=S.tg.initData||'';
+      const u=S.tg.initDataUnsafe?.user;
+      if(u){
+        S.userId=String(u.id);
+        document.getElementById('topName').textContent=u.first_name||'اللاعب';
+        if(document.getElementById('depositUserIdDisplay'))document.getElementById('depositUserIdDisplay').textContent=u.id;
+        if(u.photo_url){
+          document.getElementById('uavatar').innerHTML=`<img src="${u.photo_url}" onerror="this.parentElement.innerHTML='<div style=font-size:20px>🐼</div>'" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        const refLink=`${CFG.BOT_APP_LINK}?startapp=${u.id}`;
+        const r1=document.getElementById('refLinkInp');if(r1)r1.value=refLink;
+        const r2=document.getElementById('refLinkInp2');if(r2)r2.value=refLink;
+      }
+      S.startParam=(S.tg.initDataUnsafe?.start_param||'').toString().replace(/\D/g,'');
+    }
+    // Preload images
+    const imgUrls = [
+      'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png',
+      'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5588678a-3c18-49df-8a36-1739a6a90038.png',
+      'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e953feaa-9aa7-4298-968a-f21df3a38c06.png'
+    ];
+    await Promise.allSettled(imgUrls.map(url=>{ const i=new Image();i.src=url;return new Promise(r=>{i.onload=r;i.onerror=r;}); }));
+    // Load state
+    let loaded=false;
+    for(let attempt=1;attempt<=3;attempt++){
+      try{ await loadState();loaded=true;break; }
+      catch(e){ if(attempt<3) await new Promise(r=>setTimeout(r,1500)); }
+    }
+    if(!loaded){ for(let i=0;i<11;i++) S.squad[i]=null; updateUI(); }
+    renderMarket('all');renderNewPackages();renderTasks();renderPitch();renderBench();updatePowerDisplay();
+    setTimeout(()=>initTON(),600);
+  } catch(e){ console.warn('preload error:',e); }
+  setDataReady();
 }
 function showIntroVideo(){
   preloadGameData();
@@ -3183,11 +3262,10 @@ function hideSplashScreen(){
     splash.style.display = 'none';
     splash.classList.remove('show','fade-out');
 
-    // Loading screen removed — data loads during video
-
-    // ── شغّل التطبيق بعد ما الزر يتضغط ──
-    await init();
+    // Data loaded during video — just apply lang and refresh UI
     applyLang(_currentLang);
+    renderMarket('all');renderNewPackages();renderPackages();renderPackageCarousel();renderTasks();renderPitch();renderBench();updatePowerDisplay();
+    setInterval(()=>loadState(),30000);
     
     const tb=document.getElementById('mainTopbar');
     const bn=document.getElementById('mainBnav');

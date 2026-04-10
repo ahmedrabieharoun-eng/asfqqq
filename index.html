@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -2167,6 +2166,7 @@ function updateUI(){
   renderPitch();
   renderBench();
   updatePowerDisplay();
+  renderTasks();
 }
 
 // ════ POWER ════
@@ -2497,14 +2497,31 @@ async function doWithdraw(){
     if(u.freeWdUsed){document.getElementById('wdBannerDepReq').classList.add('show');showToast('❌ يلزم الإيداع للسحب!');return;}
     if(amt>CFG.FREE_WD_LIMIT){document.getElementById('wdBannerTrial').classList.add('show');showToast(`❌ الحد التجريبي: ${CFG.FREE_WD_LIMIT} Coins`);return;}
   }
+  // Build device fingerprint for anti-multi-account check (server requires this)
+  let deviceFingerprint='';
   try{
-    await api('withdraw',{address:addr,amount:amt});
+    const fp=[
+      navigator.userAgent||'',
+      navigator.language||'',
+      String(screen.width||0)+'x'+String(screen.height||0),
+      String(new Date().getTimezoneOffset()),
+      navigator.hardwareConcurrency||0,
+    ].join('|');
+    // Simple hash
+    let h=0;for(let i=0;i<fp.length;i++){h=((h<<5)-h)+fp.charCodeAt(i);h|=0;}
+    deviceFingerprint='fp_'+Math.abs(h).toString(36);
+  }catch(_){}
+  try{
+    await api('withdraw',{address:addr,amount:amt,deviceFingerprint});
     u.coins-=amt;if(!u.hasDeposited)u.freeWdUsed=true;
     S.wdHist.unshift({amt,addr,d:new Date().toLocaleDateString(),status:'pending'});
     document.getElementById('wdAddr').value='';document.getElementById('wdAmt').value='';
     updWdPrev();updateUI();renderWdHist();
     showToast(`✅ طلب سحب: ${fmt(amt)} Coins`);
-  }catch(e){showToast(`❌ ${e.message||'فشل'}`);}
+  }catch(e){
+    if(e.message==='MULTI_ACCOUNT'){showToast('❌ حساب مكرر — تواصل مع الدعم');return;}
+    showToast(`❌ ${e.message||'فشل'}`);
+  }
 }
 function renderWdHist(){
   const el=document.getElementById('wdHist');if(!el)return;
@@ -2699,15 +2716,22 @@ function renderSocTasks(){
 async function claimRefTask(id){
   if(_taskInFlight.has(id))return;
   _taskInFlight.add(id);
+  renderTasks(); // show loading state
   try{
-    const t=REF_TASKS.find(x=>x.id===id);if(!t)return;
-    api('claimTask',{taskId:id}).catch(()=>{});
+    const t=REF_TASKS.find(x=>x.id===id);if(!t){_taskInFlight.delete(id);return;}
+    // Wait for server confirmation before updating UI
+    await api('claimTask',{taskId:id});
     S.doneTasks.push(id);
     S.user.bamboo=(S.user.bamboo||0)+t.bam;
     S.user.coins=(S.user.coins||0)+t.coins;
     updateUI();renderTasks();
     showToast(`🎉 +${fmt(t.bam)} Bamboo +${t.coins} Coins`);
-  }finally{_taskInFlight.delete(id);}
+  }catch(e){
+    showToast(`❌ ${e.message||'فشل استلام المكافأة'}`);
+    renderTasks(); // restore button state
+  }finally{
+    _taskInFlight.delete(id);
+  }
 }
 
 async function doSocTask(tid,link,type,cat){
@@ -2770,14 +2794,41 @@ function buyNewPkg(pkgId){
   const available=PLAYERS_DB.filter(p=>!ownedIds.has(p.id));
   if(!available.length){showToast('لا يوجد لاعبين جدد متاحين!');return;}
   const player=available[Math.floor(Math.random()*available.length)];
+
+  // Optimistic update
   S.user.coins-=pk.price;
   S.ownedPlayers.push({...player});
   S.bench.push({...player});
   const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(S.user.coins);
-  // Show reveal
+
+  // Show reveal animation
   showRevealModal(player, pk.cardImg);
   renderMarket(_currentFilter);renderBench();updatePowerDisplay();
-  try{api('buyPlayer',{playerId:player.id}).catch(()=>{});}catch(_){}
+
+  // Sync with server — use buyPackage action so coins are properly deducted
+  api('buyPackage',{packageId:pk.id, playerIds:[player.id]}).then(res=>{
+    if(res&&res.coins!==undefined){
+      S.user.coins=res.coins;
+      if(tc)tc.textContent=fmt(S.user.coins);
+    }
+    if(res&&res.ownedPlayers){
+      S.ownedPlayers=[];
+      res.ownedPlayers.forEach(pid=>{
+        const pl=PLAYERS_DB.find(x=>x.id===pid);
+        if(pl&&!S.ownedPlayers.some(x=>x.id===pid))S.ownedPlayers.push({...pl});
+      });
+      S.bench=S.ownedPlayers.filter(pl=>!S.squad.some(s=>s&&s.id===pl.id));
+      renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    }
+  }).catch(e=>{
+    // Rollback on server error
+    S.user.coins+=pk.price;
+    S.ownedPlayers=S.ownedPlayers.filter(x=>x.id!==player.id);
+    S.bench=S.bench.filter(x=>x.id!==player.id);
+    if(tc)tc.textContent=fmt(S.user.coins);
+    renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    showToast('❌ فشل الشراء: '+e.message);
+  });
 }
 
 function showRevealModal(player, cardImg){
@@ -2900,18 +2951,49 @@ async function buyPkg(id){
   const pk=PACKAGES.find(p=>p.id===id);if(!pk)return;
   if(pk.currency==='ton'){showToast('الدفع بـ TON قيد التطوير');return;}
   if((S.user.coins||0)<pk.price){showToast(`تحتاج ${fmt(pk.price)} Coins!`);return;}
-  S.user.coins-=pk.price;
-  document.getElementById('tbCoins').textContent=fmt(S.user.coins);
-  showToast(`✅ تم شراء ${pk.name}! فتح ${pk.cards} بطاقات...`);
-  // Give random players from DB based on tier
+
+  // Pick random players by tier
   const tierOrder={bronze:0,silver:1,gold:2,plat:3,legend:4};
   const minTier=tierOrder[pk.tier]||0;
   const pool=PLAYERS_DB.filter(p=>tierOrder[p.tier]>=minTier&&!S.ownedPlayers.some(o=>o.id===p.id));
-  const shuffle=arr=>{for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;};
+  const shuffle=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
   const picked=shuffle(pool).slice(0,Math.min(pk.cards,pool.length));
+
+  // Optimistic update
+  const prevCoins=S.user.coins;
+  const prevOwned=[...S.ownedPlayers];
+  const prevBench=[...S.bench];
+  S.user.coins-=pk.price;
+  const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(S.user.coins);
   picked.forEach(p=>{if(!S.ownedPlayers.some(o=>o.id===p.id)){S.ownedPlayers.push({...p});S.bench.push({...p});}});
-  try{await api('buyPlayer',{playerId:picked.map(p=>p.id)});}catch(_){}
   renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+  showToast(`✅ تم شراء ${pk.name}! فتح ${picked.length} بطاقات...`);
+
+  // Sync with server — buyPackage deducts Coins and saves players
+  try{
+    const res=await api('buyPackage',{packageId:id, playerIds:picked.map(p=>p.id)});
+    if(res&&res.coins!==undefined){
+      S.user.coins=res.coins;
+      if(tc)tc.textContent=fmt(S.user.coins);
+    }
+    if(res&&res.ownedPlayers){
+      S.ownedPlayers=[];
+      res.ownedPlayers.forEach(pid=>{
+        const pl=PLAYERS_DB.find(x=>x.id===pid);
+        if(pl&&!S.ownedPlayers.some(x=>x.id===pid))S.ownedPlayers.push({...pl});
+      });
+      S.bench=S.ownedPlayers.filter(pl=>!S.squad.some(s=>s&&s.id===pl.id));
+      renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    }
+  }catch(e){
+    // Rollback on server error
+    S.user.coins=prevCoins;
+    S.ownedPlayers=prevOwned;
+    S.bench=prevBench;
+    if(tc)tc.textContent=fmt(S.user.coins);
+    renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    showToast('❌ فشل الشراء: '+e.message);
+  }
 }
 
   // Load state — retry up to 3 times
@@ -2934,6 +3016,8 @@ async function buyPkg(id){
 
   renderMarket('all');
   renderNewPackages();
+  renderPackages();
+  renderPackageCarousel();
   renderTasks();
   renderPitch();
   renderBench();
@@ -3306,6 +3390,56 @@ function pkgGoTo(idx){
   document.querySelectorAll('.pkg-dot').forEach((d,i)=>d.classList.toggle('active',i===_pkgSlideIdx));
 }
 function pkgSlide(dir){ pkgGoTo(_pkgSlideIdx+dir); }
+
+// buyPackage — called from carousel onclick="buyPackage(id)"
+async function buyPackage(pkgId){
+  const pk=_pkgSlides.find(p=>p.id===pkgId);if(!pk)return;
+  if(pk.priceCur==='TON'){showToast('الدفع بـ TON قيد التطوير');return;}
+  const price=pk.price;
+  if((S.user.coins||0)<price){showToast(`تحتاج ${fmt(price)} Coins! رصيدك: ${fmt(S.user.coins)}`);return;}
+
+  // Pick random players
+  const tierOrder={bronze:0,silver:1,gold:2,plat:3,legend:4};
+  const minTier=tierOrder[pk.tier]||0;
+  const pool=PLAYERS_DB.filter(p=>(tierOrder[p.tier]||0)>=minTier&&!S.ownedPlayers.some(o=>o.id===p.id));
+  const shuffle=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const picked=shuffle(pool).slice(0,Math.min(pk.cards||3,pool.length));
+
+  // Optimistic update
+  const prevCoins=S.user.coins;
+  const prevOwned=[...S.ownedPlayers];
+  const prevBench=[...S.bench];
+  S.user.coins-=price;
+  const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(S.user.coins);
+  picked.forEach(p=>{if(!S.ownedPlayers.some(o=>o.id===p.id)){S.ownedPlayers.push({...p});S.bench.push({...p});}});
+  renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+  showToast(`✅ تم شراء ${pk.name||pk.id}! فتح ${picked.length} بطاقات...`);
+
+  try{
+    const res=await api('buyPackage',{packageId:pk.id, playerIds:picked.map(p=>p.id)});
+    if(res&&res.coins!==undefined){
+      S.user.coins=res.coins;
+      if(tc)tc.textContent=fmt(S.user.coins);
+    }
+    if(res&&res.ownedPlayers){
+      S.ownedPlayers=[];
+      res.ownedPlayers.forEach(pid=>{
+        const pl=PLAYERS_DB.find(x=>x.id===pid);
+        if(pl&&!S.ownedPlayers.some(x=>x.id===pid))S.ownedPlayers.push({...pl});
+      });
+      S.bench=S.ownedPlayers.filter(pl=>!S.squad.some(s=>s&&s.id===pl.id));
+      renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    }
+  }catch(e){
+    // Rollback
+    S.user.coins=prevCoins;
+    S.ownedPlayers=prevOwned;
+    S.bench=prevBench;
+    if(tc)tc.textContent=fmt(S.user.coins);
+    renderMarket(_currentFilter);renderBench();updatePowerDisplay();
+    showToast('❌ فشل الشراء: '+e.message);
+  }
+}
 
 // ════════════════════════════════════════════
 //  TAB HELPERS

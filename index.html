@@ -224,11 +224,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
   padding:6px 10px 5px;
-  background:url('https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/db0d449f-240b-4384-a470-fa2fa006abd3.png') center/cover no-repeat, linear-gradient(180deg,rgba(10,10,25,.92) 0%,rgba(8,8,20,.88) 100%);
-  backdrop-filter:blur(24px) saturate(1.4);
-  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  background:url('https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/db0d449f-240b-4384-a470-fa2fa006abd3.png') center/cover no-repeat, linear-gradient(180deg,rgba(5,5,18,.96) 0%,rgba(4,4,14,.94) 100%);
+  backdrop-filter:blur(32px) saturate(1.8) brightness(0.85);
+  -webkit-backdrop-filter:blur(32px) saturate(1.8) brightness(0.85);
   position:fixed;top:0;left:0;right:0;z-index:200;
-  border-bottom:1px solid rgba(255,255,255,.1);
+  border-bottom:1px solid rgba(255,255,255,.12);
   height:62px;
   transition:transform .3s ease, opacity .3s ease;
 }
@@ -242,11 +242,12 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .tb-currencies{display:flex;align-items:center;gap:7px;}
 .tb-cur{
   display:flex;align-items:center;gap:6px;
-  background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.18);
   border-radius:22px;padding:6px 14px;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
 }
 .tb-cur-icon{font-size:15px;line-height:1;flex-shrink:0;}
 .tb-cur-val{font-family:'Orbitron',monospace;font-size:13px;font-weight:800;color:#fff;letter-spacing:.5px;}
@@ -849,7 +850,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Cairo',sans-seri
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .modal-title{font-size:16px;font-weight:800;color:var(--bamboo)}
 .modal-close{background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-.player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px;}
+.player-select-list{max-height:400px;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:2px;}
 /* Toast */
 #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(6,22,6,.97);border:1px solid var(--border);border-radius:22px;padding:10px 18px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;backdrop-filter:blur(12px);max-width:84vw;text-align:center;}
 #toast.show{opacity:1;}
@@ -1453,11 +1454,11 @@ self.addEventListener('fetch',e=>{
     <!-- Currencies -->
     <div class="tb-currencies">
       <div class="tb-cur">
-        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:26px;height:26px;object-fit:contain;vertical-align:middle"></span>
+        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:34px;height:34px;object-fit:contain;vertical-align:middle"></span>
         <span class="tb-cur-val orb" id="tbCoins">0</span>
       </div>
       <div class="tb-cur">
-        <span class="tb-cur-icon" style="color:var(--bamboo)">🎋</span>
+        <span class="tb-cur-icon" style="color:var(--bamboo);font-size:26px;">🎋</span>
         <span class="tb-cur-val orb" id="tbBamboo">0</span>
       </div>
     </div>
@@ -1623,33 +1624,31 @@ self.addEventListener('fetch',e=>{
 <!-- ══ SECTION: FRIENDS ══ -->
 <div class="sec" id="sectionFriends">
   <div class="pg-title">👥 الأصدقاء</div>
-  <!-- Hero card image with blur -->
-  <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;height:140px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/6d6bf20c-9443-4958-80ec-c6c943599f14.jpg" style="width:100%;height:100%;object-fit:cover;display:block;">
-    <div style="position:absolute;inset:0;backdrop-filter:blur(3px);background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.52) 100%);display:flex;align-items:flex-end;padding:12px 16px;">
-      <div>
-        <div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7);">برنامج الإحالة 🎁</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600;">اربح 20% عمولة من مشتريات أصدقائك</div>
+  <!-- Main referral card with player card bg -->
+  <div style="position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.5);z-index:0;transform:scale(1.04);">
+    <div style="position:relative;z-index:1;padding:16px 14px;background:rgba(0,0,0,.35);">
+      <div class="ref-bonus-badge">
+        <span class="rbb-pct">20%</span>
+        <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
       </div>
+      <div class="ref-link-row">
+        <input class="ref-inp" id="refLinkInp" readonly placeholder="رابط الإحالة...">
+        <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> نسخ</button>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px">📤 شارك الرابط مع أصدقائك</div>
     </div>
   </div>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:13px;backdrop-filter:blur(8px);margin-bottom:10px;">
-    <div class="ref-bonus-badge">
-      <span class="rbb-pct">20%</span>
-      <span class="rbb-txt">عمولة من كل مشتريات أصدقائك من السوق!</span>
+  <!-- Recent referrals with same card bg -->
+  <div style="position:relative;border-radius:16px;overflow:hidden;">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(4px) brightness(.3);z-index:0;transform:scale(1.05);">
+    <div class="hist-box" style="position:relative;z-index:1;background:transparent;border:1px solid rgba(255,255,255,.12);">
+      <div class="hist-hdr" style="justify-content:space-between">
+        <span><i class="fas fa-history"></i> الإحالات الأخيرة</span>
+        <span class="ref-count-badge" id="totalRefsDisp">0 أصدقاء</span>
+      </div>
+      <div id="recentRefsList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
     </div>
-    <div class="ref-link-row">
-      <input class="ref-inp" id="refLinkInp" readonly placeholder="رابط الإحالة...">
-      <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> نسخ</button>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">📤 شارك الرابط مع أصدقائك</div>
-  </div>
-  <div class="hist-box">
-    <div class="hist-hdr" style="justify-content:space-between">
-      <span><i class="fas fa-history"></i> الإحالات الأخيرة</span>
-      <span class="ref-count-badge" id="totalRefsDisp">0 أصدقاء</span>
-    </div>
-    <div id="recentRefsList"><div class="hist-empty">لا توجد إحالات بعد</div></div>
   </div>
 </div>
 
@@ -1657,8 +1656,8 @@ self.addEventListener('fetch',e=>{
 <div class="sec" id="sectionDeposit">
   <div class="fin-page-title">💰 إيداع TON</div>
   <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:10px;">
-    <!-- صورة الخلفية مع blur قوي علشان البيانات تظهر -->
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <!-- صورة الخلفية مع blur خفيف علشان تكون واضحة -->
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.45);z-index:0;transform:scale(1.03);">
     <!-- المحتوى فوق الصورة -->
     <div style="position:relative;z-index:1;padding:13px;backdrop-filter:blur(0px);">
       <div class="wal-row">
@@ -1704,8 +1703,8 @@ self.addEventListener('fetch',e=>{
 <div class="sec" id="sectionWithdraw">
   <div class="fin-page-title">💸 سحب</div>
   <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:10px;">
-    <!-- صورة الخلفية مع blur قوي علشان البيانات تظهر -->
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <!-- صورة الخلفية مع blur خفيف علشان تكون واضحة -->
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.45);z-index:0;transform:scale(1.03);">
     <!-- المحتوى فوق الصورة -->
     <div style="position:relative;z-index:1;padding:13px;">
       <div class="wd-err-banner trial" id="wdBannerTrial">
@@ -1732,7 +1731,7 @@ self.addEventListener('fetch',e=>{
     </div>
   </div>
   <div class="hist-box" style="margin-top:10px;position:relative;overflow:hidden;border-radius:16px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(10px) brightness(.25) saturate(0.5);z-index:0;transform:scale(1.08);">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/b197a5fb-c004-4e86-8466-3355bd0eb8d9.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.45);z-index:0;transform:scale(1.08);">
     <div style="position:relative;z-index:1;">
     <div class="hist-hdr">📋 سجل السحوبات</div>
     <div id="wdHist"><div class="hist-empty">لا توجد سحوبات بعد</div></div>
@@ -1744,7 +1743,7 @@ self.addEventListener('fetch',e=>{
 <div class="sec" id="sectionExchange">
   <div class="fin-page-title">🔄 تحويل العملة</div>
   <div style="position:relative;border-radius:20px;overflow:hidden;margin-bottom:10px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.3) saturate(0.6);z-index:0;transform:scale(1.05);">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.45);z-index:0;transform:scale(1.05);">
     <div style="position:relative;z-index:1;">
   <div class="swap-card">
     <div class="swap-section">
@@ -1781,7 +1780,7 @@ self.addEventListener('fetch',e=>{
     </div>
   </div>
   <div style="position:relative;border-radius:16px;overflow:hidden;margin-top:10px;">
-    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(10px) brightness(.25) saturate(0.5);z-index:0;transform:scale(1.08);">
+    <img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0da5c5a4-d4c4-425b-aab9-c1df628775b2.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.45);z-index:0;transform:scale(1.08);">
     <div class="hist-box" style="position:relative;z-index:1;background:transparent;border:1px solid rgba(255,255,255,.1);">
       <div class="hist-hdr">📋 سجل التحويلات</div>
       <div id="exchHist"><div class="hist-empty">لا توجد تحويلات بعد</div></div>
@@ -2297,14 +2296,19 @@ function renderBench(){
   document.getElementById('benchCount').textContent=`(${S.bench.length})`;
   if(!S.bench.length){bench.innerHTML='<div style="padding:10px;color:var(--muted);font-size:12px;">لا يوجد لاعبون احتياطيون</div>';return;}
   bench.innerHTML=S.bench.map(p=>{
-    const cc=pcClass(p.tier);
-    return`<div class="player-card ${cc}" onclick="showPlayerDetail('${p.id}')">
-      <div class="pc-inner">
-        <div class="pc-rating">${p.rating}</div>
-        <div class="pc-pos">${esc(p.pos)}</div>
-        <div class="pc-img-emoji">${esc(p.emoji||'⚽')}</div>
-        <div class="pc-name">${esc(p.name)}</div>
-        <div class="pc-club">${esc(p.club||'')}</div>
+    const cardImg=getCardBgByTier(p.tier);
+    return`<div style="width:78px;flex-shrink:0;border-radius:12px;overflow:hidden;cursor:pointer;position:relative;transition:transform .15s;" onclick="showPlayerDetail('${p.id}')" onmousedown="this.style.transform='scale(.93)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(.93)'" ontouchend="this.style.transform='scale(1)'">
+      <div style="position:relative;width:100%;padding-bottom:136%;overflow:hidden;">
+        <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:22%;left:50%;transform:translateX(-50%);height:55%;object-fit:contain;z-index:2;filter:drop-shadow(0 2px 5px rgba(0,0,0,.8));" onerror="this.style.display='none'">`:'' }
+        <div style="position:absolute;top:4px;left:5px;z-index:4;">
+          <div style="font-size:13px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.9);">${p.rating}</div>
+          <div style="font-size:7px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;">${esc(p.pos)}</div>
+        </div>
+        <div style="position:absolute;top:3px;right:4px;z-index:4;font-size:13px;line-height:1;">${p.country||''}</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(0,0,0,.75);padding:3px 4px 4px;">
+          <div style="font-size:8px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name.split(' ')[0])}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2341,14 +2345,20 @@ function openSlotModal(i){
   if(!S.bench.length&&!S.squad[i]){list.innerHTML='<div style="padding:10px;color:var(--muted);">اشترِ لاعبين من الماركت أولاً</div>';openModal('selectPlayerModal');return;}
   const options=[...(S.squad[i]?[{...S.squad[i],_current:true}]:[]),...S.bench];
   list.innerHTML=options.map(p=>{
-    const cc=pcClass(p.tier);
-    return`<div class="player-card ${cc}" onclick="assignPlayer('${p.id}')">
-      <div class="pc-inner">
-        <div class="pc-rating">${p.rating}</div>
-        <div class="pc-pos">${esc(p.pos)}</div>
-        <div class="pc-img-emoji">${esc(p.emoji||'⚽')}</div>
-        <div class="pc-name">${esc(p.name)}</div>
-        ${p._current?'<div style="font-size:9px;color:var(--neon);font-weight:800;">✓ مُعيَّن</div>':''}
+    const cardImg=getCardBgByTier(p.tier);
+    return`<div style="border-radius:12px;overflow:hidden;cursor:pointer;position:relative;transition:transform .15s;" onclick="assignPlayer('${p.id}')" onmousedown="this.style.transform='scale(.93)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.93)'" ontouchend="this.style.transform=''">
+      <div style="position:relative;width:100%;padding-bottom:136%;overflow:hidden;">
+        <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:22%;left:50%;transform:translateX(-50%);height:55%;object-fit:contain;z-index:2;filter:drop-shadow(0 2px 5px rgba(0,0,0,.8));" onerror="this.style.display='none'">`:'' }
+        <div style="position:absolute;top:4px;left:5px;z-index:4;">
+          <div style="font-size:13px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.9);">${p.rating}</div>
+          <div style="font-size:7px;font-weight:800;color:rgba(255,255,255,.85);">${esc(p.pos)}</div>
+          ${p.country?`<div style="font-size:12px;">${p.country}</div>`:''}
+        </div>
+        ${p._current?`<div style="position:absolute;top:3px;right:3px;z-index:5;background:rgba(0,255,135,.25);border:1px solid var(--neon);border-radius:5px;padding:1px 4px;font-size:7px;font-weight:900;color:var(--neon);">✓</div>`:''}
+        <div style="position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(0,0,0,.78);padding:3px 4px 4px;">
+          <div style="font-size:8px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name.split(' ').slice(-1)[0])}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2370,19 +2380,60 @@ function assignPlayer(playerId){
 
 function showPlayerDetail(id){
   const p=PLAYERS_DB.find(x=>x.id===id);if(!p)return;
-  document.getElementById('pdModalTitle').textContent=p.name;
-  const imgHtml=p.imageUrl?`<img src="${p.imageUrl}" style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,.2);margin-bottom:8px;" onerror="this.outerHTML='<div style=font-size:60px>${esc(p.emoji||'⚽')}</div>'">`:`<div style="font-size:60px;">${esc(p.emoji||'⚽')}</div>`;
+  const cardImg=getCardImg(p.rating);
+  const isOwned=S.ownedPlayers.some(x=>x.id===id);
+  document.getElementById('pdModalTitle').textContent='';
   document.getElementById('playerDetailContent').innerHTML=`
-    <div style="text-align:center;padding:10px 0 16px;">
-      ${imgHtml}
-      <div style="font-size:28px;font-weight:900;color:${tierColor(p.tier)};font-family:'Orbitron',monospace;">${p.rating}</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px;">${esc(p.pos)} · ${esc(p.club||'')} · ${p.country||''} ${esc(p.nationality||'')}</div>
+    <!-- Card preview - centered, eFootball style -->
+    <div style="display:flex;justify-content:center;margin-bottom:14px;">
+      <div style="width:150px;border-radius:16px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.8);">
+        <div style="position:relative;width:100%;padding-bottom:140%;overflow:hidden;">
+          <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+          ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:18%;left:50%;transform:translateX(-50%);height:65%;width:90%;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 12px rgba(0,0,0,.9));" onerror="this.style.display='none'">`:'' }
+          <div style="position:absolute;top:6px;left:8px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <div style="font-size:22px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.95);">${p.rating}</div>
+            <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.95);text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.9);">${esc(p.pos)}</div>
+            ${p.country?`<div style="font-size:18px;line-height:1;">${p.country}</div>`:''}
+            ${p.club?`<div style="font-size:7px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:1px 4px;color:#fff;font-weight:800;text-align:center;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.club.split(' ').slice(-1)[0])}</div>`:''}
+          </div>
+          <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 100%);padding:5px 6px 6px;">
+            <div style="font-size:11px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 4px rgba(0,0,0,.9);">${esc(p.name)}</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div style="background:rgba(0,0,0,.28);border-radius:12px;padding:12px;font-size:12px;color:var(--muted);">
-      <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span>التصنيف</span><span style="color:${tierColor(p.tier)};font-weight:800;">${p.tier}</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span>المركز</span><span style="color:#fff;font-weight:800;">${esc(p.pos)}</span></div>
-      <div style="display:flex;justify-content:space-between;"><span>السعر</span><span style="color:var(--bamboo);font-weight:800;">${fmt(p.price)} Coins</span></div>
-    </div>`;
+
+    <!-- Player full name -->
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:3px;">${esc(p.name)}</div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;">${p.country||''} ${esc(p.nationality||'')} · ${esc(p.club||'')}</div>
+    </div>
+
+    <!-- Stats grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;">
+      ${[
+        {label:'المركز',    value:esc(p.pos),            color:'var(--sky)'},
+        {label:'التصنيف',   value:esc(p.tier),           color:tierColor(p.tier)},
+        {label:'التقييم',   value:p.rating,              color:tierColor(p.tier)},
+        {label:'الجنسية',   value:esc(p.nationality||'-'),color:'#fff'},
+        {label:'النادي',    value:esc(p.club||'-'),       color:'rgba(255,255,255,.85)'},
+        {label:'السعر',     value:fmt(p.price)+' Coins',  color:'var(--gold)'},
+      ].map(s=>`
+        <div style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px;">
+          <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:3px;letter-spacing:.4px;">${s.label}</div>
+          <div style="font-size:13px;font-weight:900;color:${s.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.value}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Buy / owned -->
+    ${isOwned
+      ? `<div style="width:100%;padding:12px;border-radius:12px;background:rgba(0,255,135,.12);border:1px solid rgba(0,255,135,.3);text-align:center;color:var(--neon-green);font-size:14px;font-weight:900;">✅ اللاعب في فريقك</div>`
+      : `<button onclick="buyPlayer('${p.id}');closeModal('playerDetailModal')" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#b8860b,var(--gold),#b8860b);color:#1a0a00;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 0 16px var(--gold-glow);display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Cairo',sans-serif;">
+          🪙 شراء بـ ${fmt(p.price)} Coins
+        </button>`
+    }
+  `;
   openModal('playerDetailModal');
 }
 
@@ -2394,11 +2445,22 @@ function filterMarket(filter, el){
   renderMarket(filter);
 }
 
-// Card images by rating tier
+// Card images by rating tier (for market)
 function getCardImg(rating){
   if(rating>=80) return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png'; // gold
   if(rating>=70) return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5588678a-3c18-49df-8a36-1739a6a90038.png'; // bronze (70-80)
   return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e953feaa-9aa7-4298-968a-f21df3a38c06.png'; // silver (<70)
+}
+
+// Card background by tier string (bench, pitch, select modal)
+function getCardBgByTier(tier){
+  switch(tier){
+    case 'legend': return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png'; // gold
+    case 'plat':   return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/89de172b-a87f-4c3b-8f71-a84ad5ce6c99.png'; // purple/plat
+    case 'gold':   return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/372d8920-cb00-4959-9cff-8850ed82c921.png'; // gold
+    case 'silver': return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e953feaa-9aa7-4298-968a-f21df3a38c06.png'; // silver
+    default:       return 'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5588678a-3c18-49df-8a36-1739a6a90038.png'; // bronze
+  }
 }
 
 function renderMarket(filter='all'){
@@ -2412,35 +2474,34 @@ function renderMarket(filter='all'){
   else if(filter==='coins')players=players.filter(p=>p.currency==='coins');
   else if(filter==='ton')players=players.filter(p=>p.currency==='ton');
   const owned=new Set(S.ownedPlayers.map(p=>p.id));
+  // Hide owned players from market (fix 7)
+  players=players.filter(p=>!owned.has(p.id));
+  if(!players.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;font-weight:700;">🎉 لديك جميع اللاعبين المتاحين!</div>';
+    return;
+  }
   grid.innerHTML=players.map(p=>{
-    const isOwned=owned.has(p.id);
     const cardImg=getCardImg(p.rating);
-    // Country flag: use emoji if it's a flag emoji, otherwise show text
-    const countryHtml=p.country?`<span style="font-size:18px;line-height:1;">${p.country}</span>`:'';
-    // Club logo: use thesportsdb or a flag; show club name as fallback badge
-    const clubHtml=p.club?`<span style="font-size:9px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:1px 5px;color:rgba(255,255,255,.85);font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;">${esc(p.club)}</span>`:'';
-    return`<div class="mkt-card mkt-card-v2 ${isOwned?'mkt-owned-card':''}" onclick="showPlayerDetail('${p.id}')" style="padding:0;overflow:hidden;position:relative;">
-      ${isOwned?'<div class="mkt-owned-badge">✓ مملوك</div>':''}
-      <!-- Card background image -->
-      <div style="position:relative;width:100%;padding-bottom:130%;overflow:hidden;">
-        <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;" alt="">
-        <!-- Player image — fills upper 65% -->
-        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:32%;left:50%;transform:translateX(-50%);height:58%;object-fit:contain;z-index:2;filter:drop-shadow(0 3px 8px rgba(0,0,0,.8));" onerror="this.style.display='none'">`:''}
-        <!-- Rating top-left -->
-        <div style="position:absolute;top:6px;left:8px;z-index:4;">
-          <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.9);">${p.rating}</div>
-          <div style="font-size:8px;font-weight:800;color:rgba(255,255,255,.8);text-align:center;margin-top:1px;">${esc(p.pos)}</div>
-        </div>
-        <!-- Country + Club top-right -->
-        <div style="position:absolute;top:5px;right:6px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:3px;">
+    const countryHtml=p.country?`<div style="font-size:16px;line-height:1;text-align:center;">${p.country}</div>`:'';
+    const clubHtml=p.club?`<div style="font-size:7px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:1px 4px;color:rgba(255,255,255,.9);font-weight:700;text-align:center;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.club.split(' ').slice(-1)[0])}</div>`:'';
+    return`<div onclick="showPlayerDetail('${p.id}')" style="border-radius:14px;overflow:hidden;cursor:pointer;position:relative;transition:transform .15s;box-shadow:0 4px 16px rgba(0,0,0,.6);" onmousedown="this.style.transform='scale(.95)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.95)'" ontouchend="this.style.transform=''">
+      <div style="position:relative;width:100%;padding-bottom:140%;overflow:hidden;">
+        <!-- Card bg -->
+        <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+        <!-- Player photo fills card -->
+        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:18%;left:50%;transform:translateX(-50%);height:65%;width:90%;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 10px rgba(0,0,0,.9));" onerror="this.style.display='none'">`:'' }
+        <!-- TOP LEFT: Rating + Pos + country + club (eFootball style) -->
+        <div style="position:absolute;top:5px;left:6px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.95);">${p.rating}</div>
+          <div style="font-size:8px;font-weight:900;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.9);text-align:center;letter-spacing:.3px;">${esc(p.pos)}</div>
           ${countryHtml}
           ${clubHtml}
         </div>
-        <!-- Bottom info bar -->
-        <div style="position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);padding:5px 7px 6px;">
-          <div style="font-size:11px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</div>
-          <button class="mkt-price coins-btn" onclick="event.stopPropagation();buyPlayer('${p.id}')" style="margin-top:4px;width:100%;padding:5px;font-size:10px;">
-            🪙 ${fmt(p.price)} Coins
+        <!-- BOTTOM: Name + buy button -->
+        <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.5) 70%,transparent 100%);padding:4px 5px 5px;">
+          <div style="font-size:10px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;text-shadow:0 1px 4px rgba(0,0,0,.9);">${esc(p.name.split(' ').slice(-1)[0])}</div>
+          <button onclick="event.stopPropagation();buyPlayer('${p.id}')" style="width:100%;padding:4px 3px;background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);border-radius:7px;color:#FFD700;font-size:9px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;">
+            🪙 ${fmt(p.price)}
           </button>
         </div>
       </div>
@@ -2934,21 +2995,27 @@ function closeRevealModal(){
 
 function showPkgPlayers(pkgId){
   const pk=NEW_PACKAGES.find(p=>p.id===pkgId);if(!pk)return;
-  document.getElementById('pkgInfoTitle').textContent=pk.name+' — اللاعبين';
+  document.getElementById('pkgInfoTitle').textContent=pk.name+' — اللاعبين المتاحين';
   document.getElementById('pkgInfoContent').innerHTML=`
-    <div class="pkg-players-grid">
-      ${PLAYERS_DB.map(p=>`
-        <div class="pkg-player-mini">
-          <img class="mini-card-bg" src="${pk.cardImg}" onerror="this.style.background='#222'">
-          <img class="mini-player-img" src="${p.imageUrl}" onerror="this.style.display='none'">
-          <div class="mini-rating">${p.rating}</div>
-          <div class="mini-pos">${esc(p.pos)}</div>
-          <div class="mini-info">
-            <div class="mini-name">${esc(p.name)}</div>
-            <div class="mini-detail">${p.country||''} ${esc(p.nationality||'')}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px;">
+      ${PLAYERS_DB.map(p=>{
+        const cardImg=getCardImg(p.rating);
+        const countryHtml=p.country?`<span style="font-size:14px;line-height:1;">${p.country}</span>`:'';
+        return`<div style="border-radius:12px;overflow:hidden;cursor:pointer;position:relative;" onclick="closeModal('pkgInfoModal');showPlayerDetail('${p.id}')">
+          <div style="position:relative;width:100%;padding-bottom:136%;overflow:hidden;">
+            <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+            ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:22%;left:50%;transform:translateX(-50%);height:55%;object-fit:contain;z-index:2;filter:drop-shadow(0 2px 6px rgba(0,0,0,.8));" onerror="this.style.display='none'">`:'' }
+            <div style="position:absolute;top:4px;left:5px;z-index:4;">
+              <div style="font-size:13px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.9);">${p.rating}</div>
+              <div style="font-size:7px;font-weight:800;color:rgba(255,255,255,.85);text-align:center;">${esc(p.pos)}</div>
+            </div>
+            <div style="position:absolute;top:3px;right:4px;z-index:4;">${countryHtml}</div>
+            <div style="position:absolute;bottom:0;left:0;right:0;z-index:4;background:rgba(0,0,0,.78);padding:3px 4px 4px;">
+              <div style="font-size:8px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name.split(' ').slice(-1)[0])}</div>
+            </div>
           </div>
-        </div>
-      `).join('')}
+        </div>`;
+      }).join('')}
     </div>
   `;
   openModal('pkgInfoModal');

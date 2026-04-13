@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1298,19 +1297,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',sans-se
 
 /* ═══ NEW PACKAGE GRID ═══ */
 .new-pkg-grid{
-  display:flex;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  gap:12px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
   padding:0 12px 16px;
-  scrollbar-width:none;
-}
-.new-pkg-grid::-webkit-scrollbar{display:none;}
-.new-pkg-grid .new-pkg-card{
-  min-width:85%;
-  scroll-snap-align:center;
-  flex-shrink:0;
 }
 .new-pkg-card{
   border-radius:16px;overflow:hidden;position:relative;cursor:pointer;
@@ -1319,7 +1307,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',sans-se
 }
 .new-pkg-card:active{transform:scale(.96);}
 .new-pkg-card img.pkg-bg-img{
-  width:100%;height:200px;object-fit:cover;display:block;
+  width:100%;height:140px;object-fit:cover;display:block;
 }
 .new-pkg-overlay{
   position:absolute;bottom:0;left:0;right:0;
@@ -1351,78 +1339,44 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',sans-se
 }
 .mkt-card .mkt-content{position:relative;z-index:1;}
 
-
-/* ═══ CARD FLIP REVEAL ANIMATION ═══ */
+/* Player reveal modal */
 .reveal-modal{
   position:fixed;inset:0;z-index:9999;
-  background:rgba(0,0,0,.85);backdrop-filter:blur(16px);
+  background:rgba(0,0,0,.8);backdrop-filter:blur(12px);
   display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:12px;padding:20px;
 }
 .reveal-modal.show{display:flex;}
-.reveal-card-container{
-  perspective:1200px;
-  width:220px;height:310px;
+.reveal-card{
+  width:200px;height:280px;border-radius:18px;overflow:hidden;
+  position:relative;box-shadow:0 8px 40px rgba(0,0,0,.8);
 }
-.reveal-card-flipper{
-  width:100%;height:100%;
-  position:relative;
-  transform-style:preserve-3d;
-  transition:transform 1s cubic-bezier(.4,0,.2,1);
-}
-.reveal-card-flipper.flipped{
-  transform:rotateY(180deg);
-}
-.reveal-card-front,.reveal-card-back{
-  position:absolute;inset:0;
-  backface-visibility:hidden;
-  border-radius:18px;overflow:hidden;
-  box-shadow:0 8px 40px rgba(0,0,0,.8),0 0 60px rgba(255,215,0,.3);
-}
-.reveal-card-front{
-  background:linear-gradient(145deg,#1a1a2e,#16213e);
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid rgba(255,215,0,.4);
-}
-.reveal-card-front::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,215,0,.1),transparent 50%,rgba(255,215,0,.05));
-}
-.reveal-card-front .front-logo{
-  font-size:80px;filter:drop-shadow(0 0 20px rgba(255,215,0,.5));
-  animation:front-pulse 1.5s ease-in-out infinite;
-}
-@keyframes front-pulse{
-  0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(255,215,0,.5));}
-  50%{transform:scale(1.08);filter:drop-shadow(0 0 30px rgba(255,215,0,.8));}
-}
-.reveal-card-back{
-  transform:rotateY(180deg);
-  position:relative;
-}
-.reveal-card-back img.reveal-card-bg{
+.reveal-card img.reveal-card-bg{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
 }
-/* Animated reveal elements */
-.reveal-data-item{
-  opacity:0;transform:translateY(15px) scale(.9);
-  transition:opacity .5s ease,transform .5s ease;
+.reveal-card .reveal-player-img{
+  position:absolute;bottom:25%;left:50%;transform:translateX(-50%);
+  width:65%;object-fit:contain;z-index:2;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.7));
 }
-.reveal-data-item.visible{
-  opacity:1;transform:translateY(0) scale(1);
+.reveal-card .reveal-rating{
+  position:absolute;top:10px;left:12px;z-index:3;
+  font-size:20px;font-weight:900;color:#fff;
+  font-family:'Orbitron',monospace;
+  text-shadow:0 2px 6px rgba(0,0,0,.9);
 }
-.reveal-sparkle{
-  position:absolute;width:100%;height:100%;top:0;left:0;pointer-events:none;z-index:10;
+.reveal-card .reveal-pos{
+  position:absolute;top:32px;left:12px;z-index:3;
+  font-size:9px;font-weight:800;color:rgba(255,255,255,.8);
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
 }
-.sparkle-particle{
-  position:absolute;border-radius:50%;
-  animation:sparkle-fly 1.5s ease-out forwards;
+.reveal-card .reveal-info{
+  position:absolute;bottom:0;left:0;right:0;z-index:3;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  padding:6px 8px;
 }
-@keyframes sparkle-fly{
-  0%{opacity:1;transform:scale(1);}
-  100%{opacity:0;transform:scale(0) translate(var(--tx),var(--ty));}
-}
-
+.reveal-card .reveal-name{font-size:11px;font-weight:900;color:#fff;text-align:center;}
+.reveal-card .reveal-detail{font-size:9px;color:rgba(255,255,255,.6);text-align:center;margin-top:2px;}
 
 /* Package info modal players grid */
 .pkg-players-grid{
@@ -1639,7 +1593,7 @@ self.addEventListener('fetch',e=>{
     <!-- Currencies -->
     <div class="tb-currencies">
       <div class="tb-cur">
-        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 8px rgba(255,215,0,.7))"></span>
+        <span class="tb-cur-icon"><img src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f383ba5c-fe7a-485a-ae59-ea3b7de6e84d.png" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 0 6px rgba(255,215,0,.6))"></span>
         <span class="tb-cur-val orb" id="tbCoins">0</span>
       </div>
       <div class="tb-cur">
@@ -1727,55 +1681,6 @@ self.addEventListener('fetch',e=>{
 
   <!-- Scrollable content -->
   <div class="landing-scroll">
-    <!-- Mining Production Card -->
-    <div id="miningCard" style="margin:0 12px 16px;background:linear-gradient(135deg,rgba(0,20,40,.95),rgba(5,30,60,.9));border:1px solid rgba(0,242,122,.25);border-radius:18px;overflow:hidden;position:relative;box-shadow:0 6px 30px rgba(0,0,0,.5);">
-      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,242,122,.05),transparent 60%);pointer-events:none;"></div>
-      <div style="position:relative;z-index:1;padding:16px;">
-        <!-- Top row: title -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="font-size:28px;">⛏️</div>
-          <div>
-            <div style="font-size:14px;font-weight:900;color:#fff;">مصنع التعدين</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:600;">إنتاج تلقائي من قوة فريقك</div>
-          </div>
-        </div>
-        <!-- Stats row -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <div style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:4px;">⚡ طاقة الفريق</div>
-            <div style="font-size:20px;font-weight:900;color:var(--neon-green);font-family:'Orbitron',monospace;" id="miningPower">0</div>
-          </div>
-          <div style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:4px;">🪙 إنتاج / ساعة</div>
-            <div style="font-size:20px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;" id="miningRate">0</div>
-          </div>
-          <div style="flex:1;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:9px;color:var(--muted);font-weight:700;margin-bottom:4px;">⏱️ الجمع بعد</div>
-            <div style="font-size:18px;font-weight:900;color:var(--sky);font-family:'Orbitron',monospace;" id="miningTimer">60:00</div>
-          </div>
-        </div>
-        <!-- Collect button + progress -->
-        <div style="background:rgba(0,0,0,.3);border-radius:12px;padding:8px 12px;margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:11px;color:var(--muted);font-weight:700;">الرصيد المتراكم</span>
-            <span style="font-size:15px;font-weight:900;color:var(--gold);font-family:'Orbitron',monospace;" id="miningAccumulated">0</span>
-          </div>
-          <div style="height:6px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;">
-            <div id="miningProgressBar" style="height:100%;background:linear-gradient(90deg,var(--neon-green),var(--gold));border-radius:10px;width:0%;transition:width 1s linear;"></div>
-          </div>
-        </div>
-        <!-- Action buttons -->
-        <div style="display:flex;gap:8px;">
-          <button onclick="goNav(document.querySelector('[data-s=sectionHome]'))" style="flex:1;padding:10px;border-radius:12px;border:none;background:rgba(0,180,255,.15);border:1px solid rgba(0,180,255,.3);color:var(--sky);font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
-            👤 التشكيلة
-          </button>
-          <button onclick="goNav(document.querySelector('[data-s=sectionMarket]'))" style="flex:1;padding:10px;border-radius:12px;border:none;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);color:var(--gold);font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
-            🛒 الماركت
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- 4 New Packages -->
     <div class="efb-pkg-title" data-i18n="pkg_title">📦 الباكجات المتاحة</div>
     <div class="new-pkg-grid" id="newPkgGrid"></div>
@@ -1806,10 +1711,6 @@ self.addEventListener('fetch',e=>{
     <div style="text-align:center;">
       <div class="tp-val orb" id="teamPowerVal">0</div>
       <div style="font-size:9px;color:var(--muted);font-weight:600;">نقطة</div>
-    </div>
-    <div style="text-align:center;">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;">الإنتاج/ساعة</div>
-      <div style="font-size:14px;font-weight:900;color:var(--gold);" id="teamProductionRate">0 🪙</div>
     </div>
     <div style="text-align:left;">
       <div style="font-size:11px;color:var(--muted);font-weight:700;">اللاعبون</div>
@@ -2221,18 +2122,9 @@ self.addEventListener('fetch',e=>{
 
 <!-- PLAYER REVEAL MODAL -->
 <div class="reveal-modal" id="revealModal">
-  <div style="font-size:18px;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(255,215,0,.7);" id="revealTitle">🎉 حصلت على لاعب جديد!</div>
-  <div class="reveal-card-container">
-    <div class="reveal-card-flipper" id="revealFlipper">
-      <div class="reveal-card-front">
-        <div class="front-logo">⚽</div>
-      </div>
-      <div class="reveal-card-back" id="revealCardBack">
-        <!-- Dynamic content -->
-      </div>
-    </div>
-  </div>
-  <button onclick="closeRevealModal()" id="revealCloseBtn" style="margin-top:12px;padding:10px 28px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--bamboo),#4e7a20);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 0 14px var(--bamboo-glow);opacity:0;transition:opacity .5s;">تمام ✓</button>
+  <div style="font-size:18px;font-weight:900;color:#fff;">🎉 حصلت على لاعب جديد!</div>
+  <div class="reveal-card" id="revealCard"></div>
+  <button onclick="closeRevealModal()" style="margin-top:12px;padding:10px 28px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--bamboo),#4e7a20);color:#fff;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 0 14px var(--bamboo-glow);">تمام ✓</button>
 </div>
 
 <div id="toast"></div>
@@ -2493,7 +2385,6 @@ function updatePowerDisplay(){
   const tp=document.getElementById('topTeamPower');if(tp)tp.textContent='⚡ قوة: '+power;
   const filled=S.squad.filter(Boolean).length;
   const pf=document.getElementById('pcFilled');if(pf)pf.textContent=filled;
-  const pr=document.getElementById('teamProductionRate');if(pr)pr.textContent=fmt(power)+' 🪙';
 }
 
 // ════ PITCH ════
@@ -2585,14 +2476,11 @@ let _activeSlot=-1;
 function openSlotModal(i){
   _activeSlot=i;
   const slot=(FORMATIONS[S.formation]||FORMATIONS['4-3-3'])[i];
-  const slotPosKey=getPosKey(slot.pos);
   const info=document.getElementById('selectSlotInfo');
   if(info)info.textContent=`المركز: ${slot.pos}`;
   const list=document.getElementById('playerSelectList');
-  // Filter bench by matching position group
-  const filteredBench=S.bench.filter(p=>getPosKey(p.pos)===slotPosKey);
-  if(!filteredBench.length&&!S.squad[i]){list.innerHTML='<div style="padding:10px;color:var(--muted);">لا يوجد لاعبين بمركز '+slot.pos+' — اشترِ من الماركت</div>';openModal('selectPlayerModal');return;}
-  const options=[...(S.squad[i]?[{...S.squad[i],_current:true}]:[]),...filteredBench];
+  if(!S.bench.length&&!S.squad[i]){list.innerHTML='<div style="padding:10px;color:var(--muted);">اشترِ لاعبين من الماركت أولاً</div>';openModal('selectPlayerModal');return;}
+  const options=[...(S.squad[i]?[{...S.squad[i],_current:true}]:[]),...S.bench];
   list.innerHTML=options.map(p=>{
     const cardImg=getCardBgByTier(p.tier);
     return`<div style="border-radius:12px;overflow:hidden;cursor:pointer;position:relative;transition:transform .15s;" onclick="assignPlayer('${p.id}')" onmousedown="this.style.transform='scale(.93)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.93)'" ontouchend="this.style.transform=''">
@@ -2734,28 +2622,21 @@ function renderMarket(filter='all'){
     const countryHtml=p.country?`<div style="font-size:16px;line-height:1;text-align:center;">${p.country}</div>`:'';
     const clubHtml=p.club?`<div style="font-size:7px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:1px 4px;color:rgba(255,255,255,.9);font-weight:700;text-align:center;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(p.club.split(' ').slice(-1)[0])}</div>`:'';
     return`<div onclick="showPlayerDetail('${p.id}')" style="border-radius:14px;overflow:hidden;cursor:pointer;position:relative;transition:transform .15s;box-shadow:0 4px 16px rgba(0,0,0,.6);" onmousedown="this.style.transform='scale(.95)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.95)'" ontouchend="this.style.transform=''">
-      <div style="position:relative;width:100%;padding-bottom:145%;overflow:hidden;">
+      <div style="position:relative;width:100%;padding-bottom:140%;overflow:hidden;">
         <!-- Card bg -->
         <img src="${cardImg}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
-        <!-- Player photo -->
-        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:28%;left:50%;transform:translateX(-50%);height:55%;width:85%;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 10px rgba(0,0,0,.9));" onerror="this.style.display='none'">`:'' }
-        <!-- TOP LEFT: Rating -->
-        <div style="position:absolute;top:5px;left:6px;z-index:5;">
-          <div style="font-size:20px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.95);">${p.rating}</div>
-          <div style="font-size:8px;font-weight:900;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:.3px;">${esc(p.pos)}</div>
+        <!-- Player photo fills card -->
+        ${p.imageUrl?`<img src="${p.imageUrl}" style="position:absolute;bottom:18%;left:50%;transform:translateX(-50%);height:65%;width:90%;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 10px rgba(0,0,0,.9));" onerror="this.style.display='none'">`:'' }
+        <!-- TOP LEFT: Rating + Pos + country + club (eFootball style) -->
+        <div style="position:absolute;top:5px;left:6px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <div style="font-size:18px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.95);">${p.rating}</div>
+          <div style="font-size:8px;font-weight:900;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.9);text-align:center;letter-spacing:.3px;">${esc(p.pos)}</div>
+          ${countryHtml}
+          ${clubHtml}
         </div>
-        <!-- TOP RIGHT: Country flag -->
-        <div style="position:absolute;top:5px;right:6px;z-index:5;font-size:16px;">${p.country||''}</div>
-        <!-- Player name ON the card (not on black bottom) -->
-        <div style="position:absolute;bottom:30%;left:0;right:0;z-index:4;text-align:center;">
-          <div style="font-size:11px;font-weight:900;color:#fff;text-shadow:0 0 12px rgba(0,0,0,1),0 2px 6px rgba(0,0,0,.9),0 0 20px rgba(255,215,0,.3);letter-spacing:.5px;font-family:'Fredoka',sans-serif;">${esc(p.name.split(' ').slice(-1)[0])}</div>
-        </div>
-        <!-- BOTTOM: Stats inside card + buy button -->
-        <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:4px 5px 5px;">
-          <div style="display:flex;gap:2px;justify-content:center;margin-bottom:3px;">
-            <div style="background:rgba(0,0,0,.65);border-radius:5px;padding:1px 4px;font-size:7px;font-weight:800;color:rgba(255,255,255,.85);backdrop-filter:blur(4px);">⚡${p.rating}</div>
-            <div style="background:rgba(0,0,0,.65);border-radius:5px;padding:1px 4px;font-size:7px;font-weight:800;color:rgba(255,255,255,.85);backdrop-filter:blur(4px);max-width:40px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc((p.club||'').split(' ').slice(-1)[0])}</div>
-          </div>
+        <!-- BOTTOM: Name + buy button -->
+        <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.5) 70%,transparent 100%);padding:4px 5px 5px;">
+          <div style="font-size:10px;font-weight:900;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;text-shadow:0 1px 4px rgba(0,0,0,.9);">${esc(p.name.split(' ').slice(-1)[0])}</div>
           <button onclick="event.stopPropagation();buyPlayer('${p.id}')" style="width:100%;padding:4px 3px;background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);border-radius:7px;color:#FFD700;font-size:9px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;">
             🪙 ${fmt(p.price)}
           </button>
@@ -3231,92 +3112,22 @@ function buyNewPkg(pkgId){
 
 function showRevealModal(player, cardImg){
   const modal=document.getElementById('revealModal');
-  const flipper=document.getElementById('revealFlipper');
-  const back=document.getElementById('revealCardBack');
-  const closeBtn=document.getElementById('revealCloseBtn');
-  
-  // Reset state
-  flipper.classList.remove('flipped');
-  closeBtn.style.opacity='0';
-  
-  // Build back of card with animated reveal items
-  back.innerHTML=`
-    <img class="reveal-card-bg" src="${cardImg}" onerror="this.style.background='linear-gradient(145deg,#1a1a2e,#16213e)'">
-    <div class="reveal-sparkle" id="revealSparkle"></div>
-    <!-- Country flag -->
-    <div class="reveal-data-item" data-delay="400" style="position:absolute;top:8px;right:10px;z-index:5;font-size:28px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.9));">
-      ${player.country||''}
-    </div>
-    <!-- Club -->
-    <div class="reveal-data-item" data-delay="800" style="position:absolute;top:8px;left:10px;z-index:5;">
-      <div style="background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:3px 8px;font-size:9px;font-weight:900;color:#fff;backdrop-filter:blur(4px);">
-        ${esc(player.club||'')}
-      </div>
-    </div>
-    <!-- Position -->
-    <div class="reveal-data-item" data-delay="1200" style="position:absolute;top:42px;right:10px;z-index:5;">
-      <div style="background:rgba(0,180,255,.25);border:1px solid rgba(0,180,255,.5);border-radius:8px;padding:2px 10px;font-size:11px;font-weight:900;color:#fff;">
-        ${esc(player.pos)}
-      </div>
-    </div>
-    <!-- Rating -->
-    <div class="reveal-data-item" data-delay="1600" style="position:absolute;top:38px;left:10px;z-index:5;">
-      <div style="font-size:32px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;text-shadow:0 0 20px rgba(255,215,0,.8),0 2px 8px rgba(0,0,0,.9);">
-        ${player.rating}
-      </div>
-    </div>
-    <!-- Player image + Name (appear together) -->
-    <div class="reveal-data-item" data-delay="2000" style="position:absolute;bottom:0;left:0;right:0;z-index:5;">
-      ${player.imageUrl?`<img src="${player.imageUrl}" style="position:absolute;bottom:45px;left:50%;transform:translateX(-50%);height:60%;width:85%;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(0,0,0,.9));" onerror="this.style.display='none'">`:''}
-      <div style="background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.5) 70%,transparent 100%);padding:8px 10px 10px;">
-        <div style="font-size:16px;font-weight:900;color:#fff;text-align:center;text-shadow:0 0 12px rgba(255,215,0,.6),0 2px 4px rgba(0,0,0,.9);font-family:'Fredoka',sans-serif;">
-          ${esc(player.name)}
-        </div>
-        <div style="font-size:10px;color:rgba(255,255,255,.7);text-align:center;margin-top:2px;">
-          ${esc(player.nationality||'')}
-        </div>
-      </div>
+  const card=document.getElementById('revealCard');
+  card.innerHTML=`
+    <img class="reveal-card-bg" src="${cardImg}" onerror="this.style.background='#222'">
+    <img class="reveal-player-img" src="${player.imageUrl}" onerror="this.style.display='none'">
+    <div class="reveal-rating">${player.rating}</div>
+    <div class="reveal-pos">${esc(player.pos)}</div>
+    <div class="reveal-info">
+      <div class="reveal-name">${esc(player.name)}</div>
+      <div class="reveal-detail">${player.country||''} ${esc(player.nationality||'')} · ${esc(player.club||'')}</div>
     </div>
   `;
-  
   modal.classList.add('show');
-  
-  // Start flip after short delay
-  setTimeout(()=>{
-    flipper.classList.add('flipped');
-    // Add sparkle particles
-    setTimeout(()=>{
-      const sparkle=document.getElementById('revealSparkle');
-      if(sparkle){
-        for(let i=0;i<20;i++){
-          const p=document.createElement('div');
-          p.className='sparkle-particle';
-          const colors=['#FFD700','#FF5CA8','#00F27A','#00D4FF','#fff'];
-          p.style.cssText=`width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;background:${colors[Math.floor(Math.random()*colors.length)]};left:${30+Math.random()*40}%;top:${30+Math.random()*40}%;--tx:${(Math.random()-0.5)*200}px;--ty:${(Math.random()-0.5)*200}px;animation-delay:${Math.random()*0.5}s;`;
-          sparkle.appendChild(p);
-        }
-      }
-    },800);
-    
-    // Reveal data items sequentially
-    setTimeout(()=>{
-      const items=back.querySelectorAll('.reveal-data-item');
-      items.forEach(item=>{
-        const delay=parseInt(item.dataset.delay)||0;
-        setTimeout(()=>item.classList.add('visible'),delay);
-      });
-      // Show close button after all reveals
-      const maxDelay=Math.max(...Array.from(items).map(i=>parseInt(i.dataset.delay)||0));
-      setTimeout(()=>{closeBtn.style.opacity='1';},maxDelay+600);
-    },1000);
-  },300);
 }
 
 function closeRevealModal(){
-  const modal=document.getElementById('revealModal');
-  const flipper=document.getElementById('revealFlipper');
-  flipper.classList.remove('flipped');
-  setTimeout(()=>modal.classList.remove('show'),300);
+  document.getElementById('revealModal').classList.remove('show');
 }
 
 function showPkgPlayers(pkgId){
@@ -3325,7 +3136,7 @@ function showPkgPlayers(pkgId){
   document.getElementById('pkgInfoContent').innerHTML=`
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px;">
       ${PLAYERS_DB.map(p=>{
-        const cardImg=pk.cardImg;
+        const cardImg=getCardImg(p.rating);
         const countryHtml=p.country?`<span style="font-size:14px;line-height:1;">${p.country}</span>`:'';
         return`<div style="border-radius:12px;overflow:hidden;cursor:pointer;position:relative;" onclick="closeModal('pkgInfoModal');showPlayerDetail('${p.id}')">
           <div style="position:relative;width:100%;padding-bottom:136%;overflow:hidden;">
@@ -3345,49 +3156,6 @@ function showPkgPlayers(pkgId){
     </div>
   `;
   openModal('pkgInfoModal');
-}
-
-
-// ════ MINING SYSTEM ════
-let _miningInterval=null;
-let _miningStartTime=Date.now();
-let _miningCollectInterval=3600000; // 1 hour in ms
-
-function updateMiningCard(){
-  const power=calcTeamPower();
-  const rate=power; // 1 power = 1 coin/hr
-  const mp=document.getElementById('miningPower');if(mp)mp.textContent=fmt(power);
-  const mr=document.getElementById('miningRate');if(mr)mr.textContent=fmt(rate);
-  
-  // Timer countdown
-  const elapsed=Date.now()-_miningStartTime;
-  const remaining=Math.max(0,_miningCollectInterval-elapsed);
-  const mins=Math.floor(remaining/60000);
-  const secs=Math.floor((remaining%60000)/1000);
-  const mt=document.getElementById('miningTimer');
-  if(mt)mt.textContent=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
-  
-  // Accumulated coins (proportional to time elapsed)
-  const accumulated=Math.floor((Math.min(elapsed,_miningCollectInterval)/_miningCollectInterval)*rate);
-  const ma=document.getElementById('miningAccumulated');if(ma)ma.textContent=fmt(accumulated)+' 🪙';
-  
-  // Progress bar
-  const pct=Math.min(100,(elapsed/_miningCollectInterval)*100);
-  const pb=document.getElementById('miningProgressBar');if(pb)pb.style.width=pct+'%';
-  
-  // Auto-collect when timer reaches 0
-  if(remaining<=0){
-    S.user.coins=(S.user.coins||0)+rate;
-    const tc=document.getElementById('tbCoins');if(tc)tc.textContent=fmt(S.user.coins);
-    _miningStartTime=Date.now();
-    showToast('⛏️ تم جمع '+fmt(rate)+' Coins من التعدين!');
-  }
-}
-
-function startMiningTimer(){
-  if(_miningInterval)clearInterval(_miningInterval);
-  _miningInterval=setInterval(updateMiningCard,1000);
-  updateMiningCard();
 }
 
 // ════ INIT ════
@@ -3539,7 +3307,6 @@ async function buyPkg(id){
   renderPitch();
   renderBench();
   updatePowerDisplay();
-  startMiningTimer();
   setInterval(()=>loadState(),30000);
 
   // Loading screen removed

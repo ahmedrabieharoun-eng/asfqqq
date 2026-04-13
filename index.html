@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,6 +7,7 @@
 <title>مزاد باكج الأساطير 🏆</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -22,76 +24,44 @@
 html,body{height:100%;}
 body{
   font-family:'Tajawal',sans-serif;font-weight:500;
-  background:#04040e;
-  color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px;
-  position:relative;
+  background:#04040e;color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px;position:relative;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-serif!important;}
 .orb{font-family:'Orbitron',monospace!important;}
 
-/* ═══ ANIMATED BG ═══ */
-.bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
-canvas#bgCanvas{width:100%;height:100%;display:block;}
-
-/* Floating orbs */
+/* BG */
 .orbs-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.orb-f{
-  position:absolute;border-radius:50%;filter:blur(80px);
-  animation:orbFloat linear infinite;opacity:.18;
-}
+.orb-f{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat linear infinite;opacity:.18;}
 .orb-f.o1{width:400px;height:400px;background:radial-gradient(circle,#FFD700,#FF6B00);top:-100px;right:-80px;animation-duration:18s;}
 .orb-f.o2{width:320px;height:320px;background:radial-gradient(circle,#0088CC,#004466);bottom:-60px;left:-60px;animation-duration:22s;}
 .orb-f.o3{width:200px;height:200px;background:radial-gradient(circle,#FF3300,#660000);top:40%;left:50%;animation-duration:15s;}
-@keyframes orbFloat{
-  0%{transform:translate(0,0) scale(1);}
-  33%{transform:translate(30px,-20px) scale(1.1);}
-  66%{transform:translate(-20px,25px) scale(.95);}
-  100%{transform:translate(0,0) scale(1);}
-}
+@keyframes orbFloat{0%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.1);}66%{transform:translate(-20px,25px) scale(.95);}100%{transform:translate(0,0) scale(1);}}
 
-/* ═══ MUSIC CONTROL ═══ */
+/* MUSIC BTN */
 .music-btn{
-  position:fixed;bottom:22px;right:14px;z-index:400;
+  position:fixed;bottom:80px;right:14px;z-index:400;
   width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
   background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,100,0,.2));
   border:1.5px solid rgba(255,215,0,.35);
   display:flex;align-items:center;justify-content:center;
   font-size:18px;color:var(--gold);
-  box-shadow:0 0 20px rgba(255,215,0,.2), 0 4px 16px rgba(0,0,0,.5);
-  backdrop-filter:blur(12px);
-  transition:all .25s;
+  box-shadow:0 0 20px rgba(255,215,0,.2),0 4px 16px rgba(0,0,0,.5);
+  backdrop-filter:blur(12px);transition:all .25s;
   animation:pulse-glow 2.5s ease-in-out infinite;
 }
 .music-btn:active{transform:scale(.92);}
 .music-btn.playing{animation:pulse-glow 1.5s ease-in-out infinite;}
-.music-btn .note-anim{
-  position:absolute;font-size:12px;color:var(--gold);
-  opacity:0;pointer-events:none;
-  animation:noteFloat 2s ease-out infinite;
-}
-.music-btn .note-anim:nth-child(2){animation-delay:.5s;left:-10px;}
-.music-btn .note-anim:nth-child(3){animation-delay:1s;right:-8px;}
-@keyframes noteFloat{
-  0%{opacity:0;transform:translateY(0) rotate(-15deg);}
-  50%{opacity:.8;}
-  100%{opacity:0;transform:translateY(-30px) rotate(15deg);}
-}
-@keyframes pulse-glow{
-  0%,100%{box-shadow:0 0 20px rgba(255,215,0,.2),0 4px 16px rgba(0,0,0,.5);}
-  50%{box-shadow:0 0 32px rgba(255,215,0,.45),0 4px 20px rgba(0,0,0,.6);}
-}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.2),0 4px 16px rgba(0,0,0,.5);}50%{box-shadow:0 0 32px rgba(255,215,0,.45),0 4px 20px rgba(0,0,0,.6);}}
 
-/* ═══ TOPBAR ═══ */
+/* TOPBAR */
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
   padding:6px 12px;
-  background:rgba(4,4,14,.88);
-  backdrop-filter:blur(28px) saturate(1.8);
+  background:rgba(4,4,14,.88);backdrop-filter:blur(28px) saturate(1.8);
   -webkit-backdrop-filter:blur(28px) saturate(1.8);
   position:fixed;top:0;left:0;right:0;z-index:300;
-  border-bottom:1px solid rgba(255,215,0,.15);
-  height:60px;
-  box-shadow:0 4px 30px rgba(0,0,0,.9), 0 0 60px rgba(255,215,0,.04);
+  border-bottom:1px solid rgba(255,215,0,.15);height:60px;
+  box-shadow:0 4px 30px rgba(0,0,0,.9),0 0 60px rgba(255,215,0,.04);
 }
 .tb-left{display:flex;align-items:center;gap:8px;}
 .tb-right{display:flex;align-items:center;gap:6px;}
@@ -101,29 +71,23 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
   display:flex;align-items:center;justify-content:center;
   font-size:19px;cursor:pointer;flex-shrink:0;
   border:2px solid rgba(255,215,0,.35);
-  box-shadow:0 0 16px rgba(255,215,0,.25);
-  transition:all .2s;
+  box-shadow:0 0 16px rgba(255,215,0,.25);transition:all .2s;overflow:hidden;
 }
 .tb-user-avatar:active{transform:scale(.93);}
 .tb-user-avatar img{border-radius:50%;width:100%;height:100%;object-fit:cover;}
 .tb-ton-balance{
   display:flex;align-items:center;gap:6px;
-  background:rgba(0,0,0,.55);
-  border:1.5px solid rgba(0,136,204,.3);
-  border-radius:24px;padding:5px 12px 5px 8px;
-  backdrop-filter:blur(16px);
-  box-shadow:0 0 14px rgba(0,136,204,.15);
-  transition:all .2s;
+  background:rgba(0,0,0,.55);border:1.5px solid rgba(0,136,204,.3);
+  border-radius:24px;padding:5px 12px 5px 8px;backdrop-filter:blur(16px);
+  box-shadow:0 0 14px rgba(0,136,204,.15);transition:all .2s;
 }
 .ton-icon{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,136,204,.9));}
 .tb-ton-val{font-family:'Orbitron',monospace;font-size:12.5px;font-weight:900;color:#fff;letter-spacing:.5px;}
 .tb-deposit-btn{
   display:flex;align-items:center;gap:5px;
   background:linear-gradient(135deg,rgba(0,136,204,.22),rgba(0,70,140,.3));
-  border:1.5px solid rgba(0,136,204,.38);
-  border-radius:20px;padding:5px 13px;cursor:pointer;
-  font-size:12px;font-weight:800;color:#60CCFF;
-  transition:all .2s;white-space:nowrap;
+  border:1.5px solid rgba(0,136,204,.38);border-radius:20px;padding:5px 13px;cursor:pointer;
+  font-size:12px;font-weight:800;color:#60CCFF;transition:all .2s;white-space:nowrap;
 }
 .tb-deposit-btn:active{background:rgba(0,136,204,.42);}
 .tb-lang-btn{
@@ -133,19 +97,86 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
   font-size:12px;font-weight:800;color:#fff;transition:background .18s;
 }
 .tb-lang-btn:active{background:rgba(255,255,255,.18);}
-.tb-center{
-  position:absolute;left:50%;transform:translateX(-50%);
-  display:flex;align-items:center;gap:6px;
-}
-.tb-title{font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.5px;text-shadow:0 0 14px rgba(255,215,0,.55);}
 
-/* ═══ LANG MENU ═══ */
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:rgba(4,4,14,.95);backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,215,0,.12);
+  display:flex;height:60px;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.4);font-size:10px;font-weight:800;
+}
+.nav-item.active{color:var(--gold);}
+.nav-item i{font-size:19px;}
+.nav-item.active i{text-shadow:0 0 14px rgba(255,215,0,.6);}
+
+/* TABS */
+.tab-page{display:none;}
+.tab-page.active{display:block;}
+
+/* WELCOME OVERLAY */
+.welcome-overlay{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(12px);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.welcome-overlay.hidden{display:none;}
+.welcome-box{
+  width:100%;max-width:500px;max-height:92vh;
+  background:linear-gradient(160deg,#0c0e20,#07091a);
+  border:1px solid rgba(255,215,0,.25);
+  border-radius:28px 28px 0 0;
+  overflow:hidden;display:flex;flex-direction:column;
+  animation:slideUp .4s cubic-bezier(.25,.86,.44,1);
+}
+@keyframes slideUp{from{transform:translateY(80px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.welcome-header{
+  padding:20px 18px 14px;
+  background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,100,0,.04));
+  border-bottom:1px solid rgba(255,215,0,.12);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.welcome-title{font-size:18px;font-weight:900;color:var(--gold);}
+.welcome-close{
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);
+  border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;
+}
+.welcome-close:active{background:rgba(255,215,0,.2);}
+.welcome-scroll{flex:1;overflow-y:auto;padding:16px;}
+.welcome-section{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;padding:14px;margin-bottom:12px;
+}
+.welcome-section-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.welcome-section p{font-size:13px;color:rgba(255,255,255,.82);line-height:1.7;font-weight:500;}
+.welcome-highlight{
+  background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(255,100,0,.04));
+  border:1px solid rgba(255,215,0,.18);border-radius:12px;
+  padding:10px 12px;margin-top:8px;font-size:12px;font-weight:700;color:var(--gold);line-height:1.6;
+}
+.welcome-green{
+  background:rgba(0,242,122,.06);border:1px solid rgba(0,242,122,.13);
+  border-radius:12px;padding:10px 12px;margin-top:8px;
+  font-size:12px;font-weight:700;color:#00C25A;line-height:1.6;
+}
+.welcome-start-btn{
+  margin:8px 16px 20px;padding:14px;border-radius:18px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#FFD700,#FF8C00);
+  color:#000;font-size:15px;font-weight:900;
+  box-shadow:0 0 28px rgba(255,215,0,.35);transition:all .2s;
+}
+.welcome-start-btn:active{transform:scale(.98);}
+
+/* LANG MENU */
 .lang-menu{position:fixed;inset:0;z-index:900;display:none;}
 .lang-menu.open{display:block;}
 .lang-menu-overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);}
 .lang-menu-panel{
-  position:absolute;top:64px;right:8px;
-  width:200px;
+  position:absolute;top:64px;right:8px;width:200px;
   background:linear-gradient(160deg,#0c0e1e,#050810);
   border:1px solid rgba(255,215,0,.18);border-radius:20px;
   overflow:hidden;animation:fadeDown .22s ease;
@@ -153,292 +184,184 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 }
 @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .lang-menu-title{padding:12px 16px 8px;font-size:11px;font-weight:900;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;}
-.lang-option{
-  display:flex;align-items:center;gap:10px;padding:12px 16px;
-  cursor:pointer;font-size:14px;font-weight:700;color:#fff;
-  border-top:1px solid rgba(255,255,255,.04);transition:background .15s;
-}
+.lang-option{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;border-top:1px solid rgba(255,255,255,.04);transition:background .15s;}
 .lang-option:active,.lang-option:hover{background:rgba(255,215,0,.09);}
 .lang-option.active-lang{background:rgba(255,215,0,.11);color:var(--gold);}
 .lang-option span:first-child{font-size:20px;}
 
-/* ═══ MODALS ═══ */
-.modal,.players-modal,.explain-modal{
+/* MODALS */
+.modal,.players-modal{
   position:fixed;inset:0;z-index:500;
   display:none;align-items:flex-end;justify-content:center;
   background:rgba(0,0,0,.78);backdrop-filter:blur(10px);
 }
-.modal.active,.players-modal.active,.explain-modal.active{display:flex;}
+.modal.active,.players-modal.active{display:flex;}
 .modal-box{
   width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
   background:linear-gradient(160deg,#0c0e20,#07091a);
-  border:1px solid rgba(0,136,204,.22);
-  border-radius:26px 26px 0 0;
+  border:1px solid rgba(0,136,204,.22);border-radius:26px 26px 0 0;
   padding:20px 16px 34px;
   animation:slideUp .3s cubic-bezier(.25,.86,.44,1);
 }
-.players-modal-box,.explain-box{
+.players-modal-box{
   width:100%;max-width:500px;max-height:88vh;
   background:linear-gradient(160deg,#0c0e20,#07091a);
-  border:1px solid rgba(255,215,0,.18);
-  border-radius:26px 26px 0 0;
+  border:1px solid rgba(255,215,0,.18);border-radius:26px 26px 0 0;
   overflow:hidden;display:flex;flex-direction:column;
   animation:slideUp .3s cubic-bezier(.25,.86,.44,1);
 }
-@keyframes slideUp{from{transform:translateY(70px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .modal-title{font-size:18px;font-weight:900;color:var(--gold);}
 .modal-close,.pm-close{
   background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);
   border-radius:50%;width:33px;height:33px;color:rgba(255,255,255,.8);
-  cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
-  transition:all .18s;
+  cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .18s;
 }
 .modal-close:active,.pm-close:active{background:rgba(255,255,255,.2);}
-.finput{
-  width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.18);
-  border-radius:14px;padding:11px 14px;color:#fff;font-size:15px;font-weight:700;
-  outline:none;margin-bottom:10px;transition:border .2s;
-}
+.finput{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 14px;color:#fff;font-size:15px;font-weight:700;outline:none;margin-bottom:10px;transition:border .2s;}
 .finput:focus{border-color:rgba(0,136,204,.5);}
 .flabel{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;display:block;}
 .preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.prbtn{
-  flex:1;min-width:40px;text-align:center;padding:7px 0;
-  background:rgba(0,136,204,.13);border:1px solid rgba(0,136,204,.28);
-  border-radius:11px;cursor:pointer;font-size:13px;font-weight:800;color:#5BC8FF;
-  transition:all .15s;
-}
+.prbtn{flex:1;min-width:40px;text-align:center;padding:7px 0;background:rgba(0,136,204,.13);border:1px solid rgba(0,136,204,.28);border-radius:11px;cursor:pointer;font-size:13px;font-weight:800;color:#5BC8FF;transition:all .15s;}
 .prbtn:active{background:rgba(0,136,204,.32);}
-.btn-prim{
-  width:100%;padding:13px;border-radius:16px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#0099DD,#005580);
-  color:#fff;font-size:15px;font-weight:900;
-  box-shadow:0 0 24px rgba(0,136,204,.35);transition:all .2s;
-}
+.btn-prim{width:100%;padding:13px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,#0099DD,#005580);color:#fff;font-size:15px;font-weight:900;box-shadow:0 0 24px rgba(0,136,204,.35);transition:all .2s;}
 .btn-prim:active{transform:scale(.98);}
 .btn-prim:disabled{opacity:.5;cursor:not-allowed;}
-.btn-conn{
-  padding:8px 14px;border-radius:13px;border:none;cursor:pointer;
-  background:rgba(0,136,204,.18);border:1px solid rgba(0,136,204,.32);
-  color:#5BC8FF;font-size:12px;font-weight:800;transition:all .15s;
-}
+.btn-conn{padding:8px 14px;border-radius:13px;border:none;cursor:pointer;background:rgba(0,136,204,.18);border:1px solid rgba(0,136,204,.32);color:#5BC8FF;font-size:12px;font-weight:800;transition:all .15s;}
 .btn-conn:active{background:rgba(0,136,204,.32);}
 .wal-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
 .wl-inf{flex:1;}
 .wll{font-size:11px;color:var(--muted);font-weight:700;}
 .wla{font-size:11px;color:#5BC8FF;font-weight:700;word-break:break-all;}
-.dep-warn{
-  background:rgba(255,200,0,.07);border:1px solid rgba(255,200,0,.18);
-  border-radius:12px;padding:9px 12px;margin-bottom:10px;
-  display:flex;align-items:flex-start;gap:8px;font-size:11px;color:rgba(255,210,100,.85);font-weight:600;line-height:1.5;
-}
+.dep-warn{background:rgba(255,200,0,.07);border:1px solid rgba(255,200,0,.18);border-radius:12px;padding:9px 12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;font-size:11px;color:rgba(255,210,100,.85);font-weight:600;line-height:1.5;}
 .dep-warn i{color:#FFD700;flex-shrink:0;margin-top:2px;}
-.tx-status{
-  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;
-  display:none;flex-direction:column;align-items:center;gap:5px;margin-top:10px;text-align:center;
-}
+.tx-status{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;display:none;flex-direction:column;align-items:center;gap:5px;margin-top:10px;text-align:center;}
 .tx-status.visible{display:flex;}
-.txsi{font-size:30px;}
-.txsm{font-size:14px;font-weight:800;color:#fff;}
-.txsd{font-size:11px;color:var(--muted);}
+.txsi{font-size:30px;}.txsm{font-size:14px;font-weight:800;color:#fff;}.txsd{font-size:11px;color:var(--muted);}
 
-/* ═══ PM HEADER ═══ */
-.pm-header{
-  padding:16px;border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
-}
+/* PM HEADER */
+.pm-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .pm-title{font-size:17px;font-weight:900;color:var(--gold);}
 .pm-scroll{flex:1;overflow-y:auto;padding:14px;}
 
-/* ═══ PLAYER CARDS GRID ═══ */
-.players-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+/* PLAYER CARDS - NEW DESIGN */
+.players-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .player-card{
-  position:relative;border-radius:14px;overflow:hidden;
+  position:relative;border-radius:12px;overflow:hidden;
   aspect-ratio:.72;cursor:pointer;
-  transition:transform .2s;box-shadow:0 4px 16px rgba(0,0,0,.5);
+  transition:transform .2s;
+  box-shadow:0 6px 20px rgba(0,0,0,.7);
 }
-.player-card:active{transform:scale(.96);}
-.card-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
-.card-glow{position:absolute;inset:0;z-index:1;box-shadow:inset 0 0 22px rgba(255,215,0,.14);border-radius:14px;}
-.card-player-img{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;height:68%;object-fit:contain;}
-.card-rating{position:absolute;top:5px;left:5px;z-index:4;font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:#fff;text-shadow:0 0 8px rgba(255,215,0,.9);}
-.card-badge{position:absolute;top:4px;right:4px;z-index:4;background:linear-gradient(135deg,#FF6B00,#FF2200);border-radius:6px;padding:2px 5px;font-size:7px;font-weight:900;color:#fff;letter-spacing:.3px;}
-.card-name{position:absolute;bottom:4px;left:0;right:0;z-index:4;text-align:center;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);}
+.player-card:active{transform:scale(.95);}
+.card-full-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:1;
+}
+.card-data-overlay{
+  position:absolute;inset:0;z-index:2;
+  display:flex;flex-direction:column;
+}
+.card-top-left{
+  position:absolute;top:6px;left:6px;z-index:3;
+  display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+}
+.card-rating-num{
+  font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#fff;
+  text-shadow:0 0 8px rgba(0,0,0,1),0 0 4px rgba(0,0,0,1);
+  line-height:1;
+}
+.card-nat-flag{width:18px;height:14px;object-fit:cover;border-radius:2px;margin-top:2px;}
+.card-club-badge{width:16px;height:16px;object-fit:contain;margin-top:2px;}
+.card-pos-text{font-size:8px;font-weight:900;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,1);margin-top:2px;}
+.card-badge-le{
+  position:absolute;top:5px;right:5px;z-index:3;
+  background:linear-gradient(135deg,#FF6B00,#FF2200);
+  border-radius:5px;padding:2px 5px;
+  font-size:7px;font-weight:900;color:#fff;letter-spacing:.3px;
+}
+.card-player-name{
+  position:absolute;bottom:4px;left:0;right:0;z-index:3;
+  text-align:center;font-size:8px;font-weight:900;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,.8);
+  letter-spacing:.3px;
+  text-transform:uppercase;
+}
 
-/* ═══ EXPLAIN MODAL ═══ */
-.explain-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.explain-scroll{flex:1;overflow-y:auto;padding:16px;}
-.explain-section{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;}
-.explain-section-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
-.explain-section p{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.7;font-weight:500;}
-.explain-highlight{background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(255,100,0,.04));border:1px solid rgba(255,215,0,.18);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:12px;font-weight:700;color:var(--gold);line-height:1.6;}
-.explain-green{background:rgba(0,242,122,.06);border:1px solid rgba(0,242,122,.13);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:12px;font-weight:700;color:#00C25A;line-height:1.6;}
-
-/* ═══ MAIN ═══ */
-.main-wrap{padding:68px 12px 100px;position:relative;z-index:1;max-width:500px;margin:0 auto;}
+/* MAIN */
+.main-wrap{padding:68px 12px 72px;position:relative;z-index:1;max-width:500px;margin:0 auto;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ═══ PACKAGE HERO ═══ */
-.pkg-hero{
-  position:relative;border-radius:22px;overflow:hidden;
-  margin-bottom:14px;
-  box-shadow:0 10px 50px rgba(255,215,0,.18), 0 0 80px rgba(255,100,0,.08);
-  animation:fadeIn .5s ease;
-  border:1px solid rgba(255,215,0,.12);
-}
+/* PKG HERO */
+.pkg-hero{position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 10px 50px rgba(255,215,0,.18),0 0 80px rgba(255,100,0,.08);animation:fadeIn .5s ease;border:1px solid rgba(255,215,0,.12);}
 .pkg-hero-img{width:100%;display:block;max-height:300px;object-fit:cover;}
-.pkg-hero-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top, rgba(4,4,14,.95) 0%, rgba(0,0,0,.15) 60%, transparent 100%);
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:16px;
-}
+.pkg-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,4,14,.95) 0%,rgba(0,0,0,.15) 60%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
 .pkg-hero-label{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;text-shadow:0 0 12px rgba(255,215,0,.8);}
 .pkg-hero-title{font-size:23px;font-weight:900;color:#fff;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,.9);}
 .pkg-hero-sub{font-size:12px;color:rgba(255,255,255,.65);font-weight:500;margin-top:4px;}
-.pkg-view-btn{
-  position:absolute;top:12px;right:12px;
-  background:rgba(0,0,0,.65);backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.18);border-radius:16px;
-  padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;
-  transition:all .2s;
-}
+.pkg-view-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;}
 .pkg-view-btn:active{background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.4);}
-.pkg-limited-badge{
-  position:absolute;top:12px;left:12px;
-  background:linear-gradient(135deg,#FF6B00,#FF2200);
-  border-radius:12px;padding:5px 11px;
-  font-size:10px;font-weight:900;color:#fff;letter-spacing:.8px;
-  box-shadow:0 0 16px rgba(255,80,0,.5);
-}
+.pkg-limited-badge{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#FF6B00,#FF2200);border-radius:12px;padding:5px 11px;font-size:10px;font-weight:900;color:#fff;letter-spacing:.8px;box-shadow:0 0 16px rgba(255,80,0,.5);}
 
-/* ═══ TIMER ═══ */
-.timer-card{
-  background:linear-gradient(135deg,rgba(18,6,0,.92),rgba(10,3,0,.97));
-  border:1px solid rgba(255,100,0,.28);border-radius:22px;
-  padding:14px 16px;margin-bottom:14px;
-  box-shadow:0 0 36px rgba(255,100,0,.08);
-  animation:fadeIn .6s ease .1s both;
-  position:relative;overflow:hidden;
-}
+/* TIMER */
+.timer-card{background:linear-gradient(135deg,rgba(18,6,0,.92),rgba(10,3,0,.97));border:1px solid rgba(255,100,0,.28);border-radius:22px;padding:14px 16px;margin-bottom:14px;box-shadow:0 0 36px rgba(255,100,0,.08);animation:fadeIn .6s ease .1s both;position:relative;overflow:hidden;}
 .timer-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,150,0,.08),transparent 70%);pointer-events:none;}
 .timer-label{font-size:11px;font-weight:900;color:rgba(255,160,0,.8);letter-spacing:1.2px;text-align:center;margin-bottom:10px;text-transform:uppercase;}
 .timer-row{display:flex;align-items:center;justify-content:center;gap:8px;}
 .timer-unit{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.timer-val{
-  font-family:'Orbitron',monospace;font-size:30px;font-weight:900;
-  color:#fff;line-height:1;
-  text-shadow:0 0 24px rgba(255,150,0,.8), 0 0 50px rgba(255,100,0,.4);
-  background:rgba(0,0,0,.45);border-radius:12px;padding:6px 12px;
-  border:1px solid rgba(255,150,0,.18);min-width:64px;text-align:center;
-  transition:all .15s;
-}
+.timer-val{font-family:'Orbitron',monospace;font-size:30px;font-weight:900;color:#fff;line-height:1;text-shadow:0 0 24px rgba(255,150,0,.8),0 0 50px rgba(255,100,0,.4);background:rgba(0,0,0,.45);border-radius:12px;padding:6px 12px;border:1px solid rgba(255,150,0,.18);min-width:64px;text-align:center;transition:all .15s;}
 .timer-val.tick{transform:scale(.96);color:rgba(255,200,100,1);}
 .timer-unit-lbl{font-size:10px;color:rgba(255,150,0,.65);font-weight:800;letter-spacing:.8px;}
 .timer-sep{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:rgba(255,100,0,.55);line-height:1;padding-bottom:16px;animation:blink 1s step-start infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
 .timer-ended{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:#FF3300;text-align:center;text-shadow:0 0 24px rgba(255,50,0,.8);}
 
-/* ═══ BID CARD ═══ */
-.bid-card{
-  background:linear-gradient(135deg,rgba(3,16,3,.92),rgba(1,8,1,.97));
-  border:1px solid rgba(0,242,122,.22);border-radius:22px;
-  padding:16px;margin-bottom:14px;
-  box-shadow:0 0 36px rgba(0,242,122,.05);
-  animation:fadeIn .6s ease .2s both;
-  position:relative;overflow:hidden;
-}
+/* BID CARD */
+.bid-card{background:linear-gradient(135deg,rgba(3,16,3,.92),rgba(1,8,1,.97));border:1px solid rgba(0,242,122,.22);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 0 36px rgba(0,242,122,.05);animation:fadeIn .6s ease .2s both;position:relative;overflow:hidden;}
 .bid-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,200,90,.06),transparent 70%);pointer-events:none;}
 .bid-title{font-size:14px;font-weight:900;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
 .bid-input-row{display:flex;gap:8px;}
-.bid-input{
-  flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(0,242,122,.22);
-  border-radius:14px;padding:11px 14px;color:#fff;font-size:17px;font-weight:700;
-  outline:none;transition:border .2s;
-}
+.bid-input{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(0,242,122,.22);border-radius:14px;padding:11px 14px;color:#fff;font-size:17px;font-weight:700;outline:none;transition:border .2s;}
 .bid-input:focus{border-color:rgba(0,242,122,.48);}
-.bid-btn{
-  padding:11px 20px;border-radius:14px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#00D465,#006B30);
-  color:#fff;font-size:14px;font-weight:900;
-  box-shadow:0 0 18px rgba(0,212,101,.28);white-space:nowrap;
-  transition:all .2s;flex-shrink:0;
-}
+.bid-btn{padding:11px 20px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#00D465,#006B30);color:#fff;font-size:14px;font-weight:900;box-shadow:0 0 18px rgba(0,212,101,.28);white-space:nowrap;transition:all .2s;flex-shrink:0;}
 .bid-btn:active{transform:scale(.96);}
 .bid-quick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.bid-quick-btn{
-  flex:1;min-width:48px;padding:7px 0;text-align:center;
-  background:rgba(0,242,122,.09);border:1px solid rgba(0,242,122,.18);
-  border-radius:11px;cursor:pointer;font-size:12px;font-weight:800;color:#00C25A;
-  transition:all .15s;
-}
+.bid-quick-btn{flex:1;min-width:48px;padding:7px 0;text-align:center;background:rgba(0,242,122,.09);border:1px solid rgba(0,242,122,.18);border-radius:11px;cursor:pointer;font-size:12px;font-weight:800;color:#00C25A;transition:all .15s;}
 .bid-quick-btn:active{background:rgba(0,242,122,.22);}
 .bid-min-note{font-size:11px;color:var(--muted);font-weight:600;margin-top:7px;text-align:center;}
 
-/* ═══ STATS ═══ */
-.stats-card{
-  background:rgba(255,215,0,.03);
-  border:1px solid rgba(255,215,0,.13);border-radius:22px;
-  padding:16px;margin-bottom:14px;
-  animation:fadeIn .6s ease .3s both;
-}
+/* STATS */
+.stats-card{background:rgba(255,215,0,.03);border:1px solid rgba(255,215,0,.13);border-radius:22px;padding:16px;margin-bottom:14px;animation:fadeIn .6s ease .3s both;}
 .stats-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-.leader-card{
-  background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,100,0,.06));
-  border:1px solid rgba(255,215,0,.22);border-radius:18px;
-  padding:12px 14px;margin-bottom:10px;
-  display:flex;align-items:center;gap:12px;
-  box-shadow:0 0 24px rgba(255,215,0,.06);
-  position:relative;overflow:hidden;
-}
+.leader-card{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,100,0,.06));border:1px solid rgba(255,215,0,.22);border-radius:18px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 0 24px rgba(255,215,0,.06);position:relative;overflow:hidden;}
 .leader-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 0% 50%,rgba(255,215,0,.07),transparent 60%);pointer-events:none;}
 .leader-crown{font-size:28px;flex-shrink:0;animation:crownBounce 2s ease-in-out infinite;}
 @keyframes crownBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
 .leader-info{flex:1;}
 .leader-name{font-size:16px;font-weight:900;color:#fff;}
-.leader-prize{
-  font-size:11px;color:var(--gold);font-weight:700;margin-top:2px;
-  background:rgba(255,215,0,.09);border:1px solid rgba(255,215,0,.18);
-  border-radius:8px;padding:2px 8px;display:inline-block;margin-top:4px;
-}
-.leader-ton{
-  font-family:'Orbitron',monospace;font-size:17px;font-weight:900;
-  color:var(--gold);text-shadow:0 0 14px rgba(255,215,0,.5);
-  display:flex;align-items:center;gap:4px;flex-shrink:0;
-}
+.leader-prize{font-size:11px;color:var(--gold);font-weight:700;background:rgba(255,215,0,.09);border:1px solid rgba(255,215,0,.18);border-radius:8px;padding:2px 8px;display:inline-block;margin-top:4px;}
+.leader-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,215,0,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,215,0,.1);font-size:18px;}
+.leader-avatar img{width:100%;height:100%;object-fit:cover;}
+.leader-ton{font-family:'Orbitron',monospace;font-size:17px;font-weight:900;color:var(--gold);text-shadow:0 0 14px rgba(255,215,0,.5);display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .leader-ton img{width:17px;height:17px;object-fit:contain;}
 
-/* ═══ LEADERBOARD ═══ */
+/* LEADERBOARD */
 .leaderboard{margin-top:12px;}
 .lb-header{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.5px;padding:0 6px;margin-bottom:8px;}
-.lb-row{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);
-  border-radius:14px;padding:9px 12px;margin-bottom:6px;
-  transition:all .2s;
-}
+.lb-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:9px 12px;margin-bottom:6px;transition:all .2s;}
 .lb-row.top1{background:rgba(255,215,0,.07);border-color:rgba(255,215,0,.18);}
 .lb-row.top2{background:rgba(192,192,192,.05);border-color:rgba(192,192,192,.13);}
 .lb-row.top3{background:rgba(205,127,50,.05);border-color:rgba(205,127,50,.13);}
 .lb-rank{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;min-width:24px;text-align:center;flex-shrink:0;}
-.lb-rank.r1{color:#FFD700;}
-.lb-rank.r2{color:#C0C0C0;}
-.lb-rank.r3{color:#CD7F32;}
-.lb-rank.rn{color:rgba(255,255,255,.35);}
+.lb-rank.r1{color:#FFD700;}.lb-rank.r2{color:#C0C0C0;}.lb-rank.r3{color:#CD7F32;}.lb-rank.rn{color:rgba(255,255,255,.35);}
 .lb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2a3a,#111);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid rgba(255,255,255,.09);overflow:hidden;}
+.lb-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .lb-name{flex:1;font-size:13px;font-weight:800;color:#fff;}
 .lb-prize-note{font-size:10px;color:rgba(0,242,122,.65);font-weight:700;}
 .lb-ton{font-family:'Orbitron',monospace;font-size:12px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:3px;}
 .lb-ton img{width:12px;height:12px;}
 
-/* ═══ PRIZE BANNER ═══ */
-.prize-banner{
-  background:linear-gradient(135deg,rgba(0,22,4,.92),rgba(0,10,1,.97));
-  border:1px solid rgba(0,242,122,.18);border-radius:18px;
-  padding:13px 15px;margin-bottom:14px;margin-top:2px;
-  animation:fadeIn .6s ease .35s both;
-}
+/* PRIZE BANNER */
+.prize-banner{background:linear-gradient(135deg,rgba(0,22,4,.92),rgba(0,10,1,.97));border:1px solid rgba(0,242,122,.18);border-radius:18px;padding:13px 15px;margin-bottom:14px;margin-top:2px;animation:fadeIn .6s ease .35s both;}
 .prize-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .prize-row:last-child{margin-bottom:0;}
 .prize-icon{font-size:22px;flex-shrink:0;}
@@ -446,34 +369,71 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 .prize-text strong{color:var(--green);}
 .prize-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 0;}
 
-/* ═══ ACTION ROW ═══ */
+/* ACTION ROW */
 .action-row{display:flex;gap:8px;margin-bottom:14px;animation:fadeIn .6s ease .15s both;}
-.action-btn{
-  flex:1;padding:12px 10px;border-radius:16px;border:none;cursor:pointer;
-  font-size:13px;font-weight:900;color:#fff;transition:all .2s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
+.action-btn{flex:1;padding:12px 10px;border-radius:16px;border:none;cursor:pointer;font-size:13px;font-weight:900;color:#fff;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .action-btn.players{background:linear-gradient(135deg,rgba(0,90,190,.35),rgba(0,50,130,.45));border:1px solid rgba(0,136,204,.3);}
 .action-btn.explain{background:linear-gradient(135deg,rgba(140,70,0,.35),rgba(90,45,0,.45));border:1px solid rgba(255,140,0,.22);}
 .action-btn:active{transform:scale(.96);}
 
-/* ═══ SECTION LABEL ═══ */
+/* SECTION LABEL */
 .section-label{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin:16px 0 10px;display:flex;align-items:center;gap:8px;}
 .section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
 
-/* ═══ TOAST ═══ */
-#toast{
-  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-  background:rgba(10,10,25,.95);color:#fff;padding:10px 22px;border-radius:16px;
-  font-size:13px;font-weight:700;z-index:9999;pointer-events:none;
-  opacity:0;transition:opacity .3s;white-space:nowrap;
-  box-shadow:0 6px 24px rgba(0,0,0,.6);
-  border:1px solid rgba(255,255,255,.09);
-  max-width:90vw;text-align:center;
+/* CHANNEL PROMO PAGE */
+.promo-wrap{padding:0;}
+.promo-header-banner{
+  background:linear-gradient(135deg,rgba(0,90,190,.25),rgba(0,50,130,.35));
+  border:1px solid rgba(0,136,204,.22);border-radius:18px;
+  padding:16px;margin-bottom:16px;
 }
+.promo-header-title{font-size:17px;font-weight:900;color:#60CCFF;margin-bottom:6px;}
+.promo-header-desc{font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.6;}
+.promo-reward-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);
+  border-radius:20px;padding:5px 12px;margin-top:10px;
+  font-size:12px;font-weight:800;color:var(--gold);
+}
+.promo-submit-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;padding:16px;margin-bottom:16px;
+}
+.promo-submit-title{font-size:14px;font-weight:900;color:#fff;margin-bottom:12px;}
+.promo-input{
+  width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);
+  border-radius:14px;padding:11px 14px;color:#fff;font-size:14px;font-weight:600;
+  outline:none;margin-bottom:10px;transition:border .2s;direction:ltr;
+}
+.promo-input:focus{border-color:rgba(0,136,204,.5);}
+.promo-submit-btn{
+  width:100%;padding:12px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#0099DD,#005580);
+  color:#fff;font-size:14px;font-weight:900;
+  box-shadow:0 0 20px rgba(0,136,204,.3);transition:all .2s;
+}
+.promo-submit-btn:active{transform:scale(.98);}
+.promo-submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+.promo-log-title{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:1px;margin:16px 0 10px;text-transform:uppercase;}
+.promo-item{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;padding:12px 14px;margin-bottom:8px;
+}
+.promo-item-url{font-size:11px;color:#5BC8FF;font-weight:600;word-break:break-all;direction:ltr;margin-bottom:6px;}
+.promo-item-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.promo-item-status{font-size:11px;font-weight:800;padding:3px 9px;border-radius:8px;}
+.promo-item-status.pending{background:rgba(255,200,0,.12);color:#FFD700;border:1px solid rgba(255,200,0,.2);}
+.promo-item-status.approved{background:rgba(0,212,101,.12);color:#00D465;border:1px solid rgba(0,212,101,.2);}
+.promo-item-status.rejected{background:rgba(239,83,80,.12);color:#ef5350;border:1px solid rgba(239,83,80,.2);}
+.promo-item-earned{font-size:11px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:3px;}
+.promo-item-date{font-size:10px;color:var(--muted);font-weight:600;}
+.promo-empty{text-align:center;padding:30px 16px;color:var(--muted);font-size:13px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:rgba(10,10,25,.95);color:#fff;padding:10px 22px;border-radius:16px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.09);max-width:90vw;text-align:center;}
 #toast.show{opacity:1;}
 
-/* ═══ SCROLLBAR ═══ */
+/* SCROLLBAR */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(255,215,0,.18);border-radius:4px;}
@@ -481,25 +441,59 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 </head>
 <body>
 
-<!-- BACKGROUND -->
+<!-- BG -->
 <div class="orbs-wrap">
   <div class="orb-f o1"></div>
   <div class="orb-f o2"></div>
   <div class="orb-f o3"></div>
 </div>
-<canvas id="bgCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+<canvas id="bgCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%;display:block;"></canvas>
 
-<!-- BACKGROUND MUSIC -->
+<!-- AUDIO -->
 <audio id="bgMusic" loop>
   <source src="back music.mp3" type="audio/mpeg">
 </audio>
 
-<!-- MUSIC BUTTON -->
+<!-- MUSIC BTN -->
 <button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="موسيقى الخلفية">
-  <span class="note-anim">♪</span>
-  <span class="note-anim">♫</span>
   <i class="fas fa-music" id="musicIcon"></i>
 </button>
+
+<!-- ONE-TIME WELCOME OVERLAY -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-box">
+    <div class="welcome-header">
+      <div class="welcome-title">🏆 مرحباً بك في المزاد!</div>
+      <button class="welcome-close" onclick="closeWelcome()">✕</button>
+    </div>
+    <div class="welcome-scroll">
+      <div class="welcome-section">
+        <div class="welcome-section-title">🏆 باكج الأساطير — الموسم الجديد</div>
+        <p>الباكج يحتوي على 13 لاعب أسطوري بطاقة 99 كاملة، وهم نخبة أفضل لاعبي التاريخ: كرويف، كاكا، بوفون، كسياس، ملديني، كافو، رونالدينيو، رونالدو الظاهرة، بيليه، روبيرتو كارلوس، زيدان، مارادونا، إنيستا.</p>
+        <div class="welcome-highlight">💡 يمكن بيع هؤلاء اللاعبين في السوق فور بدء الموسم الجديد. السعر المتوقع للاعب الواحد: 5 - 10 TON، وإجمالي قيمة الباكج في السوق يتراوح بين 75 - 130 TON!</div>
+      </div>
+      <div class="welcome-section">
+        <div class="welcome-section-title">🎖️ Limited Edition حصري</div>
+        <p>هؤلاء اللاعبون سيكونون حصريين بالكامل — لن ينزلوا مرة أخرى في أي باكج عادي. ستكون ملكيتهم مرتبطة بمالك الباكج فقط، مما يجعل قيمتهم في السوق مرتفعة جداً.</p>
+      </div>
+      <div class="welcome-section">
+        <div class="welcome-section-title">🥇 الفائز الأول — الباكج كاملاً</div>
+        <p>أعلى مستخدم يدفع في المزاد سيحصل على الباكج كاملاً (13 لاعب) فور بدء الموسم الجديد.</p>
+        <div class="welcome-highlight">👑 الفائز الأول = 13 لاعب أسطوري بطاقة 99</div>
+      </div>
+      <div class="welcome-section">
+        <div class="welcome-section-title">🥈 باقي المتسابقين (2–10)</div>
+        <p>باقي المتسابقين الذين شاركوا في المزاد ولم يفوزوا بالمركز الأول سيحصلون على:</p>
+        <div class="welcome-green">✅ لاعب واحد فقط من الباكج (مختار عشوائياً)<br>✅ استرداد تلقائي 20% من قيمة مبيدهم إلى محفظتك فور بدء الموسم الجديد</div>
+      </div>
+      <div class="welcome-section">
+        <div class="welcome-section-title">⏰ مدة المزاد</div>
+        <p>المزاد يستمر 3 أيام فقط من وقت إطلاقه. بعد انتهاء الوقت، يتم توزيع الجوائز تلقائياً على الفائزين.</p>
+      </div>
+    </div>
+    <button class="welcome-start-btn" onclick="closeWelcome()">🚀 ابدأ المزايدة الآن!</button>
+  </div>
+</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -511,12 +505,8 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
     </div>
     <div class="tb-deposit-btn" onclick="openDepositModal()">
       <i class="fas fa-plus-circle" style="font-size:13px;"></i>
-      <span data-i18n="deposit">إيداع</span>
+      <span>إيداع</span>
     </div>
-  </div>
-  <div class="tb-center">
-    <span style="font-size:18px;">🏆</span>
-    <span class="tb-title" data-i18n="auction_title">مزاد الموسم</span>
   </div>
   <div class="tb-right">
     <div class="tb-lang-btn" onclick="openLangMenu()" id="tbLangBtn">
@@ -530,7 +520,7 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 <div id="langMenu" class="lang-menu">
   <div class="lang-menu-overlay" onclick="closeLangMenu()"></div>
   <div class="lang-menu-panel">
-    <div class="lang-menu-title" data-i18n="lang_select">اختر اللغة</div>
+    <div class="lang-menu-title">اختر اللغة</div>
     <div class="lang-option active-lang" onclick="setLang('ar')"><span>🇸🇦</span><span>العربية</span></div>
     <div class="lang-option" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
     <div class="lang-option" onclick="setLang('ru')"><span>🇷🇺</span><span>Русский</span></div>
@@ -543,21 +533,21 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 <div class="modal" id="depositModal">
   <div class="modal-box">
     <div class="modal-hdr">
-      <div class="modal-title" data-i18n="deposit_title">💰 إيداع TON</div>
+      <div class="modal-title">💰 إيداع TON</div>
       <button class="modal-close" onclick="closeDepositModal()">✕</button>
     </div>
     <div class="wal-row">
       <div class="wl-inf">
-        <div class="wll" data-i18n="wallet">المحفظة</div>
+        <div class="wll">المحفظة</div>
         <div class="wla" id="walletAddressDisplay">غير متصل</div>
       </div>
-      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connect">ربط</span></button>
+      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
     </div>
     <div class="dep-warn">
       <i class="fas fa-exclamation-triangle"></i>
-      <div data-i18n="deposit_warn">تأكد من إرسال المعاملة من المحفظة المتصلة فقط.</div>
+      <div>تأكد من إرسال المعاملة من المحفظة المتصلة فقط.</div>
     </div>
-    <label class="flabel" data-i18n="amount_ton">المبلغ (TON)</label>
+    <label class="flabel">المبلغ (TON)</label>
     <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1">
     <div class="preset-row">
       <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
@@ -566,10 +556,10 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
       <span class="prbtn" onclick="setDepAmt(5)">5</span>
       <span class="prbtn" onclick="setDepAmt(10)">10</span>
     </div>
-    <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="deposit_btn">إيداع TON</span></button>
+    <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
     <div class="tx-status" id="depositStatus">
       <div class="txsi">⏳</div>
-      <div class="txsm" data-i18n="processing">جاري معالجة الإيداع...</div>
+      <div class="txsm">جاري معالجة الإيداع...</div>
       <div class="txsd" id="depositStatusDetail"></div>
     </div>
   </div>
@@ -579,443 +569,371 @@ canvas#bgCanvas{width:100%;height:100%;display:block;}
 <div class="players-modal" id="playersModal">
   <div class="players-modal-box">
     <div class="pm-header">
-      <div class="pm-title" data-i18n="pkg_players">🌟 لاعبو الباكج</div>
+      <div class="pm-title">🌟 لاعبو الباكج</div>
       <button class="pm-close" onclick="closePlayersModal()">✕</button>
     </div>
     <div class="pm-scroll">
-      <div style="text-align:center;font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin-bottom:12px;letter-spacing:.5px;" data-i18n="limited_edition_note">⭐ جميع اللاعبين Limited Edition حصري — طاقة 99</div>
+      <div style="text-align:center;font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin-bottom:14px;letter-spacing:.5px;">⭐ جميع اللاعبين Limited Edition حصري — طاقة 99</div>
       <div class="players-grid" id="playersGrid"></div>
     </div>
   </div>
 </div>
 
-<!-- EXPLAIN MODAL -->
-<div class="explain-modal" id="explainModal">
-  <div class="explain-box">
-    <div class="explain-header">
-      <div class="pm-title" data-i18n="auction_rules">📖 شرح المزاد</div>
-      <button class="pm-close" onclick="closeExplainModal()">✕</button>
+<!-- MAIN PAGES -->
+<div id="page-auction" class="tab-page active">
+  <div class="main-wrap">
+
+    <div class="pkg-hero">
+      <div class="pkg-limited-badge">⚡ LIMITED EDITION</div>
+      <img class="pkg-hero-img"
+        src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5cbafd49-dd5e-4b3a-95b5-3cbc9ec31494.png"
+        onerror="this.style.background='linear-gradient(135deg,#1a0a00,#3d2000)';this.style.minHeight='200px'"
+        alt="Package">
+      <div class="pkg-hero-overlay">
+        <div class="pkg-hero-label">تحضير الموسم الجديد</div>
+        <div class="pkg-hero-title">باكج الأساطير 🏆</div>
+        <div class="pkg-hero-sub">13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
+      </div>
+      <button class="pkg-view-btn" onclick="openPlayersModal()">👁 عرض اللاعبين</button>
     </div>
-    <div class="explain-scroll">
-      <div class="explain-section">
-        <div class="explain-section-title">🏆 <span data-i18n="exp1_title">باكج الأساطير — الموسم الجديد</span></div>
-        <p data-i18n="exp1_body">الباكج يحتوي على 13 لاعب أسطوري بطاقة 99 كاملة، وهم نخبة أفضل لاعبي التاريخ: كرويف، كاكا، بوفون، كسياس، ملديني، كافو، رونالدينيو، رونالدو الظاهرة، بيليه، روبيرتو كارلوس، زيدان، مارادونا، إنيستا.</p>
-        <div class="explain-highlight" data-i18n="exp1_highlight">💡 يمكن بيع هؤلاء اللاعبين في السوق فور بدء الموسم الجديد. السعر المتوقع للاعب الواحد: 5 - 10 TON، وإجمالي قيمة الباكج في السوق يتراوح بين 75 - 130 TON!</div>
-      </div>
-      <div class="explain-section">
-        <div class="explain-section-title">🎖️ <span data-i18n="exp2_title">Limited Edition حصري</span></div>
-        <p data-i18n="exp2_body">هؤلاء اللاعبون سيكونون حصريين بالكامل — لن ينزلوا مرة أخرى في أي باكج عادي. ستكون ملكيتهم مرتبطة بمالك الباكج فقط، مما يجعل قيمتهم في السوق مرتفعة جداً.</p>
-      </div>
-      <div class="explain-section">
-        <div class="explain-section-title">🥇 <span data-i18n="exp3_title">الفائز الأول — الباكج كاملاً</span></div>
-        <p data-i18n="exp3_body">أعلى مستخدم يدفع في المزاد سيحصل على الباكج بالكامل (13 لاعب) فور بدء الموسم الجديد.</p>
-        <div class="explain-highlight" data-i18n="exp3_highlight">👑 الفائز الأول = 13 لاعب أسطوري بطاقة 99</div>
-      </div>
-      <div class="explain-section">
-        <div class="explain-section-title">🥈 <span data-i18n="exp4_title">باقي المتسابقين (2–10)</span></div>
-        <p data-i18n="exp4_body">باقي المتسابقين الذين شاركوا في المزاد ولم يفوزوا بالمركز الأول سيحصلون على:</p>
-        <div class="explain-green" data-i18n="exp4_highlight">✅ لاعب واحد فقط من الباكج (مختار عشوائياً)<br>✅ استرداد تلقائي 20% من قيمة مبيدهم إلى محفظتك فور بدء الموسم الجديد</div>
-      </div>
-      <div class="explain-section">
-        <div class="explain-section-title">⏰ <span data-i18n="exp5_title">مدة المزاد</span></div>
-        <p data-i18n="exp5_body">المزاد يستمر 3 أيام فقط. بعد انتهاء الوقت، يتم توزيع الجوائز تلقائياً.</p>
+
+    <div class="action-row">
+      <button class="action-btn players" onclick="openPlayersModal()">
+        <i class="fas fa-users"></i><span>لاعبو الباكج</span>
+      </button>
+      <button class="action-btn explain" onclick="openWelcome()">
+        <i class="fas fa-info-circle"></i><span>كيف يعمل المزاد؟</span>
+      </button>
+    </div>
+
+    <div class="timer-card">
+      <div class="timer-label">⏰ الوقت المتبقي للمزاد</div>
+      <div class="timer-row" id="timerRow">
+        <div class="timer-unit"><div class="timer-val orb" id="timerDays">03</div><div class="timer-unit-lbl">يوم</div></div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerHours">00</div><div class="timer-unit-lbl">ساعة</div></div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerMins">00</div><div class="timer-unit-lbl">دقيقة</div></div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerSecs">00</div><div class="timer-unit-lbl">ثانية</div></div>
       </div>
     </div>
+
+    <div class="bid-card">
+      <div class="bid-title"><i class="fas fa-gavel"></i><span>ضع مزايدتك</span></div>
+      <div class="bid-input-row">
+        <input type="number" class="bid-input" id="bidInput" placeholder="0.00" min="0.1" step="0.1">
+        <button class="bid-btn" onclick="placeBid()"><i class="fas fa-gavel"></i> زايد</button>
+      </div>
+      <div class="bid-quick">
+        <div class="bid-quick-btn" onclick="addBid(0.5)">+0.5</div>
+        <div class="bid-quick-btn" onclick="addBid(1)">+1</div>
+        <div class="bid-quick-btn" onclick="addBid(2)">+2</div>
+        <div class="bid-quick-btn" onclick="addBid(5)">+5</div>
+        <div class="bid-quick-btn" onclick="addBid(10)">+10</div>
+      </div>
+      <div class="bid-min-note">
+        أعلى مزايدة حالياً: <strong id="currentTopBid" style="color:var(--gold);" class="orb">0.00 TON</strong>
+      </div>
+    </div>
+
+    <div class="prize-banner">
+      <div class="prize-row"><div class="prize-icon">👑</div><div class="prize-text"><strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)</div></div>
+      <div class="prize-divider"></div>
+      <div class="prize-row"><div class="prize-icon">🥈</div><div class="prize-text"><strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم</div></div>
+    </div>
+
+    <div class="section-label">📊 إحصائيات المزاد</div>
+    <div class="stats-card">
+      <div class="stats-title"><i class="fas fa-crown"></i> المتصدر</div>
+      <div class="leader-card" id="leaderCard">
+        <div class="leader-crown">👑</div>
+        <div class="leader-avatar" id="leaderAvatar">🐼</div>
+        <div class="leader-info">
+          <div class="leader-name" id="leaderName">—</div>
+          <div class="leader-prize">سيحصل على الباكج كاملاً 🏆</div>
+        </div>
+        <div class="leader-ton">
+          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src=''" alt="">
+          <span class="orb" id="leaderAmount">0.00</span>
+        </div>
+      </div>
+      <div class="leaderboard">
+        <div class="lb-header">
+          <span>الترتيب</span><span>المستخدم</span><span>المبلغ</span>
+        </div>
+        <div id="leaderboardList"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- MAIN -->
-<div class="main-wrap">
+<!-- CHANNEL PROMO PAGE -->
+<div id="page-promo" class="tab-page">
+  <div class="main-wrap promo-wrap">
 
-  <!-- Package Hero -->
-  <div class="pkg-hero">
-    <div class="pkg-limited-badge" data-i18n="limited">⚡ LIMITED EDITION</div>
-    <img class="pkg-hero-img"
-      src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5cbafd49-dd5e-4b3a-95b5-3cbc9ec31494.png"
-      onerror="this.style.background='linear-gradient(135deg,#1a0a00,#3d2000)';this.style.minHeight='200px'"
-      alt="Package">
-    <div class="pkg-hero-overlay">
-      <div class="pkg-hero-label" data-i18n="season_prep">تحضير الموسم الجديد</div>
-      <div class="pkg-hero-title" data-i18n="legends_pkg">باكج الأساطير 🏆</div>
-      <div class="pkg-hero-sub" data-i18n="legends_sub">13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
+    <div class="promo-header-banner">
+      <div class="promo-header-title">📢 دعم قنوات التيليجرام</div>
+      <div class="promo-header-desc">أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.</div>
+      <div class="promo-reward-badge">🏆 مكافأة: 0.1 — 100 TON لكل منشور</div>
     </div>
-    <button class="pkg-view-btn" onclick="openPlayersModal()" data-i18n="view_players">👁 عرض اللاعبين</button>
-  </div>
 
-  <!-- Actions -->
-  <div class="action-row">
-    <button class="action-btn players" onclick="openPlayersModal()">
-      <i class="fas fa-users"></i>
-      <span data-i18n="view_players_btn">لاعبو الباكج</span>
-    </button>
-    <button class="action-btn explain" onclick="openExplainModal()">
-      <i class="fas fa-info-circle"></i>
-      <span data-i18n="how_works">كيف يعمل المزاد؟</span>
-    </button>
-  </div>
-
-  <!-- Timer -->
-  <div class="timer-card">
-    <div class="timer-label" data-i18n="time_remaining">⏰ الوقت المتبقي للمزاد</div>
-    <div class="timer-row" id="timerRow">
-      <div class="timer-unit">
-        <div class="timer-val orb" id="timerDays">03</div>
-        <div class="timer-unit-lbl" data-i18n="days">يوم</div>
-      </div>
-      <div class="timer-sep">:</div>
-      <div class="timer-unit">
-        <div class="timer-val orb" id="timerHours">00</div>
-        <div class="timer-unit-lbl" data-i18n="hours">ساعة</div>
-      </div>
-      <div class="timer-sep">:</div>
-      <div class="timer-unit">
-        <div class="timer-val orb" id="timerMins">00</div>
-        <div class="timer-unit-lbl" data-i18n="minutes">دقيقة</div>
-      </div>
-      <div class="timer-sep">:</div>
-      <div class="timer-unit">
-        <div class="timer-val orb" id="timerSecs">00</div>
-        <div class="timer-unit-lbl" data-i18n="seconds">ثانية</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bid Card -->
-  <div class="bid-card">
-    <div class="bid-title">
-      <i class="fas fa-gavel"></i>
-      <span data-i18n="place_bid">ضع مزايدتك</span>
-    </div>
-    <div class="bid-input-row">
-      <input type="number" class="bid-input" id="bidInput" placeholder="0.00" min="0.1" step="0.1">
-      <button class="bid-btn" onclick="placeBid()">
-        <i class="fas fa-gavel"></i>
-        <span data-i18n="bid">زايد</span>
+    <div class="promo-submit-card">
+      <div class="promo-submit-title">📎 أرسل رابط منشورك</div>
+      <input type="url" class="promo-input" id="promoLinkInput" placeholder="https://t.me/yourchannel/123">
+      <button class="promo-submit-btn" onclick="submitPromoPost()" id="promoSubmitBtn">
+        <i class="fas fa-paper-plane"></i> إرسال للمراجعة
       </button>
     </div>
-    <div class="bid-quick">
-      <div class="bid-quick-btn" onclick="addBid(0.5)">+0.5</div>
-      <div class="bid-quick-btn" onclick="addBid(1)">+1</div>
-      <div class="bid-quick-btn" onclick="addBid(2)">+2</div>
-      <div class="bid-quick-btn" onclick="addBid(5)">+5</div>
-      <div class="bid-quick-btn" onclick="addBid(10)">+10</div>
-    </div>
-    <div class="bid-min-note" id="bidMinNote">
-      <span data-i18n="current_top">أعلى مزايدة حالياً: </span>
-      <strong id="currentTopBid" style="color:var(--gold);" class="orb">0.00 TON</strong>
-    </div>
-  </div>
 
-  <!-- Prize Banner -->
-  <div class="prize-banner">
-    <div class="prize-row">
-      <div class="prize-icon">👑</div>
-      <div class="prize-text"><strong data-i18n="prize1_strong">المركز الأول</strong> — <span data-i18n="prize1_text">يحصل على الباكج كاملاً (13 لاعب أسطوري)</span></div>
+    <div class="promo-log-title">📋 سجل المنشورات</div>
+    <div id="promoLogList">
+      <div class="promo-empty">لا توجد منشورات مرسلة بعد</div>
     </div>
-    <div class="prize-divider"></div>
-    <div class="prize-row">
-      <div class="prize-icon">🥈</div>
-      <div class="prize-text"><strong data-i18n="prize2_strong">المراكز 2–10</strong> — <span data-i18n="prize2_text">لاعب واحد من الباكج + استرداد 20% فور بدء الموسم</span></div>
-    </div>
-  </div>
 
-  <!-- Stats -->
-  <div class="section-label" data-i18n="stats_label">📊 إحصائيات المزاد</div>
-  <div class="stats-card">
-    <div class="stats-title"><i class="fas fa-crown"></i> <span data-i18n="leader">المتصدر</span></div>
-    <div class="leader-card" id="leaderCard">
-      <div class="leader-crown">👑</div>
-      <div class="leader-info">
-        <div class="leader-name" id="leaderName">أحمد</div>
-        <div class="leader-prize" data-i18n="winner_gets_all">سيحصل على الباكج كاملاً 🏆</div>
-      </div>
-      <div class="leader-ton">
-        <img src="https://ton.org/download/ton_symbol.png" onerror="this.src=''" style="width:18px;height:18px;object-fit:contain;" alt="TON">
-        <span class="orb" id="leaderAmount">5.50</span>
-      </div>
-    </div>
-    <div class="leaderboard">
-      <div class="lb-header">
-        <span data-i18n="rank">الترتيب</span>
-        <span data-i18n="user">المستخدم</span>
-        <span data-i18n="amount">المبلغ</span>
-      </div>
-      <div id="leaderboardList"></div>
-    </div>
   </div>
+</div>
 
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('auction')" id="nav-auction">
+    <i class="fas fa-gavel"></i>
+    <span>المزاد</span>
+  </div>
+  <div class="nav-item" onclick="switchTab('promo')" id="nav-promo">
+    <i class="fas fa-bullhorn"></i>
+    <span>قناتك</span>
+  </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script>
-// ════ BACKGROUND CANVAS STARS ════
-(function(){
-  const canvas=document.getElementById('bgCanvas');
-  const ctx=canvas.getContext('2d');
-  let stars=[];
-  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;initStars();}
-  function initStars(){
-    stars=[];
-    for(let i=0;i<80;i++){
-      stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,a:Math.random(),speed:Math.random()*.015+.005,phase:Math.random()*Math.PI*2});
-    }
-  }
-  function drawStars(t){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    stars.forEach(s=>{
-      const alpha=.1+.7*(.5+.5*Math.sin(s.phase+t*s.speed));
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();
+// ════ CONFIG ════
+const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
+
+// ════ TELEGRAM INIT ════
+const tg = window.Telegram?.WebApp;
+let tgInitData = '';
+let tgUser = null;
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tgInitData = tg.initData || '';
+  tgUser = tg.initDataUnsafe?.user || null;
+}
+
+// ════ USER STATE ════
+let userTonBalance = 0;
+let myBid = 0;
+let currentLang = 'ar';
+let auctionEndDate = null;
+let leaderboard = [];
+let promoLog = [];
+
+// ════ API CALL ════
+async function apiCall(action, data = {}) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tgInitData },
+      body: JSON.stringify({ action, data, initData: tgInitData }),
     });
-    requestAnimationFrame(drawStars);
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return { success: false, error: e.message };
   }
+}
+
+// ════ BACKGROUND STARS ════
+(function(){
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;initStars();}
+  function initStars(){stars=[];for(let i=0;i<80;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,a:Math.random(),speed:Math.random()*.015+.005,phase:Math.random()*Math.PI*2});}
+  function drawStars(t){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{const alpha=.1+.7*(.5+.5*Math.sin(s.phase+t*s.speed));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();});requestAnimationFrame(drawStars);}
   window.addEventListener('resize',resize);
   resize();
   requestAnimationFrame(drawStars);
 })();
 
-// ════ MUSIC ════
+// ════ MUSIC — auto on ════
 let musicPlaying = false;
 const bgMusic = document.getElementById('bgMusic');
 const musicIcon = document.getElementById('musicIcon');
 const musicBtn = document.getElementById('musicBtn');
-
 bgMusic.volume = 0.35;
 
-function toggleMusic(){
-  if(musicPlaying){
+function tryAutoPlay() {
+  bgMusic.play().then(() => {
+    musicIcon.className = 'fas fa-pause';
+    musicBtn.classList.add('playing');
+    musicPlaying = true;
+  }).catch(() => {});
+}
+
+function toggleMusic() {
+  if (musicPlaying) {
     bgMusic.pause();
-    musicIcon.className='fas fa-music';
+    musicIcon.className = 'fas fa-music';
     musicBtn.classList.remove('playing');
-    musicPlaying=false;
+    musicPlaying = false;
   } else {
-    bgMusic.play().then(()=>{
-      musicIcon.className='fas fa-pause';
+    bgMusic.play().then(() => {
+      musicIcon.className = 'fas fa-pause';
       musicBtn.classList.add('playing');
-      musicPlaying=true;
-    }).catch(()=>{
-      showToast('🎵 اضغط مرة أخرى لتشغيل الموسيقى');
-    });
+      musicPlaying = true;
+    }).catch(() => showToast('🎵 اضغط مرة أخرى لتشغيل الموسيقى'));
   }
 }
 
-// Auto-play on first interaction
-document.addEventListener('click', function autoPlay(){
-  if(!musicPlaying){
-    bgMusic.play().then(()=>{
-      musicIcon.className='fas fa-pause';
-      musicBtn.classList.add('playing');
-      musicPlaying=true;
-    }).catch(()=>{});
+document.addEventListener('click', function firstClick(){
+  tryAutoPlay();
+  document.removeEventListener('click', firstClick);
+}, {once: true});
+
+tryAutoPlay();
+
+// ════ WELCOME NOTIFICATION ════
+const WELCOME_KEY = 'auction_welcome_seen_v1';
+
+function checkWelcome() {
+  const seen = localStorage.getItem(WELCOME_KEY);
+  if (!seen) {
+    document.getElementById('welcomeOverlay').classList.remove('hidden');
+  } else {
+    document.getElementById('welcomeOverlay').classList.add('hidden');
   }
-  document.removeEventListener('click', autoPlay);
-},{once:true});
+}
 
-// ════ CONFIG ════
-const AUCTION_END = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+function closeWelcome() {
+  localStorage.setItem(WELCOME_KEY, '1');
+  document.getElementById('welcomeOverlay').classList.add('hidden');
+}
 
-// ════ TRANSLATIONS ════
-const I18N = {
-  ar:{
-    deposit:'إيداع', connect:'ربط', auction_title:'مزاد الموسم',
-    lang_select:'اختر اللغة', deposit_title:'💰 إيداع TON',
-    wallet:'المحفظة', amount_ton:'المبلغ (TON)',
-    deposit_btn:'إيداع TON', processing:'جاري معالجة الإيداع...',
-    deposit_warn:'تأكد من إرسال المعاملة من المحفظة المتصلة فقط.',
-    pkg_players:'🌟 لاعبو الباكج', limited_edition_note:'⭐ جميع اللاعبين Limited Edition حصري — طاقة 99',
-    auction_rules:'📖 شرح المزاد',
-    exp1_title:'باكج الأساطير — الموسم الجديد',
-    exp1_body:'الباكج يحتوي على 13 لاعب أسطوري بطاقة 99 كاملة، وهم نخبة أفضل لاعبي التاريخ.',
-    exp1_highlight:'💡 يمكن بيع هؤلاء اللاعبين في السوق فور بدء الموسم الجديد. السعر المتوقع للاعب: 5–10 TON، إجمالي قيمة الباكج: 75–130 TON!',
-    exp2_title:'Limited Edition حصري',exp2_body:'هؤلاء اللاعبون لن ينزلوا مرة أخرى — ملكيتهم مرتبطة بمالك الباكج فقط.',
-    exp3_title:'الفائز الأول — الباكج كاملاً',exp3_body:'أعلى مستخدم يدفع في المزاد يحصل على الباكج كاملاً (13 لاعب).',
-    exp3_highlight:'👑 الفائز الأول = 13 لاعب أسطوري بطاقة 99',
-    exp4_title:'باقي المتسابقين (2–10)',exp4_body:'المتسابقون من 2 إلى 10 يحصلون على:',
-    exp4_highlight:'✅ لاعب واحد من الباكج\n✅ استرداد تلقائي 20% من مبيدهم فور بدء الموسم',
-    exp5_title:'مدة المزاد',exp5_body:'المزاد يستمر 3 أيام فقط. بعد انتهاء الوقت تُوزَّع الجوائز تلقائياً.',
-    limited:'⚡ LIMITED EDITION',season_prep:'تحضير الموسم الجديد',legends_pkg:'باكج الأساطير 🏆',
-    legends_sub:'13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
-    view_players:'👁 عرض اللاعبين',view_players_btn:'لاعبو الباكج',how_works:'كيف يعمل المزاد؟',
-    time_remaining:'⏰ الوقت المتبقي للمزاد',days:'يوم',hours:'ساعة',minutes:'دقيقة',seconds:'ثانية',
-    place_bid:'ضع مزايدتك',bid:'زايد',current_top:'أعلى مزايدة حالياً: ',
-    prize1_strong:'المركز الأول',prize1_text:'يحصل على الباكج كاملاً (13 لاعب أسطوري)',
-    prize2_strong:'المراكز 2–10',prize2_text:'لاعب واحد من الباكج + استرداد 20% فور بدء الموسم',
-    stats_label:'📊 إحصائيات المزاد',leader:'المتصدر',winner_gets_all:'سيحصل على الباكج كاملاً 🏆',
-    rank:'الترتيب',user:'المستخدم',amount:'المبلغ',
-    bid_success:'✅ تم تسجيل مزايدتك!',bid_low:'⚠️ يجب أن تكون مزايدتك أعلى من الحالية',
-    bid_zero:'⚠️ أدخل مبلغاً صحيحاً',ended:'🏁 انتهى المزاد',
-  },
-  en:{
-    deposit:'Deposit',connect:'Connect',auction_title:'Season Auction',
-    lang_select:'Select Language',deposit_title:'💰 Deposit TON',wallet:'Wallet',amount_ton:'Amount (TON)',
-    deposit_btn:'Deposit TON',processing:'Processing deposit...',
-    deposit_warn:'Make sure you send from the connected wallet only.',
-    pkg_players:'🌟 Package Players',limited_edition_note:'⭐ All players Limited Edition Exclusive — Rating 99',
-    auction_rules:'📖 Auction Rules',
-    exp1_title:'Legends Package — New Season',exp1_body:'The package contains 13 legendary players rated 99 — the best in history.',
-    exp1_highlight:'💡 These players can be sold when the new season starts. Expected price: 5–10 TON per player, total: 75–130 TON!',
-    exp2_title:'Exclusive Limited Edition',exp2_body:'These players will NEVER be available again — tied exclusively to the winner.',
-    exp3_title:'1st Place — Full Package',exp3_body:'The highest bidder wins the full package (13 players).',
-    exp3_highlight:'👑 1st Place = 13 legendary players rated 99',
-    exp4_title:'Other Competitors (2–10)',exp4_body:'Competitors ranked 2–10 receive:',
-    exp4_highlight:'✅ 1 player from the package\n✅ Automatic 20% refund when new season starts',
-    exp5_title:'Auction Duration',exp5_body:'The auction runs for 3 days. After time runs out, prizes are distributed automatically.',
-    limited:'⚡ LIMITED EDITION',season_prep:'New Season Preparation',legends_pkg:'Legends Package 🏆',
-    legends_sub:'13 legendary players rated 99 — Exclusive Limited Edition',
-    view_players:'👁 View Players',view_players_btn:'Package Players',how_works:'How does the auction work?',
-    time_remaining:'⏰ Auction Time Remaining',days:'Days',hours:'Hours',minutes:'Mins',seconds:'Secs',
-    place_bid:'Place Your Bid',bid:'Bid',current_top:'Current Top Bid: ',
-    prize1_strong:'1st Place',prize1_text:'Wins the full package (13 legendary players)',
-    prize2_strong:'Places 2–10',prize2_text:'1 player from the package + 20% auto-refund when season starts',
-    stats_label:'📊 Auction Stats',leader:'Leader',winner_gets_all:'Will win the full package 🏆',
-    rank:'Rank',user:'User',amount:'Amount',
-    bid_success:'✅ Your bid has been registered!',bid_low:'⚠️ Bid must be higher than current top',
-    bid_zero:'⚠️ Please enter a valid amount',ended:'🏁 Auction Ended',
-  },
-  ru:{
-    deposit:'Пополнить',connect:'Подключить',auction_title:'Аукцион Сезона',
-    lang_select:'Выберите язык',deposit_title:'💰 Пополнение TON',wallet:'Кошелёк',amount_ton:'Сумма (TON)',
-    deposit_btn:'Пополнить TON',processing:'Обработка...',
-    deposit_warn:'Убедитесь, что отправляете с подключённого кошелька.',
-    pkg_players:'🌟 Игроки пакета',limited_edition_note:'⭐ Все игроки Limited Edition, рейтинг 99',
-    auction_rules:'📖 Правила аукциона',
-    exp1_title:'Пакет Легенд — Новый Сезон',exp1_body:'Пакет содержит 13 легендарных игроков с рейтингом 99 — лучшие в истории.',
-    exp1_highlight:'💡 Игроков можно продать на рынке с началом сезона. Ожидаемая цена: 5–10 TON, стоимость пакета: 75–130 TON!',
-    exp2_title:'Эксклюзивный Limited Edition',exp2_body:'Эти игроки больше не появятся — принадлежат только победителю.',
-    exp3_title:'1-е место — Полный пакет',exp3_body:'Победитель получает весь пакет (13 игроков).',
-    exp3_highlight:'👑 1-е место = 13 легендарных игроков рейтинга 99',
-    exp4_title:'Остальные участники (2–10)',exp4_body:'Участники 2–10 получают:',
-    exp4_highlight:'✅ 1 игрок из пакета\n✅ Автоматический возврат 20% ставки',
-    exp5_title:'Длительность',exp5_body:'Аукцион длится 3 дня. Призы распределяются автоматически.',
-    limited:'⚡ LIMITED EDITION',season_prep:'Подготовка к сезону',legends_pkg:'Пакет Легенд 🏆',
-    legends_sub:'13 легендарных игроков рейтинга 99 — Exclusive',
-    view_players:'👁 Смотреть',view_players_btn:'Игроки пакета',how_works:'Как работает аукцион?',
-    time_remaining:'⏰ Оставшееся время',days:'дн',hours:'ч',minutes:'мин',seconds:'сек',
-    place_bid:'Сделать ставку',bid:'Ставить',current_top:'Топ ставка: ',
-    prize1_strong:'1-е место',prize1_text:'Весь пакет (13 легенд)',
-    prize2_strong:'2–10 места',prize2_text:'1 игрок + возврат 20%',
-    stats_label:'📊 Статистика',leader:'Лидер',winner_gets_all:'Получит полный пакет 🏆',
-    rank:'Место',user:'Пользователь',amount:'Сумма',
-    bid_success:'✅ Ставка зарегистрирована!',bid_low:'⚠️ Ставка должна быть выше текущей',
-    bid_zero:'⚠️ Введите корректную сумму',ended:'🏁 Аукцион завершён',
-  },
-  fr:{
-    deposit:'Dépôt',connect:'Connecter',auction_title:'Enchères Saison',
-    lang_select:'Choisir la langue',deposit_title:'💰 Dépôt TON',wallet:'Portefeuille',amount_ton:'Montant (TON)',
-    deposit_btn:'Déposer TON',processing:'Traitement en cours...',
-    deposit_warn:"Assurez-vous d'envoyer depuis le portefeuille connecté.",
-    pkg_players:'🌟 Joueurs du pack',limited_edition_note:'⭐ Tous les joueurs Limited Edition — Note 99',
-    auction_rules:'📖 Règles des enchères',
-    exp1_title:'Pack Légendes — Nouvelle Saison',exp1_body:'Le pack contient 13 joueurs légendaires notés 99.',
-    exp1_highlight:'💡 Ces joueurs peuvent être vendus dès le début de la saison. Prix: 5–10 TON/joueur, valeur totale: 75–130 TON!',
-    exp2_title:'Limited Edition Exclusif',exp2_body:'Ces joueurs ne reviendront jamais.',
-    exp3_title:'1ère place — Pack complet',exp3_body:'Le plus offrant remporte le pack complet.',
-    exp3_highlight:'👑 1ère place = 13 joueurs légendaires notés 99',
-    exp4_title:'Autres participants (2–10)',exp4_body:'Les participants du 2e au 10e reçoivent:',
-    exp4_highlight:'✅ 1 joueur du pack\n✅ Remboursement automatique 20%',
-    exp5_title:'Durée',exp5_body:'Les enchères durent 3 jours. Les prix sont distribués automatiquement.',
-    limited:'⚡ LIMITED EDITION',season_prep:'Préparation Nouvelle Saison',legends_pkg:'Pack Légendes 🏆',
-    legends_sub:'13 joueurs légendaires notés 99 — Exclusif',
-    view_players:'👁 Voir',view_players_btn:'Joueurs du pack',how_works:'Comment fonctionnent les enchères?',
-    time_remaining:'⏰ Temps restant',days:'j',hours:'h',minutes:'min',seconds:'sec',
-    place_bid:'Placer votre offre',bid:'Enchérir',current_top:'Offre actuelle: ',
-    prize1_strong:'1ère place',prize1_text:'Remporte le pack complet (13 légendes)',
-    prize2_strong:'2–10ème',prize2_text:'1 joueur + remboursement 20%',
-    stats_label:'📊 Statistiques',leader:'Leader',winner_gets_all:'Remportera le pack complet 🏆',
-    rank:'Rang',user:'Utilisateur',amount:'Montant',
-    bid_success:'✅ Votre offre est enregistrée!',bid_low:"⚠️ Votre offre doit dépasser l'offre actuelle",
-    bid_zero:'⚠️ Entrez un montant valide',ended:'🏁 Enchères terminées',
-  },
-  de:{
-    deposit:'Einzahlen',connect:'Verbinden',auction_title:'Saison-Auktion',
-    lang_select:'Sprache wählen',deposit_title:'💰 TON einzahlen',wallet:'Wallet',amount_ton:'Betrag (TON)',
-    deposit_btn:'TON einzahlen',processing:'Wird verarbeitet...',
-    deposit_warn:'Stellen Sie sicher, dass Sie vom verbundenen Wallet senden.',
-    pkg_players:'🌟 Paket-Spieler',limited_edition_note:'⭐ Alle Spieler Limited Edition — Bewertung 99',
-    auction_rules:'📖 Auktionsregeln',
-    exp1_title:'Legenden-Paket — Neue Saison',exp1_body:'Das Paket enthält 13 legendäre Spieler mit Bewertung 99.',
-    exp1_highlight:'💡 Diese Spieler können zum Start der Saison verkauft werden. Erwarteter Wert: 75–130 TON!',
-    exp2_title:'Exklusiv Limited Edition',exp2_body:'Diese Spieler kommen nie wieder.',
-    exp3_title:'1. Platz — Komplettes Paket',exp3_body:'Der Höchstbietende erhält das komplette Paket.',
-    exp3_highlight:'👑 1. Platz = 13 legendäre Spieler mit Bewertung 99',
-    exp4_title:'Weitere Teilnehmer (2–10)',exp4_body:'Teilnehmer auf Platz 2–10 erhalten:',
-    exp4_highlight:'✅ 1 Spieler aus dem Paket\n✅ Automatische 20% Rückerstattung',
-    exp5_title:'Auktionsdauer',exp5_body:'Die Auktion läuft 3 Tage. Preise werden automatisch verteilt.',
-    limited:'⚡ LIMITED EDITION',season_prep:'Neue Saison Vorbereitung',legends_pkg:'Legenden-Paket 🏆',
-    legends_sub:'13 legendäre Spieler Bewertung 99 — Exklusiv',
-    view_players:'👁 Anzeigen',view_players_btn:'Paket-Spieler',how_works:'Wie funktioniert die Auktion?',
-    time_remaining:'⏰ Verbleibende Zeit',days:'Tage',hours:'Std',minutes:'Min',seconds:'Sek',
-    place_bid:'Gebot abgeben',bid:'Bieten',current_top:'Höchstgebot: ',
-    prize1_strong:'1. Platz',prize1_text:'Erhält das komplette Paket (13 Legenden)',
-    prize2_strong:'Platz 2–10',prize2_text:'1 Spieler + automatisch 20% Rückerstattung',
-    stats_label:'📊 Statistiken',leader:'Führend',winner_gets_all:'Gewinnt das komplette Paket 🏆',
-    rank:'Rang',user:'Nutzer',amount:'Betrag',
-    bid_success:'✅ Ihr Gebot wurde registriert!',bid_low:'⚠️ Gebot muss höher als aktuelles sein',
-    bid_zero:'⚠️ Bitte geben Sie einen gültigen Betrag ein',ended:'🏁 Auktion beendet',
-  }
-};
+function openWelcome() {
+  document.getElementById('welcomeOverlay').classList.remove('hidden');
+}
 
-// ════ PLAYERS DATA ════
-const PLAYERS = [
-  {name:'كرويف',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0419a24b-2a4d-468a-a383-e5b7a969ab64.png',pos:'CAM',rating:99},
-  {name:'كاكا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/66d178dd-63f3-4665-9eeb-320beaf8d283.png',pos:'CAM',rating:99},
-  {name:'بوفون',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/11a2528f-73e8-49bf-93d5-26cd658bd3a3.png',pos:'GK',rating:99},
-  {name:'كسياس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/ed0ed9ca-30c3-4add-a356-ac1ff6a1377d.png',pos:'GK',rating:99},
-  {name:'ملديني',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e71a665e-202e-4e08-964c-121583c482d5.png',pos:'CB',rating:99},
-  {name:'كافو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/4628b100-ae11-4293-8443-84b4e022e86f.png',pos:'RB',rating:99},
-  {name:'رونالدينيو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/45ee5567-f567-4218-ac01-6fa9d18df665.png',pos:'LW',rating:99},
-  {name:'رونالدو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f92c2363-fa2a-4758-8b87-4fc004b4a22b.png',pos:'ST',rating:99},
-  {name:'بيليه',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f6e96047-c30a-416f-8f40-59faf9c6376f.png',pos:'ST',rating:99},
-  {name:'ر. كارلوس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f9ae38bc-daae-4bb7-82f0-2bead35b0d9c.png',pos:'LB',rating:99},
-  {name:'زيدان',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/07c36523-a0ef-4b4d-9812-f2d28160f1cb.png',pos:'CAM',rating:99},
-  {name:'مارادونا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5b77a26f-301b-400f-a7a8-f0555014ddf1.png',pos:'SS',rating:99},
-  {name:'إنيستا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/feec6ace-0dd8-4b2a-afba-ee15ec361393.png',pos:'CM',rating:99},
-];
-const CARD_BG='https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5cbafd49-dd5e-4b3a-95b5-3cbc9ec31494.png';
-
-// ════ LEADERBOARD DATA ════
-let leaderboard=[
-  {name:'أحمد',emoji:'🐼',ton:5.50},
-  {name:'محمد',emoji:'⚡',ton:4.20},
-  {name:'سارة',emoji:'🌟',ton:3.80},
-  {name:'علي',emoji:'🔥',ton:2.50},
-  {name:'نور',emoji:'💎',ton:2.00},
-  {name:'فاطمة',emoji:'🎯',ton:1.50},
-  {name:'خالد',emoji:'🏆',ton:1.20},
-  {name:'ريم',emoji:'🌙',ton:0.90},
-  {name:'عمر',emoji:'⚽',ton:0.60},
-  {name:'لينا',emoji:'🎪',ton:0.40},
-];
-
-// ════ STATE ════
-let currentLang='ar';
-let userTonBalance=0.00;
-let myBid=0;
+// ════ TAB NAVIGATION ════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+}
 
 // ════ LANG ════
-function t(key){return(I18N[currentLang]||I18N.ar)[key]||key;}
 function setLang(lang){
-  currentLang=lang;
-  document.documentElement.lang=lang;
-  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-  const flags={ar:'🇸🇦',en:'🇬🇧',ru:'🇷🇺',fr:'🇫🇷',de:'🇩🇪'};
-  const codes={ar:'AR',en:'EN',ru:'RU',fr:'FR',de:'DE'};
-  document.getElementById('tbLangFlag').textContent=flags[lang];
-  document.getElementById('tbLangCode').textContent=codes[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key=el.getAttribute('data-i18n');
-    if(I18N[lang]&&I18N[lang][key]){
-      const val=I18N[lang][key];
-      if(val.includes('\n'))el.innerHTML=val.split('\n').map(l=>`<div>${l}</div>`).join('');
-      else el.textContent=val;
-    }
-  });
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const flags = {ar:'🇸🇦',en:'🇬🇧',ru:'🇷🇺',fr:'🇫🇷',de:'🇩🇪'};
+  const codes = {ar:'AR',en:'EN',ru:'RU',fr:'FR',de:'DE'};
+  document.getElementById('tbLangFlag').textContent = flags[lang];
+  document.getElementById('tbLangCode').textContent = codes[lang];
   closeLangMenu();
 }
 function openLangMenu(){document.getElementById('langMenu').classList.add('open');}
 function closeLangMenu(){document.getElementById('langMenu').classList.remove('open');}
+
+// ════ USER INIT ════
+function initUserUI() {
+  const avatar = document.getElementById('topUserAvatar');
+  if (tgUser) {
+    if (tgUser.photo_url) {
+      avatar.innerHTML = `<img src="${tgUser.photo_url}" alt="" onerror="this.parentElement.textContent='🐼'">`;
+    } else {
+      avatar.textContent = (tgUser.first_name || '🐼')[0].toUpperCase();
+    }
+  }
+}
+
+// ════ LOAD DATA FROM SERVER ════
+async function loadAuctionData() {
+  if (!tgInitData && !tgUser) {
+    setMockData();
+    return;
+  }
+  const uid = tgUser ? String(tgUser.id) : null;
+  if (!uid) { setMockData(); return; }
+
+  const [auctRes, userRes] = await Promise.all([
+    apiCall('getAuction', { uid }),
+    apiCall('getUser', { uid }),
+  ]);
+
+  if (auctRes.success && auctRes.data) {
+    const d = auctRes.data;
+    auctionEndDate = d.endDate ? new Date(d.endDate) : null;
+    myBid = d.myBid || 0;
+    leaderboard = (d.leaderboard || []).map(e => ({
+      name: e.name || 'User',
+      photo: e.photo || null,
+      ton: e.amount || 0,
+      userId: e.userId,
+    }));
+    renderLeaderboard();
+  } else {
+    setMockData();
+  }
+
+  if (userRes.success && userRes.data) {
+    userTonBalance = userRes.data.tonBalance || 0;
+    document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
+  }
+}
+
+function setMockData() {
+  auctionEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  leaderboard = [
+    {name:'Ahmed',photo:null,ton:5.50},{name:'Mohammed',photo:null,ton:4.20},
+    {name:'Sara',photo:null,ton:3.80},{name:'Ali',photo:null,ton:2.50},
+    {name:'Nour',photo:null,ton:2.00},
+  ];
+  renderLeaderboard();
+}
+
+// ════ PLAYERS DATA ════
+const PLAYERS = [
+  {name:'Cruyff',nameAr:'كرويف',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0419a24b-2a4d-468a-a383-e5b7a969ab64.png',pos:'CAM',nat:'🇳🇱',natImg:'https://flagcdn.com/w40/nl.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+  {name:'Kaka',nameAr:'كاكا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/66d178dd-63f3-4665-9eeb-320beaf8d283.png',pos:'CAM',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Buffon',nameAr:'بوفون',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/11a2528f-73e8-49bf-93d5-26cd658bd3a3.png',pos:'GK',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Juventus',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/40px-Juventus_FC_2017_logo.svg.png',rating:99},
+  {name:'Casillas',nameAr:'كسياس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/ed0ed9ca-30c3-4add-a356-ac1ff6a1377d.png',pos:'GK',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Maldini',nameAr:'ملديني',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e71a665e-202e-4e08-964c-121583c482d5.png',pos:'CB',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Cafu',nameAr:'كافو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/4628b100-ae11-4293-8443-84b4e022e86f.png',pos:'RB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Ronaldinho',nameAr:'رونالدينيو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/45ee5567-f567-4218-ac01-6fa9d18df665.png',pos:'LW',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+  {name:'R. Nazario',nameAr:'رونالدو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f92c2363-fa2a-4758-8b87-4fc004b4a22b.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Pele',nameAr:'بيليه',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f6e96047-c30a-416f-8f40-59faf9c6376f.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Santos',clubImg:'',rating:99},
+  {name:'R. Carlos',nameAr:'ر. كارلوس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f9ae38bc-daae-4bb7-82f0-2bead35b0d9c.png',pos:'LB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Zidane',nameAr:'زيدان',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/07c36523-a0ef-4b4d-9812-f2d28160f1cb.png',pos:'CAM',nat:'🇫🇷',natImg:'https://flagcdn.com/w40/fr.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Maradona',nameAr:'مارادونا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5b77a26f-301b-400f-a7a8-f0555014ddf1.png',pos:'SS',nat:'🇦🇷',natImg:'https://flagcdn.com/w40/ar.png',club:'Napoli',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SSC_Napoli.svg/40px-SSC_Napoli.svg.png',rating:99},
+  {name:'Iniesta',nameAr:'إنيستا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/feec6ace-0dd8-4b2a-afba-ee15ec361393.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+];
+
+function renderPlayers() {
+  document.getElementById('playersGrid').innerHTML = PLAYERS.map(p => `
+    <div class="player-card">
+      <img class="card-full-img" src="${p.img}" onerror="this.style.background='linear-gradient(145deg,#2a1a00,#1a0800)'" alt="${p.name}">
+      <div class="card-top-left">
+        <div class="card-rating-num">${p.rating}</div>
+        <img class="card-nat-flag" src="${p.natImg}" alt="${p.nat}" onerror="this.style.display='none'">
+        ${p.clubImg ? `<img class="card-club-badge" src="${p.clubImg}" alt="${p.club}" onerror="this.style.display='none'">` : ''}
+        <div class="card-pos-text">${p.pos}</div>
+      </div>
+      <div class="card-badge-le">LE</div>
+      <div class="card-player-name">${p.name}</div>
+    </div>
+  `).join('');
+}
+
+function openPlayersModal(){renderPlayers();document.getElementById('playersModal').classList.add('active');}
+function closePlayersModal(){document.getElementById('playersModal').classList.remove('active');}
 
 // ════ DEPOSIT ════
 function openDepositModal(){document.getElementById('depositModal').classList.add('active');}
@@ -1023,12 +941,12 @@ function closeDepositModal(){document.getElementById('depositModal').classList.r
 function setDepAmt(v){document.getElementById('depositAmountInput').value=v;}
 function connectWallet(){showToast('🔗 TON Connect — اربط محفظتك');}
 function initiateDeposit(){
-  const amt=parseFloat(document.getElementById('depositAmountInput').value);
+  const amt = parseFloat(document.getElementById('depositAmountInput').value);
   if(!amt||amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
-  const sd=document.getElementById('depositStatus');
+  const sd = document.getElementById('depositStatus');
   sd.classList.add('visible');
   sd.querySelector('.txsi').innerHTML='⏳';
-  sd.querySelector('.txsm').textContent=t('processing');
+  sd.querySelector('.txsm').textContent='جاري معالجة الإيداع...';
   document.getElementById('depositStatusDetail').textContent='';
   setTimeout(()=>{
     sd.querySelector('.txsi').innerHTML='✅';
@@ -1040,65 +958,71 @@ function initiateDeposit(){
   },2000);
 }
 
-// ════ PLAYERS MODAL ════
-function openPlayersModal(){renderPlayers();document.getElementById('playersModal').classList.add('active');}
-function closePlayersModal(){document.getElementById('playersModal').classList.remove('active');}
-function renderPlayers(){
-  document.getElementById('playersGrid').innerHTML=PLAYERS.map(p=>`
-    <div class="player-card">
-      <img class="card-bg" src="${CARD_BG}" onerror="this.style.background='linear-gradient(145deg,#7a3a00,#3d1800)'" alt="">
-      <div class="card-glow"></div>
-      <img class="card-player-img" src="${p.img}" onerror="this.style.display='none'" alt="${p.name}">
-      <div class="card-rating">${p.rating}</div>
-      <div class="card-badge">LE</div>
-      <div class="card-name">${p.name}</div>
-    </div>
-  `).join('');
-}
-
-// ════ EXPLAIN MODAL ════
-function openExplainModal(){document.getElementById('explainModal').classList.add('active');}
-function closeExplainModal(){document.getElementById('explainModal').classList.remove('active');}
-
 // ════ BID ════
 function addBid(amt){
   const inp=document.getElementById('bidInput');
   inp.value=(parseFloat(inp.value||0)+amt).toFixed(2);
 }
-function placeBid(){
-  const amt=parseFloat(document.getElementById('bidInput').value);
-  if(!amt||amt<=0){showToast(t('bid_zero'));return;}
-  const topBid=leaderboard[0]?.ton||0;
-  if(amt<=topBid&&leaderboard.length>0){showToast(t('bid_low'));return;}
-  myBid+=amt;
-  leaderboard=leaderboard.filter(e=>e.name!=='أنت'&&e.name!=='You'&&e.name!=='Vous'&&e.name!=='Sie');
-  leaderboard.push({name:currentLang==='ar'?'أنت':'You',emoji:'⭐',ton:parseFloat(myBid.toFixed(2))});
-  leaderboard.sort((a,b)=>b.ton-a.ton);
-  leaderboard=leaderboard.slice(0,10);
-  renderLeaderboard();
-  document.getElementById('bidInput').value='';
-  showToast(t('bid_success'));
+
+async function placeBid(){
+  const amt = parseFloat(document.getElementById('bidInput').value);
+  if(!amt||amt<=0){showToast('⚠️ أدخل مبلغاً صحيحاً');return;}
+  if(userTonBalance < amt){showToast('⚠️ رصيدك غير كافٍ');return;}
+
+  const uid = tgUser ? String(tgUser.id) : null;
+  if(!uid){
+    showToast('⚠️ يجب فتح التطبيق من تيليجرام');return;
+  }
+
+  const btn = document.querySelector('.bid-btn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  const res = await apiCall('auctionBid', {uid, amount: amt});
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-gavel"></i> زايد';
+
+  if(res.success && res.data){
+    showToast('✅ تم تسجيل مزايدتك!');
+    userTonBalance = res.data.tonBalance;
+    myBid = res.data.totalBid;
+    document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
+    document.getElementById('bidInput').value = '';
+    await loadAuctionData();
+  } else {
+    showToast('❌ ' + (res.error || 'حدث خطأ'));
+  }
 }
 
 // ════ LEADERBOARD ════
 function renderLeaderboard(){
-  const topBid=leaderboard[0];
+  const topBid = leaderboard[0];
   if(topBid){
-    document.getElementById('leaderName').textContent=topBid.name;
-    document.getElementById('leaderAmount').textContent=topBid.ton.toFixed(2);
-    document.getElementById('currentTopBid').textContent=topBid.ton.toFixed(2)+' TON';
+    document.getElementById('leaderName').textContent = topBid.name;
+    document.getElementById('leaderAmount').textContent = topBid.ton.toFixed(2);
+    document.getElementById('currentTopBid').textContent = topBid.ton.toFixed(2) + ' TON';
+    const la = document.getElementById('leaderAvatar');
+    if(topBid.photo){
+      la.innerHTML = `<img src="${topBid.photo}" alt="" onerror="this.parentElement.textContent='🏆'">`;
+    } else {
+      la.textContent = '🏆';
+    }
   }
   const rankEmojis=['🥇','🥈','🥉'];
   const rankClasses=['r1','r2','r3'];
-  document.getElementById('leaderboardList').innerHTML=leaderboard.map((u,i)=>{
-    const rc=rankClasses[i]||'rn';
-    const rankDisp=rankEmojis[i]||(i+1);
-    const prizeNote=i===0
-      ?`<div class="lb-prize-note">🏆 ${t('winner_gets_all').replace(' 🏆','')}</div>`
-      :`<div class="lb-prize-note">🎁 1 ${currentLang==='ar'?'لاعب + 20% استرداد':'player + 20% refund'}</div>`;
-    return`<div class="lb-row ${i<3?'top'+(i+1):''}">
+  document.getElementById('leaderboardList').innerHTML = leaderboard.map((u,i)=>{
+    const rc = rankClasses[i]||'rn';
+    const rankDisp = rankEmojis[i]||(i+1);
+    const prizeNote = i===0
+      ?`<div class="lb-prize-note">🏆 سيحصل على الباكج كاملاً</div>`
+      :`<div class="lb-prize-note">🎁 لاعب + 20% استرداد</div>`;
+    const photoHtml = u.photo
+      ? `<img src="${u.photo}" alt="" onerror="this.parentElement.textContent='⭐'">`
+      : '⭐';
+    return `<div class="lb-row ${i<3?'top'+(i+1):''}">
       <div class="lb-rank ${rc}">${rankDisp}</div>
-      <div class="lb-avatar">${u.emoji}</div>
+      <div class="lb-avatar">${photoHtml}</div>
       <div style="flex:1">
         <div class="lb-name">${u.name}</div>
         ${prizeNote}
@@ -1114,9 +1038,10 @@ function renderLeaderboard(){
 // ════ TIMER ════
 let prevSecs = -1;
 function updateTimer(){
-  const diff=AUCTION_END-Date.now();
+  if(!auctionEndDate){return;}
+  const diff = auctionEndDate - Date.now();
   if(diff<=0){
-    document.getElementById('timerRow').innerHTML=`<div class="timer-ended">${t('ended')}</div>`;
+    document.getElementById('timerRow').innerHTML=`<div class="timer-ended">🏁 انتهى المزاد</div>`;
     return;
   }
   const days=Math.floor(diff/(1000*60*60*24));
@@ -1128,11 +1053,76 @@ function updateTimer(){
   document.getElementById('timerMins').textContent=String(mins).padStart(2,'0');
   const secEl=document.getElementById('timerSecs');
   secEl.textContent=String(secs).padStart(2,'0');
-  if(secs!==prevSecs){
-    secEl.classList.add('tick');
-    setTimeout(()=>secEl.classList.remove('tick'),150);
-    prevSecs=secs;
+  if(secs!==prevSecs){secEl.classList.add('tick');setTimeout(()=>secEl.classList.remove('tick'),150);prevSecs=secs;}
+}
+
+// ════ PROMO ════
+const PROMO_KEY = 'auction_promo_log_v1';
+
+function loadPromoLog(){
+  const raw = localStorage.getItem(PROMO_KEY);
+  promoLog = raw ? JSON.parse(raw) : [];
+  renderPromoLog();
+}
+
+function savePromoLog(){
+  localStorage.setItem(PROMO_KEY, JSON.stringify(promoLog));
+}
+
+async function submitPromoPost(){
+  const url = document.getElementById('promoLinkInput').value.trim();
+  if(!url || !url.startsWith('http')){showToast('⚠️ أدخل رابط صحيح');return;}
+  if(!url.includes('t.me')){showToast('⚠️ يجب أن يكون رابط من تيليجرام');return;}
+
+  const btn = document.getElementById('promoSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  const entry = {
+    id: Date.now(),
+    url,
+    status: 'pending',
+    earned: null,
+    date: new Date().toLocaleDateString('ar-EG'),
+  };
+
+  try {
+    const res = await apiCall('submitPromo', { uid: tgUser ? String(tgUser.id) : 'unknown', url });
+    if(res.success){
+      entry.id = res.data?.id || entry.id;
+    }
+  } catch(e){}
+
+  promoLog.unshift(entry);
+  savePromoLog();
+  renderPromoLog();
+  document.getElementById('promoLinkInput').value = '';
+  showToast('✅ تم إرسال المنشور للمراجعة!');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال للمراجعة';
+}
+
+function renderPromoLog(){
+  const list = document.getElementById('promoLogList');
+  if(promoLog.length === 0){
+    list.innerHTML = '<div class="promo-empty">لا توجد منشورات مرسلة بعد</div>';
+    return;
   }
+  const statusLabels = {pending:'⏳ قيد المراجعة', approved:'✅ مقبول', rejected:'❌ مرفوض'};
+  const statusClass = {pending:'pending', approved:'approved', rejected:'rejected'};
+  list.innerHTML = promoLog.map(item => `
+    <div class="promo-item">
+      <div class="promo-item-url">${item.url}</div>
+      <div class="promo-item-row">
+        <div>
+          <span class="promo-item-status ${statusClass[item.status]}">${statusLabels[item.status]}</span>
+          <div class="promo-item-date" style="margin-top:4px;">${item.date}</div>
+        </div>
+        ${item.earned !== null ? `<div class="promo-item-earned"><img src="https://ton.org/download/ton_symbol.png" style="width:14px;height:14px;object-fit:contain;" alt="">+${item.earned} TON</div>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
 // ════ TOAST ════
@@ -1142,15 +1132,18 @@ function showToast(msg){
   setTimeout(()=>toast.classList.remove('show'),3000);
 }
 
-// ════ CLOSE MODALS ════
+// ════ CLOSE MODALS ON BG CLICK ════
 document.getElementById('depositModal').addEventListener('click',function(e){if(e.target===this)closeDepositModal();});
 document.getElementById('playersModal').addEventListener('click',function(e){if(e.target===this)closePlayersModal();});
-document.getElementById('explainModal').addEventListener('click',function(e){if(e.target===this)closeExplainModal();});
+document.getElementById('welcomeOverlay').addEventListener('click',function(e){if(e.target===this)closeWelcome();});
 
 // ════ INIT ════
-setInterval(updateTimer,1000);
-updateTimer();
-renderLeaderboard();
+initUserUI();
+loadAuctionData();
+loadPromoLog();
+checkWelcome();
+setInterval(updateTimer, 1000);
+setInterval(loadAuctionData, 30000);
 </script>
 </body>
 </html>

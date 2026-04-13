@@ -207,6 +207,7 @@ const ACTION_COOLDOWNS = {
   createTask   : 5000,
   saveSquad    : 2000,
   buyPlayer    : 2500,
+  buyPackage   : 3000,
 };
 function userActionOk(uid, action){
   const cd = ACTION_COOLDOWNS[action];
@@ -889,8 +890,9 @@ async function hSaveSquad(env,uid,data,_meta={}){
     // Validate all player IDs are either null or strings max 10 chars
     const sanitizedSquad=squad.map(pid=>{
       if(!pid)return null;
-      const s=String(pid).slice(0,10);
-      return /^p\d{3}$/.test(s)?s:null;
+      const s=String(pid).slice(0,8);
+      // FIX: flexible regex — frontend uses p01..p25 (2-digit), not p001
+      return /^p\d{2,4}$/.test(s)?s:null;
     });
     await dbUpdate(env,`users/${uid}`,{
       squad:sanitizedSquad,
@@ -902,48 +904,138 @@ async function hSaveSquad(env,uid,data,_meta={}){
 }
 
 // ── Buy Player ────────────────────────────────────────────────────
-// Player prices (Coins) — mirrors frontend PLAYERS_DB
-const PLAYER_PRICES={
-  p001:800,p002:600,p003:700,p004:900,p005:1200,p006:800,p007:700,p008:1000,p009:900,p010:1100,
-  p011:3500,p012:3000,p013:5000,p014:6000,p015:4500,
-  p016:15000,p017:20000,p018:25000,p019:30000,p020:22000,
-};
-const PLAYER_PRICES_TON={p021:1.5,p022:1.2,p023:1.8,p024:2.5,p025:2.8,p026:12,p027:11,p028:8,p029:13,p030:7};
+// Player prices (Coins) — mirrors frontend PLAYERS_DB (IDs are p01..p25 format)
+// All players in frontend cost 50000 Coins each
+const PLAYER_PRICE_COINS = 50000; // uniform price for all Coins players
+const VALID_PLAYER_ID = /^p\d{2,4}$/; // accepts p01, p001, p1234 — flexible
 
+// Package definitions — priced in Coins, deducted server-side
+const PACKAGE_DEFS = {
+  // New 4 packages (from newPkgGrid)
+  'blue'      : {price:50000, currency:'coins'},
+  'gold-blue' : {price:50000, currency:'coins'},
+  'purple'    : {price:50000, currency:'coins'},
+  'gold-bamboo': {price:50000, currency:'coins'},
+  // Old tier packages (from pkgGrid / carousel)
+  'pk1': {price:500,   currency:'coins'},
+  'pk2': {price:1500,  currency:'coins'},
+  'pk3': {price:5000,  currency:'coins'},
+  'pk4': {price:15000, currency:'coins'},
+  'bronze'   : {price:500,   currency:'coins'},
+  'silver'   : {price:1500,  currency:'coins'},
+  'gold'     : {price:5000,  currency:'coins'},
+  'platinum' : {price:15000, currency:'coins'},
+  // TON packages — handled on-chain, server just validates
+  'pk5'    : {price:2.5, currency:'ton'},
+  'pk6'    : {price:5.0, currency:'ton'},
+  'legend' : {price:5.0, currency:'ton'},
+};
+
+// ── Buy Package ────────────────────────────────────────────────────
+// Called when user buys any package (new/old/carousel).
+// Frontend sends: { packageId, playerIds: [array of p-IDs to add] }
+// Server deducts Coins, adds players to ownedPlayers, returns updated state.
+async function hBuyPackage(env,uid,data,_meta={}){
+  try{
+    const{packageId, playerIds}=data;
+    if(!packageId||typeof packageId!=='string'||packageId.length>40)
+      return{success:false,error:'Invalid packageId'};
+
+    const pkgDef=PACKAGE_DEFS[packageId];
+    if(!pkgDef) return{success:false,error:'Unknown package'};
+    if(pkgDef.currency==='ton') return{success:false,error:'TON packages require on-chain payment'};
+
+    // Validate playerIds array
+    if(!Array.isArray(playerIds)||playerIds.length===0||playerIds.length>20)
+      return{success:false,error:'Invalid playerIds'};
+    const safeIds=playerIds.filter(id=>typeof id==='string'&&VALID_PLAYER_ID.test(id)&&id.length<=8);
+    if(!safeIds.length) return{success:false,error:'No valid player IDs'};
+
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user) return{success:false,error:'User not found'};
+
+    const price=pkgDef.price;
+    if((user.coins||0)<price) return{success:false,error:`Need ${price} Coins`};
+
+    // De-duplicate: only add players not already owned
+    const ownedSet=new Set(user.ownedPlayers||[]);
+    const toAdd=safeIds.filter(id=>!ownedSet.has(id));
+    // Even if all players already owned, still deduct (pack was opened)
+    const newOwned=[...(user.ownedPlayers||[]),...toAdd];
+    const newCoins=(user.coins||0)-price;
+
+    await dbUpdate(env,`users/${uid}`,{coins:newCoins,ownedPlayers:newOwned});
+    log(env,uid,'buy_item',{
+      itemId:packageId, qty:toAdd.length, totalCost:price,
+      bamboo_before:user.bamboo||0, bamboo_after:user.bamboo||0,
+      coins_before:user.coins||0, coins_after:newCoins,
+    },_meta);
+
+    // Referral commission — 20% of Coins spent to referrer
+    if(user.referredBy&&user.referredBy!==uid){
+      const comm=Math.floor(price*G.REF_BONUS_PCT/100);
+      const rr=await dbGet(env,`users/${user.referredBy}`);
+      if(rr.data){
+        await dbUpdate(env,`users/${user.referredBy}`,{coins:(rr.data.coins||0)+comm});
+        const buyerName=(user.firstName||'صديق').slice(0,32);
+        sendTgNotification(env,user.referredBy,
+          `💰 <b>عمولة إحالة!</b>\n<b>${buyerName}</b> اشترى باكج (${packageId})\nحصلت على <b>${comm} Coins</b> (20% عمولة) 🎁`
+        ).catch(()=>{});
+      }
+    }
+    return{success:true,data:{coins:newCoins,ownedPlayers:newOwned,playersAdded:toAdd}};
+  }catch(e){console.error('hBuyPackage:',e);return{success:false,error:e.message};}
+}
+
+// ── Buy Single Player (Market) ────────────────────────────────────
 async function hBuyPlayer(env,uid,data,_meta={}){
   try{
     const{playerId}=data;
-    if(!playerId||typeof playerId!=='string'||!/^p\d{3}$/.test(playerId))return{success:false,error:'Invalid player ID'};
+    // FIX: flexible regex — frontend uses p01..p25 (2-digit), not p001 (3-digit)
+    if(!playerId||typeof playerId!=='string'||!VALID_PLAYER_ID.test(playerId)||playerId.length>8)
+      return{success:false,error:'Invalid player ID'};
+
     const r=await dbGet(env,`users/${uid}`);const user=r.data;
     if(!user)return{success:false,error:'User not found'};
     const owned=user.ownedPlayers||[];
     if(owned.includes(playerId))return{success:false,error:'Player already owned'};
 
-    if(PLAYER_PRICES[playerId]!==undefined){
-      // Coins purchase
-      const price=PLAYER_PRICES[playerId];
-      if((user.coins||0)<price)return{success:false,error:`Need ${price} Coins`};
-      const newCoins=(user.coins||0)-price;
-      const newOwned=[...owned,playerId];
-      await dbUpdate(env,`users/${uid}`,{coins:newCoins,ownedPlayers:newOwned});
-      log(env,uid,'buy_item',{itemId:playerId,qty:1,totalCost:price,bamboo_before:user.bamboo||0,bamboo_after:user.bamboo||0,coins_before:user.coins||0,coins_after:newCoins},_meta);
-      // Referral commission (20% of coin price in coins to referrer)
-      if(user.referredBy&&user.referredBy!==uid){
-        const comm=Math.floor(price*G.REF_BONUS_PCT/100);
-        const rr=await dbGet(env,`users/${user.referredBy}`);
-        if(rr.data){
-          await dbUpdate(env,`users/${user.referredBy}`,{coins:(rr.data.coins||0)+comm});
-          sendTgNotification(env,user.referredBy,`💰 <b>عمولة إحالة!</b>\n<b>${user.firstName||'صديق'}</b> اشترى لاعباً\nحصلت على <b>${comm} Coins</b> (20%)`).catch(()=>{});
-        }
-      }
-      return{success:true,data:{coins:newCoins,ownedPlayers:newOwned}};
-    }else if(PLAYER_PRICES_TON[playerId]!==undefined){
-      // TON purchase — just validate wallet connected, actual payment handled on chain
+    // All market players cost PLAYER_PRICE_COINS (50000) unless it's a TON player
+    // TON players (p21+) require on-chain payment
+    const playerNum=parseInt(playerId.replace('p',''),10);
+    if(isNaN(playerNum)) return{success:false,error:'Invalid player ID format'};
+
+    if(playerNum>=21){
+      // TON player — on-chain only
       return{success:false,error:'TON player purchase requires on-chain payment'};
-    }else{
-      return{success:false,error:'Unknown player'};
     }
-  }catch(e){return{success:false,error:e.message};}
+
+    // Coins player
+    const price=PLAYER_PRICE_COINS;
+    if((user.coins||0)<price)return{success:false,error:`Need ${price} Coins`};
+    const newCoins=(user.coins||0)-price;
+    const newOwned=[...owned,playerId];
+    await dbUpdate(env,`users/${uid}`,{coins:newCoins,ownedPlayers:newOwned});
+    log(env,uid,'buy_item',{
+      itemId:playerId, qty:1, totalCost:price,
+      bamboo_before:user.bamboo||0, bamboo_after:user.bamboo||0,
+      coins_before:user.coins||0, coins_after:newCoins,
+    },_meta);
+
+    // Referral commission — 20% of Coins spent
+    if(user.referredBy&&user.referredBy!==uid){
+      const comm=Math.floor(price*G.REF_BONUS_PCT/100);
+      const rr=await dbGet(env,`users/${user.referredBy}`);
+      if(rr.data){
+        await dbUpdate(env,`users/${user.referredBy}`,{coins:(rr.data.coins||0)+comm});
+        const buyerName=(user.firstName||'صديق').slice(0,32);
+        sendTgNotification(env,user.referredBy,
+          `💰 <b>عمولة إحالة!</b>\n<b>${buyerName}</b> اشترى لاعباً من الماركت\nحصلت على <b>${comm} Coins</b> (20% عمولة) ⚽`
+        ).catch(()=>{});
+      }
+    }
+    return{success:true,data:{coins:newCoins,ownedPlayers:newOwned}};
+  }catch(e){console.error('hBuyPlayer:',e);return{success:false,error:e.message};}
 }
 
 // ── Main handler ──────────────────────────────────────────────────
@@ -1093,6 +1185,7 @@ export default {
       case 'getLeaderboard':return jRes(await hGetLeaderboard(env,uid,_meta));
       case 'saveSquad'     :return jRes(await hSaveSquad    (env,uid,data,_meta));
       case 'buyPlayer'     :return jRes(await hBuyPlayer    (env,uid,data,_meta));
+      case 'buyPackage'    :return jRes(await hBuyPackage   (env,uid,data,_meta));
       default:return fail('Unknown action',400);
     }
   }

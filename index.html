@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -278,6 +277,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   background:linear-gradient(135deg,#FF6B00,#FF2200);
   border-radius:5px;padding:2px 5px;
   font-size:7px;font-weight:900;color:#fff;letter-spacing:.3px;
+}
+.card-player-photo{
+  position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
+  height:72%;width:90%;object-fit:contain;z-index:2;
 }
 .card-player-name{
   position:absolute;bottom:4px;left:0;right:0;z-index:3;
@@ -586,7 +589,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
     <div class="pkg-hero">
       <div class="pkg-limited-badge">⚡ LIMITED EDITION</div>
       <img class="pkg-hero-img"
-        src="https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5cbafd49-dd5e-4b3a-95b5-3cbc9ec31494.png"
+        src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c994ae01-3bf7-4213-9dce-2d41b445bea5.png"
         onerror="this.style.background='linear-gradient(135deg,#1a0a00,#3d2000)';this.style.minHeight='200px'"
         alt="Package">
       <div class="pkg-hero-overlay">
@@ -900,26 +903,29 @@ function setMockData() {
 }
 
 // ════ PLAYERS DATA ════
+const CARD_BG = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dd6f98cf-4444-4460-a7d0-152ed1b5a05a.png';
+
 const PLAYERS = [
-  {name:'Cruyff',nameAr:'كرويف',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/0419a24b-2a4d-468a-a383-e5b7a969ab64.png',pos:'CAM',nat:'🇳🇱',natImg:'https://flagcdn.com/w40/nl.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
-  {name:'Kaka',nameAr:'كاكا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/66d178dd-63f3-4665-9eeb-320beaf8d283.png',pos:'CAM',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Buffon',nameAr:'بوفون',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/11a2528f-73e8-49bf-93d5-26cd658bd3a3.png',pos:'GK',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Juventus',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/40px-Juventus_FC_2017_logo.svg.png',rating:99},
-  {name:'Casillas',nameAr:'كسياس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/ed0ed9ca-30c3-4add-a356-ac1ff6a1377d.png',pos:'GK',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Maldini',nameAr:'ملديني',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/e71a665e-202e-4e08-964c-121583c482d5.png',pos:'CB',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Cafu',nameAr:'كافو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/4628b100-ae11-4293-8443-84b4e022e86f.png',pos:'RB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Ronaldinho',nameAr:'رونالدينيو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/45ee5567-f567-4218-ac01-6fa9d18df665.png',pos:'LW',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+  {name:'Cruyff',nameAr:'كرويف',img:'https://r2.thesportsdb.com/images/media/player/cutout/ze75mx1594069754.png',pos:'CAM',nat:'🇳🇱',natImg:'https://flagcdn.com/w40/nl.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+  {name:'Kaka',nameAr:'كاكا',img:'https://r2.thesportsdb.com/images/media/player/cutout/6uj1nl1665653279.png',pos:'CAM',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Buffon',nameAr:'بوفون',img:'https://r2.thesportsdb.com/images/media/player/cutout/khpcg01586360050.png',pos:'GK',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Juventus',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/40px-Juventus_FC_2017_logo.svg.png',rating:99},
+  {name:'Casillas',nameAr:'كسياس',img:'https://r2.thesportsdb.com/images/media/player/cutout/zh95mc1541336479.png',pos:'GK',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Maldini',nameAr:'ملديني',img:'https://r2.thesportsdb.com/images/media/player/cutout/9ccmbp1665653152.png',pos:'CB',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Cafu',nameAr:'كافو',img:'https://r2.thesportsdb.com/images/media/player/cutout/9t0i4f1665653369.png',pos:'RB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
+  {name:'Ronaldinho',nameAr:'رونالدينيو',img:'https://r2.thesportsdb.com/images/media/player/cutout/u91au61586868506.png',pos:'LW',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
   {name:'R. Nazario',nameAr:'رونالدو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f92c2363-fa2a-4758-8b87-4fc004b4a22b.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
   {name:'Pele',nameAr:'بيليه',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f6e96047-c30a-416f-8f40-59faf9c6376f.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Santos',clubImg:'',rating:99},
-  {name:'R. Carlos',nameAr:'ر. كارلوس',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f9ae38bc-daae-4bb7-82f0-2bead35b0d9c.png',pos:'LB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Zidane',nameAr:'زيدان',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/07c36523-a0ef-4b4d-9812-f2d28160f1cb.png',pos:'CAM',nat:'🇫🇷',natImg:'https://flagcdn.com/w40/fr.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Maradona',nameAr:'مارادونا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/5b77a26f-301b-400f-a7a8-f0555014ddf1.png',pos:'SS',nat:'🇦🇷',natImg:'https://flagcdn.com/w40/ar.png',club:'Napoli',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SSC_Napoli.svg/40px-SSC_Napoli.svg.png',rating:99},
-  {name:'Iniesta',nameAr:'إنيستا',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/feec6ace-0dd8-4b2a-afba-ee15ec361393.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
+  {name:'R. Carlos',nameAr:'ر. كارلوس',img:'https://r2.thesportsdb.com/images/media/player/cutout/ypsxvy1483909094.png',pos:'LB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Zidane',nameAr:'زيدان',img:'https://r2.thesportsdb.com/images/media/player/cutout/ae7bng1586814446.png',pos:'CAM',nat:'🇫🇷',natImg:'https://flagcdn.com/w40/fr.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
+  {name:'Maradona',nameAr:'مارادونا',img:'https://r2.thesportsdb.com/images/media/player/cutout/v298851606327825.png',pos:'SS',nat:'🇦🇷',natImg:'https://flagcdn.com/w40/ar.png',club:'Napoli',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SSC_Napoli.svg/40px-SSC_Napoli.svg.png',rating:99},
+  {name:'Iniesta',nameAr:'إنيستا',img:'https://r2.thesportsdb.com/images/media/player/cutout/nx7oze1611167333.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
 ];
 
 function renderPlayers() {
   document.getElementById('playersGrid').innerHTML = PLAYERS.map(p => `
     <div class="player-card">
-      <img class="card-full-img" src="${p.img}" onerror="this.style.background='linear-gradient(145deg,#2a1a00,#1a0800)'" alt="${p.name}">
+      <img class="card-full-img" src="${CARD_BG}" alt="card" onerror="this.style.background='linear-gradient(145deg,#2a1a00,#1a0800)'">
+      <img class="card-player-photo" src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
       <div class="card-top-left">
         <div class="card-rating-num">${p.rating}</div>
         <img class="card-nat-flag" src="${p.natImg}" alt="${p.nat}" onerror="this.style.display='none'">

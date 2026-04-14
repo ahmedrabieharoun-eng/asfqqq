@@ -82,7 +82,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   border-radius:24px;padding:5px 12px 5px 8px;backdrop-filter:blur(16px);
   box-shadow:0 0 14px rgba(0,136,204,.15);transition:all .2s;
 }
-.ton-icon{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,136,204,.9));}
+.ton-icon{width:22px;height:22px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(0,136,204,.9));}
 .tb-ton-val{font-family:'Orbitron',monospace;font-size:12.5px;font-weight:900;color:#fff;letter-spacing:.5px;}
 .tb-deposit-btn{
   display:flex;align-items:center;gap:5px;
@@ -378,7 +378,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 .section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
 
 /* CHANNEL PROMO PAGE */
-.promo-wrap{padding:0;}
+.promo-wrap{padding-top:86px;}
 .promo-header-banner{background:linear-gradient(135deg,rgba(0,90,190,.25),rgba(0,50,130,.35));border:1px solid rgba(0,136,204,.22);border-radius:18px;padding:16px;margin-bottom:16px;}
 .promo-header-title{font-size:17px;font-weight:900;color:#60CCFF;margin-bottom:6px;}
 .promo-header-desc{font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.6;}
@@ -428,7 +428,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 </audio>
 
 <!-- MUSIC BTN -->
-<button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="موسيقى الخلفية">
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="موسيقى الخلفية" data-i18n-title="music_title">
   <i class="fas fa-music" id="musicIcon"></i>
 </button>
 
@@ -466,7 +466,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   <div class="tb-left">
     <div class="tb-user-avatar" id="topUserAvatar">🐼</div>
     <div class="tb-ton-balance">
-      <img class="ton-icon" src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
+      <img class="ton-icon" src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
       <span class="tb-ton-val orb" id="topTonBalance">0.00</span>
     </div>
     <div class="tb-deposit-btn" onclick="openDepositModal()">
@@ -517,9 +517,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
     <!-- Warning -->
     <div class="dep-warn">
       <i class="fas fa-exclamation-triangle"></i>
-      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+      <div><span data-i18n="deposit_comment_warn">يجب أن يكون User ID الخاص بك هو التعليق الوحيد في المعاملة:</span>
         <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
-        التعليق الوحيد في المعاملة.
       </div>
     </div>
 
@@ -538,12 +537,12 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
     <!-- Preview -->
     <div class="dep-preview-box">
       <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px;">
-        📊 <strong style="color:#5BC8FF">1 TON = 1 TON رصيد</strong>
+        <strong style="color:#5BC8FF" data-i18n="deposit_rate_note">1 TON = طلب رصيد بانتظار المراجعة</strong>
       </div>
       <div class="dep-preview-row">
-        <span class="dep-preview-label">ستحصل على:</span>
+        <span class="dep-preview-label" data-i18n="deposit_receive_label">طلب مراجعة بقيمة:</span>
         <span id="depBalPreview" class="dep-preview-val">
-          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" style="width:18px;height:18px;object-fit:contain;">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;flex-shrink:0;" alt="TON">
           0 TON
         </span>
       </div>
@@ -557,7 +556,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
     <!-- TX Status -->
     <div class="tx-status" id="depositStatus">
       <div class="txsi">⏳</div>
-      <div class="txsm" id="depositStatusMsg">جاري معالجة الإيداع...</div>
+      <div class="txsm" id="depositStatusMsg" data-i18n="deposit_review_title">تم إرسال المعاملة وهي بانتظار المراجعة</div>
       <div class="txsd" id="depositStatusDetail"></div>
     </div>
   </div>
@@ -664,7 +663,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
           <div class="leader-prize" data-i18n="will_win_pkg">سيحصل على الباكج كاملاً 🏆</div>
         </div>
         <div class="leader-ton">
-          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;flex-shrink:0;" alt="TON">
           <span class="orb" id="leaderAmount">0.00</span>
         </div>
       </div>
@@ -730,6 +729,8 @@ const MIN_DEPOSIT_TON = 1; // الحد الأدنى للإيداع
 const I18N = {
   ar: {
     welcome_title:'🏆 مرحباً بك في المزاد!',
+    app_title:'مزاد باكج الأساطير',
+    music_title:'موسيقى الخلفية',
     welcome_pkg_title:'🏆 مميزات باكج الأساطير',
     welcome_pkg_feat1:'⭐ 13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
     welcome_pkg_feat2:'💎 لاعبون حصريون لن ينزلوا في أي باكج عادي أبداً',
@@ -747,6 +748,14 @@ const I18N = {
     connect:'ربط',
     amount_ton:'المبلغ (TON)',
     deposit_btn:'إيداع TON',
+    deposit_comment_warn:'يجب أن يكون User ID الخاص بك هو التعليق الوحيد في المعاملة:',
+    deposit_rate_note:'1 TON = طلب رصيد بانتظار المراجعة',
+    deposit_receive_label:'طلب مراجعة بقيمة:',
+    deposit_review_title:'تم إرسال المعاملة وهي بانتظار المراجعة',
+    deposit_review_detail:'لن يتم إضافة الرصيد تلقائياً. سيتم تسجيل الطلب ومراجعته من الإدارة ثم إضافة الرصيد يدوياً.',
+    deposit_registered_review:'تم تسجيل طلب الإيداع للمراجعة',
+    amount_too_large:'المبلغ كبير جداً',
+    loading_retry:'يتم التحميل... حاول مرة أخرى',
     pkg_players:'🌟 لاعبو الباكج',
     all_le:'⭐ جميع اللاعبين Limited Edition حصري — طاقة 99',
     new_season:'تحضير الموسم الجديد',
@@ -794,15 +803,17 @@ const I18N = {
     status_rejected:'❌ مرفوض',
     disconnect:'قطع',
     sending_tx:'جاري إرسال المعاملة...',
-    tx_sent:'تم إرسال المعاملة! سيُضاف رصيدك خلال دقائق',
+    tx_sent:'تم إرسال المعاملة! سيتم مراجعة الإيداع قبل إضافة الرصيد',
     tx_rejected:'تم رفض المعاملة',
     tx_failed:'فشلت المعاملة',
-    awaiting_confirm:'في انتظار التأكيد (~3 دقائق)...',
-    deposit_confirmed:'✅ تم تأكيد الإيداع!',
-    added:'أُضيف إلى رصيدك',
+    awaiting_confirm:'طلب الإيداع قيد مراجعة الإدارة',
+    deposit_confirmed:'✅ تم قبول الإيداع!',
+    added:'سيتم إضافته إلى رصيدك بعد المراجعة',
   },
   en: {
     welcome_title:'🏆 Welcome to the Auction!',
+    app_title:'Legends Package Auction',
+    music_title:'Background music',
     welcome_pkg_title:'🏆 Legends Package Features',
     welcome_pkg_feat1:'⭐ 13 Legendary players rated 99 — Exclusive Limited Edition',
     welcome_pkg_feat2:'💎 Exclusive players — will never appear in any regular pack',
@@ -815,6 +826,14 @@ const I18N = {
     welcome_btn:'🚀 Start Bidding Now!',
     deposit:'Deposit',deposit_title:'💰 Deposit TON',wallet:'Wallet',not_connected:'Not Connected',connect:'Connect',
     amount_ton:'Amount (TON)',deposit_btn:'Deposit TON',
+    deposit_comment_warn:'Your User ID must be the only transaction comment:',
+    deposit_rate_note:'1 TON = balance request pending review',
+    deposit_receive_label:'Review request amount:',
+    deposit_review_title:'Transaction sent and waiting for review',
+    deposit_review_detail:'Balance is not added automatically. The request is saved for admin review, then your balance is credited manually.',
+    deposit_registered_review:'Deposit request registered for review',
+    amount_too_large:'Amount is too large',
+    loading_retry:'Loading... try again',
     pkg_players:'🌟 Package Players',all_le:'⭐ All players are Limited Edition — Rating 99',
     new_season:'New Season Preparation',legends_pkg:'Legends Package 🏆',
     pkg_sub:'13 legendary 99-rated players — Exclusive Limited Edition',
@@ -839,13 +858,15 @@ const I18N = {
     toast_promo_not_tg:'⚠️ Must be a Telegram link',toast_music:'🎵 Tap again to play music',
     status_pending:'⏳ Under Review',status_approved:'✅ Approved',status_rejected:'❌ Rejected',
     disconnect:'Disconnect',sending_tx:'Sending transaction...',
-    tx_sent:'Transaction sent! Balance will be added within minutes',
+    tx_sent:'Transaction sent! Deposit will be reviewed before crediting',
     tx_rejected:'Transaction rejected',tx_failed:'Transaction failed',
-    awaiting_confirm:'Awaiting confirmation (~3 minutes)...',
-    deposit_confirmed:'✅ Deposit confirmed!',added:'added to your balance',
+    awaiting_confirm:'Deposit request is under admin review',
+    deposit_confirmed:'✅ Deposit approved!',added:'will be added after review',
   },
   ru: {
     welcome_title:'🏆 Добро пожаловать на аукцион!',
+    app_title:'Аукцион пакета «Легенды»',
+    music_title:'Фоновая музыка',
     welcome_pkg_title:'🏆 Преимущества пакета «Легенды»',
     welcome_pkg_feat1:'⭐ 13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
     welcome_pkg_feat2:'💎 Эксклюзивные игроки — больше никогда не появятся в обычных пакетах',
@@ -858,6 +879,14 @@ const I18N = {
     welcome_btn:'🚀 Начать торги!',
     deposit:'Пополнить',deposit_title:'💰 Пополнение TON',wallet:'Кошелёк',not_connected:'Не подключён',connect:'Подключить',
     amount_ton:'Сумма (TON)',deposit_btn:'Пополнить TON',
+    deposit_comment_warn:'Ваш User ID должен быть единственным комментарием к транзакции:',
+    deposit_rate_note:'1 TON = запрос баланса ожидает проверки',
+    deposit_receive_label:'Сумма запроса на проверку:',
+    deposit_review_title:'Транзакция отправлена и ожидает проверки',
+    deposit_review_detail:'Баланс не начисляется автоматически. Запрос сохраняется для проверки администратором, затем баланс будет зачислен вручную.',
+    deposit_registered_review:'Запрос на пополнение отправлен на проверку',
+    amount_too_large:'Сумма слишком большая',
+    loading_retry:'Загрузка... попробуйте ещё раз',
     pkg_players:'🌟 Игроки пакета',all_le:'⭐ Все игроки — Limited Edition с рейтингом 99',
     new_season:'Подготовка к новому сезону',legends_pkg:'Пакет «Легенды» 🏆',
     pkg_sub:'13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
@@ -882,13 +911,15 @@ const I18N = {
     toast_promo_not_tg:'⚠️ Должна быть ссылка Telegram',toast_music:'🎵 Нажмите ещё раз для включения музыки',
     status_pending:'⏳ На проверке',status_approved:'✅ Одобрено',status_rejected:'❌ Отклонено',
     disconnect:'Отключить',sending_tx:'Отправка транзакции...',
-    tx_sent:'Транзакция отправлена! Баланс будет пополнен в течение нескольких минут',
+    tx_sent:'Транзакция отправлена! Пополнение будет проверено перед зачислением',
     tx_rejected:'Транзакция отклонена',tx_failed:'Транзакция не удалась',
-    awaiting_confirm:'Ожидание подтверждения (~3 минуты)...',
-    deposit_confirmed:'✅ Пополнение подтверждено!',added:'добавлено к балансу',
+    awaiting_confirm:'Запрос на пополнение проверяется администратором',
+    deposit_confirmed:'✅ Пополнение одобрено!',added:'будет добавлено после проверки',
   },
   fr: {
     welcome_title:'🏆 Bienvenue aux enchères!',
+    app_title:'Enchères du pack Légendes',
+    music_title:'Musique de fond',
     welcome_pkg_title:'🏆 Avantages du pack Légendes',
     welcome_pkg_feat1:'⭐ 13 joueurs légendaires notés 99 — Limited Edition exclusif',
     welcome_pkg_feat2:'💎 Joueurs exclusifs — jamais disponibles dans les packs normaux',
@@ -901,6 +932,14 @@ const I18N = {
     welcome_btn:'🚀 Commencer les enchères!',
     deposit:'Dépôt',deposit_title:'💰 Dépôt TON',wallet:'Portefeuille',not_connected:'Non connecté',connect:'Connecter',
     amount_ton:'Montant (TON)',deposit_btn:'Déposer TON',
+    deposit_comment_warn:'Votre User ID doit être le seul commentaire de la transaction:',
+    deposit_rate_note:'1 TON = demande de solde en attente de vérification',
+    deposit_receive_label:'Montant de la demande:',
+    deposit_review_title:'Transaction envoyée et en attente de vérification',
+    deposit_review_detail:'Le solde n’est pas ajouté automatiquement. La demande est enregistrée pour vérification par l’administration, puis créditée manuellement.',
+    deposit_registered_review:'Demande de dépôt enregistrée pour vérification',
+    amount_too_large:'Montant trop élevé',
+    loading_retry:'Chargement... réessayez',
     pkg_players:'🌟 Joueurs du pack',all_le:'⭐ Tous les joueurs sont Limited Edition — Note 99',
     new_season:'Préparation de la nouvelle saison',legends_pkg:'Pack Légendes 🏆',
     pkg_sub:'13 joueurs légendaires notés 99 — Limited Edition exclusif',
@@ -924,13 +963,15 @@ const I18N = {
     toast_promo_not_tg:'⚠️ Doit être un lien Telegram',toast_music:'🎵 Appuyez à nouveau pour lire la musique',
     status_pending:'⏳ En cours de révision',status_approved:'✅ Approuvé',status_rejected:'❌ Rejeté',
     disconnect:'Déconnecter',sending_tx:'Envoi de la transaction...',
-    tx_sent:'Transaction envoyée! Le solde sera crédité dans quelques minutes',
+    tx_sent:'Transaction envoyée! Le dépôt sera vérifié avant crédit',
     tx_rejected:'Transaction rejetée',tx_failed:'Transaction échouée',
-    awaiting_confirm:'En attente de confirmation (~3 minutes)...',
-    deposit_confirmed:'✅ Dépôt confirmé!',added:'ajouté à votre solde',
+    awaiting_confirm:'La demande de dépôt est en cours de vérification',
+    deposit_confirmed:'✅ Dépôt approuvé!',added:'sera ajouté après vérification',
   },
   de: {
     welcome_title:'🏆 Willkommen bei der Auktion!',
+    app_title:'Legenden-Paket-Auktion',
+    music_title:'Hintergrundmusik',
     welcome_pkg_title:'🏆 Vorteile des Legenden-Pakets',
     welcome_pkg_feat1:'⭐ 13 legendäre Spieler mit Bewertung 99 — Exklusives Limited Edition',
     welcome_pkg_feat2:'💎 Exklusive Spieler — erscheinen nie wieder in normalen Packs',
@@ -943,6 +984,14 @@ const I18N = {
     welcome_btn:'🚀 Jetzt bieten!',
     deposit:'Einzahlen',deposit_title:'💰 TON einzahlen',wallet:'Wallet',not_connected:'Nicht verbunden',connect:'Verbinden',
     amount_ton:'Betrag (TON)',deposit_btn:'TON einzahlen',
+    deposit_comment_warn:'Ihre User ID muss der einzige Transaktionskommentar sein:',
+    deposit_rate_note:'1 TON = Guthabenanfrage wartet auf Prüfung',
+    deposit_receive_label:'Prüfanfrage über:',
+    deposit_review_title:'Transaktion gesendet und wartet auf Prüfung',
+    deposit_review_detail:'Das Guthaben wird nicht automatisch hinzugefügt. Die Anfrage wird zur Admin-Prüfung gespeichert und danach manuell gutgeschrieben.',
+    deposit_registered_review:'Einzahlungsanfrage zur Prüfung gespeichert',
+    amount_too_large:'Betrag ist zu groß',
+    loading_retry:'Lädt... bitte erneut versuchen',
     pkg_players:'🌟 Paketspieler',all_le:'⭐ Alle Spieler sind Limited Edition — Bewertung 99',
     new_season:'Vorbereitung auf die neue Saison',legends_pkg:'Legenden-Paket 🏆',
     pkg_sub:'13 legendäre Spieler mit 99 — Exklusives Limited Edition',
@@ -966,20 +1015,26 @@ const I18N = {
     toast_promo_not_tg:'⚠️ Muss ein Telegram-Link sein',toast_music:'🎵 Erneut tippen zum Abspielen',
     status_pending:'⏳ In Überprüfung',status_approved:'✅ Genehmigt',status_rejected:'❌ Abgelehnt',
     disconnect:'Trennen',sending_tx:'Transaktion wird gesendet...',
-    tx_sent:'Transaktion gesendet! Guthaben wird in wenigen Minuten hinzugefügt',
+    tx_sent:'Transaktion gesendet! Einzahlung wird vor Gutschrift geprüft',
     tx_rejected:'Transaktion abgelehnt',tx_failed:'Transaktion fehlgeschlagen',
-    awaiting_confirm:'Warte auf Bestätigung (~3 Minuten)...',
-    deposit_confirmed:'✅ Einzahlung bestätigt!',added:'zu Ihrem Guthaben hinzugefügt',
+    awaiting_confirm:'Einzahlungsanfrage wird vom Admin geprüft',
+    deposit_confirmed:'✅ Einzahlung genehmigt!',added:'wird nach Prüfung hinzugefügt',
   },
 };
 
 function t(key){ return (I18N[currentLang]||I18N.ar)[key] || key; }
 
 function applyTranslations(){
+  document.title = t('app_title');
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     const val = t(key);
     if(val) el.innerHTML = val;
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-title');
+    const val = t(key);
+    if(val) el.setAttribute('title', val);
   });
   const promoEmpty = document.querySelector('#promoLogList .promo-empty');
   if(promoEmpty && promoEmpty.getAttribute('data-i18n')) promoEmpty.textContent = t('no_posts');
@@ -1008,7 +1063,6 @@ let leaderboard = [];
 let promoLog = [];
 let tonUI = null;
 let tonWallet = null;
-let depCheckInt = null;
 
 // ════ API CALL ════
 async function apiCall(action, data = {}) {
@@ -1195,11 +1249,11 @@ const PLAYERS = [
   {name:'Iniesta',nameAr:'إنيستا',img:'https://r2.thesportsdb.com/images/media/player/cutout/nx7oze1611167333.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
 ];
 
-const TON_ICON_URL = 'https://ton.org/download/ton_symbol.png';
-const TON_ICON_FALLBACK = 'https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png';
+const TON_ICON_URL = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
+const TON_ICON_FALLBACK = TON_ICON_URL;
 
 function tonImgHtml(size){
-  return `<img src="${TON_ICON_URL}" onerror="this.src='${TON_ICON_FALLBACK}'" style="width:${size}px;height:${size}px;object-fit:contain;" alt="TON">`;
+  return `<img src="${TON_ICON_URL}" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0;" alt="TON">`;
 }
 
 function renderPlayers(){
@@ -1250,7 +1304,7 @@ function onWalletConnected(w){
   const dispEl = document.getElementById('walletAddressDisplay');
   if(dispEl) dispEl.textContent = `${short} · ${tonWallet.appName}`;
   const cb = document.getElementById('connectWalletBtn');
-  if(cb){ cb.innerHTML = '<i class="fas fa-unlink"></i> <span>' + t('disconnect') + '</span>'; cb.onclick = disconnectWallet; }
+  if(cb){ cb.innerHTML = '<i class="fas fa-unlink"></i> <span data-i18n="disconnect">' + t('disconnect') + '</span>'; cb.onclick = disconnectWallet; }
   const sb = document.getElementById('submitDepositBtn');
   if(sb){ sb.disabled = false; sb.style.opacity = '1'; sb.style.cursor = 'pointer'; }
 }
@@ -1260,7 +1314,7 @@ function onWalletDisconnected(){
   const dispEl = document.getElementById('walletAddressDisplay');
   if(dispEl) dispEl.textContent = t('not_connected');
   const cb = document.getElementById('connectWalletBtn');
-  if(cb){ cb.innerHTML = '<i class="fas fa-plug"></i> <span>' + t('connect') + '</span>'; cb.onclick = connectWallet; }
+  if(cb){ cb.innerHTML = '<i class="fas fa-plug"></i> <span data-i18n="connect">' + t('connect') + '</span>'; cb.onclick = connectWallet; }
   const sb = document.getElementById('submitDepositBtn');
   if(sb){ sb.disabled = true; sb.style.opacity = '0.5'; sb.style.cursor = 'not-allowed'; }
 }
@@ -1272,7 +1326,7 @@ async function connectWallet(){
     // انتظر قليلاً ليكتمل
     await new Promise(r => setTimeout(r, 600));
   }
-  if(!tonUI){ showToast('⚠️ يتم التحميل... حاول مرة أخرى'); return; }
+  if(!tonUI){ showToast('⚠️ ' + t('loading_retry')); return; }
   try{ await tonUI.openModal(); }catch(e){ showToast('❌ '+e.message); }
 }
 
@@ -1306,7 +1360,7 @@ function setDepAmt(v){
 
 function updDepPreview(){
   const ton = parseFloat(document.getElementById('depositAmountInput').value) || 0;
-  const tonIcon = `<img src="${TON_ICON_URL}" onerror="this.src='${TON_ICON_FALLBACK}'" style="width:18px;height:18px;object-fit:contain;">`;
+  const tonIcon = tonImgHtml(18);
   const el = document.getElementById('depBalPreview');
   if(el) el.innerHTML = `${tonIcon} ${ton > 0 ? ton.toFixed(2) : '0'} TON`;
 }
@@ -1316,14 +1370,11 @@ window.initiateDeposit = async function(){
 
   const amt = parseFloat(document.getElementById('depositAmountInput').value);
   if(!amt || amt < MIN_DEPOSIT_TON){ showToast(t('toast_deposit_min')); return; }
-  if(amt > 1000){ showToast('المبلغ كبير جداً'); return; }
+  if(amt > 1000){ showToast(t('amount_too_large')); return; }
 
   const btn = document.getElementById('submitDepositBtn');
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + t('sending_tx');
-
-  // حفظ الرصيد الحالي قبل الإيداع لمراقبة التغيير
-  const prevBalance = userTonBalance;
 
   try{
     const comment = String(tgUser ? tgUser.id : 'guest');
@@ -1344,21 +1395,15 @@ window.initiateDeposit = async function(){
 
     const result = await tonUI.sendTransaction(tx);
 
-    // إظهار حالة الإرسال
+    const depRes = await apiCall('deposit', { amount: amt, txHash: result.boc, comment });
+    if(!depRes || !depRes.success) throw new Error(depRes?.error || t('tx_failed'));
+
     const sd = document.getElementById('depositStatus');
     sd.classList.add('visible');
     sd.querySelector('.txsi').innerHTML = '⏳';
-    document.getElementById('depositStatusMsg').textContent = t('tx_sent');
-    document.getElementById('depositStatusDetail').textContent = t('awaiting_confirm');
-    showToast('✅ ' + t('tx_sent'));
-
-    // تسجيل المعاملة في السيرفر (في الخلفية)
-    try{
-      await apiCall('deposit', { amount: amt, txHash: result.boc, comment });
-    }catch(_){}
-
-    // بدء مراقبة الرصيد مثل Panda Bamboo بالضبط
-    startDepVerify(prevBalance);
+    document.getElementById('depositStatusMsg').textContent = t('deposit_review_title');
+    document.getElementById('depositStatusDetail').textContent = t('deposit_review_detail');
+    showToast('✅ ' + t('deposit_registered_review'));
 
   }catch(e){
     const sd = document.getElementById('depositStatus');
@@ -1373,41 +1418,6 @@ window.initiateDeposit = async function(){
     btn.innerHTML = '<i class="fas fa-arrow-down"></i> ' + t('deposit_btn');
   }
 };
-
-// ════ POLLING — يراقب زيادة رصيد TON مثل Panda Bamboo بالضبط ════
-function startDepVerify(prevBalance){
-  if(depCheckInt) clearInterval(depCheckInt);
-  let attempts = 0;
-
-  depCheckInt = setInterval(async()=>{
-    attempts++;
-    try{
-      const r = await apiCall('getUser', {});
-      if(r && r.success && r.data && r.data.tonBalance > prevBalance){
-        clearInterval(depCheckInt);
-        const newBal = r.data.tonBalance;
-        const diff = parseFloat((newBal - prevBalance).toFixed(6));
-
-        const sd = document.getElementById('depositStatus');
-        if(sd){
-          sd.querySelector('.txsi').innerHTML = '✅';
-          document.getElementById('depositStatusMsg').textContent = t('deposit_confirmed');
-          document.getElementById('depositStatusDetail').textContent = `+${diff.toFixed(2)} TON ${t('added')}`;
-        }
-        showToast(`💰 ${t('deposit_confirmed')} +${diff.toFixed(2)} TON`);
-
-        // تحديث الرصيد في الواجهة
-        userTonBalance = newBal;
-        document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
-
-        setTimeout(()=>{ if(sd) sd.classList.remove('visible'); }, 4000);
-      }
-    }catch(e){}
-
-    // توقف بعد ~6 دقائق (36 محاولة × 10 ثوانٍ) مثل Panda Bamboo
-    if(attempts >= 36) clearInterval(depCheckInt);
-  }, 10000);
-}
 
 // ════ BID ════
 function addBid(amt){

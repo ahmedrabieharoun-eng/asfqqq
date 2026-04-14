@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1224,16 +1223,24 @@ function openPlayersModal(){renderPlayers();document.getElementById('playersModa
 function closePlayersModal(){document.getElementById('playersModal').classList.remove('active');}
 
 // ════ TON CONNECT ════
+// ── TON Connect init مع retry تلقائي (مطابق لـ Panda Bamboo) ──
+let _tcRetry = 0;
 function initTonConnect(){
+  if(tonUI) return; // already done
+  if(!window.TON_CONNECT_UI){
+    // المكتبة لم تكتمل بعد — أعد المحاولة كل 400ms حتى 15 مرة
+    if(_tcRetry < 15){
+      _tcRetry++;
+      setTimeout(initTonConnect, 400);
+    }
+    return;
+  }
   try{
-    if(!window.TON_CONNECT_UI) return;
     tonUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${SERVER_URL}/tonconnect-manifest.json`,
       uiPreferences: { theme: 'DARK' },
     });
     tonUI.onStatusChange(w => w ? onWalletConnected(w) : onWalletDisconnected());
-    // Check if already connected
-    setTimeout(()=>{ if(tonUI.connected) tonUI.getWallets?.(); }, 500);
   }catch(e){ console.error('TON Connect init error:', e); }
 }
 
@@ -1259,7 +1266,13 @@ function onWalletDisconnected(){
 }
 
 async function connectWallet(){
-  if(!tonUI){ showToast('⚠️ TON Connect not ready'); return; }
+  // لو tonUI لم يتهيأ بعد — جرّب التهيئة الآن
+  if(!tonUI){
+    initTonConnect();
+    // انتظر قليلاً ليكتمل
+    await new Promise(r => setTimeout(r, 600));
+  }
+  if(!tonUI){ showToast('⚠️ يتم التحميل... حاول مرة أخرى'); return; }
   try{ await tonUI.openModal(); }catch(e){ showToast('❌ '+e.message); }
 }
 
@@ -1574,11 +1587,10 @@ checkWelcome();
 setInterval(updateTimer, 1000);
 setInterval(loadAuctionData, 30000);
 
-if(document.readyState==='complete'){
-  initTonConnect();
-} else {
-  window.addEventListener('load', initTonConnect);
-}
+// ── تهيئة TON Connect فوراً (مع retry تلقائي) ──
+// لا نحتاج انتظار load event لأن initTonConnect تعيد المحاولة بنفسها
+initTonConnect();
+window.addEventListener('load', initTonConnect); // backup
 </script>
 </body>
 </html>

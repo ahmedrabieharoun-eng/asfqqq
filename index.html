@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -561,16 +560,25 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
     </div>
     <div class="dep-warn">
       <i class="fas fa-exclamation-triangle"></i>
-      <div data-i18n="dep_warn">تأكد من إرسال المعاملة من المحفظة المتصلة فقط.</div>
+      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
+        <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+        التعليق الوحيد في المعاملة.
+      </div>
     </div>
     <label class="flabel" data-i18n="amount_ton">المبلغ (TON)</label>
-    <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1">
+    <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
     <div class="preset-row">
       <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
       <span class="prbtn" onclick="setDepAmt(1)">1</span>
       <span class="prbtn" onclick="setDepAmt(2)">2</span>
       <span class="prbtn" onclick="setDepAmt(5)">5</span>
       <span class="prbtn" onclick="setDepAmt(10)">10</span>
+    </div>
+    <div style="background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.2);border-radius:10px;padding:9px 12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600">رصيدك بعد الإيداع:</span>
+        <span id="depBalPreview" style="font-size:16px;font-weight:800;color:#0098ea">+0 TON</span>
+      </div>
     </div>
     <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()" disabled style="opacity:.5;cursor:not-allowed;"><i class="fas fa-arrow-down"></i> <span data-i18n="deposit_btn">إيداع TON</span></button>
     <div class="tx-status" id="depositStatus">
@@ -1437,97 +1445,76 @@ async function disconnectWallet() {
 }
 
 // ════ DEPOSIT ════
-function openDepositModal(){document.getElementById('depositModal').classList.add('active');}
+function openDepositModal(){
+  // عرض الـ User ID في نافذة الإيداع
+  const uid = tgUser ? String(tgUser.id) : '';
+  const el = document.getElementById('depositUserIdDisplay');
+  if (el) el.textContent = uid || '???';
+  document.getElementById('depositModal').classList.add('active');
+}
 function closeDepositModal(){document.getElementById('depositModal').classList.remove('active');}
-function setDepAmt(v){document.getElementById('depositAmountInput').value=v;}
+function setDepAmt(v){document.getElementById('depositAmountInput').value=v;updDepPreview();}
+function updDepPreview(){
+  const ton = parseFloat(document.getElementById('depositAmountInput').value)||0;
+  const el = document.getElementById('depBalPreview');
+  if(el) el.textContent = '+' + ton.toFixed(2) + ' TON';
+}
 
-async function initiateDeposit() {
-  if (!tonWallet) { showToast(t('toast_connect_wallet')); return; }
+window.initiateDeposit = async function(){
+  if(!tonWallet){showToast('🔗 اربط المحفظة أولاً');return;}
   const amt = parseFloat(document.getElementById('depositAmountInput').value);
-  if (!amt || amt < 0.1) { showToast(t('toast_deposit_min')); return; }
-  if (amt > 1000) { showToast('⚠️ المبلغ كبير جداً'); return; }
-
-  const sd = document.getElementById('depositStatus');
-  const txsi = sd.querySelector('.txsi');
-  const txsm = document.getElementById('depositStatusMsg');
-  const txsd = document.getElementById('depositStatusDetail');
-
-  try {
+  if(!amt||amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
+  if(amt>1000){showToast('المبلغ كبير جداً');return;}
+  try{
     const comment = String(tgUser ? tgUser.id : 'guest');
-    const nano = String(Math.floor(amt * 1e9));
-
-    // Build comment payload using TonWeb
-    let payload = '';
-    try {
-      if (window.TonWeb) {
-        const TW = window.TonWeb;
-        new TW();
-        const cell = new TW.boc.Cell();
-        cell.bits.writeUint(0, 32);
-        cell.bits.writeString(comment);
-        const boc = await cell.toBoc(false);
-        payload = TW.utils.bytesToBase64(boc);
-      }
-    } catch(e) { console.warn('TonWeb payload error:', e); }
-
-    const tx = {
-      validUntil: Math.floor(Date.now() / 1000) + 600,
-      messages: [{ address: DEPOSIT_WALLET, amount: nano, ...(payload ? { payload } : {}) }],
-    };
-
-    showToast('📤 ' + t('sending_tx'));
+    const nano = String(Math.floor(amt*1e9));
+    if(!window.TonWeb) throw new Error('TonWeb not loaded');
+    const TW = window.TonWeb; new TW();
+    const cell = new TW.boc.Cell();
+    cell.bits.writeUint(0,32); cell.bits.writeString(comment);
+    const boc = await cell.toBoc(false);
+    const payload = TW.utils.bytesToBase64(boc);
+    const tx = {validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:DEPOSIT_WALLET,amount:nano,payload}]};
     const result = await tonUI.sendTransaction(tx);
-    showToast('✅ ' + t('tx_sent'));
-    await handleDepositOk(result, amt, comment);
-
-  } catch(e) {
+    showToast('✅ تم إرسال المعاملة! ~دقيقة للتأكيد');
+    await handleDepOk(result, amt, comment);
+  }catch(e){
+    const sd = document.getElementById('depositStatus');
     sd.classList.add('visible');
-    txsi.innerHTML = '❌';
-    txsm.textContent = e.message?.includes('rejected') ? t('tx_rejected') : t('tx_failed');
-    txsd.textContent = e.message || '';
+    sd.querySelector('.txsi').innerHTML='❌';
+    document.getElementById('depositStatusMsg').textContent = e.message?.includes('rejected')?'تم رفض المعاملة':'فشلت المعاملة';
+    document.getElementById('depositStatusDetail').textContent = e.message||'حاول مجدداً';
   }
+};
+
+async function handleDepOk(result, amt, comment){
+  try{
+    const d = await apiCall('deposit',{amount:amt,txHash:result.boc,comment});
+    const sd = document.getElementById('depositStatus');
+    sd.classList.add('visible');
+    sd.querySelector('.txsi').innerHTML='⏳';
+    document.getElementById('depositStatusMsg').textContent='تم إرسال المعاملة!';
+    document.getElementById('depositStatusDetail').textContent='في انتظار التأكيد (~دقيقة)...';
+    if(d.success && d.data?.depositId) startDepVerify(d.data.depositId, result.boc);
+  }catch(e){console.error('handleDepOk:',e);}
 }
 
-async function handleDepositOk(result, amt, comment) {
-  const sd = document.getElementById('depositStatus');
-  const txsi = sd.querySelector('.txsi');
-  const txsm = document.getElementById('depositStatusMsg');
-  const txsd = document.getElementById('depositStatusDetail');
-
-  try {
-    const uid = tgUser ? String(tgUser.id) : 'guest';
-    const res = await apiCall('deposit', { amount: amt, txHash: result.boc, comment });
-    sd.classList.add('visible');
-    txsi.innerHTML = '⏳';
-    txsm.textContent = t('tx_sent');
-    txsd.textContent = t('awaiting_confirm');
-    if (res.success && res.data?.depositId) {
-      startDepVerify(res.data.depositId, result.boc);
-    }
-  } catch(e) {
-    console.error('handleDepositOk error:', e);
-  }
-}
-
-function startDepVerify(depId, txHash) {
-  if (depCheckInt) clearInterval(depCheckInt);
-  if (!depId || !txHash) return;
-  let attempts = 0;
-  depCheckInt = setInterval(async () => {
+function startDepVerify(depId, txHash){
+  if(depCheckInt) clearInterval(depCheckInt);
+  if(!depId||!txHash) return;
+  let attempts=0;
+  depCheckInt=setInterval(async()=>{
     attempts++;
-    try {
-      const r = await apiCall('verifyDeposit', { depositId: depId, txHash });
-      if (r.success && r.data?.status === 'completed') {
+    try{
+      const r = await apiCall('verifyDeposit',{depositId:depId,txHash});
+      if(r.success && r.data?.status==='completed'){
         clearInterval(depCheckInt);
-        const sd = document.getElementById('depositStatus');
-        const txsi = sd.querySelector('.txsi');
-        const txsm = document.getElementById('depositStatusMsg');
-        const txsd = document.getElementById('depositStatusDetail');
-        txsi.innerHTML = '✅';
-        txsm.textContent = t('deposit_confirmed');
-        txsd.textContent = `+${r.data.amount} TON`;
-        showToast(`💰 ${r.data.amount} TON ` + t('added'));
-        userTonBalance = (userTonBalance || 0) + (r.data.amount || 0);
+        const sd=document.getElementById('depositStatus');
+        sd.querySelector('.txsi').innerHTML='✅';
+        document.getElementById('depositStatusMsg').textContent='✅ تم تأكيد الإيداع!';
+        document.getElementById('depositStatusDetail').textContent=`${r.data.amount} TON أُضيف إلى رصيدك`;
+        showToast(`💰 ${r.data.amount} TON تم إيداعه!`);
+        userTonBalance = (userTonBalance||0)+(r.data.amount||0);
         document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
         setTimeout(() => sd.classList.remove('visible'), 4000);
       }

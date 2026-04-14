@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -170,6 +173,19 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 }
 .welcome-start-btn:active{transform:scale(.98);}
 
+/* PLAYERS MINI LIST IN WELCOME */
+.welcome-players-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;
+}
+.welcome-player-item{
+  background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);
+  border-radius:10px;padding:6px 4px;text-align:center;
+  font-size:10px;font-weight:800;color:rgba(255,255,255,.85);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.welcome-player-item img{width:36px;height:36px;object-fit:contain;border-radius:4px;}
+.welcome-player-pos{font-size:8px;color:var(--gold);font-weight:900;}
+
 /* LANG MENU */
 .lang-menu{position:fixed;inset:0;z-index:900;display:none;}
 .lang-menu.open{display:block;}
@@ -282,12 +298,16 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
   height:72%;width:90%;object-fit:contain;z-index:2;
 }
+/* IMPROVED player name — bigger and clearer */
 .card-player-name{
-  position:absolute;bottom:4px;left:0;right:0;z-index:3;
-  text-align:center;font-size:8px;font-weight:900;color:#fff;
-  text-shadow:0 1px 4px rgba(0,0,0,1),0 0 8px rgba(0,0,0,.8);
-  letter-spacing:.3px;
+  position:absolute;bottom:0;left:0;right:0;z-index:3;
+  text-align:center;font-size:11px;font-weight:900;color:#fff;
+  text-shadow:0 1px 6px rgba(0,0,0,1),0 0 12px rgba(0,0,0,1);
+  letter-spacing:.4px;
   text-transform:uppercase;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.4) 70%,transparent 100%);
+  padding:10px 4px 5px;
+  line-height:1.2;
 }
 
 /* MAIN */
@@ -361,7 +381,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 .lb-name{flex:1;font-size:13px;font-weight:800;color:#fff;}
 .lb-prize-note{font-size:10px;color:rgba(0,242,122,.65);font-weight:700;}
 .lb-ton{font-family:'Orbitron',monospace;font-size:12px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:3px;}
-.lb-ton img{width:12px;height:12px;}
+.lb-ton img{width:14px;height:14px;object-fit:contain;}
 
 /* PRIZE BANNER */
 .prize-banner{background:linear-gradient(135deg,rgba(0,22,4,.92),rgba(0,10,1,.97));border:1px solid rgba(0,242,122,.18);border-radius:18px;padding:13px 15px;margin-bottom:14px;margin-top:2px;animation:fadeIn .6s ease .35s both;}
@@ -466,35 +486,28 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-box">
     <div class="welcome-header">
-      <div class="welcome-title">🏆 مرحباً بك في المزاد!</div>
+      <div class="welcome-title" data-i18n="welcome_title">🏆 مرحباً بك في المزاد!</div>
       <button class="welcome-close" onclick="closeWelcome()">✕</button>
     </div>
     <div class="welcome-scroll">
       <div class="welcome-section">
-        <div class="welcome-section-title">🏆 باكج الأساطير — الموسم الجديد</div>
-        <p>الباكج يحتوي على 13 لاعب أسطوري بطاقة 99 كاملة، وهم نخبة أفضل لاعبي التاريخ: كرويف، كاكا، بوفون، كسياس، ملديني، كافو، رونالدينيو، رونالدو الظاهرة، بيليه، روبيرتو كارلوس، زيدان، مارادونا، إنيستا.</p>
-        <div class="welcome-highlight">💡 يمكن بيع هؤلاء اللاعبين في السوق فور بدء الموسم الجديد. السعر المتوقع للاعب الواحد: 5 - 10 TON، وإجمالي قيمة الباكج في السوق يتراوح بين 75 - 130 TON!</div>
+        <div class="welcome-section-title" data-i18n="welcome_pkg_title">🏆 مميزات باكج الأساطير</div>
+        <div class="welcome-highlight" data-i18n="welcome_pkg_feat1">⭐ 13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
+        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat2">💎 لاعبون حصريون لن ينزلوا في أي باكج عادي أبداً</div>
+        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat3">💰 القيمة المتوقعة في السوق: 75 — 130 TON</div>
+        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat4">🚀 يمكن بيع اللاعبين فور بدء الموسم الجديد</div>
       </div>
       <div class="welcome-section">
-        <div class="welcome-section-title">🎖️ Limited Edition حصري</div>
-        <p>هؤلاء اللاعبون سيكونون حصريين بالكامل — لن ينزلوا مرة أخرى في أي باكج عادي. ستكون ملكيتهم مرتبطة بمالك الباكج فقط، مما يجعل قيمتهم في السوق مرتفعة جداً.</p>
+        <div class="welcome-section-title" data-i18n="welcome_players_title">⚽ لاعبو الباكج — نخبة أفضل لاعبي التاريخ</div>
+        <div class="welcome-players-grid" id="welcomePlayersGrid"></div>
       </div>
       <div class="welcome-section">
-        <div class="welcome-section-title">🥇 الفائز الأول — الباكج كاملاً</div>
-        <p>أعلى مستخدم يدفع في المزاد سيحصل على الباكج كاملاً (13 لاعب) فور بدء الموسم الجديد.</p>
-        <div class="welcome-highlight">👑 الفائز الأول = 13 لاعب أسطوري بطاقة 99</div>
-      </div>
-      <div class="welcome-section">
-        <div class="welcome-section-title">🥈 باقي المتسابقين (2–10)</div>
-        <p>باقي المتسابقين الذين شاركوا في المزاد ولم يفوزوا بالمركز الأول سيحصلون على:</p>
-        <div class="welcome-green">✅ لاعب واحد فقط من الباكج (مختار عشوائياً)<br>✅ استرداد تلقائي 20% من قيمة مبيدهم إلى محفظتك فور بدء الموسم الجديد</div>
-      </div>
-      <div class="welcome-section">
-        <div class="welcome-section-title">⏰ مدة المزاد</div>
-        <p>المزاد يستمر 3 أيام فقط من وقت إطلاقه. بعد انتهاء الوقت، يتم توزيع الجوائز تلقائياً على الفائزين.</p>
+        <div class="welcome-section-title" data-i18n="welcome_prizes_title">🥇 جوائز المزاد</div>
+        <div class="welcome-highlight" data-i18n="welcome_prize1">👑 المركز الأول — الباكج كاملاً (13 لاعب أسطوري بطاقة 99)</div>
+        <div class="welcome-green" style="margin-top:6px;" data-i18n="welcome_prize2">🥈 المراكز 2–10 — لاعب واحد من الباكج + استرداد 20% من قيمة مزايدتك</div>
       </div>
     </div>
-    <button class="welcome-start-btn" onclick="closeWelcome()">🚀 ابدأ المزايدة الآن!</button>
+    <button class="welcome-start-btn" onclick="closeWelcome()" data-i18n="welcome_btn">🚀 ابدأ المزايدة الآن!</button>
   </div>
 </div>
 
@@ -503,12 +516,12 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   <div class="tb-left">
     <div class="tb-user-avatar" id="topUserAvatar">🐼</div>
     <div class="tb-ton-balance">
-      <img class="ton-icon" src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'" alt="TON">
+      <img class="ton-icon" src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
       <span class="tb-ton-val orb" id="topTonBalance">0.00</span>
     </div>
     <div class="tb-deposit-btn" onclick="openDepositModal()">
       <i class="fas fa-plus-circle" style="font-size:13px;"></i>
-      <span>إيداع</span>
+      <span data-i18n="deposit">إيداع</span>
     </div>
   </div>
   <div class="tb-right">
@@ -523,7 +536,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <div id="langMenu" class="lang-menu">
   <div class="lang-menu-overlay" onclick="closeLangMenu()"></div>
   <div class="lang-menu-panel">
-    <div class="lang-menu-title">اختر اللغة</div>
+    <div class="lang-menu-title" data-i18n="choose_lang">اختر اللغة</div>
     <div class="lang-option active-lang" onclick="setLang('ar')"><span>🇸🇦</span><span>العربية</span></div>
     <div class="lang-option" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
     <div class="lang-option" onclick="setLang('ru')"><span>🇷🇺</span><span>Русский</span></div>
@@ -536,21 +549,21 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <div class="modal" id="depositModal">
   <div class="modal-box">
     <div class="modal-hdr">
-      <div class="modal-title">💰 إيداع TON</div>
+      <div class="modal-title" data-i18n="deposit_title">💰 إيداع TON</div>
       <button class="modal-close" onclick="closeDepositModal()">✕</button>
     </div>
     <div class="wal-row">
       <div class="wl-inf">
-        <div class="wll">المحفظة</div>
-        <div class="wla" id="walletAddressDisplay">غير متصل</div>
+        <div class="wll" data-i18n="wallet">المحفظة</div>
+        <div class="wla" id="walletAddressDisplay" data-i18n="not_connected">غير متصل</div>
       </div>
-      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> ربط</button>
+      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connect">ربط</span></button>
     </div>
     <div class="dep-warn">
       <i class="fas fa-exclamation-triangle"></i>
-      <div>تأكد من إرسال المعاملة من المحفظة المتصلة فقط.</div>
+      <div data-i18n="dep_warn">تأكد من إرسال المعاملة من المحفظة المتصلة فقط.</div>
     </div>
-    <label class="flabel">المبلغ (TON)</label>
+    <label class="flabel" data-i18n="amount_ton">المبلغ (TON)</label>
     <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1">
     <div class="preset-row">
       <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
@@ -559,10 +572,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
       <span class="prbtn" onclick="setDepAmt(5)">5</span>
       <span class="prbtn" onclick="setDepAmt(10)">10</span>
     </div>
-    <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()"><i class="fas fa-arrow-down"></i> إيداع TON</button>
+    <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()" disabled style="opacity:.5;cursor:not-allowed;"><i class="fas fa-arrow-down"></i> <span data-i18n="deposit_btn">إيداع TON</span></button>
     <div class="tx-status" id="depositStatus">
       <div class="txsi">⏳</div>
-      <div class="txsm">جاري معالجة الإيداع...</div>
+      <div class="txsm" id="depositStatusMsg">جاري معالجة الإيداع...</div>
       <div class="txsd" id="depositStatusDetail"></div>
     </div>
   </div>
@@ -572,11 +585,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <div class="players-modal" id="playersModal">
   <div class="players-modal-box">
     <div class="pm-header">
-      <div class="pm-title">🌟 لاعبو الباكج</div>
+      <div class="pm-title" data-i18n="pkg_players">🌟 لاعبو الباكج</div>
       <button class="pm-close" onclick="closePlayersModal()">✕</button>
     </div>
     <div class="pm-scroll">
-      <div style="text-align:center;font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin-bottom:14px;letter-spacing:.5px;">⭐ جميع اللاعبين Limited Edition حصري — طاقة 99</div>
+      <div style="text-align:center;font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin-bottom:14px;letter-spacing:.5px;" data-i18n="all_le">⭐ جميع اللاعبين Limited Edition حصري — طاقة 99</div>
       <div class="players-grid" id="playersGrid"></div>
     </div>
   </div>
@@ -593,40 +606,40 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
         onerror="this.style.background='linear-gradient(135deg,#1a0a00,#3d2000)';this.style.minHeight='200px'"
         alt="Package">
       <div class="pkg-hero-overlay">
-        <div class="pkg-hero-label">تحضير الموسم الجديد</div>
-        <div class="pkg-hero-title">باكج الأساطير 🏆</div>
-        <div class="pkg-hero-sub">13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
+        <div class="pkg-hero-label" data-i18n="new_season">تحضير الموسم الجديد</div>
+        <div class="pkg-hero-title" data-i18n="legends_pkg">باكج الأساطير 🏆</div>
+        <div class="pkg-hero-sub" data-i18n="pkg_sub">13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
       </div>
-      <button class="pkg-view-btn" onclick="openPlayersModal()">👁 عرض اللاعبين</button>
+      <button class="pkg-view-btn" onclick="openPlayersModal()" data-i18n="view_players">👁 عرض اللاعبين</button>
     </div>
 
     <div class="action-row">
       <button class="action-btn players" onclick="openPlayersModal()">
-        <i class="fas fa-users"></i><span>لاعبو الباكج</span>
+        <i class="fas fa-users"></i><span data-i18n="pkg_players_btn">لاعبو الباكج</span>
       </button>
       <button class="action-btn explain" onclick="openWelcome()">
-        <i class="fas fa-info-circle"></i><span>كيف يعمل المزاد؟</span>
+        <i class="fas fa-info-circle"></i><span data-i18n="how_works">كيف يعمل المزاد؟</span>
       </button>
     </div>
 
     <div class="timer-card">
-      <div class="timer-label">⏰ الوقت المتبقي للمزاد</div>
+      <div class="timer-label" data-i18n="time_left">⏰ الوقت المتبقي للمزاد</div>
       <div class="timer-row" id="timerRow">
-        <div class="timer-unit"><div class="timer-val orb" id="timerDays">03</div><div class="timer-unit-lbl">يوم</div></div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerDays">03</div><div class="timer-unit-lbl" data-i18n="days">يوم</div></div>
         <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerHours">00</div><div class="timer-unit-lbl">ساعة</div></div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerHours">00</div><div class="timer-unit-lbl" data-i18n="hours">ساعة</div></div>
         <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerMins">00</div><div class="timer-unit-lbl">دقيقة</div></div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerMins">00</div><div class="timer-unit-lbl" data-i18n="mins">دقيقة</div></div>
         <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerSecs">00</div><div class="timer-unit-lbl">ثانية</div></div>
+        <div class="timer-unit"><div class="timer-val orb" id="timerSecs">00</div><div class="timer-unit-lbl" data-i18n="secs">ثانية</div></div>
       </div>
     </div>
 
     <div class="bid-card">
-      <div class="bid-title"><i class="fas fa-gavel"></i><span>ضع مزايدتك</span></div>
+      <div class="bid-title"><i class="fas fa-gavel"></i><span data-i18n="place_bid">ضع مزايدتك</span></div>
       <div class="bid-input-row">
         <input type="number" class="bid-input" id="bidInput" placeholder="0.00" min="0.1" step="0.1">
-        <button class="bid-btn" onclick="placeBid()"><i class="fas fa-gavel"></i> زايد</button>
+        <button class="bid-btn" onclick="placeBid()"><i class="fas fa-gavel"></i> <span data-i18n="bid_btn">زايد</span></button>
       </div>
       <div class="bid-quick">
         <div class="bid-quick-btn" onclick="addBid(0.5)">+0.5</div>
@@ -636,34 +649,34 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
         <div class="bid-quick-btn" onclick="addBid(10)">+10</div>
       </div>
       <div class="bid-min-note">
-        أعلى مزايدة حالياً: <strong id="currentTopBid" style="color:var(--gold);" class="orb">0.00 TON</strong>
+        <span data-i18n="top_bid">أعلى مزايدة حالياً:</span> <strong id="currentTopBid" style="color:var(--gold);" class="orb">0.00 TON</strong>
       </div>
     </div>
 
     <div class="prize-banner">
-      <div class="prize-row"><div class="prize-icon">👑</div><div class="prize-text"><strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)</div></div>
+      <div class="prize-row"><div class="prize-icon">👑</div><div class="prize-text" data-i18n="prize1"><strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)</div></div>
       <div class="prize-divider"></div>
-      <div class="prize-row"><div class="prize-icon">🥈</div><div class="prize-text"><strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم</div></div>
+      <div class="prize-row"><div class="prize-icon">🥈</div><div class="prize-text" data-i18n="prize2"><strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم</div></div>
     </div>
 
-    <div class="section-label">📊 إحصائيات المزاد</div>
+    <div class="section-label" data-i18n="auction_stats">📊 إحصائيات المزاد</div>
     <div class="stats-card">
-      <div class="stats-title"><i class="fas fa-crown"></i> المتصدر</div>
+      <div class="stats-title"><i class="fas fa-crown"></i> <span data-i18n="leader">المتصدر</span></div>
       <div class="leader-card" id="leaderCard">
         <div class="leader-crown">👑</div>
         <div class="leader-avatar" id="leaderAvatar">🐼</div>
         <div class="leader-info">
           <div class="leader-name" id="leaderName">—</div>
-          <div class="leader-prize">سيحصل على الباكج كاملاً 🏆</div>
+          <div class="leader-prize" data-i18n="will_win_pkg">سيحصل على الباكج كاملاً 🏆</div>
         </div>
         <div class="leader-ton">
-          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src=''" alt="">
+          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
           <span class="orb" id="leaderAmount">0.00</span>
         </div>
       </div>
       <div class="leaderboard">
         <div class="lb-header">
-          <span>الترتيب</span><span>المستخدم</span><span>المبلغ</span>
+          <span data-i18n="rank">الترتيب</span><span data-i18n="user">المستخدم</span><span data-i18n="amount">المبلغ</span>
         </div>
         <div id="leaderboardList"></div>
       </div>
@@ -677,22 +690,22 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
   <div class="main-wrap promo-wrap">
 
     <div class="promo-header-banner">
-      <div class="promo-header-title">📢 دعم قنوات التيليجرام</div>
-      <div class="promo-header-desc">أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.</div>
-      <div class="promo-reward-badge">🏆 مكافأة: 0.1 — 100 TON لكل منشور</div>
+      <div class="promo-header-title" data-i18n="promo_title">📢 دعم قنوات التيليجرام</div>
+      <div class="promo-header-desc" data-i18n="promo_desc">أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.</div>
+      <div class="promo-reward-badge" data-i18n="promo_reward">🏆 مكافأة: 0.1 — 100 TON لكل منشور</div>
     </div>
 
     <div class="promo-submit-card">
-      <div class="promo-submit-title">📎 أرسل رابط منشورك</div>
+      <div class="promo-submit-title" data-i18n="promo_submit_title">📎 أرسل رابط منشورك</div>
       <input type="url" class="promo-input" id="promoLinkInput" placeholder="https://t.me/yourchannel/123">
       <button class="promo-submit-btn" onclick="submitPromoPost()" id="promoSubmitBtn">
-        <i class="fas fa-paper-plane"></i> إرسال للمراجعة
+        <i class="fas fa-paper-plane"></i> <span data-i18n="submit_review">إرسال للمراجعة</span>
       </button>
     </div>
 
-    <div class="promo-log-title">📋 سجل المنشورات</div>
+    <div class="promo-log-title" data-i18n="posts_log">📋 سجل المنشورات</div>
     <div id="promoLogList">
-      <div class="promo-empty">لا توجد منشورات مرسلة بعد</div>
+      <div class="promo-empty" data-i18n="no_posts">لا توجد منشورات مرسلة بعد</div>
     </div>
 
   </div>
@@ -702,11 +715,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <div class="bottom-nav">
   <div class="nav-item active" onclick="switchTab('auction')" id="nav-auction">
     <i class="fas fa-gavel"></i>
-    <span>المزاد</span>
+    <span data-i18n="nav_auction">المزاد</span>
   </div>
   <div class="nav-item" onclick="switchTab('promo')" id="nav-promo">
     <i class="fas fa-bullhorn"></i>
-    <span>قناتك</span>
+    <span data-i18n="nav_promo">قناتك</span>
   </div>
 </div>
 
@@ -716,6 +729,417 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-se
 <script>
 // ════ CONFIG ════
 const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
+const DEPOSIT_WALLET = 'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k';
+
+// ════ TRANSLATIONS ════
+const I18N = {
+  ar: {
+    welcome_title:'🏆 مرحباً بك في المزاد!',
+    welcome_pkg_title:'🏆 مميزات باكج الأساطير',
+    welcome_pkg_feat1:'⭐ 13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
+    welcome_pkg_feat2:'💎 لاعبون حصريون لن ينزلوا في أي باكج عادي أبداً',
+    welcome_pkg_feat3:'💰 القيمة المتوقعة في السوق: 75 — 130 TON',
+    welcome_pkg_feat4:'🚀 يمكن بيع اللاعبين فور بدء الموسم الجديد',
+    welcome_players_title:'⚽ لاعبو الباكج — نخبة أفضل لاعبي التاريخ',
+    welcome_prizes_title:'🥇 جوائز المزاد',
+    welcome_prize1:'👑 المركز الأول — الباكج كاملاً (13 لاعب أسطوري بطاقة 99)',
+    welcome_prize2:'🥈 المراكز 2–10 — لاعب واحد من الباكج + استرداد 20% من قيمة مزايدتك',
+    welcome_btn:'🚀 ابدأ المزايدة الآن!',
+    deposit:'إيداع',
+    deposit_title:'💰 إيداع TON',
+    wallet:'المحفظة',
+    not_connected:'غير متصل',
+    connect:'ربط',
+    dep_warn:'تأكد من إرسال المعاملة من المحفظة المتصلة فقط.',
+    amount_ton:'المبلغ (TON)',
+    deposit_btn:'إيداع TON',
+    processing:'جاري معالجة الإيداع...',
+    pkg_players:'🌟 لاعبو الباكج',
+    all_le:'⭐ جميع اللاعبين Limited Edition حصري — طاقة 99',
+    new_season:'تحضير الموسم الجديد',
+    legends_pkg:'باكج الأساطير 🏆',
+    pkg_sub:'13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
+    view_players:'👁 عرض اللاعبين',
+    pkg_players_btn:'لاعبو الباكج',
+    how_works:'كيف يعمل المزاد؟',
+    time_left:'⏰ الوقت المتبقي للمزاد',
+    days:'يوم',hours:'ساعة',mins:'دقيقة',secs:'ثانية',
+    place_bid:'ضع مزايدتك',
+    bid_btn:'زايد',
+    top_bid:'أعلى مزايدة حالياً:',
+    prize1:'<strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)',
+    prize2:'<strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم',
+    auction_stats:'📊 إحصائيات المزاد',
+    leader:'المتصدر',
+    will_win_pkg:'سيحصل على الباكج كاملاً 🏆',
+    rank:'الترتيب',user:'المستخدم',amount:'المبلغ',
+    promo_title:'📢 دعم قنوات التيليجرام',
+    promo_desc:'أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.',
+    promo_reward:'🏆 مكافأة: 0.1 — 100 TON لكل منشور',
+    promo_submit_title:'📎 أرسل رابط منشورك',
+    submit_review:'إرسال للمراجعة',
+    posts_log:'📋 سجل المنشورات',
+    no_posts:'لا توجد منشورات مرسلة بعد',
+    nav_auction:'المزاد',nav_promo:'قناتك',
+    choose_lang:'اختر اللغة',
+    auction_ended:'🏁 انتهى المزاد',
+    prize_runner:'🎁 لاعب + 20% استرداد',
+    prize_winner:'🏆 سيحصل على الباكج كاملاً',
+    toast_open_tg:'⚠️ يجب فتح التطبيق من تيليجرام',
+    toast_bid_ok:'✅ تم تسجيل مزايدتك!',
+    toast_insufficient:'⚠️ رصيدك غير كافٍ',
+    toast_invalid_amount:'⚠️ أدخل مبلغاً صحيحاً',
+    toast_deposit_min:'الحد الأدنى 0.1 TON',
+    deposit_success:'تم الإيداع بنجاح!',
+    toast_connect_wallet:'🔗 TON Connect — اربط محفظتك',
+    toast_promo_ok:'✅ تم إرسال المنشور للمراجعة!',
+    toast_promo_invalid:'⚠️ أدخل رابط صحيح',
+    toast_promo_not_tg:'⚠️ يجب أن يكون رابط من تيليجرام',
+    toast_music:'🎵 اضغط مرة أخرى لتشغيل الموسيقى',
+    status_pending:'⏳ قيد المراجعة',
+    status_approved:'✅ مقبول',
+    status_rejected:'❌ مرفوض',
+    disconnect:'قطع',
+    sending_tx:'جاري إرسال المعاملة...',
+    tx_sent:'تم إرسال المعاملة! انتظر التأكيد',
+    tx_rejected:'تم رفض المعاملة',
+    tx_failed:'فشلت المعاملة',
+    awaiting_confirm:'في انتظار التأكيد (~دقيقة)...',
+    deposit_confirmed:'✅ تم تأكيد الإيداع!',
+    added:'أُضيف إلى رصيدك',
+  },
+  en: {
+    welcome_title:'🏆 Welcome to the Auction!',
+    welcome_pkg_title:'🏆 Legends Package Features',
+    welcome_pkg_feat1:'⭐ 13 Legendary players rated 99 — Exclusive Limited Edition',
+    welcome_pkg_feat2:'💎 Exclusive players — will never appear in any regular pack',
+    welcome_pkg_feat3:'💰 Expected market value: 75 — 130 TON',
+    welcome_pkg_feat4:'🚀 Players can be sold as soon as the new season starts',
+    welcome_players_title:'⚽ Package Players — The Greatest of All Time',
+    welcome_prizes_title:'🥇 Auction Prizes',
+    welcome_prize1:'👑 1st Place — Full package (13 legendary 99-rated players)',
+    welcome_prize2:'🥈 Ranks 2–10 — 1 player from the package + 20% refund of your bid',
+    welcome_btn:'🚀 Start Bidding Now!',
+    deposit:'Deposit',
+    deposit_title:'💰 Deposit TON',
+    wallet:'Wallet',
+    not_connected:'Not Connected',
+    connect:'Connect',
+    dep_warn:'Make sure to send the transaction from the connected wallet only.',
+    amount_ton:'Amount (TON)',
+    deposit_btn:'Deposit TON',
+    processing:'Processing deposit...',
+    pkg_players:'🌟 Package Players',
+    all_le:'⭐ All players are Limited Edition — Rating 99',
+    new_season:'New Season Preparation',
+    legends_pkg:'Legends Package 🏆',
+    pkg_sub:'13 legendary 99-rated players — Exclusive Limited Edition',
+    view_players:'👁 View Players',
+    pkg_players_btn:'Package Players',
+    how_works:'How does the auction work?',
+    time_left:'⏰ Time Remaining',
+    days:'Days',hours:'Hours',mins:'Mins',secs:'Secs',
+    place_bid:'Place Your Bid',
+    bid_btn:'Bid',
+    top_bid:'Current Top Bid:',
+    prize1:'<strong>1st Place</strong> — Gets the full package (13 legendary players)',
+    prize2:'<strong>Ranks 2–10</strong> — 1 player from the package + 20% refund when season starts',
+    auction_stats:'📊 Auction Stats',
+    leader:'Leader',
+    will_win_pkg:'Will get the full package 🏆',
+    rank:'Rank',user:'User',amount:'Amount',
+    promo_title:'📢 Telegram Channel Support',
+    promo_desc:'Post about the auction on your channel and earn 0.1 to 100 TON per approved post. Review takes 1 minute to 1 day.',
+    promo_reward:'🏆 Reward: 0.1 — 100 TON per post',
+    promo_submit_title:'📎 Submit Your Post Link',
+    submit_review:'Submit for Review',
+    posts_log:'📋 Posts Log',
+    no_posts:'No posts submitted yet',
+    nav_auction:'Auction',nav_promo:'Channel',
+    choose_lang:'Choose Language',
+    auction_ended:'🏁 Auction Ended',
+    prize_runner:'🎁 1 Player + 20% refund',
+    prize_winner:'🏆 Will win full package',
+    toast_open_tg:'⚠️ Please open the app from Telegram',
+    toast_bid_ok:'✅ Bid placed successfully!',
+    toast_insufficient:'⚠️ Insufficient balance',
+    toast_invalid_amount:'⚠️ Enter a valid amount',
+    toast_deposit_min:'Minimum deposit is 0.1 TON',
+    deposit_success:'Deposit successful!',
+    toast_connect_wallet:'🔗 TON Connect — Link your wallet',
+    toast_promo_ok:'✅ Post submitted for review!',
+    toast_promo_invalid:'⚠️ Enter a valid URL',
+    toast_promo_not_tg:'⚠️ Must be a Telegram link',
+    toast_music:'🎵 Tap again to play music',
+    status_pending:'⏳ Under Review',
+    status_approved:'✅ Approved',
+    status_rejected:'❌ Rejected',
+    disconnect:'Disconnect',
+    sending_tx:'Sending transaction...',
+    tx_sent:'Transaction sent! Waiting for confirmation',
+    tx_rejected:'Transaction rejected',
+    tx_failed:'Transaction failed',
+    awaiting_confirm:'Awaiting confirmation (~1 minute)...',
+    deposit_confirmed:'✅ Deposit confirmed!',
+    added:'added to your balance',
+  },
+  ru: {
+    welcome_title:'🏆 Добро пожаловать на аукцион!',
+    welcome_pkg_title:'🏆 Преимущества пакета «Легенды»',
+    welcome_pkg_feat1:'⭐ 13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
+    welcome_pkg_feat2:'💎 Эксклюзивные игроки — больше никогда не появятся в обычных пакетах',
+    welcome_pkg_feat3:'💰 Ожидаемая рыночная стоимость: 75 — 130 TON',
+    welcome_pkg_feat4:'🚀 Игроков можно продавать сразу после начала нового сезона',
+    welcome_players_title:'⚽ Игроки пакета — Лучшие в истории',
+    welcome_prizes_title:'🥇 Призы аукциона',
+    welcome_prize1:'👑 1-е место — Полный пакет (13 легендарных игроков с рейтингом 99)',
+    welcome_prize2:'🥈 Места 2–10 — 1 игрок из пакета + возврат 20% ставки',
+    welcome_btn:'🚀 Начать торги!',
+    deposit:'Пополнить',
+    deposit_title:'💰 Пополнение TON',
+    wallet:'Кошелёк',
+    not_connected:'Не подключён',
+    connect:'Подключить',
+    dep_warn:'Убедитесь, что транзакция отправлена с подключённого кошелька.',
+    amount_ton:'Сумма (TON)',
+    deposit_btn:'Пополнить TON',
+    processing:'Обработка пополнения...',
+    pkg_players:'🌟 Игроки пакета',
+    all_le:'⭐ Все игроки — Limited Edition с рейтингом 99',
+    new_season:'Подготовка к новому сезону',
+    legends_pkg:'Пакет «Легенды» 🏆',
+    pkg_sub:'13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
+    view_players:'👁 Посмотреть игроков',
+    pkg_players_btn:'Игроки пакета',
+    how_works:'Как работает аукцион?',
+    time_left:'⏰ Оставшееся время',
+    days:'Дн',hours:'Часы',mins:'Мин',secs:'Сек',
+    place_bid:'Сделать ставку',
+    bid_btn:'Ставка',
+    top_bid:'Текущая лучшая ставка:',
+    prize1:'<strong>1-е место</strong> — Получает полный пакет (13 легендарных игроков)',
+    prize2:'<strong>Места 2–10</strong> — 1 игрок из пакета + возврат 20% при старте сезона',
+    auction_stats:'📊 Статистика аукциона',
+    leader:'Лидер',
+    will_win_pkg:'Получит полный пакет 🏆',
+    rank:'Место',user:'Игрок',amount:'Сумма',
+    promo_title:'📢 Поддержка Telegram каналов',
+    promo_desc:'Опубликуйте об аукционе в своём канале и получите от 0.1 до 100 TON за каждый одобренный пост.',
+    promo_reward:'🏆 Награда: 0.1 — 100 TON за пост',
+    promo_submit_title:'📎 Отправьте ссылку на публикацию',
+    submit_review:'Отправить на проверку',
+    posts_log:'📋 Журнал публикаций',
+    no_posts:'Публикаций пока нет',
+    nav_auction:'Аукцион',nav_promo:'Канал',
+    choose_lang:'Выбрать язык',
+    auction_ended:'🏁 Аукцион завершён',
+    prize_runner:'🎁 1 игрок + возврат 20%',
+    prize_winner:'🏆 Получит полный пакет',
+    toast_open_tg:'⚠️ Откройте приложение из Telegram',
+    toast_bid_ok:'✅ Ставка сделана!',
+    toast_insufficient:'⚠️ Недостаточно средств',
+    toast_invalid_amount:'⚠️ Введите корректную сумму',
+    toast_deposit_min:'Минимум 0.1 TON',
+    deposit_success:'Пополнение выполнено!',
+    toast_connect_wallet:'🔗 TON Connect — Подключите кошелёк',
+    toast_promo_ok:'✅ Публикация отправлена на проверку!',
+    toast_promo_invalid:'⚠️ Введите корректную ссылку',
+    toast_promo_not_tg:'⚠️ Должна быть ссылка Telegram',
+    toast_music:'🎵 Нажмите ещё раз для включения музыки',
+    status_pending:'⏳ На проверке',
+    status_approved:'✅ Одобрено',
+    status_rejected:'❌ Отклонено',
+    disconnect:'Отключить',
+    sending_tx:'Отправка транзакции...',
+    tx_sent:'Транзакция отправлена! Ожидайте подтверждения',
+    tx_rejected:'Транзакция отклонена',
+    tx_failed:'Транзакция не удалась',
+    awaiting_confirm:'Ожидание подтверждения (~1 минута)...',
+    deposit_confirmed:'✅ Пополнение подтверждено!',
+    added:'добавлено к балансу',
+  },
+  fr: {
+    welcome_title:'🏆 Bienvenue aux enchères!',
+    welcome_pkg_title:'🏆 Avantages du pack Légendes',
+    welcome_pkg_feat1:'⭐ 13 joueurs légendaires notés 99 — Limited Edition exclusif',
+    welcome_pkg_feat2:'💎 Joueurs exclusifs — jamais disponibles dans les packs normaux',
+    welcome_pkg_feat3:'💰 Valeur marchande estimée: 75 — 130 TON',
+    welcome_pkg_feat4:'🚀 Les joueurs peuvent être vendus dès le début de la nouvelle saison',
+    welcome_players_title:'⚽ Joueurs du pack — Les plus grands de tous les temps',
+    welcome_prizes_title:'🥇 Prix des enchères',
+    welcome_prize1:'👑 1ère place — Pack complet (13 joueurs légendaires notés 99)',
+    welcome_prize2:'🥈 Places 2–10 — 1 joueur du pack + remboursement de 20%',
+    welcome_btn:'🚀 Commencer les enchères!',
+    deposit:'Dépôt',
+    deposit_title:'💰 Dépôt TON',
+    wallet:'Portefeuille',
+    not_connected:'Non connecté',
+    connect:'Connecter',
+    dep_warn:'Assurez-vous d\'envoyer la transaction depuis le portefeuille connecté uniquement.',
+    amount_ton:'Montant (TON)',
+    deposit_btn:'Déposer TON',
+    processing:'Traitement du dépôt...',
+    pkg_players:'🌟 Joueurs du pack',
+    all_le:'⭐ Tous les joueurs sont Limited Edition — Note 99',
+    new_season:'Préparation de la nouvelle saison',
+    legends_pkg:'Pack Légendes 🏆',
+    pkg_sub:'13 joueurs légendaires notés 99 — Limited Edition exclusif',
+    view_players:'👁 Voir les joueurs',
+    pkg_players_btn:'Joueurs du pack',
+    how_works:'Comment fonctionnent les enchères?',
+    time_left:'⏰ Temps restant',
+    days:'Jours',hours:'Heures',mins:'Min',secs:'Sec',
+    place_bid:'Placer une enchère',
+    bid_btn:'Enchérir',
+    top_bid:'Meilleure enchère actuelle:',
+    prize1:'<strong>1ère place</strong> — Reçoit le pack complet (13 joueurs légendaires)',
+    prize2:'<strong>Places 2–10</strong> — 1 joueur du pack + remboursement 20% au début de saison',
+    auction_stats:'📊 Statistiques des enchères',
+    leader:'Leader',
+    will_win_pkg:'Obtiendra le pack complet 🏆',
+    rank:'Rang',user:'Utilisateur',amount:'Montant',
+    promo_title:'📢 Soutien des chaînes Telegram',
+    promo_desc:'Publiez sur les enchères dans votre chaîne et gagnez de 0.1 à 100 TON par publication approuvée.',
+    promo_reward:'🏆 Récompense: 0.1 — 100 TON par publication',
+    promo_submit_title:'📎 Soumettre le lien de votre publication',
+    submit_review:'Envoyer pour révision',
+    posts_log:'📋 Journal des publications',
+    no_posts:'Aucune publication soumise',
+    nav_auction:'Enchères',nav_promo:'Chaîne',
+    choose_lang:'Choisir la langue',
+    auction_ended:'🏁 Enchères terminées',
+    prize_runner:'🎁 1 joueur + remboursement 20%',
+    prize_winner:'🏆 Gagnera le pack complet',
+    toast_open_tg:'⚠️ Ouvrez l\'app depuis Telegram',
+    toast_bid_ok:'✅ Enchère placée avec succès!',
+    toast_insufficient:'⚠️ Solde insuffisant',
+    toast_invalid_amount:'⚠️ Entrez un montant valide',
+    toast_deposit_min:'Minimum 0.1 TON',
+    deposit_success:'Dépôt réussi!',
+    toast_connect_wallet:'🔗 TON Connect — Liez votre portefeuille',
+    toast_promo_ok:'✅ Publication soumise pour révision!',
+    toast_promo_invalid:'⚠️ Entrez une URL valide',
+    toast_promo_not_tg:'⚠️ Doit être un lien Telegram',
+    toast_music:'🎵 Appuyez à nouveau pour lire la musique',
+    status_pending:'⏳ En cours de révision',
+    status_approved:'✅ Approuvé',
+    status_rejected:'❌ Rejeté',
+    disconnect:'Déconnecter',
+    sending_tx:'Envoi de la transaction...',
+    tx_sent:'Transaction envoyée! En attente de confirmation',
+    tx_rejected:'Transaction rejetée',
+    tx_failed:'Transaction échouée',
+    awaiting_confirm:'En attente de confirmation (~1 minute)...',
+    deposit_confirmed:'✅ Dépôt confirmé!',
+    added:'ajouté à votre solde',
+  },
+  de: {
+    welcome_title:'🏆 Willkommen bei der Auktion!',
+    welcome_pkg_title:'🏆 Vorteile des Legenden-Pakets',
+    welcome_pkg_feat1:'⭐ 13 legendäre Spieler mit Bewertung 99 — Exklusives Limited Edition',
+    welcome_pkg_feat2:'💎 Exklusive Spieler — erscheinen nie wieder in normalen Packs',
+    welcome_pkg_feat3:'💰 Erwarteter Marktwert: 75 — 130 TON',
+    welcome_pkg_feat4:'🚀 Spieler können sofort zu Saisonbeginn verkauft werden',
+    welcome_players_title:'⚽ Paketspieler — Die Größten aller Zeiten',
+    welcome_prizes_title:'🥇 Auktionspreise',
+    welcome_prize1:'👑 1. Platz — Vollständiges Paket (13 legendäre Spieler mit 99)',
+    welcome_prize2:'🥈 Plätze 2–10 — 1 Spieler aus dem Paket + 20% Rückerstattung',
+    welcome_btn:'🚀 Jetzt bieten!',
+    deposit:'Einzahlen',
+    deposit_title:'💰 TON einzahlen',
+    wallet:'Wallet',
+    not_connected:'Nicht verbunden',
+    connect:'Verbinden',
+    dep_warn:'Stellen Sie sicher, dass die Transaktion nur vom verbundenen Wallet gesendet wird.',
+    amount_ton:'Betrag (TON)',
+    deposit_btn:'TON einzahlen',
+    processing:'Einzahlung wird verarbeitet...',
+    pkg_players:'🌟 Paketspieler',
+    all_le:'⭐ Alle Spieler sind Limited Edition — Bewertung 99',
+    new_season:'Vorbereitung auf die neue Saison',
+    legends_pkg:'Legenden-Paket 🏆',
+    pkg_sub:'13 legendäre Spieler mit 99 — Exklusives Limited Edition',
+    view_players:'👁 Spieler ansehen',
+    pkg_players_btn:'Paketspieler',
+    how_works:'Wie funktioniert die Auktion?',
+    time_left:'⏰ Verbleibende Zeit',
+    days:'Tage',hours:'Std',mins:'Min',secs:'Sek',
+    place_bid:'Gebot abgeben',
+    bid_btn:'Bieten',
+    top_bid:'Aktuelles Höchstgebot:',
+    prize1:'<strong>1. Platz</strong> — Erhält das vollständige Paket (13 legendäre Spieler)',
+    prize2:'<strong>Plätze 2–10</strong> — 1 Spieler aus dem Paket + 20% Rückerstattung',
+    auction_stats:'📊 Auktionsstatistiken',
+    leader:'Spitzenreiter',
+    will_win_pkg:'Wird das vollständige Paket gewinnen 🏆',
+    rank:'Rang',user:'Nutzer',amount:'Betrag',
+    promo_title:'📢 Telegram-Kanal-Unterstützung',
+    promo_desc:'Veröffentlichen Sie über die Auktion in Ihrem Kanal und verdienen Sie 0.1 bis 100 TON pro genehmigtem Beitrag.',
+    promo_reward:'🏆 Belohnung: 0.1 — 100 TON pro Beitrag',
+    promo_submit_title:'📎 Link zu Ihrem Beitrag einreichen',
+    submit_review:'Zur Überprüfung einreichen',
+    posts_log:'📋 Beitragsprotokoll',
+    no_posts:'Noch keine Beiträge eingereicht',
+    nav_auction:'Auktion',nav_promo:'Kanal',
+    choose_lang:'Sprache wählen',
+    auction_ended:'🏁 Auktion beendet',
+    prize_runner:'🎁 1 Spieler + 20% Rückerstattung',
+    prize_winner:'🏆 Gewinnt das vollständige Paket',
+    toast_open_tg:'⚠️ Öffnen Sie die App über Telegram',
+    toast_bid_ok:'✅ Gebot erfolgreich platziert!',
+    toast_insufficient:'⚠️ Unzureichendes Guthaben',
+    toast_invalid_amount:'⚠️ Geben Sie einen gültigen Betrag ein',
+    toast_deposit_min:'Mindestbetrag 0.1 TON',
+    deposit_success:'Einzahlung erfolgreich!',
+    toast_connect_wallet:'🔗 TON Connect — Verbinden Sie Ihr Wallet',
+    toast_promo_ok:'✅ Beitrag zur Überprüfung eingereicht!',
+    toast_promo_invalid:'⚠️ Geben Sie eine gültige URL ein',
+    toast_promo_not_tg:'⚠️ Muss ein Telegram-Link sein',
+    toast_music:'🎵 Erneut drücken um Musik abzuspielen',
+    status_pending:'⏳ In Überprüfung',
+    status_approved:'✅ Genehmigt',
+    status_rejected:'❌ Abgelehnt',
+    disconnect:'Trennen',
+    sending_tx:'Transaktion wird gesendet...',
+    tx_sent:'Transaktion gesendet! Warten auf Bestätigung',
+    tx_rejected:'Transaktion abgelehnt',
+    tx_failed:'Transaktion fehlgeschlagen',
+    awaiting_confirm:'Warte auf Bestätigung (~1 Minute)...',
+    deposit_confirmed:'✅ Einzahlung bestätigt!',
+    added:'zu Ihrem Guthaben hinzugefügt',
+  }
+};
+
+function t(key) {
+  return (I18N[currentLang] || I18N.ar)[key] || (I18N.ar)[key] || key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.innerHTML = val;
+  });
+  // Placeholder for deposit input
+  const depIn = document.getElementById('depositAmountInput');
+  if (depIn) depIn.placeholder = '0.1';
+  // Update lang menu active
+  document.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active-lang'));
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    if (opt.getAttribute('onclick') && opt.getAttribute('onclick').includes(`'${currentLang}'`)) {
+      opt.classList.add('active-lang');
+    }
+  });
+  // Update promo empty state dynamically if visible
+  const promoEmpty = document.querySelector('.promo-empty');
+  if (promoEmpty && promoEmpty.getAttribute('data-i18n')) {
+    promoEmpty.textContent = t('no_posts');
+  }
+  // Re-render leaderboard to update prize notes
+  if (leaderboard.length > 0) renderLeaderboard();
+  // Re-render promo log
+  renderPromoLog();
+}
 
 // ════ TELEGRAM INIT ════
 const tg = window.Telegram?.WebApp;
@@ -736,6 +1160,9 @@ let currentLang = 'ar';
 let auctionEndDate = null;
 let leaderboard = [];
 let promoLog = [];
+let tonUI = null;
+let tonWallet = null;
+let depCheckInt = null;
 
 // ════ API CALL ════
 async function apiCall(action, data = {}) {
@@ -791,7 +1218,7 @@ function toggleMusic() {
       musicIcon.className = 'fas fa-pause';
       musicBtn.classList.add('playing');
       musicPlaying = true;
-    }).catch(() => showToast('🎵 اضغط مرة أخرى لتشغيل الموسيقى'));
+    }).catch(() => showToast(t('toast_music')));
   }
 }
 
@@ -803,11 +1230,12 @@ document.addEventListener('click', function firstClick(){
 tryAutoPlay();
 
 // ════ WELCOME NOTIFICATION ════
-const WELCOME_KEY = 'auction_welcome_seen_v1';
+const WELCOME_KEY = 'auction_welcome_seen_v2';
 
 function checkWelcome() {
   const seen = localStorage.getItem(WELCOME_KEY);
   if (!seen) {
+    renderWelcomePlayers();
     document.getElementById('welcomeOverlay').classList.remove('hidden');
   } else {
     document.getElementById('welcomeOverlay').classList.add('hidden');
@@ -820,7 +1248,21 @@ function closeWelcome() {
 }
 
 function openWelcome() {
+  renderWelcomePlayers();
   document.getElementById('welcomeOverlay').classList.remove('hidden');
+}
+
+// Render mini player grid in welcome
+function renderWelcomePlayers() {
+  const grid = document.getElementById('welcomePlayersGrid');
+  if (!grid) return;
+  grid.innerHTML = PLAYERS.map(p => `
+    <div class="welcome-player-item">
+      <img src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
+      <div>${currentLang === 'ar' ? p.nameAr : p.name}</div>
+      <div class="welcome-player-pos">${p.pos}</div>
+    </div>
+  `).join('');
 }
 
 // ════ TAB NAVIGATION ════
@@ -841,6 +1283,10 @@ function setLang(lang){
   document.getElementById('tbLangFlag').textContent = flags[lang];
   document.getElementById('tbLangCode').textContent = codes[lang];
   closeLangMenu();
+  applyTranslations();
+  // Re-render players list if open
+  const playersGrid = document.getElementById('playersGrid');
+  if (playersGrid && playersGrid.innerHTML) renderPlayers();
 }
 function openLangMenu(){document.getElementById('langMenu').classList.add('open');}
 function closeLangMenu(){document.getElementById('langMenu').classList.remove('open');}
@@ -921,6 +1367,13 @@ const PLAYERS = [
   {name:'Iniesta',nameAr:'إنيستا',img:'https://r2.thesportsdb.com/images/media/player/cutout/nx7oze1611167333.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
 ];
 
+const TON_ICON_URL = 'https://ton.org/download/ton_symbol.png';
+const TON_ICON_FALLBACK = 'https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png';
+
+function tonImgHtml(size) {
+  return `<img src="${TON_ICON_URL}" onerror="this.src='${TON_ICON_FALLBACK}'" style="width:${size}px;height:${size}px;object-fit:contain;" alt="TON">`;
+}
+
 function renderPlayers() {
   document.getElementById('playersGrid').innerHTML = PLAYERS.map(p => `
     <div class="player-card">
@@ -933,7 +1386,7 @@ function renderPlayers() {
         <div class="card-pos-text">${p.pos}</div>
       </div>
       <div class="card-badge-le">LE</div>
-      <div class="card-player-name">${p.name}</div>
+      <div class="card-player-name">${currentLang === 'ar' ? p.nameAr : p.name}</div>
     </div>
   `).join('');
 }
@@ -941,27 +1394,147 @@ function renderPlayers() {
 function openPlayersModal(){renderPlayers();document.getElementById('playersModal').classList.add('active');}
 function closePlayersModal(){document.getElementById('playersModal').classList.remove('active');}
 
+// ════ TON CONNECT ════
+function initTonConnect() {
+  try {
+    if (!window.TON_CONNECT_UI) return;
+    tonUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: `${SERVER_URL}/tonconnect-manifest.json`,
+      uiPreferences: { theme: 'DARK' },
+    });
+    tonUI.onStatusChange(w => w ? onWalletConnected(w) : onWalletDisconnected());
+  } catch(e) { console.error('TON Connect init error:', e); }
+}
+
+function onWalletConnected(w) {
+  tonWallet = { address: w.account.address, chain: w.account.chain, appName: w.device?.appName || 'Wallet' };
+  const short = `${tonWallet.address.substring(0,6)}...${tonWallet.address.slice(-4)}`;
+  document.getElementById('walletAddressDisplay').textContent = `${short} · ${tonWallet.appName}`;
+  const cb = document.getElementById('connectWalletBtn');
+  if (cb) { cb.innerHTML = '<i class="fas fa-unlink"></i> <span>' + t('disconnect') + '</span>'; cb.onclick = disconnectWallet; }
+  const sb = document.getElementById('submitDepositBtn');
+  if (sb) { sb.disabled = false; sb.style.opacity = '1'; sb.style.cursor = 'pointer'; }
+}
+
+function onWalletDisconnected() {
+  tonWallet = null;
+  const dispEl = document.getElementById('walletAddressDisplay');
+  if (dispEl) dispEl.textContent = t('not_connected');
+  const cb = document.getElementById('connectWalletBtn');
+  if (cb) { cb.innerHTML = '<i class="fas fa-plug"></i> <span>' + t('connect') + '</span>'; cb.onclick = connectWallet; }
+  const sb = document.getElementById('submitDepositBtn');
+  if (sb) { sb.disabled = true; sb.style.opacity = '0.5'; sb.style.cursor = 'not-allowed'; }
+}
+
+async function connectWallet() {
+  if (!tonUI) { showToast('⚠️ TON Connect not ready'); return; }
+  try { await tonUI.openModal(); } catch(e) { showToast('❌ ' + e.message); }
+}
+
+async function disconnectWallet() {
+  if (!tonUI) return;
+  try { await tonUI.disconnect(); } catch(e) { console.error(e); }
+}
+
 // ════ DEPOSIT ════
 function openDepositModal(){document.getElementById('depositModal').classList.add('active');}
 function closeDepositModal(){document.getElementById('depositModal').classList.remove('active');}
 function setDepAmt(v){document.getElementById('depositAmountInput').value=v;}
-function connectWallet(){showToast('🔗 TON Connect — اربط محفظتك');}
-function initiateDeposit(){
+
+async function initiateDeposit() {
+  if (!tonWallet) { showToast(t('toast_connect_wallet')); return; }
   const amt = parseFloat(document.getElementById('depositAmountInput').value);
-  if(!amt||amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
+  if (!amt || amt < 0.1) { showToast(t('toast_deposit_min')); return; }
+  if (amt > 1000) { showToast('⚠️ المبلغ كبير جداً'); return; }
+
   const sd = document.getElementById('depositStatus');
-  sd.classList.add('visible');
-  sd.querySelector('.txsi').innerHTML='⏳';
-  sd.querySelector('.txsm').textContent='جاري معالجة الإيداع...';
-  document.getElementById('depositStatusDetail').textContent='';
-  setTimeout(()=>{
-    sd.querySelector('.txsi').innerHTML='✅';
-    sd.querySelector('.txsm').textContent='تم الإيداع بنجاح!';
-    document.getElementById('depositStatusDetail').textContent=`+${amt} TON أُضيف لرصيدك`;
-    userTonBalance+=amt;
-    document.getElementById('topTonBalance').textContent=userTonBalance.toFixed(2);
-    setTimeout(()=>sd.classList.remove('visible'),3000);
-  },2000);
+  const txsi = sd.querySelector('.txsi');
+  const txsm = document.getElementById('depositStatusMsg');
+  const txsd = document.getElementById('depositStatusDetail');
+
+  try {
+    const comment = String(tgUser ? tgUser.id : 'guest');
+    const nano = String(Math.floor(amt * 1e9));
+
+    // Build comment payload using TonWeb
+    let payload = '';
+    try {
+      if (window.TonWeb) {
+        const TW = window.TonWeb;
+        new TW();
+        const cell = new TW.boc.Cell();
+        cell.bits.writeUint(0, 32);
+        cell.bits.writeString(comment);
+        const boc = await cell.toBoc(false);
+        payload = TW.utils.bytesToBase64(boc);
+      }
+    } catch(e) { console.warn('TonWeb payload error:', e); }
+
+    const tx = {
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      messages: [{ address: DEPOSIT_WALLET, amount: nano, ...(payload ? { payload } : {}) }],
+    };
+
+    showToast('📤 ' + t('sending_tx'));
+    const result = await tonUI.sendTransaction(tx);
+    showToast('✅ ' + t('tx_sent'));
+    await handleDepositOk(result, amt, comment);
+
+  } catch(e) {
+    sd.classList.add('visible');
+    txsi.innerHTML = '❌';
+    txsm.textContent = e.message?.includes('rejected') ? t('tx_rejected') : t('tx_failed');
+    txsd.textContent = e.message || '';
+  }
+}
+
+async function handleDepositOk(result, amt, comment) {
+  const sd = document.getElementById('depositStatus');
+  const txsi = sd.querySelector('.txsi');
+  const txsm = document.getElementById('depositStatusMsg');
+  const txsd = document.getElementById('depositStatusDetail');
+
+  try {
+    const uid = tgUser ? String(tgUser.id) : 'guest';
+    const res = await apiCall('deposit', { amount: amt, txHash: result.boc, comment });
+    sd.classList.add('visible');
+    txsi.innerHTML = '⏳';
+    txsm.textContent = t('tx_sent');
+    txsd.textContent = t('awaiting_confirm');
+    if (res.success && res.data?.depositId) {
+      startDepVerify(res.data.depositId, result.boc);
+    }
+  } catch(e) {
+    console.error('handleDepositOk error:', e);
+  }
+}
+
+function startDepVerify(depId, txHash) {
+  if (depCheckInt) clearInterval(depCheckInt);
+  if (!depId || !txHash) return;
+  let attempts = 0;
+  depCheckInt = setInterval(async () => {
+    attempts++;
+    try {
+      const r = await apiCall('verifyDeposit', { depositId: depId, txHash });
+      if (r.success && r.data?.status === 'completed') {
+        clearInterval(depCheckInt);
+        const sd = document.getElementById('depositStatus');
+        const txsi = sd.querySelector('.txsi');
+        const txsm = document.getElementById('depositStatusMsg');
+        const txsd = document.getElementById('depositStatusDetail');
+        txsi.innerHTML = '✅';
+        txsm.textContent = t('deposit_confirmed');
+        txsd.textContent = `+${r.data.amount} TON`;
+        showToast(`💰 ${r.data.amount} TON ` + t('added'));
+        userTonBalance = (userTonBalance || 0) + (r.data.amount || 0);
+        document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
+        setTimeout(() => sd.classList.remove('visible'), 4000);
+      }
+    } catch(e) {
+      if (attempts >= 18) clearInterval(depCheckInt);
+    }
+  }, 10000);
 }
 
 // ════ BID ════
@@ -972,12 +1545,12 @@ function addBid(amt){
 
 async function placeBid(){
   const amt = parseFloat(document.getElementById('bidInput').value);
-  if(!amt||amt<=0){showToast('⚠️ أدخل مبلغاً صحيحاً');return;}
-  if(userTonBalance < amt){showToast('⚠️ رصيدك غير كافٍ');return;}
+  if(!amt||amt<=0){showToast(t('toast_invalid_amount'));return;}
+  if(userTonBalance < amt){showToast(t('toast_insufficient'));return;}
 
   const uid = tgUser ? String(tgUser.id) : null;
   if(!uid){
-    showToast('⚠️ يجب فتح التطبيق من تيليجرام');return;
+    showToast(t('toast_open_tg'));return;
   }
 
   const btn = document.querySelector('.bid-btn');
@@ -987,17 +1560,17 @@ async function placeBid(){
   const res = await apiCall('auctionBid', {uid, amount: amt});
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-gavel"></i> زايد';
+  btn.innerHTML = `<i class="fas fa-gavel"></i> ${t('bid_btn')}`;
 
   if(res.success && res.data){
-    showToast('✅ تم تسجيل مزايدتك!');
+    showToast(t('toast_bid_ok'));
     userTonBalance = res.data.tonBalance;
     myBid = res.data.totalBid;
     document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
     document.getElementById('bidInput').value = '';
     await loadAuctionData();
   } else {
-    showToast('❌ ' + (res.error || 'حدث خطأ'));
+    showToast('❌ ' + (res.error || 'Error'));
   }
 }
 
@@ -1021,8 +1594,8 @@ function renderLeaderboard(){
     const rc = rankClasses[i]||'rn';
     const rankDisp = rankEmojis[i]||(i+1);
     const prizeNote = i===0
-      ?`<div class="lb-prize-note">🏆 سيحصل على الباكج كاملاً</div>`
-      :`<div class="lb-prize-note">🎁 لاعب + 20% استرداد</div>`;
+      ?`<div class="lb-prize-note">${t('prize_winner')}</div>`
+      :`<div class="lb-prize-note">${t('prize_runner')}</div>`;
     const photoHtml = u.photo
       ? `<img src="${u.photo}" alt="" onerror="this.parentElement.textContent='⭐'">`
       : '⭐';
@@ -1034,7 +1607,7 @@ function renderLeaderboard(){
         ${prizeNote}
       </div>
       <div class="lb-ton">
-        <img src="https://ton.org/download/ton_symbol.png" onerror="this.src=''" style="width:13px;height:13px;object-fit:contain;" alt="">
+        ${tonImgHtml(13)}
         <span>${u.ton.toFixed(2)}</span>
       </div>
     </div>`;
@@ -1047,7 +1620,7 @@ function updateTimer(){
   if(!auctionEndDate){return;}
   const diff = auctionEndDate - Date.now();
   if(diff<=0){
-    document.getElementById('timerRow').innerHTML=`<div class="timer-ended">🏁 انتهى المزاد</div>`;
+    document.getElementById('timerRow').innerHTML=`<div class="timer-ended">${t('auction_ended')}</div>`;
     return;
   }
   const days=Math.floor(diff/(1000*60*60*24));
@@ -1060,6 +1633,13 @@ function updateTimer(){
   const secEl=document.getElementById('timerSecs');
   secEl.textContent=String(secs).padStart(2,'0');
   if(secs!==prevSecs){secEl.classList.add('tick');setTimeout(()=>secEl.classList.remove('tick'),150);prevSecs=secs;}
+  // Update unit labels dynamically
+  const daysLbl = document.querySelector('#timerDays + .timer-unit-lbl') || document.querySelectorAll('.timer-unit-lbl')[0];
+  const labEls = document.querySelectorAll('.timer-unit-lbl');
+  if(labEls[0]) labEls[0].textContent = t('days');
+  if(labEls[1]) labEls[1].textContent = t('hours');
+  if(labEls[2]) labEls[2].textContent = t('mins');
+  if(labEls[3]) labEls[3].textContent = t('secs');
 }
 
 // ════ PROMO ════
@@ -1077,8 +1657,8 @@ function savePromoLog(){
 
 async function submitPromoPost(){
   const url = document.getElementById('promoLinkInput').value.trim();
-  if(!url || !url.startsWith('http')){showToast('⚠️ أدخل رابط صحيح');return;}
-  if(!url.includes('t.me')){showToast('⚠️ يجب أن يكون رابط من تيليجرام');return;}
+  if(!url || !url.startsWith('http')){showToast(t('toast_promo_invalid'));return;}
+  if(!url.includes('t.me')){showToast(t('toast_promo_not_tg'));return;}
 
   const btn = document.getElementById('promoSubmitBtn');
   btn.disabled = true;
@@ -1089,7 +1669,7 @@ async function submitPromoPost(){
     url,
     status: 'pending',
     earned: null,
-    date: new Date().toLocaleDateString('ar-EG'),
+    date: new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-GB'),
   };
 
   try {
@@ -1103,19 +1683,19 @@ async function submitPromoPost(){
   savePromoLog();
   renderPromoLog();
   document.getElementById('promoLinkInput').value = '';
-  showToast('✅ تم إرسال المنشور للمراجعة!');
+  showToast(t('toast_promo_ok'));
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال للمراجعة';
+  btn.innerHTML = `<i class="fas fa-paper-plane"></i> ${t('submit_review')}`;
 }
 
 function renderPromoLog(){
   const list = document.getElementById('promoLogList');
   if(promoLog.length === 0){
-    list.innerHTML = '<div class="promo-empty">لا توجد منشورات مرسلة بعد</div>';
+    list.innerHTML = `<div class="promo-empty">${t('no_posts')}</div>`;
     return;
   }
-  const statusLabels = {pending:'⏳ قيد المراجعة', approved:'✅ مقبول', rejected:'❌ مرفوض'};
+  const statusLabels = {pending:t('status_pending'), approved:t('status_approved'), rejected:t('status_rejected')};
   const statusClass = {pending:'pending', approved:'approved', rejected:'rejected'};
   list.innerHTML = promoLog.map(item => `
     <div class="promo-item">
@@ -1125,7 +1705,7 @@ function renderPromoLog(){
           <span class="promo-item-status ${statusClass[item.status]}">${statusLabels[item.status]}</span>
           <div class="promo-item-date" style="margin-top:4px;">${item.date}</div>
         </div>
-        ${item.earned !== null ? `<div class="promo-item-earned"><img src="https://ton.org/download/ton_symbol.png" style="width:14px;height:14px;object-fit:contain;" alt="">+${item.earned} TON</div>` : ''}
+        ${item.earned !== null ? `<div class="promo-item-earned">${tonImgHtml(14)}+${item.earned} TON</div>` : ''}
       </div>
     </div>
   `).join('');
@@ -1150,6 +1730,13 @@ loadPromoLog();
 checkWelcome();
 setInterval(updateTimer, 1000);
 setInterval(loadAuctionData, 30000);
+
+// Init TON Connect after page loads
+if (document.readyState === 'complete') {
+  initTonConnect();
+} else {
+  window.addEventListener('load', initTonConnect);
+}
 </script>
 </body>
 </html>

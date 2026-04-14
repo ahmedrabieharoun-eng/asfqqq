@@ -1,1738 +1,485 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>مزاد باكج الأساطير 🏆</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Panda Bamboo — Deposit</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --gold:#FFD700;--gold2:#FFA500;--gold-glow:rgba(255,215,0,.45);
-  --ton:#0088CC;--ton-glow:rgba(0,136,204,.4);
-  --card:rgba(255,255,255,.06);--glass:rgba(8,8,24,.82);
-  --border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.22);
-  --text:#eeeeff;--muted:rgba(238,238,255,.5);
-  --red:#ef5350;--green:#00F27A;
-  --bg1:#04040e;--bg2:#090918;--bg3:#0c0c24;
-  --accent:#FFD700;--accent2:#FF6B35;
-  --radius:18px;
+  --bamboo:#7cb342;--bamboo2:#9ccc40;--bamboo-glow:rgba(124,179,66,.5);
+  --coin:#FFD700;--coin-glow:rgba(255,215,0,.4);
+  --card:rgba(6,20,6,.82);--glass:rgba(8,28,8,.68);
+  --border:rgba(124,179,66,.2);--border2:rgba(124,179,66,.38);
+  --text:#e8f5e9;--muted:rgba(232,245,233,.52);
+  --red:#ef5350;--blue:#42a5f5;--cyan:#26c6da;
+  --g1:#061206;--g2:#0a1f0a;--g3:#0d2810;
+  --primary-pink:#FF5CA8;--pink-glow:rgba(255,92,168,.4);
+  --neon-green:#00F27A;--green-glow:rgba(0,242,122,.4);
+  --crystal-blue:#00D4FF;--blue-glow:rgba(0,212,255,.4);
+  --text-secondary:rgba(255,255,255,.85);
+  --glass-border:rgba(255,255,255,.08);
 }
-html,body{height:100%;}
 body{
-  font-family:'Tajawal',sans-serif;font-weight:500;
-  background:#04040e;color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px;position:relative;
+  font-family:'Fredoka',cursive;font-weight:800;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3e1a9f27-dd8e-459f-9c24-e0e51d9c255e.png') center center / cover no-repeat fixed;
+  color:var(--text);min-height:100vh;padding:14px 12px 30px;overflow-x:hidden;font-size:14px;
 }
-button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Tajawal',sans-serif!important;}
-.orb{font-family:'Orbitron',monospace!important;}
+button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
 
-/* BG */
-.orbs-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.orb-f{position:absolute;border-radius:50%;filter:blur(80px);animation:orbFloat linear infinite;opacity:.18;}
-.orb-f.o1{width:400px;height:400px;background:radial-gradient(circle,#FFD700,#FF6B00);top:-100px;right:-80px;animation-duration:18s;}
-.orb-f.o2{width:320px;height:320px;background:radial-gradient(circle,#0088CC,#004466);bottom:-60px;left:-60px;animation-duration:22s;}
-.orb-f.o3{width:200px;height:200px;background:radial-gradient(circle,#FF3300,#660000);top:40%;left:50%;animation-duration:15s;}
-@keyframes orbFloat{0%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.1);}66%{transform:translate(-20px,25px) scale(.95);}100%{transform:translate(0,0) scale(1);}}
+/* Shimmer animation */
+@keyframes shim{0%{left:-100%}100%{left:200%}}
+@keyframes live-dot{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* MUSIC BTN */
-.music-btn{
-  position:fixed;bottom:80px;right:14px;z-index:400;
-  width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
-  background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,100,0,.2));
-  border:1.5px solid rgba(255,215,0,.35);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:var(--gold);
-  box-shadow:0 0 20px rgba(255,215,0,.2),0 4px 16px rgba(0,0,0,.5);
-  backdrop-filter:blur(12px);transition:all .25s;
-  animation:pulse-glow 2.5s ease-in-out infinite;
+/* ── OFFER BANNER ── */
+@keyframes dep-offer-pulse{0%,100%{box-shadow:0 0 18px rgba(255,215,0,.25),0 4px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 32px rgba(255,215,0,.5),0 4px 22px rgba(0,0,0,.55)}}
+@keyframes dep-offer-fire{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.18) rotate(4deg)}}
+@keyframes dep-offer-badge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.dep-offer-banner{
+  background:linear-gradient(135deg,rgba(20,12,0,.95),rgba(40,22,0,.92));
+  border:1.5px solid rgba(255,193,7,.45);
+  border-radius:16px;margin-bottom:14px;
+  overflow:hidden;position:relative;
+  animation:dep-offer-pulse 2.4s ease-in-out infinite;
 }
-.music-btn:active{transform:scale(.92);}
-.music-btn.playing{animation:pulse-glow 1.5s ease-in-out infinite;}
-@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.2),0 4px 16px rgba(0,0,0,.5);}50%{box-shadow:0 0 32px rgba(255,215,0,.45),0 4px 20px rgba(0,0,0,.6);}}
+.dep-offer-banner::before{
+  content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,215,0,.07),transparent);
+  animation:shim 2.8s infinite;pointer-events:none;
+}
+.dep-offer-top{
+  background:linear-gradient(90deg,rgba(255,152,0,.18),rgba(255,193,7,.1),rgba(255,152,0,.18));
+  border-bottom:1px solid rgba(255,193,7,.2);
+  padding:7px 12px;display:flex;align-items:center;gap:7px;
+}
+.dep-offer-fire{font-size:18px;animation:dep-offer-fire 1.4s ease-in-out infinite;display:inline-block}
+.dep-offer-live{display:flex;align-items:center;gap:5px;flex:1}
+.dep-offer-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;box-shadow:0 0 6px #ff4444;animation:live-dot 1s ease-in-out infinite}
+.dep-offer-live-txt{font-size:11px;font-weight:800;color:#FFD740;letter-spacing:.5px;text-transform:uppercase}
+.dep-offer-badge{
+  background:linear-gradient(135deg,#ff8f00,#FFD700);border-radius:20px;
+  padding:3px 11px;font-size:12px;font-weight:800;color:#1a0a00;
+  animation:dep-offer-badge 2s ease-in-out infinite;flex-shrink:0;
+}
+.dep-offer-body{padding:10px 14px 12px;display:flex;align-items:center;gap:12px}
+.dep-offer-icon{font-size:36px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,215,0,.5))}
+.dep-offer-text{flex:1}
+.dep-offer-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:3px;line-height:1.2}
+.dep-offer-title span{color:#FFD700}
+.dep-offer-sub{font-size:11px;color:rgba(255,215,0,.65);font-weight:600;line-height:1.5}
+.dep-offer-pct{
+  flex-shrink:0;text-align:center;
+  background:linear-gradient(135deg,rgba(255,152,0,.2),rgba(255,215,0,.12));
+  border:1.5px solid rgba(255,193,7,.4);border-radius:12px;padding:8px 12px;
+}
+.dep-offer-pct-num{font-size:26px;font-weight:800;color:#FFD700;line-height:1;text-shadow:0 0 12px rgba(255,215,0,.6)}
+.dep-offer-pct-lbl{font-size:9px;color:rgba(255,215,0,.65);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
 
-/* TOPBAR */
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 12px;
-  background:rgba(4,4,14,.88);backdrop-filter:blur(28px) saturate(1.8);
-  -webkit-backdrop-filter:blur(28px) saturate(1.8);
-  position:fixed;top:0;left:0;right:0;z-index:300;
-  border-bottom:1px solid rgba(255,215,0,.15);height:60px;
-  box-shadow:0 4px 30px rgba(0,0,0,.9),0 0 60px rgba(255,215,0,.04);
-}
-.tb-left{display:flex;align-items:center;gap:8px;}
-.tb-right{display:flex;align-items:center;gap:6px;}
-.tb-user-avatar{
-  width:38px;height:38px;border-radius:50%;
-  background:linear-gradient(135deg,#FFD700,#FF5500);
-  display:flex;align-items:center;justify-content:center;
-  font-size:19px;cursor:pointer;flex-shrink:0;
-  border:2px solid rgba(255,215,0,.35);
-  box-shadow:0 0 16px rgba(255,215,0,.25);transition:all .2s;overflow:hidden;
-}
-.tb-user-avatar:active{transform:scale(.93);}
-.tb-user-avatar img{border-radius:50%;width:100%;height:100%;object-fit:cover;}
-.tb-ton-balance{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(0,0,0,.55);border:1.5px solid rgba(0,136,204,.3);
-  border-radius:24px;padding:5px 12px 5px 8px;backdrop-filter:blur(16px);
-  box-shadow:0 0 14px rgba(0,136,204,.15);transition:all .2s;
-}
-.ton-icon{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,136,204,.9));}
-.tb-ton-val{font-family:'Orbitron',monospace;font-size:12.5px;font-weight:900;color:#fff;letter-spacing:.5px;}
-.tb-deposit-btn{
-  display:flex;align-items:center;gap:5px;
-  background:linear-gradient(135deg,rgba(0,136,204,.22),rgba(0,70,140,.3));
-  border:1.5px solid rgba(0,136,204,.38);border-radius:20px;padding:5px 13px;cursor:pointer;
-  font-size:12px;font-weight:800;color:#60CCFF;transition:all .2s;white-space:nowrap;
-}
-.tb-deposit-btn:active{background:rgba(0,136,204,.42);}
-.tb-lang-btn{
-  display:flex;align-items:center;gap:4px;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
-  border-radius:20px;padding:5px 10px;cursor:pointer;flex-shrink:0;
-  font-size:12px;font-weight:800;color:#fff;transition:background .18s;
-}
-.tb-lang-btn:active{background:rgba(255,255,255,.18);}
+/* ── BALANCE CARD ── */
+.bal-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-bottom:14px;backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px}
+.bal-icon{font-size:30px}
+.bal-info{flex:1}
+.bal-lbl{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.bal-val{font-size:22px;font-weight:800;color:#fff}
 
-/* BOTTOM NAV */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:300;
-  background:rgba(4,4,14,.95);backdrop-filter:blur(20px);
-  border-top:1px solid rgba(255,215,0,.12);
-  display:flex;height:60px;
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.4);font-size:10px;font-weight:800;
-}
-.nav-item.active{color:var(--gold);}
-.nav-item i{font-size:19px;}
-.nav-item.active i{text-shadow:0 0 14px rgba(255,215,0,.6);}
+/* ── FORM CARD ── */
+.wd-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;backdrop-filter:blur(6px)}
+.wal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:10px 12px;background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:12px;}
+.wl-inf .wll{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.wl-inf .wla{font-size:12px;font-weight:700;color:var(--cyan);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-conn{background:linear-gradient(135deg,var(--crystal-blue),#0097b2);border:none;border-radius:10px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.dep-warn{display:flex;align-items:flex-start;gap:8px;padding:8px 11px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:10px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600;}
+.dep-warn i{margin-top:2px;flex-shrink:0}
+.flabel{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block}
+.finput{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-weight:600;margin-bottom:7px;}
+.finput:focus{outline:none;border-color:var(--bamboo)}
+.preset-row{display:flex;gap:5px;margin-bottom:9px}
+.prbtn{flex:1;padding:7px;text-align:center;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.2);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;color:var(--bamboo);}
+.prbtn:active{background:rgba(124,179,66,.28)}
 
-/* TABS */
-.tab-page{display:none;}
-.tab-page.active{display:block;}
+/* ── PREVIEW BOX ── */
+.dep-preview-box{background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px}
+.dep-preview-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.dep-preview-divider{height:1px;background:rgba(255,255,255,.07);margin:5px 0}
+.dep-preview-label{font-size:11px;color:var(--muted);font-weight:600}
+.dep-preview-label-total{font-size:13px;font-weight:800;color:#fff}
+.dep-preview-val{font-size:16px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:5px}
+.dep-preview-bonus-val{font-size:14px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:4px}
+.dep-preview-total-val{font-size:18px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:5px;text-shadow:0 0 10px rgba(255,215,0,.4)}
+.dep-preview-bonus-tag{background:rgba(255,152,0,.18);border:1px solid rgba(255,193,7,.35);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800;color:#FFD740;margin-left:4px}
 
-/* WELCOME OVERLAY */
-.welcome-overlay{
-  position:fixed;inset:0;z-index:800;
-  background:rgba(0,0,0,.85);backdrop-filter:blur(12px);
-  display:flex;align-items:flex-end;justify-content:center;
-}
-.welcome-overlay.hidden{display:none;}
-.welcome-box{
-  width:100%;max-width:500px;max-height:92vh;
-  background:linear-gradient(160deg,#0c0e20,#07091a);
-  border:1px solid rgba(255,215,0,.25);
-  border-radius:28px 28px 0 0;
-  overflow:hidden;display:flex;flex-direction:column;
-  animation:slideUp .4s cubic-bezier(.25,.86,.44,1);
-}
-@keyframes slideUp{from{transform:translateY(80px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.welcome-header{
-  padding:20px 18px 14px;
-  background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,100,0,.04));
-  border-bottom:1px solid rgba(255,215,0,.12);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.welcome-title{font-size:18px;font-weight:900;color:var(--gold);}
-.welcome-close{
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);
-  border-radius:50%;width:34px;height:34px;color:#fff;cursor:pointer;font-size:16px;
-  display:flex;align-items:center;justify-content:center;transition:all .18s;
-}
-.welcome-close:active{background:rgba(255,215,0,.2);}
-.welcome-scroll{flex:1;overflow-y:auto;padding:16px;}
-.welcome-section{
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
-  border-radius:16px;padding:14px;margin-bottom:12px;
-}
-.welcome-section-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
-.welcome-section p{font-size:13px;color:rgba(255,255,255,.82);line-height:1.7;font-weight:500;}
-.welcome-highlight{
-  background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(255,100,0,.04));
-  border:1px solid rgba(255,215,0,.18);border-radius:12px;
-  padding:10px 12px;margin-top:8px;font-size:12px;font-weight:700;color:var(--gold);line-height:1.6;
-}
-.welcome-green{
-  background:rgba(0,242,122,.06);border:1px solid rgba(0,242,122,.13);
-  border-radius:12px;padding:10px 12px;margin-top:8px;
-  font-size:12px;font-weight:700;color:#00C25A;line-height:1.6;
-}
-.welcome-start-btn{
-  margin:8px 16px 20px;padding:14px;border-radius:18px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#FFD700,#FF8C00);
-  color:#000;font-size:15px;font-weight:900;
-  box-shadow:0 0 28px rgba(255,215,0,.35);transition:all .2s;
-}
-.welcome-start-btn:active{transform:scale(.98);}
+/* ── BUTTON ── */
+.btn-prim{width:100%;padding:13px;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 0 14px var(--bamboo-glow);}
+.btn-prim:disabled{opacity:.42;cursor:default;box-shadow:none}
 
-/* PLAYERS MINI LIST IN WELCOME */
-.welcome-players-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;
-}
-.welcome-player-item{
-  background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);
-  border-radius:10px;padding:6px 4px;text-align:center;
-  font-size:10px;font-weight:800;color:rgba(255,255,255,.85);
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-}
-.welcome-player-item img{width:36px;height:36px;object-fit:contain;border-radius:4px;}
-.welcome-player-pos{font-size:8px;color:var(--gold);font-weight:900;}
+/* ── TX STATUS ── */
+.tx-status{display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;text-align:center;}
+.tx-status.visible{display:block}
+.txsi{font-size:22px;margin-bottom:4px}
+.txsm{font-size:13px;font-weight:800;margin-bottom:3px}
+.txsd{font-size:11px;color:var(--muted);font-weight:500}
 
-/* LANG MENU */
-.lang-menu{position:fixed;inset:0;z-index:900;display:none;}
-.lang-menu.open{display:block;}
-.lang-menu-overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);}
-.lang-menu-panel{
-  position:absolute;top:64px;right:8px;width:200px;
-  background:linear-gradient(160deg,#0c0e1e,#050810);
-  border:1px solid rgba(255,215,0,.18);border-radius:20px;
-  overflow:hidden;animation:fadeDown .22s ease;
-  box-shadow:0 12px 40px rgba(0,0,0,.85);
-}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-.lang-menu-title{padding:12px 16px 8px;font-size:11px;font-weight:900;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;}
-.lang-option{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:700;color:#fff;border-top:1px solid rgba(255,255,255,.04);transition:background .15s;}
-.lang-option:active,.lang-option:hover{background:rgba(255,215,0,.09);}
-.lang-option.active-lang{background:rgba(255,215,0,.11);color:var(--gold);}
-.lang-option span:first-child{font-size:20px;}
+/* ── NOTIF TOAST ── */
+.notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(10,30,10,.96);border:1px solid var(--border);border-radius:14px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);z-index:9999;transition:transform .3s ease;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
+.notif-toast.show{transform:translateX(-50%) translateY(0)}
+.notif-toast.s{border-color:var(--bamboo);color:var(--bamboo)}
+.notif-toast.e{border-color:var(--red);color:var(--red)}
 
-/* MODALS */
-.modal,.players-modal{
-  position:fixed;inset:0;z-index:500;
-  display:none;align-items:flex-end;justify-content:center;
-  background:rgba(0,0,0,.78);backdrop-filter:blur(10px);
-}
-.modal.active,.players-modal.active{display:flex;}
-.modal-box{
-  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
-  background:linear-gradient(160deg,#0c0e20,#07091a);
-  border:1px solid rgba(0,136,204,.22);border-radius:26px 26px 0 0;
-  padding:20px 16px 34px;
-  animation:slideUp .3s cubic-bezier(.25,.86,.44,1);
-}
-.players-modal-box{
-  width:100%;max-width:500px;max-height:88vh;
-  background:linear-gradient(160deg,#0c0e20,#07091a);
-  border:1px solid rgba(255,215,0,.18);border-radius:26px 26px 0 0;
-  overflow:hidden;display:flex;flex-direction:column;
-  animation:slideUp .3s cubic-bezier(.25,.86,.44,1);
-}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.modal-title{font-size:18px;font-weight:900;color:var(--gold);}
-.modal-close,.pm-close{
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);
-  border-radius:50%;width:33px;height:33px;color:rgba(255,255,255,.8);
-  cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .18s;
-}
-.modal-close:active,.pm-close:active{background:rgba(255,255,255,.2);}
-.finput{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 14px;color:#fff;font-size:15px;font-weight:700;outline:none;margin-bottom:10px;transition:border .2s;}
-.finput:focus{border-color:rgba(0,136,204,.5);}
-.flabel{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;display:block;}
-.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.prbtn{flex:1;min-width:40px;text-align:center;padding:7px 0;background:rgba(0,136,204,.13);border:1px solid rgba(0,136,204,.28);border-radius:11px;cursor:pointer;font-size:13px;font-weight:800;color:#5BC8FF;transition:all .15s;}
-.prbtn:active{background:rgba(0,136,204,.32);}
-.btn-prim{width:100%;padding:13px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,#0099DD,#005580);color:#fff;font-size:15px;font-weight:900;box-shadow:0 0 24px rgba(0,136,204,.35);transition:all .2s;}
-.btn-prim:active{transform:scale(.98);}
-.btn-prim:disabled{opacity:.5;cursor:not-allowed;}
-.btn-conn{padding:8px 14px;border-radius:13px;border:none;cursor:pointer;background:rgba(0,136,204,.18);border:1px solid rgba(0,136,204,.32);color:#5BC8FF;font-size:12px;font-weight:800;transition:all .15s;}
-.btn-conn:active{background:rgba(0,136,204,.32);}
-.wal-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
-.wl-inf{flex:1;}
-.wll{font-size:11px;color:var(--muted);font-weight:700;}
-.wla{font-size:11px;color:#5BC8FF;font-weight:700;word-break:break-all;}
-.dep-warn{background:rgba(255,200,0,.07);border:1px solid rgba(255,200,0,.18);border-radius:12px;padding:9px 12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;font-size:11px;color:rgba(255,210,100,.85);font-weight:600;line-height:1.5;}
-.dep-warn i{color:#FFD700;flex-shrink:0;margin-top:2px;}
-.tx-status{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px;display:none;flex-direction:column;align-items:center;gap:5px;margin-top:10px;text-align:center;}
-.tx-status.visible{display:flex;}
-.txsi{font-size:30px;}.txsm{font-size:14px;font-weight:800;color:#fff;}.txsd{font-size:11px;color:var(--muted);}
-
-/* PM HEADER */
-.pm-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.pm-title{font-size:17px;font-weight:900;color:var(--gold);}
-.pm-scroll{flex:1;overflow-y:auto;padding:14px;}
-
-/* PLAYER CARDS - NEW DESIGN */
-.players-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.player-card{
-  position:relative;border-radius:12px;overflow:hidden;
-  aspect-ratio:.72;cursor:pointer;
-  transition:transform .2s;
-  box-shadow:0 6px 20px rgba(0,0,0,.7);
-}
-.player-card:active{transform:scale(.95);}
-.card-full-img{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;z-index:1;
-}
-.card-data-overlay{
-  position:absolute;inset:0;z-index:2;
-  display:flex;flex-direction:column;
-}
-.card-top-left{
-  position:absolute;top:6px;left:6px;z-index:3;
-  display:flex;flex-direction:column;align-items:flex-start;gap:1px;
-}
-.card-rating-num{
-  font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#fff;
-  text-shadow:0 0 8px rgba(0,0,0,1),0 0 4px rgba(0,0,0,1);
-  line-height:1;
-}
-.card-nat-flag{width:18px;height:14px;object-fit:cover;border-radius:2px;margin-top:2px;}
-.card-club-badge{width:16px;height:16px;object-fit:contain;margin-top:2px;}
-.card-pos-text{font-size:8px;font-weight:900;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,1);margin-top:2px;}
-.card-badge-le{
-  position:absolute;top:5px;right:5px;z-index:3;
-  background:linear-gradient(135deg,#FF6B00,#FF2200);
-  border-radius:5px;padding:2px 5px;
-  font-size:7px;font-weight:900;color:#fff;letter-spacing:.3px;
-}
-.card-player-photo{
-  position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
-  height:72%;width:90%;object-fit:contain;z-index:2;
-}
-/* IMPROVED player name — bigger and clearer */
-.card-player-name{
-  position:absolute;bottom:0;left:0;right:0;z-index:3;
-  text-align:center;font-size:11px;font-weight:900;color:#fff;
-  text-shadow:0 1px 6px rgba(0,0,0,1),0 0 12px rgba(0,0,0,1);
-  letter-spacing:.4px;
-  text-transform:uppercase;
-  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.4) 70%,transparent 100%);
-  padding:10px 4px 5px;
-  line-height:1.2;
-}
-
-/* MAIN */
-.main-wrap{padding:68px 12px 72px;position:relative;z-index:1;max-width:500px;margin:0 auto;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* PKG HERO */
-.pkg-hero{position:relative;border-radius:22px;overflow:hidden;margin-bottom:14px;box-shadow:0 10px 50px rgba(255,215,0,.18),0 0 80px rgba(255,100,0,.08);animation:fadeIn .5s ease;border:1px solid rgba(255,215,0,.12);}
-.pkg-hero-img{width:100%;display:block;max-height:300px;object-fit:cover;}
-.pkg-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,4,14,.95) 0%,rgba(0,0,0,.15) 60%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
-.pkg-hero-label{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;text-shadow:0 0 12px rgba(255,215,0,.8);}
-.pkg-hero-title{font-size:23px;font-weight:900;color:#fff;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,.9);}
-.pkg-hero-sub{font-size:12px;color:rgba(255,255,255,.65);font-weight:500;margin-top:4px;}
-.pkg-view-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.65);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:7px 14px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;}
-.pkg-view-btn:active{background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.4);}
-.pkg-limited-badge{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#FF6B00,#FF2200);border-radius:12px;padding:5px 11px;font-size:10px;font-weight:900;color:#fff;letter-spacing:.8px;box-shadow:0 0 16px rgba(255,80,0,.5);}
-
-/* TIMER */
-.timer-card{background:linear-gradient(135deg,rgba(18,6,0,.92),rgba(10,3,0,.97));border:1px solid rgba(255,100,0,.28);border-radius:22px;padding:14px 16px;margin-bottom:14px;box-shadow:0 0 36px rgba(255,100,0,.08);animation:fadeIn .6s ease .1s both;position:relative;overflow:hidden;}
-.timer-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,150,0,.08),transparent 70%);pointer-events:none;}
-.timer-label{font-size:11px;font-weight:900;color:rgba(255,160,0,.8);letter-spacing:1.2px;text-align:center;margin-bottom:10px;text-transform:uppercase;}
-.timer-row{display:flex;align-items:center;justify-content:center;gap:8px;}
-.timer-unit{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.timer-val{font-family:'Orbitron',monospace;font-size:30px;font-weight:900;color:#fff;line-height:1;text-shadow:0 0 24px rgba(255,150,0,.8),0 0 50px rgba(255,100,0,.4);background:rgba(0,0,0,.45);border-radius:12px;padding:6px 12px;border:1px solid rgba(255,150,0,.18);min-width:64px;text-align:center;transition:all .15s;}
-.timer-val.tick{transform:scale(.96);color:rgba(255,200,100,1);}
-.timer-unit-lbl{font-size:10px;color:rgba(255,150,0,.65);font-weight:800;letter-spacing:.8px;}
-.timer-sep{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:rgba(255,100,0,.55);line-height:1;padding-bottom:16px;animation:blink 1s step-start infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
-.timer-ended{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:#FF3300;text-align:center;text-shadow:0 0 24px rgba(255,50,0,.8);}
-
-/* BID CARD */
-.bid-card{background:linear-gradient(135deg,rgba(3,16,3,.92),rgba(1,8,1,.97));border:1px solid rgba(0,242,122,.22);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 0 36px rgba(0,242,122,.05);animation:fadeIn .6s ease .2s both;position:relative;overflow:hidden;}
-.bid-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,200,90,.06),transparent 70%);pointer-events:none;}
-.bid-title{font-size:14px;font-weight:900;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
-.bid-input-row{display:flex;gap:8px;}
-.bid-input{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(0,242,122,.22);border-radius:14px;padding:11px 14px;color:#fff;font-size:17px;font-weight:700;outline:none;transition:border .2s;}
-.bid-input:focus{border-color:rgba(0,242,122,.48);}
-.bid-btn{padding:11px 20px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#00D465,#006B30);color:#fff;font-size:14px;font-weight:900;box-shadow:0 0 18px rgba(0,212,101,.28);white-space:nowrap;transition:all .2s;flex-shrink:0;}
-.bid-btn:active{transform:scale(.96);}
-.bid-quick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.bid-quick-btn{flex:1;min-width:48px;padding:7px 0;text-align:center;background:rgba(0,242,122,.09);border:1px solid rgba(0,242,122,.18);border-radius:11px;cursor:pointer;font-size:12px;font-weight:800;color:#00C25A;transition:all .15s;}
-.bid-quick-btn:active{background:rgba(0,242,122,.22);}
-.bid-min-note{font-size:11px;color:var(--muted);font-weight:600;margin-top:7px;text-align:center;}
-
-/* STATS */
-.stats-card{background:rgba(255,215,0,.03);border:1px solid rgba(255,215,0,.13);border-radius:22px;padding:16px;margin-bottom:14px;animation:fadeIn .6s ease .3s both;}
-.stats-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-.leader-card{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,100,0,.06));border:1px solid rgba(255,215,0,.22);border-radius:18px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 0 24px rgba(255,215,0,.06);position:relative;overflow:hidden;}
-.leader-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 0% 50%,rgba(255,215,0,.07),transparent 60%);pointer-events:none;}
-.leader-crown{font-size:28px;flex-shrink:0;animation:crownBounce 2s ease-in-out infinite;}
-@keyframes crownBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
-.leader-info{flex:1;}
-.leader-name{font-size:16px;font-weight:900;color:#fff;}
-.leader-prize{font-size:11px;color:var(--gold);font-weight:700;background:rgba(255,215,0,.09);border:1px solid rgba(255,215,0,.18);border-radius:8px;padding:2px 8px;display:inline-block;margin-top:4px;}
-.leader-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,215,0,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,215,0,.1);font-size:18px;}
-.leader-avatar img{width:100%;height:100%;object-fit:cover;}
-.leader-ton{font-family:'Orbitron',monospace;font-size:17px;font-weight:900;color:var(--gold);text-shadow:0 0 14px rgba(255,215,0,.5);display:flex;align-items:center;gap:4px;flex-shrink:0;}
-.leader-ton img{width:17px;height:17px;object-fit:contain;}
-
-/* LEADERBOARD */
-.leaderboard{margin-top:12px;}
-.lb-header{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.5px;padding:0 6px;margin-bottom:8px;}
-.lb-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:9px 12px;margin-bottom:6px;transition:all .2s;}
-.lb-row.top1{background:rgba(255,215,0,.07);border-color:rgba(255,215,0,.18);}
-.lb-row.top2{background:rgba(192,192,192,.05);border-color:rgba(192,192,192,.13);}
-.lb-row.top3{background:rgba(205,127,50,.05);border-color:rgba(205,127,50,.13);}
-.lb-rank{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;min-width:24px;text-align:center;flex-shrink:0;}
-.lb-rank.r1{color:#FFD700;}.lb-rank.r2{color:#C0C0C0;}.lb-rank.r3{color:#CD7F32;}.lb-rank.rn{color:rgba(255,255,255,.35);}
-.lb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2a2a3a,#111);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid rgba(255,255,255,.09);overflow:hidden;}
-.lb-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-.lb-name{flex:1;font-size:13px;font-weight:800;color:#fff;}
-.lb-prize-note{font-size:10px;color:rgba(0,242,122,.65);font-weight:700;}
-.lb-ton{font-family:'Orbitron',monospace;font-size:12px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:3px;}
-.lb-ton img{width:14px;height:14px;object-fit:contain;}
-
-/* PRIZE BANNER */
-.prize-banner{background:linear-gradient(135deg,rgba(0,22,4,.92),rgba(0,10,1,.97));border:1px solid rgba(0,242,122,.18);border-radius:18px;padding:13px 15px;margin-bottom:14px;margin-top:2px;animation:fadeIn .6s ease .35s both;}
-.prize-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.prize-row:last-child{margin-bottom:0;}
-.prize-icon{font-size:22px;flex-shrink:0;}
-.prize-text{font-size:12.5px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.55;}
-.prize-text strong{color:var(--green);}
-.prize-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 0;}
-
-/* ACTION ROW */
-.action-row{display:flex;gap:8px;margin-bottom:14px;animation:fadeIn .6s ease .15s both;}
-.action-btn{flex:1;padding:12px 10px;border-radius:16px;border:none;cursor:pointer;font-size:13px;font-weight:900;color:#fff;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.action-btn.players{background:linear-gradient(135deg,rgba(0,90,190,.35),rgba(0,50,130,.45));border:1px solid rgba(0,136,204,.3);}
-.action-btn.explain{background:linear-gradient(135deg,rgba(140,70,0,.35),rgba(90,45,0,.45));border:1px solid rgba(255,140,0,.22);}
-.action-btn:active{transform:scale(.96);}
-
-/* SECTION LABEL */
-.section-label{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin:16px 0 10px;display:flex;align-items:center;gap:8px;}
-.section-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
-
-/* CHANNEL PROMO PAGE */
-.promo-wrap{padding:0;}
-.promo-header-banner{
-  background:linear-gradient(135deg,rgba(0,90,190,.25),rgba(0,50,130,.35));
-  border:1px solid rgba(0,136,204,.22);border-radius:18px;
-  padding:16px;margin-bottom:16px;
-}
-.promo-header-title{font-size:17px;font-weight:900;color:#60CCFF;margin-bottom:6px;}
-.promo-header-desc{font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.6;}
-.promo-reward-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.25);
-  border-radius:20px;padding:5px 12px;margin-top:10px;
-  font-size:12px;font-weight:800;color:var(--gold);
-}
-.promo-submit-card{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
-  border-radius:18px;padding:16px;margin-bottom:16px;
-}
-.promo-submit-title{font-size:14px;font-weight:900;color:#fff;margin-bottom:12px;}
-.promo-input{
-  width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);
-  border-radius:14px;padding:11px 14px;color:#fff;font-size:14px;font-weight:600;
-  outline:none;margin-bottom:10px;transition:border .2s;direction:ltr;
-}
-.promo-input:focus{border-color:rgba(0,136,204,.5);}
-.promo-submit-btn{
-  width:100%;padding:12px;border-radius:14px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#0099DD,#005580);
-  color:#fff;font-size:14px;font-weight:900;
-  box-shadow:0 0 20px rgba(0,136,204,.3);transition:all .2s;
-}
-.promo-submit-btn:active{transform:scale(.98);}
-.promo-submit-btn:disabled{opacity:.5;cursor:not-allowed;}
-.promo-log-title{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:1px;margin:16px 0 10px;text-transform:uppercase;}
-.promo-item{
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
-  border-radius:14px;padding:12px 14px;margin-bottom:8px;
-}
-.promo-item-url{font-size:11px;color:#5BC8FF;font-weight:600;word-break:break-all;direction:ltr;margin-bottom:6px;}
-.promo-item-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.promo-item-status{font-size:11px;font-weight:800;padding:3px 9px;border-radius:8px;}
-.promo-item-status.pending{background:rgba(255,200,0,.12);color:#FFD700;border:1px solid rgba(255,200,0,.2);}
-.promo-item-status.approved{background:rgba(0,212,101,.12);color:#00D465;border:1px solid rgba(0,212,101,.2);}
-.promo-item-status.rejected{background:rgba(239,83,80,.12);color:#ef5350;border:1px solid rgba(239,83,80,.2);}
-.promo-item-earned{font-size:11px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:3px;}
-.promo-item-date{font-size:10px;color:var(--muted);font-weight:600;}
-.promo-empty{text-align:center;padding:30px 16px;color:var(--muted);font-size:13px;}
-
-/* TOAST */
-#toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:rgba(10,10,25,.95);color:#fff;padding:10px 22px;border-radius:16px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.09);max-width:90vw;text-align:center;}
-#toast.show{opacity:1;}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:3px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(255,215,0,.18);border-radius:4px;}
+/* ── PAGE TITLE ── */
+.page-title{font-size:20px;font-weight:800;color:var(--bamboo);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
 
-<!-- BG -->
-<div class="orbs-wrap">
-  <div class="orb-f o1"></div>
-  <div class="orb-f o2"></div>
-  <div class="orb-f o3"></div>
-</div>
-<canvas id="bgCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%;display:block;"></canvas>
+<div class="page-title">💰 Deposit TON</div>
 
-<!-- AUDIO -->
-<audio id="bgMusic" loop>
-  <source src="back music.mp3" type="audio/mpeg">
-</audio>
-
-<!-- MUSIC BTN -->
-<button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="موسيقى الخلفية">
-  <i class="fas fa-music" id="musicIcon"></i>
-</button>
-
-<!-- ONE-TIME WELCOME OVERLAY -->
-<div class="welcome-overlay" id="welcomeOverlay">
-  <div class="welcome-box">
-    <div class="welcome-header">
-      <div class="welcome-title" data-i18n="welcome_title">🏆 مرحباً بك في المزاد!</div>
-      <button class="welcome-close" onclick="closeWelcome()">✕</button>
-    </div>
-    <div class="welcome-scroll">
-      <div class="welcome-section">
-        <div class="welcome-section-title" data-i18n="welcome_pkg_title">🏆 مميزات باكج الأساطير</div>
-        <div class="welcome-highlight" data-i18n="welcome_pkg_feat1">⭐ 13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
-        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat2">💎 لاعبون حصريون لن ينزلوا في أي باكج عادي أبداً</div>
-        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat3">💰 القيمة المتوقعة في السوق: 75 — 130 TON</div>
-        <div class="welcome-highlight" style="margin-top:6px;" data-i18n="welcome_pkg_feat4">🚀 يمكن بيع اللاعبين فور بدء الموسم الجديد</div>
-      </div>
-      <div class="welcome-section">
-        <div class="welcome-section-title" data-i18n="welcome_players_title">⚽ لاعبو الباكج — نخبة أفضل لاعبي التاريخ</div>
-        <div class="welcome-players-grid" id="welcomePlayersGrid"></div>
-      </div>
-      <div class="welcome-section">
-        <div class="welcome-section-title" data-i18n="welcome_prizes_title">🥇 جوائز المزاد</div>
-        <div class="welcome-highlight" data-i18n="welcome_prize1">👑 المركز الأول — الباكج كاملاً (13 لاعب أسطوري بطاقة 99)</div>
-        <div class="welcome-green" style="margin-top:6px;" data-i18n="welcome_prize2">🥈 المراكز 2–10 — لاعب واحد من الباكج + استرداد 20% من قيمة مزايدتك</div>
-      </div>
-    </div>
-    <button class="welcome-start-btn" onclick="closeWelcome()" data-i18n="welcome_btn">🚀 ابدأ المزايدة الآن!</button>
+<!-- Balance Card -->
+<div class="bal-card">
+  <div class="bal-icon">🎋</div>
+  <div class="bal-info">
+    <div class="bal-lbl">Your Bamboo Balance</div>
+    <div class="bal-val" id="bambooBalance">—</div>
   </div>
 </div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="tb-left">
-    <div class="tb-user-avatar" id="topUserAvatar">🐼</div>
-    <div class="tb-ton-balance">
-      <img class="ton-icon" src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
-      <span class="tb-ton-val orb" id="topTonBalance">0.00</span>
-    </div>
-    <div class="tb-deposit-btn" onclick="openDepositModal()">
-      <i class="fas fa-plus-circle" style="font-size:13px;"></i>
-      <span data-i18n="deposit">إيداع</span>
-    </div>
-  </div>
-  <div class="tb-right">
-    <div class="tb-lang-btn" onclick="openLangMenu()" id="tbLangBtn">
-      <span id="tbLangFlag">🇸🇦</span>
-      <span id="tbLangCode">AR</span>
-    </div>
-  </div>
-</div>
 
-<!-- LANG MENU -->
-<div id="langMenu" class="lang-menu">
-  <div class="lang-menu-overlay" onclick="closeLangMenu()"></div>
-  <div class="lang-menu-panel">
-    <div class="lang-menu-title" data-i18n="choose_lang">اختر اللغة</div>
-    <div class="lang-option active-lang" onclick="setLang('ar')"><span>🇸🇦</span><span>العربية</span></div>
-    <div class="lang-option" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
-    <div class="lang-option" onclick="setLang('ru')"><span>🇷🇺</span><span>Русский</span></div>
-    <div class="lang-option" onclick="setLang('fr')"><span>🇫🇷</span><span>Français</span></div>
-    <div class="lang-option" onclick="setLang('de')"><span>🇩🇪</span><span>Deutsch</span></div>
-  </div>
-</div>
 
-<!-- DEPOSIT MODAL -->
-<div class="modal" id="depositModal">
-  <div class="modal-box">
-    <div class="modal-hdr">
-      <div class="modal-title" data-i18n="deposit_title">💰 إيداع TON</div>
-      <button class="modal-close" onclick="closeDepositModal()">✕</button>
+<!-- Deposit Form -->
+<div class="wd-form">
+  <!-- Wallet Row -->
+  <div class="wal-row">
+    <div class="wl-inf">
+      <div class="wll">Wallet</div>
+      <div class="wla" id="walletAddressDisplay">Not connected</div>
     </div>
-    <div class="wal-row">
-      <div class="wl-inf">
-        <div class="wll" data-i18n="wallet">المحفظة</div>
-        <div class="wla" id="walletAddressDisplay" data-i18n="not_connected">غير متصل</div>
-      </div>
-      <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connect">ربط</span></button>
+    <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> Connect</button>
+  </div>
+
+  <!-- Warning -->
+  <div class="dep-warn">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+      <strong>IMPORTANT:</strong> Your User ID
+      <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
+      must be the ONLY comment in the transaction.
     </div>
-    <div class="dep-warn">
-      <i class="fas fa-exclamation-triangle"></i>
-      <div>يجب أن يكون <strong>User ID</strong> الخاص بك:
-        <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
-        التعليق الوحيد في المعاملة.
-      </div>
+  </div>
+
+  <!-- Amount Input -->
+  <label class="flabel">Amount (TON)</label>
+  <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="1" oninput="updDepPreview()">
+
+  <!-- Preset Buttons -->
+  <div class="preset-row">
+    <span class="prbtn" onclick="setDepAmt(1)">1</span>
+    <span class="prbtn" onclick="setDepAmt(2)">2</span>
+    <span class="prbtn" onclick="setDepAmt(5)">5</span>
+    <span class="prbtn" onclick="setDepAmt(10)">10</span>
+  </div>
+
+  <!-- Preview Box -->
+  <div class="dep-preview-box">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px">
+      📊 Rate: <strong style="color:var(--bamboo)">1 TON = 1 Bamboo</strong>
     </div>
-    <label class="flabel" data-i18n="amount_ton">المبلغ (TON)</label>
-    <input type="number" id="depositAmountInput" class="finput" placeholder="0.1" step="0.1" min="0.1" oninput="updDepPreview()">
-    <div class="preset-row">
-      <span class="prbtn" onclick="setDepAmt(0.5)">0.5</span>
-      <span class="prbtn" onclick="setDepAmt(1)">1</span>
-      <span class="prbtn" onclick="setDepAmt(2)">2</span>
-      <span class="prbtn" onclick="setDepAmt(5)">5</span>
-      <span class="prbtn" onclick="setDepAmt(10)">10</span>
+    <div class="dep-preview-row">
+      <span class="dep-preview-label">You will receive:</span>
+      <span id="depBambooPreview" class="dep-preview-val">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:18px;height:18px;object-fit:contain"> 0 Bamboo
+      </span>
     </div>
-    <div style="background:rgba(0,136,204,.08);border:1px solid rgba(0,136,204,.2);border-radius:10px;padding:9px 12px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600">رصيدك بعد الإيداع:</span>
-        <span id="depBalPreview" style="font-size:16px;font-weight:800;color:#0098ea">+0 TON</span>
-      </div>
+    <div class="dep-preview-row" id="depBonusRow" style="display:none">
+      <span class="dep-preview-label">🎁 Bonus:</span>
+      <span id="depBonusPreview" class="dep-preview-bonus-val">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain"> 0 Bamboo
+      </span>
     </div>
-    <button class="btn-prim" id="submitDepositBtn" onclick="initiateDeposit()" disabled style="opacity:.5;cursor:not-allowed;"><i class="fas fa-arrow-down"></i> <span data-i18n="deposit_btn">إيداع TON</span></button>
-    <div class="tx-status" id="depositStatus">
-      <div class="txsi">⏳</div>
-      <div class="txsm" id="depositStatusMsg">جاري معالجة الإيداع...</div>
-      <div class="txsd" id="depositStatusDetail"></div>
+    <div class="dep-preview-divider" id="depTotalDivider" style="display:none"></div>
+    <div class="dep-preview-row" id="depTotalRow" style="display:none">
+      <span class="dep-preview-label-total">🏆 Total:</span>
+      <span id="depTotalPreview" class="dep-preview-total-val">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain"> 0 Bamboo
+      </span>
     </div>
+  </div>
+
+  <!-- Submit Button -->
+  <button class="btn-prim" id="submitDepositBtn" disabled onclick="initiateDeposit()">
+    <i class="fas fa-arrow-down"></i> Deposit TON
+  </button>
+
+  <!-- TX Status -->
+  <div class="tx-status" id="depositStatus">
+    <div class="txsi">⏳</div>
+    <div class="txsm">Processing deposit...</div>
+    <div class="txsd" id="depositStatusDetail"></div>
   </div>
 </div>
 
-<!-- PLAYERS MODAL -->
-<div class="players-modal" id="playersModal">
-  <div class="players-modal-box">
-    <div class="pm-header">
-      <div class="pm-title" data-i18n="pkg_players">🌟 لاعبو الباكج</div>
-      <button class="pm-close" onclick="closePlayersModal()">✕</button>
-    </div>
-    <div class="pm-scroll">
-      <div style="text-align:center;font-size:11px;color:rgba(255,215,0,.7);font-weight:700;margin-bottom:14px;letter-spacing:.5px;" data-i18n="all_le">⭐ جميع اللاعبين Limited Edition حصري — طاقة 99</div>
-      <div class="players-grid" id="playersGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN PAGES -->
-<div id="page-auction" class="tab-page active">
-  <div class="main-wrap">
-
-    <div class="pkg-hero">
-      <div class="pkg-limited-badge">⚡ LIMITED EDITION</div>
-      <img class="pkg-hero-img"
-        src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c994ae01-3bf7-4213-9dce-2d41b445bea5.png"
-        onerror="this.style.background='linear-gradient(135deg,#1a0a00,#3d2000)';this.style.minHeight='200px'"
-        alt="Package">
-      <div class="pkg-hero-overlay">
-        <div class="pkg-hero-label" data-i18n="new_season">تحضير الموسم الجديد</div>
-        <div class="pkg-hero-title" data-i18n="legends_pkg">باكج الأساطير 🏆</div>
-        <div class="pkg-hero-sub" data-i18n="pkg_sub">13 لاعب أسطوري بطاقة 99 — Limited Edition حصري</div>
-      </div>
-      <button class="pkg-view-btn" onclick="openPlayersModal()" data-i18n="view_players">👁 عرض اللاعبين</button>
-    </div>
-
-    <div class="action-row">
-      <button class="action-btn players" onclick="openPlayersModal()">
-        <i class="fas fa-users"></i><span data-i18n="pkg_players_btn">لاعبو الباكج</span>
-      </button>
-      <button class="action-btn explain" onclick="openWelcome()">
-        <i class="fas fa-info-circle"></i><span data-i18n="how_works">كيف يعمل المزاد؟</span>
-      </button>
-    </div>
-
-    <div class="timer-card">
-      <div class="timer-label" data-i18n="time_left">⏰ الوقت المتبقي للمزاد</div>
-      <div class="timer-row" id="timerRow">
-        <div class="timer-unit"><div class="timer-val orb" id="timerDays">03</div><div class="timer-unit-lbl" data-i18n="days">يوم</div></div>
-        <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerHours">00</div><div class="timer-unit-lbl" data-i18n="hours">ساعة</div></div>
-        <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerMins">00</div><div class="timer-unit-lbl" data-i18n="mins">دقيقة</div></div>
-        <div class="timer-sep">:</div>
-        <div class="timer-unit"><div class="timer-val orb" id="timerSecs">00</div><div class="timer-unit-lbl" data-i18n="secs">ثانية</div></div>
-      </div>
-    </div>
-
-    <div class="bid-card">
-      <div class="bid-title"><i class="fas fa-gavel"></i><span data-i18n="place_bid">ضع مزايدتك</span></div>
-      <div class="bid-input-row">
-        <input type="number" class="bid-input" id="bidInput" placeholder="0.00" min="0.1" step="0.1">
-        <button class="bid-btn" onclick="placeBid()"><i class="fas fa-gavel"></i> <span data-i18n="bid_btn">زايد</span></button>
-      </div>
-      <div class="bid-quick">
-        <div class="bid-quick-btn" onclick="addBid(0.5)">+0.5</div>
-        <div class="bid-quick-btn" onclick="addBid(1)">+1</div>
-        <div class="bid-quick-btn" onclick="addBid(2)">+2</div>
-        <div class="bid-quick-btn" onclick="addBid(5)">+5</div>
-        <div class="bid-quick-btn" onclick="addBid(10)">+10</div>
-      </div>
-      <div class="bid-min-note">
-        <span data-i18n="top_bid">أعلى مزايدة حالياً:</span> <strong id="currentTopBid" style="color:var(--gold);" class="orb">0.00 TON</strong>
-      </div>
-    </div>
-
-    <div class="prize-banner">
-      <div class="prize-row"><div class="prize-icon">👑</div><div class="prize-text" data-i18n="prize1"><strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)</div></div>
-      <div class="prize-divider"></div>
-      <div class="prize-row"><div class="prize-icon">🥈</div><div class="prize-text" data-i18n="prize2"><strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم</div></div>
-    </div>
-
-    <div class="section-label" data-i18n="auction_stats">📊 إحصائيات المزاد</div>
-    <div class="stats-card">
-      <div class="stats-title"><i class="fas fa-crown"></i> <span data-i18n="leader">المتصدر</span></div>
-      <div class="leader-card" id="leaderCard">
-        <div class="leader-crown">👑</div>
-        <div class="leader-avatar" id="leaderAvatar">🐼</div>
-        <div class="leader-info">
-          <div class="leader-name" id="leaderName">—</div>
-          <div class="leader-prize" data-i18n="will_win_pkg">سيحصل على الباكج كاملاً 🏆</div>
-        </div>
-        <div class="leader-ton">
-          <img src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png'" alt="TON">
-          <span class="orb" id="leaderAmount">0.00</span>
-        </div>
-      </div>
-      <div class="leaderboard">
-        <div class="lb-header">
-          <span data-i18n="rank">الترتيب</span><span data-i18n="user">المستخدم</span><span data-i18n="amount">المبلغ</span>
-        </div>
-        <div id="leaderboardList"></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- CHANNEL PROMO PAGE -->
-<div id="page-promo" class="tab-page">
-  <div class="main-wrap promo-wrap">
-
-    <div class="promo-header-banner">
-      <div class="promo-header-title" data-i18n="promo_title">📢 دعم قنوات التيليجرام</div>
-      <div class="promo-header-desc" data-i18n="promo_desc">أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.</div>
-      <div class="promo-reward-badge" data-i18n="promo_reward">🏆 مكافأة: 0.1 — 100 TON لكل منشور</div>
-    </div>
-
-    <div class="promo-submit-card">
-      <div class="promo-submit-title" data-i18n="promo_submit_title">📎 أرسل رابط منشورك</div>
-      <input type="url" class="promo-input" id="promoLinkInput" placeholder="https://t.me/yourchannel/123">
-      <button class="promo-submit-btn" onclick="submitPromoPost()" id="promoSubmitBtn">
-        <i class="fas fa-paper-plane"></i> <span data-i18n="submit_review">إرسال للمراجعة</span>
-      </button>
-    </div>
-
-    <div class="promo-log-title" data-i18n="posts_log">📋 سجل المنشورات</div>
-    <div id="promoLogList">
-      <div class="promo-empty" data-i18n="no_posts">لا توجد منشورات مرسلة بعد</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="switchTab('auction')" id="nav-auction">
-    <i class="fas fa-gavel"></i>
-    <span data-i18n="nav_auction">المزاد</span>
-  </div>
-  <div class="nav-item" onclick="switchTab('promo')" id="nav-promo">
-    <i class="fas fa-bullhorn"></i>
-    <span data-i18n="nav_promo">قناتك</span>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
+<!-- Toast -->
+<div class="notif-toast" id="notifToast"></div>
 
 <script>
-// ════ CONFIG ════
-const SERVER_URL = 'https://silent-block-bedf.ahmedrabieharoun.workers.dev';
-const DEPOSIT_WALLET = 'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k';
+// ════════════════════════════════════════
+//   CONFIG — عدّل هذه القيم حسب مشروعك
+// ════════════════════════════════════════
+const CFG = {
+  API_URL: 'https://your-worker.your-subdomain.workers.dev', // ← عدّل هنا
+  DEPOSIT_WALLET: 'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
+};
+const TON_TO_BAMBOO = 1;
+const BONUS_PCT = 0;
 
-// ════ TRANSLATIONS ════
-const I18N = {
-  ar: {
-    welcome_title:'🏆 مرحباً بك في المزاد!',
-    welcome_pkg_title:'🏆 مميزات باكج الأساطير',
-    welcome_pkg_feat1:'⭐ 13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
-    welcome_pkg_feat2:'💎 لاعبون حصريون لن ينزلوا في أي باكج عادي أبداً',
-    welcome_pkg_feat3:'💰 القيمة المتوقعة في السوق: 75 — 130 TON',
-    welcome_pkg_feat4:'🚀 يمكن بيع اللاعبين فور بدء الموسم الجديد',
-    welcome_players_title:'⚽ لاعبو الباكج — نخبة أفضل لاعبي التاريخ',
-    welcome_prizes_title:'🥇 جوائز المزاد',
-    welcome_prize1:'👑 المركز الأول — الباكج كاملاً (13 لاعب أسطوري بطاقة 99)',
-    welcome_prize2:'🥈 المراكز 2–10 — لاعب واحد من الباكج + استرداد 20% من قيمة مزايدتك',
-    welcome_btn:'🚀 ابدأ المزايدة الآن!',
-    deposit:'إيداع',
-    deposit_title:'💰 إيداع TON',
-    wallet:'المحفظة',
-    not_connected:'غير متصل',
-    connect:'ربط',
-    dep_warn:'تأكد من إرسال المعاملة من المحفظة المتصلة فقط.',
-    amount_ton:'المبلغ (TON)',
-    deposit_btn:'إيداع TON',
-    processing:'جاري معالجة الإيداع...',
-    pkg_players:'🌟 لاعبو الباكج',
-    all_le:'⭐ جميع اللاعبين Limited Edition حصري — طاقة 99',
-    new_season:'تحضير الموسم الجديد',
-    legends_pkg:'باكج الأساطير 🏆',
-    pkg_sub:'13 لاعب أسطوري بطاقة 99 — Limited Edition حصري',
-    view_players:'👁 عرض اللاعبين',
-    pkg_players_btn:'لاعبو الباكج',
-    how_works:'كيف يعمل المزاد؟',
-    time_left:'⏰ الوقت المتبقي للمزاد',
-    days:'يوم',hours:'ساعة',mins:'دقيقة',secs:'ثانية',
-    place_bid:'ضع مزايدتك',
-    bid_btn:'زايد',
-    top_bid:'أعلى مزايدة حالياً:',
-    prize1:'<strong>المركز الأول</strong> — يحصل على الباكج كاملاً (13 لاعب أسطوري)',
-    prize2:'<strong>المراكز 2–10</strong> — لاعب واحد من الباكج + استرداد 20% فور بدء الموسم',
-    auction_stats:'📊 إحصائيات المزاد',
-    leader:'المتصدر',
-    will_win_pkg:'سيحصل على الباكج كاملاً 🏆',
-    rank:'الترتيب',user:'المستخدم',amount:'المبلغ',
-    promo_title:'📢 دعم قنوات التيليجرام',
-    promo_desc:'أنشر عن المزاد في قناتك واحصل على مكافأة من 0.1 TON حتى 100 TON على كل منشور معتمد. يتم المراجعة خلال دقيقة إلى يوم.',
-    promo_reward:'🏆 مكافأة: 0.1 — 100 TON لكل منشور',
-    promo_submit_title:'📎 أرسل رابط منشورك',
-    submit_review:'إرسال للمراجعة',
-    posts_log:'📋 سجل المنشورات',
-    no_posts:'لا توجد منشورات مرسلة بعد',
-    nav_auction:'المزاد',nav_promo:'قناتك',
-    choose_lang:'اختر اللغة',
-    auction_ended:'🏁 انتهى المزاد',
-    prize_runner:'🎁 لاعب + 20% استرداد',
-    prize_winner:'🏆 سيحصل على الباكج كاملاً',
-    toast_open_tg:'⚠️ يجب فتح التطبيق من تيليجرام',
-    toast_bid_ok:'✅ تم تسجيل مزايدتك!',
-    toast_insufficient:'⚠️ رصيدك غير كافٍ',
-    toast_invalid_amount:'⚠️ أدخل مبلغاً صحيحاً',
-    toast_deposit_min:'الحد الأدنى 0.1 TON',
-    deposit_success:'تم الإيداع بنجاح!',
-    toast_connect_wallet:'🔗 TON Connect — اربط محفظتك',
-    toast_promo_ok:'✅ تم إرسال المنشور للمراجعة!',
-    toast_promo_invalid:'⚠️ أدخل رابط صحيح',
-    toast_promo_not_tg:'⚠️ يجب أن يكون رابط من تيليجرام',
-    toast_music:'🎵 اضغط مرة أخرى لتشغيل الموسيقى',
-    status_pending:'⏳ قيد المراجعة',
-    status_approved:'✅ مقبول',
-    status_rejected:'❌ مرفوض',
-    disconnect:'قطع',
-    sending_tx:'جاري إرسال المعاملة...',
-    tx_sent:'تم إرسال المعاملة! انتظر التأكيد',
-    tx_rejected:'تم رفض المعاملة',
-    tx_failed:'فشلت المعاملة',
-    awaiting_confirm:'في انتظار التأكيد (~دقيقة)...',
-    deposit_confirmed:'✅ تم تأكيد الإيداع!',
-    added:'أُضيف إلى رصيدك',
-  },
-  en: {
-    welcome_title:'🏆 Welcome to the Auction!',
-    welcome_pkg_title:'🏆 Legends Package Features',
-    welcome_pkg_feat1:'⭐ 13 Legendary players rated 99 — Exclusive Limited Edition',
-    welcome_pkg_feat2:'💎 Exclusive players — will never appear in any regular pack',
-    welcome_pkg_feat3:'💰 Expected market value: 75 — 130 TON',
-    welcome_pkg_feat4:'🚀 Players can be sold as soon as the new season starts',
-    welcome_players_title:'⚽ Package Players — The Greatest of All Time',
-    welcome_prizes_title:'🥇 Auction Prizes',
-    welcome_prize1:'👑 1st Place — Full package (13 legendary 99-rated players)',
-    welcome_prize2:'🥈 Ranks 2–10 — 1 player from the package + 20% refund of your bid',
-    welcome_btn:'🚀 Start Bidding Now!',
-    deposit:'Deposit',
-    deposit_title:'💰 Deposit TON',
-    wallet:'Wallet',
-    not_connected:'Not Connected',
-    connect:'Connect',
-    dep_warn:'Make sure to send the transaction from the connected wallet only.',
-    amount_ton:'Amount (TON)',
-    deposit_btn:'Deposit TON',
-    processing:'Processing deposit...',
-    pkg_players:'🌟 Package Players',
-    all_le:'⭐ All players are Limited Edition — Rating 99',
-    new_season:'New Season Preparation',
-    legends_pkg:'Legends Package 🏆',
-    pkg_sub:'13 legendary 99-rated players — Exclusive Limited Edition',
-    view_players:'👁 View Players',
-    pkg_players_btn:'Package Players',
-    how_works:'How does the auction work?',
-    time_left:'⏰ Time Remaining',
-    days:'Days',hours:'Hours',mins:'Mins',secs:'Secs',
-    place_bid:'Place Your Bid',
-    bid_btn:'Bid',
-    top_bid:'Current Top Bid:',
-    prize1:'<strong>1st Place</strong> — Gets the full package (13 legendary players)',
-    prize2:'<strong>Ranks 2–10</strong> — 1 player from the package + 20% refund when season starts',
-    auction_stats:'📊 Auction Stats',
-    leader:'Leader',
-    will_win_pkg:'Will get the full package 🏆',
-    rank:'Rank',user:'User',amount:'Amount',
-    promo_title:'📢 Telegram Channel Support',
-    promo_desc:'Post about the auction on your channel and earn 0.1 to 100 TON per approved post. Review takes 1 minute to 1 day.',
-    promo_reward:'🏆 Reward: 0.1 — 100 TON per post',
-    promo_submit_title:'📎 Submit Your Post Link',
-    submit_review:'Submit for Review',
-    posts_log:'📋 Posts Log',
-    no_posts:'No posts submitted yet',
-    nav_auction:'Auction',nav_promo:'Channel',
-    choose_lang:'Choose Language',
-    auction_ended:'🏁 Auction Ended',
-    prize_runner:'🎁 1 Player + 20% refund',
-    prize_winner:'🏆 Will win full package',
-    toast_open_tg:'⚠️ Please open the app from Telegram',
-    toast_bid_ok:'✅ Bid placed successfully!',
-    toast_insufficient:'⚠️ Insufficient balance',
-    toast_invalid_amount:'⚠️ Enter a valid amount',
-    toast_deposit_min:'Minimum deposit is 0.1 TON',
-    deposit_success:'Deposit successful!',
-    toast_connect_wallet:'🔗 TON Connect — Link your wallet',
-    toast_promo_ok:'✅ Post submitted for review!',
-    toast_promo_invalid:'⚠️ Enter a valid URL',
-    toast_promo_not_tg:'⚠️ Must be a Telegram link',
-    toast_music:'🎵 Tap again to play music',
-    status_pending:'⏳ Under Review',
-    status_approved:'✅ Approved',
-    status_rejected:'❌ Rejected',
-    disconnect:'Disconnect',
-    sending_tx:'Sending transaction...',
-    tx_sent:'Transaction sent! Waiting for confirmation',
-    tx_rejected:'Transaction rejected',
-    tx_failed:'Transaction failed',
-    awaiting_confirm:'Awaiting confirmation (~1 minute)...',
-    deposit_confirmed:'✅ Deposit confirmed!',
-    added:'added to your balance',
-  },
-  ru: {
-    welcome_title:'🏆 Добро пожаловать на аукцион!',
-    welcome_pkg_title:'🏆 Преимущества пакета «Легенды»',
-    welcome_pkg_feat1:'⭐ 13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
-    welcome_pkg_feat2:'💎 Эксклюзивные игроки — больше никогда не появятся в обычных пакетах',
-    welcome_pkg_feat3:'💰 Ожидаемая рыночная стоимость: 75 — 130 TON',
-    welcome_pkg_feat4:'🚀 Игроков можно продавать сразу после начала нового сезона',
-    welcome_players_title:'⚽ Игроки пакета — Лучшие в истории',
-    welcome_prizes_title:'🥇 Призы аукциона',
-    welcome_prize1:'👑 1-е место — Полный пакет (13 легендарных игроков с рейтингом 99)',
-    welcome_prize2:'🥈 Места 2–10 — 1 игрок из пакета + возврат 20% ставки',
-    welcome_btn:'🚀 Начать торги!',
-    deposit:'Пополнить',
-    deposit_title:'💰 Пополнение TON',
-    wallet:'Кошелёк',
-    not_connected:'Не подключён',
-    connect:'Подключить',
-    dep_warn:'Убедитесь, что транзакция отправлена с подключённого кошелька.',
-    amount_ton:'Сумма (TON)',
-    deposit_btn:'Пополнить TON',
-    processing:'Обработка пополнения...',
-    pkg_players:'🌟 Игроки пакета',
-    all_le:'⭐ Все игроки — Limited Edition с рейтингом 99',
-    new_season:'Подготовка к новому сезону',
-    legends_pkg:'Пакет «Легенды» 🏆',
-    pkg_sub:'13 легендарных игроков с рейтингом 99 — Эксклюзивное Limited Edition',
-    view_players:'👁 Посмотреть игроков',
-    pkg_players_btn:'Игроки пакета',
-    how_works:'Как работает аукцион?',
-    time_left:'⏰ Оставшееся время',
-    days:'Дн',hours:'Часы',mins:'Мин',secs:'Сек',
-    place_bid:'Сделать ставку',
-    bid_btn:'Ставка',
-    top_bid:'Текущая лучшая ставка:',
-    prize1:'<strong>1-е место</strong> — Получает полный пакет (13 легендарных игроков)',
-    prize2:'<strong>Места 2–10</strong> — 1 игрок из пакета + возврат 20% при старте сезона',
-    auction_stats:'📊 Статистика аукциона',
-    leader:'Лидер',
-    will_win_pkg:'Получит полный пакет 🏆',
-    rank:'Место',user:'Игрок',amount:'Сумма',
-    promo_title:'📢 Поддержка Telegram каналов',
-    promo_desc:'Опубликуйте об аукционе в своём канале и получите от 0.1 до 100 TON за каждый одобренный пост.',
-    promo_reward:'🏆 Награда: 0.1 — 100 TON за пост',
-    promo_submit_title:'📎 Отправьте ссылку на публикацию',
-    submit_review:'Отправить на проверку',
-    posts_log:'📋 Журнал публикаций',
-    no_posts:'Публикаций пока нет',
-    nav_auction:'Аукцион',nav_promo:'Канал',
-    choose_lang:'Выбрать язык',
-    auction_ended:'🏁 Аукцион завершён',
-    prize_runner:'🎁 1 игрок + возврат 20%',
-    prize_winner:'🏆 Получит полный пакет',
-    toast_open_tg:'⚠️ Откройте приложение из Telegram',
-    toast_bid_ok:'✅ Ставка сделана!',
-    toast_insufficient:'⚠️ Недостаточно средств',
-    toast_invalid_amount:'⚠️ Введите корректную сумму',
-    toast_deposit_min:'Минимум 0.1 TON',
-    deposit_success:'Пополнение выполнено!',
-    toast_connect_wallet:'🔗 TON Connect — Подключите кошелёк',
-    toast_promo_ok:'✅ Публикация отправлена на проверку!',
-    toast_promo_invalid:'⚠️ Введите корректную ссылку',
-    toast_promo_not_tg:'⚠️ Должна быть ссылка Telegram',
-    toast_music:'🎵 Нажмите ещё раз для включения музыки',
-    status_pending:'⏳ На проверке',
-    status_approved:'✅ Одобрено',
-    status_rejected:'❌ Отклонено',
-    disconnect:'Отключить',
-    sending_tx:'Отправка транзакции...',
-    tx_sent:'Транзакция отправлена! Ожидайте подтверждения',
-    tx_rejected:'Транзакция отклонена',
-    tx_failed:'Транзакция не удалась',
-    awaiting_confirm:'Ожидание подтверждения (~1 минута)...',
-    deposit_confirmed:'✅ Пополнение подтверждено!',
-    added:'добавлено к балансу',
-  },
-  fr: {
-    welcome_title:'🏆 Bienvenue aux enchères!',
-    welcome_pkg_title:'🏆 Avantages du pack Légendes',
-    welcome_pkg_feat1:'⭐ 13 joueurs légendaires notés 99 — Limited Edition exclusif',
-    welcome_pkg_feat2:'💎 Joueurs exclusifs — jamais disponibles dans les packs normaux',
-    welcome_pkg_feat3:'💰 Valeur marchande estimée: 75 — 130 TON',
-    welcome_pkg_feat4:'🚀 Les joueurs peuvent être vendus dès le début de la nouvelle saison',
-    welcome_players_title:'⚽ Joueurs du pack — Les plus grands de tous les temps',
-    welcome_prizes_title:'🥇 Prix des enchères',
-    welcome_prize1:'👑 1ère place — Pack complet (13 joueurs légendaires notés 99)',
-    welcome_prize2:'🥈 Places 2–10 — 1 joueur du pack + remboursement de 20%',
-    welcome_btn:'🚀 Commencer les enchères!',
-    deposit:'Dépôt',
-    deposit_title:'💰 Dépôt TON',
-    wallet:'Portefeuille',
-    not_connected:'Non connecté',
-    connect:'Connecter',
-    dep_warn:'Assurez-vous d\'envoyer la transaction depuis le portefeuille connecté uniquement.',
-    amount_ton:'Montant (TON)',
-    deposit_btn:'Déposer TON',
-    processing:'Traitement du dépôt...',
-    pkg_players:'🌟 Joueurs du pack',
-    all_le:'⭐ Tous les joueurs sont Limited Edition — Note 99',
-    new_season:'Préparation de la nouvelle saison',
-    legends_pkg:'Pack Légendes 🏆',
-    pkg_sub:'13 joueurs légendaires notés 99 — Limited Edition exclusif',
-    view_players:'👁 Voir les joueurs',
-    pkg_players_btn:'Joueurs du pack',
-    how_works:'Comment fonctionnent les enchères?',
-    time_left:'⏰ Temps restant',
-    days:'Jours',hours:'Heures',mins:'Min',secs:'Sec',
-    place_bid:'Placer une enchère',
-    bid_btn:'Enchérir',
-    top_bid:'Meilleure enchère actuelle:',
-    prize1:'<strong>1ère place</strong> — Reçoit le pack complet (13 joueurs légendaires)',
-    prize2:'<strong>Places 2–10</strong> — 1 joueur du pack + remboursement 20% au début de saison',
-    auction_stats:'📊 Statistiques des enchères',
-    leader:'Leader',
-    will_win_pkg:'Obtiendra le pack complet 🏆',
-    rank:'Rang',user:'Utilisateur',amount:'Montant',
-    promo_title:'📢 Soutien des chaînes Telegram',
-    promo_desc:'Publiez sur les enchères dans votre chaîne et gagnez de 0.1 à 100 TON par publication approuvée.',
-    promo_reward:'🏆 Récompense: 0.1 — 100 TON par publication',
-    promo_submit_title:'📎 Soumettre le lien de votre publication',
-    submit_review:'Envoyer pour révision',
-    posts_log:'📋 Journal des publications',
-    no_posts:'Aucune publication soumise',
-    nav_auction:'Enchères',nav_promo:'Chaîne',
-    choose_lang:'Choisir la langue',
-    auction_ended:'🏁 Enchères terminées',
-    prize_runner:'🎁 1 joueur + remboursement 20%',
-    prize_winner:'🏆 Gagnera le pack complet',
-    toast_open_tg:'⚠️ Ouvrez l\'app depuis Telegram',
-    toast_bid_ok:'✅ Enchère placée avec succès!',
-    toast_insufficient:'⚠️ Solde insuffisant',
-    toast_invalid_amount:'⚠️ Entrez un montant valide',
-    toast_deposit_min:'Minimum 0.1 TON',
-    deposit_success:'Dépôt réussi!',
-    toast_connect_wallet:'🔗 TON Connect — Liez votre portefeuille',
-    toast_promo_ok:'✅ Publication soumise pour révision!',
-    toast_promo_invalid:'⚠️ Entrez une URL valide',
-    toast_promo_not_tg:'⚠️ Doit être un lien Telegram',
-    toast_music:'🎵 Appuyez à nouveau pour lire la musique',
-    status_pending:'⏳ En cours de révision',
-    status_approved:'✅ Approuvé',
-    status_rejected:'❌ Rejeté',
-    disconnect:'Déconnecter',
-    sending_tx:'Envoi de la transaction...',
-    tx_sent:'Transaction envoyée! En attente de confirmation',
-    tx_rejected:'Transaction rejetée',
-    tx_failed:'Transaction échouée',
-    awaiting_confirm:'En attente de confirmation (~1 minute)...',
-    deposit_confirmed:'✅ Dépôt confirmé!',
-    added:'ajouté à votre solde',
-  },
-  de: {
-    welcome_title:'🏆 Willkommen bei der Auktion!',
-    welcome_pkg_title:'🏆 Vorteile des Legenden-Pakets',
-    welcome_pkg_feat1:'⭐ 13 legendäre Spieler mit Bewertung 99 — Exklusives Limited Edition',
-    welcome_pkg_feat2:'💎 Exklusive Spieler — erscheinen nie wieder in normalen Packs',
-    welcome_pkg_feat3:'💰 Erwarteter Marktwert: 75 — 130 TON',
-    welcome_pkg_feat4:'🚀 Spieler können sofort zu Saisonbeginn verkauft werden',
-    welcome_players_title:'⚽ Paketspieler — Die Größten aller Zeiten',
-    welcome_prizes_title:'🥇 Auktionspreise',
-    welcome_prize1:'👑 1. Platz — Vollständiges Paket (13 legendäre Spieler mit 99)',
-    welcome_prize2:'🥈 Plätze 2–10 — 1 Spieler aus dem Paket + 20% Rückerstattung',
-    welcome_btn:'🚀 Jetzt bieten!',
-    deposit:'Einzahlen',
-    deposit_title:'💰 TON einzahlen',
-    wallet:'Wallet',
-    not_connected:'Nicht verbunden',
-    connect:'Verbinden',
-    dep_warn:'Stellen Sie sicher, dass die Transaktion nur vom verbundenen Wallet gesendet wird.',
-    amount_ton:'Betrag (TON)',
-    deposit_btn:'TON einzahlen',
-    processing:'Einzahlung wird verarbeitet...',
-    pkg_players:'🌟 Paketspieler',
-    all_le:'⭐ Alle Spieler sind Limited Edition — Bewertung 99',
-    new_season:'Vorbereitung auf die neue Saison',
-    legends_pkg:'Legenden-Paket 🏆',
-    pkg_sub:'13 legendäre Spieler mit 99 — Exklusives Limited Edition',
-    view_players:'👁 Spieler ansehen',
-    pkg_players_btn:'Paketspieler',
-    how_works:'Wie funktioniert die Auktion?',
-    time_left:'⏰ Verbleibende Zeit',
-    days:'Tage',hours:'Std',mins:'Min',secs:'Sek',
-    place_bid:'Gebot abgeben',
-    bid_btn:'Bieten',
-    top_bid:'Aktuelles Höchstgebot:',
-    prize1:'<strong>1. Platz</strong> — Erhält das vollständige Paket (13 legendäre Spieler)',
-    prize2:'<strong>Plätze 2–10</strong> — 1 Spieler aus dem Paket + 20% Rückerstattung',
-    auction_stats:'📊 Auktionsstatistiken',
-    leader:'Spitzenreiter',
-    will_win_pkg:'Wird das vollständige Paket gewinnen 🏆',
-    rank:'Rang',user:'Nutzer',amount:'Betrag',
-    promo_title:'📢 Telegram-Kanal-Unterstützung',
-    promo_desc:'Veröffentlichen Sie über die Auktion in Ihrem Kanal und verdienen Sie 0.1 bis 100 TON pro genehmigtem Beitrag.',
-    promo_reward:'🏆 Belohnung: 0.1 — 100 TON pro Beitrag',
-    promo_submit_title:'📎 Link zu Ihrem Beitrag einreichen',
-    submit_review:'Zur Überprüfung einreichen',
-    posts_log:'📋 Beitragsprotokoll',
-    no_posts:'Noch keine Beiträge eingereicht',
-    nav_auction:'Auktion',nav_promo:'Kanal',
-    choose_lang:'Sprache wählen',
-    auction_ended:'🏁 Auktion beendet',
-    prize_runner:'🎁 1 Spieler + 20% Rückerstattung',
-    prize_winner:'🏆 Gewinnt das vollständige Paket',
-    toast_open_tg:'⚠️ Öffnen Sie die App über Telegram',
-    toast_bid_ok:'✅ Gebot erfolgreich platziert!',
-    toast_insufficient:'⚠️ Unzureichendes Guthaben',
-    toast_invalid_amount:'⚠️ Geben Sie einen gültigen Betrag ein',
-    toast_deposit_min:'Mindestbetrag 0.1 TON',
-    deposit_success:'Einzahlung erfolgreich!',
-    toast_connect_wallet:'🔗 TON Connect — Verbinden Sie Ihr Wallet',
-    toast_promo_ok:'✅ Beitrag zur Überprüfung eingereicht!',
-    toast_promo_invalid:'⚠️ Geben Sie eine gültige URL ein',
-    toast_promo_not_tg:'⚠️ Muss ein Telegram-Link sein',
-    toast_music:'🎵 Erneut drücken um Musik abzuspielen',
-    status_pending:'⏳ In Überprüfung',
-    status_approved:'✅ Genehmigt',
-    status_rejected:'❌ Abgelehnt',
-    disconnect:'Trennen',
-    sending_tx:'Transaktion wird gesendet...',
-    tx_sent:'Transaktion gesendet! Warten auf Bestätigung',
-    tx_rejected:'Transaktion abgelehnt',
-    tx_failed:'Transaktion fehlgeschlagen',
-    awaiting_confirm:'Warte auf Bestätigung (~1 Minute)...',
-    deposit_confirmed:'✅ Einzahlung bestätigt!',
-    added:'zu Ihrem Guthaben hinzugefügt',
-  }
+// ════════════════════════════════════════
+//   STATE
+// ════════════════════════════════════════
+const S = {
+  userId: null,
+  initData: null,
+  wallet: null,
+  tonUI: null,
+  user: null,
+  depCheckInt: null,
 };
 
-function t(key) {
-  return (I18N[currentLang] || I18N.ar)[key] || (I18N.ar)[key] || key;
+// ════════════════════════════════════════
+//   UTILS
+// ════════════════════════════════════════
+function fmt(n){ return Number(n).toLocaleString(); }
+
+function showNotif(msg, type=''){
+  const el = document.getElementById('notifToast');
+  el.textContent = msg;
+  el.className = 'notif-toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 3000);
 }
 
-function applyTranslations() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    const val = t(key);
-    if (val) el.innerHTML = val;
+// ════════════════════════════════════════
+//   API CALL
+// ════════════════════════════════════════
+async function api(action, data={}){
+  const res = await fetch(CFG.API_URL + '/api', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Telegram ' + S.initData,
+      'X-Action': action,
+    },
+    body: JSON.stringify({ action, data }),
   });
-  // Placeholder for deposit input
-  const depIn = document.getElementById('depositAmountInput');
-  if (depIn) depIn.placeholder = '0.1';
-  // Update lang menu active
-  document.querySelectorAll('.lang-option').forEach(opt => opt.classList.remove('active-lang'));
-  document.querySelectorAll('.lang-option').forEach(opt => {
-    if (opt.getAttribute('onclick') && opt.getAttribute('onclick').includes(`'${currentLang}'`)) {
-      opt.classList.add('active-lang');
-    }
-  });
-  // Update promo empty state dynamically if visible
-  const promoEmpty = document.querySelector('.promo-empty');
-  if (promoEmpty && promoEmpty.getAttribute('data-i18n')) {
-    promoEmpty.textContent = t('no_posts');
-  }
-  // Re-render leaderboard to update prize notes
-  if (leaderboard.length > 0) renderLeaderboard();
-  // Re-render promo log
-  renderPromoLog();
+  const json = await res.json();
+  if(!json.success) throw new Error(json.error || 'API error');
+  return json.data;
 }
 
-// ════ TELEGRAM INIT ════
-const tg = window.Telegram?.WebApp;
-let tgInitData = '';
-let tgUser = null;
-
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tgInitData = tg.initData || '';
-  tgUser = tg.initDataUnsafe?.user || null;
+// ════════════════════════════════════════
+//   PREVIEW
+// ════════════════════════════════════════
+function setDepAmt(v){
+  document.getElementById('depositAmountInput').value = Math.max(1, v);
+  updDepPreview();
 }
 
-// ════ USER STATE ════
-let userTonBalance = 0;
-let myBid = 0;
-let currentLang = 'ar';
-let auctionEndDate = null;
-let leaderboard = [];
-let promoLog = [];
-let tonUI = null;
-let tonWallet = null;
-let depCheckInt = null;
-
-// ════ API CALL ════
-async function apiCall(action, data = {}) {
-  try {
-    const res = await fetch(`${SERVER_URL}/api`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tgInitData },
-      body: JSON.stringify({ action, data, initData: tgInitData }),
-    });
-    return await res.json();
-  } catch (e) {
-    console.error('API error:', e);
-    return { success: false, error: e.message };
-  }
-}
-
-// ════ BACKGROUND STARS ════
-(function(){
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;initStars();}
-  function initStars(){stars=[];for(let i=0;i<80;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,a:Math.random(),speed:Math.random()*.015+.005,phase:Math.random()*Math.PI*2});}
-  function drawStars(t){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{const alpha=.1+.7*(.5+.5*Math.sin(s.phase+t*s.speed));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fill();});requestAnimationFrame(drawStars);}
-  window.addEventListener('resize',resize);
-  resize();
-  requestAnimationFrame(drawStars);
-})();
-
-// ════ MUSIC — auto on ════
-let musicPlaying = false;
-const bgMusic = document.getElementById('bgMusic');
-const musicIcon = document.getElementById('musicIcon');
-const musicBtn = document.getElementById('musicBtn');
-bgMusic.volume = 0.35;
-
-function tryAutoPlay() {
-  bgMusic.play().then(() => {
-    musicIcon.className = 'fas fa-pause';
-    musicBtn.classList.add('playing');
-    musicPlaying = true;
-  }).catch(() => {});
-}
-
-function toggleMusic() {
-  if (musicPlaying) {
-    bgMusic.pause();
-    musicIcon.className = 'fas fa-music';
-    musicBtn.classList.remove('playing');
-    musicPlaying = false;
-  } else {
-    bgMusic.play().then(() => {
-      musicIcon.className = 'fas fa-pause';
-      musicBtn.classList.add('playing');
-      musicPlaying = true;
-    }).catch(() => showToast(t('toast_music')));
-  }
-}
-
-document.addEventListener('click', function firstClick(){
-  tryAutoPlay();
-  document.removeEventListener('click', firstClick);
-}, {once: true});
-
-tryAutoPlay();
-
-// ════ WELCOME NOTIFICATION ════
-const WELCOME_KEY = 'auction_welcome_seen_v2';
-
-function checkWelcome() {
-  const seen = localStorage.getItem(WELCOME_KEY);
-  if (!seen) {
-    renderWelcomePlayers();
-    document.getElementById('welcomeOverlay').classList.remove('hidden');
-  } else {
-    document.getElementById('welcomeOverlay').classList.add('hidden');
-  }
-}
-
-function closeWelcome() {
-  localStorage.setItem(WELCOME_KEY, '1');
-  document.getElementById('welcomeOverlay').classList.add('hidden');
-}
-
-function openWelcome() {
-  renderWelcomePlayers();
-  document.getElementById('welcomeOverlay').classList.remove('hidden');
-}
-
-// Render mini player grid in welcome
-function renderWelcomePlayers() {
-  const grid = document.getElementById('welcomePlayersGrid');
-  if (!grid) return;
-  grid.innerHTML = PLAYERS.map(p => `
-    <div class="welcome-player-item">
-      <img src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
-      <div>${currentLang === 'ar' ? p.nameAr : p.name}</div>
-      <div class="welcome-player-pos">${p.pos}</div>
-    </div>
-  `).join('');
-}
-
-// ════ TAB NAVIGATION ════
-function switchTab(tab) {
-  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
-  document.getElementById('nav-' + tab).classList.add('active');
-}
-
-// ════ LANG ════
-function setLang(lang){
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  const flags = {ar:'🇸🇦',en:'🇬🇧',ru:'🇷🇺',fr:'🇫🇷',de:'🇩🇪'};
-  const codes = {ar:'AR',en:'EN',ru:'RU',fr:'FR',de:'DE'};
-  document.getElementById('tbLangFlag').textContent = flags[lang];
-  document.getElementById('tbLangCode').textContent = codes[lang];
-  closeLangMenu();
-  applyTranslations();
-  // Re-render players list if open
-  const playersGrid = document.getElementById('playersGrid');
-  if (playersGrid && playersGrid.innerHTML) renderPlayers();
-}
-function openLangMenu(){document.getElementById('langMenu').classList.add('open');}
-function closeLangMenu(){document.getElementById('langMenu').classList.remove('open');}
-
-// ════ USER INIT ════
-function initUserUI() {
-  const avatar = document.getElementById('topUserAvatar');
-  if (tgUser) {
-    if (tgUser.photo_url) {
-      avatar.innerHTML = `<img src="${tgUser.photo_url}" alt="" onerror="this.parentElement.textContent='🐼'">`;
-    } else {
-      avatar.textContent = (tgUser.first_name || '🐼')[0].toUpperCase();
-    }
-  }
-}
-
-// ════ LOAD DATA FROM SERVER ════
-async function loadAuctionData() {
-  if (!tgInitData && !tgUser) {
-    setMockData();
-    return;
-  }
-  const uid = tgUser ? String(tgUser.id) : null;
-  if (!uid) { setMockData(); return; }
-
-  const [auctRes, userRes] = await Promise.all([
-    apiCall('getAuction', { uid }),
-    apiCall('getUser', { uid }),
-  ]);
-
-  if (auctRes.success && auctRes.data) {
-    const d = auctRes.data;
-    auctionEndDate = d.endDate ? new Date(d.endDate) : null;
-    myBid = d.myBid || 0;
-    leaderboard = (d.leaderboard || []).map(e => ({
-      name: e.name || 'User',
-      photo: e.photo || null,
-      ton: e.amount || 0,
-      userId: e.userId,
-    }));
-    renderLeaderboard();
-  } else {
-    setMockData();
-  }
-
-  if (userRes.success && userRes.data) {
-    userTonBalance = userRes.data.tonBalance || 0;
-    document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
-  }
-}
-
-function setMockData() {
-  auctionEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-  leaderboard = [
-    {name:'Ahmed',photo:null,ton:5.50},{name:'Mohammed',photo:null,ton:4.20},
-    {name:'Sara',photo:null,ton:3.80},{name:'Ali',photo:null,ton:2.50},
-    {name:'Nour',photo:null,ton:2.00},
-  ];
-  renderLeaderboard();
-}
-
-// ════ PLAYERS DATA ════
-const CARD_BG = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dd6f98cf-4444-4460-a7d0-152ed1b5a05a.png';
-
-const PLAYERS = [
-  {name:'Cruyff',nameAr:'كرويف',img:'https://r2.thesportsdb.com/images/media/player/cutout/ze75mx1594069754.png',pos:'CAM',nat:'🇳🇱',natImg:'https://flagcdn.com/w40/nl.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
-  {name:'Kaka',nameAr:'كاكا',img:'https://r2.thesportsdb.com/images/media/player/cutout/6uj1nl1665653279.png',pos:'CAM',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Buffon',nameAr:'بوفون',img:'https://r2.thesportsdb.com/images/media/player/cutout/khpcg01586360050.png',pos:'GK',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Juventus',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Juventus_FC_2017_logo.svg/40px-Juventus_FC_2017_logo.svg.png',rating:99},
-  {name:'Casillas',nameAr:'كسياس',img:'https://r2.thesportsdb.com/images/media/player/cutout/zh95mc1541336479.png',pos:'GK',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Maldini',nameAr:'ملديني',img:'https://r2.thesportsdb.com/images/media/player/cutout/9ccmbp1665653152.png',pos:'CB',nat:'🇮🇹',natImg:'https://flagcdn.com/w40/it.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Cafu',nameAr:'كافو',img:'https://r2.thesportsdb.com/images/media/player/cutout/9t0i4f1665653369.png',pos:'RB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Milan',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Logo_of_AC_Milan.svg/40px-Logo_of_AC_Milan.svg.png',rating:99},
-  {name:'Ronaldinho',nameAr:'رونالدينيو',img:'https://r2.thesportsdb.com/images/media/player/cutout/u91au61586868506.png',pos:'LW',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
-  {name:'R. Nazario',nameAr:'رونالدو',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f92c2363-fa2a-4758-8b87-4fc004b4a22b.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Pele',nameAr:'بيليه',img:'https://i.supaimg.com/dcb81842-09c9-43fc-ac2a-f5f3568dc396/f6e96047-c30a-416f-8f40-59faf9c6376f.png',pos:'ST',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Santos',clubImg:'',rating:99},
-  {name:'R. Carlos',nameAr:'ر. كارلوس',img:'https://r2.thesportsdb.com/images/media/player/cutout/ypsxvy1483909094.png',pos:'LB',nat:'🇧🇷',natImg:'https://flagcdn.com/w40/br.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Zidane',nameAr:'زيدان',img:'https://r2.thesportsdb.com/images/media/player/cutout/ae7bng1586814446.png',pos:'CAM',nat:'🇫🇷',natImg:'https://flagcdn.com/w40/fr.png',club:'Real Madrid',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/40px-Real_Madrid_CF.svg.png',rating:99},
-  {name:'Maradona',nameAr:'مارادونا',img:'https://r2.thesportsdb.com/images/media/player/cutout/v298851606327825.png',pos:'SS',nat:'🇦🇷',natImg:'https://flagcdn.com/w40/ar.png',club:'Napoli',clubImg:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/SSC_Napoli.svg/40px-SSC_Napoli.svg.png',rating:99},
-  {name:'Iniesta',nameAr:'إنيستا',img:'https://r2.thesportsdb.com/images/media/player/cutout/nx7oze1611167333.png',pos:'CM',nat:'🇪🇸',natImg:'https://flagcdn.com/w40/es.png',club:'Barcelona',clubImg:'https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/40px-FC_Barcelona_%28crest%29.svg.png',rating:99},
-];
-
-const TON_ICON_URL = 'https://ton.org/download/ton_symbol.png';
-const TON_ICON_FALLBACK = 'https://cache.tonapi.io/imgproxy/xJuPzTjpBoHlYQxRMo1Gh1igHWOOSvCiPWNqWRYdSa0/rs:fill:200:200:1/aHR0cHM6Ly9zdGF0aWMudG9uY29pbi5vcmcvdG9uX3N5bWJvbC5wbmc.png';
-
-function tonImgHtml(size) {
-  return `<img src="${TON_ICON_URL}" onerror="this.src='${TON_ICON_FALLBACK}'" style="width:${size}px;height:${size}px;object-fit:contain;" alt="TON">`;
-}
-
-function renderPlayers() {
-  document.getElementById('playersGrid').innerHTML = PLAYERS.map(p => `
-    <div class="player-card">
-      <img class="card-full-img" src="${CARD_BG}" alt="card" onerror="this.style.background='linear-gradient(145deg,#2a1a00,#1a0800)'">
-      <img class="card-player-photo" src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
-      <div class="card-top-left">
-        <div class="card-rating-num">${p.rating}</div>
-        <img class="card-nat-flag" src="${p.natImg}" alt="${p.nat}" onerror="this.style.display='none'">
-        ${p.clubImg ? `<img class="card-club-badge" src="${p.clubImg}" alt="${p.club}" onerror="this.style.display='none'">` : ''}
-        <div class="card-pos-text">${p.pos}</div>
-      </div>
-      <div class="card-badge-le">LE</div>
-      <div class="card-player-name">${currentLang === 'ar' ? p.nameAr : p.name}</div>
-    </div>
-  `).join('');
-}
-
-function openPlayersModal(){renderPlayers();document.getElementById('playersModal').classList.add('active');}
-function closePlayersModal(){document.getElementById('playersModal').classList.remove('active');}
-
-// ════ TON CONNECT ════
-function initTonConnect() {
-  try {
-    if (!window.TON_CONNECT_UI) return;
-    tonUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-      uiPreferences: { theme: 'DARK' },
-    });
-    tonUI.onStatusChange(w => w ? onWalletConnected(w) : onWalletDisconnected());
-  } catch(e) { console.error('TON Connect init error:', e); }
-}
-
-function onWalletConnected(w) {
-  tonWallet = { address: w.account.address, chain: w.account.chain, appName: w.device?.appName || 'Wallet' };
-  const short = `${tonWallet.address.substring(0,6)}...${tonWallet.address.slice(-4)}`;
-  document.getElementById('walletAddressDisplay').textContent = `${short} · ${tonWallet.appName}`;
-  const cb = document.getElementById('connectWalletBtn');
-  if (cb) { cb.innerHTML = '<i class="fas fa-unlink"></i> <span>' + t('disconnect') + '</span>'; cb.onclick = disconnectWallet; }
-  const sb = document.getElementById('submitDepositBtn');
-  if (sb) { sb.disabled = false; sb.style.opacity = '1'; sb.style.cursor = 'pointer'; }
-}
-
-function onWalletDisconnected() {
-  tonWallet = null;
-  const dispEl = document.getElementById('walletAddressDisplay');
-  if (dispEl) dispEl.textContent = t('not_connected');
-  const cb = document.getElementById('connectWalletBtn');
-  if (cb) { cb.innerHTML = '<i class="fas fa-plug"></i> <span>' + t('connect') + '</span>'; cb.onclick = connectWallet; }
-  const sb = document.getElementById('submitDepositBtn');
-  if (sb) { sb.disabled = true; sb.style.opacity = '0.5'; sb.style.cursor = 'not-allowed'; }
-}
-
-async function connectWallet() {
-  if (!tonUI) { showToast('⚠️ TON Connect not ready'); return; }
-  try { await tonUI.openModal(); } catch(e) { showToast('❌ ' + e.message); }
-}
-
-async function disconnectWallet() {
-  if (!tonUI) return;
-  try { await tonUI.disconnect(); } catch(e) { console.error(e); }
-}
-
-// ════ DEPOSIT ════
-function openDepositModal(){
-  // عرض الـ User ID في نافذة الإيداع
-  const uid = tgUser ? String(tgUser.id) : '';
-  const el = document.getElementById('depositUserIdDisplay');
-  if (el) el.textContent = uid || '???';
-  document.getElementById('depositModal').classList.add('active');
-}
-function closeDepositModal(){document.getElementById('depositModal').classList.remove('active');}
-function setDepAmt(v){document.getElementById('depositAmountInput').value=v;updDepPreview();}
 function updDepPreview(){
-  const ton = parseFloat(document.getElementById('depositAmountInput').value)||0;
-  const el = document.getElementById('depBalPreview');
-  if(el) el.textContent = '+' + ton.toFixed(2) + ' TON';
+  const ton = parseFloat(document.getElementById('depositAmountInput').value) || 0;
+  const bam = Math.floor(ton * TON_TO_BAMBOO);
+  const bonus = Math.floor(bam * BONUS_PCT);
+  const total = bam + bonus;
+  const bamImg = '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain">';
+  const bamImgSm = '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain">';
+
+  const el = document.getElementById('depBambooPreview');
+  if(el) el.innerHTML = `${bamImg} ${fmt(bam)} Bamboo`;
+
+  const bonusRow = document.getElementById('depBonusRow');
+  const bonusEl  = document.getElementById('depBonusPreview');
+  const divider  = document.getElementById('depTotalDivider');
+  const totalRow = document.getElementById('depTotalRow');
+  const totalEl  = document.getElementById('depTotalPreview');
+
+  if(ton > 0){
+    if(bonusRow) bonusRow.style.display = 'flex';
+    if(divider)  divider.style.display  = 'block';
+    if(totalRow) totalRow.style.display = 'flex';
+    if(bonusEl)  bonusEl.innerHTML  = `${bamImgSm} +${fmt(bonus)} Bamboo`;
+    if(totalEl)  totalEl.innerHTML  = `${bamImg} ${fmt(total)} Bamboo`;
+  } else {
+    if(bonusRow) bonusRow.style.display = 'none';
+    if(divider)  divider.style.display  = 'none';
+    if(totalRow) totalRow.style.display = 'none';
+  }
 }
 
-window.initiateDeposit = async function(){
-  if(!tonWallet){showToast('🔗 اربط المحفظة أولاً');return;}
-  const amt = parseFloat(document.getElementById('depositAmountInput').value);
-  if(!amt||amt<0.1){showToast('الحد الأدنى 0.1 TON');return;}
-  if(amt>1000){showToast('المبلغ كبير جداً');return;}
+// ════════════════════════════════════════
+//   TON CONNECT
+// ════════════════════════════════════════
+async function initTON(){
   try{
-    const comment = String(tgUser ? tgUser.id : 'guest');
-    const nano = String(Math.floor(amt*1e9));
+    if(window.TON_CONNECT_UI){
+      S.tonUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: `${CFG.API_URL}/tonconnect-manifest.json`,
+        uiPreferences: { theme: 'DARK' },
+      });
+      S.tonUI.onStatusChange(w => w ? onWConn(w) : onWDisc());
+      setTimeout(()=>{ if(S.tonUI.connected) S.tonUI.getWallets(); }, 500);
+    }
+  }catch(e){ console.error('TON init error:', e); }
+}
+
+function onWConn(w){
+  S.wallet = { address: w.account.address, chain: w.account.chain, appName: w.device.appName };
+  const sh = `${S.wallet.address.substring(0,6)}...${S.wallet.address.slice(-4)}`;
+  document.getElementById('walletAddressDisplay').textContent = `${sh} · ${S.wallet.appName}`;
+  document.getElementById('connectWalletBtn').innerHTML = '<i class="fas fa-unlink"></i> Disconnect';
+  document.getElementById('connectWalletBtn').onclick = disconnectWallet;
+  document.getElementById('submitDepositBtn').disabled = false;
+}
+
+function onWDisc(){
+  S.wallet = null;
+  document.getElementById('walletAddressDisplay').textContent = 'Not connected';
+  document.getElementById('connectWalletBtn').innerHTML = '<i class="fas fa-plug"></i> Connect';
+  document.getElementById('connectWalletBtn').onclick = connectWallet;
+  document.getElementById('submitDepositBtn').disabled = true;
+}
+
+async function connectWallet(){ if(S.tonUI) await S.tonUI.openModal(); }
+async function disconnectWallet(){ if(S.tonUI) await S.tonUI.disconnect(); }
+
+// ════════════════════════════════════════
+//   INITIATE DEPOSIT
+// ════════════════════════════════════════
+async function initiateDeposit(){
+  if(!S.wallet){ showNotif('❌ Connect your wallet first', 'e'); return; }
+  const amt = parseFloat(document.getElementById('depositAmountInput').value);
+  if(!amt || amt < 1){ showNotif('❌ Minimum deposit is 1 TON', 'e'); return; }
+  if(amt > 1000){ showNotif('❌ Amount too large', 'e'); return; }
+
+  const btn = document.getElementById('submitDepositBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+  try{
+    const comment = String(S.userId);
+    const nano = String(Math.floor(amt * 1e9));
+
     if(!window.TonWeb) throw new Error('TonWeb not loaded');
     const TW = window.TonWeb; new TW();
     const cell = new TW.boc.Cell();
-    cell.bits.writeUint(0,32); cell.bits.writeString(comment);
+    cell.bits.writeUint(0, 32);
+    cell.bits.writeString(comment);
     const boc = await cell.toBoc(false);
     const payload = TW.utils.bytesToBase64(boc);
-    const tx = {validUntil:Math.floor(Date.now()/1000)+600,messages:[{address:DEPOSIT_WALLET,amount:nano,payload}]};
-    const result = await tonUI.sendTransaction(tx);
-    showToast('✅ تم إرسال المعاملة! ~دقيقة للتأكيد');
-    await handleDepOk(result, amt, comment);
-      // ── Local API deposit registration ───────────────────────────
-      try {
-        await fetch('/api/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: comment, txHash: result.boc, amount: amt })
-        });
-      } catch(e) { /* optional */ }
+
+    const tx = {
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      messages: [{ address: CFG.DEPOSIT_WALLET, amount: nano, payload }],
+    };
+
+    const result = await S.tonUI.sendTransaction(tx);
+
+    // Show pending status
+    const sd = document.getElementById('depositStatus');
+    sd.classList.add('visible');
+    sd.querySelector('.txsi').innerHTML = '⏳';
+    sd.querySelector('.txsm').innerHTML = 'Transaction sent!';
+    document.getElementById('depositStatusDetail').textContent = 'Your balance will be added within 3 minutes.';
+    showNotif('✅ Transaction sent! Balance credited within 3 minutes', 's');
+
+    // Register in backend (fire & forget)
+    try{ await api('deposit', { amount: amt, txHash: result.boc, comment }); }catch(_){}
+
+    // Poll for confirmation
+    startDepVerify(null, result.boc);
+
   }catch(e){
     const sd = document.getElementById('depositStatus');
     sd.classList.add('visible');
-    sd.querySelector('.txsi').innerHTML='❌';
-    document.getElementById('depositStatusMsg').textContent = e.message?.includes('rejected')?'تم رفض المعاملة':'فشلت المعاملة';
-    document.getElementById('depositStatusDetail').textContent = e.message||'حاول مجدداً';
+    sd.querySelector('.txsi').innerHTML = '❌';
+    sd.querySelector('.txsm').innerHTML = e.message?.includes('rejected') ? 'Transaction rejected' : 'Transaction failed';
+    document.getElementById('depositStatusDetail').textContent = e.message || 'Please try again';
+    showNotif('❌ ' + (e.message || 'Transaction failed'), 'e');
+  }finally{
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-arrow-down"></i> Deposit TON';
   }
-};
-
-async function handleDepOk(result, amt, comment){
-  try{
-    const d = await apiCall('deposit',{amount:amt,txHash:result.boc,comment});
-    const sd = document.getElementById('depositStatus');
-    sd.classList.add('visible');
-    sd.querySelector('.txsi').innerHTML='⏳';
-    document.getElementById('depositStatusMsg').textContent='تم إرسال المعاملة!';
-    document.getElementById('depositStatusDetail').textContent='في انتظار التأكيد (~دقيقة)...';
-    if(d.success && d.data?.depositId) startDepVerify(d.data.depositId, result.boc);
-  }catch(e){console.error('handleDepOk:',e);}
 }
 
+// ════════════════════════════════════════
+//   POLLING FOR CONFIRMATION
+// ════════════════════════════════════════
 function startDepVerify(depId, txHash){
-  if(depCheckInt) clearInterval(depCheckInt);
-  if(!depId||!txHash) return;
-  let attempts=0;
-  depCheckInt=setInterval(async()=>{
+  if(S.depCheckInt) clearInterval(S.depCheckInt);
+  const prevBamboo = S.user?.bamboo || 0;
+  let attempts = 0;
+
+  S.depCheckInt = setInterval(async()=>{
     attempts++;
     try{
-      const r = await apiCall('verifyDeposit',{depositId:depId,txHash});
-      if(r.success && r.data?.status==='completed'){
-        clearInterval(depCheckInt);
-        const sd=document.getElementById('depositStatus');
-        sd.querySelector('.txsi').innerHTML='✅';
-        document.getElementById('depositStatusMsg').textContent='✅ تم تأكيد الإيداع!';
-        document.getElementById('depositStatusDetail').textContent=`${r.data.amount} TON أُضيف إلى رصيدك`;
-        showToast(`💰 ${r.data.amount} TON تم إيداعه!`);
-        userTonBalance = (userTonBalance||0)+(r.data.amount||0);
-        document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
-        setTimeout(() => sd.classList.remove('visible'), 4000);
+      const r = await api('getState', {});
+      if(r && r.user && r.user.bamboo > prevBamboo){
+        clearInterval(S.depCheckInt);
+        const diff = r.user.bamboo - prevBamboo;
+        const sd = document.getElementById('depositStatus');
+        if(sd){
+          sd.querySelector('.txsi').innerHTML = '✅';
+          sd.querySelector('.txsm').innerHTML = 'Deposit confirmed!';
+          document.getElementById('depositStatusDetail').textContent = `+${fmt(diff)} Bamboo added`;
+        }
+        showNotif(`💰 Deposit confirmed! +${fmt(diff)} Bamboo`, 's');
+        // Update displayed balance
+        S.user = r.user;
+        document.getElementById('bambooBalance').textContent = fmt(r.user.bamboo) + ' 🎋';
+        setTimeout(()=>sd&&sd.classList.remove('visible'), 3500);
       }
-    } catch(e) {
-      if (attempts >= 18) clearInterval(depCheckInt);
-    }
+    }catch(e){}
+    if(attempts >= 36) clearInterval(S.depCheckInt); // stop after ~6 min
   }, 10000);
 }
 
-// ════ BID ════
-function addBid(amt){
-  const inp=document.getElementById('bidInput');
-  inp.value=(parseFloat(inp.value||0)+amt).toFixed(2);
-}
-
-async function placeBid(){
-  const amt = parseFloat(document.getElementById('bidInput').value);
-  if(!amt||amt<=0){showToast(t('toast_invalid_amount'));return;}
-  if(userTonBalance < amt){showToast(t('toast_insufficient'));return;}
-
-  const uid = tgUser ? String(tgUser.id) : null;
-  if(!uid){
-    showToast(t('toast_open_tg'));return;
-  }
-
-  const btn = document.querySelector('.bid-btn');
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  const res = await apiCall('auctionBid', {uid, amount: amt});
-
-  btn.disabled = false;
-  btn.innerHTML = `<i class="fas fa-gavel"></i> ${t('bid_btn')}`;
-
-  if(res.success && res.data){
-    showToast(t('toast_bid_ok'));
-    userTonBalance = res.data.tonBalance;
-    myBid = res.data.totalBid;
-    document.getElementById('topTonBalance').textContent = userTonBalance.toFixed(2);
-    document.getElementById('bidInput').value = '';
-    await loadAuctionData();
-  } else {
-    showToast('❌ ' + (res.error || 'Error'));
+// ════════════════════════════════════════
+//   LOAD USER STATE
+// ════════════════════════════════════════
+async function loadState(){
+  try{
+    const r = await api('getState', {});
+    S.user = r.user;
+    document.getElementById('bambooBalance').textContent = fmt(r.user.bamboo) + ' 🎋';
+  }catch(e){
+    console.error('loadState error:', e);
   }
 }
 
-// ════ LEADERBOARD ════
-function renderLeaderboard(){
-  const topBid = leaderboard[0];
-  if(topBid){
-    document.getElementById('leaderName').textContent = topBid.name;
-    document.getElementById('leaderAmount').textContent = topBid.ton.toFixed(2);
-    document.getElementById('currentTopBid').textContent = topBid.ton.toFixed(2) + ' TON';
-    const la = document.getElementById('leaderAvatar');
-    if(topBid.photo){
-      la.innerHTML = `<img src="${topBid.photo}" alt="" onerror="this.parentElement.textContent='🏆'">`;
-    } else {
-      la.textContent = '🏆';
-    }
+// ════════════════════════════════════════
+//   INIT
+// ════════════════════════════════════════
+(async function init(){
+  const tg = window.Telegram?.WebApp;
+  if(tg){
+    tg.ready();
+    tg.expand();
+    S.initData = tg.initData;
+    S.userId   = tg.initDataUnsafe?.user?.id;
   }
-  const rankEmojis=['🥇','🥈','🥉'];
-  const rankClasses=['r1','r2','r3'];
-  document.getElementById('leaderboardList').innerHTML = leaderboard.map((u,i)=>{
-    const rc = rankClasses[i]||'rn';
-    const rankDisp = rankEmojis[i]||(i+1);
-    const prizeNote = i===0
-      ?`<div class="lb-prize-note">${t('prize_winner')}</div>`
-      :`<div class="lb-prize-note">${t('prize_runner')}</div>`;
-    const photoHtml = u.photo
-      ? `<img src="${u.photo}" alt="" onerror="this.parentElement.textContent='⭐'">`
-      : '⭐';
-    return `<div class="lb-row ${i<3?'top'+(i+1):''}">
-      <div class="lb-rank ${rc}">${rankDisp}</div>
-      <div class="lb-avatar">${photoHtml}</div>
-      <div style="flex:1">
-        <div class="lb-name">${u.name}</div>
-        ${prizeNote}
-      </div>
-      <div class="lb-ton">
-        ${tonImgHtml(13)}
-        <span>${u.ton.toFixed(2)}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
 
-// ════ TIMER ════
-let prevSecs = -1;
-function updateTimer(){
-  if(!auctionEndDate){return;}
-  const diff = auctionEndDate - Date.now();
-  if(diff<=0){
-    document.getElementById('timerRow').innerHTML=`<div class="timer-ended">${t('auction_ended')}</div>`;
-    return;
+  // Show user ID in warning
+  if(S.userId){
+    document.getElementById('depositUserIdDisplay').textContent = S.userId;
   }
-  const days=Math.floor(diff/(1000*60*60*24));
-  const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-  const mins=Math.floor((diff%(1000*60*60))/(1000*60));
-  const secs=Math.floor((diff%(1000*60))/1000);
-  document.getElementById('timerDays').textContent=String(days).padStart(2,'0');
-  document.getElementById('timerHours').textContent=String(hours).padStart(2,'0');
-  document.getElementById('timerMins').textContent=String(mins).padStart(2,'0');
-  const secEl=document.getElementById('timerSecs');
-  secEl.textContent=String(secs).padStart(2,'0');
-  if(secs!==prevSecs){secEl.classList.add('tick');setTimeout(()=>secEl.classList.remove('tick'),150);prevSecs=secs;}
-  // Update unit labels dynamically
-  const daysLbl = document.querySelector('#timerDays + .timer-unit-lbl') || document.querySelectorAll('.timer-unit-lbl')[0];
-  const labEls = document.querySelectorAll('.timer-unit-lbl');
-  if(labEls[0]) labEls[0].textContent = t('days');
-  if(labEls[1]) labEls[1].textContent = t('hours');
-  if(labEls[2]) labEls[2].textContent = t('mins');
-  if(labEls[3]) labEls[3].textContent = t('secs');
-}
 
-// ════ PROMO ════
-const PROMO_KEY = 'auction_promo_log_v1';
+  // Init TON Connect
+  await initTON();
 
-function loadPromoLog(){
-  const raw = localStorage.getItem(PROMO_KEY);
-  promoLog = raw ? JSON.parse(raw) : [];
-  renderPromoLog();
-}
-
-function savePromoLog(){
-  localStorage.setItem(PROMO_KEY, JSON.stringify(promoLog));
-}
-
-async function submitPromoPost(){
-  const url = document.getElementById('promoLinkInput').value.trim();
-  if(!url || !url.startsWith('http')){showToast(t('toast_promo_invalid'));return;}
-  if(!url.includes('t.me')){showToast(t('toast_promo_not_tg'));return;}
-
-  const btn = document.getElementById('promoSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  const entry = {
-    id: Date.now(),
-    url,
-    status: 'pending',
-    earned: null,
-    date: new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-GB'),
-  };
-
-  try {
-    const res = await apiCall('submitPromo', { uid: tgUser ? String(tgUser.id) : 'unknown', url });
-    if(res.success){
-      entry.id = res.data?.id || entry.id;
-    }
-  } catch(e){}
-
-  promoLog.unshift(entry);
-  savePromoLog();
-  renderPromoLog();
-  document.getElementById('promoLinkInput').value = '';
-  showToast(t('toast_promo_ok'));
-
-  btn.disabled = false;
-  btn.innerHTML = `<i class="fas fa-paper-plane"></i> ${t('submit_review')}`;
-}
-
-function renderPromoLog(){
-  const list = document.getElementById('promoLogList');
-  if(promoLog.length === 0){
-    list.innerHTML = `<div class="promo-empty">${t('no_posts')}</div>`;
-    return;
-  }
-  const statusLabels = {pending:t('status_pending'), approved:t('status_approved'), rejected:t('status_rejected')};
-  const statusClass = {pending:'pending', approved:'approved', rejected:'rejected'};
-  list.innerHTML = promoLog.map(item => `
-    <div class="promo-item">
-      <div class="promo-item-url">${item.url}</div>
-      <div class="promo-item-row">
-        <div>
-          <span class="promo-item-status ${statusClass[item.status]}">${statusLabels[item.status]}</span>
-          <div class="promo-item-date" style="margin-top:4px;">${item.date}</div>
-        </div>
-        ${item.earned !== null ? `<div class="promo-item-earned">${tonImgHtml(14)}+${item.earned} TON</div>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-// ════ TOAST ════
-function showToast(msg){
-  const toast=document.getElementById('toast');
-  toast.textContent=msg;toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),3000);
-}
-
-// ════ CLOSE MODALS ON BG CLICK ════
-document.getElementById('depositModal').addEventListener('click',function(e){if(e.target===this)closeDepositModal();});
-document.getElementById('playersModal').addEventListener('click',function(e){if(e.target===this)closePlayersModal();});
-document.getElementById('welcomeOverlay').addEventListener('click',function(e){if(e.target===this)closeWelcome();});
-
-// ════ INIT ════
-initUserUI();
-loadAuctionData();
-loadPromoLog();
-checkWelcome();
-setInterval(updateTimer, 1000);
-setInterval(loadAuctionData, 30000);
-
-// Init TON Connect after page loads
-if (document.readyState === 'complete') {
-  initTonConnect();
-} else {
-  window.addEventListener('load', initTonConnect);
-}
+  // Load balance
+  if(S.initData) await loadState();
+})();
 </script>
 </body>
 </html>

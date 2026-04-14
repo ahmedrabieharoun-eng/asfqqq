@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1407,7 +1408,7 @@ function initTonConnect() {
   try {
     if (!window.TON_CONNECT_UI) return;
     tonUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: `${SERVER_URL}/tonconnect-manifest.json`,
+      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       uiPreferences: { theme: 'DARK' },
     });
     tonUI.onStatusChange(w => w ? onWalletConnected(w) : onWalletDisconnected());
@@ -1478,6 +1479,14 @@ window.initiateDeposit = async function(){
     const result = await tonUI.sendTransaction(tx);
     showToast('✅ تم إرسال المعاملة! ~دقيقة للتأكيد');
     await handleDepOk(result, amt, comment);
+      // ── Local API deposit registration ───────────────────────────
+      try {
+        await fetch('/api/deposit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: comment, txHash: result.boc, amount: amt })
+        });
+      } catch(e) { /* optional */ }
   }catch(e){
     const sd = document.getElementById('depositStatus');
     sd.classList.add('visible');

@@ -710,7 +710,98 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   background:linear-gradient(90deg,#388E3C,#4CAF50);
   color:#fff;cursor:default;
 }
+/* ══ BIKE DETAIL MODAL STYLES ══ */
+.bk-detail-overlay{
+  display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  align-items:flex-end;justify-content:center;
+}
+.bk-detail-overlay.open{display:flex}
+.bk-detail-sheet{
+  width:100%;max-width:480px;
+  background:#f5f5e8;
+  border-radius:24px 24px 0 0;
+  overflow:hidden;
+  animation:su .3s ease;
+  max-height:92vh;overflow-y:auto;
+}
+.bk-detail-img{
+  width:100%;height:200px;object-fit:cover;display:block;
+}
+.bk-detail-body{padding:16px 18px 24px;}
+.bk-detail-class{
+  display:inline-flex;align-items:center;
+  background:#e8e8d8;border-radius:20px;
+  padding:4px 14px;font-size:13px;font-weight:700;color:#555;
+  margin-bottom:14px;
+}
+.bk-detail-section-title{
+  font-size:17px;font-weight:800;color:#222;margin-bottom:12px;
+}
+/* Stat bars */
+.bk-detail-stat{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.bk-detail-stat-name{
+  font-size:14px;font-weight:700;color:#333;width:90px;flex-shrink:0;
+}
+.bk-detail-bar-wrap{
+  flex:1;height:14px;background:#e0e0cf;border-radius:7px;overflow:hidden;
+}
+.bk-detail-bar-fill{
+  height:100%;border-radius:7px;
+  background:linear-gradient(90deg,#ff8a80,#ff5252);
+  transition:width .4s ease;
+}
+.bk-detail-stat-val{
+  font-size:14px;font-weight:800;color:#222;width:34px;text-align:right;flex-shrink:0;
+}
+/* Earnings section */
+.bk-detail-earn-title{
+  font-size:17px;font-weight:800;color:#222;margin:16px 0 10px;
+}
+.bk-detail-earn-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(0,0,0,.07);
+}
+.bk-detail-earn-row:last-child{border-bottom:none;}
+.bk-detail-ton-icon{
+  width:28px;height:28px;border-radius:50%;object-fit:contain;flex-shrink:0;
+}
+.bk-detail-earn-val{
+  font-size:15px;font-weight:800;color:#222;flex:1;
+}
+.bk-detail-earn-arrow{font-size:16px;color:#888;}
+.bk-detail-earn-period{
+  font-size:14px;font-weight:700;color:#555;
+}
+/* Close + buy btn */
+.bk-detail-actions{
+  display:flex;gap:10px;margin-top:18px;
+}
+.bk-detail-close-btn{
+  flex-shrink:0;width:44px;height:44px;border-radius:50%;
+  background:#e0e0cf;border:none;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.bk-detail-buy-btn{
+  flex:1;padding:13px;border:none;border-radius:14px;
+  background:linear-gradient(90deg,#43A047,#66BB6A);
+  color:#fff;font-size:15px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 14px rgba(76,175,80,.4);
+}
+.bk-detail-owned-btn{
+  flex:1;padding:13px;border:none;border-radius:14px;
+  background:linear-gradient(90deg,#388E3C,#4CAF50);
+  color:#fff;font-size:15px;font-weight:800;cursor:default;
+}
 </style>
+
+<!-- BIKE DETAIL MODAL -->
+<div class="bk-detail-overlay" id="bikeDetailOverlay" onclick="closeBikeDetail(event)">
+  <div class="bk-detail-sheet" id="bikeDetailSheet"></div>
+</div>
 
 <div class="sec active" id="sectionHome">
 <div class="bk-page">
@@ -723,7 +814,6 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     </div>
   </div>
 
-
   <!-- Bike cards list -->
   <div id="bikesGrid"></div>
 
@@ -733,16 +823,16 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <script>
 /* ══ BIKE INVESTMENT DATA ══ */
 const BIKES = [
-  {lv:1,  name:'Bike Level 1',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1},
-  {lv:2,  name:'Bike Level 2',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/32770cf0-3b5c-4e73-b744-106c978b09f8.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5},
-  {lv:3,  name:'Bike Level 3',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10},
-  {lv:4,  name:'Bike Level 4',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20},
-  {lv:5,  name:'Bike Level 5',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/81b0b87c-69ff-4003-8866-e5a4124ce53f.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50},
-  {lv:6,  name:'Bike Level 6',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b86af832-2e97-4ecb-8037-3b0cb824619e.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100},
-  {lv:7,  name:'Bike Level 7',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ee262ea7-72ef-422b-983f-a6e1d546271b.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200},
-  {lv:8,  name:'Bike Level 8',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9f8df68a-d7a9-4275-a68d-ac2e577699f4.png',  speed:700,  nitro:450,  accel:260, maneuver:130, price:250},
-  {lv:9,  name:'Bike Level 9',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/57f0184f-eff4-4b5a-a2bf-a367c1b3f8e9.png',  speed:1100, nitro:700,  accel:380, maneuver:180, price:400},
-  {lv:10, name:'Bike Level 10', img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bdc5daa8-2f06-4ef3-acfd-7802b6daba26.png', speed:1800, nitro:1100, accel:550, maneuver:250, price:500},
+  {lv:1,  name:'Bike Level 1',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
+  {lv:2,  name:'Bike Level 2',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/32770cf0-3b5c-4e73-b744-106c978b09f8.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
+  {lv:3,  name:'Bike Level 3',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
+  {lv:4,  name:'Bike Level 4',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
+  {lv:5,  name:'Bike Level 5',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/81b0b87c-69ff-4003-8866-e5a4124ce53f.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
+  {lv:6,  name:'Bike Level 6',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b86af832-2e97-4ecb-8037-3b0cb824619e.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
+  {lv:7,  name:'Bike Level 7',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ee262ea7-72ef-422b-983f-a6e1d546271b.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
+  {lv:8,  name:'Bike Level 8',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9f8df68a-d7a9-4275-a68d-ac2e577699f4.png',  speed:700,  nitro:450,  accel:260, maneuver:130, price:250, dailyTon:5.55},
+  {lv:9,  name:'Bike Level 9',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/57f0183f-eff4-4b5a-a2bf-a367c1b3f8e9.png',  speed:1100, nitro:700,  accel:380, maneuver:180, price:400, dailyTon:8.88},
+  {lv:10, name:'Bike Level 10', img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bdc5daa8-2f06-4ef3-acfd-7802b6daba26.png', speed:1800, nitro:1100, accel:550, maneuver:250, price:500, dailyTon:11.11},
 ];
 
 const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
@@ -768,7 +858,7 @@ function renderBikes(){
         <div class="bk-card-info">
           <div class="bk-card-nameline">
             <div class="bk-card-name">${b.name}</div>
-            <div class="bk-card-arrow">›</div>
+            <div class="bk-card-arrow" onclick="openBikeDetail(${b.lv})" style="cursor:pointer;">›</div>
           </div>
           <div class="bk-stats-grid">
             <div class="bk-stat-cell">
@@ -794,6 +884,94 @@ function renderBikes(){
     `;
     grid.appendChild(div);
   });
+}
+
+/* ══ BIKE DETAIL MODAL ══ */
+function openBikeDetail(lv){
+  const b = BIKES.find(x=>x.lv===lv);
+  if(!b) return;
+  const ownedBikes = (S.user && S.user.ownedBikes) ? S.user.ownedBikes : [];
+  const isOwned = ownedBikes.includes(b.lv);
+
+  // Max stat values for bar calculation
+  const maxSpeed    = 1800, maxNitro = 1100, maxAccel = 550, maxManeuver = 250;
+
+  const daily  = b.dailyTon;
+  const monthly= +(daily * 30).toFixed(3);
+  const halfyr = +(daily * 180).toFixed(3);
+
+  const tonIcon = `<img class="bk-detail-ton-icon" src="https://cryptologos.cc/logos/toncoin-ton-logo.png">`;
+
+  const buyBtnHtml = isOwned
+    ? `<button class="bk-detail-owned-btn">✅ В вашем гараже</button>`
+    : `<button class="bk-detail-buy-btn" onclick="buyBike(${b.lv});closeBikeDetailForce()">Купить за ${b.price} TON</button>`;
+
+  document.getElementById('bikeDetailSheet').innerHTML = `
+    <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
+    <div class="bk-detail-body">
+      <div class="bk-detail-class">Класс: Уровень ${b.lv}</div>
+
+      <div class="bk-detail-section-title">Характеристики:</div>
+
+      <div class="bk-detail-stat">
+        <div class="bk-detail-stat-name">Скорость</div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%"></div></div>
+        <div class="bk-detail-stat-val">${b.speed}</div>
+      </div>
+      <div class="bk-detail-stat">
+        <div class="bk-detail-stat-name">Разгон</div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%"></div></div>
+        <div class="bk-detail-stat-val">${b.accel}</div>
+      </div>
+      <div class="bk-detail-stat">
+        <div class="bk-detail-stat-name">Маневры</div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%"></div></div>
+        <div class="bk-detail-stat-val">${b.maneuver}</div>
+      </div>
+      <div class="bk-detail-stat">
+        <div class="bk-detail-stat-name">Нитро</div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%"></div></div>
+        <div class="bk-detail-stat-val">${b.nitro}</div>
+      </div>
+
+      <div class="bk-detail-earn-title">Техника приносит:</div>
+
+      <div class="bk-detail-earn-row">
+        ${tonIcon}
+        <div class="bk-detail-earn-val">${daily} TON</div>
+        <div class="bk-detail-earn-arrow">→</div>
+        <div class="bk-detail-earn-period">в день</div>
+      </div>
+      <div class="bk-detail-earn-row">
+        ${tonIcon}
+        <div class="bk-detail-earn-val">${monthly} TON</div>
+        <div class="bk-detail-earn-arrow">→</div>
+        <div class="bk-detail-earn-period">в месяц</div>
+      </div>
+      <div class="bk-detail-earn-row">
+        ${tonIcon}
+        <div class="bk-detail-earn-val">${halfyr} TON</div>
+        <div class="bk-detail-earn-arrow">→</div>
+        <div class="bk-detail-earn-period">за полгода</div>
+      </div>
+
+      <div class="bk-detail-actions">
+        <button class="bk-detail-close-btn" onclick="closeBikeDetailForce()">✕</button>
+        ${buyBtnHtml}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('bikeDetailOverlay').classList.add('open');
+}
+
+function closeBikeDetail(e){
+  // Close only when clicking the overlay backdrop (not the sheet)
+  if(e && e.target !== document.getElementById('bikeDetailOverlay')) return;
+  document.getElementById('bikeDetailOverlay').classList.remove('open');
+}
+function closeBikeDetailForce(){
+  document.getElementById('bikeDetailOverlay').classList.remove('open');
 }
 
 function buyBike(lv){

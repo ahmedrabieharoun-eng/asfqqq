@@ -2315,11 +2315,6 @@ function updateUI(){
   if(finB) finB.textContent = fmt(u.bamboo||0);
   if(document.getElementById('wdCoinsDisp')) document.getElementById('wdCoinsDisp').textContent = fmt(u.coins||0);
   updSwapBals();
-  ITEMS.forEach(it=>{
-    const el = document.getElementById(`owned_${it.id}`);
-    if(el) el.textContent = (u.machines?.[it.id]||0)>0 ? `Owned: ${u.machines[it.id]}` : '';
-    updateBuyBtn(it.id);
-  });
   updateRefUI();
   renderExchHist();
   renderWdHist();
@@ -2369,8 +2364,7 @@ async function collectBamboo(){
   S.user.bamboo=(S.user.bamboo||0)+amt;
   S.user.totalEarned=(S.user.totalEarned||0)+amt;
   S.tankProgress=0;
-  updateUI(); updateTankUI(); spawnPtc();
-  showNotif(`+${fmt(amt)} Bamboo collected!`,'s');
+  updateUI(); showNotif(`+${fmt(amt)} Bamboo collected!`,'s');
   api('collect',{amount:amt}).catch(()=>{});
 }
 
@@ -2395,21 +2389,12 @@ function chgQty(id,d){
   const el=document.getElementById(`qty_${id}`);
   let v=parseInt(el.textContent)||1;
   v=Math.max(1,Math.min(99,v+d));
-  el.textContent=v; updateBuyBtn(id);
-}
-function updateBuyBtn(id){
-  const it=ITEMS.find(i=>i.id===id);
-  if(!it) return;
-  const el=document.getElementById(`buybtn_${id}`);
-  const qEl=document.getElementById(`qty_${id}`);
-  if(!el||!qEl) return;
-  el.textContent=fmt(it.price*(parseInt(qEl.textContent)||1));
+  el.textContent=v;
 }
 
 /* ════ TASKS ════ */
 let _socTab='partner';
 const _taskInFlight=new Set(); // Fix 1: double-click guard
-const BAM_IMG='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle">'; // Fix 7
 
 function switchSocTab(tab){
   _socTab=tab;
@@ -2431,7 +2416,7 @@ function buildTaskCard(t,cat){
     <div class="ticon" style="font-size:28px">${icon}</div>
     <div class="tinfo">
       <div class="tname">${name}</div>
-      <div class="trew">${BAM_IMG} ${fmt(bam)} Bamboo</div>
+      <div class="trew"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"> ${fmt(bam)} Bamboo</div>
       ${t.completions!==undefined?`<div class="tstat">${t.completions||0}/${t.targetUsers||0} completed</div>`:''}
     </div>
     ${done?`<button class="tbtn done">✅ Done</button>`
@@ -2486,7 +2471,7 @@ function renderTasks(){
       <div class="ticon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:48px;height:48px;object-fit:contain"></div>
       <div class="tinfo">
         <div class="tname">${inviteLbl}</div>
-        <div class="trew">${BAM_IMG} ${fmt(t.bam)} Bamboo + <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:50%"> ${t.coins} Coins</div>
+        <div class="trew"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"> ${fmt(t.bam)} Bamboo + <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:50%"> ${t.coins} Coins</div>
       </div>
       ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" onclick="claimRefTask('${t.id}')">${T.claimBtn2||'Claim'}</button>`:`<button class="tbtn done" style="background:rgba(255,255,255,.05)">${totalRefs}/${t.n}</button>`}
     </div>`;
@@ -2504,7 +2489,7 @@ function renderTasks(){
         <div class="tinfo">
           <div class="tname" style="color:var(--coin)">${activeLbl}</div>
           <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px">${depositedLbl}</div>
-          <div class="trew">${BAM_IMG} ${fmt(t.bam)} Bamboo + <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:50%"> ${t.coins} Coins</div>
+          <div class="trew"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"> ${fmt(t.bam)} Bamboo + <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;border-radius:50%"> ${t.coins} Coins</div>
         </div>
         ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" style="background:linear-gradient(135deg,#f9a825,#e65100)" onclick="claimRefTask('${t.id}')">${T.claimBtn2||'Claim'}</button>`:`<button class="tbtn done" style="background:rgba(255,215,0,.07);color:var(--coin)">${activeCount}/${t.n}</button>`}
       </div>`;
@@ -3004,7 +2989,7 @@ function updateRefUI(){
             <div class="rli-name">${esc(r.name||'Friend')}</div>
             <div class="rli-date">${esc(r.date||'Joined recently')}</div>
           </div>
-          <div class="rli-earn">+${fmt(r.earned||0)} <img src="${BAM_URL}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle"></div>
+          <div class="rli-earn">+${fmt(r.earned||0)} TON</div>
         </div>`).join('');
     }
   }
@@ -3151,19 +3136,18 @@ function startDepVerify(depId,txHash){
 
 /* ════ MODALS ════ */
 function openModal(id){
-  if(id==='upgradeModal') buildUpgradeContent();
-  else if(id==='infoModal') buildInfoContent();
+  if(id==='infoModal') buildInfoContent();
   document.getElementById(id).classList.add('active');
 }
 function closeModal(id){document.getElementById(id).classList.remove('active');}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('active');}));
 function buildInfoContent(){
-  const u=S.user, lv=u.tankLevel||1, cfg=TANK_LVS[lv];
-  const eff=u.miningRate||0; // no speedBonus
-  document.getElementById('infoContent').innerHTML=`
-    <div class="info-row"><div class="il">⚡ Mining Rate</div><div class="iv">${fmt(eff)} Bamboo/hr</div></div>
-    <div class="info-row"><div class="il">📦 Tank Capacity</div><div class="iv">${fmt(cfg.cap)} Bamboo</div></div>
-    <div class="info-row"><div class="il">🔧 Total Machines</div><div class="iv">${Object.values(u.machines||{}).reduce((a,b)=>a+b,0)}</div></div>
+  const u=S.user;
+  const owned = (u.ownedBikes||[]).length;
+  const el = document.getElementById('infoContent');
+  if(el) el.innerHTML=`
+    <div class="info-row"><div class="il">🏍️ Motorcycles Owned</div><div class="iv">${owned}</div></div>
+    <div class="info-row"><div class="il">💰 TON Balance</div><div class="iv">${(u.coins||0).toFixed(4)}</div></div>
     <div class="info-row"><div class="il">👥 Team Members</div><div class="iv">${S.refs.length}</div></div>`;
 }
 
@@ -3182,53 +3166,7 @@ function showNotif(msg,type='i'){
   clearTimeout(_nt); _nt=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-/* ════ ORBIT EQUIPMENT RENDER (Fix 2) ════ */
-function renderOrbit(){
-  const wrap=document.getElementById('orbitWrap');
-  if(!wrap) return;
-  wrap.querySelectorAll('.orbit-item').forEach(e=>e.remove());
-
-  // Left arc top→bottom: 150°, 180°, 210°
-  // Right arc top→bottom: 30°, 0°, 330°
-  const R = 40;   // % — wider radius = more spacing between items
-  const HALF = 12; // half of 24% item width
-  const angles = [150, 180, 210,   30, 0, 330];
-  const machines = S.user.machines || {};
-
-  ITEMS.forEach((it, i) => {
-    const a = angles[i] * Math.PI / 180;
-    // Position as % from top-left of wrap
-    const cx = 50 + R * Math.cos(a);
-    const cy = 50 + R * Math.sin(a);
-    const owned = (machines[it.id] || 0) > 0;
-    const div = document.createElement('div');
-    div.className = 'orbit-item' + (owned ? ' owned' : '');
-    div.title = it.name + (owned ? ` (×${machines[it.id]})` : '');
-    // left/top as % minus half-item-size to center the item on the point
-    div.style.cssText = `left:calc(${cx}% - ${HALF}%);top:calc(${cy}% - ${HALF}%)`;
-    div.innerHTML = `<img src="${it.iconUrl}" alt="${esc(it.name)}">`;
-    div.addEventListener('click', () => {
-      const mktNav = document.querySelector('.ni[data-s="sectionMarket"]');
-      if (mktNav) goNav(mktNav);
-    });
-    wrap.appendChild(div);
-  });
-}
-
-/* Fix 8: spawn bamboo image particle instead of emoji */
-function spawnPtc(){
-  const p=document.createElement('img');
-  p.src=BAM_URL;
-  p.className='ptc';
-  p.style.cssText=`left:${30+Math.random()*40}%;top:38%;width:24px;height:24px;object-fit:contain;font-size:0`;
-  document.body.appendChild(p);
-  setTimeout(()=>p.remove(),960);
-}
-function pandaClick(){
-  const p=document.getElementById('pandaChar');
-  if(p){p.style.transition='transform .12s';p.style.transform='scale(.86) rotate(9deg)';setTimeout(()=>{p.style.transform='';},220);}
-  spawnPtc();
-}
+/* ════ ORBIT EQUIPMENT RENDER (Fix 2) ════ */ }
 
 /* ════ LOADING SCREEN ════ */
 function ldProgress(pct, msg){
@@ -3282,14 +3220,7 @@ function ldError(msg, retryLabel){
 }
 
 // Preload all item images + panda image
-function preloadImages(){
-  // Only preload bike images — bamboo/market items removed
-  const bikeImgs = (typeof BIKES !== 'undefined') ? BIKES.map(b=>b.img) : [];
-  const urls = bikeImgs.filter(Boolean);
-  return Promise.all(urls.map(u=>new Promise(res=>{
-    const img=new Image();img.onload=img.onerror=res;img.src=u;
-  })));
-}
+function preloadImages(){ return Promise.resolve(); }
 
 /* ════ INIT ════ */
 window.addEventListener('load',init);

@@ -1020,7 +1020,7 @@ function syncTopbar(){
   // User name
   const nameEl = document.getElementById('hubUserName');
   if(nameEl){
-    const name = S.user?.firstName||S.user?.name||'Player';
+    const name = S._tgName || S.user?.firstName||S.user?.name||'Player';
     nameEl.textContent = name;
   }
   // User avatar
@@ -3210,7 +3210,9 @@ async function init(){
         const firstName=u.first_name||'';
         const lastName=u.last_name||'';
         const username=u.username||'';
-        hubName.textContent=(firstName+' '+lastName).trim()||username||'Player';
+        const displayName=(firstName+' '+lastName).trim()||username||'Player';
+        hubName.textContent=displayName;
+        S._tgName=displayName; // save for updateUI
       }
       // Legacy uavatar
       if(u.photo_url){

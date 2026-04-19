@@ -979,13 +979,22 @@ function buyBike(lv){
   if(!bike) return;
   const bal = parseFloat((S.user && S.user.coins)||0);
   if(bal < bike.price){ showNotif('❌ Недостаточно TON','e'); return; }
+  // Optimistic update
   S.user.coins = bal - bike.price;
   if(!S.user.ownedBikes) S.user.ownedBikes = [];
   if(!S.user.ownedBikes.includes(lv)) S.user.ownedBikes.push(lv);
   syncTopbar();
   renderBikes();
   showNotif(`🏍️ Bike Level ${lv} куплен!`,'s');
-  api('saveBike',{lv, price:bike.price}).catch(()=>{});
+  // Persist to server — sync authoritative state back
+  api('saveBike',{lv, price:bike.price}).then(r=>{
+    if(r && r.success && r.data){
+      if(r.data.coins !== undefined) S.user.coins = r.data.coins;
+      if(r.data.ownedBikes) S.user.ownedBikes = r.data.ownedBikes;
+      syncTopbar();
+      renderBikes();
+    }
+  }).catch(()=>{});
 }
 
 function syncTopbar(){
@@ -1159,14 +1168,17 @@ let garageOpenCard = null;
 function getUpgradeKey(lv, stat){ return `bike_upg_${lv}_${stat}`; }
 
 function getBikeUpgrades(lv){
+  // Read from server state (S.bikeUpgrades) — keyed as "lv1", "lv2", etc.
   try{
-    const raw = localStorage.getItem(`garage_upg_${lv}`);
-    return raw ? JSON.parse(raw) : {speed:0, nitro:0, accel:0, maneuver:0};
+    const all = S.bikeUpgrades || {};
+    return all[`lv${lv}`] || {speed:0, nitro:0, accel:0, maneuver:0};
   }catch(_){ return {speed:0, nitro:0, accel:0, maneuver:0}; }
 }
 
 function saveBikeUpgrades(lv, upgObj){
-  try{ localStorage.setItem(`garage_upg_${lv}`, JSON.stringify(upgObj)); }catch(_){}
+  // Update in-memory state so re-renders see the new values immediately
+  if(!S.bikeUpgrades) S.bikeUpgrades = {};
+  S.bikeUpgrades[`lv${lv}`] = upgObj;
 }
 
 function renderGarage(){
@@ -1352,7 +1364,14 @@ function doGarageUpgrade(lv, stat){
   }, 50);
 
   showNotif(`🔧 تمت ترقية ${stat === 'speed' ? 'السرعة' : stat === 'nitro' ? 'النيترو' : stat === 'accel' ? 'التسارع' : 'المناورة'} +5 ✅`, 's');
-  api('saveBikeUpgrade', {lv, stat, upgCount: upg[stat], cost}).catch(()=>{});
+  // Persist upgrade to server — sync authoritative values back
+  api('saveBikeUpgrade', {lv, stat}).then(r=>{
+    if(r && r.success && r.data){
+      if(r.data.coins !== undefined) S.user.coins = r.data.coins;
+      if(r.data.bikeUpgrades) S.bikeUpgrades = r.data.bikeUpgrades;
+      syncTopbar();
+    }
+  }).catch(()=>{});
 }
 
 // Re-render garage when section becomes visible
@@ -1937,7 +1956,7 @@ document.addEventListener('DOMContentLoaded', () => {
    CONFIG — 🔧 edit these before deploying
 ════════════════════════════════════════════ */
 const CFG = {
-  API_URL      : 'https://021-production.up.railway.app', // ✏️ ضع رابط Railway هنا
+  API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // ✏️ ضع رابط Railway هنا
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
   RATE         : 30,
   MIN_WD       : 200,
@@ -1957,7 +1976,7 @@ const CFG = {
    SECURITY: write ops (withdraw, exchange, buy) go to ONE server only.
 ═══════════════════════════════════════════════════════════════════ */
 const SERVERS = [
-  'https://021-production.up.railway.app', // ✏️ ضع رابط Railway هنا (نفس CFG.API_URL)
+  'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // ✏️ ضع رابط Railway هنا (نفس CFG.API_URL)
 ];
 
 // Actions that MUST go to ONE server only (write ops — prevent double execution)
@@ -2137,7 +2156,8 @@ const SOC_TASKS=[
 const S={
   userId:null,
   startParam:'', // Fix 3: referral ID from URL
-  user:{bamboo:0,coins:0,miningRate:0,totalEarned:0,machines:{},tankLevel:1,hasDeposited:false,freeWdUsed:false,tonBalance:0},
+  user:{bamboo:0,coins:0,miningRate:0,totalEarned:0,machines:{},tankLevel:1,hasDeposited:false,freeWdUsed:false,tonBalance:0,ownedBikes:[],},
+  bikeUpgrades:{},
   refs:[],exchHist:[],wdHist:[],balLog:[],doneTasks:[],
   tasks:{partner:[],community:[]},
   tankProgress:0,tankInt:null,
@@ -2290,6 +2310,9 @@ async function loadState(){
     S.doneTasks = d.completedTasks || [];
     S.deposits  = d.deposits  || [];
     S.tasks     = d.tasks || { partner:[], community:[] };
+    // Bike system — load from server state
+    if(d.ownedBikes)  S.user.ownedBikes  = d.ownedBikes;
+    if(d.bikeUpgrades) S.bikeUpgrades    = d.bikeUpgrades;
     // Active ref count computed in renderTasks from refs[].hasDeposited
     if(d.user && d.user.tankAccrued !== undefined){
       S.tankProgress = parseFloat(d.user.tankAccrued) || 0;

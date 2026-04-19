@@ -1699,72 +1699,62 @@ async function doUpgradeStat(bikeLevel, stat){
 <div id="floatAddTask" style="display:none"></div>
 
 <script>
-/* ══════════════════════════════════════════════
-   RACE ENGINE — Full Server-Connected Version
-══════════════════════════════════════════════ */
+/* RACE ENGINE */
 (function(){
-  let _raceIdx = 0;
-  let _raceBikes = [];
-  let _raceActive = false;
-  let _raceAnimInterval = null;
-  let _raceSelectedBike = null;
-  let _raceOpponentBike = null;
-  let _raceServerResult = null; // result from server
-  let _touchStartX = 0;
-  let _raceStarted = false;
+  var _raceIdx=0, _raceBikes=[], _raceActive=false, _raceStarted=false;
+  var _raceAnimInterval=null, _raceSelectedBike=null, _raceOpponentBike=null;
+  var _raceServerResult=null, _touchStartX=0;
+  var OPP_NAMES=['@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce','@DustRider','@JungleRun','@FastWave','@RaceKing','@DriftMaster'];
 
-  const OPP_NAMES = ['@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce','@DustRider','@JungleRun','@FastWave','@RaceKing','@DriftMaster'];
-
-  /* ── Init: build carousel from owned bikes ── */
-  window._raceInit = function(){
-    _raceBikes = [];
-    if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
-      S.user.ownedBikes.forEach(lv=>{
-        const b = BIKES.find(x=>x.lv===lv);
+  window._raceInit=function(){
+    _raceBikes=[];
+    if(S&&S.user&&S.user.ownedBikes&&S.user.ownedBikes.length>0){
+      S.user.ownedBikes.forEach(function(lv){
+        var b=BIKES.find(function(x){return x.lv===lv;});
         if(b) _raceBikes.push(b);
       });
     }
-    const track = document.getElementById('raceCarouselTrack');
+    var track=document.getElementById('raceCarouselTrack');
     if(!track) return;
-    if(_raceBikes.length === 0){
-      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style=\"font-size:48px;margin-bottom:12px\">🏍️</div><div>У вас нет байков.<br>Купите в <span style=\"color:var(--bamboo);cursor:pointer\" onclick=\"goNavBySection(\'sectionMarket\')\">Гараже</span></div></div>';
-      document.getElementById('raceDots').innerHTML='';
+    if(_raceBikes.length===0){
+      track.innerHTML='<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>Нет байков.<br>Купите в <span style="color:var(--bamboo);cursor:pointer" onclick="goNavBySection(\'sectionMarket\')">Гараже</span></div></div>';
+      var d=document.getElementById('raceDots'); if(d) d.innerHTML='';
       return;
     }
-    _raceIdx = 0;
+    _raceIdx=0;
     _buildCarousel();
   };
 
-  window.goNavBySection = function(s){
-    const el = document.querySelector('.ni[data-s="'+s+'"]');
+  window.goNavBySection=function(s){
+    var el=document.querySelector('.ni[data-s="'+s+'"]');
     if(el) goNav(el);
   };
 
   function _buildCarousel(){
-    const track = document.getElementById('raceCarouselTrack');
-    const dots  = document.getElementById('raceDots');
+    var track=document.getElementById('raceCarouselTrack');
+    var dots=document.getElementById('raceDots');
     if(!track||!dots) return;
-    track.innerHTML = '';
-    dots.innerHTML  = '';
-    _raceBikes.forEach((b,i)=>{
-      const stats = (typeof getBikeCurrentStats === 'function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
-      const slide = document.createElement('div');
-      slide.className = 'race-bike-slide';
-      slide.innerHTML =
-        '<div class="race-bike-img-wrap">' +
-          '<img src="'+b.img+'" alt="'+b.name+'" style="width:100%;height:200px;object-fit:cover" onerror="this.style.background='#1a3a0a'">' +
-          '<span class="race-upgrade-link" onclick="goNavBySection('sectionHome')">Прокачать</span>' +
-        '</div>' +
-        '<div class="race-stats-row">' +
-          '<div class="race-stat-item"><div class="race-stat-lbl">Скорость</div><div class="race-stat-val">'+stats.speed+'</div></div>' +
-          '<div class="race-stat-item"><div class="race-stat-lbl">Разгон</div><div class="race-stat-val">'+stats.accel+'</div></div>' +
-          '<div class="race-stat-item"><div class="race-stat-lbl">Маневры</div><div class="race-stat-val">'+stats.maneuver+'</div></div>' +
-          '<div class="race-stat-item"><div class="race-stat-lbl">Нитро</div><div class="race-stat-val">'+stats.nitro+'</div></div>' +
-        '</div>';
+    track.innerHTML=''; dots.innerHTML='';
+    _raceBikes.forEach(function(b,i){
+      var stats=(typeof getBikeCurrentStats==='function')?getBikeCurrentStats(b):{speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
+      var slide=document.createElement('div');
+      slide.className='race-bike-slide';
+      slide.innerHTML=[
+        '<div class="race-bike-img-wrap">',
+          '<img src="',b.img,'" alt="',b.name,'" style="width:100%;height:200px;object-fit:cover" onerror="this.style.background=\'#1a3a0a\'">',
+          '<span class="race-upgrade-link" onclick="goNavBySection(\'sectionHome\')">Прокачать</span>',
+        '</div>',
+        '<div class="race-stats-row">',
+          '<div class="race-stat-item"><div class="race-stat-lbl">Скорость</div><div class="race-stat-val">',stats.speed,'</div></div>',
+          '<div class="race-stat-item"><div class="race-stat-lbl">Разгон</div><div class="race-stat-val">',stats.accel,'</div></div>',
+          '<div class="race-stat-item"><div class="race-stat-lbl">Маневры</div><div class="race-stat-val">',stats.maneuver,'</div></div>',
+          '<div class="race-stat-item"><div class="race-stat-lbl">Нитро</div><div class="race-stat-val">',stats.nitro,'</div></div>',
+        '</div>'
+      ].join('');
       track.appendChild(slide);
-      const dot = document.createElement('div');
-      dot.className = 'race-dot'+(i===0?' active':'');
-      dot.onclick = (()=>{ const idx=i; return ()=>_goSlide(idx); })();
+      var dot=document.createElement('div');
+      dot.className='race-dot'+(i===0?' active':'');
+      (function(idx){ dot.onclick=function(){ _goSlide(idx); }; })(i);
       dots.appendChild(dot);
     });
     _goSlide(0);
@@ -1772,167 +1762,150 @@ async function doUpgradeStat(bikeLevel, stat){
   }
 
   function _goSlide(i){
-    _raceIdx = Math.max(0, Math.min(_raceBikes.length-1, i));
-    const track = document.getElementById('raceCarouselTrack');
-    if(track) track.style.transform = 'translateX(-'+(_raceIdx*100)+'%)';
-    document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
-    const b = _raceBikes[_raceIdx];
-    if(b){ const nameEl = document.getElementById('raceBikeName'); if(nameEl) nameEl.textContent = b.name+' №'+b.lv; }
+    _raceIdx=Math.max(0,Math.min(_raceBikes.length-1,i));
+    var track=document.getElementById('raceCarouselTrack');
+    if(track) track.style.transform='translateX(-'+(_raceIdx*100)+'%)';
+    document.querySelectorAll('.race-dot').forEach(function(d,j){ d.classList.toggle('active',j===_raceIdx); });
+    var b=_raceBikes[_raceIdx];
+    if(b){ var el=document.getElementById('raceBikeName'); if(el) el.textContent=b.name+' №'+b.lv; }
   }
 
   function _attachSwipe(){
-    const outer = document.querySelector('.race-carousel-outer');
-    if(!outer||outer._swipeAttached) return;
-    outer._swipeAttached = true;
-    outer.addEventListener('touchstart', e=>{ _touchStartX = e.touches[0].clientX; },{passive:true});
-    outer.addEventListener('touchend',   e=>{ const dx=e.changedTouches[0].clientX-_touchStartX; if(Math.abs(dx)>40){ dx<0?_goSlide(_raceIdx+1):_goSlide(_raceIdx-1); } },{passive:true});
+    var outer=document.querySelector('.race-carousel-outer');
+    if(!outer||outer._sw) return;
+    outer._sw=true;
+    outer.addEventListener('touchstart',function(e){ _touchStartX=e.touches[0].clientX; },{passive:true});
+    outer.addEventListener('touchend',function(e){ var dx=e.changedTouches[0].clientX-_touchStartX; if(Math.abs(dx)>40){ if(dx<0) _goSlide(_raceIdx+1); else _goSlide(_raceIdx-1); } },{passive:true});
   }
 
-  /* ── START RACE — calls server, plays animation simultaneously ── */
-  window.startRace = async function(){
-    if(_raceActive||_raceStarted) return;
+  window.startRace=function(){
+    if(_raceActive||_raceStarted){ return; }
     if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
-    const ton = S?.user?.tonBalance||0;
-    if(ton < 0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+    var ton=(S&&S.user&&S.user.tonBalance)||0;
+    if(ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
 
-    _raceStarted = true;
-    _raceSelectedBike = _raceBikes[_raceIdx];
-    const playerStats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(_raceSelectedBike) : {speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
+    _raceStarted=true;
+    _raceSelectedBike=_raceBikes[_raceIdx];
+    var playerStats=(typeof getBikeCurrentStats==='function')?getBikeCurrentStats(_raceSelectedBike):{speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
 
-    // Choose visual opponent (will be confirmed/overridden by server result)
-    const pSpeed = playerStats.speed;
-    const allBikes = (typeof BIKES!=='undefined') ? BIKES : [];
-    let candidates = allBikes.filter(b=>Math.abs(b.speed-pSpeed)/Math.max(pSpeed,1)<=0.35);
-    if(!candidates.length) candidates = allBikes.length ? allBikes : [_raceSelectedBike];
-    _raceOpponentBike = candidates[Math.floor(Math.random()*candidates.length)];
+    var pSpeed=playerStats.speed;
+    var allBikes=(typeof BIKES!=='undefined')?BIKES:[];
+    var candidates=allBikes.filter(function(b){ return Math.abs(b.speed-pSpeed)/Math.max(pSpeed,1)<=0.35; });
+    if(!candidates.length) candidates=allBikes.length?allBikes:[_raceSelectedBike];
+    _raceOpponentBike=candidates[Math.floor(Math.random()*candidates.length)];
 
-    // Optimistic UI — deduct stake locally
-    if(S&&S.user) S.user.tonBalance = Math.max(0,(S.user.tonBalance||0)-0.5);
+    // Optimistic deduct
+    if(S&&S.user) S.user.tonBalance=Math.max(0,(S.user.tonBalance||0)-0.5);
     syncTopbar();
 
-    const userName = S?.user?.username ? '@'+S.user.username : '@You';
-    const oppName  = OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
+    var userName=(S&&S.user&&S.user.username)?('@'+S.user.username):'@You';
+    var oppName=OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
 
-    // Setup HUD
-    document.getElementById('raceHudP1Name').textContent = userName;
-    document.getElementById('raceHudP2Name').textContent = oppName;
+    var h1=document.getElementById('raceHudP1Name'); if(h1) h1.textContent=userName;
+    var h2=document.getElementById('raceHudP2Name'); if(h2) h2.textContent=oppName;
 
-    // Car images
-    const pImg = document.getElementById('raceCarPlayerImg');
-    const oImg = document.getElementById('raceCarOpponentImg');
+    var pImg=document.getElementById('raceCarPlayerImg');
+    var oImg=document.getElementById('raceCarOpponentImg');
     if(pImg){ pImg.src=_raceSelectedBike.img; pImg.style.display='block'; }
     if(oImg){ oImg.src=_raceOpponentBike.img; oImg.style.display='block'; }
-    const pFb=document.getElementById('raceCarPlayerFallback');   if(pFb) pFb.style.display='none';
-    const oFb=document.getElementById('raceCarOpponentFallback'); if(oFb) oFb.style.display='none';
+    var pFb=document.getElementById('raceCarPlayerFallback');   if(pFb) pFb.style.display='none';
+    var oFb=document.getElementById('raceCarOpponentFallback'); if(oFb) oFb.style.display='none';
 
-    // Switch phase
-    document.getElementById('raceSelectPhase').style.display='none';
-    document.getElementById('raceAnimPhase').style.display='flex';
-    document.getElementById('raceFinishLine').style.display='none';
+    var sp=document.getElementById('raceSelectPhase'); if(sp) sp.style.display='none';
+    var ap=document.getElementById('raceAnimPhase');   if(ap) ap.style.display='flex';
+    var fl=document.getElementById('raceFinishLine');  if(fl) fl.style.display='none';
 
-    _raceActive = true;
-    _raceServerResult = null;
+    _raceActive=true;
+    _raceServerResult=null;
 
-    // ── Fire server call in parallel with animation ──
-    api('race',{ bikeLevel: _raceSelectedBike.lv })
-      .then(res=>{
-        _raceServerResult = res; // {won, playerScore, oppScore, oppBikeLevel, tonBalance, reward}
-        // Sync actual server balance
-        if(S&&S.user&&res.tonBalance!==undefined) S.user.tonBalance = res.tonBalance;
+    // Fire server call
+    api('race',{bikeLevel:_raceSelectedBike.lv})
+      .then(function(res){
+        _raceServerResult=res;
+        if(S&&S.user&&res.tonBalance!==undefined) S.user.tonBalance=res.tonBalance;
         syncTopbar();
-        // Update opponent bike from server response
-        if(res.oppBikeLevel && typeof BIKES!=='undefined'){
-          const sb = BIKES.find(x=>x.lv===res.oppBikeLevel);
-          if(sb) _raceOpponentBike = sb;
+        if(res.oppBikeLevel&&typeof BIKES!=='undefined'){
+          var sb=BIKES.find(function(x){return x.lv===res.oppBikeLevel;});
+          if(sb) _raceOpponentBike=sb;
         }
       })
-      .catch(e=>{
-        console.warn('Race API error:',e.message);
-        // Revert optimistic deduction on network failure
-        if(S&&S.user) S.user.tonBalance = (S.user.tonBalance||0)+0.5;
+      .catch(function(e){
+        console.warn('Race API:',e.message);
+        if(S&&S.user) S.user.tonBalance=(S.user.tonBalance||0)+0.5;
         syncTopbar();
-        _raceServerResult = { _error: e.message };
+        _raceServerResult={_error:e.message};
       });
 
-    // ── Animation ──
-    const opStats = {speed:_raceOpponentBike.speed,nitro:_raceOpponentBike.nitro,accel:_raceOpponentBike.accel,maneuver:_raceOpponentBike.maneuver};
-    const pBaseSpd = Math.floor(pSpeed*0.6+Math.random()*pSpeed*0.25);
-    const oBaseSpd = Math.floor(opStats.speed*0.6+Math.random()*opStats.speed*0.25);
-    const pRate = (playerStats.speed*0.5+playerStats.accel*0.3+playerStats.nitro*0.2)/100;
-    const oRate = (opStats.speed*0.5+opStats.accel*0.3+opStats.nitro*0.2)/100;
-    const pEff  = pRate*(0.85+Math.random()*0.30);
-    const oEff  = oRate*(0.85+Math.random()*0.30);
+    // Animation
+    var opStats={speed:_raceOpponentBike.speed,nitro:_raceOpponentBike.nitro,accel:_raceOpponentBike.accel,maneuver:_raceOpponentBike.maneuver};
+    var pBaseSpd=Math.floor(pSpeed*0.6+Math.random()*pSpeed*0.25);
+    var oBaseSpd=Math.floor(opStats.speed*0.6+Math.random()*opStats.speed*0.25);
+    var pRate=(playerStats.speed*0.5+playerStats.accel*0.3+playerStats.nitro*0.2)/100;
+    var oRate=(opStats.speed*0.5+opStats.accel*0.3+opStats.nitro*0.2)/100;
+    var pEff=pRate*(0.85+Math.random()*0.30);
+    var oEff=oRate*(0.85+Math.random()*0.30);
+    var elapsed=0, pPos=0, oPos=0;
+    var TICK=250;
 
-    let elapsed=0, pPos=0, oPos=0;
-    const TICK=250;
-
-    _raceAnimInterval = setInterval(()=>{
-      elapsed += TICK;
-      const sec = Math.max(0,15-Math.floor(elapsed/1000));
-      const td = document.getElementById('raceTimerDisplay');
+    _raceAnimInterval=setInterval(function(){
+      elapsed+=TICK;
+      var sec=Math.max(0,15-Math.floor(elapsed/1000));
+      var td=document.getElementById('raceTimerDisplay');
       if(td) td.textContent='00:'+(sec<10?'0':'')+sec;
 
-      pPos = Math.min(100, pPos+pEff*(TICK/1000)*100);
-      oPos = Math.min(100, oPos+oEff*(TICK/1000)*100);
+      pPos=Math.min(100,pPos+pEff*(TICK/1000)*100);
+      oPos=Math.min(100,oPos+oEff*(TICK/1000)*100);
 
-      const curP = Math.max(0, Math.floor(pBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
-      const curO = Math.max(0, Math.floor(oBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
-      const h1=document.getElementById('raceHudP1Speed'); if(h1) h1.textContent=curP;
-      const h2=document.getElementById('raceHudP2Speed'); if(h2) h2.textContent=curO;
+      var curP=Math.max(0,Math.floor(pBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
+      var curO=Math.max(0,Math.floor(oBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
+      var s1=document.getElementById('raceHudP1Speed'); if(s1) s1.textContent=curP;
+      var s2=document.getElementById('raceHudP2Speed'); if(s2) s2.textContent=curO;
 
-      // Cars move forward (bottom → middle of scene)
-      const pBottom = 40 + (pPos/100)*120; // px from bottom
-      const oBottom = 40 + (oPos/100)*120;
-      const carP=document.getElementById('raceCarPlayer');    if(carP) carP.style.bottom=pBottom+'px';
-      const carO=document.getElementById('raceCarOpponent'); if(carO) carO.style.bottom=oBottom+'px';
+      // Move cars upward (from bottom toward finish at top)
+      var pBottom=40+(pPos/100)*220;
+      var oBottom=40+(oPos/100)*220;
+      var carP=document.getElementById('raceCarPlayer');    if(carP) carP.style.bottom=pBottom+'px';
+      var carO=document.getElementById('raceCarOpponent');  if(carO) carO.style.bottom=oBottom+'px';
 
-      const timeUp = elapsed>=15000;
-      const done   = pPos>=100||oPos>=100;
+      var timeUp=(elapsed>=15000);
+      var done=(pPos>=100||oPos>=100);
 
       if(timeUp||done){
         clearInterval(_raceAnimInterval);
-        _raceAnimInterval = null;
-        const fl=document.getElementById('raceFinishLine');
-        if(fl) fl.style.display='flex';
-
-        // Wait for server result (max 3s extra) then show result
-        _waitServerResult(1000, 3000, ()=>{
-          _raceActive = false;
-          _raceStarted = false;
-          const won = _raceServerResult
-            ? (_raceServerResult._error ? pPos>=oPos : _raceServerResult.won)
-            : pPos>=oPos;
-          _showResult(won, userName, oppName);
-        });
+        _raceAnimInterval=null;
+        var fl2=document.getElementById('raceFinishLine'); if(fl2) fl2.style.display='flex';
+        _waitResult(pPos,oPos,userName,oppName);
       }
-    }, TICK);
+    },TICK);
   };
 
-  /* Wait for server result, with timeout fallback */
-  function _waitServerResult(checkInterval, maxWait, cb){
-    let waited=0;
-    const iv=setInterval(()=>{
-      waited+=checkInterval;
-      if(_raceServerResult!==null||waited>=maxWait){
+  function _waitResult(pPos,oPos,userName,oppName){
+    var waited=0;
+    var iv=setInterval(function(){
+      waited+=300;
+      if(_raceServerResult!==null||waited>=3000){
         clearInterval(iv);
-        setTimeout(cb,500);
+        setTimeout(function(){
+          _raceActive=false; _raceStarted=false;
+          var won=_raceServerResult
+            ?(_raceServerResult._error?(pPos>=oPos):_raceServerResult.won)
+            :(pPos>=oPos);
+          _showResult(won,userName,oppName);
+        },600);
       }
-    },checkInterval);
+    },300);
   }
 
-  /* ── Show result screen ── */
-  function _showResult(won, userName, oppName){
-    const ap=document.getElementById('raceAnimPhase'); if(ap) ap.style.display='none';
-    const rp=document.getElementById('raceResultPhase'); if(!rp) return;
+  function _showResult(won,userName,oppName){
+    var ap=document.getElementById('raceAnimPhase'); if(ap) ap.style.display='none';
+    var rp=document.getElementById('raceResultPhase'); if(!rp) return;
     rp.style.display='flex';
 
-    const titleEl=document.getElementById('raceResultTitle');
-    const rewardTxt=document.getElementById('raceResultRewardTxt');
-
+    var titleEl=document.getElementById('raceResultTitle');
+    var rewardTxt=document.getElementById('raceResultRewardTxt');
     if(won){
       if(titleEl){ titleEl.textContent='Победа!'; titleEl.className='race-result-title win'; }
       if(rewardTxt) rewardTxt.textContent='+0.9 TON';
-      // If server didn't respond, apply optimistic win
       if(!_raceServerResult||_raceServerResult._error){
         if(S&&S.user) S.user.tonBalance=(S.user.tonBalance||0)+0.9;
       }
@@ -1942,40 +1915,35 @@ async function doUpgradeStat(bikeLevel, stat){
     }
     syncTopbar();
 
-    // VS row
-    const n1=document.getElementById('raceVsName1'); if(n1) n1.textContent=userName;
-    const b1=document.getElementById('raceVsBike1'); if(b1) b1.textContent=_raceSelectedBike?.name||'Bike';
-    const n2=document.getElementById('raceVsName2'); if(n2) n2.textContent=oppName;
-    const b2=document.getElementById('raceVsBike2');
+    var n1=document.getElementById('raceVsName1'); if(n1) n1.textContent=userName;
+    var b1=document.getElementById('raceVsBike1'); if(b1) b1.textContent=(_raceSelectedBike&&_raceSelectedBike.name)||'Bike';
+    var n2=document.getElementById('raceVsName2'); if(n2) n2.textContent=oppName;
+    var b2=document.getElementById('raceVsBike2');
     if(b2){
-      const obl=_raceServerResult?.oppBikeLevel;
-      const ob=obl&&typeof BIKES!=='undefined'?BIKES.find(x=>x.lv===obl):_raceOpponentBike;
-      b2.textContent=(ob?.name)||'Bike';
+      var obl=_raceServerResult&&_raceServerResult.oppBikeLevel;
+      var ob=obl&&(typeof BIKES!=='undefined')?BIKES.find(function(x){return x.lv===obl;}):_raceOpponentBike;
+      b2.textContent=(ob&&ob.name)||'Bike';
     }
-
-    // Avatars
-    const av1=document.getElementById('raceVsAv1');
+    var av1=document.getElementById('raceVsAv1');
     if(av1){
-      if(S?.user?.photoUrl) av1.innerHTML='<img src="'+S.user.photoUrl+'" style="width:52px;height:52px;object-fit:cover;border-radius:50%">';
+      if(S&&S.user&&S.user.photoUrl) av1.innerHTML='<img src="'+S.user.photoUrl+'" style="width:52px;height:52px;object-fit:cover;border-radius:50%">';
       else av1.textContent='🏍️';
     }
-    const av2=document.getElementById('raceVsAv2');
+    var av2=document.getElementById('raceVsAv2');
     if(av2) av2.textContent=['🦊','🐻','🤖','🦅','🐺','🦁'][Math.floor(Math.random()*6)];
   }
 
-  /* ── Back to select ── */
-  window.raceGoBack = function(){
+  window.raceGoBack=function(){
     if(_raceAnimInterval){ clearInterval(_raceAnimInterval); _raceAnimInterval=null; }
     _raceActive=false; _raceStarted=false; _raceServerResult=null;
-    const rp=document.getElementById('raceResultPhase'); if(rp) rp.style.display='none';
-    const sp=document.getElementById('raceSelectPhase'); if(sp) sp.style.display='block';
-    const ap=document.getElementById('raceAnimPhase');   if(ap) ap.style.display='none';
-    _raceInit();
+    var rp=document.getElementById('raceResultPhase'); if(rp) rp.style.display='none';
+    var sp=document.getElementById('raceSelectPhase'); if(sp) sp.style.display='block';
+    var ap=document.getElementById('raceAnimPhase');   if(ap) ap.style.display='none';
+    window._raceInit();
   };
 
-  /* ── Hook goNav ── */
-  const _origGoNav = window.goNav;
-  window.goNav = function(el){
+  var _origGoNav=window.goNav;
+  window.goNav=function(el){
     _origGoNav(el);
     if(el.dataset.s==='sectionTasks') setTimeout(window._raceInit,60);
   };
@@ -1984,6 +1952,7 @@ async function doUpgradeStat(bikeLevel, stat){
 </script>
 
 <!-- FINANCE -->
+
 <div class="sec" id="sectionFinance">
   <div class="fin-tabs">
     <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>

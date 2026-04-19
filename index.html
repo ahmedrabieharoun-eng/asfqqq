@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -521,82 +520,229 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </div>
 
 <!-- HOME -->
-<div class="sec active" id="sectionHome" style="padding:10px 10px 24px">
+<style>
+/* ══ HUB PAGE — RASEEN MOTORCYCLES ══ */
+#sectionHome{background:#f5f5f5;min-height:100vh;padding:0 0 110px;}
+/* top spacer */
+.hub-spacer{height:28px;background:#f5f5f5;}
+/* balance bar */
+.hub-balbar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;padding:10px 14px;
+  border-bottom:1px solid #eee;
+}
+.hub-bal-left{display:flex;align-items:center;gap:8px;}
+.hub-ton-chip{
+  display:flex;align-items:center;gap:5px;
+  background:#f0f8ff;border:1.5px solid #1a88d4;
+  border-radius:20px;padding:5px 12px;
+}
+.hub-ton-chip img{width:20px;height:20px;object-fit:contain;}
+.hub-ton-val{font-size:14px;font-weight:800;color:#1a88d4;}
+.hub-plus-btn{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#4CAF50,#2e7d32);
+  border:none;color:#fff;font-size:20px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 2px 8px rgba(76,175,80,.5);
+  line-height:1;
+}
+/* notification banner */
+.hub-notif{
+  margin:10px 12px 0;
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border-radius:12px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(255,215,0,.2);
+  min-height:44px;
+}
+.hub-notif-icon{font-size:20px;flex-shrink:0;}
+.hub-notif-txt{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;flex:1;}
+.hub-notif-badge{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.4);border-radius:20px;padding:2px 8px;font-size:10px;color:#FFD700;font-weight:800;white-space:nowrap;}
 
-  <!-- SEASON 2 PREPARATION CARD -->
-  <style>
-    @keyframes s2-banner-glow{0%,100%{box-shadow:0 8px 36px rgba(0,0,0,.7),0 0 28px rgba(255,215,0,.15)}50%{box-shadow:0 10px 44px rgba(0,0,0,.8),0 0 48px rgba(255,215,0,.35)}}
-    @keyframes s2-pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-    @keyframes s2-cta-glow{0%,100%{box-shadow:0 0 14px rgba(255,215,0,.5),0 4px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 28px rgba(255,215,0,.9),0 4px 20px rgba(0,0,0,.5)}}
-  </style>
-  <div id="season2Banner" onclick="goToFinanceWithdraw()" style="cursor:pointer;border-radius:16px;margin-bottom:8px;position:relative;overflow:hidden;animation:s2-banner-glow 2.8s ease-in-out infinite">
-    <!-- Background image — reduced height -->
-    <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg"
-      style="width:100%;height:120px;object-fit:cover;object-position:center top;display:block">
-    <!-- gradient overlay -->
-    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,2,.08) 0%,rgba(4,14,4,.45) 45%,rgba(2,8,2,.88) 100%)"></div>
-    <!-- shimmer sweep -->
-    <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.1),transparent);animation:shim 3.2s infinite;pointer-events:none"></div>
-    <!-- gold border -->
-    <div style="position:absolute;inset:0;border:2px solid rgba(255,215,0,.45);border-radius:16px;pointer-events:none"></div>
+/* section title */
+.hub-sec-title{
+  font-size:18px;font-weight:800;color:#1a1a1a;
+  padding:14px 14px 6px;display:flex;align-items:center;justify-content:space-between;
+}
+.hub-sort-btn{
+  display:flex;align-items:center;gap:4px;
+  background:#f5f5f5;border:1px solid #ddd;border-radius:20px;
+  padding:5px 10px;font-size:11px;font-weight:700;color:#555;cursor:pointer;
+}
 
-    <!-- Bottom content row -->
-    <div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <!-- Left: badge + title + sub -->
-      <div style="flex:1;min-width:0">
-        <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.55);border:1px solid rgba(255,215,0,.5);border-radius:20px;padding:2px 8px;margin-bottom:3px;backdrop-filter:blur(8px)">
-          <span style="width:5px;height:5px;border-radius:50%;background:#FFD700;display:inline-block;animation:s2-pulse-dot 1.2s ease-in-out infinite;box-shadow:0 0 6px #FFD700;flex-shrink:0"></span>
-          <span id="s2BadgeTxt" style="font-size:8px;font-weight:800;color:#FFD700;letter-spacing:.8px;text-transform:uppercase">Coming Soon</span>
-        </div>
-        <div style="font-size:14px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:1px;text-shadow:0 2px 12px rgba(0,0,0,.9)" id="s2BannerTitle">Season 2 Preparation</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(255,215,0,.85);text-shadow:0 0 10px rgba(255,215,0,.4)" id="s2BannerSub">🎯 Check your allocation →</div>
+/* motorcycle card */
+.moto-list{display:flex;flex-direction:column;gap:10px;padding:0 12px;}
+.moto-card{
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  border:1px solid #eee;
+}
+.moto-card-inner{display:flex;align-items:center;gap:0;padding:12px;}
+.moto-img-wrap{
+  width:120px;height:90px;flex-shrink:0;
+  border-radius:12px;overflow:hidden;background:#f8f8f8;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid #eee;margin-right:12px;
+}
+.moto-img-wrap img{width:100%;height:100%;object-fit:cover;}
+.moto-info{flex:1;min-width:0;}
+.moto-name-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.moto-name{font-size:15px;font-weight:800;color:#1565C0;}
+.moto-arrow{font-size:14px;color:#1565C0;}
+.moto-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;}
+.moto-stat{display:flex;flex-direction:column;}
+.moto-stat-lbl{font-size:10px;color:#999;font-weight:600;}
+.moto-stat-val{font-size:14px;font-weight:800;color:#1a1a1a;line-height:1.2;}
+/* buy button */
+.moto-buy-wrap{padding:0 12px 12px;}
+.moto-btn-owned{
+  width:100%;padding:11px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#4CAF50,#2e7d32);
+  color:#fff;font-size:14px;font-weight:800;cursor:default;
+  font-family:'Fredoka',cursive!important;
+}
+.moto-btn-buy{
+  width:100%;padding:11px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#4CAF50,#2e7d32);
+  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  font-family:'Fredoka',cursive!important;
+  box-shadow:0 4px 14px rgba(76,175,80,.4);
+  transition:transform .15s,box-shadow .15s;
+}
+.moto-btn-buy:active{transform:scale(.97);box-shadow:0 2px 8px rgba(76,175,80,.3);}
+/* level badge */
+.moto-lvl-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  background:rgba(21,101,192,.08);border:1px solid rgba(21,101,192,.25);
+  border-radius:20px;padding:2px 8px;margin-bottom:4px;
+}
+.moto-lvl-badge span{font-size:10px;font-weight:800;color:#1565C0;}
+</style>
+
+<div class="sec active" id="sectionHome">
+  <!-- top spacer -->
+  <div class="hub-spacer"></div>
+
+  <!-- balance bar -->
+  <div class="hub-balbar">
+    <div class="hub-bal-left">
+      <div class="hub-ton-chip">
+        <img src="https://ton.org/download/ton_symbol.png" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'">
+        <span class="hub-ton-val" id="hubTonBal">0.00</span>
+        <span style="font-size:11px;font-weight:700;color:#1a88d4;">TON</span>
       </div>
-      <!-- Right: CTA button -->
-      <div style="flex-shrink:0;background:linear-gradient(135deg,rgba(255,215,0,.35),rgba(255,160,0,.2));border:1.5px solid rgba(255,215,0,.6);border-radius:11px;padding:6px 10px;text-align:center;animation:s2-cta-glow 2s ease-in-out infinite;backdrop-filter:blur(8px)">
-        <div style="font-size:8px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.5px;text-transform:uppercase;margin-bottom:1px" id="s2TapTxt">Tap</div>
-        <div style="font-size:18px;line-height:1">👉</div>
-      </div>
+      <button class="hub-plus-btn" onclick="goToFinanceDeposit()">+</button>
+    </div>
+    <!-- Coins display -->
+    <div style="display:flex;align-items:center;gap:6px;background:#fffde7;border:1.5px solid #f9a825;border-radius:20px;padding:5px 12px;">
+      <span style="font-size:16px;">💎</span>
+      <span style="font-size:14px;font-weight:800;color:#f57f17;" id="hubCoinsDisp">0</span>
     </div>
   </div>
 
-  <div class="champion-card">
-    <!-- Panda with frame -->
-    <div class="panda-frame-wrap">
-      <div class="panda-frame-inner">
-        <div id="pandaChar" onclick="pandaClick()" style="cursor:pointer;user-select:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-          <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a12ebc07-aa51-4ea7-b3ca-cefe4dce2a9e.png"
-            style="width:138px;height:auto;object-fit:contain;display:block;animation:pf 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)) drop-shadow(0 0 18px rgba(80,255,120,.35))"
-            draggable="false">
-        </div>
-      </div>
-    </div>
-    <div class="champ-stats" style="margin-bottom:12px">
-      <div class="champ-stat-box">
-        <div class="csb-lbl" data-i18n="statAccrued">Accrued</div>
-        <div class="csb-val" id="champAccrued">0.000000</div>
-        <div class="csb-unit">Bamboo</div>
-      </div>
-      <div class="champ-stat-sep"></div>
-      <div class="champ-stat-box">
-        <div class="csb-lbl" data-i18n="statRateDay">Rate/Day</div>
-        <div class="csb-val" id="champRateDay">0</div>
-        <div class="csb-unit" data-i18n="statBambooDay">Bamboo/day</div>
-      </div>
-    </div>
-    <div class="claim-wrap">
-      <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <button class="claim-btn" id="collectBtn" onclick="collectBamboo()" disabled style="flex:1">
-          <span id="claimBtnTxt"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:5px"> Claim Bamboo</span>
-          <span class="claim-pct" id="claimPct">0%</span>
-        </button>
-        <button onclick="openModal('upgradeModal')" style="width:44px;height:44px;border-radius:12px;background:rgba(255,215,0,.12);border:2px solid rgba(255,215,0,.38);color:var(--coin);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;gap:1px;transition:background .2s" title="Upgrade Storage">
-          <span style="font-size:20px;line-height:1">↑</span>
-          <span style="font-size:8px;font-weight:800;line-height:1"><span data-i18n="lvLabel">Lv.</span><span id="tankLvDisp">1</span></span>
-        </button>
-      </div>
-    </div>
+  <!-- notification banner -->
+  <div class="hub-notif">
+    <div class="hub-notif-icon">📢</div>
+    <div class="hub-notif-txt" id="hubNotifTxt">New packages coming soon! Stay tuned.</div>
+    <div class="hub-notif-badge">NEW</div>
   </div>
+
+  <!-- section title -->
+  <div class="hub-sec-title">
+    <span>🏍️ Motorcycles</span>
+    <div class="hub-sort-btn"><span>⬆</span> By Price</div>
+  </div>
+
+  <!-- motorcycle list -->
+  <div class="moto-list" id="motoList"></div>
 </div>
+
+<script>
+/* ══ MOTORCYCLE DATA ══ */
+const MOTOS = [
+  {id:1, name:'Raseen X1',  price:1,   speed:40,   nitro:20,  accel:15,  maneuver:10,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png'},
+  {id:2, name:'Raseen X2',  price:5,   speed:60,   nitro:35,  accel:25,  maneuver:16,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/32770cf0-3b5c-4e73-b744-106c978b09f8.png'},
+  {id:3, name:'Raseen X3',  price:10,  speed:90,   nitro:55,  accel:38,  maneuver:24,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51.png'},
+  {id:4, name:'Raseen X4',  price:20,  speed:135,  nitro:85,  accel:57,  maneuver:36,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5.png'},
+  {id:5, name:'Raseen X5',  price:50,  speed:200,  nitro:130, accel:85,  maneuver:50,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/81b0b87c-69ff-4003-8866-e5a4124ce53f.png'},
+  {id:6, name:'Raseen X6',  price:100, speed:300,  nitro:200, accel:125, maneuver:70,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b86af832-2e97-4ecb-8037-3b0cb824619e.png'},
+  {id:7, name:'Raseen X7',  price:200, speed:450,  nitro:300, accel:180, maneuver:95,  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ee262ea7-72ef-422b-983f-a6e1d546271b.png'},
+  {id:8, name:'Raseen X8',  price:250, speed:700,  nitro:450, accel:260, maneuver:130, img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ba628efe-eadf-4824-8ace-e3c2b61672fb.png'},
+  {id:9, name:'Raseen X9',  price:400, speed:1100, nitro:700, accel:380, maneuver:180, img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/57f0183f-eff4-4b5a-a2bf-a367c1b3f8e9.png'},
+  {id:10,name:'Raseen X10', price:500, speed:1800, nitro:1100,accel:550, maneuver:250, img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bdc5daa8-2f06-4ef3-acfd-7802b6daba26.png'},
+];
+
+function renderMotoList(){
+  const list = document.getElementById('motoList');
+  if(!list) return;
+  const owned = (S&&S.user&&S.user.motos) ? S.user.motos : {};
+  list.innerHTML = MOTOS.map(m => {
+    const isOwned = !!owned[m.id];
+    return `
+    <div class="moto-card">
+      <div class="moto-card-inner">
+        <div class="moto-img-wrap">
+          <img src="${m.img}" alt="${m.name}">
+        </div>
+        <div class="moto-info">
+          <div class="moto-lvl-badge"><span>Level ${m.id}</span></div>
+          <div class="moto-name-row">
+            <span class="moto-name">${m.name}</span>
+            <span class="moto-arrow">›</span>
+          </div>
+          <div class="moto-stats">
+            <div class="moto-stat"><span class="moto-stat-lbl">Speed</span><span class="moto-stat-val">${m.speed}</span></div>
+            <div class="moto-stat"><span class="moto-stat-lbl">Nitro</span><span class="moto-stat-val">${m.nitro}</span></div>
+            <div class="moto-stat"><span class="moto-stat-lbl">Accel</span><span class="moto-stat-val">${m.accel}</span></div>
+            <div class="moto-stat"><span class="moto-stat-lbl">Maneuver</span><span class="moto-stat-val">${m.maneuver}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="moto-buy-wrap">
+        ${isOwned
+          ? `<button class="moto-btn-owned">✅ In Your Garage</button>`
+          : `<button class="moto-btn-buy" onclick="buyMoto(${m.id})">Buy for ${m.price} TON</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buyMoto(id){
+  const m = MOTOS.find(x=>x.id===id);
+  if(!m) return;
+  if(!S||!S.user){showNotif('Not loaded yet','e');return;}
+  const bal = S.user.tonBalance||0;
+  if(bal < m.price){showNotif(`❌ Need ${m.price} TON (have ${bal.toFixed(2)})`, 'e');return;}
+  // deduct & save
+  S.user.tonBalance = (bal - m.price);
+  if(!S.user.motos) S.user.motos = {};
+  S.user.motos[id] = true;
+  saveToCloud();
+  renderMotoList();
+  updateHubBalances();
+  showNotif(`🏍️ ${m.name} added to your garage!`,'s');
+}
+
+function updateHubBalances(){
+  const u = S&&S.user ? S.user : {};
+  const ton = document.getElementById('hubTonBal');
+  if(ton) ton.textContent = (u.tonBalance||0).toFixed(2);
+  const coins = document.getElementById('hubCoinsDisp');
+  if(coins) coins.textContent = fmt(u.coins||0);
+}
+
+// Hook into existing updateUI
+const _origUpdateUI = typeof updateUI === 'function' ? updateUI : null;
+function updateUI(){
+  if(_origUpdateUI) _origUpdateUI();
+  updateHubBalances();
+}
+
+// Initial render after DOM ready
+setTimeout(()=>{ renderMotoList(); updateHubBalances(); }, 800);
+</script>
 
 <!-- FRIENDS -->
 <div class="sec" id="sectionFriends">

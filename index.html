@@ -27,7 +27,7 @@
 }
 body{
   font-family:'Fredoka',cursive;font-weight:800;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/61cbab9d-7f42-47e4-80aa-686d6b66e40c.png') center center / cover no-repeat fixed;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png') center center / cover no-repeat fixed;
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
@@ -1033,11 +1033,333 @@ document.addEventListener('DOMContentLoaded', ()=>{
   </div>
 </div>
 
-<!-- MARKET -->
+<!-- GARAGE -->
+<style>
+/* ══ GARAGE STYLES ══ */
+@keyframes gr-card-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes gr-slide-down{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+.gr-page{padding:0 12px 32px}
+.gr-title-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+.gr-page-title{font-size:22px;font-weight:800;color:#fff}
+
+/* ── Garage Card (white card like reference) ── */
+.gr-card{
+  background:#fff;
+  border-radius:18px;
+  margin-bottom:14px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.38);
+  animation:gr-card-in .32s ease both;
+  position:relative;
+}
+.gr-card-top{display:flex;align-items:stretch;min-height:140px}
+.gr-card-imgbox{
+  width:140px;flex-shrink:0;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;padding:0;
+}
+.gr-card-imgbox img{width:100%;height:100%;object-fit:cover}
+.gr-card-info{flex:1;padding:12px 14px 10px;display:flex;flex-direction:column;justify-content:center}
+.gr-card-nameline{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.gr-card-name{font-size:16px;font-weight:800;color:#1565C0;letter-spacing:.2px}
+.gr-card-arrow{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(21,101,192,.1);
+  display:flex;align-items:center;justify-content:center;
+  color:#1565C0;font-size:16px;font-weight:800;cursor:pointer;flex-shrink:0;
+  transition:background .18s;
+}
+.gr-card-arrow:active{background:rgba(21,101,192,.22)}
+
+/* 2×2 stats grid */
+.gr-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+.gr-stat-label{font-size:11px;color:#888;font-weight:600;margin-bottom:1px}
+.gr-stat-value{font-size:20px;font-weight:800;color:#222;line-height:1.1}
+
+/* ── Expanded detail panel (inline, below card top) ── */
+.gr-card-detail{
+  display:none;
+  background:#f8faf8;
+  border-top:1px solid #e8e8e8;
+  padding:14px 16px 6px;
+  animation:gr-slide-down .22s ease;
+}
+.gr-card-detail.open{display:block}
+
+/* Stat bars */
+.gr-det-stat{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.gr-det-stat-name{font-size:13px;font-weight:700;color:#333;width:80px;flex-shrink:0}
+.gr-det-bar-wrap{flex:1;height:12px;background:#e0e0cf;border-radius:6px;overflow:hidden}
+.gr-det-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#ff8a80,#ff5252);transition:width .4s ease}
+
+/* Upgrade section */
+.gr-upg-title{font-size:15px;font-weight:800;color:#222;margin:14px 0 10px;display:flex;align-items:center;gap:6px}
+.gr-upg-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border:1px solid #e0e0e0;border-radius:12px;
+  padding:10px 12px;margin-bottom:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.gr-upg-left{display:flex;align-items:center;gap:8px}
+.gr-upg-icon{font-size:22px}
+.gr-upg-info{}
+.gr-upg-name{font-size:13px;font-weight:800;color:#222}
+.gr-upg-sub{font-size:11px;color:#888;font-weight:600;margin-top:1px}
+.gr-upg-btn{
+  background:linear-gradient(135deg,#43A047,#66BB6A);
+  border:none;border-radius:10px;
+  padding:7px 14px;color:#fff;font-size:13px;font-weight:800;
+  cursor:pointer;white-space:nowrap;
+  box-shadow:0 2px 10px rgba(67,160,71,.35);
+  flex-shrink:0;
+}
+.gr-upg-btn:active{opacity:.82}
+.gr-upg-btn.maxed{background:linear-gradient(135deg,#9E9E9E,#BDBDBD);box-shadow:none;cursor:default}
+
+/* empty state */
+.gr-empty{
+  text-align:center;padding:48px 20px;
+  background:rgba(255,255,255,.08);border:2px dashed rgba(255,255,255,.18);
+  border-radius:20px;margin-top:16px;
+}
+.gr-empty-icon{font-size:56px;margin-bottom:12px}
+.gr-empty-title{font-size:17px;font-weight:800;color:#fff;margin-bottom:6px}
+.gr-empty-sub{font-size:13px;color:rgba(255,255,255,.55);font-weight:500;line-height:1.5}
+.gr-empty-btn{
+  margin-top:16px;padding:12px 28px;
+  background:linear-gradient(135deg,#43A047,#66BB6A);
+  border:none;border-radius:14px;color:#fff;
+  font-size:14px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 14px rgba(76,175,80,.4);
+}
+</style>
+
 <div class="sec" id="sectionMarket">
-  <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:38px;height:38px;object-fit:contain"> <span data-i18n="marketTitle">Mining Market</span></div>
-  <div class="mkt-list" id="marketList"></div>
+<div class="gr-page">
+  <div class="gr-title-row">
+    <div class="gr-page-title">🏍️ الجراج</div>
+  </div>
+  <div id="garageList"></div>
 </div>
+</div>
+
+<script>
+/* ══ GARAGE LOGIC ══ */
+
+// Track which card is expanded
+let garageOpenCard = null;
+
+// Upgrade data per bike stat
+// upgrade cost = bike.price / 4
+// upgrade step = +5 per upgrade
+// cap = base * 2
+
+function getUpgradeKey(lv, stat){ return `bike_upg_${lv}_${stat}`; }
+
+function getBikeUpgrades(lv){
+  try{
+    const raw = localStorage.getItem(`garage_upg_${lv}`);
+    return raw ? JSON.parse(raw) : {speed:0, nitro:0, accel:0, maneuver:0};
+  }catch(_){ return {speed:0, nitro:0, accel:0, maneuver:0}; }
+}
+
+function saveBikeUpgrades(lv, upgObj){
+  try{ localStorage.setItem(`garage_upg_${lv}`, JSON.stringify(upgObj)); }catch(_){}
+}
+
+function renderGarage(){
+  const list = document.getElementById('garageList');
+  if(!list) return;
+  const ownedBikes = (S.user && S.user.ownedBikes) ? S.user.ownedBikes : [];
+  const owned = BIKES.filter(b => ownedBikes.includes(b.lv));
+
+  if(owned.length === 0){
+    list.innerHTML = `
+      <div class="gr-empty">
+        <div class="gr-empty-icon">🏍️</div>
+        <div class="gr-empty-title">الجراج فارغ</div>
+        <div class="gr-empty-sub">اشترِ دراجتك الأولى من السوق<br>وستظهر هنا</div>
+        <button class="gr-empty-btn" onclick="switchSection('sectionHome')">🛒 تصفح السوق</button>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  owned.forEach((b, i) => {
+    const upg = getBikeUpgrades(b.lv);
+    const upgCost = (b.price / 4).toFixed(2);
+
+    // Current stats (base + upgrades * 5)
+    const curSpeed    = b.speed    + upg.speed    * 5;
+    const curNitro    = b.nitro    + upg.nitro    * 5;
+    const curAccel    = b.accel    + upg.accel    * 5;
+    const curManeuver = b.maneuver + upg.maneuver * 5;
+
+    // Caps = base * 2
+    const capSpeed    = b.speed    * 2;
+    const capNitro    = b.nitro    * 2;
+    const capAccel    = b.accel    * 2;
+    const capManeuver = b.maneuver * 2;
+
+    const maxSpeed = 3600, maxNitro = 2200, maxAccel = 1100, maxManeuver = 500;
+
+    const card = document.createElement('div');
+    card.className = 'gr-card';
+    card.style.animationDelay = (i*0.07)+'s';
+    card.id = `gr-card-${b.lv}`;
+
+    // Helper: upgrade row HTML
+    const upgRow = (statKey, icon, label, cur, cap, upgCount) => {
+      const maxed = cur >= cap;
+      const btnHtml = maxed
+        ? `<button class="gr-upg-btn maxed">✅ MAX</button>`
+        : `<button class="gr-upg-btn" onclick="doGarageUpgrade(${b.lv},'${statKey}')">+5 — ${upgCost} TON</button>`;
+      return `
+        <div class="gr-upg-row">
+          <div class="gr-upg-left">
+            <div class="gr-upg-icon">${icon}</div>
+            <div class="gr-upg-info">
+              <div class="gr-upg-name">${label} +5</div>
+              <div class="gr-upg-sub">${cur} / ${cap} (×${upgCount} مرة)</div>
+            </div>
+          </div>
+          ${btnHtml}
+        </div>`;
+    };
+
+    card.innerHTML = `
+      <div class="gr-card-top">
+        <div class="gr-card-imgbox">
+          <img src="${b.img}" onerror="this.style.opacity='.2'">
+        </div>
+        <div class="gr-card-info">
+          <div class="gr-card-nameline">
+            <div class="gr-card-name">${b.name}</div>
+            <div class="gr-card-arrow" id="gr-arrow-${b.lv}" onclick="toggleGarageCard(${b.lv})">›</div>
+          </div>
+          <div class="gr-stats-grid">
+            <div>
+              <div class="gr-stat-label">السرعة</div>
+              <div class="gr-stat-value" id="gr-spd-${b.lv}">${curSpeed}</div>
+            </div>
+            <div>
+              <div class="gr-stat-label">النيترو</div>
+              <div class="gr-stat-value" id="gr-nit-${b.lv}">${curNitro}</div>
+            </div>
+            <div>
+              <div class="gr-stat-label">التسارع</div>
+              <div class="gr-stat-value" id="gr-acc-${b.lv}">${curAccel}</div>
+            </div>
+            <div>
+              <div class="gr-stat-label">المناورة</div>
+              <div class="gr-stat-value" id="gr-man-${b.lv}">${curManeuver}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gr-card-detail" id="gr-detail-${b.lv}">
+        <!-- Stat bars -->
+        <div class="gr-det-stat">
+          <div class="gr-det-stat-name">السرعة</div>
+          <div class="gr-det-bar-wrap"><div class="gr-det-bar-fill" id="gr-bar-spd-${b.lv}" style="width:${Math.round(curSpeed/maxSpeed*100)}%"></div></div>
+          <div style="font-size:13px;font-weight:800;color:#222;width:36px;text-align:right" id="gr-bv-spd-${b.lv}">${curSpeed}</div>
+        </div>
+        <div class="gr-det-stat">
+          <div class="gr-det-stat-name">النيترو</div>
+          <div class="gr-det-bar-wrap"><div class="gr-det-bar-fill" id="gr-bar-nit-${b.lv}" style="width:${Math.round(curNitro/maxNitro*100)}%"></div></div>
+          <div style="font-size:13px;font-weight:800;color:#222;width:36px;text-align:right" id="gr-bv-nit-${b.lv}">${curNitro}</div>
+        </div>
+        <div class="gr-det-stat">
+          <div class="gr-det-stat-name">التسارع</div>
+          <div class="gr-det-bar-wrap"><div class="gr-det-bar-fill" id="gr-bar-acc-${b.lv}" style="width:${Math.round(curAccel/maxAccel*100)}%"></div></div>
+          <div style="font-size:13px;font-weight:800;color:#222;width:36px;text-align:right" id="gr-bv-acc-${b.lv}">${curAccel}</div>
+        </div>
+        <div class="gr-det-stat">
+          <div class="gr-det-stat-name">المناورة</div>
+          <div class="gr-det-bar-wrap"><div class="gr-det-bar-fill" id="gr-bar-man-${b.lv}" style="width:${Math.round(curManeuver/maxManeuver*100)}%"></div></div>
+          <div style="font-size:13px;font-weight:800;color:#222;width:36px;text-align:right" id="gr-bv-man-${b.lv}">${curManeuver}</div>
+        </div>
+
+        <!-- Upgrade section -->
+        <div class="gr-upg-title">🔧 ترقية الدراجة</div>
+        <div id="gr-upg-rows-${b.lv}">
+          ${upgRow('speed',    '🏎️', 'السرعة',   curSpeed,    capSpeed,    upg.speed)}
+          ${upgRow('nitro',    '🔥', 'النيترو',  curNitro,    capNitro,    upg.nitro)}
+          ${upgRow('accel',    '⚡', 'التسارع',  curAccel,    capAccel,    upg.accel)}
+          ${upgRow('maneuver', '🎯', 'المناورة', curManeuver, capManeuver, upg.maneuver)}
+        </div>
+        <div style="height:10px"></div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function toggleGarageCard(lv){
+  const detail = document.getElementById(`gr-detail-${lv}`);
+  const arrow  = document.getElementById(`gr-arrow-${lv}`);
+  if(!detail) return;
+  const isOpen = detail.classList.contains('open');
+  // Close previously open card
+  if(garageOpenCard && garageOpenCard !== lv){
+    const prev = document.getElementById(`gr-detail-${garageOpenCard}`);
+    const prevArrow = document.getElementById(`gr-arrow-${garageOpenCard}`);
+    if(prev){ prev.classList.remove('open'); }
+    if(prevArrow){ prevArrow.style.transform=''; }
+  }
+  if(isOpen){
+    detail.classList.remove('open');
+    arrow.style.transform = '';
+    garageOpenCard = null;
+  } else {
+    detail.classList.add('open');
+    arrow.style.transform = 'rotate(90deg)';
+    garageOpenCard = lv;
+  }
+}
+
+function doGarageUpgrade(lv, stat){
+  const bike = BIKES.find(b => b.lv === lv);
+  if(!bike) return;
+  const cost = bike.price / 4;
+  const bal  = parseFloat((S.user && S.user.coins) || 0);
+  if(bal < cost){ showNotif('❌ رصيد TON غير كافٍ', 'e'); return; }
+
+  const upg = getBikeUpgrades(lv);
+  const baseVal = {speed: bike.speed, nitro: bike.nitro, accel: bike.accel, maneuver: bike.maneuver}[stat];
+  const cap = baseVal * 2;
+  const curVal = baseVal + upg[stat] * 5;
+
+  if(curVal >= cap){ showNotif('✅ هذه الخاصية وصلت للحد الأقصى!', 'e'); return; }
+
+  // Deduct and save
+  S.user.coins = bal - cost;
+  upg[stat]++;
+  saveBikeUpgrades(lv, upg);
+  syncTopbar();
+
+  // Re-render garage
+  garageOpenCard = lv; // keep open
+  renderGarage();
+  // Reopen the card
+  setTimeout(() => {
+    const detail = document.getElementById(`gr-detail-${lv}`);
+    const arrow  = document.getElementById(`gr-arrow-${lv}`);
+    if(detail){ detail.classList.add('open'); }
+    if(arrow){ arrow.style.transform = 'rotate(90deg)'; }
+  }, 50);
+
+  showNotif(`🔧 تمت ترقية ${stat === 'speed' ? 'السرعة' : stat === 'nitro' ? 'النيترو' : stat === 'accel' ? 'التسارع' : 'المناورة'} +5 ✅`, 's');
+  api('saveBikeUpgrade', {lv, stat, upgCount: upg[stat], cost}).catch(()=>{});
+}
+
+// Re-render garage when section becomes visible
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => renderGarage(), 900);
+});
+</script>
 
 <!-- TASKS -->
 <div class="sec" id="sectionTasks">
@@ -1439,7 +1761,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 <!-- NAV -->
 <nav class="bnav">
   <div class="ni active" data-s="sectionHome"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Home</div></div>
-  <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Market</div></div>
+  <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Garage</div></div>
   <div class="ni" data-s="sectionTasks"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/31752193-26ac-4df8-b717-96af866765c6.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Tasks</div></div>
   <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Friends</div></div>
   <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Finance</div></div>
@@ -2140,6 +2462,7 @@ function goNav(el){
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
+  if(el.dataset.s==='sectionMarket'){renderGarage();}
 }
 
 /* ════ MARKET ════ */
@@ -3227,7 +3550,7 @@ async function init(){
 /* ════ LANGUAGE SYSTEM ════ */
 const TRANSLATIONS = {
   ar:{
-    navHome:'الرئيسية',navMarket:'السوق',navTasks:'المهام',navFriends:'أصدقاء',navFinance:'مالية',
+    navHome:'الرئيسية',navMarket:'جراج',navTasks:'المهام',navFriends:'أصدقاء',navFinance:'مالية',
     labelCoins:'كوينز',labelBamboo:'بامبو',
     statAccrued:'المتراكم',statRateDay:'المعدل/يوم',statBambooDay:'بامبو/يوم',
     claimBtn:'جمع Bamboo',lvLabel:'مستوى ',

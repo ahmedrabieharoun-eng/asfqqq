@@ -1123,24 +1123,28 @@ function openGrDetail(lv){
     const cur = cs[stat];
     const max = maxStats[stat];
     const pct = Math.round(cur/max*100);
-    const upg = upgs[stat]||0;
-    const maxUpg = Math.floor(b[stat]/UPGRADE_INC[stat]);
-    const isMax = upg>=maxUpg;
-    const canAfford = tonBal>=parseFloat(upgPrice);
-    let disabled = '';
-    let btnContent = '';
-    if(isMax){
-      btnContent = `<button class="gr-upg-btn maxed" disabled>\u2705 MAX</button>`;
-    } else {
-      disabled = canAfford ? '' : 'disabled';
-      btnContent = `<button class="gr-upg-btn" onclick="doUpgradeStat(${lv},'${stat}')" ${disabled}>${upgPrice} TON</button>`;
-    }
     return `
       <div class="gr-bar-row">
         <div class="gr-bar-name">${label}</div>
         <div class="gr-bar-wrap"><div class="gr-bar-fill" style="width:${pct}%"></div></div>
         <div class="gr-bar-val">${cur}</div>
       </div>
+    `;
+  }
+
+  function upgRow(stat, label){
+    const upg = upgs[stat]||0;
+    const maxUpg = Math.floor(b[stat]/UPGRADE_INC[stat]);
+    const isMax = upg>=maxUpg;
+    const canAfford = tonBal>=parseFloat(upgPrice);
+    let btnContent = '';
+    if(isMax){
+      btnContent = `<button class="gr-upg-btn maxed" disabled>✅ MAX</button>`;
+    } else {
+      const dis = canAfford ? '' : 'disabled';
+      btnContent = `<button class="gr-upg-btn" onclick="doUpgradeStat(${lv},'${stat}')" ${dis}>${upgPrice} TON</button>`;
+    }
+    return `
       <div class="gr-upg-item">
         <div class="gr-upg-icon">${STAT_ICONS[stat]}</div>
         <div class="gr-upg-name">${label} +${UPGRADE_INC[stat]}</div>
@@ -1153,11 +1157,15 @@ function openGrDetail(lv){
     <img class="gr-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
     <div class="gr-detail-body">
       <div class="gr-detail-class">Уровень ${b.lv}</div>
-      <div class="gr-detail-sec-title">Прокачка автомобиля:</div>
       ${statBar('speed','Скорость')}
       ${statBar('accel','Разгон')}
       ${statBar('maneuver','Маневры')}
       ${statBar('nitro','Нитро')}
+      <div class="gr-detail-sec-title" style="margin-top:18px;">Прокачка автомобиля:</div>
+      ${upgRow('speed','Скорость')}
+      ${upgRow('accel','Разгон')}
+      ${upgRow('maneuver','Маневры')}
+      ${upgRow('nitro','Нитро')}
       <div class="gr-detail-actions">
         <button class="gr-detail-close-btn" onclick="closeGrDetailForce()">✕</button>
       </div>
@@ -1289,7 +1297,7 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .gr-bar-name{font-size:14px;font-weight:700;color:#333;width:90px;flex-shrink:0}
 .gr-bar-wrap{flex:1;height:14px;background:#e0e0cf;border-radius:7px;overflow:hidden;}
-.gr-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,#ff7043,#ef5350);transition:width .4s ease;}
+.gr-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,#ff5252,#ff9800,#8bc34a);transition:width .4s ease;}
 .gr-bar-val{font-size:14px;font-weight:800;color:#222;width:40px;text-align:right;flex-shrink:0}
 
 /* Upgrade section */
@@ -1298,19 +1306,21 @@ async function doUpgradeStat(bikeLevel, stat){
   padding:14px 0 8px;border-top:1px solid #ebebdf;margin-top:6px;
 }
 .gr-upg-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:1px solid #f0f0e8;
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;margin-bottom:8px;
+  background:#fff;border-radius:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);
 }
-.gr-upg-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
-.gr-upg-name{flex:1;font-size:14px;font-weight:700;color:#333}
-.gr-upg-stat{font-size:12px;color:#888;font-weight:600;}
+.gr-upg-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center;color:#43A047;}
+.gr-upg-name{flex:1;font-size:15px;font-weight:700;color:#222;}
 .gr-upg-btn{
   background:linear-gradient(90deg,#43A047,#66BB6A);
-  border:none;border-radius:10px;padding:8px 14px;
-  color:#fff;font-size:13px;font-weight:800;cursor:pointer;
-  white-space:nowrap;box-shadow:0 3px 10px rgba(76,175,80,.3);
+  border:none;border-radius:12px;padding:10px 18px;
+  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  white-space:nowrap;box-shadow:0 3px 10px rgba(76,175,80,.35);
+  min-width:90px;text-align:center;
 }
-.gr-upg-btn:disabled{background:rgba(0,0,0,.12);color:#999;box-shadow:none;cursor:default;}
+.gr-upg-btn:disabled{background:#e0e0e0;color:#aaa;box-shadow:none;cursor:default;}
 .gr-upg-btn.maxed{background:linear-gradient(90deg,#1565C0,#1976D2);box-shadow:none;cursor:default;}
 
 .gr-detail-actions{display:flex;gap:10px;margin-top:18px;}
@@ -1340,14 +1350,6 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <div class="sec" id="sectionMarket">
   <div style="padding:0 0 4px">
-    <div class="gr-topbar">
-      <div class="gr-page-title">🏍️ Гараж</div>
-      <div class="gr-ton-badge">
-        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%">
-        <span class="gr-ton-val" id="garageTonBal">0</span>
-        <span style="font-size:12px;color:rgba(255,255,255,.55);font-weight:600">TON</span>
-      </div>
-    </div>
     <div id="garageList"></div>
   </div>
 </div>
@@ -3199,13 +3201,13 @@ async function init(){
       if(hubAv && u.photo_url){
         hubAv.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<span>🏍️</span>'">`;
       }
-      // Set username in new topbar — show Telegram @username, fallback to first name
+      // Set username in new topbar — show Telegram first name
       const hubName=document.getElementById('hubUserName');
       if(hubName){
         const firstName=u.first_name||'';
         const lastName=u.last_name||'';
         const username=u.username||'';
-        hubName.textContent=username?('@'+username):(firstName+' '+lastName).trim()||'Player';
+        hubName.textContent=(firstName+' '+lastName).trim()||username||'Player';
       }
       // Legacy uavatar
       if(u.photo_url){

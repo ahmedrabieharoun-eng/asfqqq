@@ -548,7 +548,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     <span class="hub-tb-name" id="hubUserName">Player</span>
     <!-- خانة TON أقصى اليمين -->
     <div class="hub-tb-ton">
-      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png">
+      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
       <span class="hub-tb-ton-val" id="tbCoins">0</span>
       <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
     </div>
@@ -660,13 +660,13 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   width:130px;flex-shrink:0;
   background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%);
   display:flex;align-items:center;justify-content:center;
-  padding:10px 8px;
+  padding:0;overflow:hidden;
 }
 .bk-card.owned .bk-card-imgbox{
   background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);
 }
 .bk-card-imgbox img{
-  width:116px;height:100px;object-fit:contain;
+  width:100%;height:100%;object-fit:cover;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));
 }
 
@@ -723,30 +723,6 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     </div>
   </div>
 
-  <!-- Promo / packages banner -->
-  <div class="bk-promo">
-    <div class="bk-promo-bg">
-      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/61cbab9d-7f42-47e4-80aa-686d6b66e40c.png" onerror="this.parentElement.style.display='none'">
-    </div>
-    <div class="bk-promo-overlay"></div>
-    <div class="bk-promo-content">
-      <div class="bk-promo-icon">🏍️</div>
-      <div class="bk-promo-text">
-        <div class="bk-promo-title">Эксклюзивные пакеты</div>
-        <div class="bk-promo-sub">Скоро доступны</div>
-      </div>
-      <div class="bk-promo-right">
-        <div class="bk-promo-right-label">Осталось:</div>
-        <div class="bk-promo-right-val" id="bkPromoTimer">Скоро</div>
-      </div>
-    </div>
-  </div>
-  <!-- Carousel dots -->
-  <div class="bk-promo-dots">
-    <div class="bk-dot"></div>
-    <div class="bk-dot"></div>
-    <div class="bk-dot active"></div>
-  </div>
 
   <!-- Bike cards list -->
   <div id="bikesGrid"></div>
@@ -757,19 +733,19 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <script>
 /* ══ BIKE INVESTMENT DATA ══ */
 const BIKES = [
-  {lv:1,  name:'Bike Level 1',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:5},
-  {lv:2,  name:'Bike Level 2',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/32770cf0-3b5c-4e73-b744-106c978b09f8.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:10},
-  {lv:3,  name:'Bike Level 3',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:20},
-  {lv:4,  name:'Bike Level 4',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:50},
-  {lv:5,  name:'Bike Level 5',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/81b0b87c-69ff-4003-8866-e5a4124ce53f.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:100},
-  {lv:6,  name:'Bike Level 6',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b86af832-2e97-4ecb-8037-3b0cb824619e.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:200},
-  {lv:7,  name:'Bike Level 7',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ee262ea7-72ef-422b-983f-a6e1d546271b.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:250},
-  {lv:8,  name:'Bike Level 8',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9f8df68a-d7a9-4275-a68d-ac2e577699f4.png',  speed:700,  nitro:450,  accel:260, maneuver:130, price:400},
-  {lv:9,  name:'Bike Level 9',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/57f0184f-eff4-4b5a-a2bf-a367c1b3f8e9.png',  speed:1100, nitro:700,  accel:380, maneuver:180, price:500},
+  {lv:1,  name:'Bike Level 1',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1},
+  {lv:2,  name:'Bike Level 2',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/32770cf0-3b5c-4e73-b744-106c978b09f8.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5},
+  {lv:3,  name:'Bike Level 3',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10},
+  {lv:4,  name:'Bike Level 4',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20},
+  {lv:5,  name:'Bike Level 5',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/81b0b87c-69ff-4003-8866-e5a4124ce53f.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50},
+  {lv:6,  name:'Bike Level 6',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b86af832-2e97-4ecb-8037-3b0cb824619e.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100},
+  {lv:7,  name:'Bike Level 7',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/ee262ea7-72ef-422b-983f-a6e1d546271b.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200},
+  {lv:8,  name:'Bike Level 8',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9f8df68a-d7a9-4275-a68d-ac2e577699f4.png',  speed:700,  nitro:450,  accel:260, maneuver:130, price:250},
+  {lv:9,  name:'Bike Level 9',  img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/57f0184f-eff4-4b5a-a2bf-a367c1b3f8e9.png',  speed:1100, nitro:700,  accel:380, maneuver:180, price:400},
   {lv:10, name:'Bike Level 10', img:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bdc5daa8-2f06-4ef3-acfd-7802b6daba26.png', speed:1800, nitro:1100, accel:550, maneuver:250, price:500},
 ];
 
-const TON_IMG = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png';
+const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
 
 function renderBikes(){
   const grid = document.getElementById('bikesGrid');
@@ -2961,6 +2937,20 @@ async function init(){
     const u=S.tg.initDataUnsafe?.user;
     if(u){
       S.userId=String(u.id);
+      // Set avatar in new topbar
+      const hubAv=document.getElementById('hubAvatar');
+      if(hubAv && u.photo_url){
+        hubAv.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<span>🏍️</span>'">`;
+      }
+      // Set username in new topbar
+      const hubName=document.getElementById('hubUserName');
+      if(hubName){
+        const firstName=u.first_name||'';
+        const lastName=u.last_name||'';
+        const username=u.username||'';
+        hubName.textContent=(firstName+' '+lastName).trim()||username||'Player';
+      }
+      // Legacy uavatar
       if(u.photo_url){
         const av=document.getElementById('uavatar');
         if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🐼</div>'">`;

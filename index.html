@@ -3095,14 +3095,11 @@ const BAM_IMG='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea
 
 function switchSocTab(tab){
   _socTab=tab;
-  const sp=document.getElementById('stab-partner');
-  const sc=document.getElementById('stab-community');
-  const pl=document.getElementById('socPartnerList');
-  const cl=document.getElementById('socCommunityList');
-  if(sp) sp.className='ttab'+(tab==='partner' ?' active':'');
-  if(sc) sc.className='ttab'+(tab==='community'?' active':'');
-  if(pl) pl.style.display=tab==='partner'?'block':'none';
-  if(cl) cl.style.display=tab==='community'?'block':'none';
+  document.getElementById('stab-partner').className  ='ttab'+(tab==='partner' ?' active':'');
+  document.getElementById('stab-community').className='ttab'+(tab==='community'?' active':'');
+  document.getElementById('socPartnerList').style.display  =tab==='partner'  ?'block':'none';
+  document.getElementById('socCommunityList').style.display=tab==='community'?'block':'none';
+  // Show floating button ONLY on community sub-tab
   if(tab==='community') showFab(); else hideFab();
 }
 
@@ -3126,12 +3123,9 @@ function buildTaskCard(t,cat){
 }
 
 function renderSocTasks(){
-  const pEl=document.getElementById('socPartnerList');
-  const cEl=document.getElementById('socCommunityList');
-  if(!pEl||!cEl) return; // race section replaced task DOM
   const p=S.tasks?.partner||[], c=S.tasks?.community||[];
-  pEl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):`<div class="hist-empty">No partner tasks yet</div>`;
-  cEl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):`<div class="hist-empty">No community tasks yet</div>`;
+  document.getElementById('socPartnerList').innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):`<div class="hist-empty">No partner tasks yet</div>`;
+  document.getElementById('socCommunityList').innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):`<div class="hist-empty">No community tasks yet</div>`;
 }
 
 function switchRefTab(tab){
@@ -3156,16 +3150,14 @@ function renderTasks(){
   const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
 
   // ── Update stats card ──
-  const totalRefs = S.refs ? S.refs.length : 0;
-  const activeCount = S.refs ? S.refs.filter(r=>r.hasDeposited).length : 0;
+  const totalRefs = S.refs.length;
+  // Active = referrals with hasDeposited:true (set by server from users/{id}/hasDeposited)
+  const activeCount = S.refs.filter(r=>r.hasDeposited).length;
   S._activeRefCount = activeCount;
   const totalEl=document.getElementById('refTotalCount');
   const activeEl=document.getElementById('refActiveCount');
   if(totalEl) totalEl.textContent=totalRefs;
   if(activeEl) activeEl.textContent=activeCount;
-
-  // Guard: race section replaced old task DOM — exit safely
-  if(!document.getElementById('refTaskList')) return;
 
   // ── Regular referral tasks (r200/r500 excluded) ──
   const REGULAR_TASKS = REF_TASKS.filter(t=>!['r200','r500'].includes(t.id));
@@ -3996,10 +3988,10 @@ async function init(){
 
   // Step 4: Render UI
   await ldAnimateTo(80, lt('ldBuilding'), 400);
-  try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e); }
-  try{ renderTasks();  }catch(e){ console.warn('renderTasks:',e);  }
-  try{ renderBikes();  }catch(e){ console.warn('renderBikes:',e);  }
-  try{ syncTopbar();   }catch(e){ console.warn('syncTopbar:',e);   }
+  renderGarage();
+  renderTasks();
+  renderBikes();
+  syncTopbar();
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers

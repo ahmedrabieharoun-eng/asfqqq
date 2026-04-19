@@ -1043,10 +1043,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
    Max = base * 2
 ══════════════════════════════════════════════════════════════ */
 const STAT_ICONS = {
-  speed:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png" style="width:56px;height:56px;object-fit:contain;display:block;padding:6px;">',
-  accel:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png" style="width:56px;height:56px;object-fit:contain;display:block;padding:6px;">',
-  maneuver:'<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png" style="width:56px;height:56px;object-fit:contain;display:block;padding:6px;">',
-  nitro:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png" style="width:56px;height:56px;object-fit:contain;display:block;padding:6px;">'
+  speed:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png" style="width:100%;height:100%;object-fit:cover;display:block;">',
+  accel:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png" style="width:100%;height:100%;object-fit:cover;display:block;">',
+  maneuver:'<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png" style="width:100%;height:100%;object-fit:cover;display:block;">',
+  nitro:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png" style="width:100%;height:100%;object-fit:cover;display:block;">'
 };
 const STAT_LABELS = { speed:'Скорость', nitro:'Нитро', accel:'Разгон', maneuver:'Маневры' };
 const UPGRADE_INC = { speed:5, nitro:5, accel:5, maneuver:3 };
@@ -1317,8 +1317,7 @@ async function doUpgradeStat(bikeLevel, stat){
   box-shadow:0 1px 4px rgba(0,0,0,.07);
   min-height:72px;
 }
-.gr-upg-icon{flex-shrink:0;width:56px;height:56px;display:flex;align-items:center;justify-content:center;color:#43A047;background:transparent;border-radius:12px;overflow:hidden;padding:0;}
-.gr-upg-icon img{mix-blend-mode:multiply;background:transparent;}
+.gr-upg-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:#43A047;background:rgba(67,160,71,0.12);border-radius:10px;border:2px solid rgba(67,160,71,0.25);overflow:hidden;}
 .gr-upg-name{flex:1;font-size:16px;font-weight:700;color:#222;}
 .gr-upg-btn{
   background:linear-gradient(90deg,#43A047,#66BB6A);

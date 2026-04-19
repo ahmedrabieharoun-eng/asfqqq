@@ -1317,7 +1317,7 @@ async function doUpgradeStat(bikeLevel, stat){
   box-shadow:0 1px 4px rgba(0,0,0,.07);
   min-height:72px;
 }
-.gr-upg-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:#43A047;background:rgba(67,160,71,0.12);border-radius:10px;border:2px solid rgba(67,160,71,0.25);overflow:hidden;}
+.gr-upg-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:#43A047;background:transparent;border-radius:10px;border:2px solid transparent;overflow:hidden;}
 .gr-upg-name{flex:1;font-size:16px;font-weight:700;color:#222;}
 .gr-upg-btn{
   background:linear-gradient(90deg,#43A047,#66BB6A);
@@ -1373,321 +1373,575 @@ async function doUpgradeStat(bikeLevel, stat){
      RACE SECTION — Bali Rally
 ══════════════════════════════════════════════ -->
 <style>
-/* ═══ RACE GLOBAL ═══ */
-#sectionTasks{padding:0!important;}
-.race-screen{display:none;position:fixed;inset:0;z-index:500;overflow:hidden;}
-.race-screen.active{display:block;}
+/* ── Race Section ── */
+#sectionTasks{ padding:0 !important; }
 
-/* ── BIKE SELECT SCREEN ── */
-#raceSelect{
-  background:linear-gradient(180deg,#f0f0f0 0%,#e8e8e8 100%);
-  min-height:100vh;padding-bottom:120px;overflow-y:auto;
+.race-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100vh;padding:0 0 108px;
+  background:transparent;
 }
-.race-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:6px 12px 0;position:relative;
-}
-.race-flags{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 0;}
-.race-flag{font-size:36px;line-height:1;}
-.race-title-wrap{text-align:center;flex:1;}
-.race-choose-lbl{font-size:14px;font-weight:800;color:#222;line-height:1.2;}
-.race-bike-name{font-size:18px;font-weight:800;color:#1565C0;line-height:1.2;}
 
-/* Carousel */
-.race-carousel-wrap{position:relative;overflow:hidden;width:100%;height:260px;margin:10px 0;}
+/* ── Phase: Bike Selection ── */
+#raceSelectPhase{width:100%;animation:fi .3s ease}
+.race-header-flags{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:18px 16px 10px;
+}
+.race-flag-img{width:44px;opacity:.85;flex-shrink:0;}
+.race-header-title{
+  text-align:center;flex:1;
+  font-size:16px;font-weight:800;color:#fff;line-height:1.25;
+}
+.race-header-title span{color:#2196F3;display:block;font-size:17px;font-weight:800;}
+
+/* ── CAROUSEL — card-peek style ── */
+.race-carousel-outer{
+  position:relative;width:100%;overflow:hidden;padding:6px 0 4px;
+}
 .race-carousel-track{
-  display:flex;transition:transform .35s cubic-bezier(.4,0,.2,1);
-  height:100%;align-items:center;
+  display:flex;gap:12px;
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+  padding:0 20px;
 }
-.race-slide{
-  min-width:100%;height:240px;
-  display:flex;align-items:center;justify-content:center;
-  position:relative;flex-shrink:0;
+.race-bike-slide{
+  flex:0 0 calc(100% - 52px);
+  display:flex;flex-direction:column;align-items:center;
+  background:rgba(8,20,8,.82);
+  border:1.5px solid rgba(124,179,66,.22);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.55);
+  backdrop-filter:blur(10px);
+  transition:border-color .2s,box-shadow .2s;
 }
-.race-slide-img{
-  width:82%;max-width:340px;height:220px;object-fit:cover;
-  border-radius:18px;box-shadow:0 8px 32px rgba(0,0,0,.22);
-  display:block;
+.race-bike-slide.active{
+  border-color:rgba(124,179,66,.55);
+  box-shadow:0 0 0 2px rgba(124,179,66,.18),0 12px 40px rgba(0,0,0,.65);
 }
-.race-promo-lbl{
-  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
-  color:#fff;font-size:13px;font-weight:700;
-  text-decoration:underline;text-shadow:0 1px 6px rgba(0,0,0,.8);
-  cursor:pointer;white-space:nowrap;
+.race-bike-img-wrap{
+  width:100%;
+  background:linear-gradient(160deg,rgba(10,30,10,.85),rgba(4,12,4,.92));
+  position:relative;overflow:hidden;
 }
-/* Carousel nav arrows */
-.race-carr-btn{
-  position:absolute;top:50%;transform:translateY(-50%);
-  width:34px;height:34px;border-radius:50%;
-  background:rgba(0,0,0,.22);border:none;
-  font-size:20px;color:#fff;cursor:pointer;z-index:5;
-  display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(4px);
+.race-bike-img-wrap img{
+  width:100%;height:210px;object-fit:contain;display:block;
+  padding:10px 20px 0;
+  filter:drop-shadow(0 14px 30px rgba(0,0,0,.75));
+  transition:transform .3s ease;
 }
-.race-carr-btn.left{left:8px;}
-.race-carr-btn.right{right:8px;}
+.race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
+.race-upgrade-link{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,.75);font-size:13px;font-weight:700;
+  text-decoration:underline;cursor:pointer;white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+}
 
-/* Stats row */
+/* stats row inside card */
 .race-stats-row{
   display:grid;grid-template-columns:repeat(4,1fr);
-  gap:0;padding:0 16px 16px;
+  width:100%;
+  border-top:1px solid rgba(124,179,66,.12);
+  padding:10px 8px 14px;
+  gap:0;
 }
-.race-stat-cell{text-align:center;padding:4px 0;}
-.race-stat-lbl{font-size:11px;color:#888;font-weight:600;margin-bottom:2px;}
-.race-stat-val{font-size:22px;font-weight:800;color:#1a1a1a;}
-
-/* Dots */
-.race-dots{display:flex;justify-content:center;gap:6px;margin:0 0 8px;}
-.race-dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:background .2s;}
-.race-dot.active{background:#1565C0;}
-
-/* Start button area */
-.race-start-area{
-  padding:0 16px;
-  position:fixed;bottom:0;left:0;right:0;
-  background:linear-gradient(180deg,transparent 0%,#eee 30%);
-  padding-bottom:env(safe-area-inset-bottom,0);
-  z-index:10;
+.race-stat-item{
+  display:flex;flex-direction:column;align-items:center;
+  padding:4px 2px;
 }
+.race-stat-lbl{font-size:11px;color:rgba(232,245,233,.5);font-weight:600;margin-bottom:2px}
+.race-stat-val{font-size:20px;font-weight:800;color:#fff}
+
+/* dot indicators */
+.race-dots{display:flex;gap:6px;margin:10px 0 0;justify-content:center;width:100%;}
+.race-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);transition:all .2s;cursor:pointer;}
+.race-dot.active{background:var(--bamboo);width:20px;border-radius:4px;}
+
+/* start button */
 .race-start-btn{
-  width:100%;padding:17px;border:none;border-radius:28px;
-  background:linear-gradient(90deg,#43C028,#2E9E10);
+  width:calc(100% - 32px);margin:16px 16px 0;
+  padding:17px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#3dba3d,#2e9e2e);
   color:#fff;font-size:18px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 20px rgba(67,192,40,.45);
-  letter-spacing:.3px;
+  box-shadow:0 4px 24px rgba(61,186,61,.45);
+  transition:transform .15s,box-shadow .15s;
+  letter-spacing:.3px;position:relative;overflow:hidden;
 }
-.race-start-btn:active{opacity:.88;}
-.race-start-btn:disabled{opacity:.45;cursor:default;}
+.race-start-btn::after{
+  content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  transform:skewX(-20deg);animation:race-shim 2.8s infinite;
+}
+@keyframes race-shim{0%{left:-60%}100%{left:160%}}
+.race-start-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(61,186,61,.3);}
 .race-stake-lbl{
-  text-align:center;font-size:12px;color:#888;font-weight:700;
-  margin-top:6px;padding-bottom:10px;
+  text-align:center;font-size:13px;color:rgba(255,255,255,.6);
+  font-weight:700;margin:9px 0 0;padding-bottom:4px;
   display:flex;align-items:center;justify-content:center;gap:5px;
 }
 
-/* ── RACE ARENA SCREEN ── */
-#raceArena{
-  background:#111;
-  width:100%;height:100%;overflow:hidden;
+/* ── DEV NOTICE OVERLAY ── */
+.race-dev-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(4,10,4,.96);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:30px;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s;
 }
-.arena-hud{
-  position:absolute;top:0;left:0;right:0;z-index:20;
-  padding:8px 14px 0;
+.race-dev-overlay.show{opacity:1;pointer-events:all;}
+.race-dev-emoji{font-size:64px;animation:rde-bounce .8s ease infinite alternate;}
+@keyframes rde-bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.race-dev-title{font-size:24px;font-weight:800;color:#fff;text-align:center;}
+.race-dev-badge{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);
+  border-radius:30px;padding:8px 20px;
+  color:#ffa500;font-size:14px;font-weight:800;
 }
-.arena-players{
-  display:flex;justify-content:space-between;align-items:flex-start;
+.race-dev-sub{
+  font-size:15px;color:rgba(232,245,233,.55);font-weight:600;
+  text-align:center;line-height:1.6;
+  background:rgba(124,179,66,.06);
+  border:1px solid rgba(124,179,66,.15);
+  border-radius:16px;padding:14px 20px;max-width:320px;
 }
-.arena-player{font-size:12px;font-weight:800;color:rgba(255,255,255,.85);}
-.arena-player.right{text-align:right;}
-.arena-speed{
-  font-size:28px;font-weight:900;color:#fff;line-height:1;
-  display:flex;align-items:flex-end;gap:3px;
+.race-dev-back{
+  margin-top:6px;padding:15px 44px;
+  background:linear-gradient(135deg,#3dba3d,#2e9e2e);
+  border:none;border-radius:50px;
+  color:#fff;font-size:16px;font-weight:800;
+  font-family:'Fredoka',cursive;
+  cursor:pointer;box-shadow:0 4px 16px rgba(61,186,61,.35);
 }
-.arena-speed-unit{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:3px;font-weight:700;}
-.arena-timer{
-  position:absolute;top:10px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.65);border:2px solid rgba(255,215,0,.7);
-  border-radius:24px;padding:5px 20px;
-  font-size:20px;font-weight:900;color:#FFD700;
-  letter-spacing:1px;backdrop-filter:blur(6px);
-  min-width:90px;text-align:center;
-}
-/* Road canvas */
-#raceCanvas{width:100%;height:100%;display:block;}
+.race-dev-back:active{transform:scale(.97)}
 
-/* ── RESULT SCREEN ── */
-#raceResult{
-  background:#000;
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-  overflow:hidden;
+/* ── Phase: Race Animation ── */
+#raceAnimPhase{
+  display:none;width:100%;position:relative;
+  flex-direction:column;align-items:stretch;
 }
-.result-bg{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center;
-  filter:brightness(.65);
+.race-scene{
+  width:100%;height:380px;position:relative;overflow:hidden;
+  border-radius:0;background:#1a3a0a;
 }
-.result-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.92) 100%);}
-.result-content{
-  position:relative;z-index:2;
-  display:flex;flex-direction:column;align-items:center;
-  width:100%;padding:60px 20px 24px;
-  height:100%;
+.race-road-bg{
+  width:100%;height:100%;object-fit:cover;
+  position:absolute;top:0;left:0;
 }
-.result-title{
-  font-size:44px;font-weight:900;
-  text-shadow:0 0 30px rgba(0,242,122,.7);
-  margin-bottom:4px;
+/* Animated road lines overlay */
+.race-scene::after{
+  content:'';position:absolute;top:0;left:47%;width:6%;height:100%;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.7) 0px,rgba(255,255,255,.7) 30px,transparent 30px,transparent 60px);
+  animation:road-lines .3s linear infinite;z-index:2;pointer-events:none;
 }
-.result-title.win{color:#00F27A;}
-.result-title.lose{color:#ef5350;}
-.result-prize{
-  font-size:22px;font-weight:800;color:#FFD700;
-  display:flex;align-items:center;gap:8px;margin-bottom:auto;
+@keyframes road-lines{
+  0%{background-position:0 0}
+  100%{background-position:0 60px}
 }
-.result-prize img{width:26px;height:26px;object-fit:contain;}
-.result-vs-card{
-  background:rgba(255,255,255,.95);border-radius:20px;
-  padding:18px 24px;width:100%;max-width:340px;margin-bottom:18px;
+.race-hud{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:12px 14px 0;z-index:10;
 }
-.result-vs-row{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;
+.race-hud-player{
+  display:flex;flex-direction:column;align-items:flex-start;
+  background:rgba(0,0,0,.55);border-radius:12px;padding:6px 10px;
+  backdrop-filter:blur(6px);
 }
-.result-player-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
-.result-avatar{
-  width:72px;height:72px;border-radius:50%;overflow:hidden;
-  background:#ddd;border:3px solid #ccc;
-}
-.result-avatar img{width:100%;height:100%;object-fit:cover;}
-.result-avatar.winner{border-color:#00C853;}
-.result-avatar.loser{border-color:#ef5350;}
-.result-uname{font-size:12px;font-weight:800;color:#333;text-align:center;}
-.result-bikename{font-size:11px;color:#777;font-weight:700;text-align:center;}
-.result-vs-lbl{font-size:22px;font-weight:900;color:#555;}
-.result-continue-btn{
-  width:100%;max-width:340px;padding:16px;border:none;border-radius:28px;
-  background:linear-gradient(90deg,#43C028,#2E9E10);
-  color:#fff;font-size:16px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 20px rgba(67,192,40,.45);
+.race-hud-player.right{ align-items:flex-end; }
+.race-hud-name{font-size:11px;font-weight:800;color:#fff;opacity:.85}
+.race-hud-speed{font-size:22px;font-weight:800;color:#fff;line-height:1}
+.race-hud-unit{font-size:10px;color:rgba(255,255,255,.5);font-weight:600}
+
+.race-timer-pill{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.7);border:1.5px solid rgba(255,215,0,.4);
+  border-radius:24px;padding:6px 18px;z-index:11;
+  font-size:18px;font-weight:800;color:#FFD700;
+  min-width:72px;text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.5);
 }
 
-/* ── NO BIKES MESSAGE ── */
+/* Cars on road — top-down view, side-by-side lanes, move from bottom to top */
+.race-car{
+  position:absolute;
+  width:72px;
+  z-index:8;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.7));
+  transition:bottom .15s linear;
+}
+.race-car-player{   left:20%; bottom:40px; }
+.race-car-opponent{ left:55%; bottom:40px; }
+
+@keyframes car-drive{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-2px)}
+  75%{transform:translateX(2px)}
+}
+.race-car.driving{ animation:car-drive .2s ease-in-out infinite; }
+
+/* Finish line overlay */
+.race-finish-banner{
+  position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);
+  z-index:20;text-align:center;display:none;
+}
+
+/* ── Phase: Result ── */
+#raceResultPhase{
+  display:none;width:100%;flex-direction:column;align-items:center;
+  background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.3) 100%);
+  min-height:100vh;padding:20px 16px 108px;
+}
+.race-result-title{
+  font-size:36px;font-weight:800;margin-bottom:4px;
+  text-shadow:0 2px 16px rgba(0,0,0,.6);
+}
+.race-result-title.win{ color:#22c55e; }
+.race-result-title.lose{ color:#ef4444; }
+.race-result-reward{
+  font-size:22px;font-weight:800;color:#FFD700;margin-bottom:20px;
+  display:flex;align-items:center;gap:6px;
+}
+
+.race-result-cars{
+  width:100%;max-width:340px;
+  border-radius:20px;overflow:hidden;margin-bottom:20px;
+  height:200px;position:relative;
+}
+.race-result-cars img{width:100%;height:100%;object-fit:cover;}
+
+.race-vs-row{
+  display:flex;align-items:center;gap:14px;width:100%;max-width:340px;
+  margin-bottom:20px;
+}
+.race-vs-player{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:12px 8px;
+}
+.race-vs-avatar{
+  width:52px;height:52px;border-radius:50%;overflow:hidden;
+  border:2px solid var(--bamboo);object-fit:cover;
+  background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+}
+.race-vs-name{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-top:2px;max-width:90px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.race-vs-bike{font-size:12px;font-weight:800;color:var(--bamboo);margin-top:1px;}
+.race-vs-sep{font-size:22px;font-weight:800;color:rgba(255,255,255,.4);flex-shrink:0}
+
+.race-continue-btn{
+  width:100%;max-width:340px;padding:16px;border:none;border-radius:18px;
+  background:linear-gradient(135deg,var(--bamboo),#4e7a20);
+  color:#fff;font-size:17px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 20px var(--bamboo-glow);
+}
+
+/* no bikes warning */
 .race-no-bikes{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;min-height:60vh;text-align:center;
-  padding:30px 20px;color:rgba(255,255,255,.6);
+  width:100%;text-align:center;padding:40px 20px;
+  color:rgba(255,255,255,.5);font-size:14px;font-weight:700;
 }
-.race-no-bikes-icon{font-size:64px;margin-bottom:16px;}
-.race-no-bikes-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;}
-.race-no-bikes-sub{font-size:13px;font-weight:600;line-height:1.5;}
-.race-go-market-btn{
-  margin-top:20px;padding:13px 30px;border:none;border-radius:24px;
-  background:linear-gradient(90deg,var(--bamboo),#4e7a20);
-  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
-}
+.race-no-bikes a{color:var(--bamboo);cursor:pointer;text-decoration:underline;}
 </style>
 
-<!-- SELECT SCREEN (inside sectionTasks) -->
-<div class="sec" id="sectionTasks" style="padding:0!important;">
+<div class="sec" id="sectionTasks">
+  <div class="race-wrap">
 
-  <!-- NO BIKES STATE -->
-  <div id="raceNoBikes" style="display:none;">
-    <div class="race-no-bikes">
-      <div class="race-no-bikes-icon">🏁</div>
-      <div class="race-no-bikes-title">Бали Ралли</div>
-      <div class="race-no-bikes-sub">У вас нет мотоциклов.<br>Купите мотоцикл в гараже чтобы участвовать в гонках!</div>
-      <button class="race-go-market-btn" onclick="goToMarket()">🏍️ Перейти в гараж</button>
-    </div>
-  </div>
-
-  <!-- BIKE PICKER -->
-  <div id="raceSelectInner" style="background:linear-gradient(180deg,#f0f0f0,#e8e8e8);min-height:100vh;padding-bottom:130px;">
-    <!-- Flags + title -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 4px;">
-      <span style="font-size:32px">🏁</span>
-      <div style="text-align:center;">
-        <div style="font-size:13px;font-weight:800;color:#333;">Выберите автомобиль</div>
-        <div id="raceSelectedName" style="font-size:17px;font-weight:900;color:#1565C0;">—</div>
+    <!-- ── SELECT PHASE ── -->
+    <div id="raceSelectPhase" style="width:100%">
+      <div class="race-header-flags">
+        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png" onerror="this.style.opacity=0" style="transform:scaleX(-1)">
+        <div class="race-header-title">
+          Выберите мотоцикл
+          <span id="raceBikeName">—</span>
+        </div>
+        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png" onerror="this.style.opacity=0">
       </div>
-      <span style="font-size:32px">🏁</span>
+
+      <!-- Carousel -->
+      <div class="race-carousel-outer" id="raceCarouselOuter">
+        <div class="race-carousel-track" id="raceCarouselTrack"></div>
+      </div>
+      <!-- Dots -->
+      <div class="race-dots" id="raceDots"></div>
+
+      <!-- Start -->
+      <button class="race-start-btn" onclick="startRace()">Старт</button>
+      <div class="race-stake-lbl">
+        Ставка за старт — 0.5
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'">
+      </div>
     </div>
 
-    <!-- Carousel -->
-    <div class="race-carousel-wrap" id="raceCarouselWrap">
-      <div class="race-carousel-track" id="raceCarouselTrack"></div>
-      <button class="race-carr-btn left"  onclick="raceCarousel(-1)">‹</button>
-      <button class="race-carr-btn right" onclick="raceCarousel(+1)">›</button>
+    <!-- ── DEV NOTICE OVERLAY ── -->
+    <div class="race-dev-overlay" id="raceDevOverlay">
+      <div class="race-dev-emoji">🚧</div>
+      <div class="race-dev-title">Гонка скоро!</div>
+      <div class="race-dev-badge">⚙️ В разработке</div>
+      <div class="race-dev-sub">
+        Режим гонки сейчас<br><strong style="color:#fff">в процессе разработки.</strong><br>
+        Скоро будет доступен — следите за обновлениями!
+      </div>
+      <button class="race-dev-back" onclick="document.getElementById('raceDevOverlay').classList.remove('show')">← Назад</button>
     </div>
 
-    <!-- Dots -->
-    <div class="race-dots" id="raceDots"></div>
+    <!-- ── RACE ANIMATION PHASE ── -->
+    <div id="raceAnimPhase" style="width:100%;display:none;flex-direction:column">
 
-    <!-- Stats -->
-    <div class="race-stats-row" id="raceStatsRow">
-      <div class="race-stat-cell"><div class="race-stat-lbl">Скорость</div><div class="race-stat-val" id="rs-speed">—</div></div>
-      <div class="race-stat-cell"><div class="race-stat-lbl">Разгон</div><div class="race-stat-val" id="rs-accel">—</div></div>
-      <div class="race-stat-cell"><div class="race-stat-lbl">Маневры</div><div class="race-stat-val" id="rs-maneuver">—</div></div>
-      <div class="race-stat-cell"><div class="race-stat-lbl">Нитро</div><div class="race-stat-val" id="rs-nitro">—</div></div>
-    </div>
-
-    <!-- Spacer for fixed button -->
-    <div style="height:90px;"></div>
-  </div>
-
-  <!-- Fixed Start Button -->
-  <div style="position:fixed;bottom:68px;left:0;right:0;padding:0 16px 8px;background:linear-gradient(180deg,transparent,rgba(232,232,232,.98) 40%);z-index:300;">
-    <button class="race-start-btn" id="raceStartBtn" onclick="startRace()">Старт</button>
-    <div class="race-stake-lbl">
-      Ставка за старт — 0.5 TON
-      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px;height:16px;object-fit:contain;">
-    </div>
-  </div>
-</div>
-
-<!-- RACE ARENA SCREEN (full-screen overlay) -->
-<div class="race-screen" id="raceArena">
-  <!-- HUD -->
-  <div class="arena-hud">
-    <div class="arena-players">
-      <!-- LEFT player -->
-      <div class="arena-player">
-        <div id="arenaLeftName" style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:2px;">@You</div>
-        <div class="arena-speed">
-          <span id="arenaLeftSpeed">0</span>
-          <span class="arena-speed-unit">km/h</span>
+      <!-- HUD top row -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:12px 14px 0;position:relative;">
+        <div class="race-hud-player">
+          <div class="race-hud-name" id="raceHudP1Name">You</div>
+          <div class="race-hud-speed" id="raceHudP1Speed">0</div>
+          <div class="race-hud-unit">km/h</div>
+        </div>
+        <div class="race-timer-pill" id="raceTimerDisplay">00:15</div>
+        <div class="race-hud-player right">
+          <div class="race-hud-name" id="raceHudP2Name">Opponent</div>
+          <div class="race-hud-speed" id="raceHudP2Speed">0</div>
+          <div class="race-hud-unit">km/h</div>
         </div>
       </div>
-      <!-- Timer -->
-      <div class="arena-timer" id="arenaTimer">00:00</div>
-      <!-- RIGHT player -->
-      <div class="arena-player right">
-        <div id="arenaRightName" style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:2px;">@AI</div>
-        <div class="arena-speed" style="justify-content:flex-end;">
-          <span id="arenaRightSpeed">0</span>
-          <span class="arena-speed-unit">km/h</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <canvas id="raceCanvas"></canvas>
-</div>
 
-<!-- RESULT SCREEN (full-screen overlay) -->
-<div class="race-screen" id="raceResult">
-  <div class="result-bg" id="resultBg" style="background-image:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png');"></div>
-  <div class="result-overlay"></div>
-  <div class="result-content">
-    <div class="result-title" id="resultTitle">Победа!</div>
-    <div class="result-prize" id="resultPrize">
-      <span id="resultPrizeTxt">+0.9 TON</span>
-      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
-    </div>
-    <div style="flex:1"></div>
-    <div class="result-vs-card">
-      <div class="result-vs-row">
-        <div class="result-player-col">
-          <div class="result-avatar" id="resAvatarMe">
-            <img id="resAvatarMeImg" src="" onerror="this.style.display='none'">
+      <!-- Road scene -->
+      <div class="race-scene">
+        <img class="race-road-bg" id="raceRoadBg"
+          src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png"
+          onerror="this.style.background='linear-gradient(180deg,#1a3a0a 0%,#2d5a1b 40%,#4a7a2e 60%,#555 80%,#444 100%)';this.src=''"
+          style="object-fit:cover;width:100%;height:100%;position:absolute;top:0;left:0;">
+
+        <!-- Player car (left lane) -->
+        <div class="race-car race-car-player driving" id="raceCarPlayer" style="bottom:60px;left:18%">
+          <img id="raceCarPlayerImg" src="" style="width:72px;height:110px;object-fit:contain;transform:rotate(0deg)" onerror="this.style.display='none'">
+          <div id="raceCarPlayerFallback" style="font-size:40px;display:none">🏍️</div>
+        </div>
+
+        <!-- Opponent car (right lane) -->
+        <div class="race-car race-car-opponent driving" id="raceCarOpponent" style="bottom:60px;left:54%">
+          <img id="raceCarOpponentImg" src="" style="width:72px;height:110px;object-fit:contain;transform:rotate(0deg)" onerror="this.style.display='none'">
+          <div id="raceCarOpponentFallback" style="font-size:40px;display:none">🏍️</div>
+        </div>
+
+        <!-- Finish line (hidden initially, slides in at end) -->
+        <div id="raceFinishLine" style="position:absolute;top:0;left:0;right:0;height:100%;display:none;align-items:center;justify-content:center;z-index:15;background:rgba(0,0,0,.35)">
+          <div style="text-align:center;background:rgba(0,0,0,.7);border-radius:16px;padding:12px 24px;">
+            <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:2px">🏁 FINISH 🏁</div>
           </div>
-          <div class="result-uname" id="resNameMe">@You</div>
-          <div class="result-bikename" id="resBikeMe">—</div>
-        </div>
-        <div class="result-vs-lbl">VS</div>
-        <div class="result-player-col">
-          <div class="result-avatar" id="resAvatarOpp">
-            <img id="resAvatarOppImg" src="" onerror="this.style.display='none'">
-          </div>
-          <div class="result-uname" id="resNameOpp">@AI</div>
-          <div class="result-bikename" id="resBikeOpp">—</div>
         </div>
       </div>
+
     </div>
-    <button class="result-continue-btn" onclick="continueAfterRace()">Продолжить</button>
+
+    <!-- ── RESULT PHASE ── -->
+    <div id="raceResultPhase" style="width:100%;display:none;flex-direction:column;align-items:center;padding:20px 16px 108px;min-height:60vh;">
+      <div class="race-result-title" id="raceResultTitle">Победа!</div>
+      <div class="race-result-reward" id="raceResultReward">
+        <span id="raceResultRewardTxt">+0.9 TON</span>
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
+      </div>
+
+      <!-- Finish scene image -->
+      <div class="race-result-cars">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png" style="width:100%;height:100%;object-fit:cover;border-radius:20px" onerror="this.style.background='linear-gradient(135deg,#1a3a0a,#2d5a1b)'">
+      </div>
+
+      <!-- VS row -->
+      <div class="race-vs-row">
+        <div class="race-vs-player" id="raceVsP1">
+          <div class="race-vs-avatar" id="raceVsAv1">🦝</div>
+          <div class="race-vs-name" id="raceVsName1">You</div>
+          <div class="race-vs-bike" id="raceVsBike1">Bike</div>
+        </div>
+        <div class="race-vs-sep">VS</div>
+        <div class="race-vs-player" id="raceVsP2">
+          <div class="race-vs-avatar" id="raceVsAv2">🤖</div>
+          <div class="race-vs-name" id="raceVsName2">Opponent</div>
+          <div class="race-vs-bike" id="raceVsBike2">Bike</div>
+        </div>
+      </div>
+
+      <button class="race-continue-btn" onclick="raceGoBack()">Продолжить</button>
+    </div>
+
   </div>
 </div>
 
-<!-- HIDDEN float task btn (keep for code compatibility) -->
-<button id="floatAddTask" style="display:none!important;"></button>
+<!-- no floatAddTask needed for race section -->
+<div id="floatAddTask" style="display:none"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   RACE ENGINE — Full Server-Connected Version
+══════════════════════════════════════════════ */
+(function(){
+  let _raceIdx = 0;
+  let _raceBikes = [];
+  let _raceActive = false;
+  let _raceAnimInterval = null;
+  let _raceSelectedBike = null;
+  let _raceOpponentBike = null;
+  let _raceServerResult = null; // result from server
+  let _touchStartX = 0;
+  let _raceStarted = false;
+
+  const OPP_NAMES = ['@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce','@DustRider','@JungleRun','@FastWave','@RaceKing','@DriftMaster'];
+
+  /* ── Init: build carousel from owned bikes ── */
+  window._raceInit = function(){
+    _raceBikes = [];
+    if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
+      S.user.ownedBikes.forEach(lv=>{
+        const b = BIKES.find(x=>x.lv===lv);
+        if(b) _raceBikes.push(b);
+      });
+    }
+    const track = document.getElementById('raceCarouselTrack');
+    if(!track) return;
+    if(_raceBikes.length === 0){
+      track.innerHTML = '<div style="min-width:calc(100% - 52px);text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>У вас нет байков.<br>Купите в <span style="color:var(--bamboo);cursor:pointer" onclick="goNavBySection(\'sectionMarket\')">Гараже</span></div></div>';
+      document.getElementById('raceDots').innerHTML='';
+      const nameEl = document.getElementById('raceBikeName');
+      if(nameEl) nameEl.textContent = 'Нет байков';
+      return;
+    }
+    _raceIdx = 0;
+    _buildCarousel();
+  };
+
+  window.goNavBySection = function(s){
+    const el = document.querySelector('.ni[data-s="'+s+'"]');
+    if(el) goNav(el);
+  };
+
+  function _buildCarousel(){
+    const track = document.getElementById('raceCarouselTrack');
+    const dots  = document.getElementById('raceDots');
+    if(!track||!dots) return;
+    track.innerHTML = '';
+    dots.innerHTML  = '';
+    _raceBikes.forEach((b,i)=>{
+      const stats = (typeof getBikeCurrentStats === 'function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
+      const slide = document.createElement('div');
+      slide.className = 'race-bike-slide'+(i===0?' active':'');
+      slide.dataset.idx = i;
+
+      // Image wrapper
+      const wrap = document.createElement('div');
+      wrap.className = 'race-bike-img-wrap';
+      const img = document.createElement('img');
+      img.src = b.img;
+      img.alt = b.name;
+      img.onerror = function(){ this.style.opacity='.2'; };
+      const up = document.createElement('span');
+      up.className = 'race-upgrade-link';
+      up.textContent = 'Прокачать';
+      up.onclick = ()=>goNavBySection('sectionHome');
+      wrap.appendChild(img);
+      wrap.appendChild(up);
+
+      // Stats grid
+      const statsRow = document.createElement('div');
+      statsRow.className = 'race-stats-row';
+      [['Скорость',stats.speed],['Разгон',stats.accel],['Маневры',stats.maneuver],['Нитро',stats.nitro]].forEach(([label,value])=>{
+        const item = document.createElement('div');
+        item.className = 'race-stat-item';
+        const lbl = document.createElement('div');
+        lbl.className = 'race-stat-lbl';
+        lbl.textContent = label;
+        const val = document.createElement('div');
+        val.className = 'race-stat-val';
+        val.textContent = value;
+        item.appendChild(lbl);
+        item.appendChild(val);
+        statsRow.appendChild(item);
+      });
+
+      slide.appendChild(wrap);
+      slide.appendChild(statsRow);
+      track.appendChild(slide);
+
+      const dot = document.createElement('div');
+      dot.className = 'race-dot'+(i===0?' active':'');
+      dot.onclick = (()=>{ const idx=i; return ()=>_goSlide(idx); })();
+      dots.appendChild(dot);
+    });
+    _goSlide(0);
+    _attachSwipe();
+  }
+
+  function _goSlide(i){
+    _raceIdx = Math.max(0, Math.min(_raceBikes.length-1, i));
+    const track = document.getElementById('raceCarouselTrack');
+    if(!track) return;
+    // card-peek: each card is calc(100% - 52px) + 12px gap
+    const outer = document.getElementById('raceCarouselOuter');
+    const cardW = outer ? (outer.offsetWidth - 52) : 300;
+    const gap = 12;
+    const offset = _raceIdx * (cardW + gap);
+    track.style.transform = 'translateX(-'+offset+'px)';
+    // update active class
+    document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
+    document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
+    const b = _raceBikes[_raceIdx];
+    if(b){ const nameEl = document.getElementById('raceBikeName'); if(nameEl) nameEl.textContent = b.name+' №'+b.lv; }
+  }
+
+  function _attachSwipe(){
+    const outer = document.getElementById('raceCarouselOuter');
+    if(!outer||outer._swipeAttached) return;
+    outer._swipeAttached = true;
+    outer.addEventListener('touchstart', e=>{ _touchStartX = e.touches[0].clientX; },{passive:true});
+    outer.addEventListener('touchend',   e=>{ const dx=e.changedTouches[0].clientX-_touchStartX; if(Math.abs(dx)>40){ dx<0?_goSlide(_raceIdx+1):_goSlide(_raceIdx-1); } },{passive:true});
+  }
+
+  /* ── START RACE — shows loading then dev notice ── */
+  window.startRace = async function(){
+    if(_raceActive||_raceStarted) return;
+    if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
+    const ton = S?.user?.tonBalance||0;
+    if(ton < 0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+
+    _raceStarted = true;
+
+    // Show loading overlay (reuse existing or create)
+    let loadOv = document.getElementById('raceLoadingOv');
+    if(!loadOv){
+      loadOv = document.createElement('div');
+      loadOv.id = 'raceLoadingOv';
+      loadOv.style.cssText = 'position:fixed;inset:0;z-index:190;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:opacity .3s;';
+      loadOv.innerHTML = '<div style="width:60px;height:60px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div><div style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">⏳ Загрузка гонки...</div><div style="font-size:14px;color:rgba(232,245,233,.5);font-weight:600;font-family:Fredoka,cursive">Ищем соперника</div>';
+      document.body.appendChild(loadOv);
+    }
+    loadOv.style.opacity='1'; loadOv.style.pointerEvents='all';
+
+    setTimeout(()=>{
+      loadOv.style.opacity='0'; loadOv.style.pointerEvents='none';
+      _raceStarted = false;
+      const devOv = document.getElementById('raceDevOverlay');
+      if(devOv) devOv.classList.add('show');
+    }, 2200);
+  };
+
+  /* ── Back to select ── */
+  window.raceGoBack = function(){
+    if(_raceAnimInterval){ clearInterval(_raceAnimInterval); _raceAnimInterval=null; }
+    _raceActive=false; _raceStarted=false; _raceServerResult=null;
+    const rp=document.getElementById('raceResultPhase'); if(rp) rp.style.display='none';
+    const sp=document.getElementById('raceSelectPhase'); if(sp) sp.style.display='block';
+    const ap=document.getElementById('raceAnimPhase');   if(ap) ap.style.display='none';
+    _raceInit();
+  };
+
+  window._raceRefreshIfActive = function(){
+    const sec = document.getElementById('sectionTasks');
+    if(sec&&sec.classList.contains('active')) setTimeout(window._raceInit,60);
+  };
+
+})();
+</script>
 
 <!-- FINANCE -->
 <div class="sec" id="sectionFinance">
@@ -2244,7 +2498,8 @@ const SERVERS = [
 // Actions that MUST go to ONE server only (write ops — prevent double execution)
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
-  'claimTask','verifyTask','createTask','deposit'
+  'claimTask','verifyTask','createTask','deposit',
+  'buyBike','upgradeStats','race'
 ]);
 
 const API_TIMEOUT_MS  = 8000;
@@ -2587,7 +2842,12 @@ async function loadState(){
     if(!S._dataLoaded) return;
   }
   // Only update UI if we have confirmed server data at least once
-  if(S._dataLoaded){ updateUI(); renderGarage(); renderBikes(); }
+  if(S._dataLoaded){
+    updateUI();
+    renderGarage();
+    renderBikes();
+    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+  }
   S._initialized = true;
 }
 
@@ -2636,438 +2896,9 @@ function goNav(el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
-  hideFab();
+  hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
-  if(el.dataset.s==='sectionTasks'){renderRaceSelect();}
-}
-
-function goToMarket(){
-  const el=document.querySelector('.ni[data-s="sectionMarket"]');
-  if(el) goNav(el);
-}
-
-/* ═══════════════════════════════════════════════════════
-   BALI RALLY — RACE ENGINE
-═══════════════════════════════════════════════════════ */
-const RACE_COST   = 0.5;
-const RACE_WIN    = 0.9;
-const RACE_DUR    = 15; // seconds
-const ROAD_IMG    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png';
-
-// AI opponent names pool
-const AI_NAMES = ['@Kilorok','@SpeedX','@Turbo_99','@Drift_K','@NitroAce','@RacePro','@MaxDrive'];
-
-let _raceState = {
-  active: false,
-  myBike: null,
-  aiBike: null,
-  aiName: '',
-  myPos: 0,     // 0..1 progress
-  aiPos: 0,
-  mySpeed: 0,
-  aiSpeed: 0,
-  elapsed: 0,
-  animId: null,
-  lastTs: null,
-  finished: false,
-  winner: null,  // 'me' | 'ai'
-  carouselIdx: 0,
-  ownedBikes: [],
-};
-
-/* ── CAROUSEL ── */
-function renderRaceSelect(){
-  const owned = (S.user && S.user.ownedBikes) ? S.user.ownedBikes.map(Number) : [];
-  _raceState.ownedBikes = BIKES.filter(b=>owned.includes(b.lv));
-
-  const noBikes = document.getElementById('raceNoBikes');
-  const inner   = document.getElementById('raceSelectInner');
-  const startBtn= document.getElementById('raceStartBtn');
-
-  if(!_raceState.ownedBikes.length){
-    noBikes.style.display='block';
-    inner.style.display='none';
-    return;
-  }
-  noBikes.style.display='none';
-  inner.style.display='block';
-
-  // clamp index
-  if(_raceState.carouselIdx >= _raceState.ownedBikes.length) _raceState.carouselIdx=0;
-
-  // Build slides
-  const track = document.getElementById('raceCarouselTrack');
-  track.innerHTML = '';
-  _raceState.ownedBikes.forEach((b,i)=>{
-    const slide = document.createElement('div');
-    slide.className='race-slide';
-    slide.innerHTML=`
-      <img class="race-slide-img" src="${b.img}" onerror="this.style.opacity='.3'">
-      <div class="race-promo-lbl" onclick="openGrDetail(${b.lv})">Прокачать</div>
-    `;
-    track.appendChild(slide);
-  });
-
-  // Dots
-  const dotsEl = document.getElementById('raceDots');
-  dotsEl.innerHTML='';
-  _raceState.ownedBikes.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='race-dot'+(i===_raceState.carouselIdx?' active':'');
-    d.onclick=()=>raceCarouselTo(i);
-    dotsEl.appendChild(d);
-  });
-
-  // Check balance for button
-  const canAfford = (S.user.tonBalance||0) >= RACE_COST;
-  startBtn.disabled = !canAfford;
-  startBtn.style.opacity = canAfford ? '1' : '.45';
-
-  raceCarouselTo(_raceState.carouselIdx);
-}
-
-function raceCarousel(dir){
-  const len = _raceState.ownedBikes.length;
-  if(!len) return;
-  _raceState.carouselIdx = (_raceState.carouselIdx + dir + len) % len;
-  raceCarouselTo(_raceState.carouselIdx);
-}
-
-function raceCarouselTo(idx){
-  _raceState.carouselIdx = idx;
-  const track  = document.getElementById('raceCarouselTrack');
-  const dotsEl = document.getElementById('raceDots');
-  if(track) track.style.transform=`translateX(-${idx*100}%)`;
-
-  // Update dots
-  if(dotsEl){
-    dotsEl.querySelectorAll('.race-dot').forEach((d,i)=>{
-      d.classList.toggle('active', i===idx);
-    });
-  }
-
-  // Update name + stats
-  const b = _raceState.ownedBikes[idx];
-  if(!b) return;
-  const cs = getBikeCurrentStats(b);
-  document.getElementById('raceSelectedName').textContent = b.name;
-  document.getElementById('rs-speed').textContent   = cs.speed;
-  document.getElementById('rs-accel').textContent   = cs.accel;
-  document.getElementById('rs-maneuver').textContent= cs.maneuver;
-  document.getElementById('rs-nitro').textContent   = cs.nitro;
-}
-
-/* ── START RACE ── */
-async function startRace(){
-  const b = _raceState.ownedBikes[_raceState.carouselIdx];
-  if(!b) return;
-  if((S.user.tonBalance||0) < RACE_COST){showNotif('❌ Недостаточно TON','e');return;}
-
-  // Deduct cost optimistically in UI
-  S.user.tonBalance = Math.max(0,(S.user.tonBalance||0)-RACE_COST);
-  syncTopbar();
-
-  // Pick AI bike — similar speed, sometimes a bit faster/slower
-  const cs = getBikeCurrentStats(b);
-  const mySpeedStat = cs.speed;
-  // Find closest bike (can be same or adjacent level)
-  const allBikes = BIKES;
-  const sorted = [...allBikes].sort((a,b)=>Math.abs(a.speed-mySpeedStat)-Math.abs(b.speed-mySpeedStat));
-  // pick one of top 3 closest randomly for variety
-  const pool = sorted.slice(0,3);
-  const aiBikeBase = pool[Math.floor(Math.random()*pool.length)];
-
-  _raceState.myBike   = b;
-  _raceState.aiBike   = aiBikeBase;
-  _raceState.aiName   = AI_NAMES[Math.floor(Math.random()*AI_NAMES.length)];
-  _raceState.myPos    = 0;
-  _raceState.aiPos    = 0;
-  _raceState.mySpeed  = 0;
-  _raceState.aiSpeed  = 0;
-  _raceState.elapsed  = 0;
-  _raceState.finished = false;
-  _raceState.winner   = null;
-  _raceState.active   = true;
-  _raceState.lastTs   = null;
-
-  // Show arena
-  document.getElementById('raceArena').classList.add('active');
-  document.getElementById('arenaLeftName').textContent  = S.tg?.initDataUnsafe?.user?.username ? '@'+S.tg.initDataUnsafe.user.username : '@You';
-  document.getElementById('arenaRightName').textContent = _raceState.aiName;
-
-  // Init canvas
-  initRaceCanvas();
-
-  // Start loop
-  _raceState.animId = requestAnimationFrame(raceLoop);
-}
-
-/* ── CANVAS SETUP ── */
-let _roadImg = null;
-let _myCarImg = null;
-let _aiCarImg = null;
-
-function initRaceCanvas(){
-  const canvas = document.getElementById('raceCanvas');
-  const arena  = document.getElementById('raceArena');
-  canvas.width  = arena.clientWidth  || window.innerWidth;
-  canvas.height = arena.clientHeight || window.innerHeight;
-
-  // Preload road
-  if(!_roadImg){
-    _roadImg = new Image();
-    _roadImg.src = ROAD_IMG;
-  }
-  // My car image
-  _myCarImg = new Image();
-  _myCarImg.src = _raceState.myBike.img;
-  // AI car image
-  _aiCarImg = new Image();
-  _aiCarImg.src = _raceState.aiBike.img;
-}
-
-/* ── RACE LOOP ── */
-function raceLoop(ts){
-  if(!_raceState.active) return;
-
-  if(!_raceState.lastTs) _raceState.lastTs = ts;
-  const dt = Math.min((ts - _raceState.lastTs)/1000, 0.05); // cap at 50ms
-  _raceState.lastTs = ts;
-  _raceState.elapsed += dt;
-
-  const t = Math.min(_raceState.elapsed / RACE_DUR, 1); // 0..1
-
-  // ── Physics: speed ramp ──
-  const myStats  = getBikeCurrentStats(_raceState.myBike);
-  const aiStats  = _raceState.aiBike; // base stats
-
-  // acceleration curve: slow start, top speed reached ~40% of race
-  const accelPhase = Math.min(t / 0.35, 1);
-  const myTopSpeed  = myStats.speed;
-  const aiTopSpeed  = aiStats.speed;
-
-  // Add nitro burst: random nitro boost every 3-5s
-  const nitroBurst = (Math.sin(_raceState.elapsed * 1.3) > 0.7) ? myStats.nitro * 0.008 : 0;
-  const aiNitro    = (Math.cos(_raceState.elapsed * 1.1) > 0.72) ? aiStats.nitro  * 0.008 : 0;
-
-  _raceState.mySpeed = myTopSpeed  * accelPhase + nitroBurst;
-  _raceState.aiSpeed = aiTopSpeed  * accelPhase + aiNitro;
-
-  // Progress: integrate speed (normalized so max speed → finish in RACE_DUR)
-  const normFactor = 1 / (myTopSpeed > aiTopSpeed ? myTopSpeed : aiTopSpeed) / RACE_DUR;
-  _raceState.myPos  = Math.min(_raceState.myPos + _raceState.mySpeed * normFactor * dt, 1);
-  _raceState.aiPos  = Math.min(_raceState.aiPos + _raceState.aiSpeed * normFactor * dt, 1);
-
-  // Maneuver: slight random weaving to make it exciting
-  const myWave = Math.sin(_raceState.elapsed * 2.1 + 0.5) * (myStats.maneuver / 500);
-  const aiWave = Math.sin(_raceState.elapsed * 1.9 + 1.2) * (aiStats.maneuver / 500);
-
-  // Update HUD
-  document.getElementById('arenaLeftSpeed').textContent  = Math.round(_raceState.mySpeed * 0.5);
-  document.getElementById('arenaRightSpeed').textContent = Math.round(_raceState.aiSpeed * 0.5);
-
-  const remSec = Math.max(0, Math.ceil(RACE_DUR - _raceState.elapsed));
-  const mm = String(Math.floor(remSec/60)).padStart(2,'0');
-  const ss = String(remSec%60).padStart(2,'0');
-  document.getElementById('arenaTimer').textContent = `${mm}:${ss}`;
-
-  // Check finish
-  if(_raceState.elapsed >= RACE_DUR && !_raceState.finished){
-    _raceState.finished = true;
-    // Determine winner based on final positions (stats-driven with small randomness)
-    const myScore  = myStats.speed + myStats.nitro*0.4 + myStats.accel*0.3 + myStats.maneuver*0.2 + Math.random()*30;
-    const aiScore  = aiStats.speed + aiStats.nitro*0.4  + aiStats.accel*0.3  + aiStats.maneuver*0.2  + Math.random()*30;
-    _raceState.winner = myScore >= aiScore ? 'me' : 'ai';
-    endRace();
-    return;
-  }
-
-  // ── Draw ──
-  drawRace(myWave, aiWave);
-
-  _raceState.animId = requestAnimationFrame(raceLoop);
-}
-
-/* ── DRAW ── */
-function drawRace(myWave, aiWave){
-  const canvas = document.getElementById('raceCanvas');
-  const ctx    = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-
-  ctx.clearRect(0,0,W,H);
-
-  // Road background — scrolling
-  if(_roadImg && _roadImg.complete){
-    const imgH = _roadImg.naturalHeight || H;
-    const imgW = _roadImg.naturalWidth  || W;
-    const scale = W / imgW;
-    const drawH = imgH * scale;
-
-    // Scroll offset based on time
-    const scrollOffset = (_raceState.elapsed * 180) % drawH;
-    // Draw 2 tiles to create seamless scroll
-    ctx.drawImage(_roadImg, 0, scrollOffset - drawH, W, drawH);
-    ctx.drawImage(_roadImg, 0, scrollOffset,          W, drawH);
-  } else {
-    // Fallback gradient road
-    const grd = ctx.createLinearGradient(0,0,0,H);
-    grd.addColorStop(0,'#1a2a1a');
-    grd.addColorStop(1,'#2d4a2d');
-    ctx.fillStyle=grd;
-    ctx.fillRect(0,0,W,H);
-    // Road center lines
-    ctx.strokeStyle='rgba(255,255,255,.4)';
-    ctx.lineWidth=3;
-    ctx.setLineDash([30,20]);
-    ctx.beginPath();
-    ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  // Semi-transparent overlay for dark road feel
-  ctx.fillStyle='rgba(0,0,0,.18)';
-  ctx.fillRect(0,0,W,H);
-
-  // Finish line visualization (appears at top when near end)
-  if(_raceState.elapsed > RACE_DUR*0.7){
-    const alpha = (_raceState.elapsed - RACE_DUR*0.7)/(RACE_DUR*0.3);
-    const finishY = H*0.15;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle='#fff';
-    ctx.font='bold 28px Arial';
-    ctx.textAlign='center';
-    ctx.fillText('FINISH', W/2, finishY);
-    // Checkered pattern
-    for(let cx=0;cx<W;cx+=20){
-      ctx.fillStyle=(Math.floor(cx/20)%2===0)?'#fff':'#000';
-      ctx.fillRect(cx, finishY+6, 20, 12);
-    }
-    ctx.restore();
-  }
-
-  // Progress-based Y positions (cars start at bottom, move toward top as they progress)
-  const carH = Math.round(H * 0.18);
-  const carW = Math.round(carH * 1.5);
-  const botY  = H - carH - 20;
-  const topY  = H * 0.38;
-
-  // MY CAR — right lane
-  const myLaneX   = W * 0.55;
-  const myCarY    = botY - (botY - topY) * _raceState.myPos;
-  const myWaveX   = myLaneX + myWave * 30;
-
-  // AI CAR — left lane
-  const aiLaneX   = W * 0.2;
-  const aiCarY    = botY - (botY - topY) * _raceState.aiPos;
-  const aiWaveX   = aiLaneX + aiWave * 30;
-
-  // Draw shadow under cars
-  function drawShadow(x, y, w, h){
-    ctx.save();
-    ctx.globalAlpha=0.35;
-    ctx.fillStyle='#000';
-    ctx.beginPath();
-    ctx.ellipse(x+w/2, y+h+4, w*0.4, 8, 0, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  drawShadow(myWaveX, myCarY, carW, carH);
-  drawShadow(aiWaveX, aiCarY, carW, carH);
-
-  // Draw cars
-  function drawCar(img, x, y, w, h){
-    if(img && img.complete && img.naturalWidth){
-      ctx.drawImage(img, x, y, w, h);
-    } else {
-      // Fallback colored rect
-      ctx.fillStyle=img===_myCarImg?'#fff':'#c8f000';
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, h, 8);
-      ctx.fill();
-    }
-  }
-
-  drawCar(_aiCarImg, aiWaveX, aiCarY, carW, carH);
-  drawCar(_myCarImg, myWaveX, myCarY, carW, carH);
-
-  // Speed lines near winner (nitro effect)
-  if(_raceState.mySpeed > _raceState.aiSpeed * 1.05){
-    ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,.25)';
-    ctx.lineWidth=1.5;
-    for(let i=0;i<5;i++){
-      const sx=myWaveX+carW*Math.random();
-      ctx.beginPath();
-      ctx.moveTo(sx, myCarY+carH+5);
-      ctx.lineTo(sx, myCarY+carH+15+Math.random()*20);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-}
-
-/* ── END RACE ── */
-async function endRace(){
-  cancelAnimationFrame(_raceState.animId);
-  _raceState.active = false;
-
-  // Small delay for last frame
-  await new Promise(r=>setTimeout(r,400));
-
-  // Hide arena
-  document.getElementById('raceArena').classList.remove('active');
-
-  // Show result
-  const won = _raceState.winner === 'me';
-
-  document.getElementById('resultTitle').textContent = won ? 'Победа!' : 'Поражение!';
-  document.getElementById('resultTitle').className   = 'result-title '+(won?'win':'lose');
-
-  if(won){
-    document.getElementById('resultPrizeTxt').textContent = '+'+RACE_WIN+' TON';
-    document.getElementById('resultPrize').style.display  = 'flex';
-    S.user.tonBalance = (S.user.tonBalance||0) + RACE_WIN;
-    syncTopbar();
-  } else {
-    document.getElementById('resultPrize').style.display  = 'none';
-  }
-
-  // VS card
-  const myUsername = S.tg?.initDataUnsafe?.user?.username ? '@'+S.tg.initDataUnsafe.user.username : '@You';
-  const myAvatar   = S.tg?.initDataUnsafe?.user?.photo_url || '';
-
-  document.getElementById('resNameMe').textContent   = myUsername;
-  document.getElementById('resBikeMe').textContent   = _raceState.myBike.name;
-  document.getElementById('resNameOpp').textContent  = _raceState.aiName;
-  document.getElementById('resBikeOpp').textContent  = _raceState.aiBike.name;
-
-  // Avatars
-  const meImg  = document.getElementById('resAvatarMeImg');
-  const oppImg = document.getElementById('resAvatarOppImg');
-  meImg.src    = myAvatar;
-  oppImg.src   = _raceState.aiBike.img;
-
-  // Winner border highlight
-  document.getElementById('resAvatarMe').className  = 'result-avatar '+(won?'winner':'loser');
-  document.getElementById('resAvatarOpp').className = 'result-avatar '+(won?'loser':'winner');
-
-  document.getElementById('raceResult').classList.add('active');
-
-  // Try to sync balance with server
-  try{
-    const res = await api('raceResult',{won, costTon: RACE_COST, prizeТon: won?RACE_WIN:0});
-    if(res && res.success && res.data){
-      S.user.tonBalance = res.data.tonBalance ?? S.user.tonBalance;
-      syncTopbar();
-    }
-  }catch(_){}
-}
-
-function continueAfterRace(){
-  document.getElementById('raceResult').classList.remove('active');
-  renderRaceSelect();
+  if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function') setTimeout(window._raceInit,60);
 }
 
 /* ════ MARKET ════ */
@@ -3095,11 +2926,10 @@ const BAM_IMG='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea
 
 function switchSocTab(tab){
   _socTab=tab;
-  document.getElementById('stab-partner').className  ='ttab'+(tab==='partner' ?' active':'');
-  document.getElementById('stab-community').className='ttab'+(tab==='community'?' active':'');
-  document.getElementById('socPartnerList').style.display  =tab==='partner'  ?'block':'none';
-  document.getElementById('socCommunityList').style.display=tab==='community'?'block':'none';
-  // Show floating button ONLY on community sub-tab
+  const sp=document.getElementById('stab-partner'); if(sp) sp.className='ttab'+(tab==='partner'?' active':'');
+  const sc=document.getElementById('stab-community'); if(sc) sc.className='ttab'+(tab==='community'?' active':'');
+  const spl=document.getElementById('socPartnerList'); if(spl) spl.style.display=tab==='partner'?'block':'none';
+  const scl=document.getElementById('socCommunityList'); if(scl) scl.style.display=tab==='community'?'block':'none';
   if(tab==='community') showFab(); else hideFab();
 }
 
@@ -3124,8 +2954,8 @@ function buildTaskCard(t,cat){
 
 function renderSocTasks(){
   const p=S.tasks?.partner||[], c=S.tasks?.community||[];
-  document.getElementById('socPartnerList').innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):`<div class="hist-empty">No partner tasks yet</div>`;
-  document.getElementById('socCommunityList').innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):`<div class="hist-empty">No community tasks yet</div>`;
+  const spl=document.getElementById('socPartnerList'); if(spl) spl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):'<div class="hist-empty">No partner tasks yet</div>';
+  const scl=document.getElementById('socCommunityList'); if(scl) scl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):'<div class="hist-empty">No community tasks yet</div>';
 }
 
 function switchRefTab(tab){
@@ -3161,7 +2991,8 @@ function renderTasks(){
 
   // ── Regular referral tasks (r200/r500 excluded) ──
   const REGULAR_TASKS = REF_TASKS.filter(t=>!['r200','r500'].includes(t.id));
-  document.getElementById('refTaskList').innerHTML=REGULAR_TASKS.map(t=>{
+  const _refList=document.getElementById('refTaskList');
+  if(_refList) _refList.innerHTML=REGULAR_TASKS.map(t=>{
     const done=S.doneTasks.includes(t.id), can=totalRefs>=t.n&&!done;
     const inviteLbl=(T.inviteFriend||'Invite {n} Friend').replace('{n}',t.n)+(t.n>1?(T.friendsPlural||'s'):'');
     return`<div class="task-item">
@@ -3173,6 +3004,7 @@ function renderTasks(){
       ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" onclick="claimRefTask('${t.id}')">${T.claimBtn2||'Claim'}</button>`:`<button class="tbtn done" style="background:rgba(255,255,255,.05)">${totalRefs}/${t.n}</button>`}
     </div>`;
   }).join('');
+  // guard end
 
   // ── Active referral tasks ──
   const activeListEl = document.getElementById('refActiveTaskList');
@@ -3199,8 +3031,8 @@ function switchTTab(el,t){
   document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tcont').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById(`tc${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.add('active');
-  // Hide fab — switchSocTab will show it again if community is selected
+  const tcEl=document.getElementById('tc'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(tcEl) tcEl.classList.add('active');
   hideFab();
 }
 async function claimRefTask(id){
@@ -3988,9 +3820,9 @@ async function init(){
 
   // Step 4: Render UI
   await ldAnimateTo(80, lt('ldBuilding'), 400);
-  renderGarage();
-  renderTasks();
-  renderBikes();
+  try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
+  try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
+  try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
   syncTopbar();
   await new Promise(r=>setTimeout(r,300));
 

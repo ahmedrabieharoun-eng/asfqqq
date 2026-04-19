@@ -355,17 +355,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes winning-pulse{0%,100%{box-shadow:0 0 0 rgba(76,175,80,0)}50%{box-shadow:0 0 18px rgba(76,175,80,.35)}}
 ::-webkit-scrollbar-thumb{background:var(--bamboo);border-radius:2px}
 .pg-title{font-size:19px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:7px}
-.topbar-main{display:flex;align-items:center;gap:8px;padding:9px 12px 7px;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(124,179,66,.12);}
-.uavatar{width:48px;height:48px;border-radius:50%;background:var(--glass);overflow:hidden;flex-shrink:0;position:relative;}
-.uavatar::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0151e176-c8ee-4c31-8bc1-7146680394c0.png') center/cover no-repeat;z-index:-1;}
-.uavatar img,.uavatar .ap{width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:18px}
-.tb-bals{display:flex;gap:5px;flex:1;min-width:0}
-.tb-chip{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:18px;padding:5px 10px;font-size:13px;font-weight:800;backdrop-filter:blur(8px);flex:1;min-width:0;white-space:nowrap;overflow:hidden;}
-.tb-chip.coin{border-color:rgba(255,215,0,.35);color:var(--coin)}
-.tb-chip.bam{border-color:rgba(124,179,66,.3);color:var(--bamboo)}
-.tb-chip-num{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis}
-.deposit-button{background:linear-gradient(135deg,var(--primary-pink),#c93d80);border:none;border-radius:28px;padding:6px 14px;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 4px 12px var(--pink-glow);white-space:nowrap;transition:.2s;flex-shrink:0;}
-.deposit-button:active{transform:scale(.96)}
+/* legacy topbar removed */
 .champ-glow-ring{display:none}.champ-glow-ring.r2{display:none}
 .champ-avatar{width:190px;height:auto;z-index:10;position:relative;cursor:pointer;user-select:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(80,255,120,.4));}
 .champ-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;text-align:center;letter-spacing:.5px}
@@ -1738,7 +1728,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="swap-currency-row">
           <div class="swap-currency-info">
             <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
-            <span class="swap-currency-name">Bamboo</span>
+            <span class="swap-currency-name">Bamboo<//span>
           </div>
           <div class="swap-input-wrap">
             <input type="number" class="swap-input" id="swapFromAmt" placeholder="0" oninput="updSwapCalc()">
@@ -1819,7 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Main idea -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--bamboo);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpIdeaTitle">💡 Main Concept</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
       </div>
       <!-- Pages explanation -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
@@ -1827,7 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;gap:10px;align-items:flex-start">
             <span style="font-size:20px;flex-shrink:0">🏠</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageHome">Home</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageHomeDesc">View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.</div></div>
+            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageHome">Home</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageHomeDesc">Browse and purchase motorcycles for your garage.</div></div>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
             <span style="font-size:20px;flex-shrink:0">🛒</span>
@@ -1981,7 +1971,7 @@ const SERVERS = [
 
 // Actions that MUST go to ONE server only (write ops — prevent double execution)
 const WRITE_ACTIONS = new Set([
-  'withdraw','exchange','buy','upgradeTank','collect',
+  'withdraw','exchange','saveBike','saveBikeUpgrade',
   'claimTask','verifyTask','createTask','deposit'
 ]);
 
@@ -2016,7 +2006,7 @@ async function _callOne(url, action, data, authHdr){
   try{
     const r = await fetch(`${url}/api`,{method:'POST',headers:heads,body:JSON.stringify({action,data}),signal:ctrl.signal});
     clearTimeout(tOut);
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    if(!r.ok) throw new Error(`HTTP_${r.status}`);
     return await r.json();
   }catch(e){ clearTimeout(tOut); throw e; }
 }
@@ -2038,8 +2028,12 @@ async function _raceServers(action, data, authHdr){
           _setStickyServer(url);
           resolve(res);
         })
-        .catch(()=>{
-          _markDead(url);
+        .catch((err)=>{
+          // Don't mark server dead on auth errors — server IS alive, just needs auth
+          const msg = err?.message || '';
+          if(!msg.includes('HTTP_401') && !msg.includes('HTTP_403')){
+            _markDead(url);
+          }
           fails++;
           if(fails===live.length && !done) reject(new Error('All servers unreachable'));
         });
@@ -2074,52 +2068,14 @@ async function _call(url/*ignored*/, action, data, authHdr){
 
 // Exposed for loading screen to race servers explicitly at startup
 window._raceServersNow = async function(authHdr){
-  return _raceServers('ping', {}, authHdr).catch(()=>
-    _raceServers('getState', {start_param:'',_initData:''}, authHdr)
-  );
+  // Always use ping (no auth needed) to find fastest server
+  return _raceServers('ping', {}, null).catch(()=>{
+    // If ping fails entirely, try with auth as fallback
+    return _raceServers('ping', {}, authHdr).catch(()=>{});
+  });
 };
 
-const BAM_URL='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png';
 
-// Fix 4: rebalanced items — clear ROI progression, higher tier always better per coin
-const ITEMS = [
-  {id:'bamboo_stick',   name:'Bamboo Stick',       icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a995343f-ab46-4c91-9cf2-1140c0bdd6f5.png',  price:7500,    power:50    },
-  {id:'panda_paw',      name:'Panda Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
-  {id:'leaf_fan',       name:'Leaf Fan Cooler',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1657ae3-3927-41e9-a32d-70ab89ddfe3b.png',  price:125000,  power:1200  },
-  {id:'bamboo_energy',  name:'Bamboo Energy Pod',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/73a7e781-107c-4598-9c1a-e9db2c65dbf5.png',  price:625000,  power:7500  },
-  {id:'panda_den',      name:'Panda Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
-  {id:'bamboo_forest',  name:'Bamboo Forest Rig',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/273f8ce0-bfa2-4618-895a-00481620d1d9.png',  price:6500000, power:110000},
-];
-// 27 tank levels — capacity only, no speedBonus
-const TANK_LVS = {
-  1 :{cap:5000,      upgCost:1000,       label:'Starter Tank'},
-  2 :{cap:10000,     upgCost:3000,       label:'Leaf Tank'},
-  3 :{cap:20000,     upgCost:8000,       label:'Bamboo Tank'},
-  4 :{cap:40000,     upgCost:20000,      label:'Panda Tank'},
-  5 :{cap:80000,     upgCost:50000,      label:'Mega Tank'},
-  6 :{cap:150000,    upgCost:120000,     label:'Empire Tank'},
-  7 :{cap:250000,    upgCost:250000,     label:'Forest Tank'},
-  8 :{cap:400000,    upgCost:450000,     label:'Giant Tank'},
-  9 :{cap:600000,    upgCost:750000,     label:'Legend Tank'},
-  10:{cap:900000,    upgCost:1200000,    label:'Titan Tank'},
-  11:{cap:1300000,   upgCost:1800000,    label:'Storm Tank'},
-  12:{cap:1800000,   upgCost:2700000,    label:'Thunder Tank'},
-  13:{cap:2500000,   upgCost:4000000,    label:'Volcano Tank'},
-  14:{cap:3300000,   upgCost:5500000,    label:'Glacier Tank'},
-  15:{cap:4300000,   upgCost:8000000,    label:'Aurora Tank'},
-  16:{cap:5500000,   upgCost:11000000,   label:'Nova Tank'},
-  17:{cap:7000000,   upgCost:15000000,   label:'Cosmic Tank'},
-  18:{cap:8800000,   upgCost:20000000,   label:'Galaxy Tank'},
-  19:{cap:11000000,  upgCost:27000000,   label:'Nebula Tank'},
-  20:{cap:14000000,  upgCost:35000000,   label:'Supernova Tank'},
-  21:{cap:17500000,  upgCost:45000000,   label:'Quantum Tank'},
-  22:{cap:22000000,  upgCost:58000000,   label:'Infinity Tank'},
-  23:{cap:28000000,  upgCost:75000000,   label:'Eternal Tank'},
-  24:{cap:35000000,  upgCost:95000000,   label:'Celestial Tank'},
-  25:{cap:44000000,  upgCost:120000000,  label:'Divine Tank'},
-  26:{cap:55000000,  upgCost:150000000,  label:'Absolute Tank'},
-  27:{cap:70000000,  upgCost:200000000,  label:'Universe Tank'},
-};
 // Fix 5: Added r200 + r500 — rewards reduced to 10% of original
 const REF_TASKS=[
   {id:'r1',  n:1,   bam:50,    coins:2   },
@@ -2343,10 +2299,14 @@ async function loadState(){
 /* ════ UPDATE UI ════ */
 function updateUI(){
   const u = S.user;
-  document.getElementById('tbCoins').textContent   = fmt(u.coins||0);
-  document.getElementById('tbBamboo').textContent  = fmt(u.bamboo||0);
-  const rateDay = Math.round((u.miningRate||0)*24);
-  document.getElementById('champRateDay').textContent = fmt(rateDay);
+  // Topbar TON balance
+  const tbCoinsEl = document.getElementById('tbCoins');
+  if(tbCoinsEl) tbCoinsEl.textContent = fmt(u.coins||0);
+  // Legacy bamboo/bamboo-rate elements — safe-guarded (they may not exist)
+  const tbBambooEl = document.getElementById('tbBamboo');
+  if(tbBambooEl) tbBambooEl.textContent = fmt(u.bamboo||0);
+  const champRateEl = document.getElementById('champRateDay');
+  if(champRateEl){ const rd=Math.round((u.miningRate||0)*24); champRateEl.textContent=fmt(rd); }
   if(document.getElementById('exchBamboo')) document.getElementById('exchBamboo').textContent = fmt(u.bamboo||0);
   if(document.getElementById('exchCoins'))  document.getElementById('exchCoins').textContent  = fmt(u.coins||0);
   const finC = document.getElementById('finCoinsDisp');
@@ -2399,33 +2359,6 @@ function updateUI(){
 })();
 
 /* ════ TANK ════ */
-function startTank(){
-  if(S.tankInt) clearInterval(S.tankInt);
-  S.tankInt = setInterval(()=>{
-    const u=S.user, lv=u.tankLevel||1, cfg=TANK_LVS[lv]||TANK_LVS[1], rate=u.miningRate||0;
-    if(rate<=0){updateTankUI();return;}
-    S.tankProgress += (rate/3600);
-    if(S.tankProgress>cfg.cap) S.tankProgress=cfg.cap;
-    updateTankUI();
-  },1000);
-}
-function updateTankUI(){
-  const u=S.user, lv=u.tankLevel||1, cfg=TANK_LVS[lv]||TANK_LVS[1];
-  const pct = Math.min(100, Math.round((S.tankProgress/cfg.cap)*100));
-  const accruedExact = S.tankProgress.toFixed(6);
-  document.getElementById('champAccrued').textContent = accruedExact;
-  const btn=document.getElementById('collectBtn');
-  const pctEl=document.getElementById('claimPct');
-  const txtEl=document.getElementById('claimBtnTxt');
-  const has = S.tankProgress>=1;
-  btn.disabled = !has;
-  if(pctEl) pctEl.textContent = pct+'%';
-  if(txtEl) txtEl.innerHTML = has
-    ? `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:5px"> Claim ${fmt(Math.floor(S.tankProgress))} Bamboo`
-    : `<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:5px"> Tank Empty...`;
-  const lvEl=document.getElementById('tankLvDisp');
-  if(lvEl) lvEl.textContent=lv;
-}
 async function collectBamboo(){
   if(S._collectCooldown) return;
   if(!debounce('collect')) return;
@@ -2442,37 +2375,6 @@ async function collectBamboo(){
 }
 
 /* Tank upgrade modal */
-function buildUpgradeContent(){
-  const u=S.user, lv=u.tankLevel||1, cur=TANK_LVS[lv], next=TANK_LVS[lv+1];
-  let h=`<div style="background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px">
-    <div class="upg-levels">
-      <div class="upg-lv"><div class="lvn">Lv.${lv}</div><div class="lvl">${esc(cur.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Cap: ${fmt(cur.cap)}</div></div>
-      <div class="upg-arrow">→</div>`;
-  if(next){
-    h+=`<div class="upg-lv" style="border-color:var(--bamboo)"><div class="lvn" style="color:var(--coin)">Lv.${lv+1}</div><div class="lvl">${esc(next.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Cap: ${fmt(next.cap)}</div></div>`;
-  } else {
-    h+=`<div class="upg-lv"><div class="lvn">MAX</div><div class="lvl">Max Level</div></div>`;
-  }
-  h+=`</div>`;
-  if(next){
-    h+=`<div class="upg-det">📦 Capacity: <span>${fmt(cur.cap)} → ${fmt(next.cap)} Bamboo</span><br>💰 Cost: <span>${fmt(next.upgCost)} <img src="${BAM_URL}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle"></span></div>
-    <button class="btn-upg" onclick="upgradeTank()">⬆️ Upgrade for ${fmt(next.upgCost)} <img src="${BAM_URL}" style="width:16px;height:16px;object-fit:contain;vertical-align:middle"></button>`;
-  } else {
-    h+=`<div style="text-align:center;padding:12px;color:var(--bamboo);font-weight:800">🏆 Maximum Level!</div>`;
-  }
-  h+=`</div>`;
-  document.getElementById('upgradeContent').innerHTML=h;
-}
-async function upgradeTank(){
-  if(!debounce('upgradeTank')) return;
-  const u=S.user, lv=u.tankLevel||1, next=TANK_LVS[lv+1];
-  if(!next){showNotif('Already max!','e');return;}
-  if((u.bamboo||0)<next.upgCost){showNotif(`Need ${fmt(next.upgCost)} Bamboo!`,'e');return;}
-  S.user.bamboo-=next.upgCost; S.user.tankLevel=lv+1;
-  api('upgradeTank',{newLevel:lv+1}).catch(()=>{});
-  buildUpgradeContent(); updateUI();
-  showNotif(`✅ Tank → Level ${lv+1}!`,'s');
-}
 
 /* ════ NAVIGATION ════ */
 function hideFab(){const f=document.getElementById('floatAddTask');if(f)f.style.display='none';}
@@ -2489,28 +2391,6 @@ function goNav(el){
 }
 
 /* ════ MARKET ════ */
-function renderMarket(){
-  document.getElementById('marketList').innerHTML=ITEMS.map(it=>`
-    <div class="mkt-item">
-      <div class="mkt-icon">${it.icon==='img'?`<img src="${esc(it.iconUrl)}" style="width:90px;height:90px;object-fit:contain">`:esc(it.icon)}</div>
-      <div class="mkt-info">
-        <div class="mkt-name">${esc(it.name)}</div>
-        <div class="mkt-power">+${fmt(it.power)} Bamboo/hr per unit</div>
-        <div class="mkt-price-lbl"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:26px;height:26px;object-fit:contain;vertical-align:middle"> ${fmt(it.price)} Bamboo each</div>
-        <div class="mkt-owned" id="owned_${it.id}"></div>
-      </div>
-      <div class="mkt-actions">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
-          <div class="qty-ctrl">
-            <button class="qty-btn" onclick="chgQty('${it.id}',-1)">−</button>
-            <div class="qty-num" id="qty_${it.id}">1</div>
-            <button class="qty-btn" onclick="chgQty('${it.id}',+1)">+</button>
-          </div>
-          <button class="btn-buy-price" id="buybtn_${it.id}" onclick="buyItem('${it.id}')" style="width:100%">${fmt(it.price)}</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
 function chgQty(id,d){
   const el=document.getElementById(`qty_${id}`);
   let v=parseInt(el.textContent)||1;
@@ -2524,19 +2404,6 @@ function updateBuyBtn(id){
   const qEl=document.getElementById(`qty_${id}`);
   if(!el||!qEl) return;
   el.textContent=fmt(it.price*(parseInt(qEl.textContent)||1));
-}
-async function buyItem(id){
-  if(!debounce('buy_'+id)) return;
-  const it=ITEMS.find(i=>i.id===id);
-  const q=parseInt(document.getElementById(`qty_${id}`)?.textContent)||1;
-  const total=it.price*q;
-  if((S.user.bamboo||0)<total){showNotif(`Need ${fmt(total)} Bamboo!`,'e');return;}
-  api('buyItem',{itemId:id,qty:q}).catch(()=>{});
-  S.user.bamboo-=total;
-  S.user.machines=S.user.machines||{};
-  S.user.machines[id]=(S.user.machines[id]||0)+q;
-  S.user.miningRate=(S.user.miningRate||0)+(it.power*q);
-  updateUI(); showNotif(`✅ ${q}x ${esc(it.name)}! +${fmt(it.power*q)} Bamboo/hr`,'s'); spawnPtc();
 }
 
 /* ════ TASKS ════ */
@@ -3416,11 +3283,9 @@ function ldError(msg, retryLabel){
 
 // Preload all item images + panda image
 function preloadImages(){
-  const urls=[
-    'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a12ebc07-aa51-4ea7-b3ca-cefe4dce2a9e.png',
-    BAM_URL,
-    ...ITEMS.map(i=>i.iconUrl),
-  ];
+  // Only preload bike images — bamboo/market items removed
+  const bikeImgs = (typeof BIKES !== 'undefined') ? BIKES.map(b=>b.img) : [];
+  const urls = bikeImgs.filter(Boolean);
   return Promise.all(urls.map(u=>new Promise(res=>{
     const img=new Image();img.onload=img.onerror=res;img.src=u;
   })));
@@ -3538,7 +3403,6 @@ async function init(){
 
   // Step 4: Render UI
   await ldAnimateTo(80, lt('ldBuilding'), 400);
-  renderMarket();
   renderTasks();
   renderBikes();
   syncTopbar();
@@ -3549,7 +3413,6 @@ async function init(){
   setTimeout(()=>initTON(), 600);
   // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
-  startTank();
   setInterval(()=>{ loadState(); }, 30000);
   await new Promise(r=>setTimeout(r,400));
 
@@ -3585,7 +3448,7 @@ const TRANSLATIONS = {
     refLinkPh:'رابط الإحالة الخاص بك...',copyBtn:'نسخ',
     refNote:'📤 شارك هذا الرابط مع أصدقائك',
     recentRefs:'أحدث الإحالات',noReferrals:'لا إحالات بعد',
-    marketTitle:'سوق التعدين',
+    marketTitle:'متجر الدراجات',
     labelWallet:'المحفظة',notConnected:'غير متصل',connectBtn:'ربط',
     important:'مهم:',depositWarning1:'معرف المستخدم الخاص بك',
     depositWarning2:'يجب أن يكون التعليق الوحيد في المعاملة.',
@@ -3607,7 +3470,7 @@ const TRANSLATIONS = {
     helpWelcomeTitle:'🎁 مكافأة الترحيب المجانية',
     helpWelcomeBody:'عند التسجيل لأول مرة تحصل تلقائياً على:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — عملة السحب الأساسية<br><span style="color:#fff;font-weight:800">• 100 Bamboo/يوم</span> — طاقة تعدين مجانية تبدأ فوراً',
     helpIdeaTitle:'💡 الفكرة الرئيسية',
-    helpIdeaBody:'البوت مصنع بامبو افتراضي 🎋<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
+    helpIdeaBody:'البوت مصنع بامبو افتراضي 🎋<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
     helpPagesTitle:'🗂 شرح الصفحات',
     helpPageHome:'🏠 الرئيسية',helpPageHomeDesc:'تشوف الباندا وتانك التجميع ومعدل التعدين اليومي. اضغط Claim Bamboo لجمع ما تراكم.',
     helpPageMarket:'🛒 السوق',helpPageMarketDesc:'اشتري آلات تعدين بـ Bamboo. كل آلة تزيد إنتاجك اليومي.',
@@ -3691,7 +3554,7 @@ const TRANSLATIONS = {
     refLinkPh:'Your referral link...',copyBtn:'Copy',
     refNote:'📤 Share this link with friends',
     recentRefs:'Recent Referrals',noReferrals:'No referrals yet',
-    marketTitle:'Mining Market',
+    marketTitle:'Motorcycle Market',
     labelWallet:'Wallet',notConnected:'Not connected',connectBtn:'Connect',
     important:'IMPORTANT:',depositWarning1:'Your User ID',
     depositWarning2:'must be the ONLY comment in the transaction.',
@@ -3713,9 +3576,9 @@ const TRANSLATIONS = {
     helpWelcomeTitle:'🎁 Free Welcome Bonus',
     helpWelcomeBody:'When you register for the first time you automatically receive:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — main withdrawal currency<br><span style="color:#fff;font-weight:800">• 100 Bamboo/day</span> — free mining power starts immediately',
     helpIdeaTitle:'💡 Main Concept',
-    helpIdeaBody:'The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
+    helpIdeaBody:'The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
     helpPagesTitle:'🗂 Pages Guide',
-    helpPageHome:'🏠 Home',helpPageHomeDesc:'View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.',
+    helpPageHome:'🏠 Home',helpPageHomeDesc:'Browse and purchase motorcycles for your garage.',
     helpPageMarket:'🛒 Market',helpPageMarketDesc:'Buy mining machines with Bamboo. Each machine increases your daily output.',
     helpPageTasks:'✅ Tasks',helpPageTasksDesc:'Complete tasks for extra Bamboo. Referral tasks reward you with Bamboo + Coins.',
     helpPageFriends:'👥 Friends',helpPageFriendsDesc:'Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">20%</span> commission on every purchase your friend makes.',
@@ -3819,7 +3682,7 @@ const TRANSLATIONS = {
     helpWelcomeTitle:'🎁 Бесплатный приветственный бонус',
     helpWelcomeBody:'При первой регистрации вы автоматически получаете:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — основная валюта вывода<br><span style="color:#fff;font-weight:800">• 100 Bamboo/день</span> — бесплатный майнинг сразу',
     helpIdeaTitle:'💡 Основная концепция',
-    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🎋<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
+    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🎋<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
     helpPagesTitle:'🗂 Руководство по страницам',
     helpPageHome:'🏠 Главная',helpPageHomeDesc:'Смотрите панду, резервуар и скорость майнинга. Нажмите Claim Bamboo для сбора.',
     helpPageMarket:'🛒 Рынок',helpPageMarketDesc:'Покупайте машины за Bamboo. Каждая машина увеличивает суточный доход.',
@@ -3925,7 +3788,7 @@ const TRANSLATIONS = {
     helpWelcomeTitle:'🎁 Bono de bienvenida gratis',
     helpWelcomeBody:'Al registrarte por primera vez recibes automáticamente:<br><span style="color:#fff;font-weight:800">• 200 Monedas</span> — moneda principal de retiro<br><span style="color:#fff;font-weight:800">• 100 Bamboo/día</span> — minería gratuita empieza de inmediato',
     helpIdeaTitle:'💡 Concepto principal',
-    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🎋<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
+    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🎋<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
     helpPagesTitle:'🗂 Guía de páginas',
     helpPageHome:'🏠 Inicio',helpPageHomeDesc:'Ve el panda, el tanque y la tasa de minería. Pulsa Claim Bamboo para recoger lo acumulado.',
     helpPageMarket:'🛒 Mercado',helpPageMarketDesc:'Compra máquinas de minería con Bamboo. Cada máquina aumenta tu producción diaria.',
@@ -4031,7 +3894,7 @@ const TRANSLATIONS = {
     helpWelcomeTitle:'🎁 Bonus de bienvenue gratuit',
     helpWelcomeBody:'À votre première inscription vous recevez automatiquement:<br><span style="color:#fff;font-weight:800">• 200 Pièces</span> — monnaie de retrait principale<br><span style="color:#fff;font-weight:800">• 100 Bamboo/jour</span> — minage gratuit démarre immédiatement',
     helpIdeaTitle:'💡 Concept principal',
-    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🎋<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
+    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🎋<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo<//span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
     helpPagesTitle:'🗂 Guide des pages',
     helpPageHome:'🏠 Accueil',helpPageHomeDesc:'Voyez le panda, le réservoir et le taux de minage. Appuyez sur Claim Bamboo pour collecter.',
     helpPageMarket:'🛒 Marché',helpPageMarketDesc:'Achetez des machines de minage avec du Bamboo. Chaque machine augmente votre production quotidienne.',

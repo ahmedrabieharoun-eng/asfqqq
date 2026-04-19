@@ -1462,17 +1462,22 @@ async function doUpgradeStat(bikeLevel, stat){
   flex-direction:column;align-items:stretch;
 }
 .race-scene{
-  width:100%;height:360px;position:relative;overflow:hidden;
-  border-radius:0;
+  width:100%;height:380px;position:relative;overflow:hidden;
+  border-radius:0;background:#1a3a0a;
 }
 .race-road-bg{
   width:100%;height:100%;object-fit:cover;
   position:absolute;top:0;left:0;
-  animation:road-scroll 0.4s linear infinite;
 }
-@keyframes road-scroll{
-  0%{transform:translateY(0)}
-  100%{transform:translateY(20px)}
+/* Animated road lines overlay */
+.race-scene::after{
+  content:'';position:absolute;top:0;left:47%;width:6%;height:100%;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.7) 0px,rgba(255,255,255,.7) 30px,transparent 30px,transparent 60px);
+  animation:road-lines .3s linear infinite;z-index:2;pointer-events:none;
+}
+@keyframes road-lines{
+  0%{background-position:0 0}
+  100%{background-position:0 60px}
 }
 .race-hud{
   position:absolute;top:0;left:0;right:0;
@@ -1498,24 +1503,23 @@ async function doUpgradeStat(bikeLevel, stat){
   box-shadow:0 2px 12px rgba(0,0,0,.5);
 }
 
-/* Cars on road */
+/* Cars on road — top-down view, side-by-side lanes, move from bottom to top */
 .race-car{
-  position:absolute;bottom:0;
-  width:80px;
-  transition:left .1s linear;
+  position:absolute;
+  width:72px;
   z-index:8;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.7));
+  transition:bottom .15s linear;
 }
-.race-car-player{ left:22%; }
-.race-car-opponent{ left:60%; }
+.race-car-player{   left:20%; bottom:40px; }
+.race-car-opponent{ left:55%; bottom:40px; }
 
-/* car movement animation — bounce while racing */
 @keyframes car-drive{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  25%{transform:translateY(-3px) rotate(-1deg)}
-  75%{transform:translateY(-2px) rotate(1deg)}
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-2px)}
+  75%{transform:translateX(2px)}
 }
-.race-car.driving{ animation:car-drive .18s ease-in-out infinite; }
+.race-car.driving{ animation:car-drive .2s ease-in-out infinite; }
 
 /* Finish line overlay */
 .race-finish-banner{
@@ -1637,13 +1641,13 @@ async function doUpgradeStat(bikeLevel, stat){
 
         <!-- Player car (left lane) -->
         <div class="race-car race-car-player driving" id="raceCarPlayer" style="bottom:60px;left:18%">
-          <img id="raceCarPlayerImg" src="" style="width:80px;height:55px;object-fit:contain;transform:rotate(0deg) scaleX(-1)" onerror="this.style.display='none'">
+          <img id="raceCarPlayerImg" src="" style="width:72px;height:110px;object-fit:contain;transform:rotate(0deg)" onerror="this.style.display='none'">
           <div id="raceCarPlayerFallback" style="font-size:40px;display:none">🏍️</div>
         </div>
 
         <!-- Opponent car (right lane) -->
         <div class="race-car race-car-opponent driving" id="raceCarOpponent" style="bottom:60px;left:54%">
-          <img id="raceCarOpponentImg" src="" style="width:80px;height:55px;object-fit:contain;transform:rotate(0deg) scaleX(-1)" onerror="this.style.display='none'">
+          <img id="raceCarOpponentImg" src="" style="width:72px;height:110px;object-fit:contain;transform:rotate(0deg)" onerror="this.style.display='none'">
           <div id="raceCarOpponentFallback" style="font-size:40px;display:none">🏍️</div>
         </div>
 
@@ -1696,28 +1700,22 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <script>
 /* ══════════════════════════════════════════════
-   RACE ENGINE
+   RACE ENGINE — Full Server-Connected Version
 ══════════════════════════════════════════════ */
 (function(){
-  let _raceIdx = 0;       // currently selected bike index in owned bikes
-  let _raceBikes = [];    // owned bike objects
+  let _raceIdx = 0;
+  let _raceBikes = [];
   let _raceActive = false;
-  let _raceTimer = null;
-  let _raceSeconds = 15;
-  let _racePlayerPos = 0; // 0-100 progress
-  let _raceOpponentPos = 0;
-  let _racePlayerSpeed = 0;
-  let _raceOpponentSpeed = 0;
+  let _raceAnimInterval = null;
   let _raceSelectedBike = null;
   let _raceOpponentBike = null;
-  let _raceAnimInterval = null;
-  let _raceCarouselX = 0;
+  let _raceServerResult = null; // result from server
   let _touchStartX = 0;
+  let _raceStarted = false;
 
-  /* Opponent usernames pool */
-  const OPP_NAMES = ['@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce','@DustRider','@JungleRun','@FastWave'];
+  const OPP_NAMES = ['@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce','@DustRider','@JungleRun','@FastWave','@RaceKing','@DriftMaster'];
 
-  /* ── Build carousel when section is visited ── */
+  /* ── Init: build carousel from owned bikes ── */
   window._raceInit = function(){
     _raceBikes = [];
     if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
@@ -1726,9 +1724,10 @@ async function doUpgradeStat(bikeLevel, stat){
         if(b) _raceBikes.push(b);
       });
     }
+    const track = document.getElementById('raceCarouselTrack');
+    if(!track) return;
     if(_raceBikes.length === 0){
-      // show no bikes message
-      document.getElementById('raceCarouselTrack').innerHTML = `<div class="race-no-bikes" style="min-width:100%"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>У вас нет велосипедов.<br>Купите в <a onclick="goNavBySection('sectionMarket')">Гараже</a></div></div>`;
+      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style=\"font-size:48px;margin-bottom:12px\">🏍️</div><div>У вас нет байков.<br>Купите в <span style=\"color:var(--bamboo);cursor:pointer\" onclick=\"goNavBySection(\'sectionMarket\')\">Гараже</span></div></div>';
       document.getElementById('raceDots').innerHTML='';
       return;
     }
@@ -1736,36 +1735,36 @@ async function doUpgradeStat(bikeLevel, stat){
     _buildCarousel();
   };
 
-  function goNavBySection(s){
-    const el = document.querySelector(`.ni[data-s="${s}"]`);
+  window.goNavBySection = function(s){
+    const el = document.querySelector('.ni[data-s="'+s+'"]');
     if(el) goNav(el);
-  }
+  };
 
   function _buildCarousel(){
     const track = document.getElementById('raceCarouselTrack');
-    const dots = document.getElementById('raceDots');
+    const dots  = document.getElementById('raceDots');
+    if(!track||!dots) return;
     track.innerHTML = '';
-    dots.innerHTML = '';
+    dots.innerHTML  = '';
     _raceBikes.forEach((b,i)=>{
-      const stats = getBikeCurrentStats ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
+      const stats = (typeof getBikeCurrentStats === 'function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
       const slide = document.createElement('div');
       slide.className = 'race-bike-slide';
-      slide.innerHTML = `
-        <div class="race-bike-img-wrap">
-          <img src="${b.img}" alt="${b.name}" style="width:100%;height:200px;object-fit:cover">
-          <span class="race-upgrade-link" onclick="goNavBySection('sectionHome')">Прокачать</span>
-        </div>
-        <div class="race-stats-row">
-          <div class="race-stat-item"><div class="race-stat-lbl">Скорость</div><div class="race-stat-val">${stats.speed}</div></div>
-          <div class="race-stat-item"><div class="race-stat-lbl">Разгон</div><div class="race-stat-val">${stats.accel}</div></div>
-          <div class="race-stat-item"><div class="race-stat-lbl">Маневры</div><div class="race-stat-val">${stats.maneuver}</div></div>
-          <div class="race-stat-item"><div class="race-stat-lbl">Нитро</div><div class="race-stat-val">${stats.nitro}</div></div>
-        </div>`;
+      slide.innerHTML =
+        '<div class="race-bike-img-wrap">' +
+          '<img src="'+b.img+'" alt="'+b.name+'" style="width:100%;height:200px;object-fit:cover" onerror="this.style.background='#1a3a0a'">' +
+          '<span class="race-upgrade-link" onclick="goNavBySection('sectionHome')">Прокачать</span>' +
+        '</div>' +
+        '<div class="race-stats-row">' +
+          '<div class="race-stat-item"><div class="race-stat-lbl">Скорость</div><div class="race-stat-val">'+stats.speed+'</div></div>' +
+          '<div class="race-stat-item"><div class="race-stat-lbl">Разгон</div><div class="race-stat-val">'+stats.accel+'</div></div>' +
+          '<div class="race-stat-item"><div class="race-stat-lbl">Маневры</div><div class="race-stat-val">'+stats.maneuver+'</div></div>' +
+          '<div class="race-stat-item"><div class="race-stat-lbl">Нитро</div><div class="race-stat-val">'+stats.nitro+'</div></div>' +
+        '</div>';
       track.appendChild(slide);
-
       const dot = document.createElement('div');
-      dot.className = 'race-dot' + (i===0?' active':'');
-      dot.onclick = ()=>_goSlide(i);
+      dot.className = 'race-dot'+(i===0?' active':'');
+      dot.onclick = (()=>{ const idx=i; return ()=>_goSlide(idx); })();
       dots.appendChild(dot);
     });
     _goSlide(0);
@@ -1775,191 +1774,210 @@ async function doUpgradeStat(bikeLevel, stat){
   function _goSlide(i){
     _raceIdx = Math.max(0, Math.min(_raceBikes.length-1, i));
     const track = document.getElementById('raceCarouselTrack');
-    track.style.transform = `translateX(-${_raceIdx*100}%)`;
+    if(track) track.style.transform = 'translateX(-'+(_raceIdx*100)+'%)';
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
     const b = _raceBikes[_raceIdx];
-    if(b){
-      const nameEl = document.getElementById('raceBikeName');
-      if(nameEl) nameEl.textContent = `${b.name} №${b.lv}`;
-    }
+    if(b){ const nameEl = document.getElementById('raceBikeName'); if(nameEl) nameEl.textContent = b.name+' №'+b.lv; }
   }
 
   function _attachSwipe(){
     const outer = document.querySelector('.race-carousel-outer');
-    if(!outer) return;
-    outer.addEventListener('touchstart', e=>{ _touchStartX = e.touches[0].clientX; }, {passive:true});
-    outer.addEventListener('touchend', e=>{
-      const dx = e.changedTouches[0].clientX - _touchStartX;
-      if(Math.abs(dx) > 40){
-        if(dx < 0) _goSlide(_raceIdx+1);
-        else _goSlide(_raceIdx-1);
-      }
-    }, {passive:true});
+    if(!outer||outer._swipeAttached) return;
+    outer._swipeAttached = true;
+    outer.addEventListener('touchstart', e=>{ _touchStartX = e.touches[0].clientX; },{passive:true});
+    outer.addEventListener('touchend',   e=>{ const dx=e.changedTouches[0].clientX-_touchStartX; if(Math.abs(dx)>40){ dx<0?_goSlide(_raceIdx+1):_goSlide(_raceIdx-1); } },{passive:true});
   }
 
-  /* ── Start Race ── */
-  window.startRace = function(){
-    if(_raceActive) return;
-    if(_raceBikes.length === 0){ showNotif('❌ Нет велосипедов! Купите в Гараже','e'); return; }
-    const ton = S?.user?.tonBalance || 0;
-    if(ton < 0.5){ showNotif('❌ Недостаточно TON! Нужно 0.5 TON','e'); return; }
+  /* ── START RACE — calls server, plays animation simultaneously ── */
+  window.startRace = async function(){
+    if(_raceActive||_raceStarted) return;
+    if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
+    const ton = S?.user?.tonBalance||0;
+    if(ton < 0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
 
+    _raceStarted = true;
     _raceSelectedBike = _raceBikes[_raceIdx];
-    const playerStats = getBikeCurrentStats ? getBikeCurrentStats(_raceSelectedBike) : {speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
+    const playerStats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(_raceSelectedBike) : {speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
 
-    // Pick opponent bike with speed close to player (±20%, sometimes faster sometimes slower)
+    // Choose visual opponent (will be confirmed/overridden by server result)
     const pSpeed = playerStats.speed;
-    const allBikes = BIKES || [];
-    // Find bikes within ±30% speed range
-    let candidates = allBikes.filter(b => Math.abs(b.speed - pSpeed)/pSpeed <= 0.35);
-    if(!candidates.length) candidates = allBikes;
+    const allBikes = (typeof BIKES!=='undefined') ? BIKES : [];
+    let candidates = allBikes.filter(b=>Math.abs(b.speed-pSpeed)/Math.max(pSpeed,1)<=0.35);
+    if(!candidates.length) candidates = allBikes.length ? allBikes : [_raceSelectedBike];
     _raceOpponentBike = candidates[Math.floor(Math.random()*candidates.length)];
-    const opStats = {speed:_raceOpponentBike.speed,nitro:_raceOpponentBike.nitro,accel:_raceOpponentBike.accel,maneuver:_raceOpponentBike.maneuver};
 
-    // Deduct TON stake from local state immediately (optimistic)
-    if(S && S.user) S.user.tonBalance = Math.max(0,(S.user.tonBalance||0) - 0.5);
+    // Optimistic UI — deduct stake locally
+    if(S&&S.user) S.user.tonBalance = Math.max(0,(S.user.tonBalance||0)-0.5);
     syncTopbar();
 
-    // Set up HUD
-    const userName = S?.user?.username ? `@${S.user.username}` : '@You';
-    const oppName = OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
+    const userName = S?.user?.username ? '@'+S.user.username : '@You';
+    const oppName  = OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
+
+    // Setup HUD
     document.getElementById('raceHudP1Name').textContent = userName;
     document.getElementById('raceHudP2Name').textContent = oppName;
 
-    // Set car images
+    // Car images
     const pImg = document.getElementById('raceCarPlayerImg');
     const oImg = document.getElementById('raceCarOpponentImg');
-    pImg.src = _raceSelectedBike.img;
-    oImg.src = _raceOpponentBike.img;
-    pImg.style.display='block'; document.getElementById('raceCarPlayerFallback').style.display='none';
-    oImg.style.display='block'; document.getElementById('raceCarOpponentFallback').style.display='none';
+    if(pImg){ pImg.src=_raceSelectedBike.img; pImg.style.display='block'; }
+    if(oImg){ oImg.src=_raceOpponentBike.img; oImg.style.display='block'; }
+    const pFb=document.getElementById('raceCarPlayerFallback');   if(pFb) pFb.style.display='none';
+    const oFb=document.getElementById('raceCarOpponentFallback'); if(oFb) oFb.style.display='none';
 
-    // Switch to race phase
+    // Switch phase
     document.getElementById('raceSelectPhase').style.display='none';
-    const animPhase = document.getElementById('raceAnimPhase');
-    animPhase.style.display='flex';
+    document.getElementById('raceAnimPhase').style.display='flex';
     document.getElementById('raceFinishLine').style.display='none';
 
     _raceActive = true;
-    _raceSeconds = 15;
-    _racePlayerPos = 0;
-    _raceOpponentPos = 0;
+    _raceServerResult = null;
 
-    // Speed values for display — randomize around bike stats
-    const pBaseSpeed = Math.floor(pSpeed * 0.6 + Math.random()*pSpeed*0.3);
-    const oBaseSpeed = Math.floor(opStats.speed * 0.6 + Math.random()*opStats.speed*0.3);
+    // ── Fire server call in parallel with animation ──
+    api('race',{ bikeLevel: _raceSelectedBike.lv })
+      .then(res=>{
+        _raceServerResult = res; // {won, playerScore, oppScore, oppBikeLevel, tonBalance, reward}
+        // Sync actual server balance
+        if(S&&S.user&&res.tonBalance!==undefined) S.user.tonBalance = res.tonBalance;
+        syncTopbar();
+        // Update opponent bike from server response
+        if(res.oppBikeLevel && typeof BIKES!=='undefined'){
+          const sb = BIKES.find(x=>x.lv===res.oppBikeLevel);
+          if(sb) _raceOpponentBike = sb;
+        }
+      })
+      .catch(e=>{
+        console.warn('Race API error:',e.message);
+        // Revert optimistic deduction on network failure
+        if(S&&S.user) S.user.tonBalance = (S.user.tonBalance||0)+0.5;
+        syncTopbar();
+        _raceServerResult = { _error: e.message };
+      });
 
-    let elapsed = 0;
-    const TICK = 250; // ms
+    // ── Animation ──
+    const opStats = {speed:_raceOpponentBike.speed,nitro:_raceOpponentBike.nitro,accel:_raceOpponentBike.accel,maneuver:_raceOpponentBike.maneuver};
+    const pBaseSpd = Math.floor(pSpeed*0.6+Math.random()*pSpeed*0.25);
+    const oBaseSpd = Math.floor(opStats.speed*0.6+Math.random()*opStats.speed*0.25);
+    const pRate = (playerStats.speed*0.5+playerStats.accel*0.3+playerStats.nitro*0.2)/100;
+    const oRate = (opStats.speed*0.5+opStats.accel*0.3+opStats.nitro*0.2)/100;
+    const pEff  = pRate*(0.85+Math.random()*0.30);
+    const oEff  = oRate*(0.85+Math.random()*0.30);
 
-    // Progress rate per tick (how much each car advances per second)
-    // Influenced by speed + accel + nitro
-    const pRate = (playerStats.speed * 0.5 + playerStats.accel * 0.3 + playerStats.nitro * 0.2) / 100;
-    const oRate = (opStats.speed * 0.5 + opStats.accel * 0.3 + opStats.nitro * 0.2) / 100;
-
-    // Add randomness factor ±15%
-    const pEffRate = pRate * (0.85 + Math.random()*0.30);
-    const oEffRate = oRate * (0.85 + Math.random()*0.30);
+    let elapsed=0, pPos=0, oPos=0;
+    const TICK=250;
 
     _raceAnimInterval = setInterval(()=>{
       elapsed += TICK;
-      _raceSeconds = Math.max(0, 15 - Math.floor(elapsed/1000));
+      const sec = Math.max(0,15-Math.floor(elapsed/1000));
+      const td = document.getElementById('raceTimerDisplay');
+      if(td) td.textContent='00:'+(sec<10?'0':'')+sec;
 
-      // Update timer
-      const s = _raceSeconds;
-      document.getElementById('raceTimerDisplay').textContent = `00:${s<10?'0':''}${s}`;
+      pPos = Math.min(100, pPos+pEff*(TICK/1000)*100);
+      oPos = Math.min(100, oPos+oEff*(TICK/1000)*100);
 
-      // Update positions
-      _racePlayerPos += pEffRate * (TICK/1000) * 100;
-      _raceOpponentPos += oEffRate * (TICK/1000) * 100;
+      const curP = Math.max(0, Math.floor(pBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
+      const curO = Math.max(0, Math.floor(oBaseSpd*Math.min(1,elapsed/2000)+Math.random()*8-4));
+      const h1=document.getElementById('raceHudP1Speed'); if(h1) h1.textContent=curP;
+      const h2=document.getElementById('raceHudP2Speed'); if(h2) h2.textContent=curO;
 
-      // Clamp to 100
-      _racePlayerPos = Math.min(100, _racePlayerPos);
-      _raceOpponentPos = Math.min(100, _raceOpponentPos);
+      // Cars move forward (bottom → middle of scene)
+      const pBottom = 40 + (pPos/100)*120; // px from bottom
+      const oBottom = 40 + (oPos/100)*120;
+      const carP=document.getElementById('raceCarPlayer');    if(carP) carP.style.bottom=pBottom+'px';
+      const carO=document.getElementById('raceCarOpponent'); if(carO) carO.style.bottom=oBottom+'px';
 
-      // Update speeds shown
-      const curPSpeed = Math.floor(pBaseSpeed * Math.min(1, elapsed/2000) + Math.random()*8 - 4);
-      const curOSpeed = Math.floor(oBaseSpeed * Math.min(1, elapsed/2000) + Math.random()*8 - 4);
-      document.getElementById('raceHudP1Speed').textContent = Math.max(0, curPSpeed);
-      document.getElementById('raceHudP2Speed').textContent = Math.max(0, curOSpeed);
+      const timeUp = elapsed>=15000;
+      const done   = pPos>=100||oPos>=100;
 
-      // Move cars horizontally based on progress difference
-      const pLeft = 8 + (_racePlayerPos/100) * 28; // 8% to 36%
-      const oLeft = 48 + (_raceOpponentPos/100) * 28; // 48% to 76%
-      document.getElementById('raceCarPlayer').style.left = pLeft+'%';
-      document.getElementById('raceCarOpponent').style.left = oLeft+'%';
-
-      // Check end conditions
-      const timeUp = elapsed >= 15000;
-      const pDone = _racePlayerPos >= 100;
-      const oDone = _raceOpponentPos >= 100;
-
-      if(timeUp || pDone || oDone){
+      if(timeUp||done){
         clearInterval(_raceAnimInterval);
         _raceAnimInterval = null;
+        const fl=document.getElementById('raceFinishLine');
+        if(fl) fl.style.display='flex';
 
-        // Show finish line briefly
-        document.getElementById('raceFinishLine').style.display='flex';
-
-        setTimeout(()=>{
+        // Wait for server result (max 3s extra) then show result
+        _waitServerResult(1000, 3000, ()=>{
           _raceActive = false;
-          const playerWon = _racePlayerPos >= _raceOpponentPos;
-          _showResult(playerWon, userName, oppName);
-        }, 800);
+          _raceStarted = false;
+          const won = _raceServerResult
+            ? (_raceServerResult._error ? pPos>=oPos : _raceServerResult.won)
+            : pPos>=oPos;
+          _showResult(won, userName, oppName);
+        });
       }
-
     }, TICK);
   };
 
-  function _showResult(won, userName, oppName){
-    document.getElementById('raceAnimPhase').style.display='none';
-    const res = document.getElementById('raceResultPhase');
-    res.style.display='flex';
+  /* Wait for server result, with timeout fallback */
+  function _waitServerResult(checkInterval, maxWait, cb){
+    let waited=0;
+    const iv=setInterval(()=>{
+      waited+=checkInterval;
+      if(_raceServerResult!==null||waited>=maxWait){
+        clearInterval(iv);
+        setTimeout(cb,500);
+      }
+    },checkInterval);
+  }
 
-    const titleEl = document.getElementById('raceResultTitle');
-    const rewardEl = document.getElementById('raceResultRewardTxt');
+  /* ── Show result screen ── */
+  function _showResult(won, userName, oppName){
+    const ap=document.getElementById('raceAnimPhase'); if(ap) ap.style.display='none';
+    const rp=document.getElementById('raceResultPhase'); if(!rp) return;
+    rp.style.display='flex';
+
+    const titleEl=document.getElementById('raceResultTitle');
+    const rewardTxt=document.getElementById('raceResultRewardTxt');
 
     if(won){
-      titleEl.textContent = 'Победа!';
-      titleEl.className = 'race-result-title win';
-      rewardEl.textContent = '+0.9 TON';
-      // Add winnings
-      if(S && S.user) S.user.tonBalance = (S.user.tonBalance||0) + 0.9;
+      if(titleEl){ titleEl.textContent='Победа!'; titleEl.className='race-result-title win'; }
+      if(rewardTxt) rewardTxt.textContent='+0.9 TON';
+      // If server didn't respond, apply optimistic win
+      if(!_raceServerResult||_raceServerResult._error){
+        if(S&&S.user) S.user.tonBalance=(S.user.tonBalance||0)+0.9;
+      }
     } else {
-      titleEl.textContent = 'Поражение';
-      titleEl.className = 'race-result-title lose';
-      rewardEl.textContent = '-0.5 TON';
+      if(titleEl){ titleEl.textContent='Поражение'; titleEl.className='race-result-title lose'; }
+      if(rewardTxt) rewardTxt.textContent='-0.5 TON';
     }
     syncTopbar();
 
-    // VS display
-    document.getElementById('raceVsName1').textContent = userName;
-    document.getElementById('raceVsBike1').textContent = _raceSelectedBike?.name || 'Bike';
-    document.getElementById('raceVsName2').textContent = oppName;
-    document.getElementById('raceVsBike2').textContent = _raceOpponentBike?.name || 'Bike';
+    // VS row
+    const n1=document.getElementById('raceVsName1'); if(n1) n1.textContent=userName;
+    const b1=document.getElementById('raceVsBike1'); if(b1) b1.textContent=_raceSelectedBike?.name||'Bike';
+    const n2=document.getElementById('raceVsName2'); if(n2) n2.textContent=oppName;
+    const b2=document.getElementById('raceVsBike2');
+    if(b2){
+      const obl=_raceServerResult?.oppBikeLevel;
+      const ob=obl&&typeof BIKES!=='undefined'?BIKES.find(x=>x.lv===obl):_raceOpponentBike;
+      b2.textContent=(ob?.name)||'Bike';
+    }
 
     // Avatars
-    const av1 = document.getElementById('raceVsAv1');
-    const av2 = document.getElementById('raceVsAv2');
-    if(S?.user?.photoUrl){
-      av1.innerHTML = `<img src="${S.user.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-    } else { av1.textContent = '🏍️'; }
-    av2.textContent = ['🦊','🐻','🤖','🦅','🐺','🦁'][Math.floor(Math.random()*6)];
+    const av1=document.getElementById('raceVsAv1');
+    if(av1){
+      if(S?.user?.photoUrl) av1.innerHTML='<img src="'+S.user.photoUrl+'" style="width:52px;height:52px;object-fit:cover;border-radius:50%">';
+      else av1.textContent='🏍️';
+    }
+    const av2=document.getElementById('raceVsAv2');
+    if(av2) av2.textContent=['🦊','🐻','🤖','🦅','🐺','🦁'][Math.floor(Math.random()*6)];
   }
 
+  /* ── Back to select ── */
   window.raceGoBack = function(){
-    document.getElementById('raceResultPhase').style.display='none';
-    document.getElementById('raceSelectPhase').style.display='block';
+    if(_raceAnimInterval){ clearInterval(_raceAnimInterval); _raceAnimInterval=null; }
+    _raceActive=false; _raceStarted=false; _raceServerResult=null;
+    const rp=document.getElementById('raceResultPhase'); if(rp) rp.style.display='none';
+    const sp=document.getElementById('raceSelectPhase'); if(sp) sp.style.display='block';
+    const ap=document.getElementById('raceAnimPhase');   if(ap) ap.style.display='none';
     _raceInit();
   };
 
-  /* ── Hook into goNav to init race on section open ── */
+  /* ── Hook goNav ── */
   const _origGoNav = window.goNav;
   window.goNav = function(el){
     _origGoNav(el);
-    if(el.dataset.s === 'sectionTasks'){
-      setTimeout(_raceInit, 50);
-    }
+    if(el.dataset.s==='sectionTasks') setTimeout(window._raceInit,60);
   };
 
 })();
@@ -2520,7 +2538,8 @@ const SERVERS = [
 // Actions that MUST go to ONE server only (write ops — prevent double execution)
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
-  'claimTask','verifyTask','createTask','deposit'
+  'claimTask','verifyTask','createTask','deposit',
+  'buyBike','upgradeStats','race'
 ]);
 
 const API_TIMEOUT_MS  = 8000;
@@ -2941,11 +2960,10 @@ const BAM_IMG='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea
 
 function switchSocTab(tab){
   _socTab=tab;
-  document.getElementById('stab-partner').className  ='ttab'+(tab==='partner' ?' active':'');
-  document.getElementById('stab-community').className='ttab'+(tab==='community'?' active':'');
-  document.getElementById('socPartnerList').style.display  =tab==='partner'  ?'block':'none';
-  document.getElementById('socCommunityList').style.display=tab==='community'?'block':'none';
-  // Show floating button ONLY on community sub-tab
+  const sp=document.getElementById('stab-partner'); if(sp) sp.className='ttab'+(tab==='partner'?' active':'');
+  const sc=document.getElementById('stab-community'); if(sc) sc.className='ttab'+(tab==='community'?' active':'');
+  const spl=document.getElementById('socPartnerList'); if(spl) spl.style.display=tab==='partner'?'block':'none';
+  const scl=document.getElementById('socCommunityList'); if(scl) scl.style.display=tab==='community'?'block':'none';
   if(tab==='community') showFab(); else hideFab();
 }
 
@@ -2970,8 +2988,8 @@ function buildTaskCard(t,cat){
 
 function renderSocTasks(){
   const p=S.tasks?.partner||[], c=S.tasks?.community||[];
-  document.getElementById('socPartnerList').innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):`<div class="hist-empty">No partner tasks yet</div>`;
-  document.getElementById('socCommunityList').innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):`<div class="hist-empty">No community tasks yet</div>`;
+  const spl=document.getElementById('socPartnerList'); if(spl) spl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):'<div class="hist-empty">No partner tasks yet</div>';
+  const scl=document.getElementById('socCommunityList'); if(scl) scl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):'<div class="hist-empty">No community tasks yet</div>';
 }
 
 function switchRefTab(tab){
@@ -3007,7 +3025,8 @@ function renderTasks(){
 
   // ── Regular referral tasks (r200/r500 excluded) ──
   const REGULAR_TASKS = REF_TASKS.filter(t=>!['r200','r500'].includes(t.id));
-  document.getElementById('refTaskList').innerHTML=REGULAR_TASKS.map(t=>{
+  const _refList=document.getElementById('refTaskList');
+  if(_refList) _refList.innerHTML=REGULAR_TASKS.map(t=>{
     const done=S.doneTasks.includes(t.id), can=totalRefs>=t.n&&!done;
     const inviteLbl=(T.inviteFriend||'Invite {n} Friend').replace('{n}',t.n)+(t.n>1?(T.friendsPlural||'s'):'');
     return`<div class="task-item">
@@ -3019,6 +3038,7 @@ function renderTasks(){
       ${done?`<button class="tbtn done">✅ Done</button>`:can?`<button class="tbtn claim" onclick="claimRefTask('${t.id}')">${T.claimBtn2||'Claim'}</button>`:`<button class="tbtn done" style="background:rgba(255,255,255,.05)">${totalRefs}/${t.n}</button>`}
     </div>`;
   }).join('');
+  // guard end
 
   // ── Active referral tasks ──
   const activeListEl = document.getElementById('refActiveTaskList');
@@ -3045,8 +3065,8 @@ function switchTTab(el,t){
   document.querySelectorAll('.ttab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tcont').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById(`tc${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.add('active');
-  // Hide fab — switchSocTab will show it again if community is selected
+  const tcEl=document.getElementById('tc'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(tcEl) tcEl.classList.add('active');
   hideFab();
 }
 async function claimRefTask(id){
@@ -3834,9 +3854,9 @@ async function init(){
 
   // Step 4: Render UI
   await ldAnimateTo(80, lt('ldBuilding'), 400);
-  renderGarage();
-  renderTasks();
-  renderBikes();
+  try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
+  try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
+  try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
   syncTopbar();
   await new Promise(r=>setTimeout(r,300));
 

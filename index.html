@@ -1042,7 +1042,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
    Stat increment: speed/nitro/accel +5, maneuver +3
    Max = base * 2
 ══════════════════════════════════════════════════════════════ */
-const STAT_ICONS = { speed:'⚡', nitro:'🔥', accel:'🚀', maneuver:'🎯' };
+const STAT_ICONS = {
+  speed:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png" style="width:26px;height:26px;object-fit:contain">',
+  accel:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png" style="width:26px;height:26px;object-fit:contain">',
+  maneuver:'<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png" style="width:26px;height:26px;object-fit:contain">',
+  nitro:   '<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png" style="width:26px;height:26px;object-fit:contain">'
+};
 const STAT_LABELS = { speed:'Скорость', nitro:'Нитро', accel:'Разгон', maneuver:'Маневры' };
 const UPGRADE_INC = { speed:5, nitro:5, accel:5, maneuver:3 };
 

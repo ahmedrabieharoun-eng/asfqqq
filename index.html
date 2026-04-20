@@ -1389,7 +1389,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* Header with flags */
 .race-header-flags{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px 16px 6px;
+  padding:18px 16px 12px;
 }
 .race-flag-img{width:132px;opacity:.85;flex-shrink:0;}
 .race-header-title{
@@ -1402,13 +1402,13 @@ async function doUpgradeStat(bikeLevel, stat){
 
 /* ── CAROUSEL — image-only cards with peek ── */
 .race-carousel-outer{
-  position:relative;width:100%;overflow:hidden;padding:4px 0 4px;
+  position:relative;width:100%;overflow:hidden;padding:8px 0 6px;
 }
 .race-carousel-track{
   display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
   will-change:transform;
-  padding:4px 0;
+  padding:4px 20px;
 }
 
 /* Card contains ONLY the image — stats are outside */
@@ -1420,13 +1420,13 @@ async function doUpgradeStat(bikeLevel, stat){
   overflow:hidden;
   box-shadow:0 6px 24px rgba(0,0,0,.5);
   position:relative;
-  transition:border-color .3s,box-shadow .3s,transform .3s,opacity .3s;
+  transition:border-color .3s,box-shadow .3s,flex-basis .3s,transform .3s;
   transform:scale(0.88);
   transform-origin:center center;
   opacity:0.7;
 }
 .race-bike-slide.active{
-  flex:0 0 calc(100% - 80px);
+  flex:0 0 calc(100% - 40px);
   border-color:rgba(124,179,66,.6);
   box-shadow:0 0 0 2.5px rgba(124,179,66,.25),0 12px 40px rgba(0,0,0,.7);
   transform:scale(1);
@@ -1457,7 +1457,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
 /* ── STATS BLOCK — lives OUTSIDE the card ── */
 .race-stats-outer{
-  width:100%;padding:6px 16px 0;
+  width:100%;padding:14px 16px 0;
 }
 .race-stats-row{
   display:grid;grid-template-columns:repeat(4,1fr);
@@ -1914,30 +1914,20 @@ async function doUpgradeStat(bikeLevel, stat){
     if(!track) return;
     const outer = document.getElementById('raceCarouselOuter');
     const gap = 12;
-
-    // Update active/dot classes
+    // Update active/dot classes first so CSS sizes settle
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
-
+    // Then measure after a frame so flex-basis has been applied
     requestAnimationFrame(()=>{
-      const outerW = outer ? outer.offsetWidth : 360;
       const slides = track.querySelectorAll('.race-bike-slide');
-      const activeSlide = slides[_raceIdx];
-      if(!activeSlide) return;
-
-      // Calculate total offset to reach the active slide's left edge
-      let offsetToSlide = 0;
-      for(let j=0; j<_raceIdx; j++){
-        offsetToSlide += (slides[j] ? slides[j].offsetWidth : (outerW - 80)) + gap;
+      let offset = 0;
+      for(let j=0;j<_raceIdx;j++){
+        const s = slides[j];
+        offset += (s ? s.offsetWidth : (outer ? outer.offsetWidth - 80 : 280)) + gap;
       }
-
-      // Center the active slide within the outer container
-      const activeW = activeSlide.offsetWidth;
-      const centerOffset = offsetToSlide - (outerW - activeW) / 2;
-
-      track.style.transform = 'translateX('+(-Math.max(0, centerOffset))+'px)';
+      // Center the active card: subtract left padding offset
+      track.style.transform = 'translateX(-'+offset+'px)';
     });
-
     const b = _raceBikes[_raceIdx];
     if(b){
       const nameEl = document.getElementById('raceBikeName');

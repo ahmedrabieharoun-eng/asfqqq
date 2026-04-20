@@ -1673,12 +1673,12 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- ── SELECT PHASE ── -->
     <div id="raceSelectPhase" style="width:100%">
       <div class="race-header-flags">
-        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png" onerror="this.style.opacity=0" style="transform:scaleX(-1)">
+        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/08f607cb-6de9-4cad-9b1f-bda6bdf85cd8.png" onerror="this.style.opacity=0" style="transform:scaleX(-1)">
         <div class="race-header-title">
           Выберите мотоцикл
           <span id="raceBikeName">—</span>
         </div>
-        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/bfab6452-3f1e-4984-8813-893bf495798f.png" onerror="this.style.opacity=0">
+        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/56554316-8b60-4260-b26a-32824d80ef08.png" onerror="this.style.opacity=0">
       </div>
 
       <!-- Carousel — cards contain image only -->
@@ -1700,7 +1700,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <button class="race-start-btn" onclick="startRace()">Старт</button>
       <div class="race-stake-lbl">
         Ставка за старт — 0.5
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">
       </div>
     </div>
 
@@ -1768,7 +1768,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="race-result-title" id="raceResultTitle">Победа!</div>
       <div class="race-result-reward" id="raceResultReward">
         <span id="raceResultRewardTxt">+0.9 TON</span>
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
       </div>
 
       <!-- Finish scene image -->
@@ -3734,6 +3734,7 @@ function preloadImages(){
     'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a12ebc07-aa51-4ea7-b3ca-cefe4dce2a9e.png',
     BAM_URL,
     ...ITEMS.map(i=>i.iconUrl),
+    ...BIKES.map(b=>b.img),
   ];
   return Promise.all(urls.map(u=>new Promise(res=>{
     const img=new Image();img.onload=img.onerror=res;img.src=u;

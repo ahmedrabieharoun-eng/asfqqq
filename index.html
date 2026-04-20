@@ -1213,27 +1213,52 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 </script>
 
-<!-- FRIENDS -->
+<!-- MINING -->
 <div class="sec" id="sectionFriends">
-  <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="friendsTitle">Friends & Referrals</span></div>
-  <div class="ref-prog-card">
-    <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="refProgTitle">Referral Program</span></div>
-    <div class="ref-bonus-badge">
-      <span class="rbb-pct">20%</span>
-      <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
+  <style>
+    #sectionFriends{padding:0!important;background:#f3f6de;color:#20251f;min-height:calc(100vh - 78px);overflow:hidden}
+    .mine-map{position:relative;min-height:calc(100vh - 78px);background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center top/cover no-repeat}
+    .mine-map::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(243,246,222,.02) 0%,rgba(243,246,222,.05) 48%,rgba(243,246,222,.92) 78%,#f3f6de 100%);pointer-events:none}
+    .mine-top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px;color:#111}
+    .mine-title{font-size:24px;font-weight:900;letter-spacing:.2px}
+    .mine-balances{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900}
+    .mine-ton-pill,.mine-gem-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.78);border-radius:16px;padding:5px 9px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .mine-plus{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#86d56d;color:#fff;font-weight:900}
+    .mine-bottom-sheet{position:absolute;left:0;right:0;bottom:0;z-index:3;background:#f6f9df;border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.22);padding:16px 18px 118px;min-height:310px;color:#20251f}
+    .mine-handle{width:140px;height:5px;background:rgba(0,0,0,.2);border-radius:10px;margin:0 auto 22px}
+    .mine-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+    .mine-garage-title{font-size:22px;font-weight:900}
+    .mine-earned{font-size:15px;font-weight:800;white-space:nowrap;color:#2b2f2a}
+    .mine-to-balance{border:none;border-radius:15px;background:#fbfff0;color:#557a45;padding:10px 13px;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 3px 12px rgba(0,0,0,.05);cursor:pointer;white-space:nowrap}
+    .mine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .mine-car-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 3px 10px rgba(31,47,23,.13);border:1px solid rgba(0,0,0,.06)}
+    .mine-card-img{height:96px;position:relative;overflow:hidden;background:#dce8cd}
+    .mine-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .mine-card-name{position:absolute;left:9px;top:8px;color:#fff;font-size:15px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.75);max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mine-card-body{padding:8px 10px 10px;background:#fbfff4}
+    .mine-in-garage{font-size:14px;font-weight:900;color:#30352f;margin-bottom:8px}
+    .mine-rate-line{font-size:11px;font-weight:800;color:#64705f;margin:-4px 0 8px}
+    .mine-action-btn{width:100%;height:39px;border:none;border-radius:8px;background:#45ba3d;color:#fff;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(69,186,61,.28)}
+    .mine-action-btn.wait{background:#bfeeb5;color:#4d5e48;box-shadow:none;cursor:default}
+    .mine-empty{grid-column:1/-1;text-align:center;color:#6d7564;font-size:15px;font-weight:800;padding:28px 14px}
+  </style>
+  <div class="mine-map">
+    <div class="mine-top">
+      <div class="mine-title">Фарминг</div>
+      <div class="mine-balances">
+        <div class="mine-ton-pill"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"><span id="mineTopTon">0.00 TON</span><span class="mine-plus">+</span></div>
+        <div class="mine-gem-pill">💎 <span>1</span></div>
+      </div>
     </div>
-    <div class="ref-link-row">
-      <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
-      <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+    <div class="mine-bottom-sheet">
+      <div class="mine-handle"></div>
+      <div class="mine-sheet-head">
+        <div class="mine-garage-title">Гараж</div>
+        <div class="mine-earned">Добыча: <span id="mineReadyTon">0.000</span> TON</div>
+        <button class="mine-to-balance" onclick="claimBikeMiningRewards()">НА БАЛАНС</button>
+      </div>
+      <div class="mine-grid" id="miningBikeGrid"><div class="mine-empty">Loading bikes...</div></div>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
-  </div>
-  <div class="hist-box" style="margin-bottom:10px">
-    <div class="hist-hdr" style="justify-content:space-between">
-      <span><i class="fas fa-history"></i> <span data-i18n="recentRefs">Recent Referrals</span></span>
-      <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
-    </div>
-    <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
   </div>
 </div>
 
@@ -1833,7 +1858,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
       S.user.ownedBikes.forEach(lv=>{
         const b = BIKES.find(x=>x.lv===lv);
-        if(b) _raceBikes.push(b);
+        if(b && !isBikeMiningActive(lv)) _raceBikes.push(b);
       });
     }
     const track = document.getElementById('raceCarouselTrack');
@@ -1842,7 +1867,7 @@ async function doUpgradeStat(bikeLevel, stat){
     const sf = document.getElementById('raceStartFixed');
     if(sf) sf.style.display = 'block';
     if(_raceBikes.length === 0){
-      track.innerHTML = '<div style="min-width:calc(100% - 48px);text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>У вас нет байков.<br>Купите в <span style="color:var(--bamboo);cursor:pointer" onclick="goNavBySection(\'sectionMarket\')">Гараже</span></div></div>';
+      track.innerHTML = '<div style="min-width:calc(100% - 48px);text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>Нет доступных байков.<br>Купите в <span style="color:var(--bamboo);cursor:pointer" onclick="goNavBySection(\'sectionMarket\')">Гараже</span> أو انتظر انتهاء التعدين</div></div>';
       document.getElementById('raceDots').innerHTML='';
       const nameEl = document.getElementById('raceBikeName');
       if(nameEl) nameEl.textContent = 'Нет байков';
@@ -2036,6 +2061,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
     <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌟 Season 2</div>
     <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
+    <div class="ftab" data-ft="referrals" onclick="switchFinTab(this,'referrals')">👥 Referrals</div>
   </div>
 
   <!-- DEPOSIT -->
@@ -2333,6 +2359,31 @@ async function doUpgradeStat(bikeLevel, stat){
   </div>
 
   <!-- EXCHANGE -->
+
+  <!-- REFERRALS -->
+  <div class="ftcont" id="ft-referrals">
+    <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="friendsTitle">Friends & Referrals</span></div>
+    <div class="ref-prog-card">
+      <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="refProgTitle">Referral Program</span></div>
+      <div class="ref-bonus-badge">
+        <span class="rbb-pct">20%</span>
+        <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
+      </div>
+      <div class="ref-link-row">
+        <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
+        <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
+    </div>
+    <div class="hist-box" style="margin-bottom:10px">
+      <div class="hist-hdr" style="justify-content:space-between">
+        <span><i class="fas fa-history"></i> <span data-i18n="recentRefs">Recent Referrals</span></span>
+        <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
+      </div>
+      <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
+    </div>
+  </div>
+
   <div class="ftcont" id="ft-exchange">
     <div class="swap-card">
       <!-- FROM: Bamboo (fixed) -->
@@ -2385,7 +2436,7 @@ async function doUpgradeStat(bikeLevel, stat){
   <div class="ni active" data-s="sectionHome"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Home</div></div>
   <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Гараж</div></div>
   <div class="ni" data-s="sectionTasks"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/31752193-26ac-4df8-b717-96af866765c6.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Tasks</div></div>
-  <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Friends</div></div>
+  <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Farm</div></div>
   <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Finance</div></div>
 </nav>
 
@@ -2586,7 +2637,7 @@ const SERVERS = [
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
   'claimTask','verifyTask','createTask','deposit',
-  'buyBike','upgradeStats','race'
+  'buyBike','upgradeStats','race','raceResult','startBikeMining','claimBikeMining'
 ]);
 
 const API_TIMEOUT_MS  = 8000;
@@ -2760,7 +2811,7 @@ const SOC_TASKS=[
 const S={
   userId:null,
   startParam:'',
-  user:{coins:0,totalEarned:0,hasDeposited:false,tonBalance:0,ownedBikes:[],bikeUpgrades:{}},
+  user:{coins:0,totalEarned:0,hasDeposited:false,tonBalance:0,ownedBikes:[],bikeUpgrades:{},bikeMining:{}},
   refs:[],wdHist:[],balLog:[],doneTasks:[],
   tasks:{partner:[],community:[]},
   tg:null,tonUI:null,wallet:null,depCheckInt:null,
@@ -2905,6 +2956,7 @@ async function loadState(){
     S.user      = d.user    || S.user;
     S.user.ownedBikes   = d.user?.ownedBikes   || S.user.ownedBikes   || [];
     S.user.bikeUpgrades = d.user?.bikeUpgrades || S.user.bikeUpgrades || {};
+    S.user.bikeMining   = d.user?.bikeMining   || S.user.bikeMining   || {};
     S.refs      = d.referrals || [];
     S.wdHist    = d.wdHistory   || [];
     S.balLog    = d.balanceLog  || [];
@@ -2933,6 +2985,7 @@ async function loadState(){
     updateUI();
     renderGarage();
     renderBikes();
+    renderMiningPage();
     if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
     // Also rebuild carousel immediately with no timeout for faster response
     if(typeof window._raceInit==='function'){
@@ -2943,6 +2996,91 @@ async function loadState(){
   S._initialized = true;
 }
 
+function getBikeMiningRec(lv){
+  const mining=S.user?.bikeMining||{};
+  return mining[String(lv)]||mining[lv]||null;
+}
+function isBikeMiningActive(lv){
+  const rec=getBikeMiningRec(lv);
+  return !!(rec&&rec.status==='active'&&(rec.endsAt||0)>Date.now());
+}
+function getBikeMiningReadyAmount(){
+  const mining=S.user?.bikeMining||{};
+  const now=Date.now();
+  return Object.values(mining).reduce((sum,rec)=>sum+((rec&&rec.status==='active'&&(rec.endsAt||0)<=now)?parseFloat(rec.reward||0):0),0);
+}
+function formatMiningTime(ms){
+  ms=Math.max(0,ms||0);
+  const total=Math.ceil(ms/1000);
+  const h=Math.floor(total/3600);
+  const m=Math.floor((total%3600)/60);
+  const sec=total%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function renderMiningPage(){
+  const grid=document.getElementById('miningBikeGrid');
+  if(!grid) return;
+  const owned=S.user?.ownedBikes||[];
+  const mining=S.user?.bikeMining||{};
+  const ready=getBikeMiningReadyAmount();
+  const readyEl=document.getElementById('mineReadyTon');
+  if(readyEl) readyEl.textContent=ready.toFixed(3);
+  const topTon=document.getElementById('mineTopTon');
+  if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(2))+' TON';
+  const ownedList=BIKES.filter(b=>owned.includes(b.lv));
+  if(!ownedList.length){
+    grid.innerHTML='<div class="mine-empty">У вас пока нет سيارات في الجراج<br><span style="font-size:12px;color:#8a927f">اشتري دراجة أولاً من الجراج</span></div>';
+    return;
+  }
+  const now=Date.now();
+  grid.innerHTML=ownedList.map(b=>{
+    const rec=mining[String(b.lv)]||mining[b.lv]||null;
+    const active=rec&&rec.status==='active'&&(rec.endsAt||0)>now;
+    const ready=rec&&rec.status==='active'&&(rec.endsAt||0)<=now;
+    const btn=active
+      ? '<button class="mine-action-btn wait" disabled>'+formatMiningTime((rec.endsAt||0)-now)+'</button>'
+      : ready
+        ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">НА БАЛАНС</button>'
+        : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">В путь</button>';
+    return '<div class="mine-car-card">'+
+      '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
+      '<div class="mine-card-body">'+
+        '<div class="mine-in-garage">В гараже: 1</div>'+
+        '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(3)+' TON / 24h</div>'+btn+
+      '</div></div>';
+  }).join('');
+}
+let _miningInFlight=false;
+async function startBikeMining(lv){
+  if(_miningInFlight){showNotif('⏳ Please wait...','w');return;}
+  if(!debounce('startMining_'+lv)) return;
+  _miningInFlight=true;
+  try{
+    const res=await api('startBikeMining',{bikeLevel:lv});
+    S.user.bikeMining=res.bikeMining||S.user.bikeMining||{};
+    renderMiningPage();
+    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+    showNotif('✅ Mining started for 24 hours','s');
+  }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
+  finally{_miningInFlight=false;}
+}
+async function claimBikeMiningRewards(){
+  if(_miningInFlight){showNotif('⏳ Please wait...','w');return;}
+  _miningInFlight=true;
+  try{
+    const res=await api('claimBikeMining',{});
+    S.user.tonBalance=res.tonBalance;
+    S.user.bikeMining=res.bikeMining||{};
+    syncTopbar();
+    renderMiningPage();
+    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+    const added=parseFloat(res.tonAdded||0);
+    showNotif(added>0?'✅ +'+added.toFixed(3)+' TON added to balance':'⏳ No completed mining yet',added>0?'s':'w');
+  }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
+  finally{_miningInFlight=false;}
+}
+setInterval(()=>{renderMiningPage();},1000);
+
 /* ════ UPDATE UI ════ */
 function updateUI(){
   const u = S.user;
@@ -2950,6 +3088,8 @@ function updateUI(){
   const tonBal = u.tonBalance||0;
   const tbEl = document.getElementById('tbCoins');
   if(tbEl) tbEl.textContent = tonBal.toFixed(2);
+  const mineTopTon=document.getElementById('mineTopTon');
+  if(mineTopTon) mineTopTon.textContent=tonBal.toFixed(2)+' TON';
   const gTon = document.getElementById('garageTonBal');
   if(gTon) gTon.textContent = tonBal.toFixed(2);
   // Coins for withdraw
@@ -2990,6 +3130,7 @@ function goNav(el){
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
+  if(el.dataset.s==='sectionFriends'){renderMiningPage();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
     // Delay so browser reflow completes and offsetWidth is accurate
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));

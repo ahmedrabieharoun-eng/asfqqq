@@ -1389,8 +1389,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* Header with flags */
 .race-header-flags{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:4px 16px 12px;
-  margin-top:-8px;
+  padding:18px 16px 12px;
 }
 .race-flag-img{width:132px;opacity:.85;flex-shrink:0;}
 .race-header-title{
@@ -1841,8 +1840,7 @@ async function doUpgradeStat(bikeLevel, stat){
       return;
     }
     _raceIdx = 0;
-    // Use rAF to ensure layout is computed (offsetWidth available) before building carousel
-    requestAnimationFrame(()=>{ _buildCarousel(); });
+    _buildCarousel();
   };
 
   window.goNavBySection = function(s){
@@ -1906,8 +1904,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(!track) return;
     // card-peek: each card is calc(100% - 48px) + 14px gap
     const outer = document.getElementById('raceCarouselOuter');
-    const outerW = (outer && outer.offsetWidth > 0) ? outer.offsetWidth : window.innerWidth;
-    const cardW = outerW - 48;
+    const cardW = outer ? (outer.offsetWidth - 48) : 300;
     const gap = 14;
     const offset = _raceIdx * (cardW + gap);
     track.style.transform = 'translateX(-'+offset+'px)';
@@ -2941,7 +2938,7 @@ function goNav(el){
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
-    if(S&&S._dataLoaded) requestAnimationFrame(window._raceInit);
+    if(S&&S._dataLoaded) window._raceInit();
     else setTimeout(window._raceInit,60);
   }
 }

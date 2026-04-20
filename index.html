@@ -1937,12 +1937,12 @@ async function doUpgradeStat(bikeLevel, stat){
       // offset = activeLeft + activeW/2 - outerW/2
       let offset = activeLeft + activeW / 2 - outerW / 2;
 
-      // Clamp offset: never go negative (first card), never go past last slide edge
+      // Clamp: don't scroll past last slide, but allow negative for first-card centering
       let totalTrackW = trackPadding;
       slides.forEach((s,j)=>{ totalTrackW += s.offsetWidth + (j < slides.length-1 ? gap : 0); });
       totalTrackW += trackPadding;
       const maxOffset = Math.max(0, totalTrackW - outerW);
-      offset = Math.max(0, Math.min(offset, maxOffset));
+      offset = Math.min(offset, maxOffset);
 
       track.style.transform = 'translateX(-'+offset+'px)';
     });

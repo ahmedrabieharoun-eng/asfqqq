@@ -1867,6 +1867,8 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceBikes.forEach((b,i)=>{
       // Card: image only
       const slide = document.createElement('div');
+      // Temporarily disable transition for initial render so sizes are correct
+      slide.style.transition = 'none';
       slide.className = 'race-bike-slide'+(i===0?' active':'');
       slide.dataset.idx = i;
 
@@ -1891,7 +1893,14 @@ async function doUpgradeStat(bikeLevel, stat){
       dot.onclick = (()=>{ const idx=i; return ()=>_goSlide(idx); })();
       dots.appendChild(dot);
     });
+    // Position first slide, then re-enable transitions
     _goSlide(0);
+    // Re-enable transitions after initial position is set
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        track.querySelectorAll('.race-bike-slide').forEach(s=>{ s.style.transition=''; });
+      });
+    });
     _attachSwipe();
   }
 
@@ -1918,33 +1927,42 @@ async function doUpgradeStat(bikeLevel, stat){
     // Update active/dot classes first so CSS sizes settle
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
-    // Then measure after a frame so flex-basis has been applied
+    // Use double rAF to ensure browser reflow after section becomes visible
     requestAnimationFrame(()=>{
-      const slides = track.querySelectorAll('.race-bike-slide');
-      const outerW = outer ? outer.offsetWidth : 320;
-      const trackPadding = 20; // padding left of track
+      requestAnimationFrame(()=>{
+        const slides = track.querySelectorAll('.race-bike-slide');
+        const outerW = (outer && outer.offsetWidth > 0) ? outer.offsetWidth : 320;
+        const trackPadding = 20; // padding left of track
+        // Use CSS-defined sizes when DOM reports 0 (section hidden or first paint)
+        const activeCardW = outerW - 40;
+        const inactiveCardW = outerW - 80;
 
-      // Calculate left edge of active card (sum of all previous widths + gaps + trackPadding)
-      let activeLeft = trackPadding;
-      for(let j = 0; j < _raceIdx; j++){
-        const s = slides[j];
-        activeLeft += (s ? s.offsetWidth : (outerW - 80)) + gap;
-      }
-      const activeCard = slides[_raceIdx];
-      const activeW = activeCard ? activeCard.offsetWidth : (outerW - 40);
+        // Calculate left edge of active card
+        let activeLeft = trackPadding;
+        for(let j = 0; j < _raceIdx; j++){
+          const s = slides[j];
+          const w = (s && s.offsetWidth > 10) ? s.offsetWidth : inactiveCardW;
+          activeLeft += w + gap;
+        }
+        const activeCard = slides[_raceIdx];
+        const activeW = (activeCard && activeCard.offsetWidth > 10) ? activeCard.offsetWidth : activeCardW;
 
-      // Center the active card in the outer container
-      // offset = activeLeft + activeW/2 - outerW/2
-      let offset = activeLeft + activeW / 2 - outerW / 2;
+        // Center the active card in the outer container
+        let offset = activeLeft + activeW / 2 - outerW / 2;
 
-      // Clamp offset: never go negative (first card), never go past last slide edge
-      let totalTrackW = trackPadding;
-      slides.forEach((s,j)=>{ totalTrackW += s.offsetWidth + (j < slides.length-1 ? gap : 0); });
-      totalTrackW += trackPadding;
-      const maxOffset = Math.max(0, totalTrackW - outerW);
-      offset = Math.max(0, Math.min(offset, maxOffset));
+        // Clamp offset
+        let totalTrackW = trackPadding;
+        const n = slides.length;
+        slides.forEach((s,j)=>{
+          const w = (s && s.offsetWidth > 10) ? s.offsetWidth : (j===_raceIdx ? activeCardW : inactiveCardW);
+          totalTrackW += w + (j < n-1 ? gap : 0);
+        });
+        totalTrackW += trackPadding;
+        const maxOffset = Math.max(0, totalTrackW - outerW);
+        offset = Math.max(0, Math.min(offset, maxOffset));
 
-      track.style.transform = 'translateX(-'+offset+'px)';
+        track.style.transform = 'translateX(-'+offset+'px)';
+      });
     });
     const b = _raceBikes[_raceIdx];
     if(b){
@@ -2973,7 +2991,8 @@ function goNav(el){
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
-    if(S&&S._dataLoaded) window._raceInit();
+    // Delay so browser reflow completes and offsetWidth is accurate
+    if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
     else setTimeout(window._raceInit,60);
   }
 }

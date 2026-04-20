@@ -1402,41 +1402,51 @@ async function doUpgradeStat(bikeLevel, stat){
 
 /* ── CAROUSEL — image-only cards with peek ── */
 .race-carousel-outer{
-  position:relative;width:100%;overflow:hidden;padding:4px 0;
+  position:relative;width:100%;overflow:hidden;padding:8px 0 6px;
 }
 .race-carousel-track{
-  display:flex;gap:14px;
+  display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
   will-change:transform;
-  padding:0 16px;
+  padding:4px 20px;
 }
 
 /* Card contains ONLY the image — stats are outside */
 .race-bike-slide{
-  flex:0 0 calc(100% - 48px);
+  flex:0 0 calc(100% - 80px);
   background:rgba(8,18,8,.88);
   border:1.5px solid rgba(124,179,66,.15);
   border-radius:20px;
   overflow:hidden;
   box-shadow:0 6px 24px rgba(0,0,0,.5);
   position:relative;
-  transition:border-color .22s,box-shadow .22s;
+  transition:border-color .3s,box-shadow .3s,flex-basis .3s,transform .3s;
+  transform:scale(0.88);
+  transform-origin:center center;
+  opacity:0.7;
 }
 .race-bike-slide.active{
-  border-color:rgba(124,179,66,.45);
-  box-shadow:0 0 0 2px rgba(124,179,66,.12),0 10px 32px rgba(0,0,0,.6);
+  flex:0 0 calc(100% - 40px);
+  border-color:rgba(124,179,66,.6);
+  box-shadow:0 0 0 2.5px rgba(124,179,66,.25),0 12px 40px rgba(0,0,0,.7);
+  transform:scale(1);
+  opacity:1;
 }
 .race-bike-img-wrap{
-  width:100%;height:220px;
+  width:100%;height:200px;
   position:relative;overflow:hidden;
   background:rgba(6,14,6,.9);
+  transition:height .3s ease;
+}
+.race-bike-slide.active .race-bike-img-wrap{
+  height:260px;
 }
 .race-bike-img-wrap img{
   width:100%;height:100%;
   object-fit:cover;display:block;
   transition:transform .3s ease;
 }
-.race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.03);}
+.race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
 
 .race-upgrade-link{
   position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
@@ -1902,15 +1912,22 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceIdx = Math.max(0, Math.min(_raceBikes.length-1, i));
     const track = document.getElementById('raceCarouselTrack');
     if(!track) return;
-    // card-peek: each card is calc(100% - 48px) + 14px gap
     const outer = document.getElementById('raceCarouselOuter');
-    const cardW = outer ? (outer.offsetWidth - 48) : 300;
-    const gap = 14;
-    const offset = _raceIdx * (cardW + gap);
-    track.style.transform = 'translateX(-'+offset+'px)';
-    // active class on cards
+    const gap = 12;
+    // Update active/dot classes first so CSS sizes settle
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
+    // Then measure after a frame so flex-basis has been applied
+    requestAnimationFrame(()=>{
+      const slides = track.querySelectorAll('.race-bike-slide');
+      let offset = 0;
+      for(let j=0;j<_raceIdx;j++){
+        const s = slides[j];
+        offset += (s ? s.offsetWidth : (outer ? outer.offsetWidth - 80 : 280)) + gap;
+      }
+      // Center the active card: subtract left padding offset
+      track.style.transform = 'translateX(-'+offset+'px)';
+    });
     const b = _raceBikes[_raceIdx];
     if(b){
       const nameEl = document.getElementById('raceBikeName');
@@ -3861,11 +3878,25 @@ async function init(){
   await ldAnimateTo(70, lt('ldConnected'), 500);
   await new Promise(r=>setTimeout(r,300));
 
+  // Step 3.5: Preload owned bike images with priority
+  await ldAnimateTo(72, '🏍️ Loading your bikes...', 400);
+  try{
+    const ownedLvs = S.user?.ownedBikes || [];
+    if(ownedLvs.length > 0){
+      const bikeImgs = ownedLvs.map(lv=>{ const b=BIKES.find(x=>x.lv===lv); return b?b.img:null; }).filter(Boolean);
+      await Promise.all(bikeImgs.map(u=>new Promise(res=>{
+        const img=new Image(); img.onload=img.onerror=res; img.src=u;
+      })));
+    }
+  }catch(e){ console.warn('bike preload:',e.message); }
+
   // Step 4: Render UI
   await ldAnimateTo(80, lt('ldBuilding'), 400);
   try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
+  // Pre-build race carousel so bikes appear instantly when user opens race section
+  try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
   await new Promise(r=>setTimeout(r,300));
 

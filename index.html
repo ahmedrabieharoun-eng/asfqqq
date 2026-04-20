@@ -1493,12 +1493,19 @@ async function doUpgradeStat(bikeLevel, stat){
 ══════════════════════════════════════════════ -->
 <style>
 /* ── Race Section ── */
-#sectionTasks{ padding:0 !important; }
+#sectionTasks{
+  padding:0 !important;
+  position:fixed;
+  top:0;left:0;right:0;bottom:78px;
+  overflow:hidden;
+  z-index:5;
+}
 
 .race-wrap{
   display:flex;flex-direction:column;align-items:center;
-  min-height:100vh;
-  padding:0 0 170px;
+  height:100%;
+  overflow:hidden;
+  padding:0;
   background:transparent;
 }
 

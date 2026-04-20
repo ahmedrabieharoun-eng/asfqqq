@@ -512,7 +512,24 @@ async function hCreateTask(env,uid,data,_meta={}){
   }catch(e){console.error('createTask:',e);return{success:false,error:e.message};}
 }
 
-// ── Admin ─────────────────────────────────────────────────────────
+// ── Race Result ───────────────────────────────────────────────────
+async function hRaceResult(env,uid,data,_meta={}){
+  try{
+    const won=!!data.won;
+    const cost=0.5;
+    const prize=won?0.9:0;
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    const bal=user.tonBalance||0;
+    if(bal<cost)return{success:false,error:'Insufficient TON balance'};
+    const newBal=Math.max(0,bal-cost)+(won?prize:0);
+    await dbUpdate(env,`users/${uid}`,{tonBalance:parseFloat(newBal.toFixed(4))});
+    log(env,uid,'race_result',{won,cost,prize,tonBalance_before:bal,tonBalance_after:newBal},_meta);
+    return{success:true,data:{tonBalance:parseFloat(newBal.toFixed(4)),won,prize}};
+  }catch(e){console.error('raceResult:',e);return{success:false,error:e.message};}
+}
+
+
 async function hAdmin(env,action,data){
   switch(action){
     case 'adminGetUser':{const r=await dbGet(env,`users/${data.userId}`);return{success:true,data:r.data||null};}
@@ -611,6 +628,7 @@ export default {
       case 'createTask'   :return jRes(await hCreateTask  (env,uid,data,_meta));
       case 'buyBike'      :return jRes(await hBuyBike     (env,uid,data,_meta));
       case 'upgradeStats' :return jRes(await hUpgradeStats(env,uid,data,_meta));
+      case 'raceResult'   :return jRes(await hRaceResult  (env,uid,data,_meta));
       default:return fail('Unknown action',400);
     }
   }

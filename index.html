@@ -1217,97 +1217,19 @@ async function doUpgradeStat(bikeLevel, stat){
 <div class="sec" id="sectionFriends">
   <style>
     #sectionFriends{padding:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:78px;z-index:5}
-
-    /* Full-screen map — covers entire area, no scroll */
-    .mine-map{
-      position:absolute;
-      inset:0;
-      background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center center/cover no-repeat;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-end;
-      overflow:hidden;
-    }
-
-    /* Subtle bottom fade */
-    .mine-map::after{
-      content:'';
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg,transparent 60%, rgba(0,0,0,.22) 100%);
-      pointer-events:none;
-      z-index:1;
-    }
-
-    /* Garage button — fixed at bottom of map, always visible */
-    .mine-garage-fab{
-      position:relative;
-      z-index:10;
-      margin:0 16px 20px;
-      background:#fff;
-      border-radius:50px;
-      padding:15px 28px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      font-size:17px;
-      font-weight:900;
-      color:#20251f;
-      box-shadow:0 6px 28px rgba(0,0,0,.28);
-      cursor:pointer;
-      border:none;
-      width:calc(100% - 32px);
-      letter-spacing:.2px;
-    }
+    .mine-map{position:absolute;inset:0;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+    .mine-map::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.22) 100%);pointer-events:none;z-index:1}
+    .mine-garage-fab{position:relative;z-index:10;margin:0 16px 20px;background:#fff;border-radius:50px;padding:15px 28px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:900;color:#20251f;box-shadow:0 6px 28px rgba(0,0,0,.28);cursor:pointer;border:none;width:calc(100% - 32px);letter-spacing:.2px}
     .mine-garage-fab:active{transform:scale(.97)}
-
-    /* ── GARAGE SHEET (slides up) ── */
-    .mine-sheet-overlay{
-      display:none;
-      position:fixed;inset:0;z-index:200;
-      background:rgba(0,0,0,.45);
-      backdrop-filter:blur(3px);
-    }
+    .mine-sheet-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(3px)}
     .mine-sheet-overlay.open{display:block}
-
-    .mine-bottom-sheet{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      z-index:201;
-      background:#f6f9df;
-      border-radius:22px 22px 0 0;
-      box-shadow:0 -12px 35px rgba(0,0,0,.28);
-      padding:16px 18px 110px;
-      min-height:340px;
-      max-height:82vh;
-      overflow-y:auto;
-      color:#20251f;
-      transform:translateY(100%);
-      transition:transform .32s cubic-bezier(.4,0,.2,1);
-    }
+    .mine-bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#f6f9df;border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.28);padding:16px 18px 110px;min-height:340px;max-height:82vh;overflow-y:auto;color:#20251f;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
     .mine-bottom-sheet.open{transform:translateY(0)}
-
     .mine-handle{width:140px;height:5px;background:rgba(0,0,0,.18);border-radius:10px;margin:0 auto 20px}
-
-    .mine-sheet-head{
-      display:flex;align-items:center;
-      justify-content:space-between;
-      gap:10px;margin-bottom:18px;
-    }
+    .mine-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
     .mine-garage-title{font-size:22px;font-weight:900}
     .mine-earned{font-size:15px;font-weight:800;white-space:nowrap;color:#2b2f2a}
-    .mine-to-balance{
-      border:none;border-radius:15px;
-      background:#e8f5e0;
-      color:#3a6e28;
-      border:1.5px solid #a8d88a;
-      padding:10px 14px;
-      font-size:12px;font-weight:900;
-      letter-spacing:.6px;text-transform:uppercase;
-      box-shadow:0 3px 12px rgba(0,0,0,.06);
-      cursor:pointer;white-space:nowrap;
-    }
+    .mine-to-balance{border:none;border-radius:15px;background:#e8f5e0;color:#3a6e28;border:1.5px solid #a8d88a;padding:10px 14px;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 3px 12px rgba(0,0,0,.06);cursor:pointer;white-space:nowrap}
     .mine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .mine-car-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 3px 10px rgba(31,47,23,.13);border:1px solid rgba(0,0,0,.06)}
     .mine-card-img{height:96px;position:relative;overflow:hidden;background:#dce8cd}
@@ -1320,20 +1242,10 @@ async function doUpgradeStat(bikeLevel, stat){
     .mine-action-btn.wait{background:#bfeeb5;color:#4d5e48;box-shadow:none;cursor:default}
     .mine-empty{grid-column:1/-1;text-align:center;color:#6d7564;font-size:15px;font-weight:800;padding:28px 14px}
   </style>
-
   <div class="mine-map">
-    <!-- Map fills the whole screen — no top bar -->
-
-    <!-- Bottom garage trigger button -->
-    <button class="mine-garage-fab" onclick="openMineSheet()">
-      Гараж 🚗
-    </button>
+    <button class="mine-garage-fab" onclick="openMineSheet()">Гараж 🚗</button>
   </div>
-
-  <!-- Overlay backdrop -->
   <div class="mine-sheet-overlay" id="mineSheetOverlay" onclick="closeMineSheet()"></div>
-
-  <!-- Bottom sheet with garage content -->
   <div class="mine-bottom-sheet" id="mineBottomSheet">
     <div class="mine-handle"></div>
     <div class="mine-sheet-head">
@@ -1343,7 +1255,6 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
     <div class="mine-grid" id="miningBikeGrid"><div class="mine-empty">Loading bikes...</div></div>
   </div>
-
   <script>
   function openMineSheet(){
     document.getElementById('mineSheetOverlay').classList.add('open');
@@ -1515,7 +1426,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* Header with flags */
 .race-header-flags{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:4px 16px 0;
+  padding:6px 16px 0;
   margin-top:60px;
 }
 .race-flag-img{width:132px;opacity:.85;flex-shrink:0;}

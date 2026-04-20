@@ -1216,37 +1216,37 @@ async function doUpgradeStat(bikeLevel, stat){
 <!-- MINING -->
 <div class="sec" id="sectionFriends">
   <style>
-    #sectionFriends{padding:0!important;color:#20251f;min-height:calc(100vh - 78px);overflow:hidden;position:relative}
+    #sectionFriends{padding:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:78px;z-index:5}
 
-    /* Full-screen map background */
+    /* Full-screen map — covers entire area, no scroll */
     .mine-map{
-      position:relative;
-      width:100%;
-      min-height:calc(100vh - 78px);
+      position:absolute;
+      inset:0;
       background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center center/cover no-repeat;
       display:flex;
       flex-direction:column;
       justify-content:flex-end;
+      overflow:hidden;
     }
 
-    /* Subtle bottom fade to help garage button readability */
+    /* Subtle bottom fade */
     .mine-map::after{
       content:'';
       position:absolute;
       inset:0;
-      background:linear-gradient(180deg,transparent 55%, rgba(0,0,0,.18) 100%);
+      background:linear-gradient(180deg,transparent 60%, rgba(0,0,0,.22) 100%);
       pointer-events:none;
       z-index:1;
     }
 
-    /* Bottom garage button — like the reference screenshot */
+    /* Garage button — fixed at bottom of map, always visible */
     .mine-garage-fab{
       position:relative;
       z-index:10;
-      margin:0 16px 24px;
+      margin:0 16px 20px;
       background:#fff;
       border-radius:50px;
-      padding:14px 28px;
+      padding:15px 28px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -1254,7 +1254,7 @@ async function doUpgradeStat(bikeLevel, stat){
       font-size:17px;
       font-weight:900;
       color:#20251f;
-      box-shadow:0 6px 28px rgba(0,0,0,.22);
+      box-shadow:0 6px 28px rgba(0,0,0,.28);
       cursor:pointer;
       border:none;
       width:calc(100% - 32px);

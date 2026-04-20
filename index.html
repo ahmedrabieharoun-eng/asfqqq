@@ -1401,48 +1401,43 @@ async function doUpgradeStat(bikeLevel, stat){
   color:#2196F3;display:block;font-size:17px;font-weight:800;
 }
 
-/* ── CAROUSEL — active card big + peek sides ── */
+/* ── CAROUSEL — image-only cards with peek ── */
 .race-carousel-outer{
   position:relative;width:100%;overflow:hidden;padding:4px 0;
 }
 .race-carousel-track{
-  display:flex;align-items:center;gap:10px;
-  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  display:flex;gap:14px;
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
   will-change:transform;
-  padding:0 22px;
+  padding:0 16px;
 }
 
 /* Card contains ONLY the image — stats are outside */
 .race-bike-slide{
-  flex:0 0 calc(100% - 64px);
+  flex:0 0 calc(100% - 48px);
   background:rgba(8,18,8,.88);
   border:1.5px solid rgba(124,179,66,.15);
   border-radius:20px;
   overflow:hidden;
   box-shadow:0 6px 24px rgba(0,0,0,.5);
   position:relative;
-  transition:border-color .3s,box-shadow .3s,transform .35s cubic-bezier(.4,0,.2,1),flex-basis .35s cubic-bezier(.4,0,.2,1);
-  transform:scale(0.82);
-  opacity:0.55;
+  transition:border-color .22s,box-shadow .22s;
 }
 .race-bike-slide.active{
-  flex:0 0 calc(100% - 64px);
-  border-color:rgba(124,179,66,.55);
-  box-shadow:0 0 0 2px rgba(124,179,66,.2),0 12px 36px rgba(0,0,0,.65);
-  transform:scale(1);
-  opacity:1;
+  border-color:rgba(124,179,66,.45);
+  box-shadow:0 0 0 2px rgba(124,179,66,.12),0 10px 32px rgba(0,0,0,.6);
 }
 .race-bike-img-wrap{
-  width:100%;height:240px;
+  width:100%;height:220px;
   position:relative;overflow:hidden;
   background:rgba(6,14,6,.9);
 }
 .race-bike-img-wrap img{
   width:100%;height:100%;
-  object-fit:cover;object-position:center 20%;display:block;
+  object-fit:cover;display:block;
   transition:transform .3s ease;
 }
-.race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
+.race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.03);}
 
 .race-upgrade-link{
   position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
@@ -1872,8 +1867,6 @@ async function doUpgradeStat(bikeLevel, stat){
       const img = document.createElement('img');
       img.src = b.img;
       img.alt = b.name;
-      img.loading = 'eager';
-      img.fetchPriority = 'high';
       img.onerror = function(){ this.style.opacity='.2'; };
       const up = document.createElement('span');
       up.className = 'race-upgrade-link';
@@ -1911,11 +1904,11 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceIdx = Math.max(0, Math.min(_raceBikes.length-1, i));
     const track = document.getElementById('raceCarouselTrack');
     if(!track) return;
-    // card-peek: each card is calc(100% - 64px) + 10px gap, padding 22px each side
+    // card-peek: each card is calc(100% - 48px) + 14px gap
     const outer = document.getElementById('raceCarouselOuter');
     const outerW = (outer && outer.offsetWidth > 0) ? outer.offsetWidth : window.innerWidth;
-    const cardW = outerW - 64;
-    const gap = 10;
+    const cardW = outerW - 48;
+    const gap = 14;
     const offset = _raceIdx * (cardW + gap);
     track.style.transform = 'translateX(-'+offset+'px)';
     // active class on cards
@@ -3877,16 +3870,6 @@ async function init(){
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
   syncTopbar();
-  // Preload owned bike images so race carousel shows instantly
-  try{
-    const ownedBikes = (S.user && S.user.ownedBikes) ? S.user.ownedBikes : [];
-    if(ownedBikes.length > 0){
-      const ownedImgs = BIKES.filter(b=>ownedBikes.includes(b.lv)).map(b=>b.img);
-      await Promise.all(ownedImgs.map(u=>new Promise(res=>{
-        const img=new Image(); img.onload=img.onerror=res; img.src=u;
-      })));
-    }
-  }catch(e){ console.warn('Bike preload:',e.message); }
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers

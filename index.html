@@ -1391,7 +1391,7 @@ async function doUpgradeStat(bikeLevel, stat){
   display:flex;align-items:center;justify-content:center;gap:8px;
   padding:18px 16px 12px;
 }
-.race-flag-img{width:44px;opacity:.85;flex-shrink:0;}
+.race-flag-img{width:132px;opacity:.85;flex-shrink:0;}
 .race-header-title{
   text-align:center;flex:1;
   font-size:17px;font-weight:800;color:#fff;line-height:1.25;
@@ -1673,7 +1673,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- ── SELECT PHASE ── -->
     <div id="raceSelectPhase" style="width:100%">
       <div class="race-header-flags">
-        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/08f607cb-6de9-4cad-9b1f-bda6bdf85cd8.png" onerror="this.style.opacity=0" style="transform:scaleX(-1)">
+        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/08f607cb-6de9-4cad-9b1f-bda6bdf85cd8.png" onerror="this.style.opacity=0">
         <div class="race-header-title">
           Выберите мотоцикл
           <span id="raceBikeName">—</span>
@@ -1971,7 +1971,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
   window._raceRefreshIfActive = function(){
     const sec = document.getElementById('sectionTasks');
-    if(sec&&sec.classList.contains('active')) setTimeout(window._raceInit,60);
+    if(sec&&sec.classList.contains('active')) window._raceInit();
   };
 
 })();
@@ -2881,6 +2881,11 @@ async function loadState(){
     renderGarage();
     renderBikes();
     if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+    // Also rebuild carousel immediately with no timeout for faster response
+    if(typeof window._raceInit==='function'){
+      const sec=document.getElementById('sectionTasks');
+      if(sec&&sec.classList.contains('active')) window._raceInit();
+    }
   }
   S._initialized = true;
 }
@@ -2932,7 +2937,10 @@ function goNav(el){
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
-  if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function') setTimeout(window._raceInit,60);
+  if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
+    if(S&&S._dataLoaded) window._raceInit();
+    else setTimeout(window._raceInit,60);
+  }
 }
 
 /* ════ MARKET ════ */

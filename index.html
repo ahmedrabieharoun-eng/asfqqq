@@ -1457,7 +1457,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
 /* ── STATS BLOCK — lives OUTSIDE the card ── */
 .race-stats-outer{
-  width:100%;padding:14px 16px 0;
+  width:100%;padding:4px 16px 0;
 }
 .race-stats-row{
   display:grid;grid-template-columns:repeat(4,1fr);
@@ -1914,18 +1914,36 @@ async function doUpgradeStat(bikeLevel, stat){
     if(!track) return;
     const outer = document.getElementById('raceCarouselOuter');
     const gap = 12;
+    const total = _raceBikes.length;
     // Update active/dot classes first so CSS sizes settle
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
     // Then measure after a frame so flex-basis has been applied
     requestAnimationFrame(()=>{
       const slides = track.querySelectorAll('.race-bike-slide');
-      let offset = 0;
-      for(let j=0;j<_raceIdx;j++){
+      const outerW = outer ? outer.offsetWidth : 320;
+      const trackPadding = 20; // padding left of track
+
+      // Calculate left edge of active card (sum of all previous widths + gaps + trackPadding)
+      let activeLeft = trackPadding;
+      for(let j = 0; j < _raceIdx; j++){
         const s = slides[j];
-        offset += (s ? s.offsetWidth : (outer ? outer.offsetWidth - 80 : 280)) + gap;
+        activeLeft += (s ? s.offsetWidth : (outerW - 80)) + gap;
       }
-      // Center the active card: subtract left padding offset
+      const activeCard = slides[_raceIdx];
+      const activeW = activeCard ? activeCard.offsetWidth : (outerW - 40);
+
+      // Center the active card in the outer container
+      // offset = activeLeft + activeW/2 - outerW/2
+      let offset = activeLeft + activeW / 2 - outerW / 2;
+
+      // Clamp offset: never go negative (first card), never go past last slide edge
+      let totalTrackW = trackPadding;
+      slides.forEach((s,j)=>{ totalTrackW += s.offsetWidth + (j < slides.length-1 ? gap : 0); });
+      totalTrackW += trackPadding;
+      const maxOffset = Math.max(0, totalTrackW - outerW);
+      offset = Math.max(0, Math.min(offset, maxOffset));
+
       track.style.transform = 'translateX(-'+offset+'px)';
     });
     const b = _raceBikes[_raceIdx];

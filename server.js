@@ -61,6 +61,12 @@ const BIKE_BASE_STATS = {
   10:{ speed:1800,nitro:1100,accel:550,maneuver:250,price:500 },
 };
 
+const BIKE_DAILY_TON = {
+  1:0.022, 2:0.111, 3:0.222, 4:0.444, 5:1.11,
+  6:2.22, 7:4.44, 8:5.55, 9:8.88, 10:11.11,
+};
+const BIKE_MINING_MS = 24*60*60*1000;
+
 // Default partner tasks
 const DEFAULT_PARTNER_TASKS = [
   { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/PandaBambooPayouts', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
@@ -119,11 +125,11 @@ function rateOk(ip){const now=Date.now();const d=_rl.get(ip)||{c:0,r:now+60000};
 
 // Per-user per-action cooldown
 const _userActionTs=new Map();
-const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500};
+const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500};
 function userActionOk(uid,action){const cd=ACTION_COOLDOWNS[action];if(!cd)return true;const key=`${uid}:${action}`;const now=Date.now();const last=_userActionTs.get(key)||0;if(now-last<cd)return false;_userActionTs.set(key,now);return true;}
 
 // Logging
-const BALANCE_CHANGE_EVENTS=new Set(['withdraw_request','deposit_completed','claim_task','verify_task','create_task','admin_set_balance','admin_confirm_deposit','referral_commission','buy_bike','upgrade_stats']);
+const BALANCE_CHANGE_EVENTS=new Set(['withdraw_request','deposit_completed','claim_task','verify_task','create_task','admin_set_balance','admin_confirm_deposit','referral_commission','buy_bike','upgrade_stats','bike_mining_start','bike_mining_claim']);
 function log(env,uid,type,details={},meta={}){
   if(!BALANCE_CHANGE_EVENTS.has(type))return;
   const ts=Date.now();const date=new Date(ts).toISOString();
@@ -199,6 +205,7 @@ function makeUser(uid,tg={},ref=null){
     totalEarned:0,
     ownedBikes:[],
     bikeUpgrades:{},
+    bikeMining:{},
     hasDeposited:false,
     tonBalance:0,
     referralCode:String(uid),
@@ -239,12 +246,16 @@ async function hGetState(env,uid,tg,data={},_meta={}){
         if(tg.username)  user.username=tg.username.slice(0,64);
         if(tg.photo_url) user.photoUrl=tg.photo_url.slice(0,512);
       }
+      user.bikeMining=user.bikeMining||{};
       await dbUpdate(env,`users/${uid}`,{
         firstName:user.firstName,lastName:user.lastName,
         username:user.username,photoUrl:user.photoUrl,
+        bikeMining:user.bikeMining,
         ...(needsSave?{coins:user.coins,welcomeBonusGiven:true}:{}),
       });
     }
+    const settled=await settleBikeMining(env,uid,user,_meta);
+    user=settled.user;
     const rr=await dbGet(env,`users/${uid}/referrals`);
     const refList=Object.values(rr.data||{});
     const referrals=await Promise.all(refList.map(async r=>{
@@ -274,6 +285,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
         tonBalance:user.tonBalance||0,
         ownedBikes:user.ownedBikes||[],
         bikeUpgrades:user.bikeUpgrades||{},
+        bikeMining:user.bikeMining||{},
       },
       referrals,
       completedTasks:user.completedTasks||[],
@@ -340,6 +352,63 @@ async function hUpgradeStats(env,uid,data,_meta={}){
     await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeUpgrades:upgs});
     log(env,uid,'upgrade_stats',{bikeLevel:lv,stat,upgradeCount:bikeUpgs[stat],upgPrice,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
     return{success:true,data:{tonBalance:newTon,bikeUpgrades:upgs,newUpgradeCount:bikeUpgs[stat]}};
+  }catch(e){return{success:false,error:e.message};}
+}
+
+async function settleBikeMining(env,uid,user,_meta={}){
+  const mining=user.bikeMining||{};
+  const now=Date.now();
+  let tonAdded=0;
+  const completed=[];
+  let changed=false;
+  for(const [lv,rec] of Object.entries(mining)){
+    if(rec&&rec.status==='active'&&(rec.endsAt||0)<=now){
+      const reward=parseFloat(rec.reward||BIKE_DAILY_TON[lv]||0);
+      if(reward>0){
+        tonAdded+=reward;
+        completed.push({bikeLevel:Number(lv),reward});
+      }
+      mining[lv]={...rec,status:'idle',claimedAt:now,lastReward:reward};
+      changed=true;
+    }
+  }
+  if(!changed)return{user,bikeMining:mining,tonAdded:0,completed:[]};
+  const newTon=parseFloat(((user.tonBalance||0)+tonAdded).toFixed(8));
+  await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeMining:mining});
+  log(env,uid,'bike_mining_claim',{ton_reward:tonAdded,completed,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
+  sendTgNotification(env,uid,`🏍️ Bike mining completed!\n\n💎 +${tonAdded.toFixed(3)} TON has been added to your balance.`).catch(()=>{});
+  return{user:{...user,tonBalance:newTon,bikeMining:mining},bikeMining:mining,tonAdded,completed};
+}
+
+async function hStartBikeMining(env,uid,data,_meta={}){
+  try{
+    const lv=parseInt(data.bikeLevel)||0;
+    if(!BIKE_BASE_STATS[lv])return{success:false,error:'Unknown bike'};
+    const r=await dbGet(env,`users/${uid}`);let user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    const settled=await settleBikeMining(env,uid,user,_meta);
+    user=settled.user;
+    const owned=(user.ownedBikes||[]).map(Number);
+    if(!owned.includes(lv))return{success:false,error:'Bike not owned'};
+    const mining=user.bikeMining||{};
+    const cur=mining[String(lv)]||mining[lv];
+    const now=Date.now();
+    if(cur&&cur.status==='active'&&(cur.endsAt||0)>now)return{success:false,error:'Bike is already mining'};
+    const reward=BIKE_DAILY_TON[lv]||0;
+    const rec={bikeLevel:lv,status:'active',startedAt:now,endsAt:now+BIKE_MINING_MS,reward};
+    mining[String(lv)]=rec;
+    await dbUpdate(env,`users/${uid}`,{bikeMining:mining});
+    log(env,uid,'bike_mining_start',{bikeLevel:lv,reward,startsAt:now,endsAt:rec.endsAt},_meta);
+    return{success:true,data:{bikeMining:mining,started:rec,settledTon:settled.tonAdded||0,tonBalance:user.tonBalance||0}};
+  }catch(e){return{success:false,error:e.message};}
+}
+
+async function hClaimBikeMining(env,uid,_data,_meta={}){
+  try{
+    const r=await dbGet(env,`users/${uid}`);const user=r.data;
+    if(!user)return{success:false,error:'User not found'};
+    const settled=await settleBikeMining(env,uid,user,_meta);
+    return{success:true,data:{bikeMining:settled.bikeMining,tonAdded:settled.tonAdded,completed:settled.completed,tonBalance:settled.user.tonBalance||0}};
   }catch(e){return{success:false,error:e.message};}
 }
 
@@ -518,8 +587,13 @@ async function hRaceResult(env,uid,data,_meta={}){
     const won=!!data.won;
     const cost=0.5;
     const prize=won?0.9:0;
+    const lv=parseInt(data.bikeLevel)||0;
     const r=await dbGet(env,`users/${uid}`);const user=r.data;
     if(!user)return{success:false,error:'User not found'};
+    if(lv){
+      const rec=(user.bikeMining||{})[String(lv)]||(user.bikeMining||{})[lv];
+      if(rec&&rec.status==='active'&&(rec.endsAt||0)>Date.now())return{success:false,error:'This bike is mining now'};
+    }
     const bal=user.tonBalance||0;
     if(bal<cost)return{success:false,error:'Insufficient TON balance'};
     const newBal=Math.max(0,bal-cost)+(won?prize:0);
@@ -628,6 +702,8 @@ export default {
       case 'createTask'   :return jRes(await hCreateTask  (env,uid,data,_meta));
       case 'buyBike'      :return jRes(await hBuyBike     (env,uid,data,_meta));
       case 'upgradeStats' :return jRes(await hUpgradeStats(env,uid,data,_meta));
+      case 'startBikeMining':return jRes(await hStartBikeMining(env,uid,data,_meta));
+      case 'claimBikeMining':return jRes(await hClaimBikeMining(env,uid,data,_meta));
       case 'raceResult'   :return jRes(await hRaceResult  (env,uid,data,_meta));
       default:return fail('Unknown action',400);
     }

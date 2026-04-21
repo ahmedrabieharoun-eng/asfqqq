@@ -9,6 +9,127 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
+<!-- Three.js for 3D bike model -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// GLTFLoader inline (r128 compatible)
+(function(){
+'use strict';
+const scope=THREE;
+class GLTFLoader extends scope.Loader{
+  constructor(manager){super(manager);}
+  load(url,onLoad,onProgress,onError){
+    const loader=new scope.FileLoader(this.manager);
+    loader.setPath(this.path);
+    loader.setResponseType('arraybuffer');
+    loader.setRequestHeader(this.requestHeader);
+    loader.setWithCredentials(this.withCredentials);
+    loader.load(url,data=>{
+      try{this.parse(data,'',onLoad,onError);}
+      catch(e){onError?onError(e):console.error(e);}
+    },onProgress,onError);
+  }
+  parse(data,path,onLoad,onError){
+    let content='';
+    const extensions={};
+    const plugins={};
+    if(typeof data==='string'){content=data;}
+    else{
+      const magic=scope.LoaderUtils?scope.LoaderUtils.decodeText(new Uint8Array(data,0,4)):'';
+      if(magic==='\x67\x6C\x54\x46'){
+        // GLB
+        const headerDV=new DataView(data,0,12);
+        // chunk0 = JSON
+        const chunk0Len=new DataView(data,12,4).getUint32(0,true);
+        const jsonBuf=new Uint8Array(data,20,chunk0Len);
+        content=new TextDecoder().decode(jsonBuf);
+        // chunk1 = BIN (may not exist)
+        if(data.byteLength>20+chunk0Len+8){
+          const binStart=20+chunk0Len+8;
+          extensions['KHR_binary_glTF']={body:data.slice(binStart)};
+        }
+      } else {
+        content=new TextDecoder().decode(new Uint8Array(data));
+      }
+    }
+    const json=JSON.parse(content);
+    if(json.asset===undefined||json.asset.version[0]<2){
+      onError&&onError(new Error('GLTFLoader: Unsupported asset version'));return;
+    }
+    // Simple parser: just load first mesh geometry + default material
+    _parseGLTF(json,extensions,path,onLoad,onError,data);
+  }
+}
+
+function _parseGLTF(json,extensions,path,onLoad,onError,rawData){
+  const group=new scope.Group();
+  try{
+    const buffers=[];
+    if(json.buffers){
+      json.buffers.forEach((buf,i)=>{
+        if(buf.uri){
+          if(buf.uri.startsWith('data:')){
+            const b64=buf.uri.split(',')[1];
+            const bin=atob(b64);
+            const arr=new Uint8Array(bin.length);
+            for(let j=0;j<bin.length;j++) arr[j]=bin.charCodeAt(j);
+            buffers[i]=arr.buffer;
+          }
+        } else if(extensions['KHR_binary_glTF']){
+          buffers[i]=extensions['KHR_binary_glTF'].body;
+        }
+      });
+    }
+
+    function getAccessor(index){
+      const acc=json.accessors[index];
+      const bv=json.bufferViews[acc.bufferView];
+      const buf=buffers[bv.buffer];
+      const offset=(bv.byteOffset||0)+(acc.byteOffset||0);
+      const compCount={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16}[acc.type]||1;
+      const typeArr={5120:Int8Array,5121:Uint8Array,5122:Int16Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType]||Float32Array;
+      return new typeArr(buf,offset,acc.count*compCount);
+    }
+
+    (json.meshes||[]).forEach(mesh=>{
+      mesh.primitives.forEach(prim=>{
+        const geo=new scope.BufferGeometry();
+        if(prim.attributes.POSITION!==undefined){
+          geo.setAttribute('position',new scope.BufferAttribute(new Float32Array(getAccessor(prim.attributes.POSITION)),3));
+        }
+        if(prim.attributes.NORMAL!==undefined){
+          geo.setAttribute('normal',new scope.BufferAttribute(new Float32Array(getAccessor(prim.attributes.NORMAL)),3));
+        }
+        if(prim.indices!==undefined){
+          const idx=getAccessor(prim.indices);
+          geo.setIndex(new scope.BufferAttribute(new Uint32Array(idx),1));
+        }
+        geo.computeBoundingBox();
+        const matDef=(json.materials&&prim.material!==undefined)?json.materials[prim.material]:null;
+        let color=0x888888;
+        if(matDef&&matDef.pbrMetallicRoughness&&matDef.pbrMetallicRoughness.baseColorFactor){
+          const f=matDef.pbrMetallicRoughness.baseColorFactor;
+          color=new scope.Color(f[0],f[1],f[2]);
+        }
+        const mat=new scope.MeshStandardMaterial({color,metalness:.6,roughness:.3,side:scope.DoubleSide});
+        group.add(new scope.Mesh(geo,mat));
+      });
+    });
+  }catch(e){console.warn('GLTFLoader parse warn:',e);}
+
+  // If empty group (parse failed), add a fallback sphere
+  if(group.children.length===0){
+    group.add(new scope.Mesh(
+      new scope.BoxGeometry(1,0.5,2),
+      new scope.MeshStandardMaterial({color:0x4CAF50,metalness:.7,roughness:.2})
+    ));
+  }
+  onLoad({scene:group});
+}
+
+scope.GLTFLoader=GLTFLoader;
+})();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1453,6 +1574,13 @@ async function doUpgradeStat(bikeLevel, stat){
   width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
+/* 3D canvas inside carousel card */
+.race-bike-3d-canvas{
+  width:100%;height:100%;display:block;
+  background:transparent;
+  cursor:grab;
+}
+.race-bike-3d-canvas:active{ cursor:grabbing; }
 .race-upgrade-link{
   position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
   color:rgba(255,255,255,.82);font-size:13px;font-weight:700;
@@ -1540,16 +1668,19 @@ body.race-active .bnav{       display:none!important; }
   display:block;
 }
 
-/* ── Bike sprites layered above canvas ── */
+/* ── Bike 3D viewers layered above canvas ── */
 .rs-bike{
   position:absolute;z-index:10;
   pointer-events:none;
   transition: transform .35s cubic-bezier(.4,0,.2,1);
 }
-.rs-bike img{
-  display:block;width:100%;
+.rs-bike canvas{
+  display:block;width:100%;height:100%;
   filter:drop-shadow(0 10px 22px rgba(0,0,0,.7));
+  background:transparent;
 }
+/* keep .rs-bike img for fallback only */
+.rs-bike img{ display:none; }
 
 /* AI bike — LEFT lane */
 #rsBikeAI{
@@ -1727,16 +1858,12 @@ body.race-active .bnav{       display:none!important; }
       <!-- Canvas draws: sky, mountains, trees, road perspective, lane marks -->
       <canvas id="raceCanvas"></canvas>
 
-      <!-- Bike sprites layered above canvas -->
+      <!-- Bike 3D viewers layered above canvas -->
       <div class="rs-bike" id="rsBikeAI">
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/484eb586-f90d-485c-82cc-576c157ed284.png"
-             alt="AI bike"
-             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
+        <canvas id="rsBikeAICanvas" style="width:100%;height:100%;display:block;background:transparent;"></canvas>
       </div>
       <div class="rs-bike" id="rsBikePlayer">
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7d815159-26f2-4b00-bee9-426e2118046b.png"
-             alt="Player bike"
-             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
+        <canvas id="rsBikePlayerCanvas" style="width:100%;height:100%;display:block;background:transparent;"></canvas>
       </div>
 
       <!-- Finish line -->
@@ -1877,15 +2004,16 @@ body.race-active .bnav{       display:none!important; }
       slide.dataset.idx = i;
       const wrap = document.createElement('div');
       wrap.className = 'race-bike-img-wrap';
-      const img = document.createElement('img');
-      img.src = b.img;
-      img.alt = b.name;
-      img.onerror = function(){ this.style.opacity='.2'; };
+      // ── 3D canvas viewer ──
+      const cvs = document.createElement('canvas');
+      cvs.className = 'race-bike-3d-canvas';
+      cvs.style.background = 'transparent';
+      wrap.appendChild(cvs);
+      // Upgrade link on top
       const up = document.createElement('span');
       up.className = 'race-upgrade-link';
       up.textContent = 'Прокачать';
       up.onclick = ()=>goNavBySection('sectionHome');
-      wrap.appendChild(img);
       wrap.appendChild(up);
       slide.appendChild(wrap);
       track.appendChild(slide);
@@ -1893,6 +2021,8 @@ body.race-active .bnav{       display:none!important; }
       dot.className = 'race-dot'+(i===0?' active':'');
       dot.onclick = (()=>{ const idx=i; return ()=>_goSlide(idx); })();
       dots.appendChild(dot);
+      // Init 3D viewer after DOM is ready
+      requestAnimationFrame(()=>_initBike3DViewer(cvs, b.lv));
     });
     _goSlide(0);
     requestAnimationFrame(()=>{
@@ -1901,6 +2031,131 @@ body.race-active .bnav{       display:none!important; }
       });
     });
     _attachSwipe();
+  }
+
+  /* ── Mini Three.js viewer for each carousel card ── */
+  const _bike3DViewers = [];
+  function _initBike3DViewer(cvs, bikeLv){
+    if(!window.THREE) return;
+    const W = cvs.offsetWidth  || 300;
+    const H = cvs.offsetHeight || 160;
+    cvs.width  = W * (window.devicePixelRatio||1);
+    cvs.height = H * (window.devicePixelRatio||1);
+    cvs.style.width  = W+'px';
+    cvs.style.height = H+'px';
+
+    const renderer = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    renderer.setPixelRatio(window.devicePixelRatio||1);
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, W/H, 0.1, 100);
+    camera.position.set(0, 1.2, 3.8);
+    camera.lookAt(0, 0.2, 0);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+    dir.position.set(3, 5, 3);
+    scene.add(dir);
+    const fill = new THREE.DirectionalLight(0x88aaff, 0.4);
+    fill.position.set(-3, 2, -2);
+    scene.add(fill);
+
+    // Ground glow plane
+    const planeGeo = new THREE.PlaneGeometry(6,4);
+    const planeMat = new THREE.MeshStandardMaterial({color:0x0d2810,roughness:1,metalness:0,transparent:true,opacity:.45});
+    const plane = new THREE.Mesh(planeGeo, planeMat);
+    plane.rotation.x = -Math.PI/2;
+    plane.position.y = -0.01;
+    scene.add(plane);
+
+    let bikeModel = null;
+    let loadError = false;
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      'BIKE MOTO.glb',
+      (gltf)=>{
+        bikeModel = gltf.scene;
+        // Centre + scale model
+        const box = new THREE.Box3().setFromObject(bikeModel);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const centre = new THREE.Vector3();
+        box.getCenter(centre);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 1.6 / maxDim;
+        bikeModel.scale.setScalar(scale);
+        bikeModel.position.sub(centre.multiplyScalar(scale));
+        bikeModel.position.y += size.y * scale * 0.5;
+        // Tint based on bike level
+        const hues = [0x4CAF50, 0x2196F3, 0xFF9800, 0xE91E63, 0x9C27B0];
+        const tint = hues[(bikeLv-1) % hues.length];
+        bikeModel.traverse(child=>{
+          if(child.isMesh && child.material){
+            child.material = child.material.clone();
+            child.material.emissive = new THREE.Color(tint);
+            child.material.emissiveIntensity = 0.12;
+          }
+        });
+        scene.add(bikeModel);
+      },
+      undefined,
+      (err)=>{
+        loadError = true;
+        // Fallback: stylised bike shape from boxes
+        const group = new THREE.Group();
+        const bodyMat = new THREE.MeshStandardMaterial({color:0x4CAF50,metalness:.8,roughness:.2});
+        const body = new THREE.Mesh(new THREE.BoxGeometry(.4,.3,1.1),bodyMat);
+        body.position.y=.35;
+        group.add(body);
+        const wheelMat = new THREE.MeshStandardMaterial({color:0x222222,metalness:.5,roughness:.5});
+        [-0.5,0.5].forEach(z=>{
+          const w=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.08,16),wheelMat);
+          w.rotation.z=Math.PI/2; w.position.set(0,.2,z);
+          group.add(w);
+        });
+        group.scale.setScalar(0.85);
+        bikeModel = group;
+        scene.add(group);
+      }
+    );
+
+    let rotY = -0.4;
+    let autoRot = true;
+    let lastX = null;
+    function onStart(e){
+      autoRot=false;
+      lastX=(e.touches?e.touches[0].clientX:e.clientX);
+    }
+    function onMove(e){
+      if(lastX===null) return;
+      const x=(e.touches?e.touches[0].clientX:e.clientX);
+      rotY+=(x-lastX)*0.015;
+      lastX=x;
+    }
+    function onEnd(){lastX=null;setTimeout(()=>{autoRot=true;},2000);}
+    cvs.addEventListener('touchstart',onStart,{passive:true});
+    cvs.addEventListener('touchmove',onMove,{passive:true});
+    cvs.addEventListener('touchend',onEnd,{passive:true});
+    cvs.addEventListener('mousedown',onStart);
+    cvs.addEventListener('mousemove',e=>{if(lastX!==null)onMove(e);});
+    cvs.addEventListener('mouseup',onEnd);
+
+    let rafId;
+    function animate(){
+      rafId = requestAnimationFrame(animate);
+      if(autoRot) rotY += 0.012;
+      if(bikeModel) bikeModel.rotation.y = rotY;
+      renderer.render(scene, camera);
+    }
+    animate();
+    _bike3DViewers.push({renderer, rafId:()=>rafId, dispose:()=>{
+      cancelAnimationFrame(rafId);
+      renderer.dispose();
+    }});
   }
 
   function _renderStats(b){
@@ -2044,6 +2299,104 @@ body.race-active .bnav{       display:none!important; }
   /* ══════════════════════════════════════════════════════════
      RACE ANIMATION — Core Loop
   ══════════════════════════════════════════════════════════ */
+  /* ══ 3D viewer for race sprites (AI + Player) ══ */
+  function _initRaceBike3D(canvasId, isPlayer, bikeData){
+    if(!window.THREE) return null;
+    const cvs = document.getElementById(canvasId);
+    if(!cvs) return null;
+    const parent = cvs.parentElement;
+    const W = parent.offsetWidth  || 140;
+    const H = parent.offsetHeight || 160;
+    cvs.width  = W * (window.devicePixelRatio||1);
+    cvs.height = H * (window.devicePixelRatio||1);
+    cvs.style.width  = W+'px';
+    cvs.style.height = H+'px';
+
+    const renderer = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    renderer.setPixelRatio(window.devicePixelRatio||1);
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
+    camera.position.set(isPlayer?-0.3:0.3, 1.1, 3.2);
+    camera.lookAt(0, 0.3, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+    dir.position.set(isPlayer?-3:3, 5, 3);
+    scene.add(dir);
+    const rim = new THREE.DirectionalLight(isPlayer?0x00ff88:0xff4444, 0.5);
+    rim.position.set(isPlayer?2:-2, 1, -3);
+    scene.add(rim);
+
+    let bikeModel = null;
+    let rotY = isPlayer ? -0.3 : 0.3;
+    let bounceT = 0;
+    let isBouncing = false;
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('BIKE MOTO.glb',
+      (gltf)=>{
+        bikeModel = gltf.scene;
+        const box = new THREE.Box3().setFromObject(bikeModel);
+        const size = new THREE.Vector3(); box.getSize(size);
+        const centre = new THREE.Vector3(); box.getCenter(centre);
+        const scale = 1.5 / Math.max(size.x,size.y,size.z);
+        bikeModel.scale.setScalar(scale);
+        bikeModel.position.sub(centre.multiplyScalar(scale));
+        bikeModel.position.y += size.y * scale * 0.5;
+        bikeModel.rotation.y = rotY;
+        // Color: player=green, AI=red-orange
+        const tint = isPlayer ? 0x22c55e : 0xef4444;
+        bikeModel.traverse(c=>{
+          if(c.isMesh&&c.material){
+            c.material=c.material.clone();
+            c.material.emissive=new THREE.Color(tint);
+            c.material.emissiveIntensity=0.18;
+          }
+        });
+        // Mirror AI bike to face opposite direction
+        if(!isPlayer) bikeModel.scale.x *= -1;
+        scene.add(bikeModel);
+      },
+      undefined,
+      ()=>{
+        // Fallback shape
+        const g=new THREE.Group();
+        const bm=new THREE.MeshStandardMaterial({color:isPlayer?0x22c55e:0xef4444,metalness:.8,roughness:.2});
+        g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.4,.3,1.1),bm),{position:new THREE.Vector3(0,.35,0)}));
+        const wm=new THREE.MeshStandardMaterial({color:0x111111});
+        [-0.5,0.5].forEach(z=>{
+          const w=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.08,16),wm);
+          w.rotation.z=Math.PI/2; w.position.set(0,.2,z); g.add(w);
+        });
+        if(!isPlayer) g.scale.x=-1;
+        bikeModel=g; scene.add(g);
+      }
+    );
+
+    let rafId;
+    function animate(){
+      rafId=requestAnimationFrame(animate);
+      if(bikeModel){
+        bikeModel.rotation.y = rotY;
+        if(isBouncing){
+          bounceT+=0.18;
+          bikeModel.position.y = Math.abs(Math.sin(bounceT))*0.08;
+        }
+      }
+      renderer.render(scene,camera);
+    }
+    animate();
+    return {
+      startBounce(){ isBouncing=true; bounceT=0; },
+      stopBounce(){  isBouncing=false; if(bikeModel) bikeModel.position.y=0; },
+      tiltForward(deg){ rotY = (isPlayer?-0.3:0.3) + (deg||0)*0.017; },
+      dispose(){ cancelAnimationFrame(rafId); renderer.dispose(); }
+    };
+  }
+
   function _runRaceAnimation(playerPower, aiPower, playerWins, aiName){
     _raceActive = true;
 
@@ -2055,6 +2408,14 @@ body.race-active .bnav{       display:none!important; }
     if(animPhase)   animPhase.style.display   = 'block';
     if(resultOv)    resultOv.style.display    = 'none';
     document.body.classList.add('race-active');
+
+    /* ── Init 3D bike viewers for race sprites ── */
+    let _rsBikeAI3D   = null;
+    let _rsBikePlayer3D = null;
+    requestAnimationFrame(()=>{
+      _rsBikeAI3D     = _initRaceBike3D('rsBikeAICanvas',   false, _raceSelectedBike);
+      _rsBikePlayer3D = _initRaceBike3D('rsBikePlayerCanvas', true, _raceSelectedBike);
+    });
 
     /* ═══════════════════════════════════════════════════════════
        CANVAS RACE RENDERER v3.0 — Professional Tropical Highway
@@ -2517,11 +2878,13 @@ body.race-active .bnav{       display:none!important; }
       bikeAI.style.bottom    = '2%';
       bikeAI.style.transform = '';
       bikeAI.classList.add('racing');
+      if(_rsBikeAI3D) _rsBikeAI3D.startBounce();
     }
     if(bikePlayer){
       bikePlayer.style.bottom    = '1%';
       bikePlayer.style.transform = '';
       bikePlayer.classList.add('racing');
+      if(_rsBikePlayer3D) _rsBikePlayer3D.startBounce();
     }
     if(finishImg) finishImg.className = '';
 
@@ -2636,6 +2999,8 @@ body.race-active .bnav{       display:none!important; }
         /* Stop bounce */
         if(bikeAI)     bikeAI.classList.remove('racing');
         if(bikePlayer) bikePlayer.classList.remove('racing');
+        if(_rsBikeAI3D)     _rsBikeAI3D.stopBounce();
+        if(_rsBikePlayer3D) _rsBikePlayer3D.stopBounce();
         _raceActive  = false;
         _raceStarted = false;
         setTimeout(()=>{ _showResult(playerWins, p1Name, aiName, maxPlayerKmh, maxAiKmh); }, 800);

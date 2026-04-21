@@ -1593,30 +1593,39 @@ body.race-active .bnav{       display:none!important; }
 .rs-hud{
   position:absolute;top:0;left:0;right:0;z-index:25;
   display:flex;align-items:flex-start;justify-content:space-between;
-  padding:10px 10px 0;
+  padding:14px 10px 0;
+  gap:8px;
 }
 .rs-hud-box{
   display:flex;flex-direction:column;
-  background:rgba(0,0,0,.62);border-radius:14px;
-  padding:7px 13px;
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.12);
-  min-width:80px;
+  background:rgba(0,0,0,.72);border-radius:16px;
+  padding:8px 14px 10px;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1.5px solid rgba(255,255,255,.18);
+  min-width:88px;
+  box-shadow:0 4px 18px rgba(0,0,0,.4);
 }
 .rs-hud-box.right{ align-items:flex-end; }
 .rs-hud-name{
-  font-size:11px;font-weight:800;color:rgba(255,255,255,.8);
-  max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:11px;font-weight:800;color:rgba(255,255,255,.75);
+  max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  letter-spacing:.3px;
 }
-.rs-hud-spd{ font-size:30px;font-weight:900;color:#fff;line-height:1.05; }
-.rs-hud-unit{ font-size:10px;color:rgba(255,255,255,.4);font-weight:600; }
+.rs-hud-spd{
+  font-size:34px;font-weight:900;color:#fff;line-height:1.0;
+  text-shadow:0 2px 12px rgba(255,255,255,.25);
+}
+.rs-hud-unit{ font-size:10px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.5px; }
 .rs-timer-pill{
-  background:rgba(0,0,0,.72);
-  border:2px solid rgba(255,215,0,.6);
-  border-radius:30px;padding:7px 18px;
+  background:rgba(0,0,0,.78);
+  border:2px solid rgba(255,215,0,.75);
+  border-radius:32px;padding:8px 18px;
   font-size:20px;font-weight:900;color:#FFD700;text-align:center;
-  box-shadow:0 0 22px rgba(255,215,0,.25);
-  align-self:center;min-width:90px;
+  box-shadow:0 0 24px rgba(255,215,0,.3), inset 0 1px 0 rgba(255,255,255,.1);
+  align-self:center;min-width:95px;
+  letter-spacing:1px;
+  backdrop-filter:blur(10px);
 }
 
 /* ── Result Overlay ── */
@@ -2048,14 +2057,14 @@ body.race-active .bnav{       display:none!important; }
     document.body.classList.add('race-active');
 
     /* ═══════════════════════════════════════════════════════════
-       CANVAS RACE RENDERER  — perspective road like Image 2
+       CANVAS RACE RENDERER v3.0 — Professional Tropical Highway
+       Matches reference: tall palms, realistic asphalt, mountains
     ═══════════════════════════════════════════════════════════ */
-    const ROAD_SCROLL_SPEED = 6; /* px per frame */
+    const ROAD_SCROLL_SPEED = 8; /* px per frame — faster feel */
 
-    /* Pre-load background image */
-    const _bgImg = new Image();
-    _bgImg.crossOrigin = 'anonymous';
-    _bgImg.src = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f01e8142-0136-4eab-960c-d165e1abc90c.png';
+    /* Scrolling offsets for different layers (parallax) */
+    let _treeOffset = 0;
+    let _mountainOffset = 0;
 
     function _initCanvas(){
       _cvs = document.getElementById('raceCanvas');
@@ -2066,237 +2075,436 @@ body.race-active .bnav{       display:none!important; }
       return true;
     }
 
-    /* Vanishing point */
-    function _vp(){ return { x: _cW * 0.5, y: _cH * 0.42 }; }
+    /* Vanishing point — slightly above center for dramatic perspective */
+    function _vp(){ return { x: _cW * 0.5, y: _cH * 0.38 }; }
 
-    function _drawFrame(){
-      if(!_ctx) return;
+    /* ── Draw mountains in background (parallax layer) ── */
+    function _drawMountains(){
+      const vp = _vp();
+      const H  = vp.y;
+      const off = _mountainOffset;
+
+      /* Sky — deep tropical blue gradient */
+      const sky = _ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0,   '#1a6fa8');
+      sky.addColorStop(0.4, '#3d9fd4');
+      sky.addColorStop(0.75,'#72c3e8');
+      sky.addColorStop(1,   '#a8d8f0');
+      _ctx.fillStyle = sky;
+      _ctx.fillRect(0, 0, _cW, H + 4);
+
+      /* Clouds */
+      _ctx.globalAlpha = 0.45;
+      _ctx.fillStyle = '#fff';
+      const cloudSeed = Math.floor(off * 0.001);
+      for(let c = 0; c < 4; c++){
+        const cx = ((c * _cW * 0.27 + off * 0.12) % (_cW + 80)) - 40;
+        const cy = H * (0.18 + c * 0.12);
+        const cr = 18 + c * 8;
+        _ctx.beginPath();
+        _ctx.arc(cx,         cy,      cr,      0, Math.PI*2);
+        _ctx.arc(cx + cr*0.9,cy-cr*0.3, cr*0.8, 0, Math.PI*2);
+        _ctx.arc(cx - cr*0.7,cy-cr*0.2, cr*0.65, 0, Math.PI*2);
+        _ctx.fill();
+      }
+      _ctx.globalAlpha = 1;
+
+      /* Far mountains (purple-blue haze) */
+      _ctx.save();
+      const mOff = (off * 0.05) % (_cW * 2);
+      _ctx.translate(-mOff % _cW, 0);
+      for(let pass = 0; pass < 2; pass++){
+        _ctx.beginPath();
+        const mY = H * 0.45;
+        _ctx.moveTo(-60, H);
+        const peaks1 = pass===0
+          ? [0.05,0.15,0.28,0.40,0.52,0.65,0.78,0.90,1.02,1.15]
+          : [0.0,0.12,0.23,0.36,0.48,0.61,0.74,0.87,0.99,1.12];
+        const heights1 = pass===0
+          ? [0.72,0.55,0.68,0.50,0.62,0.48,0.70,0.53,0.66,0.52]
+          : [0.62,0.45,0.58,0.40,0.52,0.38,0.60,0.43,0.56,0.42];
+        peaks1.forEach((px,i)=>{
+          _ctx.lineTo(px * _cW * 1.2, H - (H - mY) * heights1[i]);
+        });
+        _ctx.lineTo(_cW * 1.2, H);
+        _ctx.closePath();
+        const mGrad = _ctx.createLinearGradient(0, H * 0.4, 0, H);
+        if(pass===0){
+          mGrad.addColorStop(0, 'rgba(80,110,160,0.85)');
+          mGrad.addColorStop(1, 'rgba(60,90,130,0.6)');
+        } else {
+          mGrad.addColorStop(0, 'rgba(50,85,130,0.7)');
+          mGrad.addColorStop(1, 'rgba(40,70,110,0.5)');
+        }
+        _ctx.fillStyle = mGrad;
+        _ctx.fill();
+      }
+      _ctx.restore();
+
+      /* Tropical treeline silhouette at horizon */
+      _ctx.save();
+      const tOff = (off * 0.18) % (_cW * 1.5);
+      _ctx.translate(-tOff % (_cW * 0.5), 0);
+      _ctx.fillStyle = 'rgba(20,55,20,0.88)';
+      _ctx.beginPath();
+      _ctx.moveTo(-40, H + 2);
+      const tlineX = _cW * 1.5;
+      for(let tx = -40; tx < tlineX; tx += 18){
+        const rng = Math.sin(tx * 0.037 + 5.1) * 0.5 + 0.5;
+        const th  = H * (0.07 + rng * 0.18);
+        /* Tree spike */
+        _ctx.lineTo(tx,        H - th * 0.3);
+        _ctx.lineTo(tx + 6,    H - th);
+        _ctx.lineTo(tx + 12,   H - th * 0.25);
+      }
+      _ctx.lineTo(tlineX, H + 2);
+      _ctx.closePath();
+      _ctx.fill();
+      _ctx.restore();
+    }
+
+    /* ── Draw the road and ground ── */
+    function _drawRoad(){
       const vp = _vp();
       const HORIZON = vp.y;
+      const roadTopW = _cW * 0.07;
+      const roadBotW = _cW * 0.85;
+      const roadTop  = HORIZON;
+      const roadBot  = _cH + 4;
 
-      /* ── 1. Sky gradient ── */
-      const skyGrad = _ctx.createLinearGradient(0,0,0,HORIZON);
-      skyGrad.addColorStop(0,   '#5db8e8');
-      skyGrad.addColorStop(0.5, '#85ccf0');
-      skyGrad.addColorStop(1,   '#b8e0f7');
-      _ctx.fillStyle = skyGrad;
-      _ctx.fillRect(0, 0, _cW, HORIZON + 2);
-
-      /* ── 2. Background image (mountains + trees) ── */
-      if(_bgImg.complete && _bgImg.naturalWidth > 0){
-        const bgH = HORIZON + 30;
-        _ctx.drawImage(_bgImg, 0, 0, _cW, bgH);
-      }
-
-      /* ── 3. Ground below horizon ── */
-      const groundGrad = _ctx.createLinearGradient(0, HORIZON, 0, _cH);
-      groundGrad.addColorStop(0,   '#2d5a1b');
-      groundGrad.addColorStop(0.15,'#3a7022');
-      groundGrad.addColorStop(1,   '#1a3a0f');
-      _ctx.fillStyle = groundGrad;
-      _ctx.fillRect(0, HORIZON - 2, _cW, _cH - HORIZON + 2);
-
-      /* ── 4. Road trapezoid ── */
-      const roadTopW  = _cW * 0.09;   /* narrow at horizon */
-      const roadBotW  = _cW * 0.78;   /* wide at bottom */
-      const roadTop   = HORIZON - 2;
-      const roadBot   = _cH;
-
-      _ctx.beginPath();
-      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
-      _ctx.lineTo(vp.x + roadTopW/2, roadTop);
-      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
-      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
-      _ctx.closePath();
-
-      const roadGrad = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
-      roadGrad.addColorStop(0,    '#555');
-      roadGrad.addColorStop(0.15, '#666');
-      roadGrad.addColorStop(1,    '#3a3a3a');
-      _ctx.fillStyle = roadGrad;
-      _ctx.fill();
-
-      /* ── 5. Lane lines (perspective-correct, scrolling) ── */
-      const NUM_LINES = 16;
-      for(let i = 0; i <= NUM_LINES; i++){
-        const t = i / NUM_LINES;
-        /* Add scroll offset mapped to perspective */
-        const tScroll = ((t + _roadOffset / _cH) % 1 + 1) % 1;
-
-        const perspT  = tScroll * tScroll; /* ease toward horizon */
-        const y = roadTop + (roadBot - roadTop) * tScroll;
-
-        /* interpolate road half-width at this depth */
-        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
-        const x1 = vp.x - hw;
-        const x2 = vp.x + hw;
-
-        /* Side edges */
-        _ctx.beginPath();
-        _ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-        _ctx.lineWidth   = 1 + perspT * 2;
-        /* Left edge line */
-        if(i < NUM_LINES){
-          const tNext = (i+1)/NUM_LINES;
-          const ptN   = tNext * tNext;
-          const yN    = roadTop + (roadBot - roadTop) * ((((tNext + _roadOffset / _cH) % 1 + 1) % 1));
-          const hwN   = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * ptN;
-        }
-
-        /* Center dashes — skip thin area near horizon */
-        if(tScroll > 0.04){
-          const dashH  = Math.max(2, 14 * perspT);
-          const dashW  = Math.max(1, 4  * perspT);
-          const cx     = vp.x;
-
-          /* Only draw dash on alternating segments (dashed effect) */
-          const segIdx = Math.floor(tScroll * NUM_LINES * 2);
-          if(segIdx % 2 === 0){
-            _ctx.fillStyle = 'rgba(255,255,255,0.85)';
-            _ctx.fillRect(cx - dashW/2, y - dashH/2, dashW, dashH);
-          }
-
-          /* Left lane divider (~30% from center) */
-          const lx = vp.x - hw * 0.55;
-          if(segIdx % 2 === 0){
-            _ctx.fillStyle = 'rgba(255,255,255,0.45)';
-            _ctx.fillRect(lx - dashW/2, y - dashH/2, dashW * 0.7, dashH);
-          }
-
-          /* Right lane divider */
-          const rx = vp.x + hw * 0.55;
-          if(segIdx % 2 === 0){
-            _ctx.fillStyle = 'rgba(255,255,255,0.45)';
-            _ctx.fillRect(rx - dashW/2, y - dashH/2, dashW * 0.7, dashH);
-          }
-        }
-      }
-
-      /* Road left + right solid edge lines */
-      _ctx.beginPath();
-      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
-      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
-      _ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-      _ctx.lineWidth = 3;
-      _ctx.stroke();
-      _ctx.beginPath();
-      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
-      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
-      _ctx.stroke();
-
-      /* ── 6. Roadside grass strips ── */
+      /* Grass sides — rich green with texture variation */
       /* Left grass */
       _ctx.beginPath();
       _ctx.moveTo(vp.x - roadTopW/2, roadTop);
       _ctx.lineTo(0, roadBot);
       _ctx.lineTo(vp.x - roadBotW/2, roadBot);
       _ctx.closePath();
-      _ctx.fillStyle = '#2d6e1a';
+      const grassL = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      grassL.addColorStop(0,   '#2a6b18');
+      grassL.addColorStop(0.3, '#3a8522');
+      grassL.addColorStop(1,   '#1e5012');
+      _ctx.fillStyle = grassL;
       _ctx.fill();
+
       /* Right grass */
       _ctx.beginPath();
       _ctx.moveTo(vp.x + roadTopW/2, roadTop);
       _ctx.lineTo(_cW, roadBot);
       _ctx.lineTo(vp.x + roadBotW/2, roadBot);
       _ctx.closePath();
-      _ctx.fillStyle = '#2d6e1a';
+      const grassR = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      grassR.addColorStop(0,   '#2a6b18');
+      grassR.addColorStop(0.3, '#3a8522');
+      grassR.addColorStop(1,   '#1e5012');
+      _ctx.fillStyle = grassR;
       _ctx.fill();
 
-      /* ── 7. Palm trees (left + right, perspective) ── */
-      _drawPalmRow(-1); /* left side */
-      _drawPalmRow( 1); /* right side */
+      /* Grass highlight strip near road edge */
+      for(let side = -1; side <= 1; side += 2){
+        const edgeTopX = vp.x + side * roadTopW/2;
+        const edgeBotX = vp.x + side * roadBotW/2;
+        const stripW   = _cW * 0.012;
+        _ctx.beginPath();
+        _ctx.moveTo(edgeTopX,            roadTop);
+        _ctx.lineTo(edgeTopX + side*stripW, roadTop);
+        _ctx.lineTo(edgeBotX + side*stripW*6, roadBot);
+        _ctx.lineTo(edgeBotX,            roadBot);
+        _ctx.closePath();
+        _ctx.fillStyle = 'rgba(80,180,40,0.35)';
+        _ctx.fill();
+      }
 
-      /* ── 8. Horizon fog blend ── */
-      const fogGrad = _ctx.createLinearGradient(0, HORIZON - 30, 0, HORIZON + 40);
-      fogGrad.addColorStop(0,   'rgba(185,218,235,0)');
-      fogGrad.addColorStop(0.4, 'rgba(185,218,235,.25)');
-      fogGrad.addColorStop(1,   'rgba(185,218,235,0)');
-      _ctx.fillStyle = fogGrad;
-      _ctx.fillRect(0, HORIZON - 30, _cW, 70);
+      /* Main road — dark asphalt with realistic gradient */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.closePath();
+      const roadGrad = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      roadGrad.addColorStop(0,    '#4a4a4a');
+      roadGrad.addColorStop(0.08, '#525252');
+      roadGrad.addColorStop(0.5,  '#484848');
+      roadGrad.addColorStop(1,    '#3a3a3a');
+      _ctx.fillStyle = roadGrad;
+      _ctx.fill();
+
+      /* Road surface texture — subtle lighter center strip */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW*0.1, roadTop);
+      _ctx.lineTo(vp.x + roadTopW*0.1, roadTop);
+      _ctx.lineTo(vp.x + roadBotW*0.18, roadBot);
+      _ctx.lineTo(vp.x - roadBotW*0.18, roadBot);
+      _ctx.closePath();
+      _ctx.fillStyle = 'rgba(100,100,100,0.12)';
+      _ctx.fill();
+
+      /* ── Lane markings (perspective-correct, scrolling) ── */
+      const NUM_SEGS = 20;
+      const scrollStep = ROAD_SCROLL_SPEED / (_cH * 0.6);
+
+      for(let i = 0; i < NUM_SEGS; i++){
+        /* t from 0 (horizon) to 1 (bottom) with scroll */
+        let t = ((i / NUM_SEGS) + (_roadOffset / (_cH * 0.9))) % 1;
+        if(t < 0) t += 1;
+
+        const perspT = t * t * t; /* cubic for more natural perspective */
+        const y  = roadTop + (roadBot - roadTop) * t;
+        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
+
+        if(t < 0.03) continue;
+
+        const dashH = Math.max(2, 22 * perspT);
+        const dashW = Math.max(1, 5  * perspT);
+
+        /* Only alternating dashes */
+        const segBucket = Math.floor(t * NUM_SEGS * 2.5);
+        if(segBucket % 2 !== 0) continue;
+
+        /* CENTER solid line — yellow */
+        _ctx.fillStyle = `rgba(255,220,0,${0.75 + perspT * 0.2})`;
+        _ctx.fillRect(vp.x - dashW*0.4, y - dashH/2, dashW*0.8, dashH);
+
+        /* Left lane divider — white dashes */
+        const lx = vp.x - hw * 0.52;
+        _ctx.fillStyle = `rgba(255,255,255,${0.55 + perspT*0.3})`;
+        _ctx.fillRect(lx - dashW*0.5, y - dashH/2, dashW, dashH);
+
+        /* Right lane divider — white dashes */
+        const rx = vp.x + hw * 0.52;
+        _ctx.fillRect(rx - dashW*0.5, y - dashH/2, dashW, dashH);
+      }
+
+      /* Road edges — white lines */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      _ctx.lineWidth = 2.5;
+      _ctx.stroke();
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.stroke();
+
+      /* Curb stripes — red/white alternating on road edges */
+      const CURB_SEGS = 14;
+      for(let i = 0; i < CURB_SEGS; i++){
+        let t = ((i / CURB_SEGS) + (_roadOffset / (_cH * 0.85)) * 1.2) % 1;
+        if(t < 0) t += 1;
+        if(t < 0.04) continue;
+        const perspT = t * t * t;
+        const y  = roadTop + (roadBot - roadTop) * t;
+        const yt = roadTop + (roadBot - roadTop) * Math.min(1, t + 1/CURB_SEGS);
+        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
+        const hwt= (roadTopW/2) + (roadBotW/2 - roadTopW/2) * (Math.min(1,t+1/CURB_SEGS)**3);
+        const cW2 = Math.max(1, 5 * perspT);
+        const color = (i % 2 === 0) ? 'rgba(220,30,30,0.7)' : 'rgba(255,255,255,0.7)';
+        /* Left curb */
+        _ctx.beginPath();
+        _ctx.moveTo(vp.x - hw - cW2,  y);
+        _ctx.lineTo(vp.x - hw,        y);
+        _ctx.lineTo(vp.x - hwt,       yt);
+        _ctx.lineTo(vp.x - hwt - cW2, yt);
+        _ctx.closePath();
+        _ctx.fillStyle = color;
+        _ctx.fill();
+        /* Right curb */
+        _ctx.beginPath();
+        _ctx.moveTo(vp.x + hw,        y);
+        _ctx.lineTo(vp.x + hw + cW2,  y);
+        _ctx.lineTo(vp.x + hwt + cW2, yt);
+        _ctx.lineTo(vp.x + hwt,       yt);
+        _ctx.closePath();
+        _ctx.fill();
+      }
     }
 
-    /* Draw a row of palm trees on one side */
-    function _drawPalmRow(side /* -1=left, +1=right */){
+    /* ── Draw tall palm trees on both sides ── */
+    function _drawPalmRow(side){
       if(!_ctx) return;
-      const vp   = _vp();
+      const vp      = _vp();
       const HORIZON = vp.y;
-      const roadBotHW = _cW * 0.39;
-      const roadTopHW = _cW * 0.045;
-      const NUM_TREES = 7;
+      const roadBotHW = _cW * 0.425;
+      const roadTopHW = _cW * 0.035;
+      const NUM_TREES = 9;
 
       for(let i = 0; i < NUM_TREES; i++){
-        /* t=0 → near horizon, t=1 → near bottom */
-        const tBase = (i / (NUM_TREES - 1));
-        /* apply scroll */
-        const t = ((tBase + _roadOffset * 0.0008) % 1 + 1) % 1;
-        if(t < 0.05) continue; /* too close to horizon, skip */
+        const tBase = i / NUM_TREES;
+        /* Each tree scrolls at slightly different rate for parallax depth */
+        const treeScroll = (_treeOffset * (0.0006 + tBase * 0.0003)) % 1;
+        let t = ((tBase + treeScroll) % 1 + 1) % 1;
+        if(t < 0.04) continue;
 
         const perspT = t * t;
         const y = HORIZON + ((_cH - HORIZON) * t);
 
-        /* X position: follows road edge + offset into grass */
-        const roadHW = roadTopHW + (roadBotHW - roadTopHW) * perspT;
-        const treeOffsetX = roadHW * (1 + 0.35 * perspT);
-        const x = vp.x + side * treeOffsetX;
+        /* X — outside road edge, pushed far into grass */
+        const roadHW    = roadTopHW + (roadBotHW - roadTopHW) * perspT;
+        const grassGap  = roadHW * (0.08 + 0.22 * perspT);
+        /* Two rows of trees per side for density */
+        const rowOffset = (i % 2 === 0) ? 0 : roadHW * 0.28;
+        const x = vp.x + side * (roadHW + grassGap + rowOffset);
 
-        /* Tree height scales with perspective */
-        const treeH = 28 + perspT * 110;
-        const trunkW = 2  + perspT * 7;
+        /* Skip if off-screen */
+        if(x < -80 || x > _cW + 80) continue;
 
-        /* ── Trunk ── */
+        /* Tree proportions — tall tropical palms */
+        const treeH  = 35 + perspT * 200;   /* tall! */
+        const trunkW = 2.5 + perspT * 10;
+        const lean   = side * (0.06 + perspT * 0.04);
+
         _ctx.save();
         _ctx.translate(x, y);
-        /* slight lean away from road */
-        _ctx.rotate(side * 0.08);
+        _ctx.rotate(lean);
 
-        const trunkGrad = _ctx.createLinearGradient(-trunkW/2, -treeH, trunkW/2, 0);
-        trunkGrad.addColorStop(0, '#6b4e2a');
-        trunkGrad.addColorStop(1, '#4a3318');
-        _ctx.fillStyle = trunkGrad;
+        /* ── Shadow on ground ── */
+        _ctx.save();
+        _ctx.globalAlpha = 0.18 * perspT;
+        _ctx.fillStyle = '#000';
         _ctx.beginPath();
-        _ctx.moveTo(-trunkW/2,  0);
-        _ctx.lineTo( trunkW/2,  0);
-        _ctx.lineTo( trunkW*0.4, -treeH);
-        _ctx.lineTo(-trunkW*0.4, -treeH);
-        _ctx.closePath();
+        _ctx.ellipse(treeH * 0.18, -2, treeH * 0.35 * perspT, 4 * perspT, 0, 0, Math.PI*2);
         _ctx.fill();
+        _ctx.globalAlpha = 1;
+        _ctx.restore();
 
-        /* ── Fronds ── */
-        const frondR = treeH * 0.38;
-        const frondY = -treeH;
-        const frondColor = `rgba(${34+Math.round(perspT*20)},${120+Math.round(perspT*20)},${34},${0.7+perspT*0.3})`;
-
-        for(let f = 0; f < 6; f++){
-          const angle = (f / 6) * Math.PI * 2 - Math.PI * 0.5;
-          const fx = Math.cos(angle) * frondR;
-          const fy = Math.sin(angle) * frondR * 0.55;
+        /* ── Trunk — segmented palm style ── */
+        const trunkSegs = 6;
+        for(let seg = 0; seg < trunkSegs; seg++){
+          const sy0 = -(treeH * seg / trunkSegs);
+          const sy1 = -(treeH * (seg+1) / trunkSegs);
+          const sw0 = trunkW * (1 - seg/trunkSegs * 0.45);
+          const sw1 = trunkW * (1 - (seg+1)/trunkSegs * 0.45);
+          const tc = _ctx.createLinearGradient(-sw0, sy0, sw0, sy0);
+          const lightness = 60 + seg * 4;
+          const darkness  = 35 + seg * 3;
+          tc.addColorStop(0,    `rgb(${darkness+10},${darkness+5},${darkness-5})`);
+          tc.addColorStop(0.3,  `rgb(${lightness+10},${lightness},${lightness-15})`);
+          tc.addColorStop(0.7,  `rgb(${lightness+5},${lightness-5},${lightness-20})`);
+          tc.addColorStop(1,    `rgb(${darkness},${darkness-5},${darkness-10})`);
+          _ctx.fillStyle = tc;
           _ctx.beginPath();
-          _ctx.moveTo(0, frondY);
-          _ctx.quadraticCurveTo(fx * 0.5, frondY + fy * 0.5, fx, frondY + fy);
-          _ctx.lineWidth   = Math.max(1, perspT * 4);
-          _ctx.strokeStyle = frondColor;
+          _ctx.moveTo(-sw0/2, sy0 + 1);
+          _ctx.lineTo( sw0/2, sy0 + 1);
+          _ctx.lineTo( sw1/2, sy1);
+          _ctx.lineTo(-sw1/2, sy1);
+          _ctx.closePath();
+          _ctx.fill();
+          /* Segment ring */
+          _ctx.strokeStyle = `rgba(40,25,10,${0.25 * perspT})`;
+          _ctx.lineWidth = 0.5 * perspT;
           _ctx.stroke();
         }
-        /* Canopy circle */
+
+        /* ── Fronds — long drooping tropical fronds ── */
+        const frondLen  = treeH * 0.45;
+        const topY      = -treeH;
+        const NUM_FRONDS = 8;
+
+        for(let f = 0; f < NUM_FRONDS; f++){
+          const angle     = (f / NUM_FRONDS) * Math.PI * 2;
+          /* Drooping arc — start going up, droop outward-down */
+          const fx0 = Math.cos(angle) * frondLen * 0.25;
+          const fy0 = Math.sin(angle) * frondLen * 0.25 - frondLen * 0.15;
+          const fxEnd = Math.cos(angle) * frondLen;
+          const fyEnd = Math.sin(angle) * frondLen * 0.5 + frondLen * 0.25;
+
+          /* Color varies with angle — lit vs dark side */
+          const lit = (Math.cos(angle + 0.8) + 1) / 2;
+          const g1  = Math.round(100 + lit * 60);
+          const g2  = Math.round(50  + lit * 40);
+          const frondColor = `rgba(${g2},${g1},${g2-30},${0.8 + perspT * 0.2})`;
+
+          /* Main frond stalk */
+          _ctx.beginPath();
+          _ctx.moveTo(0, topY);
+          _ctx.quadraticCurveTo(fx0, topY + fy0, fxEnd, topY + fyEnd);
+          _ctx.strokeStyle = frondColor;
+          _ctx.lineWidth   = Math.max(0.8, perspT * 3.5);
+          _ctx.stroke();
+
+          /* Leaflets along frond */
+          const LEAFLETS = 5;
+          for(let l = 1; l <= LEAFLETS; l++){
+            const lt  = l / (LEAFLETS + 1);
+            /* Bezier point at this t */
+            const bx = (1-lt)*(1-lt)*0 + 2*(1-lt)*lt*fx0 + lt*lt*fxEnd;
+            const by = (1-lt)*(1-lt)*topY + 2*(1-lt)*lt*(topY+fy0) + lt*lt*(topY+fyEnd);
+            const leafDir = angle + (lt > 0.5 ? 0.4 : -0.4);
+            const leafLen = frondLen * 0.12 * (1 - lt * 0.3);
+            _ctx.beginPath();
+            _ctx.moveTo(bx, by);
+            _ctx.lineTo(bx + Math.cos(leafDir)*leafLen, by + Math.sin(leafDir)*leafLen*0.6);
+            _ctx.strokeStyle = `rgba(${g2+10},${g1+10},${g2-20},0.55)`;
+            _ctx.lineWidth   = Math.max(0.5, perspT * 1.5);
+            _ctx.stroke();
+          }
+        }
+
+        /* Canopy base — dark green circle */
         _ctx.beginPath();
-        _ctx.arc(0, frondY, frondR * 0.55, 0, Math.PI * 2);
-        _ctx.fillStyle = `rgba(28,95,28,${0.55 + perspT * 0.25})`;
+        _ctx.arc(0, topY, frondLen * 0.18, 0, Math.PI*2);
+        const canopyGrad = _ctx.createRadialGradient(0, topY, 0, 0, topY, frondLen*0.18);
+        canopyGrad.addColorStop(0,   `rgba(60,140,40,${0.6+perspT*0.3})`);
+        canopyGrad.addColorStop(1,   `rgba(20,80,20,${0.4+perspT*0.3})`);
+        _ctx.fillStyle = canopyGrad;
         _ctx.fill();
 
         _ctx.restore();
       }
     }
 
-    /* ── Road tile scroll via RAF ── */
-    function _roadLoop(ts){
+    /* ── Main frame draw ── */
+    function _drawFrame(){
+      if(!_ctx) return;
+      const vp      = _vp();
+      const HORIZON = vp.y;
+
+      /* Layer 1: Sky + Mountains + Treeline */
+      _drawMountains();
+
+      /* Layer 2: Ground + Road + Markings */
+      _drawRoad();
+
+      /* Layer 3: Palm trees (drawn back-to-front via perspective t) */
+      _drawPalmRow(-1);
+      _drawPalmRow( 1);
+
+      /* Layer 4: Heat shimmer / horizon fog */
+      const fogGrad = _ctx.createLinearGradient(0, HORIZON - 20, 0, HORIZON + 55);
+      fogGrad.addColorStop(0,   'rgba(172,214,230,0)');
+      fogGrad.addColorStop(0.35,'rgba(172,214,230,0.22)');
+      fogGrad.addColorStop(0.65,'rgba(172,214,230,0.12)');
+      fogGrad.addColorStop(1,   'rgba(172,214,230,0)');
+      _ctx.fillStyle = fogGrad;
+      _ctx.fillRect(0, HORIZON - 20, _cW, 75);
+
+      /* Layer 5: Speed lines (motion blur effect at bottom corners) */
+      if(_raceActive){
+        const speedAlpha = 0.06;
+        for(let sl = 0; sl < 5; sl++){
+          const sy = _cH * (0.75 + sl * 0.05);
+          const sw = _cW * (0.05 + sl * 0.02);
+          _ctx.fillStyle = `rgba(255,255,255,${speedAlpha - sl*0.01})`;
+          _ctx.fillRect(0,       sy, sw, 1.5);
+          _ctx.fillRect(_cW - sw, sy, sw, 1.5);
+        }
+      }
+    }
+
+    /* ── RAF loop ── */
+    function _roadLoop(){
       if(!_raceActive) return;
-      _roadOffset = (_roadOffset + ROAD_SCROLL_SPEED) % (_cH || 500);
+      _roadOffset    = (_roadOffset    + ROAD_SCROLL_SPEED)        % (_cH * 2);
+      _treeOffset    = (_treeOffset    + ROAD_SCROLL_SPEED * 1.1)  % 10000;
+      _mountainOffset= (_mountainOffset+ ROAD_SCROLL_SPEED * 0.25) % 10000;
       _drawFrame();
       _raceRafId = requestAnimationFrame(_roadLoop);
     }
     if(_raceRafId) cancelAnimationFrame(_raceRafId);
     if(_initCanvas()){
-      _drawFrame(); /* draw once immediately */
+      _roadOffset = 0; _treeOffset = 0; _mountainOffset = 0;
+      _drawFrame();
       _raceRafId = requestAnimationFrame(_roadLoop);
     }
 

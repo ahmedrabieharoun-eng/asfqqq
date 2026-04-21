@@ -1525,7 +1525,8 @@ async function doUpgradeStat(bikeLevel, stat){
 ══════════════════════════════════════════════ */
 #raceAnimPhase{
   position:fixed;inset:0;z-index:200;
-  display:none;overflow:hidden;background:#87CEEB;
+  display:none;overflow:hidden;
+  background:#5a9fd4; /* sky fallback */
 }
 
 /* Hide topbar + bottom nav during active race */
@@ -1536,98 +1537,107 @@ body.race-active .bnav{
   display:none!important;
 }
 
-/* ── Layer 1: Background (sky + trees + mountains) — fixed, top 60% ── */
+/* ── Layer 1: Background — fills top 52% of screen ── */
 .rs-bg{
   position:absolute;
   left:0;right:0;top:0;
-  height:62%;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f01e8142-0136-4eab-960c-d165e1abc90c.png') center bottom/cover no-repeat;
+  height:52%;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f01e8142-0136-4eab-960c-d165e1abc90c.png')
+    center center / cover no-repeat;
   z-index:1;
 }
 
-/* ── Fog / blend layer at horizon (bottom of bg into top of road) ── */
-.rs-horizon-blend{
-  position:absolute;left:0;right:0;
-  top:50%;height:14%;
-  background:linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(200,220,200,.55) 40%,
-    rgba(180,210,180,.85) 75%,
-    rgba(160,200,160,.95) 100%
-  );
-  z-index:4;pointer-events:none;
-}
-
-/* ── Layer 2: Road container — bottom 55% ── */
+/* ── Layer 2: Road container — bottom 52% (overlaps bg by ~4%) ── */
 .rs-road-wrap{
   position:absolute;
-  bottom:0;left:0;right:0;
-  height:58%;
-  z-index:2;overflow:hidden;
+  bottom:0; left:0; right:0;
+  height:52%;
+  z-index:2;
+  overflow:hidden;
 }
 
-/* ── Road tile A (bottom tile) ── */
+/* Road tile A */
 .rs-road-tile{
   position:absolute;
-  left:0;right:0;
-  height:100%;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png') center top / 100% auto repeat-y;
+  left:0;right:0;top:0;bottom:0;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png')
+    center top / 100% auto;
   will-change:background-position;
 }
-/* Second tile stacked above for seamless loop */
+/* Road tile B — sits directly above A for seamless loop */
 .rs-road-tile-b{
   position:absolute;
-  left:0;right:0;top:-100%;height:100%;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png') center top / 100% auto repeat-y;
+  left:0;right:0;
+  top:-100%;height:100%;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png')
+    center top / 100% auto;
   will-change:background-position;
 }
 
-/* Fog at TOP of road — blends into background */
+/* ── Fog overlay — sits at top of road, fades to transparent downward ──
+   Uses SAME colour as sky so blend is invisible (not green!)           */
 .rs-road-fog{
-  position:absolute;top:0;left:0;right:0;height:22%;
+  position:absolute;
+  top:0;left:0;right:0;
+  height:28%;
   background:linear-gradient(
     180deg,
-    rgba(160,200,160,1) 0%,
-    rgba(160,200,160,.7) 30%,
-    rgba(160,200,160,.2) 70%,
-    transparent 100%
+    rgba(90,159,212,1)   0%,
+    rgba(90,159,212,.75) 25%,
+    rgba(90,159,212,.35) 60%,
+    transparent          100%
   );
   z-index:5;pointer-events:none;
 }
 
+/* ── Horizon blend — bridges bg bottom and road top ── */
+.rs-horizon-blend{
+  position:absolute;
+  /* sits right at the 48%-52% junction */
+  top:44%; height:12%;
+  left:0;right:0;
+  background:linear-gradient(
+    180deg,
+    transparent            0%,
+    rgba(90,159,212,.55)  50%,
+    rgba(90,159,212,.9)  100%
+  );
+  z-index:3;pointer-events:none;
+}
+
 /* ── Bikes ── */
 .rs-bike{
-  position:absolute;z-index:10;
-  transition:bottom .4s cubic-bezier(.4,0,.2,1),
-             left   .4s cubic-bezier(.4,0,.2,1),
-             right  .4s cubic-bezier(.4,0,.2,1),
-             transform .4s ease;
+  position:absolute;
+  z-index:10;
+  transition: bottom    .4s cubic-bezier(.4,0,.2,1),
+              transform .4s ease;
 }
 .rs-bike img{
   display:block;width:100%;
-  filter:drop-shadow(0 8px 16px rgba(0,0,0,.5));
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));
 }
 
-/* AI car — left lane */
+/* AI bike — LEFT lane, starts at bottom */
 #rsBikeAI{
-  left:5%;bottom:2%;width:42%;
+  left:4%;
+  bottom:2%;
+  width:40%;
 }
 
-/* Player car — right lane */
+/* Player bike — RIGHT lane, starts at bottom */
 #rsBikePlayer{
-  right:2%;bottom:1%;width:44%;
+  right:3%;
+  bottom:2%;
+  width:40%;
 }
 
-/* Subtle car bounce animation */
+/* Bounce while racing */
 @keyframes carBounce{
   0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-3px)}
+  50%{transform:translateY(-4px)}
 }
-.rs-bike.racing{
-  animation:carBounce .45s ease-in-out infinite;
-}
-#rsBikeAI.racing{animation-delay:.2s;}
+.rs-bike.racing{ animation:carBounce .5s ease-in-out infinite; }
+#rsBikeAI.racing{ animation-delay:.22s; }
 
 /* Finish line image — slides in at race end */
 #rsFinishImg{
@@ -2110,9 +2120,11 @@ body.race-active .bnav{
     /* ── Road tile scroll via RAF ── */
     const tileA = document.getElementById('rsRoadTileA');
     const tileB = document.getElementById('rsRoadTileB');
-    let roadY = 0;
-    const ROAD_SPEED = 9; /* px per frame at 60fps */
-    let lastRafTime = null;
+    /* Use actual pixel height of the road wrap (52% of screen) */
+    let roadH   = animPhase ? Math.round(animPhase.offsetHeight * 0.52) : 500;
+    let roadY   = 0;
+    const ROAD_SPEED = 10; /* px per frame @60fps */
+    let lastRafTime  = null;
 
     function roadLoop(ts){
       if(!_raceActive) return;
@@ -2120,19 +2132,12 @@ body.race-active .bnav{
       const dt = Math.min((ts - lastRafTime) / 16.667, 3);
       lastRafTime = ts;
 
-      roadY += ROAD_SPEED * dt;
-      /* Height of road wrap — use 58% of screen height */
-      const roadH = animPhase ? animPhase.offsetHeight * 0.58 : 500;
+      roadY = (roadY + ROAD_SPEED * dt) % roadH;
 
-      if(roadY >= roadH) roadY -= roadH;
-
-      /* Tile A: starts at 0, scrolls down */
-      const aY = roadY;
-      /* Tile B: always directly above tile A */
-      const bY = roadY - roadH;
-
-      if(tileA) tileA.style.backgroundPosition = `center ${aY}px`;
-      if(tileB) tileB.style.backgroundPosition = `center ${bY + roadH}px`;
+      /* Tile A scrolls down by roadY */
+      /* Tile B sits exactly roadH pixels above tile A — creates seamless loop */
+      if(tileA) tileA.style.backgroundPosition = `center ${roadY}px`;
+      if(tileB) tileB.style.backgroundPosition = `center ${roadY + roadH}px`;
 
       _raceRafId = requestAnimationFrame(roadLoop);
     }

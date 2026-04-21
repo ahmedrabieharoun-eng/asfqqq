@@ -1450,7 +1450,7 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .race-bike-slide.active .race-bike-img-wrap{height:210px;}
 .race-bike-img-wrap img{
-  width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;
+  width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
 .race-upgrade-link{
@@ -1526,6 +1526,11 @@ async function doUpgradeStat(bikeLevel, stat){
 #raceAnimPhase{
   position:fixed;inset:0;z-index:200;
   display:none;overflow:hidden;background:#050d05;
+}
+
+/* Hide topbar during active race */
+body.race-active .hub-topbar{
+  display:none!important;
 }
 
 /* Nature background layer */
@@ -2069,6 +2074,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(selectPhase) selectPhase.style.display = 'none';
     if(animPhase)   animPhase.style.display   = 'block';
     if(resultOv)    resultOv.style.display    = 'none';
+    document.body.classList.add('race-active');
 
     /* Reset bikes to starting positions */
     const bikeAI     = document.getElementById('rsBikeAI');
@@ -2261,6 +2267,7 @@ async function doUpgradeStat(bikeLevel, stat){
     const selectPhase = document.getElementById('raceSelectPhase');
     if(animPhase)   animPhase.style.display   = 'none';
     if(selectPhase) selectPhase.style.display = 'block';
+    document.body.classList.remove('race-active');
 
     /* Show start button again */
     const sf = document.getElementById('raceStartFixed');

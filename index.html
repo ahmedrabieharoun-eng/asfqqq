@@ -2070,62 +2070,271 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <!-- FINANCE -->
 <div class="sec" id="sectionFinance">
-  <div class="fin-tabs">
-    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌟 Season 2</div>
-    <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
-    <div class="ftab" data-ft="referrals" onclick="switchFinTab(this,'referrals')">👥 Referrals</div>
+<style>
+/* ══ PROFILE PAGE (Finance redesign) ══ */
+#sectionFinance{
+  padding:0 !important;
+  background:var(--bg,#0d1a0d);
+  min-height:calc(100vh - 78px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Hero banner */
+.prf-hero{
+  position:relative;height:180px;overflow:hidden;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center top/cover no-repeat;
+}
+.prf-hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(13,26,13,.95) 100%);
+}
+.prf-hero-wave{
+  position:absolute;bottom:-1px;left:0;right:0;z-index:2;
+}
+
+/* Avatar */
+.prf-avatar-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  margin-top:-52px;position:relative;z-index:3;padding-bottom:8px;
+}
+.prf-avatar-ring{
+  width:96px;height:96px;border-radius:50%;
+  border:3px solid #fff;
+  background:#1a2e1a;overflow:hidden;position:relative;
+}
+.prf-avatar-ring img{width:100%;height:100%;object-fit:cover}
+.prf-edit-btn{
+  position:absolute;bottom:2px;right:2px;
+  width:26px;height:26px;border-radius:50%;
+  background:#4CAF50;border:2px solid #fff;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:12px;cursor:pointer;
+}
+.prf-username{
+  font-size:16px;font-weight:800;color:#fff;
+  margin-top:10px;text-align:center;padding:0 20px;
+}
+
+/* Menu list */
+.prf-menu{
+  background:rgba(255,255,255,.06);
+  border-radius:16px;margin:16px 14px;overflow:hidden;
+}
+.prf-menu-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:17px 18px;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  transition:background .15s;
+  gap:12px;
+}
+.prf-menu-item:last-child{border-bottom:none}
+.prf-menu-item:active{background:rgba(255,255,255,.08)}
+.prf-menu-left{display:flex;align-items:center;gap:12px}
+.prf-menu-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
+.prf-menu-label{font-size:16px;font-weight:700;color:#fff}
+.prf-menu-arrow{color:rgba(255,255,255,.4);font-size:16px}
+
+/* ══ SUB PAGES ══ */
+.prf-subpage{
+  display:none;position:fixed;
+  top:0;left:0;right:0;bottom:78px;
+  background:var(--bg,#0d1a0d);
+  z-index:300;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  animation:slideUp .25s ease;
+}
+.prf-subpage.open{display:block}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.prf-sub-topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:16px 16px 10px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  position:sticky;top:0;z-index:10;
+  background:var(--bg,#0d1a0d);
+}
+.prf-back-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:none;
+  color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+}
+.prf-sub-title{font-size:17px;font-weight:800;color:#fff}
+
+.prf-sub-body{padding:16px 14px 24px}
+
+/* ── Deposit sub ── */
+/* ── Withdraw sub ── */
+/* ── Referrals sub ── */
+/* (reuse existing styles, just moved into subpage) */
+
+/* ── Collab sub ── */
+.collab-hero{
+  background:linear-gradient(135deg,rgba(33,150,243,.15),rgba(0,188,212,.08));
+  border:1px solid rgba(33,150,243,.25);border-radius:16px;
+  padding:20px 16px;text-align:center;margin-bottom:16px;
+}
+.collab-hero-icon{font-size:48px;margin-bottom:8px}
+.collab-hero-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:6px}
+.collab-hero-sub{font-size:13px;color:rgba(255,255,255,.55);font-weight:600;line-height:1.5}
+
+.collab-reqs{background:rgba(255,255,255,.05);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.collab-reqs-title{font-size:13px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+.collab-req-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.collab-req-row:last-child{border-bottom:none}
+.collab-req-icon{font-size:18px;width:28px;text-align:center}
+.collab-req-text{font-size:13px;font-weight:700;color:#fff}
+.collab-req-val{font-size:12px;font-weight:600;color:#4CAF50;margin-left:auto}
+
+.collab-input-wrap{margin-bottom:12px}
+.collab-input-label{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:8px}
+.collab-input{
+  width:100%;padding:14px 16px;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.15);border-radius:12px;
+  color:#fff;font-size:15px;font-weight:600;outline:none;
+  box-sizing:border-box;
+}
+.collab-input:focus{border-color:#2196F3}
+.collab-submit-btn{
+  width:100%;padding:16px;background:linear-gradient(135deg,#2196F3,#00BCD4);
+  border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 18px rgba(33,150,243,.35);
+}
+
+/* ── Language sub ── */
+.lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.lang-card{
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.lang-card.active,.lang-card:active{border-color:#4CAF50;background:rgba(76,175,80,.12)}
+.lang-card-flag{font-size:28px;margin-bottom:6px}
+.lang-card-name{font-size:14px;font-weight:700;color:#fff}
+
+/* ── Music sub ── */
+.music-card{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:22px 18px;text-align:center;margin-bottom:14px;
+}
+.music-icon{font-size:52px;margin-bottom:10px}
+.music-status{font-size:16px;font-weight:800;color:#fff;margin-bottom:6px}
+.music-desc{font-size:13px;color:rgba(255,255,255,.5);font-weight:600;line-height:1.5;margin-bottom:18px}
+.music-toggle{
+  display:flex;align-items:center;justify-content:center;gap:14px;
+  padding:14px 24px;border-radius:50px;border:none;cursor:pointer;
+  font-size:16px;font-weight:800;width:100%;
+  transition:all .2s;
+}
+.music-toggle.on{background:linear-gradient(135deg,#4CAF50,#2e7d32);color:#fff;box-shadow:0 4px 18px rgba(76,175,80,.35)}
+.music-toggle.off{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.15)}
+
+/* ── Missions / Tasks sub (reuse existing) ── */
+</style>
+
+<!-- ══ MAIN PROFILE PAGE ══ -->
+<div id="prfMainPage">
+
+  <!-- Hero background -->
+  <div class="prf-hero">
+    <svg class="prf-hero-wave" viewBox="0 0 390 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 L0,30 Q60,0 130,20 Q195,40 260,18 Q320,0 390,25 L390,60 Z" fill="#0d1a0d"/>
+    </svg>
   </div>
 
-  <!-- DEPOSIT -->
-  <div class="ftcont active" id="ft-deposit">
+  <!-- Avatar + username -->
+  <div class="prf-avatar-wrap">
+    <div class="prf-avatar-ring" style="position:relative">
+      <img id="prfAvatarImg" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" onerror="this.src='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png'">
+      <div class="prf-edit-btn">✏️</div>
+    </div>
+    <div class="prf-username" id="prfUsername">Loading...</div>
+  </div>
 
-    <!-- ══ LIMITED OFFER BANNER ══ -->
+  <!-- Menu -->
+  <div class="prf-menu">
+    <div class="prf-menu-item" onclick="openPrfSub('sub-wallet')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">👛</span><span class="prf-menu-label">Мой кошелек</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-deposit')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">💰</span><span class="prf-menu-label">Пополнение</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-withdraw')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">💸</span><span class="prf-menu-label">Вывод средств</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-referrals')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">👥</span><span class="prf-menu-label">Рефералы</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-missions')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">🎯</span><span class="prf-menu-label">Миссии</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-collab')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">🤝</span><span class="prf-menu-label">Сотрудничество</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-language')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">🌐</span><span class="prf-menu-label">Язык</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+    <div class="prf-menu-item" onclick="openPrfSub('sub-music')">
+      <div class="prf-menu-left"><span class="prf-menu-icon">🎵</span><span class="prf-menu-label">Музыка</span></div>
+      <span class="prf-menu-arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUB PAGE: Wallet ══ -->
+<div class="prf-subpage" id="sub-wallet">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-wallet')">‹</button>
+    <div class="prf-sub-title">👛 Мой кошелек</div>
+  </div>
+  <div class="prf-sub-body">
+    <div class="wd-form">
+      <div class="wal-row">
+        <div class="wl-inf">
+          <div class="wll" data-i18n="labelWallet">Wallet</div>
+          <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
+        </div>
+        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUB PAGE: Deposit ══ -->
+<div class="prf-subpage" id="sub-deposit">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-deposit')">‹</button>
+    <div class="prf-sub-title">💰 Пополнение</div>
+  </div>
+  <div class="prf-sub-body">
     <style>
     @keyframes dep-offer-pulse{0%,100%{box-shadow:0 0 18px rgba(255,215,0,.25),0 4px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 32px rgba(255,215,0,.5),0 4px 22px rgba(0,0,0,.55)}}
     @keyframes dep-offer-fire{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.18) rotate(4deg)}}
     @keyframes dep-offer-badge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-    @keyframes dep-ticker{0%{opacity:1}49%{opacity:1}50%{opacity:0}100%{opacity:0}}
-    .dep-offer-banner{
-      background:linear-gradient(135deg,rgba(20,12,0,.95),rgba(40,22,0,.92));
-      border:1.5px solid rgba(255,193,7,.45);
-      border-radius:16px;margin-bottom:12px;
-      overflow:hidden;position:relative;
-      animation:dep-offer-pulse 2.4s ease-in-out infinite;
-    }
-    .dep-offer-banner::before{
-      content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
-      background:linear-gradient(90deg,transparent,rgba(255,215,0,.07),transparent);
-      animation:shim 2.8s infinite;pointer-events:none;
-    }
-    .dep-offer-top{
-      background:linear-gradient(90deg,rgba(255,152,0,.18),rgba(255,193,7,.1),rgba(255,152,0,.18));
-      border-bottom:1px solid rgba(255,193,7,.2);
-      padding:7px 12px;display:flex;align-items:center;gap:7px;
-    }
+    .dep-offer-banner{background:linear-gradient(135deg,rgba(20,12,0,.95),rgba(40,22,0,.92));border:1.5px solid rgba(255,193,7,.45);border-radius:16px;margin-bottom:12px;overflow:hidden;position:relative;animation:dep-offer-pulse 2.4s ease-in-out infinite}
+    .dep-offer-top{background:linear-gradient(90deg,rgba(255,152,0,.18),rgba(255,193,7,.1),rgba(255,152,0,.18));border-bottom:1px solid rgba(255,193,7,.2);padding:7px 12px;display:flex;align-items:center;gap:7px}
     .dep-offer-fire{font-size:18px;animation:dep-offer-fire 1.4s ease-in-out infinite;display:inline-block}
     .dep-offer-live{display:flex;align-items:center;gap:5px;flex:1}
     .dep-offer-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;box-shadow:0 0 6px #ff4444;animation:live-dot 1s ease-in-out infinite}
     .dep-offer-live-txt{font-size:11px;font-weight:800;color:#FFD740;letter-spacing:.5px;text-transform:uppercase}
-    .dep-offer-badge{
-      background:linear-gradient(135deg,#ff8f00,#FFD700);border-radius:20px;
-      padding:3px 11px;font-size:12px;font-weight:800;color:#1a0a00;
-      animation:dep-offer-badge 2s ease-in-out infinite;flex-shrink:0;
-    }
+    .dep-offer-badge{background:linear-gradient(135deg,#ff8f00,#FFD700);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:800;color:#1a0a00;animation:dep-offer-badge 2s ease-in-out infinite;flex-shrink:0}
     .dep-offer-body{padding:10px 14px 12px;display:flex;align-items:center;gap:12px}
     .dep-offer-icon{font-size:36px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,215,0,.5))}
     .dep-offer-text{flex:1}
     .dep-offer-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:3px;line-height:1.2}
     .dep-offer-title span{color:#FFD700}
     .dep-offer-sub{font-size:11px;color:rgba(255,215,0,.65);font-weight:600;line-height:1.5}
-    .dep-offer-pct{
-      flex-shrink:0;text-align:center;
-      background:linear-gradient(135deg,rgba(255,152,0,.2),rgba(255,215,0,.12));
-      border:1.5px solid rgba(255,193,7,.4);border-radius:12px;padding:8px 12px;
-    }
+    .dep-offer-pct{flex-shrink:0;text-align:center;background:linear-gradient(135deg,rgba(255,152,0,.2),rgba(255,215,0,.12));border:1.5px solid rgba(255,193,7,.4);border-radius:12px;padding:8px 12px}
     .dep-offer-pct-num{font-size:26px;font-weight:800;color:#FFD700;line-height:1;text-shadow:0 0 12px rgba(255,215,0,.6)}
     .dep-offer-pct-lbl{font-size:9px;color:rgba(255,215,0,.65);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
-    /* Preview bonus rows */
     .dep-preview-box{background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px}
     .dep-preview-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
     .dep-preview-divider{height:1px;background:rgba(255,255,255,.07);margin:5px 0}
@@ -2136,38 +2345,22 @@ async function doUpgradeStat(bikeLevel, stat){
     .dep-preview-total-val{font-size:18px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:5px;text-shadow:0 0 10px rgba(255,215,0,.4)}
     .dep-preview-bonus-tag{background:rgba(255,152,0,.18);border:1px solid rgba(255,193,7,.35);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800;color:#FFD740;margin-left:4px}
     </style>
-
     <div class="dep-offer-banner">
       <div class="dep-offer-top">
         <span class="dep-offer-fire">🔥</span>
-        <div class="dep-offer-live">
-          <div class="dep-offer-dot"></div>
-          <span class="dep-offer-live-txt" data-i18n="offerLiveTag">Limited Time Offer — Active Now</span>
-        </div>
+        <div class="dep-offer-live"><div class="dep-offer-dot"></div><span class="dep-offer-live-txt" data-i18n="offerLiveTag">Limited Time Offer — Active Now</span></div>
         <div class="dep-offer-badge" data-i18n="offerBonusTag">BONUS</div>
       </div>
       <div class="dep-offer-body">
         <div class="dep-offer-icon">🎋</div>
         <div class="dep-offer-text">
           <div class="dep-offer-title" data-i18n="offerTitle">Get <span>+50% Extra</span> Bamboo<br>on every deposit!</div>
-          <div class="dep-offer-sub" data-i18n="offerSub">⏳ Temporary offer — don't miss it<br>Deposit now and get more Bamboo instantly</div>
+          <div class="dep-offer-sub" data-i18n="offerSub">⏳ Temporary offer — don't miss it</div>
         </div>
-        <div class="dep-offer-pct">
-          <div class="dep-offer-pct-num">+50%</div>
-          <div class="dep-offer-pct-lbl" data-i18n="offerBonusPctLbl">BONUS</div>
-        </div>
+        <div class="dep-offer-pct"><div class="dep-offer-pct-num">+50%</div><div class="dep-offer-pct-lbl" data-i18n="offerBonusPctLbl">BONUS</div></div>
       </div>
     </div>
-    <!-- ══ END OFFER BANNER ══ -->
-
     <div class="wd-form">
-      <div class="wal-row">
-        <div class="wl-inf">
-          <div class="wll" data-i18n="labelWallet">Wallet</div>
-          <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
-        </div>
-        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
-      </div>
       <div class="dep-warn">
         <i class="fas fa-exclamation-triangle"></i>
         <div class="dep-warn-txt">
@@ -2186,28 +2379,18 @@ async function doUpgradeStat(bikeLevel, stat){
       </div>
       <div class="dep-preview-box">
         <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px">📊 <span data-i18n="rateLabel">Rate:</span> <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
-        <!-- You will receive row -->
         <div class="dep-preview-row">
           <span class="dep-preview-label" data-i18n="youWillReceive">You will receive:</span>
-          <span id="depBambooPreview" class="dep-preview-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:18px;height:18px;object-fit:contain"> 0 Bamboo
-          </span>
+          <span id="depBambooPreview" class="dep-preview-val"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:18px;height:18px;object-fit:contain"> 0 Bamboo</span>
         </div>
-        <!-- Bonus row -->
         <div class="dep-preview-row" id="depBonusRow" style="display:none">
           <span class="dep-preview-label"><span data-i18n="offerBonusRow">🎁 50% Bonus:</span> <span class="dep-preview-bonus-tag">+50%</span></span>
-          <span id="depBonusPreview" class="dep-preview-bonus-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain"> 0 Bamboo
-          </span>
+          <span id="depBonusPreview" class="dep-preview-bonus-val"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain"> 0 Bamboo</span>
         </div>
-        <!-- Divider -->
         <div class="dep-preview-divider" id="depTotalDivider" style="display:none"></div>
-        <!-- Total row -->
         <div class="dep-preview-row" id="depTotalRow" style="display:none">
           <span class="dep-preview-label-total" data-i18n="offerTotalRow">🏆 Total:</span>
-          <span id="depTotalPreview" class="dep-preview-total-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain"> 0 Bamboo
-          </span>
+          <span id="depTotalPreview" class="dep-preview-total-val"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain"> 0 Bamboo</span>
         </div>
       </div>
       <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
@@ -2217,178 +2400,39 @@ async function doUpgradeStat(bikeLevel, stat){
       </div>
     </div>
   </div>
+</div>
 
-  <!-- NEW SEASON PREP -->
-  <div class="ftcont" id="ft-withdraw">
-    <style>
-      /* ═══ NEW SEASON S2 STYLES ═══ */
-      .sns-page{padding:0 0 14px}
-
-      /* ── Hero card ── */
-      .sns-hero-card{
-        position:relative;border-radius:20px;overflow:hidden;
-        margin-bottom:12px;min-height:170px;
-        border:1px solid rgba(255,215,0,.28);
-        box-shadow:0 6px 32px rgba(0,0,0,.55);
-      }
-      .sns-hero-bg{
-        position:absolute;inset:0;
-        background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg') center top / cover no-repeat;
-        filter:brightness(.78) saturate(1.1);
-      }
-      .sns-hero-overlay{
-        position:absolute;inset:0;
-        background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(2,8,2,.5) 55%,rgba(2,8,2,.88) 100%);
-      }
-      .sns-hero-content{
-        position:relative;z-index:2;padding:14px 16px 16px;
-        display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:170px;
-      }
-      .sns-hero-badge{
-        display:inline-flex;align-items:center;gap:5px;
-        background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.45);
-        border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;
-        color:#FFD700;letter-spacing:.4px;margin-bottom:6px;backdrop-filter:blur(8px);
-      }
-      .sns-hero-title{font-size:22px;font-weight:800;color:#FFD700;text-shadow:0 2px 18px rgba(255,215,0,.55);margin-bottom:2px;text-align:center}
-      .sns-hero-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-align:center}
-
-      /* ── Allocation rows ── */
-      .sns-rows-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-      .sns-row{
-        /* glassmorphism: semi-dark + blur */
-        background:rgba(6,18,6,.68);
-        border:1px solid rgba(255,255,255,.18);
-        border-radius:16px;padding:11px 13px;
-        display:flex;align-items:center;gap:10px;
-        backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-        box-shadow:0 2px 12px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
-        position:relative;overflow:hidden;
-      }
-      .sns-row::before{
-        content:'';position:absolute;inset:0;
-        background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 55%);
-        pointer-events:none;border-radius:16px;
-      }
-      .sns-row.sns-row-ton{border-color:rgba(0,212,255,.22)}
-      .sns-row-icon-wrap{
-        width:42px;height:42px;border-radius:12px;flex-shrink:0;
-        display:flex;align-items:center;justify-content:center;
-      }
-      .sns-row-icon-wrap.green{background:rgba(124,179,66,.18);border:1px solid rgba(124,179,66,.28)}
-      .sns-row-icon-wrap.blue{background:rgba(66,165,245,.15);border:1px solid rgba(66,165,245,.22)}
-      .sns-row-icon-wrap.cyan{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.22)}
-      .sns-row-icon-img{width:28px;height:28px;object-fit:contain}
-      .sns-row-icon-emoji{font-size:20px;line-height:1}
-      .sns-row-body{flex:1;min-width:0}
-      .sns-row-title{font-size:12px;font-weight:800;color:rgba(255,255,255,.92);margin-bottom:1px;line-height:1.2}
-      .sns-row-desc{font-size:9.5px;color:rgba(255,255,255,.35);font-weight:600;line-height:1.3}
-      .sns-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;min-width:80px}
-      .sns-spin{width:18px;height:18px;border:2px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
-      @keyframes sns-rotate{to{transform:rotate(360deg)}}
-
-      /* value displays */
-      .sns-val-coins{font-size:17px;font-weight:800;color:#FFD700;line-height:1;text-align:right;text-shadow:0 0 10px rgba(255,215,0,.35)}
-      .sns-val-ton{font-size:16px;font-weight:800;color:#00D4FF;line-height:1;text-align:right;text-shadow:0 0 10px rgba(0,212,255,.35)}
-      .sns-val-badge{
-        display:inline-flex;align-items:center;gap:3px;
-        background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.28);
-        border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800;color:#00F27A;margin-bottom:1px;
-      }
-      .sns-val-sub{font-size:9px;color:rgba(255,255,255,.25);font-weight:600;text-align:right;line-height:1.3}
-      .sns-empty-tag{font-size:10px;color:rgba(255,255,255,.22);font-weight:600;font-style:italic;text-align:right}
-
-      /* ── Total card ── */
-      .sns-total-card{
-        background:rgba(6,18,6,.75);
-        border:1.5px solid rgba(255,215,0,.32);
-        border-radius:20px;
-        backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-        box-shadow:0 0 30px rgba(255,215,0,.07),0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);
-        position:relative;overflow:hidden;padding:16px 18px 14px;text-align:center;
-      }
-      .sns-total-card::before{
-        content:'';position:absolute;inset:0;
-        background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.06) 0%,transparent 65%);
-        pointer-events:none;
-      }
-      .sns-total-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px;text-align:center}
-      .sns-total-coins-num{font-size:36px;font-weight:800;color:#FFD700;text-shadow:0 0 18px rgba(255,215,0,.4);line-height:1;margin-bottom:4px}
-      .sns-total-coins-unit{font-size:12px;font-weight:700;color:rgba(255,215,0,.5);letter-spacing:.8px}
-      .sns-cup-img{position:absolute;right:-8px;bottom:-8px;width:90px;opacity:.12;pointer-events:none}
-    </style>
-
-    <div class="sns-page">
-
-      <!-- Hero Card -->
-      <div class="sns-hero-card">
-        <div class="sns-hero-bg"></div>
-        <div class="sns-hero-overlay"></div>
-        <div class="sns-hero-content">
-          <div class="sns-hero-badge">🌟 <span data-i18n="snsSeasonBadge">Season 2</span></div>
-          <div class="sns-hero-title" id="sns-hero-main-title">Season 2 Preparation</div>
-          <div class="sns-hero-sub" id="sns-hero-sub-txt">Your progress carries forward</div>
-        </div>
-      </div>
-
-      <!-- Allocation rows -->
-      <div class="sns-rows-wrap">
-
-        <!-- Row 1: Current Coins — outputs COINS -->
-        <div class="sns-row" id="sns-row-coins">
-          <div class="sns-row-icon-wrap green">
-            <span class="sns-row-icon-emoji">🏛️</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowCoinsTitle">Current Coins</div>
-            <div class="sns-row-desc" data-i18n="snsRowCoinsDesc">Carry Over: 20%</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
-        <!-- Row 2: Referrals — outputs COINS -->
-        <div class="sns-row" id="sns-row-refs">
-          <div class="sns-row-icon-wrap blue">
-            <span class="sns-row-icon-emoji">👥</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowRefsTitle">Referrals</div>
-            <div class="sns-row-desc" data-i18n="snsRowRefsDesc">Active Referrals Bonus</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
-      </div>
-
-      <!-- Total: Coins allocation -->
-      <div class="sns-total-card" id="sns-total" style="display:none">
-        <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
-        <div class="sns-total-lbl" data-i18n="snsTotalLbl">🎯 Total Season Allocation</div>
-        <div class="sns-total-coins-num" id="sns-total-coins-num">0</div>
-        <div class="sns-total-coins-unit">COINS</div>
-      </div>
-
-    </div>
+<!-- ══ SUB PAGE: Withdraw ══ -->
+<div class="prf-subpage" id="sub-withdraw">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-withdraw')">‹</button>
+    <div class="prf-sub-title">💸 Вывод средств</div>
   </div>
+  <div class="prf-sub-body" id="withdrawSubBody">
+    <!-- populated by renderWithdrawSection() -->
+    <div style="text-align:center;padding:40px 0;color:rgba(255,255,255,.4)">Loading...</div>
+  </div>
+</div>
 
-  <!-- EXCHANGE -->
-
-  <!-- REFERRALS -->
-  <div class="ftcont" id="ft-referrals">
-    <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="friendsTitle">Friends & Referrals</span></div>
+<!-- ══ SUB PAGE: Referrals ══ -->
+<div class="prf-subpage" id="sub-referrals">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-referrals')">‹</button>
+    <div class="prf-sub-title">👥 Рефералы</div>
+  </div>
+  <div class="prf-sub-body">
     <div class="ref-prog-card">
-      <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="refProgTitle">Referral Program</span></div>
       <div class="ref-bonus-badge">
         <span class="rbb-pct">20%</span>
         <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
       </div>
       <div class="ref-link-row">
-        <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
+        <input class="ref-inp" id="refLinkInp" readonly placeholder="Your referral link...">
         <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
     </div>
-    <div class="hist-box" style="margin-bottom:10px">
+    <div class="hist-box" style="margin-top:12px">
       <div class="hist-hdr" style="justify-content:space-between">
         <span><i class="fas fa-history"></i> <span data-i18n="recentRefs">Recent Referrals</span></span>
         <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
@@ -2396,47 +2440,212 @@ async function doUpgradeStat(bikeLevel, stat){
       <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
     </div>
   </div>
+</div>
 
-  <div class="ftcont" id="ft-exchange">
-    <div class="swap-card">
-      <!-- FROM: Bamboo (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapFrom">FROM</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
-            <span class="swap-currency-name">Bamboo</span>
-          </div>
-          <div class="swap-input-wrap">
-            <input type="number" class="swap-input" id="swapFromAmt" placeholder="0" oninput="updSwapCalc()">
-            <button class="swap-max-btn" onclick="swapMax()" data-i18n="maxBtn">MAX</button>
-          </div>
-        </div>
-        <div class="swap-balance" id="swapFromBal"><span data-i18n="balance">Balance:</span> 0 Bamboo</div>
-      </div>
-      <div class="swap-divider">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid var(--card);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
-      </div>
-      <!-- TO: Coins (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapTo">TO</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:38px;height:38px;object-fit:contain;border-radius:50%">
-            <span class="swap-currency-name">Coins</span>
-          </div>
-          <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt">0</div></div>
-        </div>
-        <div class="swap-balance" id="swapToBal"><span data-i18n="balance">Balance:</span> 0 Coins</div>
-      </div>
-      <div class="swap-rate" data-i18n="swapRate">📊 300 Bamboo = 10 Coins</div>
-      <button class="btn-prim" style="margin-top:10px" onclick="doExchange()" data-i18n="exchangeNow">⚡ Exchange Now</button>
+<!-- ══ SUB PAGE: Missions ══ -->
+<div class="prf-subpage" id="sub-missions">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-missions')">‹</button>
+    <div class="prf-sub-title">🎯 Миссии</div>
+  </div>
+  <div class="prf-sub-body" id="missionsSubBody">
+    <div style="text-align:center;padding:40px 0;color:rgba(255,255,255,.4)">Loading...</div>
+  </div>
+</div>
+
+<!-- ══ SUB PAGE: Collab ══ -->
+<div class="prf-subpage" id="sub-collab">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-collab')">‹</button>
+    <div class="prf-sub-title">🤝 Сотрудничество</div>
+  </div>
+  <div class="prf-sub-body">
+    <div class="collab-hero">
+      <div class="collab-hero-icon">📡</div>
+      <div class="collab-hero-title">Сотрудничество с каналами</div>
+      <div class="collab-hero-sub">Разместите наш бот в вашем канале и получайте награды за каждого привлечённого пользователя</div>
     </div>
-    <div class="hist-box" style="margin-top:12px">
-      <div class="hist-hdr" data-i18n="exchangeHist">📋 Exchange History</div>
-      <div id="exchHist"><div class="hist-empty" data-i18n="noConversions">No conversions yet</div></div>
+    <div class="collab-reqs">
+      <div class="collab-reqs-title">Требования к каналу</div>
+      <div class="collab-req-row">
+        <span class="collab-req-icon">👥</span>
+        <span class="collab-req-text">Минимум подписчиков</span>
+        <span class="collab-req-val">1,000+</span>
+      </div>
+      <div class="collab-req-row">
+        <span class="collab-req-icon">📅</span>
+        <span class="collab-req-text">Возраст канала</span>
+        <span class="collab-req-val">30+ дней</span>
+      </div>
+      <div class="collab-req-row">
+        <span class="collab-req-icon">📊</span>
+        <span class="collab-req-text">Тематика</span>
+        <span class="collab-req-val">Крипто / Финансы</span>
+      </div>
+      <div class="collab-req-row">
+        <span class="collab-req-icon">✅</span>
+        <span class="collab-req-text">Активность</span>
+        <span class="collab-req-val">Регулярные посты</span>
+      </div>
+    </div>
+    <div class="collab-input-wrap">
+      <div class="collab-input-label">Ссылка на ваш канал</div>
+      <input class="collab-input" id="collabLinkInput" placeholder="https://t.me/yourchannel" type="url">
+    </div>
+    <button class="collab-submit-btn" onclick="submitCollabRequest()">📨 Отправить заявку</button>
+  </div>
+</div>
+
+<!-- ══ SUB PAGE: Language ══ -->
+<div class="prf-subpage" id="sub-language">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-language')">‹</button>
+    <div class="prf-sub-title">🌐 Язык</div>
+  </div>
+  <div class="prf-sub-body">
+    <div class="lang-grid">
+      <div class="lang-card active" onclick="setLang('ru',this)">
+        <div class="lang-card-flag">🇷🇺</div>
+        <div class="lang-card-name">Русский</div>
+      </div>
+      <div class="lang-card" onclick="setLang('en',this)">
+        <div class="lang-card-flag">🇬🇧</div>
+        <div class="lang-card-name">English</div>
+      </div>
+      <div class="lang-card" onclick="setLang('ar',this)">
+        <div class="lang-card-flag">🇸🇦</div>
+        <div class="lang-card-name">العربية</div>
+      </div>
+      <div class="lang-card" onclick="setLang('uz',this)">
+        <div class="lang-card-flag">🇺🇿</div>
+        <div class="lang-card-name">O'zbek</div>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- ══ SUB PAGE: Music ══ -->
+<div class="prf-subpage" id="sub-music">
+  <div class="prf-sub-topbar">
+    <button class="prf-back-btn" onclick="closePrfSub('sub-music')">‹</button>
+    <div class="prf-sub-title">🎵 Музыка</div>
+  </div>
+  <div class="prf-sub-body">
+    <div class="music-card">
+      <div class="music-icon" id="musicIcon">🎵</div>
+      <div class="music-status" id="musicStatus">Музыка включена</div>
+      <div class="music-desc">Фоновая музыка добавляет атмосферу игре. Вы можете включить или отключить её в любое время.</div>
+      <button class="music-toggle on" id="musicToggleBtn" onclick="toggleMusicSetting()">
+        <span id="musicToggleTxt">🔊 Выключить музыку</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Open / close sub pages ──
+function openPrfSub(id){
+  document.getElementById(id).classList.add('open');
+  if(id==='sub-withdraw') populateWithdrawSub();
+  if(id==='sub-missions') populateMissionsSub();
+  // Set avatar & username when wallet page opens
+  if(id==='sub-wallet'){
+    const u=window.S&&S.user;
+    if(u) document.getElementById('walletAddressDisplay').textContent = S.wallet ? `${S.wallet.address.substring(0,6)}...${S.wallet.address.slice(-4)}` : 'Not connected';
+  }
+}
+function closePrfSub(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+// Update profile avatar + username when section loads
+function renderProfilePage(){
+  const u=window.S&&S.user;
+  if(!u)return;
+  const el=document.getElementById('prfUsername');
+  if(el) el.textContent=(u.firstName||'')+' '+( u.username ? '(@'+u.username+')' : '');
+  const av=document.getElementById('prfAvatarImg');
+  if(av&&u.photoUrl) av.src=u.photoUrl;
+}
+
+// Populate withdraw sub from existing withdraw logic
+function populateWithdrawSub(){
+  const b=document.getElementById('withdrawSubBody');
+  if(!b)return;
+  // reuse the existing withdraw render if available
+  if(typeof renderWithdrawPage==='function'){renderWithdrawPage(b);return;}
+  b.innerHTML=`<div class="wd-form" id="withdrawForm"></div>`;
+  if(typeof initWithdrawUI==='function') initWithdrawUI();
+}
+
+// Populate missions sub
+function populateMissionsSub(){
+  const b=document.getElementById('missionsSubBody');
+  if(!b||b.dataset.loaded)return;
+  b.dataset.loaded='1';
+  if(typeof renderMissionsInto==='function'){renderMissionsInto(b);return;}
+  // fallback: show tasks section content
+  b.innerHTML='<div style="text-align:center;padding:30px;color:rgba(255,255,255,.4)">Нет доступных миссий</div>';
+}
+
+// Language setter
+function setLang(code,el){
+  document.querySelectorAll('.lang-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(typeof switchLang==='function') switchLang(code);
+  else if(typeof setLanguage==='function') setLanguage(code);
+}
+
+// Music toggle
+let _musicOn=true;
+function toggleMusicSetting(){
+  _musicOn=!_musicOn;
+  document.getElementById('musicIcon').textContent=_musicOn?'🎵':'🔇';
+  document.getElementById('musicStatus').textContent=_musicOn?'Музыка включена':'Музыка отключена';
+  document.getElementById('musicToggleTxt').textContent=_musicOn?'🔊 Выключить музыку':'🎵 Включить музыку';
+  document.getElementById('musicToggleBtn').className='music-toggle '+ (_musicOn?'on':'off');
+  if(typeof setBgMusic==='function') setBgMusic(_musicOn);
+  else{const a=document.getElementById('bgAudio')||document.querySelector('audio');if(a){if(_musicOn)a.play().catch(()=>{});else a.pause();}}
+}
+
+// Collab submit
+function submitCollabRequest(){
+  const v=document.getElementById('collabLinkInput').value.trim();
+  if(!v||!v.startsWith('https://t.me/')){alert('Введите корректную ссылку на Telegram канал');return;}
+  // Send to backend if available
+  if(typeof sendCollabRequest==='function'){sendCollabRequest(v);return;}
+  alert('✅ Заявка отправлена! Мы свяжемся с вами в ближайшее время.');
+}
+
+// goToFinanceDeposit / goToFinanceWithdraw compatibility shim
+window.goToFinanceDeposit=function(){
+  const fn=document.querySelector('.ni[data-s="sectionFinance"]');
+  if(fn)fn.click();
+  setTimeout(()=>openPrfSub('sub-deposit'),80);
+};
+window.goToFinanceWithdraw=function(){
+  const fn=document.querySelector('.ni[data-s="sectionFinance"]');
+  if(fn)fn.click();
+  setTimeout(()=>openPrfSub('sub-withdraw'),80);
+};
+
+// switchFinTab shim (keep compatibility with any existing calls)
+window.switchFinTab=function(el,tab){
+  if(tab==='deposit') openPrfSub('sub-deposit');
+  else if(tab==='withdraw') openPrfSub('sub-withdraw');
+  else if(tab==='referrals') openPrfSub('sub-referrals');
+};
+
+// Render profile when nav hits this section
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs=new MutationObserver(()=>{
+    const sec=document.getElementById('sectionFinance');
+    if(sec&&sec.classList.contains('active')) renderProfilePage();
+  });
+  const sec=document.getElementById('sectionFinance');
+  if(sec) obs.observe(sec,{attributes:true,attributeFilter:['class']});
+});
+</script>
 </div>
 
 

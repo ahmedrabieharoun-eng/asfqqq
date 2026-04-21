@@ -1521,191 +1521,131 @@ async function doUpgradeStat(bikeLevel, stat){
 .race-dev-back:active{transform:scale(.97)}
 
 /* ══════════════════════════════════════════════
-   RACE ANIMATION PHASE — FULL SCREEN TAKEOVER
+   RACE ANIMATION PHASE — FULL CANVAS SCENE
 ══════════════════════════════════════════════ */
 #raceAnimPhase{
   position:fixed;inset:0;z-index:200;
   display:none;overflow:hidden;
-  background:#5a9fd4; /* sky fallback */
+  background:#000;
 }
 
 /* Hide topbar + bottom nav during active race */
-body.race-active .hub-topbar{
-  display:none!important;
-}
-body.race-active .bnav{
-  display:none!important;
+body.race-active .hub-topbar{ display:none!important; }
+body.race-active .bnav{       display:none!important; }
+
+/* ── Full-screen canvas — draws everything ── */
+#raceCanvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  display:block;
 }
 
-/* ── Layer 1: Background — fills top 52% of screen ── */
-.rs-bg{
-  position:absolute;
-  left:0;right:0;top:0;
-  height:52%;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f01e8142-0136-4eab-960c-d165e1abc90c.png')
-    center center / cover no-repeat;
-  z-index:1;
-}
-
-/* ── Layer 2: Road container — bottom 52% (overlaps bg by ~4%) ── */
-.rs-road-wrap{
-  position:absolute;
-  bottom:0; left:0; right:0;
-  height:52%;
-  z-index:2;
-  overflow:hidden;
-}
-
-/* Road tile A */
-.rs-road-tile{
-  position:absolute;
-  left:0;right:0;top:0;bottom:0;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png')
-    center top / 100% auto;
-  will-change:background-position;
-}
-/* Road tile B — sits directly above A for seamless loop */
-.rs-road-tile-b{
-  position:absolute;
-  left:0;right:0;
-  top:-100%;height:100%;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/adcda0a5-4494-468f-94c4-1ab88bd037ad.png')
-    center top / 100% auto;
-  will-change:background-position;
-}
-
-/* ── Fog overlay — sits at top of road, fades to transparent downward ──
-   Uses SAME colour as sky so blend is invisible (not green!)           */
-.rs-road-fog{
-  position:absolute;
-  top:0;left:0;right:0;
-  height:28%;
-  background:linear-gradient(
-    180deg,
-    rgba(90,159,212,1)   0%,
-    rgba(90,159,212,.75) 25%,
-    rgba(90,159,212,.35) 60%,
-    transparent          100%
-  );
-  z-index:5;pointer-events:none;
-}
-
-/* ── Horizon blend — bridges bg bottom and road top ── */
-.rs-horizon-blend{
-  position:absolute;
-  /* sits right at the 48%-52% junction */
-  top:44%; height:12%;
-  left:0;right:0;
-  background:linear-gradient(
-    180deg,
-    transparent            0%,
-    rgba(90,159,212,.55)  50%,
-    rgba(90,159,212,.9)  100%
-  );
-  z-index:3;pointer-events:none;
-}
-
-/* ── Bikes ── */
+/* ── Bike sprites layered above canvas ── */
 .rs-bike{
-  position:absolute;
-  z-index:10;
-  transition: bottom    .4s cubic-bezier(.4,0,.2,1),
-              transform .4s ease;
+  position:absolute;z-index:10;
+  pointer-events:none;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
 }
 .rs-bike img{
   display:block;width:100%;
-  filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.7));
 }
 
-/* AI bike — LEFT lane, starts at bottom */
+/* AI bike — LEFT lane */
 #rsBikeAI{
-  left:4%;
-  bottom:2%;
-  width:40%;
+  left:5%;
+  bottom:4%;
+  width:38%;
+  transform-origin:bottom center;
 }
-
-/* Player bike — RIGHT lane, starts at bottom */
+/* Player bike — RIGHT lane */
 #rsBikePlayer{
-  right:3%;
-  bottom:2%;
+  right:4%;
+  bottom:3%;
   width:40%;
+  transform-origin:bottom center;
 }
 
 /* Bounce while racing */
-@keyframes carBounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-4px)}
+@keyframes bikeBounce{
+  0%,100%{ margin-bottom:0 }
+  50%{     margin-bottom:5px }
 }
-.rs-bike.racing{ animation:carBounce .5s ease-in-out infinite; }
-#rsBikeAI.racing{ animation-delay:.22s; }
+.rs-bike.racing{ animation:bikeBounce .5s ease-in-out infinite; }
+#rsBikeAI.racing{ animation-delay:.25s; }
 
-/* Finish line image — slides in at race end */
+/* ── Finish line ── */
 #rsFinishImg{
-  position:absolute;left:0;right:0;top:27%;
-  z-index:15;display:none;
+  position:absolute;left:0;right:0;
+  top:38%;z-index:15;display:none;
 }
-#rsFinishImg img{width:100%;display:block;}
+#rsFinishImg img{ width:100%;display:block; }
 @keyframes rsFinishSlide{
-  from{transform:translateY(-60px);opacity:0}
-  to{transform:translateY(0);opacity:1}
+  from{transform:translateY(-50px);opacity:0}
+  to  {transform:translateY(0);opacity:1}
 }
-#rsFinishImg.show{display:block;animation:rsFinishSlide .7s cubic-bezier(.22,1,.36,1) both;}
+#rsFinishImg.show{
+  display:block;
+  animation:rsFinishSlide .6s cubic-bezier(.22,1,.36,1) both;
+}
 
-/* ── HUD Overlay ── */
+/* ── HUD ── */
 .rs-hud{
   position:absolute;top:0;left:0;right:0;z-index:25;
   display:flex;align-items:flex-start;justify-content:space-between;
-  padding:10px 12px;
-  background:linear-gradient(180deg,rgba(0,0,0,.72) 0%,transparent 100%);
+  padding:10px 10px 0;
 }
 .rs-hud-box{
   display:flex;flex-direction:column;
-  background:rgba(0,0,0,.6);border-radius:14px;padding:7px 12px;
-  backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);
-  min-width:84px;
+  background:rgba(0,0,0,.62);border-radius:14px;
+  padding:7px 13px;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.12);
+  min-width:80px;
 }
-.rs-hud-box.right{align-items:flex-end;}
+.rs-hud-box.right{ align-items:flex-end; }
 .rs-hud-name{
-  font-size:11px;font-weight:800;color:rgba(255,255,255,.82);
-  max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:11px;font-weight:800;color:rgba(255,255,255,.8);
+  max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.rs-hud-spd{font-size:28px;font-weight:800;color:#fff;line-height:1;}
-.rs-hud-unit{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;}
+.rs-hud-spd{ font-size:30px;font-weight:900;color:#fff;line-height:1.05; }
+.rs-hud-unit{ font-size:10px;color:rgba(255,255,255,.4);font-weight:600; }
 .rs-timer-pill{
-  background:rgba(0,0,0,.75);border:1.5px solid rgba(255,215,0,.55);
-  border-radius:30px;padding:7px 20px;
-  font-size:20px;font-weight:800;color:#FFD700;text-align:center;
-  box-shadow:0 0 18px rgba(255,215,0,.22);align-self:center;
-  min-width:92px;
+  background:rgba(0,0,0,.72);
+  border:2px solid rgba(255,215,0,.6);
+  border-radius:30px;padding:7px 18px;
+  font-size:20px;font-weight:900;color:#FFD700;text-align:center;
+  box-shadow:0 0 22px rgba(255,215,0,.25);
+  align-self:center;min-width:90px;
 }
 
-/* ── Result Overlay (inside race screen) ── */
+/* ── Result Overlay ── */
 #rsResultOverlay{
   position:absolute;inset:0;z-index:40;
   display:none;flex-direction:column;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.86);backdrop-filter:blur(16px);
-  padding:20px;gap:14px;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(18px);
+  padding:24px;gap:14px;
 }
-.rsr-emoji{font-size:70px;animation:rsr-pop .55s cubic-bezier(.36,.07,.19,.97) both;}
+.rsr-emoji{ font-size:72px;animation:rsr-pop .55s cubic-bezier(.36,.07,.19,.97) both; }
 @keyframes rsr-pop{
-  0%{transform:scale(0.3);opacity:0}
-  70%{transform:scale(1.12)}
+  0%{transform:scale(.3);opacity:0}
+  70%{transform:scale(1.15)}
   100%{transform:scale(1);opacity:1}
 }
-.rsr-title{font-size:36px;font-weight:800;text-align:center;text-shadow:0 2px 20px currentColor;}
-.rsr-title.win{color:#22c55e;}
-.rsr-title.lose{color:#ef4444;}
-.rsr-reward{font-size:24px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:8px;}
-.rsr-vs{display:flex;align-items:center;gap:14px;width:100%;max-width:320px;}
+.rsr-title{ font-size:38px;font-weight:900;text-align:center;text-shadow:0 2px 22px currentColor; }
+.rsr-title.win{  color:#22c55e; }
+.rsr-title.lose{ color:#ef4444; }
+.rsr-reward{ font-size:24px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:8px; }
+.rsr-vs{ display:flex;align-items:center;gap:14px;width:100%;max-width:320px; }
 .rsr-side{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
   background:rgba(255,255,255,.07);border-radius:16px;padding:12px 8px;
   border:1px solid rgba(255,255,255,.12);
 }
-.rsr-av{font-size:32px;}
-.rsr-sname{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.rsr-sspd{font-size:13px;font-weight:800;color:var(--bamboo);}
-.rsr-sep{font-size:20px;font-weight:800;color:rgba(255,255,255,.3);flex-shrink:0;}
+.rsr-av{ font-size:32px; }
+.rsr-sname{ font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-align:center;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.rsr-sspd{ font-size:13px;font-weight:800;color:var(--bamboo); }
+.rsr-sep{ font-size:20px;font-weight:800;color:rgba(255,255,255,.3);flex-shrink:0; }
 .rsr-btn{
   width:100%;max-width:320px;padding:16px;border:none;border-radius:18px;
   background:linear-gradient(135deg,var(--bamboo),#4e7a20);
@@ -1772,42 +1712,29 @@ body.race-active .bnav{
       <button class="race-dev-back" onclick="document.getElementById('raceDevOverlay').classList.remove('show')">← Назад</button>
     </div>
 
-    <!-- ── RACE ANIMATION PHASE (Full Screen) ── -->
+    <!-- ══ RACE ANIMATION PHASE ══ -->
     <div id="raceAnimPhase">
 
-      <!-- Layer 1: Nature background (sky + trees) -->
-      <div class="rs-bg"></div>
+      <!-- Canvas draws: sky, mountains, trees, road perspective, lane marks -->
+      <canvas id="raceCanvas"></canvas>
 
-      <!-- Layer 2: Road (two tiles for seamless loop) -->
-      <div class="rs-road-wrap">
-        <div class="rs-road-tile" id="rsRoadTileA"></div>
-        <div class="rs-road-tile-b" id="rsRoadTileB"></div>
-        <!-- Fog at top of road blends into background -->
-        <div class="rs-road-fog"></div>
-      </div>
-
-      <!-- Layer 3: Horizon fog blend -->
-      <div class="rs-horizon-blend"></div>
-
-      <!-- Layer 4: AI Car (left lane) -->
+      <!-- Bike sprites layered above canvas -->
       <div class="rs-bike" id="rsBikeAI">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/484eb586-f90d-485c-82cc-576c157ed284.png"
-             alt="AI car"
-             onerror="this.parentElement.innerHTML='<div style=font-size:60px;text-align:center>🚗</div>'">
+             alt="AI bike"
+             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
       </div>
-
-      <!-- Layer 5: Player Car (right lane) -->
       <div class="rs-bike" id="rsBikePlayer">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7d815159-26f2-4b00-bee9-426e2118046b.png"
-             alt="Player car"
-             onerror="this.parentElement.innerHTML='<div style=font-size:60px;text-align:center>🚗</div>'">
+             alt="Player bike"
+             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
       </div>
 
-      <!-- Layer 6: Finish line image -->
+      <!-- Finish line -->
       <div id="rsFinishImg">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5ea7018c-2054-4a44-bf47-4f285555d3bf.png"
              alt="Finish"
-             onerror="this.parentElement.style.background='linear-gradient(90deg,rgba(0,0,0,0),rgba(255,255,255,.9),rgba(0,0,0,0))';this.style.display='none'">
+             onerror="this.style.display='none'">
       </div>
 
       <!-- Layer 7: HUD -->
@@ -1888,6 +1815,9 @@ body.race-active .bnav{
   let _raceRafId        = null;
   let _raceSelectedBike = null;
   let _raceStarted      = false;
+  /* Canvas renderer state (outer scope so raceGoBack can reset) */
+  let _cvs = null, _ctx = null, _cW = 0, _cH = 0;
+  let _roadOffset = 0;
   let _touchStartX      = 0;
 
   const OPP_NAMES = [
@@ -2117,32 +2047,258 @@ body.race-active .bnav{
     if(resultOv)    resultOv.style.display    = 'none';
     document.body.classList.add('race-active');
 
+    /* ═══════════════════════════════════════════════════════════
+       CANVAS RACE RENDERER  — perspective road like Image 2
+    ═══════════════════════════════════════════════════════════ */
+    const ROAD_SCROLL_SPEED = 6; /* px per frame */
+
+    /* Pre-load background image */
+    const _bgImg = new Image();
+    _bgImg.crossOrigin = 'anonymous';
+    _bgImg.src = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f01e8142-0136-4eab-960c-d165e1abc90c.png';
+
+    function _initCanvas(){
+      _cvs = document.getElementById('raceCanvas');
+      if(!_cvs) return false;
+      _cW = _cvs.width  = _cvs.offsetWidth  || window.innerWidth;
+      _cH = _cvs.height = _cvs.offsetHeight || window.innerHeight;
+      _ctx = _cvs.getContext('2d');
+      return true;
+    }
+
+    /* Vanishing point */
+    function _vp(){ return { x: _cW * 0.5, y: _cH * 0.42 }; }
+
+    function _drawFrame(){
+      if(!_ctx) return;
+      const vp = _vp();
+      const HORIZON = vp.y;
+
+      /* ── 1. Sky gradient ── */
+      const skyGrad = _ctx.createLinearGradient(0,0,0,HORIZON);
+      skyGrad.addColorStop(0,   '#5db8e8');
+      skyGrad.addColorStop(0.5, '#85ccf0');
+      skyGrad.addColorStop(1,   '#b8e0f7');
+      _ctx.fillStyle = skyGrad;
+      _ctx.fillRect(0, 0, _cW, HORIZON + 2);
+
+      /* ── 2. Background image (mountains + trees) ── */
+      if(_bgImg.complete && _bgImg.naturalWidth > 0){
+        const bgH = HORIZON + 30;
+        _ctx.drawImage(_bgImg, 0, 0, _cW, bgH);
+      }
+
+      /* ── 3. Ground below horizon ── */
+      const groundGrad = _ctx.createLinearGradient(0, HORIZON, 0, _cH);
+      groundGrad.addColorStop(0,   '#2d5a1b');
+      groundGrad.addColorStop(0.15,'#3a7022');
+      groundGrad.addColorStop(1,   '#1a3a0f');
+      _ctx.fillStyle = groundGrad;
+      _ctx.fillRect(0, HORIZON - 2, _cW, _cH - HORIZON + 2);
+
+      /* ── 4. Road trapezoid ── */
+      const roadTopW  = _cW * 0.09;   /* narrow at horizon */
+      const roadBotW  = _cW * 0.78;   /* wide at bottom */
+      const roadTop   = HORIZON - 2;
+      const roadBot   = _cH;
+
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.closePath();
+
+      const roadGrad = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      roadGrad.addColorStop(0,    '#555');
+      roadGrad.addColorStop(0.15, '#666');
+      roadGrad.addColorStop(1,    '#3a3a3a');
+      _ctx.fillStyle = roadGrad;
+      _ctx.fill();
+
+      /* ── 5. Lane lines (perspective-correct, scrolling) ── */
+      const NUM_LINES = 16;
+      for(let i = 0; i <= NUM_LINES; i++){
+        const t = i / NUM_LINES;
+        /* Add scroll offset mapped to perspective */
+        const tScroll = ((t + _roadOffset / _cH) % 1 + 1) % 1;
+
+        const perspT  = tScroll * tScroll; /* ease toward horizon */
+        const y = roadTop + (roadBot - roadTop) * tScroll;
+
+        /* interpolate road half-width at this depth */
+        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
+        const x1 = vp.x - hw;
+        const x2 = vp.x + hw;
+
+        /* Side edges */
+        _ctx.beginPath();
+        _ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        _ctx.lineWidth   = 1 + perspT * 2;
+        /* Left edge line */
+        if(i < NUM_LINES){
+          const tNext = (i+1)/NUM_LINES;
+          const ptN   = tNext * tNext;
+          const yN    = roadTop + (roadBot - roadTop) * ((((tNext + _roadOffset / _cH) % 1 + 1) % 1));
+          const hwN   = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * ptN;
+        }
+
+        /* Center dashes — skip thin area near horizon */
+        if(tScroll > 0.04){
+          const dashH  = Math.max(2, 14 * perspT);
+          const dashW  = Math.max(1, 4  * perspT);
+          const cx     = vp.x;
+
+          /* Only draw dash on alternating segments (dashed effect) */
+          const segIdx = Math.floor(tScroll * NUM_LINES * 2);
+          if(segIdx % 2 === 0){
+            _ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            _ctx.fillRect(cx - dashW/2, y - dashH/2, dashW, dashH);
+          }
+
+          /* Left lane divider (~30% from center) */
+          const lx = vp.x - hw * 0.55;
+          if(segIdx % 2 === 0){
+            _ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            _ctx.fillRect(lx - dashW/2, y - dashH/2, dashW * 0.7, dashH);
+          }
+
+          /* Right lane divider */
+          const rx = vp.x + hw * 0.55;
+          if(segIdx % 2 === 0){
+            _ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            _ctx.fillRect(rx - dashW/2, y - dashH/2, dashW * 0.7, dashH);
+          }
+        }
+      }
+
+      /* Road left + right solid edge lines */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      _ctx.lineWidth = 3;
+      _ctx.stroke();
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.stroke();
+
+      /* ── 6. Roadside grass strips ── */
+      /* Left grass */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(0, roadBot);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.closePath();
+      _ctx.fillStyle = '#2d6e1a';
+      _ctx.fill();
+      /* Right grass */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(_cW, roadBot);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.closePath();
+      _ctx.fillStyle = '#2d6e1a';
+      _ctx.fill();
+
+      /* ── 7. Palm trees (left + right, perspective) ── */
+      _drawPalmRow(-1); /* left side */
+      _drawPalmRow( 1); /* right side */
+
+      /* ── 8. Horizon fog blend ── */
+      const fogGrad = _ctx.createLinearGradient(0, HORIZON - 30, 0, HORIZON + 40);
+      fogGrad.addColorStop(0,   'rgba(185,218,235,0)');
+      fogGrad.addColorStop(0.4, 'rgba(185,218,235,.25)');
+      fogGrad.addColorStop(1,   'rgba(185,218,235,0)');
+      _ctx.fillStyle = fogGrad;
+      _ctx.fillRect(0, HORIZON - 30, _cW, 70);
+    }
+
+    /* Draw a row of palm trees on one side */
+    function _drawPalmRow(side /* -1=left, +1=right */){
+      if(!_ctx) return;
+      const vp   = _vp();
+      const HORIZON = vp.y;
+      const roadBotHW = _cW * 0.39;
+      const roadTopHW = _cW * 0.045;
+      const NUM_TREES = 7;
+
+      for(let i = 0; i < NUM_TREES; i++){
+        /* t=0 → near horizon, t=1 → near bottom */
+        const tBase = (i / (NUM_TREES - 1));
+        /* apply scroll */
+        const t = ((tBase + _roadOffset * 0.0008) % 1 + 1) % 1;
+        if(t < 0.05) continue; /* too close to horizon, skip */
+
+        const perspT = t * t;
+        const y = HORIZON + ((_cH - HORIZON) * t);
+
+        /* X position: follows road edge + offset into grass */
+        const roadHW = roadTopHW + (roadBotHW - roadTopHW) * perspT;
+        const treeOffsetX = roadHW * (1 + 0.35 * perspT);
+        const x = vp.x + side * treeOffsetX;
+
+        /* Tree height scales with perspective */
+        const treeH = 28 + perspT * 110;
+        const trunkW = 2  + perspT * 7;
+
+        /* ── Trunk ── */
+        _ctx.save();
+        _ctx.translate(x, y);
+        /* slight lean away from road */
+        _ctx.rotate(side * 0.08);
+
+        const trunkGrad = _ctx.createLinearGradient(-trunkW/2, -treeH, trunkW/2, 0);
+        trunkGrad.addColorStop(0, '#6b4e2a');
+        trunkGrad.addColorStop(1, '#4a3318');
+        _ctx.fillStyle = trunkGrad;
+        _ctx.beginPath();
+        _ctx.moveTo(-trunkW/2,  0);
+        _ctx.lineTo( trunkW/2,  0);
+        _ctx.lineTo( trunkW*0.4, -treeH);
+        _ctx.lineTo(-trunkW*0.4, -treeH);
+        _ctx.closePath();
+        _ctx.fill();
+
+        /* ── Fronds ── */
+        const frondR = treeH * 0.38;
+        const frondY = -treeH;
+        const frondColor = `rgba(${34+Math.round(perspT*20)},${120+Math.round(perspT*20)},${34},${0.7+perspT*0.3})`;
+
+        for(let f = 0; f < 6; f++){
+          const angle = (f / 6) * Math.PI * 2 - Math.PI * 0.5;
+          const fx = Math.cos(angle) * frondR;
+          const fy = Math.sin(angle) * frondR * 0.55;
+          _ctx.beginPath();
+          _ctx.moveTo(0, frondY);
+          _ctx.quadraticCurveTo(fx * 0.5, frondY + fy * 0.5, fx, frondY + fy);
+          _ctx.lineWidth   = Math.max(1, perspT * 4);
+          _ctx.strokeStyle = frondColor;
+          _ctx.stroke();
+        }
+        /* Canopy circle */
+        _ctx.beginPath();
+        _ctx.arc(0, frondY, frondR * 0.55, 0, Math.PI * 2);
+        _ctx.fillStyle = `rgba(28,95,28,${0.55 + perspT * 0.25})`;
+        _ctx.fill();
+
+        _ctx.restore();
+      }
+    }
+
     /* ── Road tile scroll via RAF ── */
-    const tileA = document.getElementById('rsRoadTileA');
-    const tileB = document.getElementById('rsRoadTileB');
-    /* Use actual pixel height of the road wrap (52% of screen) */
-    let roadH   = animPhase ? Math.round(animPhase.offsetHeight * 0.52) : 500;
-    let roadY   = 0;
-    const ROAD_SPEED = 10; /* px per frame @60fps */
-    let lastRafTime  = null;
-
-    function roadLoop(ts){
+    function _roadLoop(ts){
       if(!_raceActive) return;
-      if(!lastRafTime) lastRafTime = ts;
-      const dt = Math.min((ts - lastRafTime) / 16.667, 3);
-      lastRafTime = ts;
-
-      roadY = (roadY + ROAD_SPEED * dt) % roadH;
-
-      /* Tile A scrolls down by roadY */
-      /* Tile B sits exactly roadH pixels above tile A — creates seamless loop */
-      if(tileA) tileA.style.backgroundPosition = `center ${roadY}px`;
-      if(tileB) tileB.style.backgroundPosition = `center ${roadY + roadH}px`;
-
-      _raceRafId = requestAnimationFrame(roadLoop);
+      _roadOffset = (_roadOffset + ROAD_SCROLL_SPEED) % (_cH || 500);
+      _drawFrame();
+      _raceRafId = requestAnimationFrame(_roadLoop);
     }
     if(_raceRafId) cancelAnimationFrame(_raceRafId);
-    _raceRafId = requestAnimationFrame(roadLoop);
+    if(_initCanvas()){
+      _drawFrame(); /* draw once immediately */
+      _raceRafId = requestAnimationFrame(_roadLoop);
+    }
 
     /* ── Bikes start position ── */
     const bikeAI     = document.getElementById('rsBikeAI');
@@ -2334,15 +2490,10 @@ body.race-active .bnav{
     if(_raceRafId){ cancelAnimationFrame(_raceRafId); _raceRafId = null; }
     _raceActive  = false;
     _raceStarted = false;
+    _roadOffset  = 0;
 
-    /* Stop car bounce */
+    /* Stop bike bounce */
     document.querySelectorAll('.rs-bike').forEach(b=>b.classList.remove('racing'));
-
-    /* Reset road tiles */
-    const tileA = document.getElementById('rsRoadTileA');
-    const tileB = document.getElementById('rsRoadTileB');
-    if(tileA) tileA.style.backgroundPosition = 'center 0px';
-    if(tileB) tileB.style.backgroundPosition = 'center 0px';
 
     /* Reset finish line */
     const finishImg = document.getElementById('rsFinishImg');

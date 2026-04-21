@@ -1539,28 +1539,40 @@ async function doUpgradeStat(bikeLevel, stat){
   display:block;
 }
 
+/* Bike engine vibration during race */
+@keyframes rsBikeVibrate{
+  0%,100%{transform:translateY(0) rotate(-0.4deg);}
+  20%{transform:translateY(-4px) rotate(0.5deg);}
+  50%{transform:translateY(2px) rotate(-0.3deg);}
+  80%{transform:translateY(-2px) rotate(0.4deg);}
+}
+
 /* Bike containers — positioned over canvas */
 .rs-bike{
   position:absolute;z-index:10;
-  transition:bottom .55s cubic-bezier(.4,0,.2,1), left .55s ease, right .55s ease, transform .5s ease;
+  will-change:bottom,transform;
+  transition:bottom .7s cubic-bezier(.4,0,.2,1);
+}
+.rs-bike.racing{
+  animation:rsBikeVibrate .22s linear infinite;
 }
 .rs-bike img{
   display:block;width:100%;
-  mix-blend-mode:multiply;
-  filter:drop-shadow(0 8px 16px rgba(0,0,0,.6));
+  mix-blend-mode:screen;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.7)) brightness(1.05);
 }
 
 /* AI bike — left lane */
 #rsBikeAI{
   left:7%;
-  bottom:14%;
+  bottom:12%;
   width:30%;
 }
 
 /* Player bike — right lane */
 #rsBikePlayer{
   right:5%;
-  bottom:10%;
+  bottom:8%;
   width:34%;
 }
 
@@ -2184,24 +2196,51 @@ async function doUpgradeStat(bikeLevel, stat){
     _finishVisible= false;
     _finishPos    = 0;
 
+    /* ── Hide top bar and bottom nav for full immersion ── */
+    const hubTopbar = document.querySelector('.hub-topbar');
+    const bNav      = document.querySelector('.bnav');
+    if(hubTopbar) hubTopbar.style.cssText = 'opacity:0;pointer-events:none;position:fixed;z-index:-1';
+    if(bNav)      bNav.style.cssText      = 'opacity:0;pointer-events:none';
+
     const selectPhase=document.getElementById('raceSelectPhase');
     const animPhase=document.getElementById('raceAnimPhase');
     const resultOv=document.getElementById('rsResultOverlay');
     if(selectPhase)selectPhase.style.display='none';
-    if(animPhase){animPhase.style.display='block';}
-    if(resultOv)resultOv.style.display='none';
+    if(animPhase)  animPhase.style.display='block';
+    if(resultOv)   resultOv.style.display='none';
 
-    /* Size canvas to match screen */
+    /* Size canvas to match full screen */
     const canvas=document.getElementById('rsCanvas');
     if(!canvas) return;
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    /* Reset bikes */
-    const bikeAI=document.getElementById('rsBikeAI');
-    const bikePlayer=document.getElementById('rsBikePlayer');
-    if(bikeAI){bikeAI.style.bottom='14%';bikeAI.style.left='7%';bikeAI.style.transform='';}
-    if(bikePlayer){bikePlayer.style.bottom='10%';bikePlayer.style.right='5%';bikePlayer.style.transform='';}
+    /* Bikes */
+    const bikeAI    = document.getElementById('rsBikeAI');
+    const bikePlayer= document.getElementById('rsBikePlayer');
+
+    /* Starting positions */
+    const aiStartBottom     = 12;
+    const playerStartBottom = 8;
+
+    if(bikeAI){
+      bikeAI.style.transition='none';
+      bikeAI.style.bottom=aiStartBottom+'%';
+      bikeAI.style.left='7%';
+      /* start vibration immediately */
+      bikeAI.classList.add('racing');
+    }
+    if(bikePlayer){
+      bikePlayer.style.transition='none';
+      bikePlayer.style.bottom=playerStartBottom+'%';
+      bikePlayer.style.right='5%';
+      bikePlayer.classList.add('racing');
+    }
+    /* Re-enable transition after 1 frame */
+    requestAnimationFrame(()=>{
+      if(bikeAI)     bikeAI.style.transition    = 'bottom .7s cubic-bezier(.4,0,.2,1)';
+      if(bikePlayer) bikePlayer.style.transition = 'bottom .7s cubic-bezier(.4,0,.2,1)';
+    });
 
     /* HUD init */
     const p1Name=(S?._tgName||S?.user?.firstName||'You').slice(0,14);
@@ -2220,27 +2259,31 @@ async function doUpgradeStat(bikeLevel, stat){
     const maxPlayerKmh=Math.max(35,Math.round(40+playerPower*0.026));
     const maxAiKmh=Math.max(35,Math.round(40+aiPower*0.026));
 
-    /* Timing */
+    /* Timing constants */
     const RACE_MS        = 15000;
-    const RAMP_MS        = 8000;
-    const AHEAD_START_MS = 10000;
-    const FINISH_MS      = 12500;
+    const RAMP_MS        = 6000;  /* speed ramp */
+    const SEPARATE_MS    = 6000;  /* when bikes start separating */
+    const FINISH_MS      = 12000; /* when finish line appears */
     const TICK_MS        = 180;
+
+    /* How far ahead the winner gets vs loser (in % of screen height) */
+    const WINNER_ADVANCE = 28;  /* winner moves up this many % */
+    const LOSER_DROP     = 6;   /* loser drops down this many % */
 
     let elapsed   = 0;
     let apiCalled = false;
     let lastTs    = performance.now();
 
-    /* Road scroll speed proportional to player power */
-    const scrollSpeed = Math.max(0.6, Math.min(3.5, playerPower * 0.002));
+    /* Road scroll speed */
+    const scrollSpeed = Math.max(0.8, Math.min(4.0, playerPower * 0.0025));
 
     if(_raceAnimInterval)clearInterval(_raceAnimInterval);
 
-    /* Canvas draw loop using requestAnimationFrame */
+    /* RAF loop — draws canvas road */
     function rafLoop(){
       if(!_raceActive) return;
       const now=performance.now();
-      const dt=(now-lastTs)/16.67; /* normalize to 60fps */
+      const dt=(now-lastTs)/16.67;
       lastTs=now;
       _roadScroll += scrollSpeed * dt;
       drawRoad(canvas, _roadScroll, _finishVisible, _finishPos);
@@ -2253,45 +2296,56 @@ async function doUpgradeStat(bikeLevel, stat){
       elapsed+=TICK_MS;
       if(!_raceActive){clearInterval(_raceAnimInterval);return;}
 
-      /* Speed ramp */
+      /* Speed ramp display */
       const rampPct=Math.min(1,elapsed/RAMP_MS);
       const easeRamp=rampPct<0.5?2*rampPct*rampPct:1-((-2*rampPct+2)**2)/2;
       if(el_p1s)el_p1s.textContent=Math.round(maxPlayerKmh*easeRamp);
       if(el_p2s)el_p2s.textContent=Math.round(maxAiKmh*easeRamp);
 
-      /* Timer */
+      /* Timer countdown */
       const remaining=Math.max(0,RACE_MS-elapsed);
       const secs=Math.ceil(remaining/1000);
       const mm=String(Math.floor(secs/60)).padStart(2,'0');
       const ss=String(secs%60).padStart(2,'0');
       if(el_tmr)el_tmr.textContent=mm+':'+ss;
 
-      /* Winner pulls ahead */
-      if(elapsed>AHEAD_START_MS){
-        const aheadPct=Math.min(1,(elapsed-AHEAD_START_MS)/(RACE_MS-AHEAD_START_MS-500));
-        const shrink=1-aheadPct*0.18;
+      /* ── Bike positions: both move forward from second 0 ──
+         Winner advances more aggressively; loser falls behind.
+         "Up" on screen = farther ahead on road = closer to finish.
+      ── */
+      const totalRacePct = Math.min(1, elapsed / RACE_MS);
+
+      /* Both bikes move up slightly as race progresses (common forward motion) */
+      const commonAdvance = totalRacePct * 10; /* both advance 10% by end */
+
+      if(elapsed >= SEPARATE_MS){
+        /* Separation phase */
+        const sepPct = Math.min(1,(elapsed-SEPARATE_MS)/(RACE_MS-SEPARATE_MS));
+        const easeS  = sepPct<0.5?2*sepPct*sepPct:1-((-2*sepPct+2)**2)/2;
+
         if(playerWins){
-          if(bikePlayer){
-            bikePlayer.style.bottom=(10+aheadPct*15)+'%';
-            bikePlayer.style.transform='scale('+shrink+')';
-          }
+          /* Player goes higher (forward), AI drops (behind) */
+          if(bikePlayer) bikePlayer.style.bottom=(playerStartBottom+commonAdvance+easeS*WINNER_ADVANCE)+'%';
+          if(bikeAI)     bikeAI.style.bottom    =(aiStartBottom+commonAdvance-easeS*LOSER_DROP)+'%';
         } else {
-          if(bikeAI){
-            bikeAI.style.bottom=(14+aheadPct*15)+'%';
-            bikeAI.style.transform='scale('+shrink+')';
-          }
+          /* AI goes higher (forward), Player drops (behind) */
+          if(bikeAI)     bikeAI.style.bottom    =(aiStartBottom+commonAdvance+easeS*WINNER_ADVANCE)+'%';
+          if(bikePlayer) bikePlayer.style.bottom=(playerStartBottom+commonAdvance-easeS*LOSER_DROP)+'%';
         }
+      } else {
+        /* Both moving forward together */
+        if(bikeAI)     bikeAI.style.bottom    =(aiStartBottom+commonAdvance)+'%';
+        if(bikePlayer) bikePlayer.style.bottom=(playerStartBottom+commonAdvance)+'%';
       }
 
-      /* Finish line appears and approaches */
+      /* Finish line approaches */
       if(elapsed>=FINISH_MS){
         _finishVisible=true;
         const finPct=Math.min(1,(elapsed-FINISH_MS)/(RACE_MS-FINISH_MS));
-        /* Ease-in: finish line rushes toward viewer */
         _finishPos=finPct*finPct;
       }
 
-      /* Server call just before race ends */
+      /* Server API call */
       if(elapsed>=RACE_MS-TICK_MS*2&&!apiCalled){
         apiCalled=true;
         try{
@@ -2303,13 +2357,16 @@ async function doUpgradeStat(bikeLevel, stat){
         }catch(e){console.warn('raceResult API:',e.message);}
       }
 
-      /* Race ends */
+      /* Race over */
       if(elapsed>=RACE_MS){
         clearInterval(_raceAnimInterval);
         _raceAnimInterval=null;
         _raceActive=false;
         _raceStarted=false;
         if(_raceRafId){cancelAnimationFrame(_raceRafId);_raceRafId=null;}
+        /* Stop vibration */
+        if(bikeAI)     bikeAI.classList.remove('racing');
+        if(bikePlayer) bikePlayer.classList.remove('racing');
         setTimeout(()=>{
           _showResult(playerWins,p1Name,aiName,maxPlayerKmh,maxAiKmh);
         },800);
@@ -2363,11 +2420,24 @@ async function doUpgradeStat(bikeLevel, stat){
     if(_raceAnimInterval){clearInterval(_raceAnimInterval);_raceAnimInterval=null;}
     if(_raceRafId){cancelAnimationFrame(_raceRafId);_raceRafId=null;}
     _raceActive=false;_raceStarted=false;_finishVisible=false;_finishPos=0;
+
+    /* Stop bike vibration */
+    const bikeAI=document.getElementById('rsBikeAI');
+    const bikePlayer=document.getElementById('rsBikePlayer');
+    if(bikeAI)     bikeAI.classList.remove('racing');
+    if(bikePlayer) bikePlayer.classList.remove('racing');
+
+    /* Restore top bar and bottom nav */
+    const hubTopbar=document.querySelector('.hub-topbar');
+    const bNav=document.querySelector('.bnav');
+    if(hubTopbar) hubTopbar.style.cssText='';
+    if(bNav)      bNav.style.cssText='';
+
     const ov=document.getElementById('rsResultOverlay');
     if(ov)ov.style.display='none';
     const animPhase=document.getElementById('raceAnimPhase');
     const selectPhase=document.getElementById('raceSelectPhase');
-    if(animPhase)animPhase.style.display='none';
+    if(animPhase)  animPhase.style.display='none';
     if(selectPhase)selectPhase.style.display='block';
     const sf=document.getElementById('raceStartFixed');
     if(sf)sf.style.display='block';

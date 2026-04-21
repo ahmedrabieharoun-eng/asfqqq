@@ -1655,6 +1655,7 @@ body.race-active .bnav{       display:none!important; }
   left:5%;
   bottom:4%;
   width:38%;
+  height:38%;
   transform-origin:bottom center;
 }
 /* Player bike — RIGHT lane */
@@ -1662,15 +1663,16 @@ body.race-active .bnav{       display:none!important; }
   right:4%;
   bottom:3%;
   width:40%;
+  height:40%;
   transform-origin:bottom center;
 }
 
-/* Bounce while racing */
+/* Bounce handled internally by 3D canvas renderer */
 @keyframes bikeBounce{
   0%,100%{ margin-bottom:0 }
   50%{     margin-bottom:5px }
 }
-.rs-bike.racing{ animation:bikeBounce .5s ease-in-out infinite; }
+.rs-bike.racing{ /* bounce done in canvas */ }
 #rsBikeAI.racing{ animation-delay:.25s; }
 
 /* ── Finish line ── */
@@ -2069,48 +2071,70 @@ body.race-active .bnav{       display:none!important; }
     const cx2=(minX+maxX)/2, cy2=(minY+maxY)/2, cz2=(minZ+maxZ)/2;
     const sc = 1.8/Math.max(maxX-minX,maxY-minY,maxZ-minZ,0.001);
     faces.forEach(f=>f.verts.forEach(v=>{
-      v.ox=(v.ox-cx2)*sc; v.oy=(v.oy-cy2)*sc; v.oz=(v.oz-cz2)*sc;
+      v.ox=(v.ox-cx2)*sc;
+      // Flip Y: GLB uses Y-up, canvas 2D uses Y-down
+      v.oy=-(v.oy-cy2)*sc;
+      v.oz=(v.oz-cz2)*sc;
     }));
     return faces;
   }
 
   /* Draw all faces onto a canvas 2D ctx */
   function _drawFaces(ctx, faces, rotY, cx, cy, scale, tintHex, flip){
-    const projected = faces.map(f=>{
-      const pverts = f.verts.map(v=>{
-        let {ox,oy,oz}=v;
-        if(flip) ox=-ox; // mirror for AI side
-        return _project(ox,oy,oz, rotY, cx,cy, scale);
-      });
-      const avgDepth = (pverts[0].depth+pverts[1].depth+pverts[2].depth)/3;
-      // lighting: dot product with light dir (0.5,1,0.8)
+    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+    const fov = 2.8;
+
+    // Parse tint once
+    const tr = parseInt(tintHex.slice(1,3),16)/255;
+    const tg = parseInt(tintHex.slice(3,5),16)/255;
+    const tb = parseInt(tintHex.slice(5,7),16)/255;
+
+    const projected = [];
+    for(let fi=0; fi<faces.length; fi++){
+      const f = faces[fi];
+      const pverts = new Array(3);
+      let sumDepth = 0;
+      for(let vi=0; vi<3; vi++){
+        let {ox,oy,oz} = f.verts[vi];
+        if(flip) ox = -ox;
+        // rotate Y
+        const rx = ox*cosY + oz*sinY;
+        const rz = -ox*sinY + oz*cosY;
+        const d = fov / (fov + rz + 2.2);
+        pverts[vi] = { px: cx + rx*scale*d, py: cy + oy*scale*d, rz };
+        sumDepth += rz;
+      }
+
+      // Backface culling: skip faces facing away
+      const ax = pverts[1].px-pverts[0].px, ay = pverts[1].py-pverts[0].py;
+      const bx = pverts[2].px-pverts[0].px, by = pverts[2].py-pverts[0].py;
+      if(ax*by - ay*bx < 0) continue; // backface
+
+      // Lighting
       const n = _faceNormal(f.verts);
       const len = Math.sqrt(n.nx*n.nx+n.ny*n.ny+n.nz*n.nz)||1;
       const dot = (n.nx*0.5+n.ny*1+n.nz*0.8)/(len*Math.sqrt(1.89));
       const light = 0.35 + 0.65*Math.max(0,dot);
-      return { pverts, avgDepth, light, color:f.color };
-    });
-    // depth sort back-to-front
+
+      const c = f.color;
+      const r = Math.round(Math.min(255,(c[0]*0.55+tr*0.45)*light*255));
+      const g = Math.round(Math.min(255,(c[1]*0.55+tg*0.45)*light*255));
+      const b = Math.round(Math.min(255,(c[2]*0.55+tb*0.45)*light*255));
+
+      projected.push({ pverts, avgDepth: sumDepth/3, r, g, b });
+    }
+
+    // Depth sort back-to-front
     projected.sort((a,b)=>b.avgDepth-a.avgDepth);
-    // parse tint once
-    const tr = parseInt(tintHex.slice(1,3),16)/255;
-    const tg = parseInt(tintHex.slice(3,5),16)/255;
-    const tb = parseInt(tintHex.slice(5,7),16)/255;
-    projected.forEach(({pverts,light,color})=>{
-      // mix mesh color with tint
-      const r = Math.round(Math.min(255,(color[0]*0.6+tr*0.4)*light*255));
-      const g = Math.round(Math.min(255,(color[1]*0.6+tg*0.4)*light*255));
-      const b = Math.round(Math.min(255,(color[2]*0.6+tb*0.4)*light*255));
+
+    projected.forEach(({pverts,r,g,b})=>{
       ctx.beginPath();
       ctx.moveTo(pverts[0].px, pverts[0].py);
-      for(let i=1;i<pverts.length;i++) ctx.lineTo(pverts[i].px, pverts[i].py);
+      ctx.lineTo(pverts[1].px, pverts[1].py);
+      ctx.lineTo(pverts[2].px, pverts[2].py);
       ctx.closePath();
       ctx.fillStyle = `rgb(${r},${g},${b})`;
       ctx.fill();
-      // thin edge for definition
-      ctx.strokeStyle = `rgba(0,0,0,0.18)`;
-      ctx.lineWidth = 0.4;
-      ctx.stroke();
     });
   }
 
@@ -2220,7 +2244,8 @@ body.race-active .bnav{       display:none!important; }
       ctx.clearRect(0,0,W,H);
       const bounceY = Math.abs(Math.sin(bounceT))*6;
       if(faces && faces.length){
-        _drawFaces(ctx, faces, rotY, W/2, H*0.55-bounceY, Math.min(W,H)*0.45, tint, false);
+        // Larger scale: 0.62 of min dimension, centred at 50% height
+        _drawFaces(ctx, faces, rotY, W/2, H*0.52-bounceY, Math.min(W,H)*0.62, tint, false);
       } else {
         _drawVectorBike(ctx, W, H, rotY, tint, false, bounceY);
       }
@@ -2237,13 +2262,17 @@ body.race-active .bnav{       display:none!important; }
     cvs.addEventListener('mouseup',onEnd);
 
     let rafId;
-    function animate(){
+    let _lastFrame = 0;
+    function animate(ts){
       rafId=requestAnimationFrame(animate);
-      if(autoRot) rotY+=0.014;
-      bounceT+=0.04;
+      // Throttle to ~30fps
+      if(ts - _lastFrame < 33) return;
+      _lastFrame = ts;
+      if(autoRot) rotY+=0.022;
+      bounceT+=0.06;
       render();
     }
-    animate();
+    animate(0);
     _bike3DViewers.push({ dispose(){ cancelAnimationFrame(rafId); } });
   }
 
@@ -2268,7 +2297,6 @@ body.race-active .bnav{       display:none!important; }
     let bounceT = 0;
     let isBouncing = false;
     let faces = null;
-    let rafId;
 
     window.BikeGLBLoader.load('BIKE MOTO.glb').then(meshes=>{
       faces = _normaliseFaces(_buildFaces(meshes));
@@ -2277,40 +2305,31 @@ body.race-active .bnav{       display:none!important; }
     function render(){
       ctx.clearRect(0,0,W,H);
       const bounceY = isBouncing ? Math.abs(Math.sin(bounceT))*H*0.06 : 0;
-      // scale so bike fills most of the container
-      const scale = Math.min(W,H)*0.52;
+      // Large scale: fill most of the race sprite area
+      const scale = Math.min(W,H)*0.72;
       if(faces && faces.length){
-        _drawFaces(ctx, faces, rotY, W/2, H*0.60-bounceY, scale, tint, !isPlayer);
+        _drawFaces(ctx, faces, rotY, W/2, H*0.52-bounceY, scale, tint, !isPlayer);
       } else {
         _drawVectorBike(ctx, W, H, rotY, tint, !isPlayer, bounceY);
       }
     }
 
-    function animate(){
+    let rafId;
+    let _lastRaceFrame = 0;
+    function animate(ts){
       rafId=requestAnimationFrame(animate);
-      if(isBouncing) bounceT+=0.2;
+      if(ts - _lastRaceFrame < 33) return;
+      _lastRaceFrame = ts;
+      if(isBouncing) bounceT+=0.25;
       render();
     }
-    animate();
+    animate(0);
 
     return {
       startBounce(){ isBouncing=true; bounceT=0; },
       stopBounce(){  isBouncing=false; bounceT=0; },
       dispose(){ cancelAnimationFrame(rafId); }
     };
-  }
-
-
-    const statsRow = document.getElementById('raceStatsRow');
-    if(!statsRow) return;
-    const stats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
-    statsRow.innerHTML = '';
-    [['Скорость',stats.speed],['Разгон',stats.accel],['Маневры',stats.maneuver],['Нитро',stats.nitro]].forEach(([label,value])=>{
-      const item = document.createElement('div');
-      item.className = 'race-stat-item';
-      item.innerHTML = '<div class="race-stat-lbl">'+label+'</div><div class="race-stat-val">'+value+'</div>';
-      statsRow.appendChild(item);
-    });
   }
 
   function _goSlide(i){
@@ -2454,104 +2473,6 @@ body.race-active .bnav{       display:none!important; }
   /* ══════════════════════════════════════════════════════════
      RACE ANIMATION — Core Loop
   ══════════════════════════════════════════════════════════ */
-  /* ══ 3D viewer for race sprites (AI + Player) ══ */
-  function _initRaceBike3D(canvasId, isPlayer, bikeData){
-    if(!window.THREE) return null;
-    const cvs = document.getElementById(canvasId);
-    if(!cvs) return null;
-    const parent = cvs.parentElement;
-    const W = parent.offsetWidth  || 140;
-    const H = parent.offsetHeight || 160;
-    cvs.width  = W * (window.devicePixelRatio||1);
-    cvs.height = H * (window.devicePixelRatio||1);
-    cvs.style.width  = W+'px';
-    cvs.style.height = H+'px';
-
-    const renderer = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
-    renderer.setPixelRatio(window.devicePixelRatio||1);
-    renderer.setSize(W, H);
-    renderer.setClearColor(0x000000, 0);
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
-    camera.position.set(isPlayer?-0.3:0.3, 1.1, 3.2);
-    camera.lookAt(0, 0.3, 0);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const dir = new THREE.DirectionalLight(0xffffff, 1.4);
-    dir.position.set(isPlayer?-3:3, 5, 3);
-    scene.add(dir);
-    const rim = new THREE.DirectionalLight(isPlayer?0x00ff88:0xff4444, 0.5);
-    rim.position.set(isPlayer?2:-2, 1, -3);
-    scene.add(rim);
-
-    let bikeModel = null;
-    let rotY = isPlayer ? -0.3 : 0.3;
-    let bounceT = 0;
-    let isBouncing = false;
-
-    const loader = new THREE.GLTFLoader();
-    loader.load('BIKE MOTO.glb',
-      (gltf)=>{
-        bikeModel = gltf.scene;
-        const box = new THREE.Box3().setFromObject(bikeModel);
-        const size = new THREE.Vector3(); box.getSize(size);
-        const centre = new THREE.Vector3(); box.getCenter(centre);
-        const scale = 1.5 / Math.max(size.x,size.y,size.z);
-        bikeModel.scale.setScalar(scale);
-        bikeModel.position.sub(centre.multiplyScalar(scale));
-        bikeModel.position.y += size.y * scale * 0.5;
-        bikeModel.rotation.y = rotY;
-        // Color: player=green, AI=red-orange
-        const tint = isPlayer ? 0x22c55e : 0xef4444;
-        bikeModel.traverse(c=>{
-          if(c.isMesh&&c.material){
-            c.material=c.material.clone();
-            c.material.emissive=new THREE.Color(tint);
-            c.material.emissiveIntensity=0.18;
-          }
-        });
-        // Mirror AI bike to face opposite direction
-        if(!isPlayer) bikeModel.scale.x *= -1;
-        scene.add(bikeModel);
-      },
-      undefined,
-      ()=>{
-        // Fallback shape
-        const g=new THREE.Group();
-        const bm=new THREE.MeshStandardMaterial({color:isPlayer?0x22c55e:0xef4444,metalness:.8,roughness:.2});
-        g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.4,.3,1.1),bm),{position:new THREE.Vector3(0,.35,0)}));
-        const wm=new THREE.MeshStandardMaterial({color:0x111111});
-        [-0.5,0.5].forEach(z=>{
-          const w=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.08,16),wm);
-          w.rotation.z=Math.PI/2; w.position.set(0,.2,z); g.add(w);
-        });
-        if(!isPlayer) g.scale.x=-1;
-        bikeModel=g; scene.add(g);
-      }
-    );
-
-    let rafId;
-    function animate(){
-      rafId=requestAnimationFrame(animate);
-      if(bikeModel){
-        bikeModel.rotation.y = rotY;
-        if(isBouncing){
-          bounceT+=0.18;
-          bikeModel.position.y = Math.abs(Math.sin(bounceT))*0.08;
-        }
-      }
-      renderer.render(scene,camera);
-    }
-    animate();
-    return {
-      startBounce(){ isBouncing=true; bounceT=0; },
-      stopBounce(){  isBouncing=false; if(bikeModel) bikeModel.position.y=0; },
-      tiltForward(deg){ rotY = (isPlayer?-0.3:0.3) + (deg||0)*0.017; },
-      dispose(){ cancelAnimationFrame(rafId); renderer.dispose(); }
-    };
-  }
-
   function _runRaceAnimation(playerPower, aiPower, playerWins, aiName){
     _raceActive = true;
 

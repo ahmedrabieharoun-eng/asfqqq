@@ -174,6 +174,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 <script>
 (function(){
 'use strict';
@@ -836,10 +837,69 @@ for(let z = 25; z < 850; z += 35 + Math.random() * 15){
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  GLTF FERRARI CAR LOADING
+//  GLTF FERRARI CAR LOADING — FIX: DRACOLoader + correct mesh names
 // ═══════════════════════════════════════════════════════════════
 
-// Car placeholders (empty groups that will be populated when model loads)
+function setupCarModel(model, paintColor){
+  // Body paint
+  const bodyMat = new THREE.MeshPhysicalMaterial({
+    color: paintColor,
+    metalness: 0.9,
+    roughness: 0.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.03,
+    envMapIntensity: 1.6
+  });
+
+  // Details/trim
+  const detailsMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 1.0,
+    roughness: 0.5
+  });
+
+  // Glass
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0.25,
+    roughness: 0,
+    transmission: 1.0
+  });
+
+  const wheels = [];
+
+  model.traverse(function(child){
+    if(child.isMesh){
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+
+  // Set materials by name
+  const body = model.getObjectByName('body');
+  if(body) body.material = bodyMat;
+
+  const trim = model.getObjectByName('trim');
+  if(trim) trim.material = detailsMat;
+
+  const glass = model.getObjectByName('glass');
+  if(glass) glass.material = glassMat;
+
+  // Rims
+  ['rim_fl','rim_fr','rim_rl','rim_rr'].forEach(name => {
+    const rim = model.getObjectByName(name);
+    if(rim) rim.material = detailsMat;
+  });
+
+  // Wheels (for spinning)
+  ['wheel_fl','wheel_fr','wheel_rl','wheel_rr'].forEach(name => {
+    const w = model.getObjectByName(name);
+    if(w) wheels.push(w);
+  });
+
+  return wheels;
+}
+
 const car1 = new THREE.Group();
 car1.position.set(-3.6, 0, 5);
 car1.rotation.y = Math.PI;
@@ -850,99 +910,48 @@ car2.position.set(3.6, 0, 5);
 car2.rotation.y = Math.PI;
 scene.add(car2);
 
-// Wheel references for spinning
 car1._wheels = [];
 car2._wheels = [];
-
-// Loading screen / status
 let modelsLoaded = false;
 
-const loader = new THREE.GLTFLoader();
+const dracoLoader = new THREE.DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
 
-// Load Ferrari model
-loader.load('https://threejs.org/examples/models/gltf/ferrari.glb', function(gltf){
-  const model = gltf.scene;
+const gltfLoader = new THREE.GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
 
-  // Scale and position adjustments (Ferrari model might need scaling)
-  // The Ferrari model in three.js examples is typically ~4.3m long, scale if needed
-  model.scale.set(1, 1, 1);
+gltfLoader.load(
+  'https://threejs.org/examples/models/gltf/ferrari.glb',
+  function(gltf){
+    const carModel = gltf.scene;
 
-  // Find and customize materials for car 1 (Gold/Yellow)
-  const car1Model = model.clone();
-  car1Model.traverse(function(child){
-    if(child.isMesh){
-      child.castShadow = true;
-      child.receiveShadow = true;
-      // Identify body paint by material name or by checking if it's the main body
-      if(child.material){
-        const mat = child.material;
-        // If it's the body paint (usually named 'body' or is red/colored)
-        if(mat.name && (mat.name.toLowerCase().includes('body') || mat.name.toLowerCase().includes('paint') || mat.name.toLowerCase().includes('car'))){
-          child.material = new THREE.MeshPhysicalMaterial({
-            color: 0xFFCC00,
-            metalness: 0.5,
-            roughness: 0.08,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.04,
-            envMapIntensity: 1.6
-          });
-        }
-      }
+    // Car 1 - Gold
+    const car1Model = carModel.clone();
+    car1._wheels = setupCarModel(car1Model, 0xFFCC00);
+    car1.add(car1Model);
+
+    // Car 2 - Blue
+    const car2Model = carModel.clone();
+    car2._wheels = setupCarModel(car2Model, 0x1E88E5);
+    car2.add(car2Model);
+
+    modelsLoaded = true;
+    document.getElementById('timer-val').textContent = '0.000';
+
+    // Cleanup
+    dracoLoader.dispose();
+  },
+  function(xhr){
+    if(xhr.total > 0){
+      const pct = Math.round(xhr.loaded / xhr.total * 100);
+      document.getElementById('timer-val').textContent = 'Loading ' + pct + '%';
     }
-  });
-
-  car1.add(car1Model);
-
-  // Find wheels in the model for spinning
-  car1Model.traverse(function(child){
-    if(child.name && child.name.toLowerCase().includes('wheel')){
-      car1._wheels.push(child);
-    }
-  });
-
-  // Car 2 (Blue) - clone again from original
-  const car2Model = model.clone();
-  car2Model.traverse(function(child){
-    if(child.isMesh){
-      child.castShadow = true;
-      child.receiveShadow = true;
-      if(child.material){
-        const mat = child.material;
-        if(mat.name && (mat.name.toLowerCase().includes('body') || mat.name.toLowerCase().includes('paint') || mat.name.toLowerCase().includes('car'))){
-          child.material = new THREE.MeshPhysicalMaterial({
-            color: 0x1E88E5,
-            metalness: 0.5,
-            roughness: 0.08,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.04,
-            envMapIntensity: 1.6
-          });
-        }
-      }
-    }
-  });
-
-  car2.add(car2Model);
-
-  car2Model.traverse(function(child){
-    if(child.name && child.name.toLowerCase().includes('wheel')){
-      car2._wheels.push(child);
-    }
-  });
-
-  modelsLoaded = true;
-
-}, function(progress){
-  // Loading progress
-  if(progress.total > 0){
-    const pct = Math.round(progress.loaded / progress.total * 100);
-    document.getElementById('timer-val').textContent = 'Loading ' + pct + '%';
+  },
+  function(error){
+    console.error('Model load failed:', error);
+    document.getElementById('timer-val').textContent = 'Load Error';
   }
-}, function(error){
-  console.error('Failed to load car model:', error);
-  // Fallback: show message
-  document.getElementById('timer-val').textContent = 'Model Error';
-});
+);
 
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — MAX_P 400
@@ -1085,7 +1094,9 @@ function updatePhysics(dt){
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
-    if(c._wheels && c._wheels.length > 0) c._wheels.forEach(w=>{ w.rotation.x -= spds[ci] * 0.038 * dt; });
+    if(c._wheels && c._wheels.length > 0){
+      c._wheels.forEach(w=>{ w.rotation.x += spds[ci] * 0.038 * dt; });
+    }
   });
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);

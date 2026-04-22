@@ -641,16 +641,19 @@ const palmBillboardMat = new THREE.MeshBasicMaterial({
   depthWrite: false
 });
 
-const palmGeo = new THREE.PlaneGeometry(14, 20); // adjust size as needed for realistic proportions
+// FIX 1: Shift geometry origin to bottom edge so Y=0 sits on the ground
+const palmGeo = new THREE.PlaneGeometry(14, 20);
+palmGeo.translate(0, 10, 0); // bottom edge is now at local Y=0
+
 const palms = [];
 
 // INCREASED DENSITY: spacing reduced from 35+random*15 to 22+random*12
 for(let z = 25; z < 850; z += 22 + Math.random() * 12){
   const offset = 10 + Math.random() * 6;
   [-1, 1].forEach(side => {
-    // Main billboard facing camera direction
+    // Main billboard — Y=0 so bottom of plane sits on ground
     const palm = new THREE.Mesh(palmGeo, palmBillboardMat);
-    palm.position.set(side * (TRACK_WIDTH/2 + offset), 10, z); // y=10 centers the 20-unit tall billboard
+    palm.position.set(side * (TRACK_WIDTH/2 + offset), 0, z);
     palm.rotation.y = side * 0.3; // slight angle toward road
     scene.add(palm);
     palms.push(palm);
@@ -663,12 +666,12 @@ for(let z = 25; z < 850; z += 22 + Math.random() * 12){
     palms.push(palmCross);
   });
 
-  // INCREASED CHANCE: extra background palms raised from 0.3 to 0.45
+  // INCREASED CHANCE: extra background palms
   if(Math.random() < 0.45){
     [-1, 1].forEach(side => {
       const extraOffset = offset + 6 + Math.random() * 8;
       const ep = new THREE.Mesh(palmGeo, palmBillboardMat);
-      ep.position.set(side * (TRACK_WIDTH/2 + extraOffset), 9, z + Math.random() * 10);
+      ep.position.set(side * (TRACK_WIDTH/2 + extraOffset), 0, z + Math.random() * 10);
       ep.rotation.y = Math.random() * Math.PI;
       const sc = 0.7 + Math.random() * 0.3;
       ep.scale.set(sc, sc, sc);
@@ -698,16 +701,17 @@ const bushMat = new THREE.MeshBasicMaterial({
   depthWrite: false
 });
 
-const bushGeo = new THREE.PlaneGeometry(5, 3.5); // bushes are shorter and wider than palms
+// FIX 2: Shift geometry origin to bottom edge so Y=0 sits on the ground
+const bushGeo = new THREE.PlaneGeometry(5, 3.5);
+bushGeo.translate(0, 1.75, 0); // bottom edge is now at local Y=0
 
 // Place bushes in organized rows along both sides of the road
-// Between the road edge and the palm trees - closer to the road
 for(let z = 10; z < 860; z += 6 + Math.random() * 4){
   [-1, 1].forEach(side => {
     // Inner row of bushes - right next to the road/armco barrier
     const bushX = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 2);
     const bush = new THREE.Mesh(bushGeo, bushMat);
-    bush.position.set(bushX, 1.75, z);
+    bush.position.set(bushX, 0, z);
     bush.rotation.y = Math.random() * Math.PI; // random rotation for variety
     scene.add(bush);
 
@@ -725,7 +729,7 @@ for(let z = 10; z < 860; z += 6 + Math.random() * 4){
       const bush2 = new THREE.Mesh(bushGeo, bushMat);
       const sc = 0.8 + Math.random() * 0.4; // slight size variation
       bush2.scale.set(sc, sc, sc);
-      bush2.position.set(bushX2, 1.75 * sc, z + Math.random() * 4);
+      bush2.position.set(bushX2, 0, z + Math.random() * 4);
       bush2.rotation.y = Math.random() * Math.PI;
       scene.add(bush2);
 

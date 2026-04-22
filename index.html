@@ -32,41 +32,41 @@
   #p1-hud {
     position:absolute; top:16px; left:16px;
     background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
-    border:1px solid rgba(255,180,0,0.5); border-radius:14px;
-    padding:14px 20px; min-width:195px;
+    border:1px solid rgba(255,180,0,0.5); border-radius:10px;
+    padding:8px 12px; min-width:140px;
     backdrop-filter:blur(12px);
     box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);
   }
   #p2-hud {
     position:absolute; top:16px; right:16px;
     background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);
-    border:1px solid rgba(0,160,255,0.5); border-radius:14px;
-    padding:14px 20px; min-width:195px; text-align:right;
+    border:1px solid rgba(0,160,255,0.5); border-radius:10px;
+    padding:8px 12px; min-width:140px; text-align:right;
     backdrop-filter:blur(12px);
     box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);
   }
-  .car-name { font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
   #p1-hud .car-name { color:#FFB800; }
   #p2-hud .car-name { color:#00CFFF; }
   .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:40px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
-  .speed-unit { font-size:11px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:4px; }
-  .rpm-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:3px; }
-  .rpm-bar-bg { width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
+  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
+  .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
+  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
   .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
-  .gear-row { display:flex; align-items:baseline; margin-top:7px; gap:8px; }
-  .gear-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
-  .gear-num { font-size:24px; font-weight:900; color:#FF8C00; line-height:1; }
+  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
+  .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
+  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
   #p2-hud .gear-row { flex-direction:row-reverse; }
   #p2-hud .gear-num { color:#00CFFF; }
   #timer-hud {
     position:absolute; top:16px; left:50%; transform:translateX(-50%);
     background:rgba(0,0,0,0.68); border:1px solid rgba(255,255,255,0.14);
-    border-radius:12px; padding:10px 28px; text-align:center;
+    border-radius:8px; padding:6px 16px; text-align:center;
     backdrop-filter:blur(12px); box-shadow:0 4px 22px rgba(0,0,0,0.5);
   }
-  .timer-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:3px; }
-  .timer-value { font-size:28px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:2px; }
+  .timer-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }
+  .timer-value { font-size:20px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
   .prog-wrap { position:absolute; bottom:28px; width:38%; }
   #p1-prog-wrap { left:5%; }
   #p2-prog-wrap { right:5%; }
@@ -187,16 +187,16 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.45;
+renderer.toneMappingExposure = 1.6;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x8ED8F0, 0.003);
+scene.fog = new THREE.FogExp2(0x8ED8F0, 0.0015);
 
 // ─── CAMERA ──────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 2500);
+const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 3000);
 camera.position.set(0, 5.5, -18);
 camera.lookAt(0, 1.5, 0);
 window.addEventListener('resize', ()=>{
@@ -346,8 +346,9 @@ scene.add(groundBounce);
 // ═══════════════════════════════════════════════════════════════
 //  TRACK
 // ═══════════════════════════════════════════════════════════════
-const TRACK_LENGTH = 880;
+const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
+const FINISH_Z     = 860;
 const asphaltTex   = makeAsphaltTexture(1024,1024);
 const normalTex    = makeAsphaltNormal(512,512);
 
@@ -495,13 +496,19 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  FOREST BACKDROP — Real image texture
+//  FOREST BACKDROP — Real image texture — MeshStandardMaterial
 // ═══════════════════════════════════════════════════════════════
 (function buildForestBackdrop(){
   const forestImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b4f2e04d-e5c4-48be-b6da-bedeedbf2db9.png');
   forestImgTex.wrapS = THREE.RepeatWrapping;
   forestImgTex.repeat.set(12, 1);
-  const forestMat = new THREE.MeshBasicMaterial({map: forestImgTex, side: THREE.DoubleSide});
+  const forestMat = new THREE.MeshStandardMaterial({
+    map: forestImgTex,
+    side: THREE.DoubleSide,
+    roughness: 0.9,
+    metalness: 0,
+    envMapIntensity: 0.2
+  });
   [-1, 1].forEach(side => {
     const fPlane = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_LENGTH + 100, 35), forestMat);
     fPlane.position.set(side * (TRACK_WIDTH/2 + 35), 17, TRACK_LENGTH/2);
@@ -519,8 +526,8 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   const sCtx = shadowC.getContext('2d');
   sCtx.clearRect(0, 0, 512, 4096);
 
-  for(let z = 25; z < 850; z += 35 + 15){
-    const yOnTex = (z / 880) * 4096;
+  for(let z = 25; z < 1080; z += 35 + 15){
+    const yOnTex = (z / TRACK_LENGTH) * 4096;
     sCtx.save();
     sCtx.translate(256, yOnTex);
     sCtx.rotate(-0.18);
@@ -547,16 +554,19 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  ROADSIDE BUSHES/SHRUBS — Dense, three rows, real PNG billboard
+//  ROADSIDE BUSHES/SHRUBS — Optimized: every 8 units, 2 rows,
+//  single plane (no cross-billboard), MeshStandardMaterial
 // ═══════════════════════════════════════════════════════════════
 const bushTexture = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7948c31-84c8-4d5f-9f38-83d2357a7548.png');
 
-const bushMat = new THREE.MeshBasicMaterial({
+const bushMat = new THREE.MeshStandardMaterial({
   map: bushTexture,
   transparent: true,
-  alphaTest: 0.2,
+  alphaTest: 0.3,
   side: THREE.DoubleSide,
-  depthWrite: false
+  roughness: 0.85,
+  metalness: 0,
+  envMapIntensity: 0.3
 });
 
 // Standard bush geometry (bottom-aligned)
@@ -567,8 +577,8 @@ bushGeo.translate(0, 1.75, 0);
 const bushGeoTall = new THREE.PlaneGeometry(6, 5);
 bushGeoTall.translate(0, 2.5, 0);
 
-// Place bushes in three dense rows along both sides
-for(let z = 10; z < 860; z += 4 + Math.random() * 2){
+// Place bushes — every 8 units, 2 rows per side, single plane
+for(let z = 10; z < TRACK_LENGTH - 20; z += 8 + Math.random() * 2){
   [-1, 1].forEach(side => {
     // ── ROW 1: Inner row, close to road/armco
     const bushX1 = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 1.5);
@@ -579,11 +589,6 @@ for(let z = 10; z < 860; z += 4 + Math.random() * 2){
     b1.scale.set(sc1, sc1, sc1);
     b1.rotation.y = Math.random() * Math.PI;
     scene.add(b1);
-    const b1c = new THREE.Mesh(useTall1 ? bushGeoTall : bushGeo, bushMat);
-    b1c.position.copy(b1.position);
-    b1c.rotation.y = b1.rotation.y + Math.PI/2;
-    b1c.scale.copy(b1.scale);
-    scene.add(b1c);
 
     // ── ROW 2: Middle row
     const bushX2 = side * (TRACK_WIDTH/2 + 5.5 + Math.random() * 2);
@@ -594,28 +599,6 @@ for(let z = 10; z < 860; z += 4 + Math.random() * 2){
     b2.scale.set(sc2, sc2, sc2);
     b2.rotation.y = Math.random() * Math.PI;
     scene.add(b2);
-    const b2c = new THREE.Mesh(useTall2 ? bushGeoTall : bushGeo, bushMat);
-    b2c.position.copy(b2.position);
-    b2c.rotation.y = b2.rotation.y + Math.PI/2;
-    b2c.scale.copy(b2.scale);
-    scene.add(b2c);
-
-    // ── ROW 3: Outer row, far from road
-    if(z % 6 < 5){
-      const bushX3 = side * (TRACK_WIDTH/2 + 9 + Math.random() * 5);
-      const sc3 = 0.8 + Math.random() * 0.6;
-      const useTall3 = Math.random() < 0.25;
-      const b3 = new THREE.Mesh(useTall3 ? bushGeoTall : bushGeo, bushMat);
-      b3.position.set(bushX3, 0, z + Math.random() * 3);
-      b3.scale.set(sc3, sc3, sc3);
-      b3.rotation.y = Math.random() * Math.PI;
-      scene.add(b3);
-      const b3c = new THREE.Mesh(useTall3 ? bushGeoTall : bushGeo, bushMat);
-      b3c.position.copy(b3.position);
-      b3c.rotation.y = b3.rotation.y + Math.PI/2;
-      b3c.scale.copy(b3.scale);
-      scene.add(b3c);
-    }
   });
 }
 
@@ -662,7 +645,7 @@ for(let z = 10; z < 860; z += 4 + Math.random() * 2){
 //  FINISH GATE
 // ═══════════════════════════════════════════════════════════════
 (function buildFinish(){
-  const finZ=TRACK_LENGTH-20;
+  const finZ=FINISH_Z;
   const poleMat=new THREE.MeshStandardMaterial({color:0xBBBBBB,metalness:0.88,roughness:0.18});
   [-TRACK_WIDTH/2-0.6, TRACK_WIDTH/2+0.6].forEach(x=>{
     const p=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.26,14,14),poleMat);
@@ -826,7 +809,6 @@ function spawnP(x,y,z,vx,vy,vz,type){
 // ═══════════════════════════════════════════════════════════════
 //  GAME STATE
 // ═══════════════════════════════════════════════════════════════
-const FINISH_Z=TRACK_LENGTH-22;
 const START_Z=5;
 const gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];
 const gearThr=[0,14,38,70,106,148,198];
@@ -1141,7 +1123,6 @@ function initAudio(){
 
 function playGearShiftPop(){
   if(!audioReady) return;
-  // Brief rev drop/pop on gear change
   const o = audioCtx.createOscillator();
   o.type = 'sawtooth';
   const g = audioCtx.createGain();
@@ -1163,7 +1144,6 @@ function updateSound(dt){
 
   if(state.phase === 'racing'){
     const t = audioCtx.currentTime;
-    // RPM range: idle 35Hz → redline 420Hz
     const rpm = 35 + sr * 385;
     engOsc1.frequency.setTargetAtTime(rpm,        t, 0.08);
     engOsc2.frequency.setTargetAtTime(rpm * 2,    t, 0.08);
@@ -1174,14 +1154,11 @@ function updateSound(dt){
     const el = (performance.now() - state.raceStart) / 1000;
     engGain.gain.setTargetAtTime(Math.min(0.6 + sr * 0.4 + (el < 1.5 ? 0.8 : 0), 1.0), t, 0.06);
 
-    // Turbo whistle rises with speed
     turbOsc.frequency.setTargetAtTime(2000 + sr * 2000, t, 0.15);
     turbGain.gain.setTargetAtTime(sr * 0.04, t, 0.12);
 
-    // Wind noise up to 0.45 at high speed
     windGain.gain.setTargetAtTime(sr * 0.45, t, 0.12);
 
-    // Gear shift detection — check both cars
     const g1 = state.p1.gear;
     const g2 = state.p2.gear;
     if(g1 !== lastGear1 || g2 !== lastGear2){ playGearShiftPop(); }
@@ -1206,7 +1183,6 @@ function playScreech(){
   f.type = 'bandpass'; f.frequency.value = 1000;
   o.connect(f); f.connect(g); g.connect(masterGain);
   o.start();
-  // Deeper frequency drop, longer duration 1.8s
   o.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 1.8);
   g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8);
   o.stop(audioCtx.currentTime + 1.8);
@@ -1232,8 +1208,7 @@ function animate(time){
   if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
   if(state.phase!=='racing') _didScreech=false;
   updateSound(dt);
-  const avgS=(state.p1.speed+state.p2.speed)*0.5;
-  renderer.domElement.style.filter=avgS>200?'saturate(1.2) contrast(1.04)':'';
+  renderer.domElement.style.filter='';
   renderer.render(scene,camera);
 }
 resetGame();

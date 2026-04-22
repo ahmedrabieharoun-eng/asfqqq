@@ -279,29 +279,6 @@ function makeAsphaltNormal(w,h){
   return tex;
 }
 
-function makeGrassTexture(w,h){
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
-  const ctx=c.getContext('2d');
-  ctx.fillStyle='#2eaa18'; ctx.fillRect(0,0,w,h);
-  fbmNoise(ctx,w,h,4,4,0.25);
-  for(let i=0;i<9000;i++){
-    const x=Math.random()*w, y=Math.random()*h, r=0.8+Math.random()*2.5;
-    const g2=Math.floor(130+Math.random()*60), rb=Math.floor(20+Math.random()*30);
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fillStyle=`rgb(${rb},${g2},${rb-8})`; ctx.fill();
-  }
-  for(let i=0;i<3;i++){
-    const x=Math.random()*w, y=Math.random()*h, r=10+Math.random()*20;
-    const dg=ctx.createRadialGradient(x,y,0,x,y,r);
-    dg.addColorStop(0,'rgba(60,100,20,0.3)'); dg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=dg; ctx.fillRect(x-r,y-r,r*2,r*2);
-  }
-  const tex=new THREE.CanvasTexture(c);
-  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.repeat.set(10,70);
-  return tex;
-}
-
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING — lower sun angle for dramatic long shadows
 // ═══════════════════════════════════════════════════════════════
@@ -309,7 +286,7 @@ const hemi = new THREE.HemisphereLight(0x87CEEB, 0x4CAF50, 0.85);
 scene.add(hemi);
 
 const sun = new THREE.DirectionalLight(0xFFFFF5, 3.2);
-sun.position.set(80, 60, -120); // lower sun = longer shadows
+sun.position.set(80, 60, -120);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 2048;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
@@ -327,30 +304,15 @@ groundBounce.position.set(0,-20,0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY DOME
+//  SKY DOME — Real image texture
 // ═══════════════════════════════════════════════════════════════
 (function buildSky(){
   const skyGeo = new THREE.SphereGeometry(1200, 48, 24);
-  const skyC = document.createElement('canvas'); skyC.width=4; skyC.height=1024;
-  const sCtx = skyC.getContext('2d');
-  const sg = sCtx.createLinearGradient(0,0,0,1024);
-  sg.addColorStop(0,   '#1565C0');
-  sg.addColorStop(0.15,'#1976D2');
-  sg.addColorStop(0.35,'#2196F3');
-  sg.addColorStop(0.55,'#42A5F5');
-  sg.addColorStop(0.72,'#64B5F6');
-  sg.addColorStop(0.85,'#90CAF9');
-  sg.addColorStop(0.94,'#B3E5FC');
-  sg.addColorStop(1,   '#C8EEF8');
-  sCtx.fillStyle=sg; sCtx.fillRect(0,0,4,1024);
-  const dayGlow = sCtx.createRadialGradient(2,Math.floor(1024*0.12),0,2,Math.floor(1024*0.12),200);
-  dayGlow.addColorStop(0,'rgba(255,255,255,0.35)');
-  dayGlow.addColorStop(0.3,'rgba(200,230,255,0.12)');
-  dayGlow.addColorStop(1,'rgba(0,0,0,0)');
-  sCtx.fillStyle=dayGlow; sCtx.fillRect(0,0,4,400);
+  const skyImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6ac5d766-20cf-4793-bcc1-55ceb80fd30b.png');
+  const skyMat = new THREE.MeshBasicMaterial({ map:skyImgTex, side:THREE.BackSide });
+  scene.add(new THREE.Mesh(skyGeo, skyMat));
 
-  const skyTex = new THREE.CanvasTexture(skyC);
-
+  // Subtle cloud plane
   const cloudC = document.createElement('canvas'); cloudC.width=2048; cloudC.height=512;
   const cCtx = cloudC.getContext('2d');
   for(let i=0;i<45;i++){
@@ -372,15 +334,13 @@ scene.add(groundBounce);
   }
   const cloudTex = new THREE.CanvasTexture(cloudC);
   cloudTex.wrapS=THREE.RepeatWrapping; cloudTex.repeat.set(2,1);
-  const skyMat = new THREE.MeshBasicMaterial({ map:skyTex, side:THREE.BackSide });
-  scene.add(new THREE.Mesh(skyGeo, skyMat));
   const cPlaneGeo = new THREE.PlaneGeometry(2400, 600, 1, 1);
-  const cPlaneMat = new THREE.MeshBasicMaterial({ map:cloudTex, transparent:true, opacity:0.72, depthWrite:false, side:THREE.DoubleSide });
+  const cPlaneMat = new THREE.MeshBasicMaterial({ map:cloudTex, transparent:true, opacity:0.3, depthWrite:false, side:THREE.DoubleSide });
   const cloudMesh = new THREE.Mesh(cPlaneGeo, cPlaneMat);
   cloudMesh.rotation.x = -Math.PI/2; cloudMesh.position.set(0, 320, 400);
   scene.add(cloudMesh);
   scene.userData.cloudMesh = cloudMesh;
-  scene.environment = skyTex;
+  scene.environment = skyImgTex;
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -390,7 +350,11 @@ const TRACK_LENGTH = 880;
 const TRACK_WIDTH  = 24;
 const asphaltTex   = makeAsphaltTexture(1024,1024);
 const normalTex    = makeAsphaltNormal(512,512);
-const grassTex     = makeGrassTexture(512,512);
+
+// Real grass image texture
+const grassImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/92dfe77f-7183-41e5-9a87-12c168a8ec1e.png');
+grassImgTex.wrapS = grassImgTex.wrapT = THREE.RepeatWrapping;
+grassImgTex.repeat.set(30, 120);
 
 const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
 const rPos = roadGeo.attributes.position;
@@ -409,7 +373,7 @@ road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10); road.recei
 scene.add(road);
 
 const gGeo = new THREE.PlaneGeometry(280, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map:grassTex, roughness:0.90, metalness:0, envMapIntensity:0.15 });
+const gMat = new THREE.MeshStandardMaterial({ map:grassImgTex, roughness:0.90, metalness:0, envMapIntensity:0.15 });
 [-140, 140].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); g.receiveShadow=true; scene.add(g);
@@ -531,51 +495,13 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  2D BACKGROUND FOREST WALLS
+//  FOREST BACKDROP — Real image texture
 // ═══════════════════════════════════════════════════════════════
 (function buildForestBackdrop(){
-  const forestC = document.createElement('canvas');
-  forestC.width = 2048; forestC.height = 512;
-  const fCtx = forestC.getContext('2d');
-
-  // Dense jungle gradient background
-  const fg = fCtx.createLinearGradient(0, 0, 0, 512);
-  fg.addColorStop(0, '#0D3B0D');
-  fg.addColorStop(0.3, '#1B5E20');
-  fg.addColorStop(0.6, '#2E7D32');
-  fg.addColorStop(1, '#1B5E20');
-  fCtx.fillStyle = fg;
-  fCtx.fillRect(0, 0, 2048, 512);
-
-  // Random tree top silhouettes
-  for(let i=0; i<80; i++){
-    const x = Math.random() * 2048;
-    const h = 80 + Math.random() * 200;
-    const w = 30 + Math.random() * 60;
-    fCtx.fillStyle = `rgb(${15+Math.floor(Math.random()*30)},${60+Math.floor(Math.random()*40)},${10+Math.floor(Math.random()*20)})`;
-    // Triangle tree tops
-    fCtx.beginPath();
-    fCtx.moveTo(x - w/2, 512);
-    fCtx.lineTo(x, 512 - h);
-    fCtx.lineTo(x + w/2, 512);
-    fCtx.fill();
-  }
-  // Second layer of rounder tree tops
-  for(let i=0; i<60; i++){
-    const x = Math.random() * 2048;
-    const y = 512 - 60 - Math.random() * 120;
-    const r = 25 + Math.random() * 50;
-    const shade = 15+Math.floor(Math.random()*25);
-    fCtx.beginPath();
-    fCtx.arc(x, y, r, 0, Math.PI*2);
-    fCtx.fillStyle = `rgb(${shade},${55+Math.floor(Math.random()*35)},${shade-5})`;
-    fCtx.fill();
-  }
-
-  const forestTex = new THREE.CanvasTexture(forestC);
-  forestTex.wrapS = THREE.RepeatWrapping;
-  forestTex.repeat.set(8, 1);
-  const forestMat = new THREE.MeshBasicMaterial({map: forestTex, side: THREE.DoubleSide, transparent: true, opacity: 0.92});
+  const forestImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b4f2e04d-e5c4-48be-b6da-bedeedbf2db9.png');
+  forestImgTex.wrapS = THREE.RepeatWrapping;
+  forestImgTex.repeat.set(12, 1);
+  const forestMat = new THREE.MeshBasicMaterial({map: forestImgTex, side: THREE.DoubleSide});
   [-1, 1].forEach(side => {
     const fPlane = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_LENGTH + 100, 35), forestMat);
     fPlane.position.set(side * (TRACK_WIDTH/2 + 35), 17, TRACK_LENGTH/2);
@@ -585,7 +511,7 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  LONG TREE SHADOWS ON ROAD — baked shadow stripes
+//  LONG SHADOWS ON ROAD — baked shadow stripes
 // ═══════════════════════════════════════════════════════════════
 (function buildRoadShadows(){
   const shadowC = document.createElement('canvas');
@@ -593,22 +519,18 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   const sCtx = shadowC.getContext('2d');
   sCtx.clearRect(0, 0, 512, 4096);
 
-  // Draw shadow stripes at each palm tree position
   for(let z = 25; z < 850; z += 35 + 15){
     const yOnTex = (z / 880) * 4096;
-    // Main shadow stripe across road — angled like low sun
     sCtx.save();
     sCtx.translate(256, yOnTex);
-    sCtx.rotate(-0.18); // slight angle matching sun position
+    sCtx.rotate(-0.18);
     sCtx.fillStyle = 'rgba(0,0,0,0.28)';
     sCtx.fillRect(-300, -5, 600, 10);
-    // Secondary frond shadow lines
     for(let f = 0; f < 6; f++){
       const fy = -16 + f * 6;
       sCtx.fillStyle = 'rgba(0,0,0,0.12)';
       sCtx.fillRect(-220 + f*18, fy, 160, 3);
     }
-    // Thin trunk shadow
     sCtx.fillStyle = 'rgba(0,0,0,0.35)';
     sCtx.fillRect(-4, -30, 8, 60);
     sCtx.restore();
@@ -625,71 +547,7 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  BILLBOARD PALM TREES — Real PNG image texture
-// ═══════════════════════════════════════════════════════════════
-
-// Load real palm tree image as billboard texture
-const palmTextureLoader = new THREE.TextureLoader();
-const realPalmTexture = palmTextureLoader.load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dac9b512-557d-41f7-8a84-6062343b5eda.png');
-
-// Single material using the real palm PNG (with transparency)
-const palmBillboardMat = new THREE.MeshBasicMaterial({
-  map: realPalmTexture,
-  transparent: true,
-  alphaTest: 0.3,
-  side: THREE.DoubleSide,
-  depthWrite: false
-});
-
-// FIX 1: Shift geometry origin to bottom edge so Y=0 sits on the ground
-const palmGeo = new THREE.PlaneGeometry(14, 20);
-palmGeo.translate(0, 10, 0); // bottom edge is now at local Y=0
-
-const palms = [];
-
-// INCREASED DENSITY: spacing reduced from 35+random*15 to 22+random*12
-for(let z = 25; z < 850; z += 22 + Math.random() * 12){
-  const offset = 10 + Math.random() * 6;
-  [-1, 1].forEach(side => {
-    // Main billboard — Y=0 so bottom of plane sits on ground
-    const palm = new THREE.Mesh(palmGeo, palmBillboardMat);
-    palm.position.set(side * (TRACK_WIDTH/2 + offset), 0, z);
-    palm.rotation.y = side * 0.3; // slight angle toward road
-    scene.add(palm);
-    palms.push(palm);
-
-    // Cross billboard for volume (rotated 90 degrees)
-    const palmCross = new THREE.Mesh(palmGeo, palmBillboardMat);
-    palmCross.position.copy(palm.position);
-    palmCross.rotation.y = palm.rotation.y + Math.PI/2;
-    scene.add(palmCross);
-    palms.push(palmCross);
-  });
-
-  // INCREASED CHANCE: extra background palms
-  if(Math.random() < 0.45){
-    [-1, 1].forEach(side => {
-      const extraOffset = offset + 6 + Math.random() * 8;
-      const ep = new THREE.Mesh(palmGeo, palmBillboardMat);
-      ep.position.set(side * (TRACK_WIDTH/2 + extraOffset), 0, z + Math.random() * 10);
-      ep.rotation.y = Math.random() * Math.PI;
-      const sc = 0.7 + Math.random() * 0.3;
-      ep.scale.set(sc, sc, sc);
-      scene.add(ep);
-      palms.push(ep);
-
-      const epCross = new THREE.Mesh(palmGeo, palmBillboardMat);
-      epCross.position.copy(ep.position);
-      epCross.rotation.y = ep.rotation.y + Math.PI/2;
-      epCross.scale.copy(ep.scale);
-      scene.add(epCross);
-      palms.push(epCross);
-    });
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  ROADSIDE BUSHES/SHRUBS — Real PNG billboard
+//  ROADSIDE BUSHES/SHRUBS — Dense, three rows, real PNG billboard
 // ═══════════════════════════════════════════════════════════════
 const bushTexture = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7948c31-84c8-4d5f-9f38-83d2357a7548.png');
 
@@ -701,45 +559,64 @@ const bushMat = new THREE.MeshBasicMaterial({
   depthWrite: false
 });
 
-// FIX 2: Shift geometry origin to bottom edge so Y=0 sits on the ground
+// Standard bush geometry (bottom-aligned)
 const bushGeo = new THREE.PlaneGeometry(5, 3.5);
-bushGeo.translate(0, 1.75, 0); // bottom edge is now at local Y=0
+bushGeo.translate(0, 1.75, 0);
 
-// Place bushes in organized rows along both sides of the road
-for(let z = 10; z < 860; z += 6 + Math.random() * 4){
+// Tall bush variation
+const bushGeoTall = new THREE.PlaneGeometry(6, 5);
+bushGeoTall.translate(0, 2.5, 0);
+
+// Place bushes in three dense rows along both sides
+for(let z = 10; z < 860; z += 4 + Math.random() * 2){
   [-1, 1].forEach(side => {
-    // Inner row of bushes - right next to the road/armco barrier
-    const bushX = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 2);
-    const bush = new THREE.Mesh(bushGeo, bushMat);
-    bush.position.set(bushX, 0, z);
-    bush.rotation.y = Math.random() * Math.PI; // random rotation for variety
-    scene.add(bush);
+    // ── ROW 1: Inner row, close to road/armco
+    const bushX1 = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 1.5);
+    const sc1 = 0.6 + Math.random() * 0.8;
+    const useTall1 = Math.random() < 0.18;
+    const b1 = new THREE.Mesh(useTall1 ? bushGeoTall : bushGeo, bushMat);
+    b1.position.set(bushX1, 0, z);
+    b1.scale.set(sc1, sc1, sc1);
+    b1.rotation.y = Math.random() * Math.PI;
+    scene.add(b1);
+    const b1c = new THREE.Mesh(useTall1 ? bushGeoTall : bushGeo, bushMat);
+    b1c.position.copy(b1.position);
+    b1c.rotation.y = b1.rotation.y + Math.PI/2;
+    b1c.scale.copy(b1.scale);
+    scene.add(b1c);
 
-    // Cross billboard for volume
-    const bushCross = new THREE.Mesh(bushGeo, bushMat);
-    bushCross.position.copy(bush.position);
-    bushCross.rotation.y = bush.rotation.y + Math.PI/2;
-    scene.add(bushCross);
+    // ── ROW 2: Middle row
+    const bushX2 = side * (TRACK_WIDTH/2 + 5.5 + Math.random() * 2);
+    const sc2 = 0.7 + Math.random() * 0.7;
+    const useTall2 = Math.random() < 0.2;
+    const b2 = new THREE.Mesh(useTall2 ? bushGeoTall : bushGeo, bushMat);
+    b2.position.set(bushX2, 0, z + Math.random() * 2);
+    b2.scale.set(sc2, sc2, sc2);
+    b2.rotation.y = Math.random() * Math.PI;
+    scene.add(b2);
+    const b2c = new THREE.Mesh(useTall2 ? bushGeoTall : bushGeo, bushMat);
+    b2c.position.copy(b2.position);
+    b2c.rotation.y = b2.rotation.y + Math.PI/2;
+    b2c.scale.copy(b2.scale);
+    scene.add(b2c);
+
+    // ── ROW 3: Outer row, far from road
+    if(z % 6 < 5){
+      const bushX3 = side * (TRACK_WIDTH/2 + 9 + Math.random() * 5);
+      const sc3 = 0.8 + Math.random() * 0.6;
+      const useTall3 = Math.random() < 0.25;
+      const b3 = new THREE.Mesh(useTall3 ? bushGeoTall : bushGeo, bushMat);
+      b3.position.set(bushX3, 0, z + Math.random() * 3);
+      b3.scale.set(sc3, sc3, sc3);
+      b3.rotation.y = Math.random() * Math.PI;
+      scene.add(b3);
+      const b3c = new THREE.Mesh(useTall3 ? bushGeoTall : bushGeo, bushMat);
+      b3c.position.copy(b3.position);
+      b3c.rotation.y = b3.rotation.y + Math.PI/2;
+      b3c.scale.copy(b3.scale);
+      scene.add(b3c);
+    }
   });
-
-  // Occasional second row further from road (between bushes and palms)
-  if(z % 15 < 8){
-    [-1, 1].forEach(side => {
-      const bushX2 = side * (TRACK_WIDTH/2 + 6 + Math.random() * 3);
-      const bush2 = new THREE.Mesh(bushGeo, bushMat);
-      const sc = 0.8 + Math.random() * 0.4; // slight size variation
-      bush2.scale.set(sc, sc, sc);
-      bush2.position.set(bushX2, 0, z + Math.random() * 4);
-      bush2.rotation.y = Math.random() * Math.PI;
-      scene.add(bush2);
-
-      const bush2Cross = new THREE.Mesh(bushGeo, bushMat);
-      bush2Cross.position.copy(bush2.position);
-      bush2Cross.rotation.y = bush2.rotation.y + Math.PI/2;
-      bush2Cross.scale.copy(bush2.scale);
-      scene.add(bush2Cross);
-    });
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -825,11 +702,9 @@ for(let z = 10; z < 860; z += 6 + Math.random() * 4){
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  GLTF FERRARI CAR LOADING — FIX: DRACOLoader + correct mesh names
+//  GLTF FERRARI CAR LOADING
 // ═══════════════════════════════════════════════════════════════
-
 function setupCarModel(model, paintColor){
-  // Body paint
   const bodyMat = new THREE.MeshPhysicalMaterial({
     color: paintColor,
     metalness: 0.9,
@@ -838,53 +713,35 @@ function setupCarModel(model, paintColor){
     clearcoatRoughness: 0.03,
     envMapIntensity: 1.6
   });
-
-  // Details/trim
   const detailsMat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     metalness: 1.0,
     roughness: 0.5
   });
-
-  // Glass
   const glassMat = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     metalness: 0.25,
     roughness: 0,
     transmission: 1.0
   });
-
   const wheels = [];
-
   model.traverse(function(child){
-    if(child.isMesh){
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
+    if(child.isMesh){ child.castShadow = true; child.receiveShadow = true; }
   });
-
-  // Set materials by name
   const body = model.getObjectByName('body');
   if(body) body.material = bodyMat;
-
   const trim = model.getObjectByName('trim');
   if(trim) trim.material = detailsMat;
-
   const glass = model.getObjectByName('glass');
   if(glass) glass.material = glassMat;
-
-  // Rims
   ['rim_fl','rim_fr','rim_rl','rim_rr'].forEach(name => {
     const rim = model.getObjectByName(name);
     if(rim) rim.material = detailsMat;
   });
-
-  // Wheels (for spinning)
   ['wheel_fl','wheel_fr','wheel_rl','wheel_rr'].forEach(name => {
     const w = model.getObjectByName(name);
     if(w) wheels.push(w);
   });
-
   return wheels;
 }
 
@@ -912,23 +769,16 @@ gltfLoader.load(
   'https://threejs.org/examples/models/gltf/ferrari.glb',
   function(gltf){
     const carModel = gltf.scene;
-
-    // Car 1 - Gold
     const car1Model = carModel.clone();
     car1._wheels = setupCarModel(car1Model, 0xFFCC00);
     car1.add(car1Model);
     car1Model.scale.set(1.8, 1.8, 1.8);
-
-    // Car 2 - Blue
     const car2Model = carModel.clone();
     car2._wheels = setupCarModel(car2Model, 0x1E88E5);
     car2.add(car2Model);
     car2Model.scale.set(1.8, 1.8, 1.8);
-
     modelsLoaded = true;
     document.getElementById('timer-val').textContent = '0.000';
-
-    // Cleanup
     dracoLoader.dispose();
   },
   function(xhr){
@@ -1173,75 +1023,198 @@ function updateHUD(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  AUDIO
+//  AUDIO — V8 SUPERCAR ENGINE (5 oscillators + turbo + wind)
 // ═══════════════════════════════════════════════════════════════
-let audioCtx=null, engOsc1=null, engOsc2=null, engOsc3=null, engGain=null,
-    masterGain=null, windGain=null, audioReady=false;
+let audioCtx=null;
+let engOsc1=null, engOsc2=null, engOsc3=null, engOsc4=null, engOsc5=null;
+let turbOsc=null, turbGain=null;
+let engGain=null, masterGain=null, windGain=null;
+let audioReady=false;
+let lastGear1=1, lastGear2=1;
+
+function makeDistortion(ctx, amount){
+  const curve = new Float32Array(256);
+  for(let i=0;i<256;i++){
+    const x = (i * 2) / 256 - 1;
+    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+  }
+  const shaper = ctx.createWaveShaper();
+  shaper.curve = curve;
+  shaper.oversample = '4x';
+  return shaper;
+}
+
 function initAudio(){
   if(audioReady) return;
   try{
-    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    masterGain=audioCtx.createGain(); masterGain.gain.value=0.35;
-    const comp=audioCtx.createDynamicsCompressor();
-    comp.threshold.value=-18; comp.knee.value=8; comp.ratio.value=4; comp.attack.value=0.003; comp.release.value=0.18;
-    masterGain.connect(comp); comp.connect(audioCtx.destination); masterGain.connect(audioCtx.destination);
-    engOsc1=audioCtx.createOscillator(); engOsc1.type='sawtooth'; engOsc1.frequency.value=55;
-    const ef1=audioCtx.createBiquadFilter(); ef1.type='lowpass'; ef1.frequency.value=500;
-    engOsc1.connect(ef1);
-    engOsc2=audioCtx.createOscillator(); engOsc2.type='square'; engOsc2.frequency.value=110;
-    const ef2=audioCtx.createBiquadFilter(); ef2.type='bandpass'; ef2.frequency.value=400; ef2.Q.value=1.5;
-    engOsc2.connect(ef2);
-    engOsc3=audioCtx.createOscillator(); engOsc3.type='sawtooth'; engOsc3.frequency.value=220;
-    const ef3=audioCtx.createBiquadFilter(); ef3.type='highpass'; ef3.frequency.value=300;
-    engOsc3.connect(ef3);
-    engGain=audioCtx.createGain(); engGain.gain.value=0;
-    ef1.connect(engGain); ef2.connect(engGain); ef3.connect(engGain);
-    engGain.connect(masterGain);
-    engOsc1.start(); engOsc2.start(); engOsc3.start();
-    const bufSz=audioCtx.sampleRate*2;
-    const wBuf=audioCtx.createBuffer(1,bufSz,audioCtx.sampleRate);
-    const wData=wBuf.getChannelData(0);
-    for(let i=0;i<bufSz;i++) wData[i]=Math.random()*2-1;
-    const wNode=audioCtx.createBufferSource(); wNode.buffer=wBuf; wNode.loop=true;
-    const wf=audioCtx.createBiquadFilter(); wf.type='bandpass'; wf.frequency.value=800; wf.Q.value=0.5;
-    windGain=audioCtx.createGain(); windGain.gain.value=0;
+    audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+
+    // Master gain + compressor
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.5;
+    const comp = audioCtx.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.knee.value = 8;
+    comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.18;
+    masterGain.connect(comp);
+    comp.connect(audioCtx.destination);
+
+    // Distortion waveshaper for aggressive tone
+    const distortion = makeDistortion(audioCtx, 180);
+    distortion.connect(masterGain);
+
+    engGain = audioCtx.createGain();
+    engGain.gain.value = 0;
+
+    // osc1: sawtooth at fundamental (base RPM)
+    engOsc1 = audioCtx.createOscillator();
+    engOsc1.type = 'sawtooth';
+    engOsc1.frequency.value = 35;
+    const ef1 = audioCtx.createBiquadFilter();
+    ef1.type = 'lowpass'; ef1.frequency.value = 800;
+    engOsc1.connect(ef1); ef1.connect(engGain);
+
+    // osc2: sawtooth at 2x RPM (second harmonic)
+    engOsc2 = audioCtx.createOscillator();
+    engOsc2.type = 'sawtooth';
+    engOsc2.frequency.value = 70;
+    const ef2 = audioCtx.createBiquadFilter();
+    ef2.type = 'bandpass'; ef2.frequency.value = 600; ef2.Q.value = 1.2;
+    engOsc2.connect(ef2); ef2.connect(engGain);
+
+    // osc3: square at 3x RPM with bandpass (growl)
+    engOsc3 = audioCtx.createOscillator();
+    engOsc3.type = 'square';
+    engOsc3.frequency.value = 105;
+    const ef3 = audioCtx.createBiquadFilter();
+    ef3.type = 'bandpass'; ef3.frequency.value = 500; ef3.Q.value = 1.8;
+    engOsc3.connect(ef3); ef3.connect(engGain);
+
+    // osc4: triangle at 0.5x RPM (low rumble/bass)
+    engOsc4 = audioCtx.createOscillator();
+    engOsc4.type = 'triangle';
+    engOsc4.frequency.value = 17.5;
+    const ef4 = audioCtx.createBiquadFilter();
+    ef4.type = 'lowpass'; ef4.frequency.value = 200;
+    engOsc4.connect(ef4); ef4.connect(engGain);
+
+    // osc5: sawtooth at 5x RPM with highpass (exhaust crackle)
+    engOsc5 = audioCtx.createOscillator();
+    engOsc5.type = 'sawtooth';
+    engOsc5.frequency.value = 175;
+    const ef5 = audioCtx.createBiquadFilter();
+    ef5.type = 'highpass'; ef5.frequency.value = 400;
+    engOsc5.connect(ef5); ef5.connect(engGain);
+
+    // Route engGain through distortion
+    engGain.connect(distortion);
+
+    // Start all engine oscillators
+    engOsc1.start(); engOsc2.start(); engOsc3.start(); engOsc4.start(); engOsc5.start();
+
+    // Turbo whistle: sine 2000-4000Hz, very quiet
+    turbOsc = audioCtx.createOscillator();
+    turbOsc.type = 'sine';
+    turbOsc.frequency.value = 2000;
+    turbGain = audioCtx.createGain();
+    turbGain.gain.value = 0;
+    turbOsc.connect(turbGain);
+    turbGain.connect(masterGain);
+    turbOsc.start();
+
+    // Wind noise
+    const bufSz = audioCtx.sampleRate * 2;
+    const wBuf = audioCtx.createBuffer(1, bufSz, audioCtx.sampleRate);
+    const wData = wBuf.getChannelData(0);
+    for(let i=0;i<bufSz;i++) wData[i] = Math.random()*2-1;
+    const wNode = audioCtx.createBufferSource();
+    wNode.buffer = wBuf; wNode.loop = true;
+    const wf = audioCtx.createBiquadFilter();
+    wf.type = 'bandpass'; wf.frequency.value = 800; wf.Q.value = 0.5;
+    windGain = audioCtx.createGain();
+    windGain.gain.value = 0;
     wNode.connect(wf); wf.connect(windGain); windGain.connect(masterGain);
     wNode.start();
-    audioReady=true;
+
+    audioReady = true;
   } catch(e){ console.warn('Audio failed:',e); }
 }
+
+function playGearShiftPop(){
+  if(!audioReady) return;
+  // Brief rev drop/pop on gear change
+  const o = audioCtx.createOscillator();
+  o.type = 'sawtooth';
+  const g = audioCtx.createGain();
+  const t = audioCtx.currentTime;
+  const currentRpm = engOsc1.frequency.value;
+  o.frequency.value = currentRpm * 0.75;
+  g.gain.setValueAtTime(0.18, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  const f = audioCtx.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 400;
+  o.connect(f); f.connect(g); g.connect(masterGain);
+  o.start(t); o.stop(t + 0.12);
+}
+
 function updateSound(dt){
   if(!audioReady) return;
-  const avg=(state.p1.speed+state.p2.speed)*0.5;
-  const sr=avg/MAX_SPD;
-  if(state.phase==='racing'){
-    const t=audioCtx.currentTime;
-    const rpm=55+sr*330;
-    engOsc1.frequency.setTargetAtTime(rpm,t,0.08);
-    engOsc2.frequency.setTargetAtTime(rpm*2,t,0.08);
-    engOsc3.frequency.setTargetAtTime(rpm*4,t,0.04);
-    const el=(performance.now()-state.raceStart)/1000;
-    engGain.gain.setTargetAtTime(Math.min(0.55+sr*0.45+(el<1.5?0.85:0),1.0),t,0.06);
-    windGain.gain.setTargetAtTime(sr*0.32,t,0.12);
+  const avg = (state.p1.speed + state.p2.speed) * 0.5;
+  const sr = avg / MAX_SPD;
+
+  if(state.phase === 'racing'){
+    const t = audioCtx.currentTime;
+    // RPM range: idle 35Hz → redline 420Hz
+    const rpm = 35 + sr * 385;
+    engOsc1.frequency.setTargetAtTime(rpm,        t, 0.08);
+    engOsc2.frequency.setTargetAtTime(rpm * 2,    t, 0.08);
+    engOsc3.frequency.setTargetAtTime(rpm * 3,    t, 0.06);
+    engOsc4.frequency.setTargetAtTime(rpm * 0.5,  t, 0.10);
+    engOsc5.frequency.setTargetAtTime(rpm * 5,    t, 0.04);
+
+    const el = (performance.now() - state.raceStart) / 1000;
+    engGain.gain.setTargetAtTime(Math.min(0.6 + sr * 0.4 + (el < 1.5 ? 0.8 : 0), 1.0), t, 0.06);
+
+    // Turbo whistle rises with speed
+    turbOsc.frequency.setTargetAtTime(2000 + sr * 2000, t, 0.15);
+    turbGain.gain.setTargetAtTime(sr * 0.04, t, 0.12);
+
+    // Wind noise up to 0.45 at high speed
+    windGain.gain.setTargetAtTime(sr * 0.45, t, 0.12);
+
+    // Gear shift detection — check both cars
+    const g1 = state.p1.gear;
+    const g2 = state.p2.gear;
+    if(g1 !== lastGear1 || g2 !== lastGear2){ playGearShiftPop(); }
+    lastGear1 = g1; lastGear2 = g2;
+
   } else {
-    if(engGain) engGain.gain.setTargetAtTime(0,audioCtx.currentTime,0.3);
-    if(windGain) windGain.gain.setTargetAtTime(0,audioCtx.currentTime,0.3);
+    if(engGain)  engGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+    if(windGain) windGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+    if(turbGain) turbGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+    lastGear1 = 1; lastGear2 = 1;
   }
 }
+
 function playScreech(){
   if(!audioReady) return;
-  const o=audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value=820;
-  const g=audioCtx.createGain(); g.gain.value=0.22;
-  const f=audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1200;
+  const o = audioCtx.createOscillator();
+  o.type = 'sawtooth';
+  o.frequency.value = 600;
+  const g = audioCtx.createGain();
+  g.gain.value = 0.28;
+  const f = audioCtx.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 1000;
   o.connect(f); f.connect(g); g.connect(masterGain);
   o.start();
-  o.frequency.exponentialRampToValueAtTime(180,audioCtx.currentTime+1.3);
-  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1.3);
-  o.stop(audioCtx.currentTime+1.3);
+  // Deeper frequency drop, longer duration 1.8s
+  o.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 1.8);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8);
+  o.stop(audioCtx.currentTime + 1.8);
 }
-document.addEventListener('click',initAudio,{once:false});
-document.addEventListener('keydown',initAudio,{once:false});
-let _didScreech=false;
+
+document.addEventListener('click', initAudio, {once:false});
+document.addEventListener('keydown', initAudio, {once:false});
+let _didScreech = false;
 
 // ═══════════════════════════════════════════════════════════════
 //  MAIN LOOP

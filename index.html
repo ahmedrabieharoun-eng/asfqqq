@@ -889,12 +889,12 @@ function setupCarModel(model, paintColor){
 }
 
 const car1 = new THREE.Group();
-car1.position.set(-3.6, 0, 5);
+car1.position.set(-4.5, 0, 5);
 car1.rotation.y = Math.PI;
 scene.add(car1);
 
 const car2 = new THREE.Group();
-car2.position.set(3.6, 0, 5);
+car2.position.set(4.5, 0, 5);
 car2.rotation.y = Math.PI;
 scene.add(car2);
 
@@ -917,11 +917,13 @@ gltfLoader.load(
     const car1Model = carModel.clone();
     car1._wheels = setupCarModel(car1Model, 0xFFCC00);
     car1.add(car1Model);
+    car1Model.scale.set(1.8, 1.8, 1.8);
 
     // Car 2 - Blue
     const car2Model = carModel.clone();
     car2._wheels = setupCarModel(car2Model, 0x1E88E5);
     car2.add(car2Model);
+    car2Model.scale.set(1.8, 1.8, 1.8);
 
     modelsLoaded = true;
     document.getElementById('timer-val').textContent = '0.000';
@@ -991,7 +993,7 @@ function resetGame(){
   state.phase='idle'; state.timer=0; state.raceStart=0;
   state.p1={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
   state.p2={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
-  car1.position.set(-3.6,0,START_Z); car2.position.set(3.6,0,START_Z);
+  car1.position.set(-4.5,0,START_Z); car2.position.set(4.5,0,START_Z);
   document.getElementById('winner-banner').style.display='none';
   document.getElementById('countdown').style.display='none';
   document.getElementById('launch-hint').style.display='block';

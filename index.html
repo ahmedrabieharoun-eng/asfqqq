@@ -625,133 +625,117 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  2D BILLBOARD PALM TREES
+//  BILLBOARD PALM TREES — Real PNG image texture
 // ═══════════════════════════════════════════════════════════════
-function createPalmTexture(){
-  const c = document.createElement('canvas');
-  c.width = 256; c.height = 512;
-  const ctx = c.getContext('2d');
 
-  // Transparent background
-  ctx.clearRect(0, 0, 256, 512);
+// Load real palm tree image as billboard texture
+const palmTextureLoader = new THREE.TextureLoader();
+const realPalmTexture = palmTextureLoader.load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dac9b512-557d-41f7-8a84-6062343b5eda.png');
 
-  // Draw trunk — brown curved trunk
-  ctx.strokeStyle = '#6B4226';
-  ctx.lineWidth = 14;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(128, 500); // base
-  ctx.quadraticCurveTo(120, 300, 130, 180);
-  ctx.stroke();
+// Single material using the real palm PNG (with transparency)
+const palmBillboardMat = new THREE.MeshBasicMaterial({
+  map: realPalmTexture,
+  transparent: true,
+  alphaTest: 0.3,
+  side: THREE.DoubleSide,
+  depthWrite: false
+});
 
-  // Trunk highlight
-  ctx.strokeStyle = '#8B5A2B';
-  ctx.lineWidth = 8;
-  ctx.beginPath();
-  ctx.moveTo(130, 500);
-  ctx.quadraticCurveTo(122, 300, 132, 180);
-  ctx.stroke();
+const palmGeo = new THREE.PlaneGeometry(14, 20); // adjust size as needed for realistic proportions
+const palms = [];
 
-  // Trunk ring marks
-  ctx.strokeStyle = 'rgba(80,40,10,0.4)';
-  ctx.lineWidth = 2;
-  for(let i=0; i<12; i++){
-    const ty = 195 + i * 26;
-    ctx.beginPath();
-    ctx.moveTo(118, ty);
-    ctx.lineTo(138, ty + 2);
-    ctx.stroke();
-  }
-
-  // Draw fronds — multiple green leaf shapes radiating from top
-  const frondColors = ['#1B5E20', '#2E7D32', '#388E3C', '#1B8A1B', '#267326', '#1E6E1E', '#3A9E3A'];
-  const topX = 130, topY = 178;
-
-  for(let i = 0; i < 9; i++){
-    const angle = (i / 9) * Math.PI * 2 - Math.PI/2;
-    const len = 88 + Math.random() * 42;
-    const droop = 28 + Math.random() * 28;
-    const endX = topX + Math.cos(angle) * len;
-    const endY = topY + Math.sin(angle) * len + droop;
-    const cpX = topX + Math.cos(angle) * len * 0.5;
-    const cpY = topY + Math.sin(angle) * len * 0.3;
-
-    // Frond stem
-    ctx.strokeStyle = frondColors[i % frondColors.length];
-    ctx.lineWidth = 5 + Math.random() * 3;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(topX, topY);
-    ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-    ctx.stroke();
-
-    // Leaflets along each frond
-    const steps = 8;
-    for(let j = 1; j < steps; j++){
-      const t = j / steps;
-      // Point along quadratic bezier
-      const bx = (1-t)*(1-t)*topX + 2*(1-t)*t*cpX + t*t*endX;
-      const by = (1-t)*(1-t)*topY + 2*(1-t)*t*cpY + t*t*endY;
-      ctx.strokeStyle = frondColors[(i+j) % frondColors.length];
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(bx, by);
-      const leafAngle = angle + Math.PI/2 + (Math.random()-0.5)*0.4;
-      const leafLen = 8 + Math.random() * 12;
-      ctx.lineTo(bx + Math.cos(leafAngle)*leafLen, by + Math.sin(leafAngle)*leafLen + 3);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(bx, by);
-      ctx.lineTo(bx - Math.cos(leafAngle)*leafLen*0.8, by - Math.sin(leafAngle)*leafLen*0.8 + 3);
-      ctx.stroke();
-    }
-  }
-
-  // Coconuts near base of fronds
-  for(let cc=0; cc<2+Math.floor(Math.random()*2); cc++){
-    const ca = Math.random() * Math.PI * 2;
-    ctx.beginPath();
-    ctx.arc(topX + Math.cos(ca)*14, topY + Math.sin(ca)*10 + 10, 6, 0, Math.PI*2);
-    ctx.fillStyle = '#6B4A1A';
-    ctx.fill();
-  }
-
-  const tex = new THREE.CanvasTexture(c);
-  tex.premultiplyAlpha = true;
-  return tex;
-}
-
-// Create a few variations of palm textures
-const palmTextures = [];
-for(let i = 0; i < 4; i++) palmTextures.push(createPalmTexture());
-
-// Create materials for each texture variation
-const palmMats = palmTextures.map(t => new THREE.MeshBasicMaterial({
-  map: t, transparent: true, alphaTest: 0.08, side: THREE.DoubleSide, depthWrite: false
-}));
-
-// Place palm billboards — two crossed planes per tree for more volume
-for(let z = 25; z < 850; z += 35 + Math.random() * 15){
+// INCREASED DENSITY: spacing reduced from 35+random*15 to 22+random*12
+for(let z = 25; z < 850; z += 22 + Math.random() * 12){
   const offset = 10 + Math.random() * 6;
   [-1, 1].forEach(side => {
-    const mat = palmMats[Math.floor(Math.random() * palmMats.length)];
-    const palmX = side * (TRACK_WIDTH/2 + offset);
-    const palmZ = z + (Math.random()-0.5)*5;
-    const palmH = 10 + Math.random()*2;
+    // Main billboard facing camera direction
+    const palm = new THREE.Mesh(palmGeo, palmBillboardMat);
+    palm.position.set(side * (TRACK_WIDTH/2 + offset), 10, z); // y=10 centers the 20-unit tall billboard
+    palm.rotation.y = side * 0.3; // slight angle toward road
+    scene.add(palm);
+    palms.push(palm);
 
-    // Primary plane facing camera direction
-    const palm1 = new THREE.Mesh(new THREE.PlaneGeometry(12, 20), mat);
-    palm1.position.set(palmX, palmH, palmZ);
-    // Billboard: rotate slightly toward the track center
-    palm1.rotation.y = side > 0 ? -0.2 : 0.2;
-    scene.add(palm1);
-
-    // Cross plane for volume (perpendicular to first)
-    const palm2 = new THREE.Mesh(new THREE.PlaneGeometry(12, 20), mat);
-    palm2.position.set(palmX, palmH, palmZ);
-    palm2.rotation.y = (side > 0 ? -0.2 : 0.2) + Math.PI/2;
-    scene.add(palm2);
+    // Cross billboard for volume (rotated 90 degrees)
+    const palmCross = new THREE.Mesh(palmGeo, palmBillboardMat);
+    palmCross.position.copy(palm.position);
+    palmCross.rotation.y = palm.rotation.y + Math.PI/2;
+    scene.add(palmCross);
+    palms.push(palmCross);
   });
+
+  // INCREASED CHANCE: extra background palms raised from 0.3 to 0.45
+  if(Math.random() < 0.45){
+    [-1, 1].forEach(side => {
+      const extraOffset = offset + 6 + Math.random() * 8;
+      const ep = new THREE.Mesh(palmGeo, palmBillboardMat);
+      ep.position.set(side * (TRACK_WIDTH/2 + extraOffset), 9, z + Math.random() * 10);
+      ep.rotation.y = Math.random() * Math.PI;
+      const sc = 0.7 + Math.random() * 0.3;
+      ep.scale.set(sc, sc, sc);
+      scene.add(ep);
+      palms.push(ep);
+
+      const epCross = new THREE.Mesh(palmGeo, palmBillboardMat);
+      epCross.position.copy(ep.position);
+      epCross.rotation.y = ep.rotation.y + Math.PI/2;
+      epCross.scale.copy(ep.scale);
+      scene.add(epCross);
+      palms.push(epCross);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ROADSIDE BUSHES/SHRUBS — Real PNG billboard
+// ═══════════════════════════════════════════════════════════════
+const bushTexture = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7948c31-84c8-4d5f-9f38-83d2357a7548.png');
+
+const bushMat = new THREE.MeshBasicMaterial({
+  map: bushTexture,
+  transparent: true,
+  alphaTest: 0.2,
+  side: THREE.DoubleSide,
+  depthWrite: false
+});
+
+const bushGeo = new THREE.PlaneGeometry(5, 3.5); // bushes are shorter and wider than palms
+
+// Place bushes in organized rows along both sides of the road
+// Between the road edge and the palm trees - closer to the road
+for(let z = 10; z < 860; z += 6 + Math.random() * 4){
+  [-1, 1].forEach(side => {
+    // Inner row of bushes - right next to the road/armco barrier
+    const bushX = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 2);
+    const bush = new THREE.Mesh(bushGeo, bushMat);
+    bush.position.set(bushX, 1.75, z);
+    bush.rotation.y = Math.random() * Math.PI; // random rotation for variety
+    scene.add(bush);
+
+    // Cross billboard for volume
+    const bushCross = new THREE.Mesh(bushGeo, bushMat);
+    bushCross.position.copy(bush.position);
+    bushCross.rotation.y = bush.rotation.y + Math.PI/2;
+    scene.add(bushCross);
+  });
+
+  // Occasional second row further from road (between bushes and palms)
+  if(z % 15 < 8){
+    [-1, 1].forEach(side => {
+      const bushX2 = side * (TRACK_WIDTH/2 + 6 + Math.random() * 3);
+      const bush2 = new THREE.Mesh(bushGeo, bushMat);
+      const sc = 0.8 + Math.random() * 0.4; // slight size variation
+      bush2.scale.set(sc, sc, sc);
+      bush2.position.set(bushX2, 1.75 * sc, z + Math.random() * 4);
+      bush2.rotation.y = Math.random() * Math.PI;
+      scene.add(bush2);
+
+      const bush2Cross = new THREE.Mesh(bushGeo, bushMat);
+      bush2Cross.position.copy(bush2.position);
+      bush2Cross.rotation.y = bush2.rotation.y + Math.PI/2;
+      bush2Cross.scale.copy(bush2.scale);
+      scene.add(bush2Cross);
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAG RACE — ULTRA PHOTOREALISTIC</title>
+<title>DRAG RACE — TROPICAL</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
@@ -179,6 +179,13 @@
 (function(){
 'use strict';
 
+// ─── IMAGE URLs ──────────────────────────────────────────────
+const URL_SKY      = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0283923f-92e7-4fa1-9174-3b65fb3787eb.jpg';
+const URL_MOUNTAIN = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dbae7089-ceee-43a4-95ff-6821267cfe5b.jpg';
+const URL_GRASS    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2b70430a-30b5-46e2-9fc7-ce262e388893.jpg';
+const URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/059510d9-2941-45c5-9b6a-9343b1da9b4f.jpg';
+const URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d2aa6b88-dea9-42c9-ad0c-fe51b179c093.jpg';
+
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
@@ -187,13 +194,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
+renderer.toneMappingExposure = 1.65;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x8ED8F0, 0.0015);
+scene.fog = new THREE.FogExp2(0xC8EEF8, 0.001);
 
 // ─── CAMERA ──────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 3000);
@@ -206,7 +213,12 @@ window.addEventListener('resize', ()=>{
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  PROCEDURAL TEXTURE HELPERS
+//  TEXTURE LOADER
+// ═══════════════════════════════════════════════════════════════
+const TL = new THREE.TextureLoader();
+
+// ═══════════════════════════════════════════════════════════════
+//  PROCEDURAL TEXTURE HELPERS (asphalt only — keep)
 // ═══════════════════════════════════════════════════════════════
 function fbmNoise(ctx, w, h, scale, octaves, baseAlpha){
   for(let o=0;o<octaves;o++){
@@ -280,13 +292,13 @@ function makeAsphaltNormal(w,h){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  LIGHTING — lower sun angle for dramatic long shadows
+//  LIGHTING — bright tropical sun from upper LEFT
 // ═══════════════════════════════════════════════════════════════
 const hemi = new THREE.HemisphereLight(0x87CEEB, 0x4CAF50, 0.85);
 scene.add(hemi);
 
 const sun = new THREE.DirectionalLight(0xFFFFF5, 3.2);
-sun.position.set(80, 60, -120);
+sun.position.set(-80, 120, -100);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 2048;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
@@ -296,7 +308,7 @@ sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.025;
 scene.add(sun);
 
 const fillLight = new THREE.DirectionalLight(0xC8E8FF, 0.55);
-fillLight.position.set(-60, 60, 80);
+fillLight.position.set(60, 60, 80);
 scene.add(fillLight);
 
 const groundBounce = new THREE.DirectionalLight(0x88DD44, 0.25);
@@ -304,43 +316,15 @@ groundBounce.position.set(0,-20,0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY DOME — Real image texture
+//  SKY DOME — Real sky image, no cloud plane
 // ═══════════════════════════════════════════════════════════════
 (function buildSky(){
+  const skyTex = TL.load(URL_SKY);
+  skyTex.encoding = THREE.sRGBEncoding;
   const skyGeo = new THREE.SphereGeometry(1200, 48, 24);
-  const skyImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6ac5d766-20cf-4793-bcc1-55ceb80fd30b.png');
-  const skyMat = new THREE.MeshBasicMaterial({ map:skyImgTex, side:THREE.BackSide });
+  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide });
   scene.add(new THREE.Mesh(skyGeo, skyMat));
-
-  // Subtle cloud plane
-  const cloudC = document.createElement('canvas'); cloudC.width=2048; cloudC.height=512;
-  const cCtx = cloudC.getContext('2d');
-  for(let i=0;i<45;i++){
-    const cx=Math.random()*2048, cy=40+Math.random()*220, rx=50+Math.random()*140, ry=18+Math.random()*38;
-    const cg=cCtx.createRadialGradient(cx,cy,0,cx,cy,Math.max(rx,ry));
-    cg.addColorStop(0,'rgba(255,255,255,0.82)');
-    cg.addColorStop(0.3,'rgba(245,248,255,0.55)');
-    cg.addColorStop(0.6,'rgba(230,240,255,0.22)');
-    cg.addColorStop(1,'rgba(0,0,0,0)');
-    cCtx.fillStyle=cg; cCtx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); cCtx.fill();
-    for(let b=0;b<4;b++){
-      const bx=cx+(Math.random()-0.5)*rx*0.8, by=cy-ry*0.3-Math.random()*ry*0.5;
-      const br=ry*0.5+Math.random()*ry*0.4;
-      const bg=cCtx.createRadialGradient(bx,by,0,bx,by,br);
-      bg.addColorStop(0,'rgba(255,255,255,0.65)');
-      bg.addColorStop(1,'rgba(0,0,0,0)');
-      cCtx.fillStyle=bg; cCtx.ellipse(bx,by,br*1.2,br,0,0,Math.PI*2); cCtx.fill();
-    }
-  }
-  const cloudTex = new THREE.CanvasTexture(cloudC);
-  cloudTex.wrapS=THREE.RepeatWrapping; cloudTex.repeat.set(2,1);
-  const cPlaneGeo = new THREE.PlaneGeometry(2400, 600, 1, 1);
-  const cPlaneMat = new THREE.MeshBasicMaterial({ map:cloudTex, transparent:true, opacity:0.3, depthWrite:false, side:THREE.DoubleSide });
-  const cloudMesh = new THREE.Mesh(cPlaneGeo, cPlaneMat);
-  cloudMesh.rotation.x = -Math.PI/2; cloudMesh.position.set(0, 320, 400);
-  scene.add(cloudMesh);
-  scene.userData.cloudMesh = cloudMesh;
-  scene.environment = skyImgTex;
+  scene.environment = skyTex;
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -352,10 +336,12 @@ const FINISH_Z     = 860;
 const asphaltTex   = makeAsphaltTexture(1024,1024);
 const normalTex    = makeAsphaltNormal(512,512);
 
-// Real grass image texture
-const grassImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/92dfe77f-7183-41e5-9a87-12c168a8ec1e.png');
-grassImgTex.wrapS = grassImgTex.wrapT = THREE.RepeatWrapping;
-grassImgTex.repeat.set(30, 120);
+// Real grass texture
+const grassTex = TL.load(URL_GRASS);
+grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
+grassTex.repeat.set(40, 140);
+grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+grassTex.encoding = THREE.sRGBEncoding;
 
 const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
 const rPos = roadGeo.attributes.position;
@@ -373,13 +359,24 @@ const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10); road.receiveShadow=true;
 scene.add(road);
 
-const gGeo = new THREE.PlaneGeometry(280, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map:grassImgTex, roughness:0.90, metalness:0, envMapIntensity:0.15 });
-[-140, 140].forEach(x=>{
+// Grass ground planes (wide)
+const gGeo = new THREE.PlaneGeometry(320, TRACK_LENGTH+100);
+const gMat = new THREE.MeshStandardMaterial({ map:grassTex, roughness:0.90, metalness:0, envMapIntensity:0.15 });
+[-160, 160].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); g.receiveShadow=true; scene.add(g);
 });
 
+// Thin brown dirt strip between road edge and bushes
+const dirtMat = new THREE.MeshStandardMaterial({color: 0x5C3A1A, roughness: 0.95});
+[-1,1].forEach(side => {
+  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
+  dirt.rotation.x = -Math.PI/2;
+  dirt.position.set(side * (TRACK_WIDTH/2 + 2), 0.005, TRACK_LENGTH/2);
+  scene.add(dirt);
+});
+
+// Curbs
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
 function makeCurb(x, zCenter, length){
   const cg=new THREE.BoxGeometry(0.7,0.12,length);
@@ -395,6 +392,7 @@ function makeCurb(x, zCenter, length){
 makeCurb(-TRACK_WIDTH/2-0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeCurb( TRACK_WIDTH/2+0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
+// Armco barriers
 const armcoMat = new THREE.MeshStandardMaterial({ color:0xCCCCCC, metalness:0.7, roughness:0.35 });
 function makeArmco(x, zCenter, length){
   const ag=new THREE.BoxGeometry(0.2,0.6,length);
@@ -416,6 +414,21 @@ function makeArmco(x, zCenter, length){
 }
 makeArmco(-TRACK_WIDTH/2-1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
+
+// ═══════════════════════════════════════════════════════════════
+//  MOUNTAINS — Real image as wide curved backdrop
+// ═══════════════════════════════════════════════════════════════
+(function buildMountains(){
+  const mtnTex = TL.load(URL_MOUNTAIN);
+  mtnTex.encoding = THREE.sRGBEncoding;
+
+  // Wide curved cylinder shell behind the track
+  const mtnGeo = new THREE.CylinderGeometry(800, 800, 300, 64, 1, true, -Math.PI*0.6, Math.PI*1.2);
+  const mtnMat = new THREE.MeshBasicMaterial({ map: mtnTex, side: THREE.BackSide, transparent: true, opacity: 0.95 });
+  const mtnMesh = new THREE.Mesh(mtnGeo, mtnMat);
+  mtnMesh.position.set(0, 80, 600);
+  scene.add(mtnMesh);
+})();
 
 // ═══════════════════════════════════════════════════════════════
 //  START LINE GANTRY (F1 Style)
@@ -448,197 +461,6 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   const sl=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,3),
     new THREE.MeshStandardMaterial({map:slTex,roughness:0.6,metalness:0.05}));
   sl.rotation.x=-Math.PI/2; sl.position.set(0,0.012,z); scene.add(sl);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  MOUNTAINS
-// ═══════════════════════════════════════════════════════════════
-(function buildMountains(){
-  const ranges=[
-    {dist:920, w:2000, h:260, color:new THREE.Color(0.08,0.28,0.08), opacity:0.95, ySeg:28, xOffset:0},
-    {dist:840, w:1700, h:240, color:new THREE.Color(0.10,0.33,0.10), opacity:0.90, ySeg:26, xOffset:0},
-    {dist:760, w:1500, h:200, color:new THREE.Color(0.12,0.38,0.12), opacity:0.88, ySeg:22, xOffset:0},
-  ];
-  ranges.forEach((r,ri)=>{
-    const geo=new THREE.PlaneGeometry(r.w,r.h,r.ySeg*3,r.ySeg);
-    const pos=geo.attributes.position;
-    for(let i=0;i<pos.count;i++){
-      const x=pos.getX(i), y=pos.getY(i);
-      if(y>-r.h/2+20){
-        const xNorm=x/r.w;
-        const valleyDepth=Math.abs(xNorm)*2.2;
-        const n=Math.sin(x*0.004+ri)*45+Math.sin(x*0.012+ri*1.7)*30+Math.sin(x*0.028+ri)*15+Math.sin(x*0.06)*8;
-        const topness=(y+r.h/2)/r.h;
-        const mountainShape=valleyDepth*topness;
-        pos.setY(i, y + n*topness*1.2 + mountainShape*r.h*0.35);
-      }
-    }
-    geo.computeVertexNormals();
-    const colors=[];
-    for(let i=0;i<pos.count;i++){
-      const y=pos.getY(i);
-      const shade=0.85+Math.random()*0.3;
-      const darkFactor=Math.max(0, (y-r.h*0.1)/(r.h*0.5));
-      const gr=r.color.r*shade + darkFactor*0.04;
-      const gg=r.color.g*shade + darkFactor*0.06;
-      const gb=r.color.b*shade + darkFactor*0.03;
-      colors.push(gr, gg, gb);
-    }
-    geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(colors),3));
-    const mat=new THREE.MeshStandardMaterial({
-      vertexColors:true, roughness:0.94, metalness:0,
-      transparent:true, opacity:r.opacity, fog:true
-    });
-    const mesh=new THREE.Mesh(geo,mat);
-    mesh.position.set(0, 65+ri*15, r.dist-ri*80);
-    scene.add(mesh);
-  });
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  FOREST BACKDROP — Real image texture — MeshStandardMaterial
-// ═══════════════════════════════════════════════════════════════
-(function buildForestBackdrop(){
-  const forestImgTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b4f2e04d-e5c4-48be-b6da-bedeedbf2db9.png');
-  forestImgTex.wrapS = THREE.RepeatWrapping;
-  forestImgTex.repeat.set(12, 1);
-  const forestMat = new THREE.MeshStandardMaterial({
-    map: forestImgTex,
-    side: THREE.DoubleSide,
-    roughness: 0.9,
-    metalness: 0,
-    envMapIntensity: 0.2
-  });
-  [-1, 1].forEach(side => {
-    const fPlane = new THREE.Mesh(new THREE.PlaneGeometry(TRACK_LENGTH + 100, 35), forestMat);
-    fPlane.position.set(side * (TRACK_WIDTH/2 + 35), 17, TRACK_LENGTH/2);
-    fPlane.rotation.y = side * Math.PI/2 + Math.PI;
-    scene.add(fPlane);
-  });
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  LONG SHADOWS ON ROAD — baked shadow stripes
-// ═══════════════════════════════════════════════════════════════
-(function buildRoadShadows(){
-  const shadowC = document.createElement('canvas');
-  shadowC.width = 512; shadowC.height = 4096;
-  const sCtx = shadowC.getContext('2d');
-  sCtx.clearRect(0, 0, 512, 4096);
-
-  for(let z = 25; z < 1080; z += 35 + 15){
-    const yOnTex = (z / TRACK_LENGTH) * 4096;
-    sCtx.save();
-    sCtx.translate(256, yOnTex);
-    sCtx.rotate(-0.18);
-    sCtx.fillStyle = 'rgba(0,0,0,0.28)';
-    sCtx.fillRect(-300, -5, 600, 10);
-    for(let f = 0; f < 6; f++){
-      const fy = -16 + f * 6;
-      sCtx.fillStyle = 'rgba(0,0,0,0.12)';
-      sCtx.fillRect(-220 + f*18, fy, 160, 3);
-    }
-    sCtx.fillStyle = 'rgba(0,0,0,0.35)';
-    sCtx.fillRect(-4, -30, 8, 60);
-    sCtx.restore();
-  }
-
-  const shadowTex = new THREE.CanvasTexture(shadowC);
-  const shadowPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(TRACK_WIDTH + 4, TRACK_LENGTH),
-    new THREE.MeshBasicMaterial({map: shadowTex, transparent: true, depthWrite: false, opacity: 0.55})
-  );
-  shadowPlane.rotation.x = -Math.PI/2;
-  shadowPlane.position.set(0, 0.02, TRACK_LENGTH/2 - 10);
-  scene.add(shadowPlane);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  ROADSIDE BUSHES/SHRUBS — Optimized: every 8 units, 2 rows,
-//  single plane (no cross-billboard), MeshStandardMaterial
-// ═══════════════════════════════════════════════════════════════
-const bushTexture = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7948c31-84c8-4d5f-9f38-83d2357a7548.png');
-
-const bushMat = new THREE.MeshStandardMaterial({
-  map: bushTexture,
-  transparent: true,
-  alphaTest: 0.3,
-  side: THREE.DoubleSide,
-  roughness: 0.85,
-  metalness: 0,
-  envMapIntensity: 0.3
-});
-
-// Standard bush geometry (bottom-aligned)
-const bushGeo = new THREE.PlaneGeometry(5, 3.5);
-bushGeo.translate(0, 1.75, 0);
-
-// Tall bush variation
-const bushGeoTall = new THREE.PlaneGeometry(6, 5);
-bushGeoTall.translate(0, 2.5, 0);
-
-// Place bushes — every 8 units, 2 rows per side, single plane
-for(let z = 10; z < TRACK_LENGTH - 20; z += 8 + Math.random() * 2){
-  [-1, 1].forEach(side => {
-    // ── ROW 1: Inner row, close to road/armco
-    const bushX1 = side * (TRACK_WIDTH/2 + 2.5 + Math.random() * 1.5);
-    const sc1 = 0.6 + Math.random() * 0.8;
-    const useTall1 = Math.random() < 0.18;
-    const b1 = new THREE.Mesh(useTall1 ? bushGeoTall : bushGeo, bushMat);
-    b1.position.set(bushX1, 0, z);
-    b1.scale.set(sc1, sc1, sc1);
-    b1.rotation.y = Math.random() * Math.PI;
-    scene.add(b1);
-
-    // ── ROW 2: Middle row
-    const bushX2 = side * (TRACK_WIDTH/2 + 5.5 + Math.random() * 2);
-    const sc2 = 0.7 + Math.random() * 0.7;
-    const useTall2 = Math.random() < 0.2;
-    const b2 = new THREE.Mesh(useTall2 ? bushGeoTall : bushGeo, bushMat);
-    b2.position.set(bushX2, 0, z + Math.random() * 2);
-    b2.scale.set(sc2, sc2, sc2);
-    b2.rotation.y = Math.random() * Math.PI;
-    scene.add(b2);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  ADVERTISING BOARDS
-// ═══════════════════════════════════════════════════════════════
-(function buildAdBoards(){
-  const boardTextures=[
-    {bg:'#1a1a2e',fg:'#FFB800',text:'SPEED KING'},
-    {bg:'#0d2137',fg:'#00CFFF',text:'ULTRA RACE'},
-    {bg:'#2d0a0a',fg:'#FF4444',text:'TURBO 500'},
-    {bg:'#0a2d0a',fg:'#44FF88',text:'MAX POWER'},
-  ];
-  const boardMat=(bt)=>{
-    const bc=document.createElement('canvas'); bc.width=512; bc.height=128;
-    const bCtx=bc.getContext('2d');
-    bCtx.fillStyle=bt.bg; bCtx.fillRect(0,0,512,128);
-    bCtx.fillStyle=bt.fg; bCtx.font='bold 64px Arial';
-    bCtx.textAlign='center'; bCtx.textBaseline='middle';
-    bCtx.fillText(bt.text, 256, 64);
-    bCtx.strokeStyle=bt.fg; bCtx.lineWidth=4;
-    bCtx.strokeRect(8,8,496,112);
-    return new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(bc),roughness:0.65,metalness:0.1,side:THREE.DoubleSide});
-  };
-  let btIdx=0;
-  for(let z=60;z<820;z+=100){
-    [-1,1].forEach(side=>{
-      const bm=boardMat(boardTextures[btIdx%boardTextures.length]);
-      btIdx++;
-      const board=new THREE.Mesh(new THREE.BoxGeometry(6,1.8,0.12),bm);
-      board.position.set(side*(TRACK_WIDTH/2+5), 1.8, z);
-      board.rotation.y=side*Math.PI/2;
-      board.castShadow=true; scene.add(board);
-      [-2.5,2.5].forEach(dx=>{
-        const post=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.07,2.5,8),
-          new THREE.MeshStandardMaterial({color:0x888888,metalness:0.7,roughness:0.4}));
-        post.position.set(side*(TRACK_WIDTH/2+5)+dx*side, 1.0, z); scene.add(post);
-      });
-    });
-  }
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -682,6 +504,114 @@ for(let z = 10; z < TRACK_LENGTH - 20; z += 8 + Math.random() * 2){
   const lMat=new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.55,metalness:0.08});
   const line=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,2.5),lMat);
   line.rotation.x=-Math.PI/2; line.position.set(0,0.012,finZ); scene.add(line);
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  BUSHES — Real image, cross-billboard, dense placement
+// ═══════════════════════════════════════════════════════════════
+(function buildBushes(){
+  const bushTex = TL.load(URL_BUSH);
+  bushTex.encoding = THREE.sRGBEncoding;
+  const bushMat = new THREE.MeshStandardMaterial({
+    map: bushTex,
+    transparent: true,
+    alphaTest: 0.15,
+    side: THREE.DoubleSide,
+    roughness: 0.85,
+    metalness: 0,
+    depthWrite: false
+  });
+
+  // Standard bush geometry bottom-anchored
+  const bushGeo = new THREE.PlaneGeometry(8, 5);
+  bushGeo.translate(0, 2.5, 0);
+
+  for(let z = 5; z < TRACK_LENGTH - 10; z += 5){
+    [-1, 1].forEach(side => {
+      // Row 1: right after armco
+      const r1x = side * (TRACK_WIDTH/2 + 3 + Math.random());
+      const sc1 = 0.7 + Math.random() * 0.5;
+      // plane A
+      const bA1 = new THREE.Mesh(bushGeo, bushMat);
+      bA1.position.set(r1x, 0, z + Math.random());
+      bA1.scale.setScalar(sc1);
+      bA1.rotation.y = Math.random() * Math.PI;
+      scene.add(bA1);
+      // plane B (cross-billboard)
+      const bB1 = new THREE.Mesh(bushGeo, bushMat);
+      bB1.position.set(r1x, 0, z + Math.random());
+      bB1.scale.setScalar(sc1);
+      bB1.rotation.y = bA1.rotation.y + Math.PI/2;
+      scene.add(bB1);
+
+      // Row 2: between armco and palms
+      const r2x = side * (TRACK_WIDTH/2 + 8 + Math.random() * 1.5);
+      const sc2 = 0.65 + Math.random() * 0.55;
+      const bA2 = new THREE.Mesh(bushGeo, bushMat);
+      bA2.position.set(r2x, 0, z + Math.random());
+      bA2.scale.setScalar(sc2);
+      bA2.rotation.y = Math.random() * Math.PI;
+      scene.add(bA2);
+      const bB2 = new THREE.Mesh(bushGeo, bushMat);
+      bB2.position.set(r2x, 0, z + Math.random());
+      bB2.scale.setScalar(sc2);
+      bB2.rotation.y = bA2.rotation.y + Math.PI/2;
+      scene.add(bB2);
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  PALM TREES — Real image, cross-billboard
+// ═══════════════════════════════════════════════════════════════
+(function buildPalms(){
+  const palmTex = TL.load(URL_PALM);
+  palmTex.encoding = THREE.sRGBEncoding;
+  const palmMat = new THREE.MeshBasicMaterial({
+    map: palmTex,
+    transparent: true,
+    alphaTest: 0.15,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+
+  const palmGeo = new THREE.PlaneGeometry(12, 22);
+  palmGeo.translate(0, 11, 0); // anchor bottom to ground
+
+  for(let z = 10; z < TRACK_LENGTH - 15; z += 25){
+    [-1, 1].forEach(side => {
+      // Primary palm
+      const palmX = side * (TRACK_WIDTH/2 + 10 + Math.random() * 6);
+      const sc = 0.85 + Math.random() * 0.4;
+      const pA = new THREE.Mesh(palmGeo, palmMat);
+      pA.position.set(palmX, 0, z + (Math.random()-0.5) * 8);
+      pA.scale.setScalar(sc);
+      pA.rotation.y = Math.random() * Math.PI;
+      scene.add(pA);
+      // Cross plane
+      const pB = new THREE.Mesh(palmGeo, palmMat);
+      pB.position.copy(pA.position);
+      pB.scale.copy(pA.scale);
+      pB.rotation.y = pA.rotation.y + Math.PI/2;
+      scene.add(pB);
+
+      // Occasional extra palm further back
+      if(Math.random() < 0.45){
+        const palmX2 = side * (TRACK_WIDTH/2 + 18 + Math.random() * 8);
+        const sc2 = 0.75 + Math.random() * 0.35;
+        const pC = new THREE.Mesh(palmGeo, palmMat);
+        pC.position.set(palmX2, 0, z + 8 + (Math.random()-0.5) * 6);
+        pC.scale.setScalar(sc2);
+        pC.rotation.y = Math.random() * Math.PI;
+        scene.add(pC);
+        const pD = new THREE.Mesh(palmGeo, palmMat);
+        pD.position.copy(pC.position);
+        pD.scale.copy(pC.scale);
+        pD.rotation.y = pC.rotation.y + Math.PI/2;
+        scene.add(pD);
+      }
+    });
+  }
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -1031,7 +961,6 @@ function initAudio(){
   try{
     audioCtx = new(window.AudioContext||window.webkitAudioContext)();
 
-    // Master gain + compressor
     masterGain = audioCtx.createGain();
     masterGain.gain.value = 0.5;
     const comp = audioCtx.createDynamicsCompressor();
@@ -1040,14 +969,12 @@ function initAudio(){
     masterGain.connect(comp);
     comp.connect(audioCtx.destination);
 
-    // Distortion waveshaper for aggressive tone
     const distortion = makeDistortion(audioCtx, 180);
     distortion.connect(masterGain);
 
     engGain = audioCtx.createGain();
     engGain.gain.value = 0;
 
-    // osc1: sawtooth at fundamental (base RPM)
     engOsc1 = audioCtx.createOscillator();
     engOsc1.type = 'sawtooth';
     engOsc1.frequency.value = 35;
@@ -1055,7 +982,6 @@ function initAudio(){
     ef1.type = 'lowpass'; ef1.frequency.value = 800;
     engOsc1.connect(ef1); ef1.connect(engGain);
 
-    // osc2: sawtooth at 2x RPM (second harmonic)
     engOsc2 = audioCtx.createOscillator();
     engOsc2.type = 'sawtooth';
     engOsc2.frequency.value = 70;
@@ -1063,7 +989,6 @@ function initAudio(){
     ef2.type = 'bandpass'; ef2.frequency.value = 600; ef2.Q.value = 1.2;
     engOsc2.connect(ef2); ef2.connect(engGain);
 
-    // osc3: square at 3x RPM with bandpass (growl)
     engOsc3 = audioCtx.createOscillator();
     engOsc3.type = 'square';
     engOsc3.frequency.value = 105;
@@ -1071,7 +996,6 @@ function initAudio(){
     ef3.type = 'bandpass'; ef3.frequency.value = 500; ef3.Q.value = 1.8;
     engOsc3.connect(ef3); ef3.connect(engGain);
 
-    // osc4: triangle at 0.5x RPM (low rumble/bass)
     engOsc4 = audioCtx.createOscillator();
     engOsc4.type = 'triangle';
     engOsc4.frequency.value = 17.5;
@@ -1079,7 +1003,6 @@ function initAudio(){
     ef4.type = 'lowpass'; ef4.frequency.value = 200;
     engOsc4.connect(ef4); ef4.connect(engGain);
 
-    // osc5: sawtooth at 5x RPM with highpass (exhaust crackle)
     engOsc5 = audioCtx.createOscillator();
     engOsc5.type = 'sawtooth';
     engOsc5.frequency.value = 175;
@@ -1087,13 +1010,10 @@ function initAudio(){
     ef5.type = 'highpass'; ef5.frequency.value = 400;
     engOsc5.connect(ef5); ef5.connect(engGain);
 
-    // Route engGain through distortion
     engGain.connect(distortion);
 
-    // Start all engine oscillators
     engOsc1.start(); engOsc2.start(); engOsc3.start(); engOsc4.start(); engOsc5.start();
 
-    // Turbo whistle: sine 2000-4000Hz, very quiet
     turbOsc = audioCtx.createOscillator();
     turbOsc.type = 'sine';
     turbOsc.frequency.value = 2000;
@@ -1103,7 +1023,6 @@ function initAudio(){
     turbGain.connect(masterGain);
     turbOsc.start();
 
-    // Wind noise
     const bufSz = audioCtx.sampleRate * 2;
     const wBuf = audioCtx.createBuffer(1, bufSz, audioCtx.sampleRate);
     const wData = wBuf.getChannelData(0);
@@ -1199,7 +1118,6 @@ let lastT=0;
 function animate(time){
   requestAnimationFrame(animate);
   const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
-  if(scene.userData.cloudMesh) scene.userData.cloudMesh.material.map.offset.x+=dt*0.002;
   updatePhysics(dt);
   spawnCarParticles();
   updateParticles(dt);
@@ -1208,7 +1126,6 @@ function animate(time){
   if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
   if(state.phase!=='racing') _didScreech=false;
   updateSound(dt);
-  renderer.domElement.style.filter='';
   renderer.render(scene,camera);
 }
 resetGame();

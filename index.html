@@ -258,16 +258,14 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// Boosted exposure for more vivid, contrasty look
-renderer.toneMappingExposure = 1.35;
+renderer.toneMappingExposure = 1.7;
 renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.physicallyCorrectLights = true;
+renderer.physicallyCorrectLights = false;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -525,10 +523,37 @@ scene.add(groundBounce);
 const skyGroup = new THREE.Group();
 scene.add(skyGroup);
 
-// Plain sky - no background images
 (function buildSky(){
-  // Top cap only - plain sky color
-  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),
+  const skyTex = TL.load(URL_SIDE_BG);
+  skyTex.encoding = THREE.sRGBEncoding;
+  skyTex.wrapS = THREE.RepeatWrapping;
+
+  // Front panel
+  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });
+  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };
+  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);
+  skyFront.position.set(0, 60, -580);
+  skyGroup.add(skyFront);
+
+  // Clone for left/right/back panels
+  const skyTexL = TL.load(URL_SIDE_BG);
+  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);
+  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });
+
+  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);
+  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;
+  skyGroup.add(skyLeft);
+
+  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;
+  skyGroup.add(skyRight);
+
+  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;
+  skyGroup.add(skyBack);
+
+  // Top cap
+  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),
     new THREE.MeshBasicMaterial({color:0x7BBCE0, side:THREE.FrontSide, depthWrite:false, fog:false}));
   skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;
   skyGroup.add(skyTop);
@@ -585,23 +610,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
   scene.add(dirt);
 });
 
-// Road edge debris / dirt patches
-for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
-  [-1, 1].forEach(side => {
-    if(Math.random() < 0.15){
-      const debrisGeo = new THREE.PlaneGeometry(0.3 + Math.random()*0.8, 0.2 + Math.random()*0.5);
-      const debrisMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0.15 + Math.random()*0.10, 0.12 + Math.random()*0.08, 0.08 + Math.random()*0.05),
-        roughness: 0.95, metalness: 0
-      });
-      const debris = new THREE.Mesh(debrisGeo, debrisMat);
-      debris.rotation.x = -Math.PI/2;
-      debris.position.set(side * (TRACK_WIDTH/2 - 0.5 + Math.random()*1.5), 0.008, z);
-      debris.rotation.z = Math.random() * Math.PI;
-      scene.add(debris);
-    }
-  });
-}
+// Debris removed for performance
 
 // Curbs
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
@@ -753,7 +762,7 @@ function setupCarModel(model, paintColor){
   });
   const wheels = [];
   model.traverse(function(child){
-    if(child.isMesh){ child.castShadow = true; child.receiveShadow = true; }
+    if(child.isMesh){ child.castShadow = false; child.receiveShadow = false; }
   });
   const body = model.getObjectByName('body');
   if(body) body.material = bodyMat;
@@ -1070,7 +1079,7 @@ function playGearShiftPop(){ /* Audio disabled */ }
 // ═══════════════════════════════════════════════════════════════
 //  MAIN LOOP
 // ═══════════════════════════════════════════════════════════════
-let lastT=0;
+let lastT=0, hudFrame=0;
 function animate(time){
   requestAnimationFrame(animate);
   const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
@@ -1078,7 +1087,8 @@ function animate(time){
   spawnCarParticles();
   updateParticles(dt);
   updateCamera(dt);
-  updateHUD();
+  // Update HUD every 2 frames to reduce DOM overhead
+  if(hudFrame++ % 2 === 0) updateHUD();
   renderer.render(scene,camera);
 }
 resetGame();

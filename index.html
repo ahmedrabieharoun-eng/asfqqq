@@ -8,7 +8,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
   #canvas-container { position:relative; width:100vw; height:100vh; }
-  canvas { display:block; width:100%!important; height:100%!important; will-change:transform; }
+  canvas { display:block; width:100%!important; height:100%!important; }
 
   /* ── LOADING SCREEN ── */
   #loading-screen {
@@ -101,11 +101,11 @@
   #p1-hud .car-name { color:#FFB800; }
   #p2-hud .car-name { color:#00CFFF; }
   .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); transition:none; }
+  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
   .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
   .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
   .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  .rpm-fill { height:100%; border-radius:3px; transition:width 0.1s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
+  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
   .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
   .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
   .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
@@ -258,11 +258,10 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
-const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, powerPreference:'high-performance', logarithmicDepthBuffer: !isMobile });
-renderer.setPixelRatio(isMobile ? Math.min(window.devicePixelRatio, 0.75) : Math.min(window.devicePixelRatio, 1.0));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = !isMobile;
+renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 // Boosted exposure for more vivid, contrasty look
@@ -500,8 +499,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xFFEFCC, 2.4);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
-sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
-sun.castShadow = !isMobile;
+sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
@@ -527,37 +525,10 @@ scene.add(groundBounce);
 const skyGroup = new THREE.Group();
 scene.add(skyGroup);
 
+// Plain sky - no background images
 (function buildSky(){
-  const skyTex = TL.load(URL_SIDE_BG);
-  skyTex.encoding = THREE.sRGBEncoding;
-  skyTex.wrapS = THREE.RepeatWrapping;
-
-  // Front panel
-  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });
-  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };
-  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);
-  skyFront.position.set(0, 60, -580);
-  skyGroup.add(skyFront);
-
-  // Clone for left/right/back panels
-  const skyTexL = TL.load(URL_SIDE_BG);
-  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);
-  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });
-
-  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);
-  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;
-  skyGroup.add(skyLeft);
-
-  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
-  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;
-  skyGroup.add(skyRight);
-
-  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
-  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;
-  skyGroup.add(skyBack);
-
-  // Top cap
-  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),
+  // Top cap only - plain sky color
+  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),
     new THREE.MeshBasicMaterial({color:0x7BBCE0, side:THREE.FrontSide, depthWrite:false, fog:false}));
   skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;
   skyGroup.add(skyTop);
@@ -569,8 +540,8 @@ scene.add(skyGroup);
 const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
 const FINISH_Z     = 860;
-const asphaltTex   = makeAsphaltTexture(isMobile ? 512 : 1024, isMobile ? 512 : 1024);
-const normalTex    = isMobile ? null : makeAsphaltNormal(256,256);
+const asphaltTex   = makeAsphaltTexture(2048, 2048);
+const normalTex    = makeAsphaltNormal(512,512);
 
 // Real grass texture
 const grassTex = TL.load(URL_GRASS);
@@ -579,7 +550,7 @@ grassTex.repeat.set(40, 140);
 grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 grassTex.encoding = THREE.sRGBEncoding;
 
-const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, isMobile ? 2 : 8, isMobile ? 20 : 80);
+const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
 const rPos = roadGeo.attributes.position;
 for(let i=0;i<rPos.count;i++){
   const x = rPos.getX(i);
@@ -587,18 +558,20 @@ for(let i=0;i<rPos.count;i++){
 }
 roadGeo.computeVertexNormals();
 // Road keeps MeshStandardMaterial — it needs lighting for shadows/depth
-const roadMat = isMobile
-  ? new THREE.MeshBasicMaterial({ map: asphaltTex })
-  : new THREE.MeshStandardMaterial({ map:asphaltTex, normalMap:normalTex, normalScale:new THREE.Vector2(0.45,0.45), roughness:0.82, metalness:0.04, envMapIntensity:0.35 });
+const roadMat = new THREE.MeshStandardMaterial({
+  map:asphaltTex, normalMap:normalTex,
+  normalScale:new THREE.Vector2(0.45,0.45),
+  roughness:0.82, metalness:0.04, envMapIntensity:0.35
+});
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
-road.receiveShadow = !isMobile;
+road.receiveShadow=true;
 scene.add(road);
 
-// FIX 7: Grass ground planes — MeshBasicMaterial so they show real green color
-const gGeo = new THREE.PlaneGeometry(320, TRACK_LENGTH+100);
+// FIX 7: Grass ground planes — extended to cover full sides
+const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
 const gMat = new THREE.MeshBasicMaterial({ map: grassTex });
-[-160, 160].forEach(x=>{
+[-400, 400].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
 });
@@ -613,10 +586,9 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
 });
 
 // Road edge debris / dirt patches
-if(!isMobile){
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
-    if(Math.random() < 0.07){
+    if(Math.random() < 0.15){
       const debrisGeo = new THREE.PlaneGeometry(0.3 + Math.random()*0.8, 0.2 + Math.random()*0.5);
       const debrisMat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(0.15 + Math.random()*0.10, 0.12 + Math.random()*0.08, 0.08 + Math.random()*0.05),
@@ -630,14 +602,13 @@ for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
     }
   });
 }
-} // end if(!isMobile) debris
 
 // Curbs
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
 function makeCurb(x, zCenter, length){
   const cg=new THREE.BoxGeometry(0.7,0.12,length);
   const c=new THREE.Mesh(cg,curbMat); c.position.set(x,0.06,zCenter);
-  c.receiveShadow=!isMobile; c.castShadow=!isMobile; scene.add(c);
+  c.receiveShadow=c.castShadow=true; scene.add(c);
   const stripeW=3;
   for(let z=-length/2;z<length/2;z+=stripeW*2){
     const sg=new THREE.BoxGeometry(0.72,0.13,stripeW);
@@ -671,47 +642,9 @@ function makeArmco(x, zCenter, length){
 makeArmco(-TRACK_WIDTH/2-1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
-// ═══════════════════════════════════════════════════════════════
-//  MOUNTAINS — Real image as wide curved backdrop
-// ═══════════════════════════════════════════════════════════════
-(function buildMountains(){
-  const mtnTex = TL.load(URL_SIDE_BG);
-  mtnTex.encoding = THREE.sRGBEncoding;
-  mtnTex.wrapS = THREE.RepeatWrapping;
-  mtnTex.repeat.set(4, 1);
-  const mtnGeo = new THREE.CylinderGeometry(850, 850, 380, 64, 1, true, -Math.PI*0.6, Math.PI*1.2);
-  const mtnMat = new THREE.MeshBasicMaterial({ map: mtnTex, side: THREE.BackSide, transparent: true, opacity: 1.0 });
-  const mtnMesh = new THREE.Mesh(mtnGeo, mtnMat);
-  mtnMesh.position.set(0, 60, 600);
-  scene.add(mtnMesh);
-})();
+// Mountains backdrop removed
 
-// ═══════════════════════════════════════════════════════════════
-//  SIDE BACKGROUND PANELS — behind trees on both sides
-// ═══════════════════════════════════════════════════════════════
-(function buildSideBgPanels(){
-  const sideTex = TL.load(URL_SIDE_BG);
-  sideTex.encoding = THREE.sRGBEncoding;
-  sideTex.wrapS = THREE.RepeatWrapping;
-  sideTex.wrapT = THREE.ClampToEdgeWrapping;
-  sideTex.repeat.set(6, 1);
-
-  const sideMat = new THREE.MeshBasicMaterial({
-    map: sideTex, side: THREE.DoubleSide, transparent: false
-  });
-
-  const panelHeight = 55;
-  const panelLength = TRACK_LENGTH + 100;
-  const sidePanelGeo = new THREE.PlaneGeometry(panelLength, panelHeight);
-  sidePanelGeo.translate(0, panelHeight / 2, 0);
-
-  [-1, 1].forEach(side => {
-    const panel = new THREE.Mesh(sidePanelGeo, sideMat);
-    panel.position.set(side * (TRACK_WIDTH / 2 + 38), 0, TRACK_LENGTH / 2);
-    panel.rotation.y = side > 0 ? -Math.PI / 2 : Math.PI / 2;
-    scene.add(panel);
-  });
-})();
+// Side background panels removed
 
 // ═══════════════════════════════════════════════════════════════
 //  START LINE GANTRY (F1 Style)
@@ -789,26 +722,38 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   line.rotation.x=-Math.PI/2; line.position.set(0,0.012,finZ); scene.add(line);
 })();
 
-// FOREST/BUSHES/PALMS REMOVED FOR PERFORMANCE
+// Forest backdrop removed
 
-// BUSHES REMOVED FOR PERFORMANCE
+// Bushes removed
 
-// PALM TREES REMOVED FOR PERFORMANCE
+// Palm trees removed
 
 // ═══════════════════════════════════════════════════════════════
 //  GLTF FERRARI CAR LOADING
 // ═══════════════════════════════════════════════════════════════
 function setupCarModel(model, paintColor){
-  const bodyMat = isMobile
-    ? new THREE.MeshStandardMaterial({ color: paintColor, metalness: 0.8, roughness: 0.4 })
-    : new THREE.MeshPhysicalMaterial({ color: paintColor, metalness: 0.9, roughness: 0.5, clearcoat: 1.0, clearcoatRoughness: 0.03, envMapIntensity: 1.6 });
-  const detailsMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.5 });
-  const glassMat = isMobile
-    ? new THREE.MeshStandardMaterial({ color: 0x88ccff, metalness: 0.1, roughness: 0.1, transparent: true, opacity: 0.5 })
-    : new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.25, roughness: 0, transmission: 1.0 });
+  const bodyMat = new THREE.MeshPhysicalMaterial({
+    color: paintColor,
+    metalness: 0.9,
+    roughness: 0.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.03,
+    envMapIntensity: 1.6
+  });
+  const detailsMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 1.0,
+    roughness: 0.5
+  });
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0.25,
+    roughness: 0,
+    transmission: 1.0
+  });
   const wheels = [];
   model.traverse(function(child){
-    if(child.isMesh){ child.castShadow = !isMobile; child.receiveShadow = !isMobile; }
+    if(child.isMesh){ child.castShadow = true; child.receiveShadow = true; }
   });
   const body = model.getObjectByName('body');
   if(body) body.material = bodyMat;
@@ -883,7 +828,7 @@ gltfLoader.load(
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — MAX_P 400
 // ═══════════════════════════════════════════════════════════════
-const MAX_P = isMobile ? 60 : 150;
+const MAX_P=150;
 const pGeo=new THREE.BufferGeometry();
 const pPos2=new Float32Array(MAX_P*3);
 const pSz=new Float32Array(MAX_P);
@@ -992,9 +937,9 @@ const camOff=new THREE.Vector3(0,5.5,-18);
 const camLook=new THREE.Vector3(0,1.8,10);
 function updateCamera(dt){
   const midZ=(state.p1.pos+state.p2.pos)*0.5;
-  const sh=cShake*Math.sin(Date.now()*0.07)*0.08;
+  const sh=cShake*Math.sin(Date.now()*0.09)*0.14;
   const targetPos=new THREE.Vector3(camOff.x+sh, camOff.y+Math.abs(sh)*0.4, midZ+camOff.z);
-  camera.position.lerp(targetPos,0.06);
+  camera.position.lerp(targetPos,0.09);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
   // Sky follows camera (X and Z only, keep Y fixed so sky stays on horizon)
@@ -1067,13 +1012,11 @@ function spawnCarParticles(){
     if(s.finished) return;
     const cx=c.position.x, cy=c.position.y, cz=c.position.z;
     if(elapsed<2.8&&s.speed<90){
-      if(!isMobile) for(let i=0;i<5;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
-      else if(Math.random()<0.3) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
+      for(let i=0;i<5;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
     }
-    if(!isMobile) for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
-    else if(Math.random()<0.4) spawnP(cx,cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
-    if(s.speed>35&&(!isMobile||Math.random()<0.3)) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);
-    if(s.speed>185&&Math.random()<(isMobile?0.06:0.18)) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);
+    for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
+    if(s.speed>35) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);
+    if(s.speed>185&&Math.random()<0.18) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);
   });
 }
 
@@ -1085,7 +1028,7 @@ function updateParticles(dt){
     if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }
     pPos2[i*3]+=pVx[i]*dt*4; pPos2[i*3+1]+=pVy[i]*dt*4; pPos2[i*3+2]+=pVz2[i]*dt*4;
     pVy[i]-=dt*0.75;
-    pSz[i]*=0.993;
+    pSz[i]*=0.996;
   }
   pGeo.attributes.position.needsUpdate=true;
   pGeo.attributes.size.needsUpdate=true;
@@ -1130,7 +1073,7 @@ function playGearShiftPop(){ /* Audio disabled */ }
 let lastT=0;
 function animate(time){
   requestAnimationFrame(animate);
-  const dt=Math.min((time-lastT)/1000,0.033); lastT=time;
+  const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
   updatePhysics(dt);
   spawnCarParticles();
   updateParticles(dt);

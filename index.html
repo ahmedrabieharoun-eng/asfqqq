@@ -10,6 +10,58 @@
   #canvas-container { position:relative; width:100vw; height:100vh; }
   canvas { display:block; width:100%!important; height:100%!important; }
 
+  /* ── LOADING SCREEN ── */
+  #loading-screen {
+    position:fixed; inset:0; z-index:999;
+    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  #loading-logo {
+    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
+    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
+    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
+  }
+  #loading-logo span { color:#FFB800; }
+  @keyframes logoPulse {
+    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
+    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
+  }
+  #loading-subtitle {
+    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
+    text-transform:uppercase; margin-bottom:60px;
+  }
+  #loading-bar-wrap {
+    width:320px; height:5px; background:rgba(255,255,255,0.08);
+    border-radius:10px; overflow:hidden; margin-bottom:18px;
+    box-shadow:0 0 20px rgba(255,180,0,0.15);
+  }
+  #loading-bar {
+    height:100%; width:0%; border-radius:10px;
+    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
+    transition:width 0.25s ease;
+    box-shadow:0 0 10px rgba(255,180,0,0.6);
+  }
+  #loading-status {
+    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
+    text-transform:uppercase; min-height:16px; text-align:center;
+  }
+  #loading-dots {
+    margin-top:50px; display:flex; gap:10px; align-items:center;
+  }
+  .load-dot {
+    width:8px; height:8px; border-radius:50%;
+    animation:dotBounce 1.2s ease-in-out infinite;
+  }
+  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
+  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
+  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
+  @keyframes dotBounce {
+    0%,100%{transform:translateY(0);opacity:0.3;}
+    50%{transform:translateY(-10px);opacity:1;}
+  }
+
   #vignette {
     position:absolute; top:0; left:0; width:100%; height:100%;
     pointer-events:none; z-index:5;
@@ -116,6 +168,21 @@
 </style>
 </head>
 <body>
+<!-- LOADING SCREEN -->
+<div id="loading-screen" style="display:none!important">
+  <div id="loading-logo">DRAG<span>RACE</span></div>
+  <div id="loading-subtitle">🏆 Tropical Edition</div>
+  <div id="loading-bar-wrap">
+    <div id="loading-bar"></div>
+  </div>
+  <div id="loading-status">Initializing...</div>
+  <div id="loading-dots">
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+  </div>
+</div>
+
 <div id="canvas-container">
   <canvas id="c"></canvas>
   <div id="vignette"></div>
@@ -192,7 +259,7 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2.0));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -204,8 +271,8 @@ renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
-scene.fog = new THREE.Fog(0xCCE8F0, 400, 1200);
+scene.background = new THREE.Color(0x7BBCE0);
+// fog removed
 
 // ─── CAMERA ──────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 3000);
@@ -218,9 +285,45 @@ window.addEventListener('resize', ()=>{
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  TEXTURE LOADER
+//  LOADING MANAGER — tracks all assets
 // ═══════════════════════════════════════════════════════════════
+let _loadTotal = 0, _loadDone = 0;
+const _loadItems = {};
+
+function setLoadStatus(msg){ document.getElementById('loading-status').textContent = msg; }
+function setLoadBar(pct){ document.getElementById('loading-bar').style.width = Math.min(pct,100)+'%'; }
+
+function trackLoad(key){
+  if(_loadItems[key]) return;
+  _loadItems[key] = false;
+  _loadTotal++;
+  setLoadBar((_loadDone/_loadTotal)*90);
+}
+function loadProgress(key){
+  if(_loadItems[key]) return;
+  _loadItems[key] = true;
+  _loadDone++;
+  const pct = (_loadDone / _loadTotal) * 90;
+  setLoadBar(pct);
+  const labels = { sky:'Sky loaded', grass:'Terrain loaded', palm:'Trees loaded',
+    bush:'Vegetation loaded', forest:'Forest loaded', mountain:'Mountains loaded',
+    model:'Cars loaded' };
+  setLoadStatus(labels[key] || 'Loading assets...');
+}
+function checkAllLoaded(){
+  setLoadBar(100);
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('launch-hint').style.display = 'block';
+}
+
+// Patch TL.load to auto-track
+const _origLoad = THREE.TextureLoader.prototype.load;
 const TL = new THREE.TextureLoader();
+const _tlLoad = TL.load.bind(TL);
+TL.load = function(url, onLoad, onProgress, onError){
+  trackLoad(url);
+  return _tlLoad(url, (tex)=>{ loadProgress(url); if(onLoad) onLoad(tex); }, onProgress, onError);
+};
 
 // ═══════════════════════════════════════════════════════════════
 //  PROCEDURAL TEXTURE HELPERS
@@ -396,7 +499,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xFFEFCC, 2.4);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
-sun.shadow.mapSize.width = sun.shadow.mapSize.height = 4096;
+sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
@@ -417,37 +520,45 @@ groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY — Use URL_SIDE_BG for all sky planes (front + left + right + back)
+//  SKY — Skybox that always follows the camera (always visible)
 // ═══════════════════════════════════════════════════════════════
+const skyGroup = new THREE.Group();
+scene.add(skyGroup);
+
 (function buildSky(){
   const skyTex = TL.load(URL_SIDE_BG);
   skyTex.encoding = THREE.sRGBEncoding;
   skyTex.wrapS = THREE.RepeatWrapping;
-  skyTex.repeat.set(3, 1);
-  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.DoubleSide, depthWrite: false });
 
-  // Front sky (looking down the track)
-  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(3000, 700), skyMat);
-  skyFront.position.set(0, 250, 1200);
-  scene.add(skyFront);
+  // Front panel
+  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });
+  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };
+  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);
+  skyFront.position.set(0, 60, -580);
+  skyGroup.add(skyFront);
 
-  // Left sky
-  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(2600, 700), skyMat);
-  skyLeft.position.set(-650, 250, 600);
-  skyLeft.rotation.y = Math.PI / 2;
-  scene.add(skyLeft);
+  // Clone for left/right/back panels
+  const skyTexL = TL.load(URL_SIDE_BG);
+  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);
+  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });
 
-  // Right sky
-  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(2600, 700), skyMat);
-  skyRight.position.set(650, 250, 600);
-  skyRight.rotation.y = -Math.PI / 2;
-  scene.add(skyRight);
+  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);
+  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;
+  skyGroup.add(skyLeft);
 
-  // Back sky
-  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(3000, 700), skyMat);
-  skyBack.position.set(0, 250, -200);
-  skyBack.rotation.y = Math.PI;
-  scene.add(skyBack);
+  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;
+  skyGroup.add(skyRight);
+
+  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;
+  skyGroup.add(skyBack);
+
+  // Top cap
+  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),
+    new THREE.MeshBasicMaterial({color:0x7BBCE0, side:THREE.FrontSide, depthWrite:false, fog:false}));
+  skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;
+  skyGroup.add(skyTop);
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -504,7 +615,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
 // Road edge debris / dirt patches
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
-    if(Math.random() < 0.4){
+    if(Math.random() < 0.15){
       const debrisGeo = new THREE.PlaneGeometry(0.3 + Math.random()*0.8, 0.2 + Math.random()*0.5);
       const debrisMat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(0.15 + Math.random()*0.10, 0.12 + Math.random()*0.08, 0.08 + Math.random()*0.05),
@@ -927,6 +1038,7 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
+trackLoad('model');
 gltfLoader.load(
   'https://threejs.org/examples/models/gltf/ferrari.glb',
   function(gltf){
@@ -940,25 +1052,29 @@ gltfLoader.load(
     car2.add(car2Model);
     car2Model.scale.set(1.8, 1.8, 1.8);
     modelsLoaded = true;
-    document.getElementById('timer-val').textContent = '0.000';
+    loadProgress('model');
     dracoLoader.dispose();
+    checkAllLoaded();
   },
   function(xhr){
     if(xhr.total > 0){
       const pct = Math.round(xhr.loaded / xhr.total * 100);
-      document.getElementById('timer-val').textContent = 'Loading ' + pct + '%';
+      setLoadStatus('Loading cars... ' + pct + '%');
     }
   },
   function(error){
     console.error('Model load failed:', error);
-    document.getElementById('timer-val').textContent = 'Load Error';
+    setLoadStatus('Cars failed — continuing...');
+    modelsLoaded = true;
+    loadProgress('model');
+    checkAllLoaded();
   }
 );
 
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — MAX_P 400
 // ═══════════════════════════════════════════════════════════════
-const MAX_P=400;
+const MAX_P=150;
 const pGeo=new THREE.BufferGeometry();
 const pPos2=new Float32Array(MAX_P*3);
 const pSz=new Float32Array(MAX_P);
@@ -1011,7 +1127,6 @@ function resetGame(){
   p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;
   cShake=0;
   for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
-  _didScreech=false;
   if(!modelsLoaded){
     document.getElementById('timer-val').textContent = 'Loading...';
   } else {
@@ -1073,6 +1188,8 @@ function updateCamera(dt){
   camera.position.lerp(targetPos,0.09);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
+  // Sky follows camera (X and Z only, keep Y fixed so sky stays on horizon)
+  skyGroup.position.set(camera.position.x, 0, camera.position.z);
   // Sun follows cars along track
   sun.position.set(-80, 100, midZ + 50);
   sun.target.position.set(0, 0, midZ);
@@ -1187,202 +1304,14 @@ function updateHUD(){
   else lf.style.display='none';
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  AUDIO — V8 SUPERCAR ENGINE (5 oscillators + turbo + wind)
-// ═══════════════════════════════════════════════════════════════
-let audioCtx=null;
-let engOsc1=null, engOsc2=null, engOsc3=null, engOsc4=null, engOsc5=null;
-let turbOsc=null, turbGain=null;
-let engGain=null, masterGain=null, windGain=null;
-let audioReady=false;
-let lastGear1=1, lastGear2=1;
-
-function makeDistortion(ctx, amount){
-  const curve = new Float32Array(256);
-  for(let i=0;i<256;i++){
-    const x = (i * 2) / 256 - 1;
-    curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
-  }
-  const shaper = ctx.createWaveShaper();
-  shaper.curve = curve;
-  shaper.oversample = '4x';
-  return shaper;
-}
-
 function initAudio(){
-  if(audioReady) return;
-  try{
-    audioCtx = new(window.AudioContext||window.webkitAudioContext)();
-
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.45;
-    
-    // Clean compressor - less aggressive
-    const comp = audioCtx.createDynamicsCompressor();
-    comp.threshold.value = -12; comp.knee.value = 15;
-    comp.ratio.value = 2.5; comp.attack.value = 0.01; comp.release.value = 0.25;
-    masterGain.connect(comp);
-    comp.connect(audioCtx.destination);
-
-    // Light distortion for grit without harshness
-    const distortion = makeDistortion(audioCtx, 60);
-    distortion.connect(masterGain);
-
-    engGain = audioCtx.createGain();
-    engGain.gain.value = 0;
-
-    // OSC1: Main engine fundamental - sawtooth, warmly filtered
-    engOsc1 = audioCtx.createOscillator();
-    engOsc1.type = 'sawtooth';
-    engOsc1.frequency.value = 50;
-    const ef1 = audioCtx.createBiquadFilter();
-    ef1.type = 'lowpass'; ef1.frequency.value = 600; ef1.Q.value = 0.7;
-    engOsc1.connect(ef1); ef1.connect(engGain);
-
-    // OSC2: 2nd harmonic - smooth
-    engOsc2 = audioCtx.createOscillator();
-    engOsc2.type = 'sawtooth';
-    engOsc2.frequency.value = 100;
-    const ef2 = audioCtx.createBiquadFilter();
-    ef2.type = 'bandpass'; ef2.frequency.value = 700; ef2.Q.value = 0.8;
-    engOsc2.connect(ef2); ef2.connect(engGain);
-
-    // OSC3: 4th harmonic - triangle wave (cleaner than square)
-    engOsc3 = audioCtx.createOscillator();
-    engOsc3.type = 'triangle';
-    engOsc3.frequency.value = 200;
-    const ef3 = audioCtx.createBiquadFilter();
-    ef3.type = 'bandpass'; ef3.frequency.value = 900; ef3.Q.value = 1.0;
-    engOsc3.connect(ef3); ef3.connect(engGain);
-
-    // OSC4: Sub rumble - very low, clean sine
-    engOsc4 = audioCtx.createOscillator();
-    engOsc4.type = 'sine';
-    engOsc4.frequency.value = 25;
-    const ef4 = audioCtx.createBiquadFilter();
-    ef4.type = 'lowpass'; ef4.frequency.value = 120; ef4.Q.value = 0.5;
-    engOsc4.connect(ef4); ef4.connect(engGain);
-
-    // OSC5: Upper mid presence - gentle
-    engOsc5 = audioCtx.createOscillator();
-    engOsc5.type = 'sawtooth';
-    engOsc5.frequency.value = 300;
-    const ef5 = audioCtx.createBiquadFilter();
-    ef5.type = 'peaking'; ef5.frequency.value = 1200; ef5.gain.value = 6; ef5.Q.value = 1.5;
-    engOsc5.connect(ef5); ef5.connect(engGain);
-
-    engGain.connect(distortion);
-
-    engOsc1.start(); engOsc2.start(); engOsc3.start(); engOsc4.start(); engOsc5.start();
-
-    // Turbo whine - higher pitch, cleaner sine
-    turbOsc = audioCtx.createOscillator();
-    turbOsc.type = 'sine';
-    turbOsc.frequency.value = 2800;
-    turbGain = audioCtx.createGain();
-    turbGain.gain.value = 0;
-    const turbFilter = audioCtx.createBiquadFilter();
-    turbFilter.type = 'bandpass'; turbFilter.frequency.value = 3000; turbFilter.Q.value = 3;
-    turbOsc.connect(turbFilter); turbFilter.connect(turbGain);
-    turbGain.connect(masterGain);
-    turbOsc.start();
-
-    // Wind noise - bandpass filtered white noise (cleaner)
-    const bufSz = audioCtx.sampleRate * 2;
-    const wBuf = audioCtx.createBuffer(1, bufSz, audioCtx.sampleRate);
-    const wData = wBuf.getChannelData(0);
-    for(let i=0;i<bufSz;i++) wData[i] = Math.random()*2-1;
-    const wNode = audioCtx.createBufferSource();
-    wNode.buffer = wBuf; wNode.loop = true;
-    const wf = audioCtx.createBiquadFilter();
-    wf.type = 'bandpass'; wf.frequency.value = 1200; wf.Q.value = 0.8;
-    const wf2 = audioCtx.createBiquadFilter();
-    wf2.type = 'highpass'; wf2.frequency.value = 600;
-    windGain = audioCtx.createGain();
-    windGain.gain.value = 0;
-    wNode.connect(wf); wf.connect(wf2); wf2.connect(windGain); windGain.connect(masterGain);
-    wNode.start();
-
-    audioReady = true;
-  } catch(e){ console.warn('Audio failed:',e); }
+  // Audio disabled
+  return;
 }
 
-function playGearShiftPop(){
-  if(!audioReady) return;
-  const o = audioCtx.createOscillator();
-  o.type = 'sine';
-  const g = audioCtx.createGain();
-  const t = audioCtx.currentTime;
-  const currentRpm = engOsc1.frequency.value;
-  o.frequency.value = currentRpm * 1.5;
-  o.frequency.setTargetAtTime(currentRpm * 0.7, t, 0.06);
-  g.gain.setValueAtTime(0.12, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-  const f = audioCtx.createBiquadFilter();
-  f.type = 'bandpass'; f.frequency.value = 600; f.Q.value = 1.5;
-  o.connect(f); f.connect(g); g.connect(masterGain);
-  o.start(t); o.stop(t + 0.18);
-}
-
-function updateSound(dt){
-  if(!audioReady) return;
-  const avg = (state.p1.speed + state.p2.speed) * 0.5;
-  const sr = avg / MAX_SPD;
-
-  if(state.phase === 'racing'){
-    const t = audioCtx.currentTime;
-    // Cleaner RPM mapping: 50Hz idle → 280Hz at max (smooth V8 character)
-    const rpm = 50 + sr * 230;
-    engOsc1.frequency.setTargetAtTime(rpm,        t, 0.12);
-    engOsc2.frequency.setTargetAtTime(rpm * 2,    t, 0.10);
-    engOsc3.frequency.setTargetAtTime(rpm * 4,    t, 0.08);
-    engOsc4.frequency.setTargetAtTime(rpm * 0.5,  t, 0.15);
-    engOsc5.frequency.setTargetAtTime(rpm * 6,    t, 0.06);
-
-    const el = (performance.now() - state.raceStart) / 1000;
-    // Smooth gain ramp - not too loud
-    const targetGain = Math.min(0.45 + sr * 0.45 + (el < 1.0 ? 0.4 : 0), 0.85);
-    engGain.gain.setTargetAtTime(targetGain, t, 0.08);
-
-    // Turbo whine - cleaner, only at high RPM
-    turbOsc.frequency.setTargetAtTime(2800 + sr * 2400, t, 0.20);
-    turbGain.gain.setTargetAtTime(sr > 0.5 ? (sr - 0.5) * 0.07 : 0, t, 0.15);
-
-    // Wind - smooth
-    windGain.gain.setTargetAtTime(sr * 0.30, t, 0.15);
-
-    const g1 = state.p1.gear;
-    const g2 = state.p2.gear;
-    if(g1 !== lastGear1 || g2 !== lastGear2){ playGearShiftPop(); }
-    lastGear1 = g1; lastGear2 = g2;
-
-  } else {
-    if(engGain)  engGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
-    if(windGain) windGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
-    if(turbGain) turbGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
-    lastGear1 = 1; lastGear2 = 1;
-  }
-}
-
-function playScreech(){
-  if(!audioReady) return;
-  const o = audioCtx.createOscillator();
-  o.type = 'sawtooth';
-  o.frequency.value = 600;
-  const g = audioCtx.createGain();
-  g.gain.value = 0.28;
-  const f = audioCtx.createBiquadFilter();
-  f.type = 'bandpass'; f.frequency.value = 1000;
-  o.connect(f); f.connect(g); g.connect(masterGain);
-  o.start();
-  o.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 1.8);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.8);
-  o.stop(audioCtx.currentTime + 1.8);
-}
-
-document.addEventListener('click', initAudio, {once:false});
-document.addEventListener('keydown', initAudio, {once:false});
-let _didScreech = false;
+function updateSound(dt){ /* Audio disabled */ }
+function playScreech(){ /* Audio disabled */ }
+function playGearShiftPop(){ /* Audio disabled */ }
 
 // ═══════════════════════════════════════════════════════════════
 //  MAIN LOOP
@@ -1396,14 +1325,13 @@ function animate(time){
   updateParticles(dt);
   updateCamera(dt);
   updateHUD();
-  if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
-  if(state.phase!=='racing') _didScreech=false;
-  updateSound(dt);
-  // FIX 5: NO CSS filter — Three.js handles all color processing
   renderer.render(scene,camera);
 }
 resetGame();
 requestAnimationFrame(animate);
+// Start polling for load completion
+setLoadStatus('Loading track & environment...');
+setTimeout(checkAllLoaded, 500);
 
 })();
 </script>

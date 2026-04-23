@@ -258,10 +258,11 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.0));
+const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, powerPreference:'high-performance', logarithmicDepthBuffer: !isMobile });
+renderer.setPixelRatio(isMobile ? Math.min(window.devicePixelRatio, 0.75) : Math.min(window.devicePixelRatio, 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !isMobile;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 // Boosted exposure for more vivid, contrasty look
@@ -500,6 +501,7 @@ const sun = new THREE.DirectionalLight(0xFFEFCC, 2.4);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
+sun.castShadow = !isMobile;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
@@ -567,8 +569,8 @@ scene.add(skyGroup);
 const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
 const FINISH_Z     = 860;
-const asphaltTex   = makeAsphaltTexture(1024, 1024);
-const normalTex    = makeAsphaltNormal(256,256);
+const asphaltTex   = makeAsphaltTexture(isMobile ? 512 : 1024, isMobile ? 512 : 1024);
+const normalTex    = isMobile ? null : makeAsphaltNormal(256,256);
 
 // Real grass texture
 const grassTex = TL.load(URL_GRASS);
@@ -577,7 +579,7 @@ grassTex.repeat.set(40, 140);
 grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 grassTex.encoding = THREE.sRGBEncoding;
 
-const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
+const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, isMobile ? 2 : 8, isMobile ? 20 : 80);
 const rPos = roadGeo.attributes.position;
 for(let i=0;i<rPos.count;i++){
   const x = rPos.getX(i);
@@ -585,14 +587,12 @@ for(let i=0;i<rPos.count;i++){
 }
 roadGeo.computeVertexNormals();
 // Road keeps MeshStandardMaterial — it needs lighting for shadows/depth
-const roadMat = new THREE.MeshStandardMaterial({
-  map:asphaltTex, normalMap:normalTex,
-  normalScale:new THREE.Vector2(0.45,0.45),
-  roughness:0.82, metalness:0.04, envMapIntensity:0.35
-});
+const roadMat = isMobile
+  ? new THREE.MeshBasicMaterial({ map: asphaltTex })
+  : new THREE.MeshStandardMaterial({ map:asphaltTex, normalMap:normalTex, normalScale:new THREE.Vector2(0.45,0.45), roughness:0.82, metalness:0.04, envMapIntensity:0.35 });
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
-road.receiveShadow=true;
+road.receiveShadow = !isMobile;
 scene.add(road);
 
 // FIX 7: Grass ground planes — MeshBasicMaterial so they show real green color
@@ -613,6 +613,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
 });
 
 // Road edge debris / dirt patches
+if(!isMobile){
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
     if(Math.random() < 0.07){
@@ -629,13 +630,14 @@ for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
     }
   });
 }
+} // end if(!isMobile) debris
 
 // Curbs
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
 function makeCurb(x, zCenter, length){
   const cg=new THREE.BoxGeometry(0.7,0.12,length);
   const c=new THREE.Mesh(cg,curbMat); c.position.set(x,0.06,zCenter);
-  c.receiveShadow=c.castShadow=true; scene.add(c);
+  c.receiveShadow=!isMobile; c.castShadow=!isMobile; scene.add(c);
   const stripeW=3;
   for(let z=-length/2;z<length/2;z+=stripeW*2){
     const sg=new THREE.BoxGeometry(0.72,0.13,stripeW);
@@ -787,219 +789,26 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   line.rotation.x=-Math.PI/2; line.position.set(0,0.012,finZ); scene.add(line);
 })();
 
-// ═══════════════════════════════════════════════════════════════
-//  FOREST/TREE MIX BACKDROP — FIX 1: MeshBasicMaterial (unlit)
-// ═══════════════════════════════════════════════════════════════
-(function buildForestBackdrop(){
-  const forestMixTex = new THREE.TextureLoader().load(URL_FOREST);
-  forestMixTex.wrapS = THREE.RepeatWrapping;
-  forestMixTex.repeat.set(10, 1);
-  // FIX 1: MeshBasicMaterial — shows full texture color regardless of lighting
-  const forestMixMat = new THREE.MeshBasicMaterial({
-    map: forestMixTex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.1
-  });
-  const fmGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 200, 25);
-  fmGeo.translate(0, 12.5, 0);
-  [-1, 1].forEach(side => {
-    const fm = new THREE.Mesh(fmGeo, forestMixMat);
-    fm.position.set(side * (TRACK_WIDTH/2 + 22), 0, TRACK_LENGTH/2);
-    fm.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
-    scene.add(fm);
-  });
-})();
+// FOREST/BUSHES/PALMS REMOVED FOR PERFORMANCE
 
-// ═══════════════════════════════════════════════════════════════
-//  BUSHES — FIX 1: MeshBasicMaterial (unlit) for both bush types
-// ═══════════════════════════════════════════════════════════════
-(function buildBushes(){
-  const bushTex = TL.load(URL_BUSH);
-  bushTex.encoding = THREE.sRGBEncoding;
-  // FIX 1: MeshBasicMaterial — vegetation shows full color, no dark tunnel effect
-  const bushMat = new THREE.MeshBasicMaterial({
-    map: bushTex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, depthWrite: false
-  });
+// BUSHES REMOVED FOR PERFORMANCE
 
-  const bush2Tex = TL.load(URL_BUSH2);
-  // FIX 1: MeshBasicMaterial for bush2 as well
-  const bush2Mat = new THREE.MeshBasicMaterial({
-    map: bush2Tex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, depthWrite: false
-  });
-
-  const bushGeo = new THREE.PlaneGeometry(9, 6);
-  bushGeo.translate(0, 3, 0);
-
-  // Dense bush rows — step 3 (was 5), always spawn (was 90% chance)
-  for(let z = 5; z < TRACK_LENGTH - 10; z += 6){
-    // === LEFT side — 3 rows ===
-    const leftZ = z + (Math.random() - 0.5) * 4;
-
-    // Row 1 (closest to track)
-    const sc1 = 0.7 + Math.random() * 1.2;
-    const mat1 = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const r1x = -(TRACK_WIDTH/2 + 2.5 + Math.random() * 0.5);
-    const bA1 = new THREE.Mesh(bushGeo, mat1);
-    bA1.position.set(r1x, 0, leftZ); bA1.scale.setScalar(sc1);
-    bA1.rotation.y = Math.random() * Math.PI * 2; scene.add(bA1);
-    const bB1 = new THREE.Mesh(bushGeo, mat1);
-    bB1.position.set(r1x, 0, leftZ); bB1.scale.setScalar(sc1);
-    bB1.rotation.y = bA1.rotation.y + Math.PI/2; scene.add(bB1);
-
-    // Row 2
-    const r2x = -(TRACK_WIDTH/2 + 7 + Math.random() * 1.5);
-    const sc2 = 0.8 + Math.random() * 1.3;
-    const mat2 = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const leftZ2 = leftZ + (Math.random() - 0.5) * 3;
-    const bA2 = new THREE.Mesh(bushGeo, mat2);
-    bA2.position.set(r2x, 0, leftZ2); bA2.scale.setScalar(sc2);
-    bA2.rotation.y = Math.random() * Math.PI * 2; scene.add(bA2);
-    const bB2 = new THREE.Mesh(bushGeo, mat2);
-    bB2.position.set(r2x, 0, leftZ2); bB2.scale.setScalar(sc2);
-    bB2.rotation.y = bA2.rotation.y + Math.PI/2; scene.add(bB2);
-
-    // Row 3 (deep background)
-    const r3x = -(TRACK_WIDTH/2 + 13 + Math.random() * 2);
-    const sc3b = 0.9 + Math.random() * 1.4;
-    const mat3b = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const leftZ3 = leftZ + (Math.random() - 0.5) * 3;
-    const bA3b = new THREE.Mesh(bushGeo, mat3b);
-    bA3b.position.set(r3x, 0, leftZ3); bA3b.scale.setScalar(sc3b);
-    bA3b.rotation.y = Math.random() * Math.PI * 2; scene.add(bA3b);
-    const bB3b = new THREE.Mesh(bushGeo, mat3b);
-    bB3b.position.set(r3x, 0, leftZ3); bB3b.scale.setScalar(sc3b);
-    bB3b.rotation.y = bA3b.rotation.y + Math.PI/2; scene.add(bB3b);
-
-    // === RIGHT side — 3 rows ===
-    const rightZ = z + 1.5 + (Math.random() - 0.5) * 4;
-
-    // Row 1
-    const sc4 = 0.7 + Math.random() * 1.2;
-    const mat4 = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const r4x = TRACK_WIDTH/2 + 2.5 + Math.random() * 0.5;
-    const bA4 = new THREE.Mesh(bushGeo, mat4);
-    bA4.position.set(r4x, 0, rightZ); bA4.scale.setScalar(sc4);
-    bA4.rotation.y = Math.random() * Math.PI * 2; scene.add(bA4);
-    const bB4 = new THREE.Mesh(bushGeo, mat4);
-    bB4.position.set(r4x, 0, rightZ); bB4.scale.setScalar(sc4);
-    bB4.rotation.y = bA4.rotation.y + Math.PI/2; scene.add(bB4);
-
-    // Row 2
-    const r5x = TRACK_WIDTH/2 + 7 + Math.random() * 1.5;
-    const sc5 = 0.8 + Math.random() * 1.3;
-    const mat5 = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const rightZ2 = rightZ + (Math.random() - 0.5) * 3;
-    const bA5 = new THREE.Mesh(bushGeo, mat5);
-    bA5.position.set(r5x, 0, rightZ2); bA5.scale.setScalar(sc5);
-    bA5.rotation.y = Math.random() * Math.PI * 2; scene.add(bA5);
-    const bB5 = new THREE.Mesh(bushGeo, mat5);
-    bB5.position.set(r5x, 0, rightZ2); bB5.scale.setScalar(sc5);
-    bB5.rotation.y = bA5.rotation.y + Math.PI/2; scene.add(bB5);
-
-    // Row 3
-    const r6x = TRACK_WIDTH/2 + 13 + Math.random() * 2;
-    const sc6 = 0.9 + Math.random() * 1.4;
-    const mat6 = Math.random() < 0.5 ? bushMat : bush2Mat;
-    const rightZ3 = rightZ + (Math.random() - 0.5) * 3;
-    const bA6 = new THREE.Mesh(bushGeo, mat6);
-    bA6.position.set(r6x, 0, rightZ3); bA6.scale.setScalar(sc6);
-    bA6.rotation.y = Math.random() * Math.PI * 2; scene.add(bA6);
-    const bB6 = new THREE.Mesh(bushGeo, mat6);
-    bB6.position.set(r6x, 0, rightZ3); bB6.scale.setScalar(sc6);
-    bB6.rotation.y = bA6.rotation.y + Math.PI/2; scene.add(bB6);
-  }
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  PALM TREES — already MeshBasicMaterial, kept as-is
-// ═══════════════════════════════════════════════════════════════
-(function buildPalms(){
-  const palmTex = TL.load(URL_PALM);
-  palmTex.encoding = THREE.sRGBEncoding;
-  palmTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const palmMat = new THREE.MeshBasicMaterial({
-    map: palmTex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, depthWrite: false
-  });
-
-  const palmGeo = new THREE.PlaneGeometry(14, 26);
-  palmGeo.translate(0, 13, 0);
-
-  for(let z = 5; z < TRACK_LENGTH - 15; z += 10 + Math.random() * 8){
-    // LEFT palms — 3 rows
-    [-1, 1].forEach(side => {
-      const baseX = side * TRACK_WIDTH/2;
-
-      // Row 1 (close)
-      const off1 = 9 + Math.random() * 4;
-      const pz1 = z + (Math.random() - 0.5) * 6;
-      const hv1 = 0.75 + Math.random() * 0.9;
-      const wv1 = 0.8 + Math.random() * 0.7;
-      const pA = new THREE.Mesh(palmGeo, palmMat);
-      pA.position.set(side < 0 ? -(TRACK_WIDTH/2 + off1) : (TRACK_WIDTH/2 + off1), 0, pz1);
-      pA.scale.set(wv1, hv1, wv1); pA.rotation.y = Math.random() * Math.PI * 2;
-      pA.rotation.z = (Math.random() - 0.5) * 0.1; scene.add(pA);
-      const pB = new THREE.Mesh(palmGeo, palmMat);
-      pB.position.copy(pA.position); pB.scale.copy(pA.scale);
-      pB.rotation.y = pA.rotation.y + Math.PI/2; pB.rotation.z = pA.rotation.z; scene.add(pB);
-
-      // Row 2 (mid)
-      const off2 = 17 + Math.random() * 5;
-      const pz2 = z + 3 + (Math.random() - 0.5) * 6;
-      const hv2 = 0.85 + Math.random() * 1.0;
-      const wv2 = 0.9 + Math.random() * 0.8;
-      const pC = new THREE.Mesh(palmGeo, palmMat);
-      pC.position.set(side < 0 ? -(TRACK_WIDTH/2 + off2) : (TRACK_WIDTH/2 + off2), 0, pz2);
-      pC.scale.set(wv2, hv2, wv2); pC.rotation.y = Math.random() * Math.PI * 2;
-      pC.rotation.z = (Math.random() - 0.5) * 0.08; scene.add(pC);
-      const pD = new THREE.Mesh(palmGeo, palmMat);
-      pD.position.copy(pC.position); pD.scale.copy(pC.scale);
-      pD.rotation.y = pC.rotation.y + Math.PI/2; pD.rotation.z = pC.rotation.z; scene.add(pD);
-
-      // Row 3 (deep background, 80% chance)
-      if(Math.random() < 0.80){
-        const off3 = 26 + Math.random() * 7;
-        const pz3 = z + 5 + (Math.random() - 0.5) * 6;
-        const hv3 = 0.9 + Math.random() * 1.1;
-        const wv3 = 0.85 + Math.random() * 0.8;
-        const pE = new THREE.Mesh(palmGeo, palmMat);
-        pE.position.set(side < 0 ? -(TRACK_WIDTH/2 + off3) : (TRACK_WIDTH/2 + off3), 0, pz3);
-        pE.scale.set(wv3, hv3, wv3); pE.rotation.y = Math.random() * Math.PI * 2;
-        pE.rotation.z = (Math.random() - 0.5) * 0.07; scene.add(pE);
-        const pF = new THREE.Mesh(palmGeo, palmMat);
-        pF.position.copy(pE.position); pF.scale.copy(pE.scale);
-        pF.rotation.y = pE.rotation.y + Math.PI/2; pF.rotation.z = pE.rotation.z; scene.add(pF);
-      }
-    });
-  }
-})();
+// PALM TREES REMOVED FOR PERFORMANCE
 
 // ═══════════════════════════════════════════════════════════════
 //  GLTF FERRARI CAR LOADING
 // ═══════════════════════════════════════════════════════════════
 function setupCarModel(model, paintColor){
-  const bodyMat = new THREE.MeshPhysicalMaterial({
-    color: paintColor,
-    metalness: 0.9,
-    roughness: 0.5,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.03,
-    envMapIntensity: 1.6
-  });
-  const detailsMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    metalness: 1.0,
-    roughness: 0.5
-  });
-  const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    metalness: 0.25,
-    roughness: 0,
-    transmission: 1.0
-  });
+  const bodyMat = isMobile
+    ? new THREE.MeshStandardMaterial({ color: paintColor, metalness: 0.8, roughness: 0.4 })
+    : new THREE.MeshPhysicalMaterial({ color: paintColor, metalness: 0.9, roughness: 0.5, clearcoat: 1.0, clearcoatRoughness: 0.03, envMapIntensity: 1.6 });
+  const detailsMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.5 });
+  const glassMat = isMobile
+    ? new THREE.MeshStandardMaterial({ color: 0x88ccff, metalness: 0.1, roughness: 0.1, transparent: true, opacity: 0.5 })
+    : new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.25, roughness: 0, transmission: 1.0 });
   const wheels = [];
   model.traverse(function(child){
-    if(child.isMesh){ child.castShadow = true; child.receiveShadow = true; }
+    if(child.isMesh){ child.castShadow = !isMobile; child.receiveShadow = !isMobile; }
   });
   const body = model.getObjectByName('body');
   if(body) body.material = bodyMat;
@@ -1074,7 +883,7 @@ gltfLoader.load(
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — MAX_P 400
 // ═══════════════════════════════════════════════════════════════
-const MAX_P=150;
+const MAX_P = isMobile ? 60 : 150;
 const pGeo=new THREE.BufferGeometry();
 const pPos2=new Float32Array(MAX_P*3);
 const pSz=new Float32Array(MAX_P);
@@ -1258,11 +1067,13 @@ function spawnCarParticles(){
     if(s.finished) return;
     const cx=c.position.x, cy=c.position.y, cz=c.position.z;
     if(elapsed<2.8&&s.speed<90){
-      for(let i=0;i<5;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
+      if(!isMobile) for(let i=0;i<5;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
+      else if(Math.random()<0.3) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
     }
-    for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
-    if(s.speed>35) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);
-    if(s.speed>185&&Math.random()<0.18) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);
+    if(!isMobile) for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
+    else if(Math.random()<0.4) spawnP(cx,cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
+    if(s.speed>35&&(!isMobile||Math.random()<0.3)) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);
+    if(s.speed>185&&Math.random()<(isMobile?0.06:0.18)) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);
   });
 }
 

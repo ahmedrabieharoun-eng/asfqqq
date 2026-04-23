@@ -195,15 +195,16 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-// UPGRADE 8: ACESFilmic tone mapping + refined exposure
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.6;
+// C. COLOR FIX: reduced exposure from 1.6 to 1.35
+renderer.toneMappingExposure = 1.35;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// UPGRADE 4: Subtle LINEAR fog — starts at 400, full at 1200. Near scene stays crystal clear.
+// A. SKY FIX: solid sky color background instead of sphere dome
+scene.background = new THREE.Color(0x87CEEB);
 scene.fog = new THREE.Fog(0xCCE8F0, 400, 1200);
 
 // ─── CAMERA ──────────────────────────────────────────────────
@@ -238,7 +239,7 @@ function fbmNoise(ctx, w, h, scale, octaves, baseAlpha){
   }
 }
 
-// UPGRADE 1: Highly detailed weathered road texture
+// D. ROAD TILING FIX: canvas size changed to 2048x2048
 function makeAsphaltTexture(w,h){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
@@ -367,8 +368,8 @@ function makeAsphaltTexture(w,h){
 
   const tex=new THREE.CanvasTexture(c);
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.repeat.set(2,45);
-  // UPGRADE 10: Max anisotropy for sharp distant rendering
+  // D. ROAD TILING FIX: reduced repeats from (2,45) to (1,25)
+  tex.repeat.set(1, 25);
   tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
   return tex;
 }
@@ -391,25 +392,26 @@ function makeAsphaltNormal(w,h){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  LIGHTING — UPGRADE 5: Multi-light natural setup
+//  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// Hemisphere — sky blue / ground green
-const hemi = new THREE.HemisphereLight(0x88CCEE, 0x446622, 0.7);
+// C. COLOR FIX: hemisphere intensity changed from 0.7 to 0.5
+const hemi = new THREE.HemisphereLight(0x88CCEE, 0x446622, 0.5);
 scene.add(hemi);
 
-// Main sun — slightly warm white
+// B. SHADOW FIX: updated shadow map size to 4096x4096
 const sun = new THREE.DirectionalLight(0xFFF8E8, 3.0);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
-// UPGRADE 7: Softer, higher-res shadows
-sun.shadow.mapSize.width = sun.shadow.mapSize.height = 2048;
+sun.shadow.mapSize.width = sun.shadow.mapSize.height = 4096;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
-sun.shadow.radius = 3;           // softer shadow edges
+sun.shadow.radius = 3;
 sun.shadow.bias = -0.0002;
 sun.shadow.normalBias = 0.02;
 scene.add(sun);
+// B. SHADOW FIX: add sun.target to scene so it can be repositioned
+scene.add(sun.target);
 
 // Sky fill light — cool blue from directly above
 const skyFill = new THREE.DirectionalLight(0x88BBEE, 0.6);
@@ -422,15 +424,16 @@ groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY DOME
+//  SKY — A. SKY FIX: PlaneGeometry sky panel instead of SphereGeometry dome
 // ═══════════════════════════════════════════════════════════════
 (function buildSky(){
   const skyTex = TL.load(URL_SKY);
   skyTex.encoding = THREE.sRGBEncoding;
-  const skyGeo = new THREE.SphereGeometry(1200, 48, 24);
-  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide });
-  scene.add(new THREE.Mesh(skyGeo, skyMat));
-  scene.environment = skyTex;
+  const skyGeo = new THREE.PlaneGeometry(3000, 800);
+  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, depthWrite: false });
+  const skyMesh = new THREE.Mesh(skyGeo, skyMat);
+  skyMesh.position.set(0, 250, 1200);
+  scene.add(skyMesh);
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -439,10 +442,11 @@ scene.add(groundBounce);
 const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
 const FINISH_Z     = 860;
-const asphaltTex   = makeAsphaltTexture(1024,1024);
+// D. ROAD TILING FIX: makeAsphaltTexture called with 2048x2048
+const asphaltTex   = makeAsphaltTexture(2048, 2048);
 const normalTex    = makeAsphaltNormal(512,512);
 
-// Real grass texture — UPGRADE 10: max anisotropy
+// Real grass texture
 const grassTex = TL.load(URL_GRASS);
 grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
 grassTex.repeat.set(40, 140);
@@ -462,7 +466,9 @@ const roadMat = new THREE.MeshStandardMaterial({
   roughness:0.82, metalness:0.04, envMapIntensity:0.35
 });
 const road = new THREE.Mesh(roadGeo, roadMat);
-road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10); road.receiveShadow=true;
+road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
+// B. SHADOW FIX: ensure road receiveShadow
+road.receiveShadow=true;
 scene.add(road);
 
 // Grass ground planes (wide)
@@ -482,7 +488,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x5C3A1A, roughness: 0.95
   scene.add(dirt);
 });
 
-// UPGRADE 6: Road edge debris / dirt patches
+// Road edge debris / dirt patches
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
     if(Math.random() < 0.4){
@@ -649,41 +655,46 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  BUSHES — UPGRADE 3: Asymmetric placement, varied size, random Y rotation, gaps
+//  BUSHES
 // ═══════════════════════════════════════════════════════════════
 (function buildBushes(){
   const bushTex = TL.load(URL_BUSH);
   bushTex.encoding = THREE.sRGBEncoding;
+  // C. COLOR FIX: bush roughness changed from 0.85 to 0.7
   const bushMat = new THREE.MeshStandardMaterial({
     map: bushTex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, roughness: 0.85, metalness: 0, depthWrite: false
+    side: THREE.DoubleSide, roughness: 0.7, metalness: 0, depthWrite: false
   });
 
   const bush2Tex = TL.load(URL_BUSH2);
+  // C. COLOR FIX: bush2 roughness changed from 0.85 to 0.7
   const bush2Mat = new THREE.MeshStandardMaterial({
     map: bush2Tex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, roughness: 0.85, metalness: 0
+    side: THREE.DoubleSide, roughness: 0.7, metalness: 0
   });
 
   const bushGeo = new THREE.PlaneGeometry(8, 5);
   bushGeo.translate(0, 2.5, 0);
 
   for(let z = 5; z < TRACK_LENGTH - 10; z += 5){
-    // LEFT side — independent Z offset from right
-    if(Math.random() > 0.10){ // 10% chance to skip for natural gaps
+    // LEFT side
+    if(Math.random() > 0.10){
       const leftZ = z + (Math.random() - 0.5) * 6;
-      const sc1 = 0.5 + Math.random() * 1.1; // 0.5 to 1.6
+      const sc1 = 0.5 + Math.random() * 1.1;
       const mat1 = Math.random() < 0.5 ? bushMat : bush2Mat;
       const r1x = -(TRACK_WIDTH/2 + 3 + Math.random());
       const bA1 = new THREE.Mesh(bushGeo, mat1);
       bA1.position.set(r1x, 0, leftZ);
       bA1.scale.setScalar(sc1);
       bA1.rotation.y = Math.random() * Math.PI * 2;
+      // B. SHADOW FIX: bush castShadow
+      bA1.castShadow = true;
       scene.add(bA1);
       const bB1 = new THREE.Mesh(bushGeo, mat1);
       bB1.position.set(r1x, 0, leftZ);
       bB1.scale.setScalar(sc1);
       bB1.rotation.y = bA1.rotation.y + Math.PI/2;
+      bB1.castShadow = true;
       scene.add(bB1);
 
       // Row 2 left
@@ -695,17 +706,19 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       bA2.position.set(r2x, 0, leftZ2);
       bA2.scale.setScalar(sc2);
       bA2.rotation.y = Math.random() * Math.PI * 2;
+      bA2.castShadow = true;
       scene.add(bA2);
       const bB2 = new THREE.Mesh(bushGeo, mat2);
       bB2.position.set(r2x, 0, leftZ2);
       bB2.scale.setScalar(sc2);
       bB2.rotation.y = bA2.rotation.y + Math.PI/2;
+      bB2.castShadow = true;
       scene.add(bB2);
     }
 
-    // RIGHT side — DIFFERENT Z offset, independent from left
+    // RIGHT side
     if(Math.random() > 0.10){
-      const rightZ = z + 2.5 + (Math.random() - 0.5) * 8; // offset from left side
+      const rightZ = z + 2.5 + (Math.random() - 0.5) * 8;
       const sc3 = 0.5 + Math.random() * 1.1;
       const mat3 = Math.random() < 0.5 ? bushMat : bush2Mat;
       const r3x = TRACK_WIDTH/2 + 3 + Math.random();
@@ -713,11 +726,13 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       bA3.position.set(r3x, 0, rightZ);
       bA3.scale.setScalar(sc3);
       bA3.rotation.y = Math.random() * Math.PI * 2;
+      bA3.castShadow = true;
       scene.add(bA3);
       const bB3 = new THREE.Mesh(bushGeo, mat3);
       bB3.position.set(r3x, 0, rightZ);
       bB3.scale.setScalar(sc3);
       bB3.rotation.y = bA3.rotation.y + Math.PI/2;
+      bB3.castShadow = true;
       scene.add(bB3);
 
       // Row 2 right
@@ -729,23 +744,24 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       bA4.position.set(r4x, 0, rightZ2);
       bA4.scale.setScalar(sc4);
       bA4.rotation.y = Math.random() * Math.PI * 2;
+      bA4.castShadow = true;
       scene.add(bA4);
       const bB4 = new THREE.Mesh(bushGeo, mat4);
       bB4.position.set(r4x, 0, rightZ2);
       bB4.scale.setScalar(sc4);
       bB4.rotation.y = bA4.rotation.y + Math.PI/2;
+      bB4.castShadow = true;
       scene.add(bB4);
     }
   }
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  PALM TREES — UPGRADES 2 & 9: Asymmetric positions, height/width independent scale
+//  PALM TREES
 // ═══════════════════════════════════════════════════════════════
 (function buildPalms(){
   const palmTex = TL.load(URL_PALM);
   palmTex.encoding = THREE.sRGBEncoding;
-  // UPGRADE 10: Max anisotropy on palm texture
   palmTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   const palmMat = new THREE.MeshBasicMaterial({
     map: palmTex, transparent: true, alphaTest: 0.15,
@@ -756,10 +772,9 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   palmGeo.translate(0, 11, 0);
 
   for(let z = 10; z < TRACK_LENGTH - 15; z += 20 + Math.random() * 15){
-    // LEFT palm — independent offset
+    // LEFT palm
     const leftOffset = 10 + Math.random() * 8;
     const leftZ = z + (Math.random() - 0.5) * 8;
-    // UPGRADE 9: Height independent from width
     const leftHeightVar = 0.6 + Math.random() * 0.8;
     const leftWidthVar  = 0.7 + Math.random() * 0.6;
     const pA = new THREE.Mesh(palmGeo, palmMat);
@@ -767,15 +782,18 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     pA.scale.set(leftWidthVar, leftHeightVar, leftWidthVar);
     pA.rotation.y = Math.random() * Math.PI * 2;
     pA.rotation.z = (Math.random() - 0.5) * 0.10;
+    // B. SHADOW FIX: palm castShadow
+    pA.castShadow = true;
     scene.add(pA);
     const pB = new THREE.Mesh(palmGeo, palmMat);
     pB.position.copy(pA.position);
     pB.scale.copy(pA.scale);
     pB.rotation.y = pA.rotation.y + Math.PI/2;
     pB.rotation.z = pA.rotation.z;
+    pB.castShadow = true;
     scene.add(pB);
 
-    // RIGHT palm — DIFFERENT Z position offset from left
+    // RIGHT palm
     const rightOffset = 9 + Math.random() * 9;
     const rightZ = z + 5 + (Math.random() - 0.5) * 10;
     const rightHeightVar = 0.6 + Math.random() * 0.8;
@@ -785,15 +803,17 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     pC.scale.set(rightWidthVar, rightHeightVar, rightWidthVar);
     pC.rotation.y = Math.random() * Math.PI * 2;
     pC.rotation.z = (Math.random() - 0.5) * 0.10;
+    pC.castShadow = true;
     scene.add(pC);
     const pD = new THREE.Mesh(palmGeo, palmMat);
     pD.position.copy(pC.position);
     pD.scale.copy(pC.scale);
     pD.rotation.y = pC.rotation.y + Math.PI/2;
     pD.rotation.z = pC.rotation.z;
+    pD.castShadow = true;
     scene.add(pD);
 
-    // Occasional extra deep-background palm (45% chance, further back)
+    // Occasional extra deep-background palm (45% chance)
     if(Math.random() < 0.45){
       const deepHV = 0.6 + Math.random() * 0.8;
       const deepWV = 0.7 + Math.random() * 0.6;
@@ -805,12 +825,14 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
         pE.scale.set(deepWV,deepHV,deepWV);
         pE.rotation.y=Math.random()*Math.PI*2;
         pE.rotation.z=(Math.random()-0.5)*0.08;
+        pE.castShadow = true;
         scene.add(pE);
         const pF=new THREE.Mesh(palmGeo,palmMat);
         pF.position.copy(pE.position);
         pF.scale.copy(pE.scale);
         pF.rotation.y=pE.rotation.y+Math.PI/2;
         pF.rotation.z=pE.rotation.z;
+        pF.castShadow = true;
         scene.add(pF);
       });
     }
@@ -1027,6 +1049,10 @@ function updateCamera(dt){
   camera.position.lerp(targetPos,0.09);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
+  // B. SHADOW FIX: sun follows cars along track
+  sun.position.set(-80, 100, midZ + 50);
+  sun.target.position.set(0, 0, midZ);
+  sun.target.updateMatrixWorld();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1329,6 +1355,8 @@ function animate(time){
   if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
   if(state.phase!=='racing') _didScreech=false;
   updateSound(dt);
+  // C. COLOR FIX: persistent saturate/contrast filter (no conditional)
+  renderer.domElement.style.filter = 'saturate(1.15) contrast(1.05)';
   renderer.render(scene,camera);
 }
 resetGame();

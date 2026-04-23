@@ -186,7 +186,8 @@ const URL_GRASS    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 const URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3928c54e-b10d-4d5e-8672-fc0062585db0.png';
 const URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b260a10e-10db-43ca-854c-48b74fb24ef8.png';
 const URL_BUSH2    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/25cfa60d-c358-4d87-b386-d9379515fc09.png';
-const URL_FOREST   = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a90fb8e-890f-422f-811d-e00c619311eb.png';
+// CHANGE 1: New forest backdrop URL
+const URL_FOREST   = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/8d9d07e8-6107-4cfd-ba07-1202d0e2481b.png';
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
@@ -196,7 +197,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// FIX 2: Reduced exposure from 1.35 → 1.0 to stop road overexposure
 renderer.toneMappingExposure = 1.0;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
@@ -241,14 +241,8 @@ function fbmNoise(ctx, w, h, scale, octaves, baseAlpha){
 function makeAsphaltTexture(w,h){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
-
-  // FIX 4: Darker base asphalt '#141414' to prevent road looking white under strong lighting
   ctx.fillStyle='#141414'; ctx.fillRect(0,0,w,h);
-
-  // FBM noise for general surface variation
   fbmNoise(ctx,w,h,5,4,0.38);
-
-  // Color variation patches — warm zones (slightly brownish)
   for(let i=0;i<12;i++){
     const x=Math.random()*w, y=Math.random()*h;
     const rx=30+Math.random()*80, ry=20+Math.random()*60;
@@ -259,8 +253,6 @@ function makeAsphaltTexture(w,h){
     ctx.fillStyle=g2; ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2);
     ctx.fill();
   }
-
-  // Cool variation patches
   for(let i=0;i<10;i++){
     const x=Math.random()*w, y=Math.random()*h;
     const rx=25+Math.random()*70, ry=18+Math.random()*50;
@@ -270,8 +262,6 @@ function makeAsphaltTexture(w,h){
     ctx.fillStyle=g2;
     ctx.beginPath(); ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2); ctx.fill();
   }
-
-  // Oil stains / dark patches
   for(let i=0;i<14;i++){
     const x=Math.random()*w, y=Math.random()*h;
     const r=8+Math.random()*25;
@@ -281,8 +271,6 @@ function makeAsphaltTexture(w,h){
     g2.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
   }
-
-  // Water marks (lighter patches)
   for(let i=0;i<8;i++){
     const x=Math.random()*w, y=Math.random()*h;
     const r=12+Math.random()*30;
@@ -291,16 +279,12 @@ function makeAsphaltTexture(w,h){
     g2.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
   }
-
-  // Dense aggregate stones (1200+)
   for(let i=0;i<1300;i++){
     const x=Math.random()*w, y=Math.random()*h, r=0.5+Math.random()*2.5;
     const v=Math.floor(48+Math.random()*50);
     ctx.beginPath(); ctx.ellipse(x,y,r,r*0.65,Math.random()*Math.PI,0,Math.PI*2);
     ctx.fillStyle=`rgb(${v},${v},${v})`; ctx.fill();
   }
-
-  // Tire rubber marks (dark streaks along center)
   for(let i=0;i<8;i++){
     const xm=w*0.28+Math.random()*(w*0.44);
     const ym=Math.random()*h;
@@ -310,8 +294,6 @@ function makeAsphaltTexture(w,h){
     ctx.beginPath(); ctx.moveTo(xm+(Math.random()-0.5)*3,ym);
     ctx.lineTo(xm+(Math.random()-0.5)*5,ym+len); ctx.stroke();
   }
-
-  // 20+ crack lines — thin, branching
   for(let i=0;i<24;i++){
     const xm=40+Math.random()*(w-80);
     const ym=Math.random()*h;
@@ -336,8 +318,6 @@ function makeAsphaltTexture(w,h){
       ctx.stroke();
     }
   }
-
-  // Small potholes (dark circular spots)
   for(let i=0;i<18;i++){
     const x=20+Math.random()*(w-40), y=Math.random()*h;
     const r=1.5+Math.random()*5;
@@ -347,19 +327,15 @@ function makeAsphaltTexture(w,h){
     g2.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
   }
-
-  // Road markings — slightly faded/worn (opacity 0.70)
   ctx.strokeStyle='rgba(255,255,255,0.70)'; ctx.lineWidth=9+Math.random()*2;
   ctx.setLineDash([88,72]);
   ctx.beginPath(); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.stroke();
   ctx.setLineDash([]);
-
   [18, w-18].forEach(x=>{
     ctx.strokeStyle='rgba(255,255,255,0.70)';
     ctx.lineWidth=6+Math.random()*2;
     ctx.beginPath(); ctx.moveTo(x+(Math.random()-0.5)*1.5,0); ctx.lineTo(x+(Math.random()-0.5)*1.5,h); ctx.stroke();
   });
-
   const tex=new THREE.CanvasTexture(c);
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
   tex.repeat.set(1, 25);
@@ -387,11 +363,9 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// FIX 3: Hemisphere light intensity boosted to 0.8 to evenly illuminate everything
 const hemi = new THREE.HemisphereLight(0x88CCEE, 0x446622, 0.8);
 scene.add(hemi);
 
-// FIX 2: Sun intensity reduced from 3.0 → 1.8 to stop road blowout
 const sun = new THREE.DirectionalLight(0xFFF5E0, 1.8);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
@@ -405,36 +379,31 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// Sky fill light — cool blue from directly above
 const skyFill = new THREE.DirectionalLight(0x88BBEE, 0.6);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-// Bounce light from ground — subtle green tint
 const groundBounce = new THREE.DirectionalLight(0x88CC66, 0.3);
 groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY — FIX 6: 3 sky planes (front + left + right) for full coverage
+//  SKY — 3 sky planes (front + left + right) for full coverage
 // ═══════════════════════════════════════════════════════════════
 (function buildSky(){
   const skyTex = TL.load(URL_SKY);
   skyTex.encoding = THREE.sRGBEncoding;
   const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.DoubleSide, depthWrite: false });
 
-  // Front sky (looking down the track)
   const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(3000, 600), skyMat);
   skyFront.position.set(0, 200, 1200);
   scene.add(skyFront);
 
-  // Left sky
   const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(2000, 600), skyMat);
   skyLeft.position.set(-600, 200, 500);
   skyLeft.rotation.y = Math.PI / 2;
   scene.add(skyLeft);
 
-  // Right sky
   const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(2000, 600), skyMat);
   skyRight.position.set(600, 200, 500);
   skyRight.rotation.y = -Math.PI / 2;
@@ -450,7 +419,6 @@ const FINISH_Z     = 860;
 const asphaltTex   = makeAsphaltTexture(2048, 2048);
 const normalTex    = makeAsphaltNormal(512,512);
 
-// Real grass texture
 const grassTex = TL.load(URL_GRASS);
 grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
 grassTex.repeat.set(40, 140);
@@ -464,7 +432,6 @@ for(let i=0;i<rPos.count;i++){
   rPos.setY(i, rPos.getY(i) - Math.abs(x/TRACK_WIDTH)*0.04);
 }
 roadGeo.computeVertexNormals();
-// Road keeps MeshStandardMaterial — it needs lighting for shadows/depth
 const roadMat = new THREE.MeshStandardMaterial({
   map:asphaltTex, normalMap:normalTex,
   normalScale:new THREE.Vector2(0.45,0.45),
@@ -475,7 +442,6 @@ road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
 road.receiveShadow=true;
 scene.add(road);
 
-// FIX 7: Grass ground planes — MeshBasicMaterial so they show real green color
 const gGeo = new THREE.PlaneGeometry(320, TRACK_LENGTH+100);
 const gMat = new THREE.MeshBasicMaterial({ map: grassTex });
 [-160, 160].forEach(x=>{
@@ -483,7 +449,6 @@ const gMat = new THREE.MeshBasicMaterial({ map: grassTex });
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
 });
 
-// FIX 8: Dirt strip — lighter medium brown instead of very dark brown
 const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});
 [-1,1].forEach(side => {
   const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
@@ -492,7 +457,6 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
   scene.add(dirt);
 });
 
-// Road edge debris / dirt patches
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
     if(Math.random() < 0.4){
@@ -510,7 +474,6 @@ for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   });
 }
 
-// Curbs
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
 function makeCurb(x, zCenter, length){
   const cg=new THREE.BoxGeometry(0.7,0.12,length);
@@ -526,7 +489,6 @@ function makeCurb(x, zCenter, length){
 makeCurb(-TRACK_WIDTH/2-0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeCurb( TRACK_WIDTH/2+0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
-// Armco barriers
 const armcoMat = new THREE.MeshStandardMaterial({ color:0xCCCCCC, metalness:0.7, roughness:0.35 });
 function makeArmco(x, zCenter, length){
   const ag=new THREE.BoxGeometry(0.2,0.6,length);
@@ -639,62 +601,67 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  FOREST/TREE MIX BACKDROP — FIX 1: MeshBasicMaterial (unlit)
+//  FOREST/TREE MIX BACKDROP — CHANGE 1+2: New URL, taller plane
 // ═══════════════════════════════════════════════════════════════
 (function buildForestBackdrop(){
   const forestMixTex = new THREE.TextureLoader().load(URL_FOREST);
   forestMixTex.wrapS = THREE.RepeatWrapping;
   forestMixTex.repeat.set(10, 1);
-  // FIX 1: MeshBasicMaterial — shows full texture color regardless of lighting
   const forestMixMat = new THREE.MeshBasicMaterial({
     map: forestMixTex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.1
   });
-  const fmGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 200, 25);
-  fmGeo.translate(0, 12.5, 0);
+  // CHANGE 2: Height increased from 25 → 35, translate anchors at ground (0, 17.5, 0)
+  const fmGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 200, 35);
+  fmGeo.translate(0, 17.5, 0);
   [-1, 1].forEach(side => {
     const fm = new THREE.Mesh(fmGeo, forestMixMat);
-    fm.position.set(side * (TRACK_WIDTH/2 + 22), 0, TRACK_LENGTH/2);
+    // CHANGE 2: Positioned further back at TRACK_WIDTH/2 + 25
+    fm.position.set(side * (TRACK_WIDTH/2 + 25), 0, TRACK_LENGTH/2);
     fm.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
     scene.add(fm);
   });
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  BUSHES — FIX 1: MeshBasicMaterial (unlit) for both bush types
+//  BUSHES — CHANGE 3+4: Denser spacing, bigger geo, 3rd row
 // ═══════════════════════════════════════════════════════════════
 (function buildBushes(){
   const bushTex = TL.load(URL_BUSH);
   bushTex.encoding = THREE.sRGBEncoding;
-  // FIX 1: MeshBasicMaterial — vegetation shows full color, no dark tunnel effect
   const bushMat = new THREE.MeshBasicMaterial({
     map: bushTex, transparent: true, alphaTest: 0.15,
     side: THREE.DoubleSide, depthWrite: false
   });
 
   const bush2Tex = TL.load(URL_BUSH2);
-  // FIX 1: MeshBasicMaterial for bush2 as well
   const bush2Mat = new THREE.MeshBasicMaterial({
     map: bush2Tex, transparent: true, alphaTest: 0.15,
     side: THREE.DoubleSide, depthWrite: false
   });
 
-  const bushGeo = new THREE.PlaneGeometry(8, 5);
-  bushGeo.translate(0, 2.5, 0);
+  // CHANGE 4: Bigger bush geometries
+  const bushGeo = new THREE.PlaneGeometry(9, 6);
+  bushGeo.translate(0, 3, 0);
 
+  const bushGeoTall = new THREE.PlaneGeometry(11, 8);
+  bushGeoTall.translate(0, 4, 0);
+
+  // CHANGE 3: Spacing changed from 8 → 5
   for(let z = 5; z < TRACK_LENGTH - 10; z += 5){
     // LEFT side
     if(Math.random() > 0.10){
       const leftZ = z + (Math.random() - 0.5) * 6;
       const sc1 = 0.5 + Math.random() * 1.1;
       const mat1 = Math.random() < 0.5 ? bushMat : bush2Mat;
+      const geo1 = Math.random() < 0.5 ? bushGeo : bushGeoTall;
       const r1x = -(TRACK_WIDTH/2 + 3 + Math.random());
-      const bA1 = new THREE.Mesh(bushGeo, mat1);
+      const bA1 = new THREE.Mesh(geo1, mat1);
       bA1.position.set(r1x, 0, leftZ);
       bA1.scale.setScalar(sc1);
       bA1.rotation.y = Math.random() * Math.PI * 2;
       bA1.castShadow = true;
       scene.add(bA1);
-      const bB1 = new THREE.Mesh(bushGeo, mat1);
+      const bB1 = new THREE.Mesh(geo1, mat1);
       bB1.position.set(r1x, 0, leftZ);
       bB1.scale.setScalar(sc1);
       bB1.rotation.y = bA1.rotation.y + Math.PI/2;
@@ -705,19 +672,29 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       const r2x = -(TRACK_WIDTH/2 + 8 + Math.random() * 1.5);
       const sc2 = 0.5 + Math.random() * 1.1;
       const mat2 = Math.random() < 0.5 ? bushMat : bush2Mat;
+      const geo2 = Math.random() < 0.5 ? bushGeo : bushGeoTall;
       const leftZ2 = leftZ + (Math.random() - 0.5) * 4;
-      const bA2 = new THREE.Mesh(bushGeo, mat2);
+      const bA2 = new THREE.Mesh(geo2, mat2);
       bA2.position.set(r2x, 0, leftZ2);
       bA2.scale.setScalar(sc2);
       bA2.rotation.y = Math.random() * Math.PI * 2;
       bA2.castShadow = true;
       scene.add(bA2);
-      const bB2 = new THREE.Mesh(bushGeo, mat2);
+      const bB2 = new THREE.Mesh(geo2, mat2);
       bB2.position.set(r2x, 0, leftZ2);
       bB2.scale.setScalar(sc2);
       bB2.rotation.y = bA2.rotation.y + Math.PI/2;
       bB2.castShadow = true;
       scene.add(bB2);
+
+      // CHANGE 3: Third row left — between palms and forest backdrop
+      const x3left = -(TRACK_WIDTH/2 + 12 + Math.random()*3);
+      const bush3left = new THREE.Mesh(Math.random() < 0.5 ? bushGeo : bushGeoTall, Math.random() < 0.5 ? bushMat : bush2Mat);
+      const sc3left = 0.7 + Math.random() * 0.7;
+      bush3left.scale.set(sc3left, sc3left, sc3left);
+      bush3left.position.set(x3left, 0, z + (Math.random()-0.5)*3);
+      bush3left.rotation.y = Math.random() * Math.PI * 2;
+      scene.add(bush3left);
     }
 
     // RIGHT side
@@ -725,14 +702,15 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       const rightZ = z + 2.5 + (Math.random() - 0.5) * 8;
       const sc3 = 0.5 + Math.random() * 1.1;
       const mat3 = Math.random() < 0.5 ? bushMat : bush2Mat;
+      const geo3 = Math.random() < 0.5 ? bushGeo : bushGeoTall;
       const r3x = TRACK_WIDTH/2 + 3 + Math.random();
-      const bA3 = new THREE.Mesh(bushGeo, mat3);
+      const bA3 = new THREE.Mesh(geo3, mat3);
       bA3.position.set(r3x, 0, rightZ);
       bA3.scale.setScalar(sc3);
       bA3.rotation.y = Math.random() * Math.PI * 2;
       bA3.castShadow = true;
       scene.add(bA3);
-      const bB3 = new THREE.Mesh(bushGeo, mat3);
+      const bB3 = new THREE.Mesh(geo3, mat3);
       bB3.position.set(r3x, 0, rightZ);
       bB3.scale.setScalar(sc3);
       bB3.rotation.y = bA3.rotation.y + Math.PI/2;
@@ -743,25 +721,35 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       const r4x = TRACK_WIDTH/2 + 8 + Math.random() * 1.5;
       const sc4 = 0.5 + Math.random() * 1.1;
       const mat4 = Math.random() < 0.5 ? bushMat : bush2Mat;
+      const geo4 = Math.random() < 0.5 ? bushGeo : bushGeoTall;
       const rightZ2 = rightZ + (Math.random() - 0.5) * 4;
-      const bA4 = new THREE.Mesh(bushGeo, mat4);
+      const bA4 = new THREE.Mesh(geo4, mat4);
       bA4.position.set(r4x, 0, rightZ2);
       bA4.scale.setScalar(sc4);
       bA4.rotation.y = Math.random() * Math.PI * 2;
       bA4.castShadow = true;
       scene.add(bA4);
-      const bB4 = new THREE.Mesh(bushGeo, mat4);
+      const bB4 = new THREE.Mesh(geo4, mat4);
       bB4.position.set(r4x, 0, rightZ2);
       bB4.scale.setScalar(sc4);
       bB4.rotation.y = bA4.rotation.y + Math.PI/2;
       bB4.castShadow = true;
       scene.add(bB4);
+
+      // CHANGE 3: Third row right — between palms and forest backdrop
+      const x3right = TRACK_WIDTH/2 + 12 + Math.random()*3;
+      const bush3right = new THREE.Mesh(Math.random() < 0.5 ? bushGeo : bushGeoTall, Math.random() < 0.5 ? bushMat : bush2Mat);
+      const sc3right = 0.7 + Math.random() * 0.7;
+      bush3right.scale.set(sc3right, sc3right, sc3right);
+      bush3right.position.set(x3right, 0, z + (Math.random()-0.5)*3);
+      bush3right.rotation.y = Math.random() * Math.PI * 2;
+      scene.add(bush3right);
     }
   }
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  PALM TREES — already MeshBasicMaterial, kept as-is
+//  PALM TREES — CHANGE 2: Denser spacing + 60% extra background palms
 // ═══════════════════════════════════════════════════════════════
 (function buildPalms(){
   const palmTex = TL.load(URL_PALM);
@@ -775,7 +763,8 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   const palmGeo = new THREE.PlaneGeometry(12, 22);
   palmGeo.translate(0, 11, 0);
 
-  for(let z = 10; z < TRACK_LENGTH - 15; z += 20 + Math.random() * 15){
+  // CHANGE 2: Spacing changed from 20+rand*15 → 15+rand*7
+  for(let z = 10; z < TRACK_LENGTH - 15; z += 15 + Math.random() * 7){
     // LEFT palm
     const leftOffset = 10 + Math.random() * 8;
     const leftZ = z + (Math.random() - 0.5) * 8;
@@ -816,8 +805,8 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     pD.castShadow = true;
     scene.add(pD);
 
-    // Occasional extra deep-background palm (45% chance)
-    if(Math.random() < 0.45){
+    // CHANGE 2: Extra deep-background palm chance increased from 45% → 60%
+    if(Math.random() < 0.6){
       const deepHV = 0.6 + Math.random() * 0.8;
       const deepWV = 0.7 + Math.random() * 0.6;
       [-1,1].forEach(side=>{
@@ -1052,7 +1041,6 @@ function updateCamera(dt){
   camera.position.lerp(targetPos,0.09);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
-  // Sun follows cars along track
   sun.position.set(-80, 100, midZ + 50);
   sun.target.position.set(0, 0, midZ);
   sun.target.updateMatrixWorld();
@@ -1358,7 +1346,6 @@ function animate(time){
   if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
   if(state.phase!=='racing') _didScreech=false;
   updateSound(dt);
-  // FIX 5: NO CSS filter — Three.js handles all color processing
   renderer.render(scene,camera);
 }
 resetGame();

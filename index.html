@@ -183,24 +183,28 @@
 const URL_SKY      = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0283923f-92e7-4fa1-9174-3b65fb3787eb.jpg';
 const URL_MOUNTAIN = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dbae7089-ceee-43a4-95ff-6821267cfe5b.jpg';
 const URL_GRASS    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2b70430a-30b5-46e2-9fc7-ce262e388893.jpg';
-const URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/059510d9-2941-45c5-9b6a-9343b1da9b4f.jpg';
-const URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d2aa6b88-dea9-42c9-ad0c-fe51b179c093.jpg';
+// CHANGE 2: New palm texture URL
+const URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3928c54e-b10d-4d5e-8672-fc0062585db0.png';
+// CHANGE 1: New bush texture URL
+const URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b260a10e-10db-43ca-854c-48b74fb24ef8.png';
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
+// CHANGE 8: Shadows ON + strong
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.65;
+// CHANGE 9: Slightly brighter exposure
+renderer.toneMappingExposure = 1.75;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xC8EEF8, 0.001);
+// CHANGE 3: NO FOG — scene.fog removed entirely
 
 // ─── CAMERA ──────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 3000);
@@ -297,7 +301,7 @@ function makeAsphaltNormal(w,h){
 const hemi = new THREE.HemisphereLight(0x87CEEB, 0x4CAF50, 0.85);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xFFFFF5, 3.2);
+const sun = new THREE.DirectionalLight(0xFFFFF5, 3.5); // CHANGE 8: intensity 3.5
 sun.position.set(-80, 120, -100);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 2048;
@@ -507,7 +511,29 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  BUSHES — Real image, cross-billboard, dense placement
+//  FOREST/TREE MIX BACKDROP — CHANGE 5
+// ═══════════════════════════════════════════════════════════════
+(function buildForestBackdrop(){
+  const forestMixTex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a90fb8e-890f-422f-811d-e00c619311eb.png');
+  forestMixTex.wrapS = THREE.RepeatWrapping;
+  forestMixTex.repeat.set(10, 1);
+  const forestMixMat = new THREE.MeshBasicMaterial({
+    map: forestMixTex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.1
+  });
+
+  // Wide tall plane on each side, behind the palms
+  const fmGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 200, 25);
+  fmGeo.translate(0, 12.5, 0); // anchor to ground
+  [-1, 1].forEach(side => {
+    const fm = new THREE.Mesh(fmGeo, forestMixMat);
+    fm.position.set(side * (TRACK_WIDTH/2 + 22), 0, TRACK_LENGTH/2);
+    fm.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
+    scene.add(fm);
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  BUSHES — CHANGES 1, 4, 7: New texture, second bush type, wider scale variety
 // ═══════════════════════════════════════════════════════════════
 (function buildBushes(){
   const bushTex = TL.load(URL_BUSH);
@@ -522,23 +548,33 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     depthWrite: false
   });
 
+  // CHANGE 4: Second bush type for variety
+  const bush2Tex = new THREE.TextureLoader().load('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/25cfa60d-c358-4d87-b386-d9379515fc09.png');
+  const bush2Mat = new THREE.MeshStandardMaterial({
+    map: bush2Tex, transparent: true, alphaTest: 0.15,
+    side: THREE.DoubleSide, roughness: 0.85, metalness: 0
+  });
+
   // Standard bush geometry bottom-anchored
   const bushGeo = new THREE.PlaneGeometry(8, 5);
   bushGeo.translate(0, 2.5, 0);
 
   for(let z = 5; z < TRACK_LENGTH - 10; z += 5){
     [-1, 1].forEach(side => {
+      // CHANGE 7: wider scale range 0.6–1.4
       // Row 1: right after armco
       const r1x = side * (TRACK_WIDTH/2 + 3 + Math.random());
-      const sc1 = 0.7 + Math.random() * 0.5;
+      const sc1 = 0.6 + Math.random() * 0.8;
+      // Randomly alternate between bushMat and bush2Mat (50/50)
+      const mat1 = Math.random() < 0.5 ? bushMat : bush2Mat;
       // plane A
-      const bA1 = new THREE.Mesh(bushGeo, bushMat);
+      const bA1 = new THREE.Mesh(bushGeo, mat1);
       bA1.position.set(r1x, 0, z + Math.random());
       bA1.scale.setScalar(sc1);
       bA1.rotation.y = Math.random() * Math.PI;
       scene.add(bA1);
       // plane B (cross-billboard)
-      const bB1 = new THREE.Mesh(bushGeo, bushMat);
+      const bB1 = new THREE.Mesh(bushGeo, mat1);
       bB1.position.set(r1x, 0, z + Math.random());
       bB1.scale.setScalar(sc1);
       bB1.rotation.y = bA1.rotation.y + Math.PI/2;
@@ -546,13 +582,14 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
       // Row 2: between armco and palms
       const r2x = side * (TRACK_WIDTH/2 + 8 + Math.random() * 1.5);
-      const sc2 = 0.65 + Math.random() * 0.55;
-      const bA2 = new THREE.Mesh(bushGeo, bushMat);
+      const sc2 = 0.6 + Math.random() * 0.8;
+      const mat2 = Math.random() < 0.5 ? bushMat : bush2Mat;
+      const bA2 = new THREE.Mesh(bushGeo, mat2);
       bA2.position.set(r2x, 0, z + Math.random());
       bA2.scale.setScalar(sc2);
       bA2.rotation.y = Math.random() * Math.PI;
       scene.add(bA2);
-      const bB2 = new THREE.Mesh(bushGeo, bushMat);
+      const bB2 = new THREE.Mesh(bushGeo, mat2);
       bB2.position.set(r2x, 0, z + Math.random());
       bB2.scale.setScalar(sc2);
       bB2.rotation.y = bA2.rotation.y + Math.PI/2;
@@ -562,7 +599,7 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  PALM TREES — Real image, cross-billboard
+//  PALM TREES — CHANGES 2, 6: New texture, random scale/rotation/lean
 // ═══════════════════════════════════════════════════════════════
 (function buildPalms(){
   const palmTex = TL.load(URL_PALM);
@@ -582,32 +619,37 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     [-1, 1].forEach(side => {
       // Primary palm
       const palmX = side * (TRACK_WIDTH/2 + 10 + Math.random() * 6);
-      const sc = 0.85 + Math.random() * 0.4;
+      // CHANGE 6: Random scale 0.7–1.3, full random Y rotation, slight lean
+      const scaleVar = 0.7 + Math.random() * 0.6;
       const pA = new THREE.Mesh(palmGeo, palmMat);
       pA.position.set(palmX, 0, z + (Math.random()-0.5) * 8);
-      pA.scale.setScalar(sc);
-      pA.rotation.y = Math.random() * Math.PI;
+      pA.scale.set(scaleVar, scaleVar, scaleVar);
+      pA.rotation.y = Math.random() * Math.PI * 2;
+      pA.rotation.z = (Math.random() - 0.5) * 0.08;
       scene.add(pA);
       // Cross plane
       const pB = new THREE.Mesh(palmGeo, palmMat);
       pB.position.copy(pA.position);
       pB.scale.copy(pA.scale);
       pB.rotation.y = pA.rotation.y + Math.PI/2;
+      pB.rotation.z = pA.rotation.z;
       scene.add(pB);
 
       // Occasional extra palm further back
       if(Math.random() < 0.45){
         const palmX2 = side * (TRACK_WIDTH/2 + 18 + Math.random() * 8);
-        const sc2 = 0.75 + Math.random() * 0.35;
+        const scaleVar2 = 0.7 + Math.random() * 0.6;
         const pC = new THREE.Mesh(palmGeo, palmMat);
         pC.position.set(palmX2, 0, z + 8 + (Math.random()-0.5) * 6);
-        pC.scale.setScalar(sc2);
-        pC.rotation.y = Math.random() * Math.PI;
+        pC.scale.set(scaleVar2, scaleVar2, scaleVar2);
+        pC.rotation.y = Math.random() * Math.PI * 2;
+        pC.rotation.z = (Math.random() - 0.5) * 0.08;
         scene.add(pC);
         const pD = new THREE.Mesh(palmGeo, palmMat);
         pD.position.copy(pC.position);
         pD.scale.copy(pC.scale);
         pD.rotation.y = pC.rotation.y + Math.PI/2;
+        pD.rotation.z = pC.rotation.z;
         scene.add(pD);
       }
     });

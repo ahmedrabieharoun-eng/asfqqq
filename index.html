@@ -8,7 +8,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
   #canvas-container { position:relative; width:100vw; height:100vh; }
-  canvas { display:block; width:100%!important; height:100%!important; }
+  canvas { display:block; width:100%!important; height:100%!important; will-change:transform; }
 
   /* ── LOADING SCREEN ── */
   #loading-screen {
@@ -101,11 +101,11 @@
   #p1-hud .car-name { color:#FFB800; }
   #p2-hud .car-name { color:#00CFFF; }
   .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
+  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); transition:none; }
   .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
   .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
   .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
+  .rpm-fill { height:100%; border-radius:3px; transition:width 0.1s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
   .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
   .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
   .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
@@ -259,7 +259,7 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -499,7 +499,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xFFEFCC, 2.4);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
-sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
+sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
 sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
@@ -567,8 +567,8 @@ scene.add(skyGroup);
 const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
 const FINISH_Z     = 860;
-const asphaltTex   = makeAsphaltTexture(2048, 2048);
-const normalTex    = makeAsphaltNormal(512,512);
+const asphaltTex   = makeAsphaltTexture(1024, 1024);
+const normalTex    = makeAsphaltNormal(256,256);
 
 // Real grass texture
 const grassTex = TL.load(URL_GRASS);
@@ -615,7 +615,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
 // Road edge debris / dirt patches
 for(let z = 0; z < TRACK_LENGTH; z += 3 + Math.random()*5){
   [-1, 1].forEach(side => {
-    if(Math.random() < 0.15){
+    if(Math.random() < 0.07){
       const debrisGeo = new THREE.PlaneGeometry(0.3 + Math.random()*0.8, 0.2 + Math.random()*0.5);
       const debrisMat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(0.15 + Math.random()*0.10, 0.12 + Math.random()*0.08, 0.08 + Math.random()*0.05),
@@ -831,7 +831,7 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   bushGeo.translate(0, 3, 0);
 
   // Dense bush rows — step 3 (was 5), always spawn (was 90% chance)
-  for(let z = 5; z < TRACK_LENGTH - 10; z += 3){
+  for(let z = 5; z < TRACK_LENGTH - 10; z += 6){
     // === LEFT side — 3 rows ===
     const leftZ = z + (Math.random() - 0.5) * 4;
 
@@ -1183,9 +1183,9 @@ const camOff=new THREE.Vector3(0,5.5,-18);
 const camLook=new THREE.Vector3(0,1.8,10);
 function updateCamera(dt){
   const midZ=(state.p1.pos+state.p2.pos)*0.5;
-  const sh=cShake*Math.sin(Date.now()*0.09)*0.14;
+  const sh=cShake*Math.sin(Date.now()*0.07)*0.08;
   const targetPos=new THREE.Vector3(camOff.x+sh, camOff.y+Math.abs(sh)*0.4, midZ+camOff.z);
-  camera.position.lerp(targetPos,0.09);
+  camera.position.lerp(targetPos,0.06);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
   // Sky follows camera (X and Z only, keep Y fixed so sky stays on horizon)
@@ -1274,7 +1274,7 @@ function updateParticles(dt){
     if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }
     pPos2[i*3]+=pVx[i]*dt*4; pPos2[i*3+1]+=pVy[i]*dt*4; pPos2[i*3+2]+=pVz2[i]*dt*4;
     pVy[i]-=dt*0.75;
-    pSz[i]*=0.996;
+    pSz[i]*=0.993;
   }
   pGeo.attributes.position.needsUpdate=true;
   pGeo.attributes.size.needsUpdate=true;
@@ -1319,7 +1319,7 @@ function playGearShiftPop(){ /* Audio disabled */ }
 let lastT=0;
 function animate(time){
   requestAnimationFrame(animate);
-  const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
+  const dt=Math.min((time-lastT)/1000,0.033); lastT=time;
   updatePhysics(dt);
   spawnCarParticles();
   updateParticles(dt);

@@ -525,10 +525,37 @@ scene.add(groundBounce);
 const skyGroup = new THREE.Group();
 scene.add(skyGroup);
 
-// Plain sky - no background images
 (function buildSky(){
-  // Top cap only - plain sky color
-  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),
+  const skyTex = TL.load(URL_SIDE_BG);
+  skyTex.encoding = THREE.sRGBEncoding;
+  skyTex.wrapS = THREE.RepeatWrapping;
+
+  // Front panel
+  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });
+  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };
+  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);
+  skyFront.position.set(0, 60, -580);
+  skyGroup.add(skyFront);
+
+  // Clone for left/right/back panels
+  const skyTexL = TL.load(URL_SIDE_BG);
+  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);
+  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });
+
+  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);
+  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;
+  skyGroup.add(skyLeft);
+
+  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;
+  skyGroup.add(skyRight);
+
+  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
+  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;
+  skyGroup.add(skyBack);
+
+  // Top cap
+  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),
     new THREE.MeshBasicMaterial({color:0x7BBCE0, side:THREE.FrontSide, depthWrite:false, fog:false}));
   skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;
   skyGroup.add(skyTop);

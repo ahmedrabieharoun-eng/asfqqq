@@ -196,14 +196,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// C. COLOR FIX: reduced exposure from 1.6 to 1.35
-renderer.toneMappingExposure = 1.35;
+// FIX 2: Reduced exposure from 1.35 → 1.0 to stop road overexposure
+renderer.toneMappingExposure = 1.0;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = true;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// A. SKY FIX: solid sky color background instead of sphere dome
 scene.background = new THREE.Color(0x87CEEB);
 scene.fog = new THREE.Fog(0xCCE8F0, 400, 1200);
 
@@ -239,13 +238,12 @@ function fbmNoise(ctx, w, h, scale, octaves, baseAlpha){
   }
 }
 
-// D. ROAD TILING FIX: canvas size changed to 2048x2048
 function makeAsphaltTexture(w,h){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
   const ctx=c.getContext('2d');
 
-  // Base asphalt — slightly varied dark grey
-  ctx.fillStyle='#1c1c1c'; ctx.fillRect(0,0,w,h);
+  // FIX 4: Darker base asphalt '#141414' to prevent road looking white under strong lighting
+  ctx.fillStyle='#141414'; ctx.fillRect(0,0,w,h);
 
   // FBM noise for general surface variation
   fbmNoise(ctx,w,h,5,4,0.38);
@@ -322,7 +320,6 @@ function makeAsphaltTexture(w,h){
     ctx.strokeStyle=`rgba(6,6,6,${0.18+Math.random()*0.20})`; ctx.lineWidth=0.8+Math.random()*1.8;
     ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(xm,ym);
-    // Main crack
     let cx2=xm, cy2=ym;
     const steps=3+Math.floor(Math.random()*4);
     for(let s=0;s<steps;s++){
@@ -331,7 +328,6 @@ function makeAsphaltTexture(w,h){
       ctx.lineTo(cx2,cy2);
     }
     ctx.stroke();
-    // Branch crack (50% chance)
     if(Math.random()<0.5){
       const bx=xm+(Math.random()-0.5)*20, by=ym+len*0.3;
       ctx.beginPath(); ctx.moveTo(bx,by);
@@ -353,13 +349,11 @@ function makeAsphaltTexture(w,h){
   }
 
   // Road markings — slightly faded/worn (opacity 0.70)
-  // Center dashed line
   ctx.strokeStyle='rgba(255,255,255,0.70)'; ctx.lineWidth=9+Math.random()*2;
   ctx.setLineDash([88,72]);
   ctx.beginPath(); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Edge lines — worn, slightly random width
   [18, w-18].forEach(x=>{
     ctx.strokeStyle='rgba(255,255,255,0.70)';
     ctx.lineWidth=6+Math.random()*2;
@@ -368,7 +362,6 @@ function makeAsphaltTexture(w,h){
 
   const tex=new THREE.CanvasTexture(c);
   tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  // D. ROAD TILING FIX: reduced repeats from (2,45) to (1,25)
   tex.repeat.set(1, 25);
   tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
   return tex;
@@ -394,12 +387,12 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// C. COLOR FIX: hemisphere intensity changed from 0.7 to 0.5
-const hemi = new THREE.HemisphereLight(0x88CCEE, 0x446622, 0.5);
+// FIX 3: Hemisphere light intensity boosted to 0.8 to evenly illuminate everything
+const hemi = new THREE.HemisphereLight(0x88CCEE, 0x446622, 0.8);
 scene.add(hemi);
 
-// B. SHADOW FIX: updated shadow map size to 4096x4096
-const sun = new THREE.DirectionalLight(0xFFF8E8, 3.0);
+// FIX 2: Sun intensity reduced from 3.0 → 1.8 to stop road blowout
+const sun = new THREE.DirectionalLight(0xFFF5E0, 1.8);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 4096;
@@ -410,7 +403,6 @@ sun.shadow.radius = 3;
 sun.shadow.bias = -0.0002;
 sun.shadow.normalBias = 0.02;
 scene.add(sun);
-// B. SHADOW FIX: add sun.target to scene so it can be repositioned
 scene.add(sun.target);
 
 // Sky fill light — cool blue from directly above
@@ -424,16 +416,29 @@ groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
 // ═══════════════════════════════════════════════════════════════
-//  SKY — A. SKY FIX: PlaneGeometry sky panel instead of SphereGeometry dome
+//  SKY — FIX 6: 3 sky planes (front + left + right) for full coverage
 // ═══════════════════════════════════════════════════════════════
 (function buildSky(){
   const skyTex = TL.load(URL_SKY);
   skyTex.encoding = THREE.sRGBEncoding;
-  const skyGeo = new THREE.PlaneGeometry(3000, 800);
-  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, depthWrite: false });
-  const skyMesh = new THREE.Mesh(skyGeo, skyMat);
-  skyMesh.position.set(0, 250, 1200);
-  scene.add(skyMesh);
+  const skyMat = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.DoubleSide, depthWrite: false });
+
+  // Front sky (looking down the track)
+  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(3000, 600), skyMat);
+  skyFront.position.set(0, 200, 1200);
+  scene.add(skyFront);
+
+  // Left sky
+  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(2000, 600), skyMat);
+  skyLeft.position.set(-600, 200, 500);
+  skyLeft.rotation.y = Math.PI / 2;
+  scene.add(skyLeft);
+
+  // Right sky
+  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(2000, 600), skyMat);
+  skyRight.position.set(600, 200, 500);
+  skyRight.rotation.y = -Math.PI / 2;
+  scene.add(skyRight);
 })();
 
 // ═══════════════════════════════════════════════════════════════
@@ -442,7 +447,6 @@ scene.add(groundBounce);
 const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 24;
 const FINISH_Z     = 860;
-// D. ROAD TILING FIX: makeAsphaltTexture called with 2048x2048
 const asphaltTex   = makeAsphaltTexture(2048, 2048);
 const normalTex    = makeAsphaltNormal(512,512);
 
@@ -460,6 +464,7 @@ for(let i=0;i<rPos.count;i++){
   rPos.setY(i, rPos.getY(i) - Math.abs(x/TRACK_WIDTH)*0.04);
 }
 roadGeo.computeVertexNormals();
+// Road keeps MeshStandardMaterial — it needs lighting for shadows/depth
 const roadMat = new THREE.MeshStandardMaterial({
   map:asphaltTex, normalMap:normalTex,
   normalScale:new THREE.Vector2(0.45,0.45),
@@ -467,20 +472,19 @@ const roadMat = new THREE.MeshStandardMaterial({
 });
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
-// B. SHADOW FIX: ensure road receiveShadow
 road.receiveShadow=true;
 scene.add(road);
 
-// Grass ground planes (wide)
+// FIX 7: Grass ground planes — MeshBasicMaterial so they show real green color
 const gGeo = new THREE.PlaneGeometry(320, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map:grassTex, roughness:0.90, metalness:0, envMapIntensity:0.15 });
+const gMat = new THREE.MeshBasicMaterial({ map: grassTex });
 [-160, 160].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
-  g.position.set(x,-0.01,TRACK_LENGTH/2-10); g.receiveShadow=true; scene.add(g);
+  g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
 });
 
-// Thin brown dirt strip between road edge and bushes
-const dirtMat = new THREE.MeshStandardMaterial({color: 0x5C3A1A, roughness: 0.95});
+// FIX 8: Dirt strip — lighter medium brown instead of very dark brown
+const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});
 [-1,1].forEach(side => {
   const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
   dirt.rotation.x = -Math.PI/2;
@@ -635,12 +639,13 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  FOREST/TREE MIX BACKDROP
+//  FOREST/TREE MIX BACKDROP — FIX 1: MeshBasicMaterial (unlit)
 // ═══════════════════════════════════════════════════════════════
 (function buildForestBackdrop(){
   const forestMixTex = new THREE.TextureLoader().load(URL_FOREST);
   forestMixTex.wrapS = THREE.RepeatWrapping;
   forestMixTex.repeat.set(10, 1);
+  // FIX 1: MeshBasicMaterial — shows full texture color regardless of lighting
   const forestMixMat = new THREE.MeshBasicMaterial({
     map: forestMixTex, side: THREE.DoubleSide, transparent: true, alphaTest: 0.1
   });
@@ -655,22 +660,22 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  BUSHES
+//  BUSHES — FIX 1: MeshBasicMaterial (unlit) for both bush types
 // ═══════════════════════════════════════════════════════════════
 (function buildBushes(){
   const bushTex = TL.load(URL_BUSH);
   bushTex.encoding = THREE.sRGBEncoding;
-  // C. COLOR FIX: bush roughness changed from 0.85 to 0.7
-  const bushMat = new THREE.MeshStandardMaterial({
+  // FIX 1: MeshBasicMaterial — vegetation shows full color, no dark tunnel effect
+  const bushMat = new THREE.MeshBasicMaterial({
     map: bushTex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, roughness: 0.7, metalness: 0, depthWrite: false
+    side: THREE.DoubleSide, depthWrite: false
   });
 
   const bush2Tex = TL.load(URL_BUSH2);
-  // C. COLOR FIX: bush2 roughness changed from 0.85 to 0.7
-  const bush2Mat = new THREE.MeshStandardMaterial({
+  // FIX 1: MeshBasicMaterial for bush2 as well
+  const bush2Mat = new THREE.MeshBasicMaterial({
     map: bush2Tex, transparent: true, alphaTest: 0.15,
-    side: THREE.DoubleSide, roughness: 0.7, metalness: 0
+    side: THREE.DoubleSide, depthWrite: false
   });
 
   const bushGeo = new THREE.PlaneGeometry(8, 5);
@@ -687,7 +692,6 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
       bA1.position.set(r1x, 0, leftZ);
       bA1.scale.setScalar(sc1);
       bA1.rotation.y = Math.random() * Math.PI * 2;
-      // B. SHADOW FIX: bush castShadow
       bA1.castShadow = true;
       scene.add(bA1);
       const bB1 = new THREE.Mesh(bushGeo, mat1);
@@ -757,7 +761,7 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  PALM TREES
+//  PALM TREES — already MeshBasicMaterial, kept as-is
 // ═══════════════════════════════════════════════════════════════
 (function buildPalms(){
   const palmTex = TL.load(URL_PALM);
@@ -782,7 +786,6 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
     pA.scale.set(leftWidthVar, leftHeightVar, leftWidthVar);
     pA.rotation.y = Math.random() * Math.PI * 2;
     pA.rotation.z = (Math.random() - 0.5) * 0.10;
-    // B. SHADOW FIX: palm castShadow
     pA.castShadow = true;
     scene.add(pA);
     const pB = new THREE.Mesh(palmGeo, palmMat);
@@ -1049,7 +1052,7 @@ function updateCamera(dt){
   camera.position.lerp(targetPos,0.09);
   camera.lookAt(new THREE.Vector3(0,camLook.y,midZ+camLook.z));
   if(cShake>0) cShake=Math.max(0,cShake-dt*0.75);
-  // B. SHADOW FIX: sun follows cars along track
+  // Sun follows cars along track
   sun.position.set(-80, 100, midZ + 50);
   sun.target.position.set(0, 0, midZ);
   sun.target.updateMatrixWorld();
@@ -1355,8 +1358,7 @@ function animate(time){
   if(state.phase==='racing'&&!_didScreech){ initAudio(); if(audioReady) playScreech(); _didScreech=true; }
   if(state.phase!=='racing') _didScreech=false;
   updateSound(dt);
-  // C. COLOR FIX: persistent saturate/contrast filter (no conditional)
-  renderer.domElement.style.filter = 'saturate(1.15) contrast(1.05)';
+  // FIX 5: NO CSS filter — Three.js handles all color processing
   renderer.render(scene,camera);
 }
 resetGame();

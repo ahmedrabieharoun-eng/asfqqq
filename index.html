@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,8 @@
 <title>Panda Bamboo Factory 🎋</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
@@ -464,18 +465,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 #compBanner{display:none!important}
 #compBanner.ended{display:none!important}
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-  }
-}
-</script>
-
-<style id="race3dStyles">
-body.race-active .rs-bike, body.race-active #rsFinishImg { display:none !important; }
-#raceCanvas { background:#0a0a14; }
-</style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1684,6 +1674,17 @@ body.race-active .bnav{       display:none!important; }
 
 /* Result phase placeholder (compatibility) */
 #raceResultPhase{display:none;}
+
+/* 3D Bike Canvas Styles */
+.bike-3d-canvas {
+  width: 100%;
+  height: 100%;
+}
+.bike-3d-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
 </style>
 
 <div class="sec" id="sectionTasks">
@@ -1740,16 +1741,12 @@ body.race-active .bnav{       display:none!important; }
       <!-- Canvas draws: sky, mountains, trees, road perspective, lane marks -->
       <canvas id="raceCanvas"></canvas>
 
-      <!-- Bike sprites layered above canvas -->
+      <!-- Bike 3D containers -->
       <div class="rs-bike" id="rsBikeAI">
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/484eb586-f90d-485c-82cc-576c157ed284.png"
-             alt="AI bike"
-             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
+        <div class="bike-3d-canvas" id="bikeAI3D" style="width:100%;height:100%;"></div>
       </div>
       <div class="rs-bike" id="rsBikePlayer">
-        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7d815159-26f2-4b00-bee9-426e2118046b.png"
-             alt="Player bike"
-             onerror="this.parentElement.innerHTML='<div style=font-size:64px;text-align:center;filter:drop-shadow(0 4px 8px #000)>🏍️</div>'">
+        <div class="bike-3d-canvas" id="bikePlayer3D" style="width:100%;height:100%;"></div>
       </div>
 
       <!-- Finish line -->
@@ -1813,6 +1810,136 @@ body.race-active .bnav{       display:none!important; }
 <div id="floatAddTask" style="display:none"></div>
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   3D BIKE GLB SYSTEM
+══════════════════════════════════════════════════════════ */
+const Bike3DSystem = (function(){
+  const MODEL_PATH = 'BIKE MOTO.glb';
+  const instances = {};
+
+  function createScene(containerId, opts) {
+    opts = opts || {};
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+
+    container.innerHTML = '';
+
+    const w = container.offsetWidth || 300;
+    const h = container.offsetHeight || 200;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+    camera.position.set(opts.camX || 0, opts.camY || 1.5, opts.camZ || 3.5);
+    camera.lookAt(0, 0.4, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    keyLight.position.set(5, 8, 5);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+    fillLight.position.set(-5, 3, -5);
+    scene.add(fillLight);
+    const rimLight = new THREE.DirectionalLight(0xffaa88, 0.3);
+    rimLight.position.set(0, 2, -5);
+    scene.add(rimLight);
+
+    let model = null;
+    let mixer = null;
+    let isRacing = false;
+    let raceTime = 0;
+
+    const loader = new THREE.GLTFLoader();
+    loader.load(MODEL_PATH, function(gltf) {
+      model = gltf.scene;
+
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const baseScale = (1.8 / maxDim) * (opts.scale || 1);
+      model.scale.set(baseScale, baseScale, baseScale);
+
+      const center = box.getCenter(new THREE.Vector3());
+      model.position.set(
+        -center.x * baseScale,
+        -center.y * baseScale + 0.3,
+        -center.z * baseScale
+      );
+
+      if (opts.rotY) model.rotation.y = opts.rotY;
+
+      scene.add(model);
+
+      if (gltf.animations && gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(model);
+        gltf.animations.forEach(function(a) { mixer.clipAction(a).play(); });
+      }
+    }, undefined, function(err) {
+      console.warn('BIKE MOTO.glb load error:', err);
+      container.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;filter:drop-shadow(0 4px 8px #000)">🏍️</div>';
+    });
+
+    const clock = new THREE.Clock();
+    function animate() {
+      if (!container.isConnected) return;
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+      if (mixer) mixer.update(delta);
+
+      if (model && isRacing) {
+        raceTime += delta;
+        model.position.y = 0.3 + Math.sin(raceTime * 15) * 0.025;
+        model.rotation.z = Math.sin(raceTime * 12) * 0.015;
+        model.traverse(function(child) {
+          if (child.isMesh && child.name.toLowerCase().includes('wheel')) {
+            child.rotation.x += delta * 15;
+          }
+        });
+      } else if (model) {
+        raceTime = 0;
+        model.position.y = 0.3;
+        model.rotation.z = 0;
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    const ro = new ResizeObserver(function() {
+      var cw = container.offsetWidth;
+      var ch = container.offsetHeight;
+      if (cw && ch) {
+        camera.aspect = cw / ch;
+        camera.updateProjectionMatrix();
+        renderer.setSize(cw, ch);
+      }
+    });
+    ro.observe(container);
+
+    var api = {
+      setRacing: function(v) { isRacing = v; if(!v) raceTime = 0; },
+      dispose: function() {
+        ro.disconnect();
+        renderer.dispose();
+        if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+        delete instances[containerId];
+      }
+    };
+    instances[containerId] = api;
+    return api;
+  }
+
+  return { create: createScene, get: function(id) { return instances[id]; } };
+})();
+
 /* ══════════════════════════════════════════════════════════════
    BALI RALLY — Race Engine v2.0
    Full Server-Connected · Real 2-Lane Racing Animation
@@ -2069,373 +2196,669 @@ body.race-active .bnav{       display:none!important; }
     if(resultOv)    resultOv.style.display    = 'none';
     document.body.classList.add('race-active');
 
-    /* HUD names */
-    const p1NameEl = document.getElementById('rsHudP1Name');
-    const p2NameEl = document.getElementById('rsHudP2Name');
-    const p1SpdEl  = document.getElementById('rsHudP1Speed');
-    const p2SpdEl  = document.getElementById('rsHudP2Speed');
-    const timerEl  = document.getElementById('rsTimer');
-    const userName = (S && S.user && (S.user.username || S.user.name)) ? ('@'+(S.user.username||S.user.name)) : '@You';
-    if(p1NameEl) p1NameEl.textContent = userName;
-    if(p2NameEl) p2NameEl.textContent = aiName;
-
     /* ═══════════════════════════════════════════════════════════
-       3D RACE RENDERER — Three.js based realistic scene
+       CANVAS RACE RENDERER v3.0 — Professional Tropical Highway
+       Matches reference: tall palms, realistic asphalt, mountains
     ═══════════════════════════════════════════════════════════ */
-    const cvs = document.getElementById('raceCanvas');
-    if(!cvs){ console.error('raceCanvas missing'); return; }
+    const ROAD_SCROLL_SPEED = 8; /* px per frame — faster feel */
 
-    /* Async load three.js as module */
-    import('three').then(THREE => {
-      _start3DRace(THREE, cvs, {
-        playerPower, aiPower, playerWins, aiName,
-        timerEl, p1SpdEl, p2SpdEl
-      });
-    }).catch(err => {
-      console.error('Three.js load failed', err);
-      showNotif && showNotif('❌ 3D engine failed to load','e');
-    });
-  }
+    /* Scrolling offsets for different layers (parallax) */
+    let _treeOffset = 0;
+    let _mountainOffset = 0;
 
-  /* Holder so raceGoBack can dispose */
-  let _race3D = null;
-
-  function _start3DRace(THREE, cvs, opts){
-    /* Cleanup any prior */
-    if(_race3D){ try{ _race3D.dispose(); }catch(e){} _race3D = null; }
-
-    const W = cvs.offsetWidth || window.innerWidth;
-    const H = cvs.offsetHeight || window.innerHeight;
-    cvs.width = W; cvs.height = H;
-
-    const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W, H, false);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#87b8d8');
-    scene.fog = new THREE.Fog('#9ec5db', 60, 220);
-
-    const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 600);
-    camera.position.set(0, 4.5, 14);
-
-    /* Lights */
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    scene.add(new THREE.HemisphereLight(0xbcd4ff, 0x3a2a1a, 0.45));
-    const sun = new THREE.DirectionalLight(0xfff2d6, 1.5);
-    sun.position.set(20, 40, 10);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(1024,1024);
-    sun.shadow.camera.left=-40; sun.shadow.camera.right=40;
-    sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40;
-    scene.add(sun);
-
-    /* Track */
-    const TRACK_LENGTH = 400;
-    const FINISH_Z = -TRACK_LENGTH + 20;
-    const trackGroup = new THREE.Group();
-    scene.add(trackGroup);
-
-    /* Asphalt */
-    const asphalt = new THREE.Mesh(
-      new THREE.PlaneGeometry(10, TRACK_LENGTH),
-      new THREE.MeshStandardMaterial({ color: 0x1a1a1f, roughness: 0.95 })
-    );
-    asphalt.rotation.x = -Math.PI/2;
-    asphalt.position.z = -TRACK_LENGTH/2 + 5;
-    asphalt.receiveShadow = true;
-    trackGroup.add(asphalt);
-
-    /* Lane markings */
-    for(let z = 0; z > -TRACK_LENGTH; z -= 6){
-      const mark = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.25, 3),
-        new THREE.MeshBasicMaterial({ color: 0xffffff })
-      );
-      mark.rotation.x = -Math.PI/2;
-      mark.position.set(0, 0.02, z);
-      trackGroup.add(mark);
-    }
-    /* Edge lines */
-    [-4.7, 4.7].forEach(x=>{
-      const line = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.18, TRACK_LENGTH),
-        new THREE.MeshBasicMaterial({ color: 0xffe066 })
-      );
-      line.rotation.x = -Math.PI/2;
-      line.position.set(x, 0.02, -TRACK_LENGTH/2 + 5);
-      trackGroup.add(line);
-    });
-
-    /* Grass sides */
-    const grassMat = new THREE.MeshStandardMaterial({ color: 0x2d5a2d, roughness: 1 });
-    [-15, 15].forEach(x=>{
-      const g = new THREE.Mesh(new THREE.PlaneGeometry(20, TRACK_LENGTH), grassMat);
-      g.rotation.x = -Math.PI/2;
-      g.position.set(x, 0, -TRACK_LENGTH/2 + 5);
-      g.receiveShadow = true;
-      trackGroup.add(g);
-    });
-
-    /* Trees (palm-ish: brown trunk + green sphere) */
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.9 });
-    const leafMat  = new THREE.MeshStandardMaterial({ color: 0x2e8b34, roughness: 0.7 });
-    for(let z = -10; z > -TRACK_LENGTH; z -= 12){
-      [-9, 9, -12, 12].forEach((x,i)=>{
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 4, 8), trunkMat);
-        trunk.position.set(x + (i%2?0.5:-0.5), 2, z + (i*1.7));
-        trunk.castShadow = true;
-        trackGroup.add(trunk);
-        const leaves = new THREE.Mesh(new THREE.SphereGeometry(1.6, 10, 8), leafMat);
-        leaves.position.set(trunk.position.x, 4.8, trunk.position.z);
-        leaves.castShadow = true;
-        trackGroup.add(leaves);
-      });
+    function _initCanvas(){
+      _cvs = document.getElementById('raceCanvas');
+      if(!_cvs) return false;
+      _cW = _cvs.width  = _cvs.offsetWidth  || window.innerWidth;
+      _cH = _cvs.height = _cvs.offsetHeight || window.innerHeight;
+      _ctx = _cvs.getContext('2d');
+      return true;
     }
 
-    /* Finish line */
-    const finishGeo = new THREE.PlaneGeometry(10, 2);
-    const finishCanvas = document.createElement('canvas');
-    finishCanvas.width = 256; finishCanvas.height = 64;
-    const fctx = finishCanvas.getContext('2d');
-    for(let yy=0; yy<8; yy++){
-      for(let xx=0; xx<32; xx++){
-        fctx.fillStyle = ((xx+yy)%2===0) ? '#fff' : '#000';
-        fctx.fillRect(xx*8, yy*8, 8, 8);
+    /* Vanishing point — slightly above center for dramatic perspective */
+    function _vp(){ return { x: _cW * 0.5, y: _cH * 0.38 }; }
+
+    /* ── Draw mountains in background (parallax layer) ── */
+    function _drawMountains(){
+      const vp = _vp();
+      const H  = vp.y;
+      const off = _mountainOffset;
+
+      /* Sky — deep tropical blue gradient */
+      const sky = _ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0,   '#1a6fa8');
+      sky.addColorStop(0.4, '#3d9fd4');
+      sky.addColorStop(0.75,'#72c3e8');
+      sky.addColorStop(1,   '#a8d8f0');
+      _ctx.fillStyle = sky;
+      _ctx.fillRect(0, 0, _cW, H + 4);
+
+      /* Clouds */
+      _ctx.globalAlpha = 0.45;
+      _ctx.fillStyle = '#fff';
+      const cloudSeed = Math.floor(off * 0.001);
+      for(let c = 0; c < 4; c++){
+        const cx = ((c * _cW * 0.27 + off * 0.12) % (_cW + 80)) - 40;
+        const cy = H * (0.18 + c * 0.12);
+        const cr = 18 + c * 8;
+        _ctx.beginPath();
+        _ctx.arc(cx,         cy,      cr,      0, Math.PI*2);
+        _ctx.arc(cx + cr*0.9,cy-cr*0.3, cr*0.8, 0, Math.PI*2);
+        _ctx.arc(cx - cr*0.7,cy-cr*0.2, cr*0.65, 0, Math.PI*2);
+        _ctx.fill();
       }
-    }
-    const finishTex = new THREE.CanvasTexture(finishCanvas);
-    const finish = new THREE.Mesh(finishGeo, new THREE.MeshBasicMaterial({ map: finishTex }));
-    finish.rotation.x = -Math.PI/2;
-    finish.position.set(0, 0.03, FINISH_Z);
-    trackGroup.add(finish);
+      _ctx.globalAlpha = 1;
 
-    /* Finish gantry */
-    const gantryMat = new THREE.MeshStandardMaterial({ color: 0xff3344, roughness: 0.6 });
-    const post1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6, 0.4), gantryMat);
-    post1.position.set(-5, 3, FINISH_Z); trackGroup.add(post1);
-    const post2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6, 0.4), gantryMat);
-    post2.position.set(5, 3, FINISH_Z); trackGroup.add(post2);
-    const top = new THREE.Mesh(new THREE.BoxGeometry(11, 0.8, 0.5), gantryMat);
-    top.position.set(0, 6, FINISH_Z); trackGroup.add(top);
+      /* Far mountains (purple-blue haze) */
+      _ctx.save();
+      const mOff = (off * 0.05) % (_cW * 2);
+      _ctx.translate(-mOff % _cW, 0);
+      for(let pass = 0; pass < 2; pass++){
+        _ctx.beginPath();
+        const mY = H * 0.45;
+        _ctx.moveTo(-60, H);
+        const peaks1 = pass===0
+          ? [0.05,0.15,0.28,0.40,0.52,0.65,0.78,0.90,1.02,1.15]
+          : [0.0,0.12,0.23,0.36,0.48,0.61,0.74,0.87,0.99,1.12];
+        const heights1 = pass===0
+          ? [0.72,0.55,0.68,0.50,0.62,0.48,0.70,0.53,0.66,0.52]
+          : [0.62,0.45,0.58,0.40,0.52,0.38,0.60,0.43,0.56,0.42];
+        peaks1.forEach((px,i)=>{
+          _ctx.lineTo(px * _cW * 1.2, H - (H - mY) * heights1[i]);
+        });
+        _ctx.lineTo(_cW * 1.2, H);
+        _ctx.closePath();
+        const mGrad = _ctx.createLinearGradient(0, H * 0.4, 0, H);
+        if(pass===0){
+          mGrad.addColorStop(0, 'rgba(80,110,160,0.85)');
+          mGrad.addColorStop(1, 'rgba(60,90,130,0.6)');
+        } else {
+          mGrad.addColorStop(0, 'rgba(50,85,130,0.7)');
+          mGrad.addColorStop(1, 'rgba(40,70,110,0.5)');
+        }
+        _ctx.fillStyle = mGrad;
+        _ctx.fill();
+      }
+      _ctx.restore();
 
-    /* ── Build a stylized car ── */
-    function buildCar(color){
-      const g = new THREE.Group();
-      const bodyMat = new THREE.MeshStandardMaterial({ color, metalness:0.7, roughness:0.25 });
-      const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a0a14, metalness:0.9, roughness:0.15 });
-      const blackMat= new THREE.MeshStandardMaterial({ color: 0x111, metalness:0.6, roughness:0.4 });
-
-      const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.35, 3.6), blackMat);
-      chassis.position.y = 0.45; chassis.castShadow = true; g.add(chassis);
-
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 3.2), bodyMat);
-      body.position.set(0, 0.85, 0.1); body.castShadow = true; g.add(body);
-
-      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.6, 1.6), darkMat);
-      cabin.position.set(0, 1.25, -0.1); cabin.castShadow = true; g.add(cabin);
-
-      const wsMat = new THREE.MeshStandardMaterial({ color: 0x1a2a3a, metalness:1, roughness:0.05, transparent:true, opacity:0.7 });
-      const ws = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 0.1), wsMat);
-      ws.position.set(0, 1.25, 0.75); ws.rotation.x = -0.5; g.add(ws);
-
-      const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.06, 0.5), blackMat);
-      spoiler.position.set(0, 1.05, -1.7); g.add(spoiler);
-
-      const headMat = new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0xfffbe6, emissiveIntensity:2 });
-      [[-0.55,1.81],[0.55,1.81]].forEach(([x,z])=>{
-        const h = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.15,0.05), headMat);
-        h.position.set(x, 0.85, z); g.add(h);
-      });
-      const tailMat = new THREE.MeshStandardMaterial({ color:0xaa0000, emissive:0xff2222, emissiveIntensity:2 });
-      [[-0.55,-1.81],[0.55,-1.81]].forEach(([x,z])=>{
-        const h = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.12,0.05), tailMat);
-        h.position.set(x, 0.85, z); g.add(h);
-      });
-
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.9 });
-      const wheels = [];
-      [[-0.85,1.3],[0.85,1.3],[-0.85,-1.3],[0.85,-1.3]].forEach(([x,z])=>{
-        const w = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.35, 18), wheelMat);
-        w.rotation.z = Math.PI/2;
-        w.position.set(x, 0.4, z); w.castShadow = true;
-        g.add(w); wheels.push(w);
-      });
-      g.userData.wheels = wheels;
-      return g;
+      /* Tropical treeline silhouette at horizon */
+      _ctx.save();
+      const tOff = (off * 0.18) % (_cW * 1.5);
+      _ctx.translate(-tOff % (_cW * 0.5), 0);
+      _ctx.fillStyle = 'rgba(20,55,20,0.88)';
+      _ctx.beginPath();
+      _ctx.moveTo(-40, H + 2);
+      const tlineX = _cW * 1.5;
+      for(let tx = -40; tx < tlineX; tx += 18){
+        const rng = Math.sin(tx * 0.037 + 5.1) * 0.5 + 0.5;
+        const th  = H * (0.07 + rng * 0.18);
+        /* Tree spike */
+        _ctx.lineTo(tx,        H - th * 0.3);
+        _ctx.lineTo(tx + 6,    H - th);
+        _ctx.lineTo(tx + 12,   H - th * 0.25);
+      }
+      _ctx.lineTo(tlineX, H + 2);
+      _ctx.closePath();
+      _ctx.fill();
+      _ctx.restore();
     }
 
-    const playerCar = buildCar(0xe63946);   /* red = player */
-    playerCar.position.set(-2.2, 0, 0);
-    scene.add(playerCar);
-    const aiCar = buildCar(0x2a9df4);       /* blue = AI */
-    aiCar.position.set(2.2, 0, 0);
-    scene.add(aiCar);
+    /* ── Draw the road and ground ── */
+    function _drawRoad(){
+      const vp = _vp();
+      const HORIZON = vp.y;
+      const roadTopW = _cW * 0.07;
+      const roadBotW = _cW * 0.85;
+      const roadTop  = HORIZON;
+      const roadBot  = _cH + 4;
 
-    /* Race state */
-    const RACE_DURATION = 15; /* seconds */
-    /* Speed in world units per second; tune so the winner reaches FINISH_Z right around RACE_DURATION */
-    const baseSpeed = (Math.abs(FINISH_Z) / RACE_DURATION); /* ~25 */
-    /* Power -> multiplier */
-    const powerToMult = (p) => 0.85 + Math.min(0.35, p / 1500);
-    const playerMult = powerToMult(opts.playerPower);
-    const aiMult     = powerToMult(opts.aiPower);
-    /* Force outcome: bias winner faster */
-    const winnerBoost = 1.05;
-    const loserDamp   = 0.95;
-    const playerTargetSpeed = baseSpeed * playerMult * (opts.playerWins ? winnerBoost : loserDamp);
-    const aiTargetSpeed     = baseSpeed * aiMult     * (opts.playerWins ? loserDamp   : winnerBoost);
+      /* Grass sides — rich green with texture variation */
+      /* Left grass */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(0, roadBot);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.closePath();
+      const grassL = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      grassL.addColorStop(0,   '#2a6b18');
+      grassL.addColorStop(0.3, '#3a8522');
+      grassL.addColorStop(1,   '#1e5012');
+      _ctx.fillStyle = grassL;
+      _ctx.fill();
 
-    const carState = [
-      { z: 0, speed: 0, target: playerTargetSpeed, car: playerCar },
-      { z: 0, speed: 0, target: aiTargetSpeed,     car: aiCar }
-    ];
+      /* Right grass */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(_cW, roadBot);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.closePath();
+      const grassR = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      grassR.addColorStop(0,   '#2a6b18');
+      grassR.addColorStop(0.3, '#3a8522');
+      grassR.addColorStop(1,   '#1e5012');
+      _ctx.fillStyle = grassR;
+      _ctx.fill();
 
-    let finished = false;
-    let raceWinnerIdx = null;
-    let raceFinalTimes = [null, null];
-    let startTime = null;
-    let lastFrame = performance.now();
-
-    function frame(now){
-      if(!_race3D || !_race3D.alive) return;
-      const dt = Math.min(0.05, (now - lastFrame) / 1000);
-      lastFrame = now;
-      if(startTime === null) startTime = now;
-      const elapsed = (now - startTime) / 1000;
-
-      /* Update timer (countdown from 15s, then count up) */
-      if(timerEl){
-        const remain = Math.max(0, RACE_DURATION - elapsed);
-        const m = Math.floor(remain/60);
-        const s = Math.floor(remain%60);
-        timerEl.textContent = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+      /* Grass highlight strip near road edge */
+      for(let side = -1; side <= 1; side += 2){
+        const edgeTopX = vp.x + side * roadTopW/2;
+        const edgeBotX = vp.x + side * roadBotW/2;
+        const stripW   = _cW * 0.012;
+        _ctx.beginPath();
+        _ctx.moveTo(edgeTopX,            roadTop);
+        _ctx.lineTo(edgeTopX + side*stripW, roadTop);
+        _ctx.lineTo(edgeBotX + side*stripW*6, roadBot);
+        _ctx.lineTo(edgeBotX,            roadBot);
+        _ctx.closePath();
+        _ctx.fillStyle = 'rgba(80,180,40,0.35)';
+        _ctx.fill();
       }
 
-      carState.forEach((c, i)=>{
-        const wob = Math.sin(elapsed * (1.3 + i*0.5) + i*1.7) * 2.5;
-        const tgt = c.target + wob;
-        c.speed += (tgt - c.speed) * Math.min(1, dt * 2);
-        if(!finished) c.z -= c.speed * dt;
-        c.car.position.z = c.z;
-        /* Wheel spin */
-        c.car.userData.wheels.forEach(w => { w.rotation.x -= dt * (c.speed * 0.6); });
-      });
+      /* Main road — dark asphalt with realistic gradient */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.closePath();
+      const roadGrad = _ctx.createLinearGradient(0, roadTop, 0, roadBot);
+      roadGrad.addColorStop(0,    '#4a4a4a');
+      roadGrad.addColorStop(0.08, '#525252');
+      roadGrad.addColorStop(0.5,  '#484848');
+      roadGrad.addColorStop(1,    '#3a3a3a');
+      _ctx.fillStyle = roadGrad;
+      _ctx.fill();
 
-      /* HUD speeds (km/h-ish) */
-      if(opts.p1SpdEl) opts.p1SpdEl.textContent = Math.round(carState[0].speed * 6);
-      if(opts.p2SpdEl) opts.p2SpdEl.textContent = Math.round(carState[1].speed * 6);
+      /* Road surface texture — subtle lighter center strip */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW*0.1, roadTop);
+      _ctx.lineTo(vp.x + roadTopW*0.1, roadTop);
+      _ctx.lineTo(vp.x + roadBotW*0.18, roadBot);
+      _ctx.lineTo(vp.x - roadBotW*0.18, roadBot);
+      _ctx.closePath();
+      _ctx.fillStyle = 'rgba(100,100,100,0.12)';
+      _ctx.fill();
 
-      /* Camera follows lead car */
-      const leadZ = Math.min(carState[0].z, carState[1].z);
-      const camTargetZ = leadZ + 14;
-      camera.position.z += (camTargetZ - camera.position.z) * Math.min(1, dt * 3);
-      camera.position.x = Math.sin(elapsed * 0.25) * 1.2;
-      camera.position.y = 4.8;
-      camera.lookAt(0, 1, leadZ - 10);
+      /* ── Lane markings (perspective-correct, scrolling) ── */
+      const NUM_SEGS = 20;
+      const scrollStep = ROAD_SCROLL_SPEED / (_cH * 0.6);
 
-      /* Finish detection */
-      if(!finished){
-        if(carState[0].z <= FINISH_Z) { raceFinalTimes[0] = elapsed; }
-        if(carState[1].z <= FINISH_Z) { raceFinalTimes[1] = elapsed; }
-        if(carState[0].z <= FINISH_Z || carState[1].z <= FINISH_Z){
-          finished = true;
-          raceWinnerIdx = (carState[0].z <= carState[1].z) ? 0 : 1;
-          /* Show result after 1.5s */
-          setTimeout(()=> _show3DResult(raceWinnerIdx, carState, opts), 1500);
+      for(let i = 0; i < NUM_SEGS; i++){
+        /* t from 0 (horizon) to 1 (bottom) with scroll */
+        let t = ((i / NUM_SEGS) + (_roadOffset / (_cH * 0.9))) % 1;
+        if(t < 0) t += 1;
+
+        const perspT = t * t * t; /* cubic for more natural perspective */
+        const y  = roadTop + (roadBot - roadTop) * t;
+        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
+
+        if(t < 0.03) continue;
+
+        const dashH = Math.max(2, 22 * perspT);
+        const dashW = Math.max(1, 5  * perspT);
+
+        /* Only alternating dashes */
+        const segBucket = Math.floor(t * NUM_SEGS * 2.5);
+        if(segBucket % 2 !== 0) continue;
+
+        /* CENTER solid line — yellow */
+        _ctx.fillStyle = `rgba(255,220,0,${0.75 + perspT * 0.2})`;
+        _ctx.fillRect(vp.x - dashW*0.4, y - dashH/2, dashW*0.8, dashH);
+
+        /* Left lane divider — white dashes */
+        const lx = vp.x - hw * 0.52;
+        _ctx.fillStyle = `rgba(255,255,255,${0.55 + perspT*0.3})`;
+        _ctx.fillRect(lx - dashW*0.5, y - dashH/2, dashW, dashH);
+
+        /* Right lane divider — white dashes */
+        const rx = vp.x + hw * 0.52;
+        _ctx.fillRect(rx - dashW*0.5, y - dashH/2, dashW, dashH);
+      }
+
+      /* Road edges — white lines */
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x - roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x - roadBotW/2, roadBot);
+      _ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      _ctx.lineWidth = 2.5;
+      _ctx.stroke();
+      _ctx.beginPath();
+      _ctx.moveTo(vp.x + roadTopW/2, roadTop);
+      _ctx.lineTo(vp.x + roadBotW/2, roadBot);
+      _ctx.stroke();
+
+      /* Curb stripes — red/white alternating on road edges */
+      const CURB_SEGS = 14;
+      for(let i = 0; i < CURB_SEGS; i++){
+        let t = ((i / CURB_SEGS) + (_roadOffset / (_cH * 0.85)) * 1.2) % 1;
+        if(t < 0) t += 1;
+        if(t < 0.04) continue;
+        const perspT = t * t * t;
+        const y  = roadTop + (roadBot - roadTop) * t;
+        const yt = roadTop + (roadBot - roadTop) * Math.min(1, t + 1/CURB_SEGS);
+        const hw = (roadTopW/2) + (roadBotW/2 - roadTopW/2) * perspT;
+        const hwt= (roadTopW/2) + (roadBotW/2 - roadTopW/2) * (Math.min(1,t+1/CURB_SEGS)**3);
+        const cW2 = Math.max(1, 5 * perspT);
+        const color = (i % 2 === 0) ? 'rgba(220,30,30,0.7)' : 'rgba(255,255,255,0.7)';
+        /* Left curb */
+        _ctx.beginPath();
+        _ctx.moveTo(vp.x - hw - cW2,  y);
+        _ctx.lineTo(vp.x - hw,        y);
+        _ctx.lineTo(vp.x - hwt,       yt);
+        _ctx.lineTo(vp.x - hwt - cW2, yt);
+        _ctx.closePath();
+        _ctx.fillStyle = color;
+        _ctx.fill();
+        /* Right curb */
+        _ctx.beginPath();
+        _ctx.moveTo(vp.x + hw,        y);
+        _ctx.lineTo(vp.x + hw + cW2,  y);
+        _ctx.lineTo(vp.x + hwt + cW2, yt);
+        _ctx.lineTo(vp.x + hwt,       yt);
+        _ctx.closePath();
+        _ctx.fill();
+      }
+    }
+
+    /* ── Draw tall palm trees on both sides ── */
+    function _drawPalmRow(side){
+      if(!_ctx) return;
+      const vp      = _vp();
+      const HORIZON = vp.y;
+      const roadBotHW = _cW * 0.425;
+      const roadTopHW = _cW * 0.035;
+      const NUM_TREES = 9;
+
+      for(let i = 0; i < NUM_TREES; i++){
+        const tBase = i / NUM_TREES;
+        /* Each tree scrolls at slightly different rate for parallax depth */
+        const treeScroll = (_treeOffset * (0.0006 + tBase * 0.0003)) % 1;
+        let t = ((tBase + treeScroll) % 1 + 1) % 1;
+        if(t < 0.04) continue;
+
+        const perspT = t * t;
+        const y = HORIZON + ((_cH - HORIZON) * t);
+
+        /* X — outside road edge, pushed far into grass */
+        const roadHW    = roadTopHW + (roadBotHW - roadTopHW) * perspT;
+        const grassGap  = roadHW * (0.08 + 0.22 * perspT);
+        /* Two rows of trees per side for density */
+        const rowOffset = (i % 2 === 0) ? 0 : roadHW * 0.28;
+        const x = vp.x + side * (roadHW + grassGap + rowOffset);
+
+        /* Skip if off-screen */
+        if(x < -80 || x > _cW + 80) continue;
+
+        /* Tree proportions — tall tropical palms */
+        const treeH  = 35 + perspT * 200;   /* tall! */
+        const trunkW = 2.5 + perspT * 10;
+        const lean   = side * (0.06 + perspT * 0.04);
+
+        _ctx.save();
+        _ctx.translate(x, y);
+        _ctx.rotate(lean);
+
+        /* ── Shadow on ground ── */
+        _ctx.save();
+        _ctx.globalAlpha = 0.18 * perspT;
+        _ctx.fillStyle = '#000';
+        _ctx.beginPath();
+        _ctx.ellipse(treeH * 0.18, -2, treeH * 0.35 * perspT, 4 * perspT, 0, 0, Math.PI*2);
+        _ctx.fill();
+        _ctx.globalAlpha = 1;
+        _ctx.restore();
+
+        /* ── Trunk — segmented palm style ── */
+        const trunkSegs = 6;
+        for(let seg = 0; seg < trunkSegs; seg++){
+          const sy0 = -(treeH * seg / trunkSegs);
+          const sy1 = -(treeH * (seg+1) / trunkSegs);
+          const sw0 = trunkW * (1 - seg/trunkSegs * 0.45);
+          const sw1 = trunkW * (1 - (seg+1)/trunkSegs * 0.45);
+          const tc = _ctx.createLinearGradient(-sw0, sy0, sw0, sy0);
+          const lightness = 60 + seg * 4;
+          const darkness  = 35 + seg * 3;
+          tc.addColorStop(0,    `rgb(${darkness+10},${darkness+5},${darkness-5})`);
+          tc.addColorStop(0.3,  `rgb(${lightness+10},${lightness},${lightness-15})`);
+          tc.addColorStop(0.7,  `rgb(${lightness+5},${lightness-5},${lightness-20})`);
+          tc.addColorStop(1,    `rgb(${darkness},${darkness-5},${darkness-10})`);
+          _ctx.fillStyle = tc;
+          _ctx.beginPath();
+          _ctx.moveTo(-sw0/2, sy0 + 1);
+          _ctx.lineTo( sw0/2, sy0 + 1);
+          _ctx.lineTo( sw1/2, sy1);
+          _ctx.lineTo(-sw1/2, sy1);
+          _ctx.closePath();
+          _ctx.fill();
+          /* Segment ring */
+          _ctx.strokeStyle = `rgba(40,25,10,${0.25 * perspT})`;
+          _ctx.lineWidth = 0.5 * perspT;
+          _ctx.stroke();
+        }
+
+        /* ── Fronds — long drooping tropical fronds ── */
+        const frondLen  = treeH * 0.45;
+        const topY      = -treeH;
+        const NUM_FRONDS = 8;
+
+        for(let f = 0; f < NUM_FRONDS; f++){
+          const angle     = (f / NUM_FRONDS) * Math.PI * 2;
+          /* Drooping arc — start going up, droop outward-down */
+          const fx0 = Math.cos(angle) * frondLen * 0.25;
+          const fy0 = Math.sin(angle) * frondLen * 0.25 - frondLen * 0.15;
+          const fxEnd = Math.cos(angle) * frondLen;
+          const fyEnd = Math.sin(angle) * frondLen * 0.5 + frondLen * 0.25;
+
+          /* Color varies with angle — lit vs dark side */
+          const lit = (Math.cos(angle + 0.8) + 1) / 2;
+          const g1  = Math.round(100 + lit * 60);
+          const g2  = Math.round(50  + lit * 40);
+          const frondColor = `rgba(${g2},${g1},${g2-30},${0.8 + perspT * 0.2})`;
+
+          /* Main frond stalk */
+          _ctx.beginPath();
+          _ctx.moveTo(0, topY);
+          _ctx.quadraticCurveTo(fx0, topY + fy0, fxEnd, topY + fyEnd);
+          _ctx.strokeStyle = frondColor;
+          _ctx.lineWidth   = Math.max(0.8, perspT * 3.5);
+          _ctx.stroke();
+
+          /* Leaflets along frond */
+          const LEAFLETS = 5;
+          for(let l = 1; l <= LEAFLETS; l++){
+            const lt  = l / (LEAFLETS + 1);
+            /* Bezier point at this t */
+            const bx = (1-lt)*(1-lt)*0 + 2*(1-lt)*lt*fx0 + lt*lt*fxEnd;
+            const by = (1-lt)*(1-lt)*topY + 2*(1-lt)*lt*(topY+fy0) + lt*lt*(topY+fyEnd);
+            const leafDir = angle + (lt > 0.5 ? 0.4 : -0.4);
+            const leafLen = frondLen * 0.12 * (1 - lt * 0.3);
+            _ctx.beginPath();
+            _ctx.moveTo(bx, by);
+            _ctx.lineTo(bx + Math.cos(leafDir)*leafLen, by + Math.sin(leafDir)*leafLen*0.6);
+            _ctx.strokeStyle = `rgba(${g2+10},${g1+10},${g2-20},0.55)`;
+            _ctx.lineWidth   = Math.max(0.5, perspT * 1.5);
+            _ctx.stroke();
+          }
+        }
+
+        /* Canopy base — dark green circle */
+        _ctx.beginPath();
+        _ctx.arc(0, topY, frondLen * 0.18, 0, Math.PI*2);
+        const canopyGrad = _ctx.createRadialGradient(0, topY, 0, 0, topY, frondLen*0.18);
+        canopyGrad.addColorStop(0,   `rgba(60,140,40,${0.6+perspT*0.3})`);
+        canopyGrad.addColorStop(1,   `rgba(20,80,20,${0.4+perspT*0.3})`);
+        _ctx.fillStyle = canopyGrad;
+        _ctx.fill();
+
+        _ctx.restore();
+      }
+    }
+
+    /* ── Main frame draw ── */
+    function _drawFrame(){
+      if(!_ctx) return;
+      const vp      = _vp();
+      const HORIZON = vp.y;
+
+      /* Layer 1: Sky + Mountains + Treeline */
+      _drawMountains();
+
+      /* Layer 2: Ground + Road + Markings */
+      _drawRoad();
+
+      /* Layer 3: Palm trees (drawn back-to-front via perspective t) */
+      _drawPalmRow(-1);
+      _drawPalmRow( 1);
+
+      /* Layer 4: Heat shimmer / horizon fog */
+      const fogGrad = _ctx.createLinearGradient(0, HORIZON - 20, 0, HORIZON + 55);
+      fogGrad.addColorStop(0,   'rgba(172,214,230,0)');
+      fogGrad.addColorStop(0.35,'rgba(172,214,230,0.22)');
+      fogGrad.addColorStop(0.65,'rgba(172,214,230,0.12)');
+      fogGrad.addColorStop(1,   'rgba(172,214,230,0)');
+      _ctx.fillStyle = fogGrad;
+      _ctx.fillRect(0, HORIZON - 20, _cW, 75);
+
+      /* Layer 5: Speed lines (motion blur effect at bottom corners) */
+      if(_raceActive){
+        const speedAlpha = 0.06;
+        for(let sl = 0; sl < 5; sl++){
+          const sy = _cH * (0.75 + sl * 0.05);
+          const sw = _cW * (0.05 + sl * 0.02);
+          _ctx.fillStyle = `rgba(255,255,255,${speedAlpha - sl*0.01})`;
+          _ctx.fillRect(0,       sy, sw, 1.5);
+          _ctx.fillRect(_cW - sw, sy, sw, 1.5);
         }
       }
-
-      renderer.render(scene, camera);
-      _race3D.rafId = requestAnimationFrame(frame);
     }
 
-    /* Resize handling */
-    function onResize(){
-      const nW = cvs.offsetWidth || window.innerWidth;
-      const nH = cvs.offsetHeight || window.innerHeight;
-      renderer.setSize(nW, nH, false);
-      camera.aspect = nW / nH;
-      camera.updateProjectionMatrix();
+    /* ── RAF loop ── */
+    function _roadLoop(){
+      if(!_raceActive) return;
+      _roadOffset    = (_roadOffset    + ROAD_SCROLL_SPEED)        % (_cH * 2);
+      _treeOffset    = (_treeOffset    + ROAD_SCROLL_SPEED * 1.1)  % 10000;
+      _mountainOffset= (_mountainOffset+ ROAD_SCROLL_SPEED * 0.25) % 10000;
+      _drawFrame();
+      _raceRafId = requestAnimationFrame(_roadLoop);
     }
-    window.addEventListener('resize', onResize);
+    if(_raceRafId) cancelAnimationFrame(_raceRafId);
+    if(_initCanvas()){
+      _roadOffset = 0; _treeOffset = 0; _mountainOffset = 0;
+      _drawFrame();
+      _raceRafId = requestAnimationFrame(_roadLoop);
+    }
 
-    _race3D = {
-      alive: true,
-      rafId: null,
-      dispose(){
-        this.alive = false;
-        if(this.rafId) cancelAnimationFrame(this.rafId);
-        window.removeEventListener('resize', onResize);
-        try{
-          scene.traverse(o=>{
-            if(o.geometry) o.geometry.dispose();
-            if(o.material){
-              const mats = Array.isArray(o.material) ? o.material : [o.material];
-              mats.forEach(m=>{ for(const k in m){ if(m[k] && m[k].isTexture) m[k].dispose(); } m.dispose && m.dispose(); });
-            }
-          });
-          renderer.dispose();
-        }catch(e){}
+    /* ── Bikes 3D initialization ── */
+    if (!Bike3DSystem.get('bikeAI3D')) {
+      Bike3DSystem.create('bikeAI3D', { scale: 0.9, rotY: -0.2, camX: -0.5 });
+    }
+    if (!Bike3DSystem.get('bikePlayer3D')) {
+      Bike3DSystem.create('bikePlayer3D', { scale: 1.0, rotY: 0.2, camX: 0.5 });
+    }
+
+    const bikeAI     = document.getElementById('rsBikeAI');
+    const bikePlayer = document.getElementById('rsBikePlayer');
+    const finishImg  = document.getElementById('rsFinishImg');
+    const ai3d       = Bike3DSystem.get('bikeAI3D');
+    const pl3d       = Bike3DSystem.get('bikePlayer3D');
+
+    if(bikeAI){
+      bikeAI.style.bottom    = '2%';
+      bikeAI.style.transform = '';
+      bikeAI.classList.add('racing');
+    }
+    if(bikePlayer){
+      bikePlayer.style.bottom    = '1%';
+      bikePlayer.style.transform = '';
+      bikePlayer.classList.add('racing');
+    }
+    if(ai3d) ai3d.setRacing(true);
+    if(pl3d) pl3d.setRacing(true);
+    if(finishImg) finishImg.className = '';
+
+    /* ── HUD setup ── */
+    const p1Name = (S?._tgName || S?.user?.firstName || 'You').slice(0,14);
+    const el_p1n = document.getElementById('rsHudP1Name');
+    const el_p2n = document.getElementById('rsHudP2Name');
+    const el_p1s = document.getElementById('rsHudP1Speed');
+    const el_p2s = document.getElementById('rsHudP2Speed');
+    const el_tmr = document.getElementById('rsTimer');
+    if(el_p1n) el_p1n.textContent = '@'+p1Name;
+    if(el_p2n) el_p2n.textContent = aiName;
+    if(el_p1s) el_p1s.textContent = '0';
+    if(el_p2s) el_p2s.textContent = '0';
+    if(el_tmr) el_tmr.textContent = '00:15';
+
+    /* ── Speed values ── */
+    const maxPlayerKmh = Math.max(35, Math.round(40 + playerPower * 0.026));
+    const maxAiKmh     = Math.max(35, Math.round(40 + aiPower     * 0.026));
+
+    /* ── Race timing ── */
+    const RACE_MS        = 15000;
+    const RAMP_MS        = 5000;   /* speed ramps up over first 5s */
+    const MOVE_START_MS  = 0;      /* BOTH cars move from the very start */
+    const AHEAD_START_MS = 9000;   /* winner starts pulling ahead at 9s */
+    const FINISH_MS      = 13000;
+    const TICK_MS        = 150;
+
+    let elapsed  = 0;
+    let apiCalled = false;
+
+    if(_raceAnimInterval) clearInterval(_raceAnimInterval);
+
+    /* Track vertical positions (% from bottom) */
+    let aiBottom     = 2;
+    let playerBottom = 1;
+    const MAX_FORWARD = 28; /* max % forward movement for winner */
+
+    _raceAnimInterval = setInterval(async ()=>{
+      elapsed += TICK_MS;
+      if(!_raceActive){ clearInterval(_raceAnimInterval); return; }
+
+      /* Speed ramp-up */
+      const rampPct  = Math.min(1, elapsed / RAMP_MS);
+      const easeRamp = rampPct < 0.5 ? 2*rampPct*rampPct : 1-((-2*rampPct+2)**2)/2;
+      const curP1Speed = Math.round(maxPlayerKmh * easeRamp);
+      const curP2Speed = Math.round(maxAiKmh     * easeRamp);
+      if(el_p1s) el_p1s.textContent = curP1Speed;
+      if(el_p2s) el_p2s.textContent = curP2Speed;
+
+      /* Timer */
+      const remaining = Math.max(0, RACE_MS - elapsed);
+      const secs = Math.ceil(remaining / 1000);
+      if(el_tmr) el_tmr.textContent =
+        String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
+
+      /* ── BOTH cars move forward from start ── */
+      const movePct   = Math.min(1, elapsed / (RACE_MS * 0.85));
+      const moveEase  = movePct < 0.5 ? 2*movePct*movePct : 1-((-2*movePct+2)**2)/2;
+      /* Base forward movement for both */
+      const baseMove  = moveEase * 12; /* both go up 12% together */
+
+      /* ── Winner separation (after 9s) ── */
+      let aheadBonus = 0;
+      if(elapsed > AHEAD_START_MS){
+        const sep = Math.min(1,(elapsed - AHEAD_START_MS)/(RACE_MS - AHEAD_START_MS - 400));
+        aheadBonus = sep * MAX_FORWARD;
       }
-    };
 
-    _race3D.rafId = requestAnimationFrame(frame);
-  }
-
-  /* ── Show race result overlay (replaces complex 2D result) ── */
-  function _show3DResult(winnerIdx, carState, opts){
-    const playerWon = (winnerIdx === 0);
-    const ov     = document.getElementById('rsResultOverlay');
-    const emoji  = document.getElementById('rsrEmoji');
-    const title  = document.getElementById('rsrTitle');
-    const reward = document.getElementById('rsrReward');
-    const rwTxt  = document.getElementById('rsrRewardTxt');
-    const name1  = document.getElementById('rsrName1');
-    const name2  = document.getElementById('rsrName2');
-    const spd1   = document.getElementById('rsrSpd1');
-    const spd2   = document.getElementById('rsrSpd2');
-
-    if(emoji) emoji.textContent = playerWon ? '🏆' : '😔';
-    if(title) title.textContent = playerWon ? 'Победа!' : 'Поражение';
-    if(reward){
-      if(playerWon){
-        reward.style.display = '';
-        if(rwTxt) rwTxt.textContent = '+0.9 TON';
+      if(playerWins){
+        playerBottom = 1  + baseMove + aheadBonus;
+        aiBottom     = 2  + baseMove;
+        /* Winner appears smaller (farther ahead) */
+        if(bikePlayer && aheadBonus > 0){
+          const sc = 1 - (aheadBonus/MAX_FORWARD) * 0.18;
+          bikePlayer.style.transform = `scale(${sc.toFixed(3)})`;
+        }
       } else {
-        reward.style.display = 'none';
+        aiBottom     = 2  + baseMove + aheadBonus;
+        playerBottom = 1  + baseMove;
+        if(bikeAI && aheadBonus > 0){
+          const sc = 1 - (aheadBonus/MAX_FORWARD) * 0.18;
+          bikeAI.style.transform = `scale(${sc.toFixed(3)})`;
+        }
       }
-    }
-    const userName = (S && S.user && (S.user.username || S.user.name)) ? ('@'+(S.user.username||S.user.name)) : '@You';
-    if(name1) name1.textContent = userName;
-    if(name2) name2.textContent = opts.aiName;
-    if(spd1)  spd1.textContent  = Math.round(carState[0].speed * 6) + ' km/h';
-    if(spd2)  spd2.textContent  = Math.round(carState[1].speed * 6) + ' km/h';
+      if(bikeAI)     bikeAI.style.bottom     = aiBottom     + '%';
+      if(bikePlayer) bikePlayer.style.bottom = playerBottom + '%';
 
-    if(ov) ov.style.display = 'flex';
+      /* Finish line */
+      if(elapsed >= FINISH_MS && finishImg && !finishImg.classList.contains('show')){
+        finishImg.classList.add('show');
+      }
 
-    /* Award reward via existing API if present */
-    if(playerWon){
-      try{
-        if(typeof loadState === 'function') setTimeout(loadState, 1200);
-      }catch(e){}
-    }
+      /* API call near end */
+      if(elapsed >= RACE_MS - TICK_MS * 2 && !apiCalled){
+        apiCalled = true;
+        try{
+          const result = await api('raceResult',{won:playerWins, bikeLevel:_raceSelectedBike?.lv||0});
+          if(result?.success && result.data){
+            if(S.user) S.user.tonBalance = result.data.tonBalance;
+            syncTopbar();
+          }
+        }catch(e){ console.warn('raceResult API error:', e.message); }
+      }
+
+      /* Race over */
+      if(elapsed >= RACE_MS){
+        clearInterval(_raceAnimInterval);
+        _raceAnimInterval = null;
+        /* Stop road RAF */
+        if(_raceRafId){ cancelAnimationFrame(_raceRafId); _raceRafId = null; }
+        /* Stop bounce */
+        if(bikeAI)     bikeAI.classList.remove('racing');
+        if(bikePlayer) bikePlayer.classList.remove('racing');
+        if(ai3d) ai3d.setRacing(false);
+        if(pl3d) pl3d.setRacing(false);
+        _raceActive  = false;
+        _raceStarted = false;
+        setTimeout(()=>{ _showResult(playerWins, p1Name, aiName, maxPlayerKmh, maxAiKmh); }, 800);
+      }
+    }, TICK_MS);
   }
 
-    /* ── Back to Bike Selection ── */
+  /* ══════════════════════════════════════════════════════════
+     RESULT OVERLAY
+  ══════════════════════════════════════════════════════════ */
+  function _showResult(playerWins, p1Name, aiName, p1Kmh, p2Kmh){
+    const ov = document.getElementById('rsResultOverlay');
+    if(!ov) return;
+
+    const emoji   = document.getElementById('rsrEmoji');
+    const title   = document.getElementById('rsrTitle');
+    const reward  = document.getElementById('rsrReward');
+    const rewTxt  = document.getElementById('rsrRewardTxt');
+    const av1     = document.getElementById('rsrAv1');
+    const name1   = document.getElementById('rsrName1');
+    const spd1    = document.getElementById('rsrSpd1');
+    const av2     = document.getElementById('rsrAv2');
+    const name2   = document.getElementById('rsrName2');
+    const spd2    = document.getElementById('rsrSpd2');
+
+    if(playerWins){
+      if(emoji)  emoji.textContent   = '🏆';
+      if(title){ title.textContent   = 'Победа!'; title.className = 'rsr-title win'; }
+      if(reward) reward.style.display= 'flex';
+      if(rewTxt) rewTxt.textContent  = '+0.9 TON';
+    } else {
+      if(emoji)  emoji.textContent   = '💨';
+      if(title){ title.textContent   = 'Проигрыш'; title.className = 'rsr-title lose'; }
+      if(reward) reward.style.display= 'none';
+    }
+
+    /* Telegramm user avatar if available */
+    const tgUser = S?.tg?.initDataUnsafe?.user;
+    if(tgUser?.photo_url){
+      if(av1) av1.innerHTML = '<img src="'+tgUser.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
+    } else {
+      if(av1) av1.textContent = '🏍️';
+    }
+    if(av2) av2.textContent = '🤖';
+
+    if(name1) name1.textContent = '@'+p1Name;
+    if(name2) name2.textContent = aiName;
+    if(spd1)  spd1.textContent  = p1Kmh + ' km/h';
+    if(spd2)  spd2.textContent  = p2Kmh + ' km/h';
+
+    ov.style.display = 'flex';
+
+    /* Refresh balance in background */
+    setTimeout(()=>{ try{ loadState(); }catch(e){} }, 1200);
+  }
+
+  /* ── Back to Bike Selection ── */
   window.raceGoBack = function(){
     if(_raceAnimInterval){ clearInterval(_raceAnimInterval); _raceAnimInterval = null; }
     if(_raceRafId){ cancelAnimationFrame(_raceRafId); _raceRafId = null; }
-    if(_race3D){ try{ _race3D.dispose(); }catch(e){} _race3D = null; }
     _raceActive  = false;
     _raceStarted = false;
     _roadOffset  = 0;
 
     /* Stop bike bounce */
     document.querySelectorAll('.rs-bike').forEach(b=>b.classList.remove('racing'));
+    const ai3d = Bike3DSystem.get('bikeAI3D');
+    const pl3d = Bike3DSystem.get('bikePlayer3D');
+    if(ai3d) ai3d.setRacing(false);
+    if(pl3d) pl3d.setRacing(false);
 
     /* Reset finish line */
     const finishImg = document.getElementById('rsFinishImg');

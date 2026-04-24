@@ -9,93 +9,125 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
-<!-- Lightweight GLB loader for 3D bike -->
+<!-- Three.js for 3D bike model -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* ══ Minimal GLB → Mesh loader (no Three.js dependency) ══ */
-window.BikeGLBLoader = (function(){
-  let _cachedMesh = null; // reuse parsed mesh across viewers
-  let _loadPromise = null;
-
-  function load(url){
-    if(_loadPromise) return _loadPromise;
-    _loadPromise = fetch(url)
-      .then(r=>r.ok ? r.arrayBuffer() : Promise.reject('404'))
-      .then(buf=>{ _cachedMesh = _parseGLB(buf); return _cachedMesh; })
-      .catch(()=>{ _cachedMesh = _fallbackMesh(); return _cachedMesh; });
-    return _loadPromise;
+// GLTFLoader inline (r128 compatible)
+(function(){
+'use strict';
+const scope=THREE;
+class GLTFLoader extends scope.Loader{
+  constructor(manager){super(manager);}
+  load(url,onLoad,onProgress,onError){
+    const loader=new scope.FileLoader(this.manager);
+    loader.setPath(this.path);
+    loader.setResponseType('arraybuffer');
+    loader.setRequestHeader(this.requestHeader);
+    loader.setWithCredentials(this.withCredentials);
+    loader.load(url,data=>{
+      try{this.parse(data,'',onLoad,onError);}
+      catch(e){onError?onError(e):console.error(e);}
+    },onProgress,onError);
   }
-
-  function _parseGLB(buf){
-    try{
-      const dv = new DataView(buf);
-      if(dv.getUint32(0,true) !== 0x46546C67) return _parseGLTFJSON(new TextDecoder().decode(new Uint8Array(buf)));
-      const jsonLen = dv.getUint32(12,true);
-      const jsonStr = new TextDecoder().decode(new Uint8Array(buf,20,jsonLen));
-      const binStart = 20+jsonLen+8;
-      const binBuf   = buf.byteLength > binStart ? buf.slice(binStart) : null;
-      return _parseGLTFJSON(jsonStr, binBuf);
-    }catch(e){ return _fallbackMesh(); }
+  parse(data,path,onLoad,onError){
+    let content='';
+    const extensions={};
+    const plugins={};
+    if(typeof data==='string'){content=data;}
+    else{
+      const magic=scope.LoaderUtils?scope.LoaderUtils.decodeText(new Uint8Array(data,0,4)):'';
+      if(magic==='\x67\x6C\x54\x46'){
+        // GLB
+        const headerDV=new DataView(data,0,12);
+        // chunk0 = JSON
+        const chunk0Len=new DataView(data,12,4).getUint32(0,true);
+        const jsonBuf=new Uint8Array(data,20,chunk0Len);
+        content=new TextDecoder().decode(jsonBuf);
+        // chunk1 = BIN (may not exist)
+        if(data.byteLength>20+chunk0Len+8){
+          const binStart=20+chunk0Len+8;
+          extensions['KHR_binary_glTF']={body:data.slice(binStart)};
+        }
+      } else {
+        content=new TextDecoder().decode(new Uint8Array(data));
+      }
+    }
+    const json=JSON.parse(content);
+    if(json.asset===undefined||json.asset.version[0]<2){
+      onError&&onError(new Error('GLTFLoader: Unsupported asset version'));return;
+    }
+    // Simple parser: just load first mesh geometry + default material
+    _parseGLTF(json,extensions,path,onLoad,onError,data);
   }
+}
 
-  function _parseGLTFJSON(jsonStr, binBuf){
-    const json = JSON.parse(jsonStr);
-    const buffers = [binBuf];
+function _parseGLTF(json,extensions,path,onLoad,onError,rawData){
+  const group=new scope.Group();
+  try{
+    const buffers=[];
     if(json.buffers){
-      json.buffers.forEach((b,i)=>{
-        if(b.uri && b.uri.startsWith('data:')){
-          const raw = atob(b.uri.split(',')[1]);
-          const arr = new Uint8Array(raw.length);
-          for(let j=0;j<raw.length;j++) arr[j]=raw.charCodeAt(j);
-          buffers[i] = arr.buffer;
+      json.buffers.forEach((buf,i)=>{
+        if(buf.uri){
+          if(buf.uri.startsWith('data:')){
+            const b64=buf.uri.split(',')[1];
+            const bin=atob(b64);
+            const arr=new Uint8Array(bin.length);
+            for(let j=0;j<bin.length;j++) arr[j]=bin.charCodeAt(j);
+            buffers[i]=arr.buffer;
+          }
+        } else if(extensions['KHR_binary_glTF']){
+          buffers[i]=extensions['KHR_binary_glTF'].body;
         }
       });
     }
 
-    function getAcc(idx){
-      const a = json.accessors[idx];
-      const bv = json.bufferViews[a.bufferView];
-      const off = (bv.byteOffset||0)+(a.byteOffset||0);
-      const n = {SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type]||1;
-      const T = {5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType]||Float32Array;
-      return new T(buffers[bv.buffer||0], off, a.count*n);
+    function getAccessor(index){
+      const acc=json.accessors[index];
+      const bv=json.bufferViews[acc.bufferView];
+      const buf=buffers[bv.buffer];
+      const offset=(bv.byteOffset||0)+(acc.byteOffset||0);
+      const compCount={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16}[acc.type]||1;
+      const typeArr={5120:Int8Array,5121:Uint8Array,5122:Int16Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType]||Float32Array;
+      return new typeArr(buf,offset,acc.count*compCount);
     }
 
-    const meshes = [];
     (json.meshes||[]).forEach(mesh=>{
-      (mesh.primitives||[]).forEach(prim=>{
-        const pos  = prim.attributes.POSITION !== undefined ? new Float32Array(getAcc(prim.attributes.POSITION)) : null;
-        const norm = prim.attributes.NORMAL   !== undefined ? new Float32Array(getAcc(prim.attributes.NORMAL))   : null;
-        const idx  = prim.indices             !== undefined ? new Uint32Array(getAcc(prim.indices))               : null;
-        let color = [0.3,0.8,0.3];
-        if(json.materials && prim.material !== undefined){
-          const pbr = (json.materials[prim.material]||{}).pbrMetallicRoughness||{};
-          if(pbr.baseColorFactor) color = pbr.baseColorFactor.slice(0,3);
+      mesh.primitives.forEach(prim=>{
+        const geo=new scope.BufferGeometry();
+        if(prim.attributes.POSITION!==undefined){
+          geo.setAttribute('position',new scope.BufferAttribute(new Float32Array(getAccessor(prim.attributes.POSITION)),3));
         }
-        if(pos) meshes.push({pos,norm,idx,color});
+        if(prim.attributes.NORMAL!==undefined){
+          geo.setAttribute('normal',new scope.BufferAttribute(new Float32Array(getAccessor(prim.attributes.NORMAL)),3));
+        }
+        if(prim.indices!==undefined){
+          const idx=getAccessor(prim.indices);
+          geo.setIndex(new scope.BufferAttribute(new Uint32Array(idx),1));
+        }
+        geo.computeBoundingBox();
+        const matDef=(json.materials&&prim.material!==undefined)?json.materials[prim.material]:null;
+        let color=0x888888;
+        if(matDef&&matDef.pbrMetallicRoughness&&matDef.pbrMetallicRoughness.baseColorFactor){
+          const f=matDef.pbrMetallicRoughness.baseColorFactor;
+          color=new scope.Color(f[0],f[1],f[2]);
+        }
+        const mat=new scope.MeshStandardMaterial({color,metalness:.6,roughness:.3,side:scope.DoubleSide});
+        group.add(new scope.Mesh(geo,mat));
       });
     });
-    return meshes.length ? meshes : _fallbackMesh();
-  }
+  }catch(e){console.warn('GLTFLoader parse warn:',e);}
 
-  function _fallbackMesh(){
-    // Simple moto shape: body + 2 wheels as triangle strips
-    return [{
-      pos: new Float32Array([
-        // body rectangle
-        -0.55,-0.05,-0.18,  0.55,-0.05,-0.18,  0.55,0.28,-0.18,
-        -0.55,-0.05,-0.18,  0.55,0.28,-0.18,  -0.55,0.28,-0.18,
-        // seat hump
-        -0.1,0.28,-0.18,  0.2,0.28,-0.18,  0.05,0.46,-0.18,
-        // handlebar
-        0.42,0.32,-0.18, 0.42,0.38,-0.18, 0.55,0.38,-0.18,
-        0.42,0.32,-0.18, 0.55,0.38,-0.18, 0.55,0.32,-0.18,
-      ]),
-      norm:null, idx:null,
-      color:[0.2,0.85,0.35]
-    }];
+  // If empty group (parse failed), add a fallback sphere
+  if(group.children.length===0){
+    group.add(new scope.Mesh(
+      new scope.BoxGeometry(1,0.5,2),
+      new scope.MeshStandardMaterial({color:0x4CAF50,metalness:.7,roughness:.2})
+    ));
   }
+  onLoad({scene:group});
+}
 
-  return { load, getCached:()=>_cachedMesh };
+scope.GLTFLoader=GLTFLoader;
 })();
 </script>
 <style>
@@ -1655,7 +1687,6 @@ body.race-active .bnav{       display:none!important; }
   left:5%;
   bottom:4%;
   width:38%;
-  height:38%;
   transform-origin:bottom center;
 }
 /* Player bike — RIGHT lane */
@@ -1663,16 +1694,15 @@ body.race-active .bnav{       display:none!important; }
   right:4%;
   bottom:3%;
   width:40%;
-  height:40%;
   transform-origin:bottom center;
 }
 
-/* Bounce handled internally by 3D canvas renderer */
+/* Bounce while racing */
 @keyframes bikeBounce{
   0%,100%{ margin-bottom:0 }
   50%{     margin-bottom:5px }
 }
-.rs-bike.racing{ /* bounce done in canvas */ }
+.rs-bike.racing{ animation:bikeBounce .5s ease-in-out infinite; }
 #rsBikeAI.racing{ animation-delay:.25s; }
 
 /* ── Finish line ── */
@@ -2004,257 +2034,110 @@ body.race-active .bnav{       display:none!important; }
   }
 
   /* ── Mini Three.js viewer for each carousel card ── */
-  /* ══════════════════════════════════════════════════════
-     LIGHTWEIGHT GLB SOFT-RENDERER  — Canvas 2D only
-     Loads BIKE MOTO.glb once, renders with flat shading
-     + fake depth sort. Falls back to vector art if load fails.
-  ══════════════════════════════════════════════════════ */
-  const BIKE_COLORS = [
-    ['#22c55e','#166534'], ['#3b82f6','#1e3a8a'],
-    ['#f97316','#7c2d12'], ['#ec4899','#831843'],
-    ['#a855f7','#4c1d95']
-  ];
-
-  /* Project a 3D point with simple perspective */
-  function _project(x,y,z, rotY, cx,cy, scale){
-    // rotate around Y
-    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-    const rx = x*cosY + z*sinY;
-    const ry = y;
-    const rz = -x*sinY + z*cosY;
-    // perspective
-    const fov = 2.8;
-    const d = fov / (fov + rz + 2.2);
-    return { px: cx + rx*scale*d, py: cy - ry*scale*d, d: rz, depth: rz };
-  }
-
-  /* Compute face normal Z (for backface + lighting) */
-  function _faceNormal(pts){
-    if(pts.length < 3) return {nx:0,ny:0,nz:1};
-    const ax=pts[1].ox-pts[0].ox, ay=pts[1].oy-pts[0].oy, az=pts[1].oz-pts[0].oz;
-    const bx=pts[2].ox-pts[0].ox, by=pts[2].oy-pts[0].oy, bz=pts[2].oz-pts[0].oz;
-    return { nx:ay*bz-az*by, ny:az*bx-ax*bz, nz:ax*by-ay*bx };
-  }
-
-  /* Build renderable face list from GLB mesh data */
-  function _buildFaces(meshes){
-    const faces = [];
-    meshes.forEach(m=>{
-      const pos = m.pos;
-      const idx = m.idx;
-      const baseColor = m.color || [0.3,0.85,0.35];
-      const n = idx ? idx.length/3 : pos.length/9;
-      for(let f=0;f<n;f++){
-        const i0 = idx ? idx[f*3]   : f*3;
-        const i1 = idx ? idx[f*3+1] : f*3+1;
-        const i2 = idx ? idx[f*3+2] : f*3+2;
-        faces.push({
-          verts:[
-            {ox:pos[i0*3],oy:pos[i0*3+1],oz:pos[i0*3+2]},
-            {ox:pos[i1*3],oy:pos[i1*3+1],oz:pos[i1*3+2]},
-            {ox:pos[i2*3],oy:pos[i2*3+1],oz:pos[i2*3+2]}
-          ],
-          color: baseColor
-        });
-      }
-    });
-    return faces;
-  }
-
-  /* Centre + normalise face verts to fit in [-1,1] */
-  function _normaliseFaces(faces){
-    let minX=1e9,minY=1e9,minZ=1e9,maxX=-1e9,maxY=-1e9,maxZ=-1e9;
-    faces.forEach(f=>f.verts.forEach(v=>{
-      minX=Math.min(minX,v.ox);minY=Math.min(minY,v.oy);minZ=Math.min(minZ,v.oz);
-      maxX=Math.max(maxX,v.ox);maxY=Math.max(maxY,v.oy);maxZ=Math.max(maxZ,v.oz);
-    }));
-    const cx2=(minX+maxX)/2, cy2=(minY+maxY)/2, cz2=(minZ+maxZ)/2;
-    const sc = 1.8/Math.max(maxX-minX,maxY-minY,maxZ-minZ,0.001);
-    faces.forEach(f=>f.verts.forEach(v=>{
-      v.ox=(v.ox-cx2)*sc;
-      // Flip Y: GLB uses Y-up, canvas 2D uses Y-down
-      v.oy=-(v.oy-cy2)*sc;
-      v.oz=(v.oz-cz2)*sc;
-    }));
-    return faces;
-  }
-
-  /* Draw all faces onto a canvas 2D ctx */
-  function _drawFaces(ctx, faces, rotY, cx, cy, scale, tintHex, flip){
-    const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-    const fov = 2.8;
-
-    // Parse tint once
-    const tr = parseInt(tintHex.slice(1,3),16)/255;
-    const tg = parseInt(tintHex.slice(3,5),16)/255;
-    const tb = parseInt(tintHex.slice(5,7),16)/255;
-
-    const projected = [];
-    for(let fi=0; fi<faces.length; fi++){
-      const f = faces[fi];
-      const pverts = new Array(3);
-      let sumDepth = 0;
-      for(let vi=0; vi<3; vi++){
-        let {ox,oy,oz} = f.verts[vi];
-        if(flip) ox = -ox;
-        // rotate Y
-        const rx = ox*cosY + oz*sinY;
-        const rz = -ox*sinY + oz*cosY;
-        const d = fov / (fov + rz + 2.2);
-        pverts[vi] = { px: cx + rx*scale*d, py: cy + oy*scale*d, rz };
-        sumDepth += rz;
-      }
-
-      // Backface culling: skip faces facing away
-      const ax = pverts[1].px-pverts[0].px, ay = pverts[1].py-pverts[0].py;
-      const bx = pverts[2].px-pverts[0].px, by = pverts[2].py-pverts[0].py;
-      if(ax*by - ay*bx < 0) continue; // backface
-
-      // Lighting
-      const n = _faceNormal(f.verts);
-      const len = Math.sqrt(n.nx*n.nx+n.ny*n.ny+n.nz*n.nz)||1;
-      const dot = (n.nx*0.5+n.ny*1+n.nz*0.8)/(len*Math.sqrt(1.89));
-      const light = 0.35 + 0.65*Math.max(0,dot);
-
-      const c = f.color;
-      const r = Math.round(Math.min(255,(c[0]*0.55+tr*0.45)*light*255));
-      const g = Math.round(Math.min(255,(c[1]*0.55+tg*0.45)*light*255));
-      const b = Math.round(Math.min(255,(c[2]*0.55+tb*0.45)*light*255));
-
-      projected.push({ pverts, avgDepth: sumDepth/3, r, g, b });
-    }
-
-    // Depth sort back-to-front
-    projected.sort((a,b)=>b.avgDepth-a.avgDepth);
-
-    projected.forEach(({pverts,r,g,b})=>{
-      ctx.beginPath();
-      ctx.moveTo(pverts[0].px, pverts[0].py);
-      ctx.lineTo(pverts[1].px, pverts[1].py);
-      ctx.lineTo(pverts[2].px, pverts[2].py);
-      ctx.closePath();
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fill();
-    });
-  }
-
-  /* Fallback vector art bike (no GLB) */
-  function _drawVectorBike(ctx, W, H, rotY, tintHex, flip, bounceY){
-    const cx = W/2, cy = H*0.58 - bounceY;
-    const sc = Math.min(W,H)*0.36;
-    const cos = Math.cos(rotY), sin = Math.sin(rotY);
-    const skew = sin * 0.35; // fake perspective skew
-    const squeeze = Math.abs(cos)*0.55+0.45;
-
-    const [c1,c2] = [tintHex, '#1a1a2e'];
-
-    // shadow
-    ctx.save();
-    ctx.globalAlpha=0.25;
-    ctx.beginPath();
-    ctx.ellipse(cx+skew*sc*0.3, cy+sc*0.42, sc*0.55*squeeze, sc*0.08, 0, 0, Math.PI*2);
-    ctx.fillStyle='#000'; ctx.fill();
-    ctx.restore();
-
-    // rear wheel
-    const wx1 = cx + (-0.55+skew)*sc*squeeze;
-    const wy1 = cy + sc*0.32;
-    ctx.beginPath(); ctx.ellipse(wx1,wy1,sc*0.28*squeeze,sc*0.28,0,0,Math.PI*2);
-    ctx.fillStyle=c2; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(wx1,wy1,sc*0.16*squeeze,sc*0.16,0,0,Math.PI*2);
-    ctx.fillStyle='#333'; ctx.fill();
-
-    // front wheel
-    const wx2 = cx + (0.55+skew)*sc*squeeze;
-    const wy2 = cy + sc*0.32;
-    ctx.beginPath(); ctx.ellipse(wx2,wy2,sc*0.25*squeeze,sc*0.25,0,0,Math.PI*2);
-    ctx.fillStyle=c2; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(wx2,wy2,sc*0.14*squeeze,sc*0.14,0,0,Math.PI*2);
-    ctx.fillStyle='#333'; ctx.fill();
-
-    // body
-    ctx.beginPath();
-    ctx.moveTo(cx+(-0.52+skew)*sc*squeeze, cy+sc*0.18);
-    ctx.lineTo(cx+(0.48+skew)*sc*squeeze,  cy+sc*0.08);
-    ctx.lineTo(cx+(0.52+skew)*sc*squeeze,  cy+sc*0.22);
-    ctx.lineTo(cx+(-0.48+skew)*sc*squeeze, cy+sc*0.28);
-    ctx.closePath();
-    ctx.fillStyle=c1; ctx.fill();
-
-    // fairing
-    ctx.beginPath();
-    ctx.moveTo(cx+(0.15+skew)*sc*squeeze, cy-sc*0.05);
-    ctx.lineTo(cx+(0.52+skew)*sc*squeeze, cy+sc*0.08);
-    ctx.lineTo(cx+(0.38+skew)*sc*squeeze, cy+sc*0.18);
-    ctx.lineTo(cx+(0.10+skew)*sc*squeeze, cy+sc*0.10);
-    ctx.closePath();
-    ctx.fillStyle=c1; ctx.fill();
-
-    // seat / tank hump
-    ctx.beginPath();
-    ctx.moveTo(cx+(-0.12+skew)*sc*squeeze, cy+sc*0.18);
-    ctx.quadraticCurveTo(cx+(0.1+skew)*sc*squeeze, cy-sc*0.10, cx+(0.22+skew)*sc*squeeze, cy+sc*0.05);
-    ctx.lineTo(cx+(0.18+skew)*sc*squeeze, cy+sc*0.18);
-    ctx.closePath();
-    ctx.fillStyle=c1; ctx.fill();
-
-    // handlebar
-    ctx.beginPath();
-    ctx.moveTo(cx+(0.40+skew)*sc*squeeze, cy+sc*0.04);
-    ctx.lineTo(cx+(0.54+skew)*sc*squeeze, cy-sc*0.04);
-    ctx.strokeStyle='#aaa'; ctx.lineWidth=sc*0.04; ctx.stroke();
-
-    // exhaust
-    ctx.beginPath();
-    ctx.moveTo(cx+(-0.30+skew)*sc*squeeze, cy+sc*0.25);
-    ctx.lineTo(cx+(-0.52+skew)*sc*squeeze, cy+sc*0.30);
-    ctx.strokeStyle='#888'; ctx.lineWidth=sc*0.05; ctx.stroke();
-
-    // rider silhouette
-    ctx.beginPath();
-    ctx.ellipse(cx+(0.04+skew)*sc*squeeze, cy-sc*0.16, sc*0.12*squeeze, sc*0.14, -0.3, 0, Math.PI*2);
-    ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fill();
-  }
-
-  /* ── Carousel card 3D viewer ── */
   const _bike3DViewers = [];
   function _initBike3DViewer(cvs, bikeLv){
-    const parent = cvs.parentElement;
-    const W = parent ? (parent.offsetWidth||300) : 300;
-    const H = parent ? (parent.offsetHeight||180) : 180;
-    const dpr = window.devicePixelRatio||1;
-    cvs.width  = W*dpr; cvs.height = H*dpr;
-    cvs.style.width=W+'px'; cvs.style.height=H+'px';
-    const ctx = cvs.getContext('2d');
-    ctx.scale(dpr,dpr);
+    if(!window.THREE) return;
+    const W = cvs.offsetWidth  || 300;
+    const H = cvs.offsetHeight || 160;
+    cvs.width  = W * (window.devicePixelRatio||1);
+    cvs.height = H * (window.devicePixelRatio||1);
+    cvs.style.width  = W+'px';
+    cvs.style.height = H+'px';
 
-    const [tint] = BIKE_COLORS[(bikeLv-1)%BIKE_COLORS.length];
-    let rotY = Math.PI*0.15;
+    const renderer = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    renderer.setPixelRatio(window.devicePixelRatio||1);
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, W/H, 0.1, 100);
+    camera.position.set(0, 1.2, 3.8);
+    camera.lookAt(0, 0.2, 0);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+    dir.position.set(3, 5, 3);
+    scene.add(dir);
+    const fill = new THREE.DirectionalLight(0x88aaff, 0.4);
+    fill.position.set(-3, 2, -2);
+    scene.add(fill);
+
+    // Ground glow plane
+    const planeGeo = new THREE.PlaneGeometry(6,4);
+    const planeMat = new THREE.MeshStandardMaterial({color:0x0d2810,roughness:1,metalness:0,transparent:true,opacity:.45});
+    const plane = new THREE.Mesh(planeGeo, planeMat);
+    plane.rotation.x = -Math.PI/2;
+    plane.position.y = -0.01;
+    scene.add(plane);
+
+    let bikeModel = null;
+    let loadError = false;
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      'BIKE MOTO.glb',
+      (gltf)=>{
+        bikeModel = gltf.scene;
+        // Centre + scale model
+        const box = new THREE.Box3().setFromObject(bikeModel);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const centre = new THREE.Vector3();
+        box.getCenter(centre);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 1.6 / maxDim;
+        bikeModel.scale.setScalar(scale);
+        bikeModel.position.sub(centre.multiplyScalar(scale));
+        bikeModel.position.y += size.y * scale * 0.5;
+        // Tint based on bike level
+        const hues = [0x4CAF50, 0x2196F3, 0xFF9800, 0xE91E63, 0x9C27B0];
+        const tint = hues[(bikeLv-1) % hues.length];
+        bikeModel.traverse(child=>{
+          if(child.isMesh && child.material){
+            child.material = child.material.clone();
+            child.material.emissive = new THREE.Color(tint);
+            child.material.emissiveIntensity = 0.12;
+          }
+        });
+        scene.add(bikeModel);
+      },
+      undefined,
+      (err)=>{
+        loadError = true;
+        // Fallback: stylised bike shape from boxes
+        const group = new THREE.Group();
+        const bodyMat = new THREE.MeshStandardMaterial({color:0x4CAF50,metalness:.8,roughness:.2});
+        const body = new THREE.Mesh(new THREE.BoxGeometry(.4,.3,1.1),bodyMat);
+        body.position.y=.35;
+        group.add(body);
+        const wheelMat = new THREE.MeshStandardMaterial({color:0x222222,metalness:.5,roughness:.5});
+        [-0.5,0.5].forEach(z=>{
+          const w=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.08,16),wheelMat);
+          w.rotation.z=Math.PI/2; w.position.set(0,.2,z);
+          group.add(w);
+        });
+        group.scale.setScalar(0.85);
+        bikeModel = group;
+        scene.add(group);
+      }
+    );
+
+    let rotY = -0.4;
     let autoRot = true;
     let lastX = null;
-    let faces = null;
-    let bounceT = 0;
-
-    // Load GLB once (cached)
-    window.BikeGLBLoader.load('BIKE MOTO.glb').then(meshes=>{
-      faces = _normaliseFaces(_buildFaces(meshes));
-    }).catch(()=>{ faces = null; });
-
-    function render(){
-      ctx.clearRect(0,0,W,H);
-      const bounceY = Math.abs(Math.sin(bounceT))*6;
-      if(faces && faces.length){
-        // Larger scale: 0.62 of min dimension, centred at 50% height
-        _drawFaces(ctx, faces, rotY, W/2, H*0.52-bounceY, Math.min(W,H)*0.62, tint, false);
-      } else {
-        _drawVectorBike(ctx, W, H, rotY, tint, false, bounceY);
-      }
+    function onStart(e){
+      autoRot=false;
+      lastX=(e.touches?e.touches[0].clientX:e.clientX);
     }
-
-    function onStart(e){ autoRot=false; lastX=(e.touches?e.touches[0].clientX:e.clientX); e.stopPropagation(); }
-    function onMove(e){ if(lastX===null)return; const x=(e.touches?e.touches[0].clientX:e.clientX); rotY+=(x-lastX)*0.018; lastX=x; }
-    function onEnd(){ lastX=null; setTimeout(()=>{autoRot=true;},2000); }
-    cvs.addEventListener('touchstart',onStart,{passive:false});
+    function onMove(e){
+      if(lastX===null) return;
+      const x=(e.touches?e.touches[0].clientX:e.clientX);
+      rotY+=(x-lastX)*0.015;
+      lastX=x;
+    }
+    function onEnd(){lastX=null;setTimeout(()=>{autoRot=true;},2000);}
+    cvs.addEventListener('touchstart',onStart,{passive:true});
     cvs.addEventListener('touchmove',onMove,{passive:true});
     cvs.addEventListener('touchend',onEnd,{passive:true});
     cvs.addEventListener('mousedown',onStart);
@@ -2262,74 +2145,30 @@ body.race-active .bnav{       display:none!important; }
     cvs.addEventListener('mouseup',onEnd);
 
     let rafId;
-    let _lastFrame = 0;
-    function animate(ts){
-      rafId=requestAnimationFrame(animate);
-      // Throttle to ~30fps
-      if(ts - _lastFrame < 33) return;
-      _lastFrame = ts;
-      if(autoRot) rotY+=0.022;
-      bounceT+=0.06;
-      render();
+    function animate(){
+      rafId = requestAnimationFrame(animate);
+      if(autoRot) rotY += 0.012;
+      if(bikeModel) bikeModel.rotation.y = rotY;
+      renderer.render(scene, camera);
     }
-    animate(0);
-    _bike3DViewers.push({ dispose(){ cancelAnimationFrame(rafId); } });
+    animate();
+    _bike3DViewers.push({renderer, rafId:()=>rafId, dispose:()=>{
+      cancelAnimationFrame(rafId);
+      renderer.dispose();
+    }});
   }
 
-  /* ══ 3D viewer for race sprites (AI + Player) ══ */
-  function _initRaceBike3D(canvasId, isPlayer, bikeData){
-    const cvs = document.getElementById(canvasId);
-    if(!cvs) return null;
-    const parent = cvs.parentElement;
-    const W = parent ? (parent.offsetWidth||150)  : 150;
-    const H = parent ? (parent.offsetHeight||180) : 180;
-    const dpr = window.devicePixelRatio||1;
-    cvs.width  = W*dpr; cvs.height = H*dpr;
-    cvs.style.width=W+'px'; cvs.style.height=H+'px';
-    const ctx = cvs.getContext('2d');
-    ctx.scale(dpr,dpr);
-
-    const lvIdx = bikeData ? (bikeData.lv||1)-1 : 0;
-    const [tint] = isPlayer ? ['#22c55e'] : ['#ef4444'];
-    // player faces right (rotY≈-0.5), AI faces left (rotY≈0.5, flipped)
-    const baseRot = isPlayer ? -Math.PI*0.18 : Math.PI*0.18;
-    let rotY = baseRot;
-    let bounceT = 0;
-    let isBouncing = false;
-    let faces = null;
-
-    window.BikeGLBLoader.load('BIKE MOTO.glb').then(meshes=>{
-      faces = _normaliseFaces(_buildFaces(meshes));
-    }).catch(()=>{ faces = null; });
-
-    function render(){
-      ctx.clearRect(0,0,W,H);
-      const bounceY = isBouncing ? Math.abs(Math.sin(bounceT))*H*0.06 : 0;
-      // Large scale: fill most of the race sprite area
-      const scale = Math.min(W,H)*0.72;
-      if(faces && faces.length){
-        _drawFaces(ctx, faces, rotY, W/2, H*0.52-bounceY, scale, tint, !isPlayer);
-      } else {
-        _drawVectorBike(ctx, W, H, rotY, tint, !isPlayer, bounceY);
-      }
-    }
-
-    let rafId;
-    let _lastRaceFrame = 0;
-    function animate(ts){
-      rafId=requestAnimationFrame(animate);
-      if(ts - _lastRaceFrame < 33) return;
-      _lastRaceFrame = ts;
-      if(isBouncing) bounceT+=0.25;
-      render();
-    }
-    animate(0);
-
-    return {
-      startBounce(){ isBouncing=true; bounceT=0; },
-      stopBounce(){  isBouncing=false; bounceT=0; },
-      dispose(){ cancelAnimationFrame(rafId); }
-    };
+  function _renderStats(b){
+    const statsRow = document.getElementById('raceStatsRow');
+    if(!statsRow) return;
+    const stats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
+    statsRow.innerHTML = '';
+    [['Скорость',stats.speed],['Разгон',stats.accel],['Маневры',stats.maneuver],['Нитро',stats.nitro]].forEach(([label,value])=>{
+      const item = document.createElement('div');
+      item.className = 'race-stat-item';
+      item.innerHTML = '<div class="race-stat-lbl">'+label+'</div><div class="race-stat-val">'+value+'</div>';
+      statsRow.appendChild(item);
+    });
   }
 
   function _goSlide(i){
@@ -2374,19 +2213,6 @@ body.race-active .bnav{       display:none!important; }
       if(nameEl) nameEl.textContent = b.name+' №'+b.lv;
       _renderStats(b);
     }
-  }
-
-  function _renderStats(b){
-    const statsRow = document.getElementById('raceStatsRow');
-    if(!statsRow) return;
-    const stats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(b) : {speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
-    statsRow.innerHTML = '';
-    [['Скорость',stats.speed],['Разгон',stats.accel],['Маневры',stats.maneuver],['Нитро',stats.nitro]].forEach(([label,value])=>{
-      const item = document.createElement('div');
-      item.className = 'race-stat-item';
-      item.innerHTML = '<div class="race-stat-lbl">'+label+'</div><div class="race-stat-val">'+value+'</div>';
-      statsRow.appendChild(item);
-    });
   }
 
   function _attachSwipe(){
@@ -2473,6 +2299,104 @@ body.race-active .bnav{       display:none!important; }
   /* ══════════════════════════════════════════════════════════
      RACE ANIMATION — Core Loop
   ══════════════════════════════════════════════════════════ */
+  /* ══ 3D viewer for race sprites (AI + Player) ══ */
+  function _initRaceBike3D(canvasId, isPlayer, bikeData){
+    if(!window.THREE) return null;
+    const cvs = document.getElementById(canvasId);
+    if(!cvs) return null;
+    const parent = cvs.parentElement;
+    const W = parent.offsetWidth  || 140;
+    const H = parent.offsetHeight || 160;
+    cvs.width  = W * (window.devicePixelRatio||1);
+    cvs.height = H * (window.devicePixelRatio||1);
+    cvs.style.width  = W+'px';
+    cvs.style.height = H+'px';
+
+    const renderer = new THREE.WebGLRenderer({canvas:cvs, alpha:true, antialias:true});
+    renderer.setPixelRatio(window.devicePixelRatio||1);
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
+    camera.position.set(isPlayer?-0.3:0.3, 1.1, 3.2);
+    camera.lookAt(0, 0.3, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+    dir.position.set(isPlayer?-3:3, 5, 3);
+    scene.add(dir);
+    const rim = new THREE.DirectionalLight(isPlayer?0x00ff88:0xff4444, 0.5);
+    rim.position.set(isPlayer?2:-2, 1, -3);
+    scene.add(rim);
+
+    let bikeModel = null;
+    let rotY = isPlayer ? -0.3 : 0.3;
+    let bounceT = 0;
+    let isBouncing = false;
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('BIKE MOTO.glb',
+      (gltf)=>{
+        bikeModel = gltf.scene;
+        const box = new THREE.Box3().setFromObject(bikeModel);
+        const size = new THREE.Vector3(); box.getSize(size);
+        const centre = new THREE.Vector3(); box.getCenter(centre);
+        const scale = 1.5 / Math.max(size.x,size.y,size.z);
+        bikeModel.scale.setScalar(scale);
+        bikeModel.position.sub(centre.multiplyScalar(scale));
+        bikeModel.position.y += size.y * scale * 0.5;
+        bikeModel.rotation.y = rotY;
+        // Color: player=green, AI=red-orange
+        const tint = isPlayer ? 0x22c55e : 0xef4444;
+        bikeModel.traverse(c=>{
+          if(c.isMesh&&c.material){
+            c.material=c.material.clone();
+            c.material.emissive=new THREE.Color(tint);
+            c.material.emissiveIntensity=0.18;
+          }
+        });
+        // Mirror AI bike to face opposite direction
+        if(!isPlayer) bikeModel.scale.x *= -1;
+        scene.add(bikeModel);
+      },
+      undefined,
+      ()=>{
+        // Fallback shape
+        const g=new THREE.Group();
+        const bm=new THREE.MeshStandardMaterial({color:isPlayer?0x22c55e:0xef4444,metalness:.8,roughness:.2});
+        g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.4,.3,1.1),bm),{position:new THREE.Vector3(0,.35,0)}));
+        const wm=new THREE.MeshStandardMaterial({color:0x111111});
+        [-0.5,0.5].forEach(z=>{
+          const w=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.08,16),wm);
+          w.rotation.z=Math.PI/2; w.position.set(0,.2,z); g.add(w);
+        });
+        if(!isPlayer) g.scale.x=-1;
+        bikeModel=g; scene.add(g);
+      }
+    );
+
+    let rafId;
+    function animate(){
+      rafId=requestAnimationFrame(animate);
+      if(bikeModel){
+        bikeModel.rotation.y = rotY;
+        if(isBouncing){
+          bounceT+=0.18;
+          bikeModel.position.y = Math.abs(Math.sin(bounceT))*0.08;
+        }
+      }
+      renderer.render(scene,camera);
+    }
+    animate();
+    return {
+      startBounce(){ isBouncing=true; bounceT=0; },
+      stopBounce(){  isBouncing=false; if(bikeModel) bikeModel.position.y=0; },
+      tiltForward(deg){ rotY = (isPlayer?-0.3:0.3) + (deg||0)*0.017; },
+      dispose(){ cancelAnimationFrame(rafId); renderer.dispose(); }
+    };
+  }
+
   function _runRaceAnimation(playerPower, aiPower, playerWins, aiName){
     _raceActive = true;
 

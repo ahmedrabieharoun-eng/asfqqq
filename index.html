@@ -998,6 +998,7 @@ async function buyBike(lv){
     // Update local state with server response
     S.user.tonBalance  = res.tonBalance;
     S.user.ownedBikes  = res.ownedBikes;
+    if(res.totalBikesBought!==undefined) S.user.totalBikesBought = res.totalBikesBought;
     syncTopbar();
     renderBikes();
     renderGarage();
@@ -1014,6 +1015,8 @@ function syncTopbar(){
   const tonBal = S.user?.tonBalance||0;
   const el = document.getElementById('tbCoins');
   if(el) el.textContent = tonBal.toFixed(2);
+  // Also update finance header
+  if(typeof syncFinanceHeader === 'function') syncFinanceHeader();
   // Garage page TON balance
   const gTon = document.getElementById('garageTonBal');
   if(gTon) gTon.textContent = tonBal.toFixed(2);
@@ -2384,97 +2387,38 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <!-- FINANCE -->
 <div class="sec" id="sectionFinance">
-  <div class="fin-tabs">
-    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 Deposit</div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">🌟 Season 2</div>
-    <div class="ftab" data-ft="exchange" onclick="switchFinTab(this,'exchange')">⚡ Exchange</div>
-    <div class="ftab" data-ft="referrals" onclick="switchFinTab(this,'referrals')">👥 Referrals</div>
+
+  <!-- FINANCE PROFILE HEADER -->
+  <div id="finProfileHeader" style="display:flex;flex-direction:column;align-items:center;padding:18px 0 10px;position:relative">
+    <!-- Sound button left -->
+    <button onclick="toggleSound()" id="soundBtn" style="position:absolute;left:14px;top:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px)">🔊</button>
+    <!-- Language button right -->
+    <button onclick="toggleLangMenu()" style="position:absolute;right:14px;top:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:5px"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
+    <!-- User photo circle -->
+    <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:8px" id="finUserAvatar"><span>🏍️</span></div>
+    <!-- User name -->
+    <div style="font-size:16px;font-weight:800;color:#fff;text-align:center" id="finUserName">Player</div>
+    <!-- TON balance -->
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px">
+      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">
+      <span style="font-size:18px;font-weight:800;color:#fff" id="finTonBal">0.00</span>
+      <span style="font-size:12px;color:rgba(255,255,255,.6);font-weight:700">TON</span>
+    </div>
   </div>
 
-  <!-- DEPOSIT -->
+  <!-- Finance Tabs (bottom style like image) -->
+  <div class="fin-tabs" style="margin:8px 12px 12px">
+    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 <span data-i18n="tabDeposit">Deposit</span></div>
+    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">📤 <span data-i18n="tabWithdraw">Withdraw</span></div>
+    <div class="ftab" data-ft="missions" onclick="switchFinTab(this,'missions')">🎯 <span data-i18n="tabMissions">Missions</span></div>
+    <div class="ftab" data-ft="partnership" onclick="switchFinTab(this,'partnership')">🤝 <span data-i18n="tabPartnership">Partnership</span></div>
+    <div class="ftab" data-ft="referrals" onclick="switchFinTab(this,'referrals')">👥 <span data-i18n="tabReferrals">Referrals</span></div>
+  </div>
+
+  <!-- DEPOSIT TAB -->
   <div class="ftcont active" id="ft-deposit">
-
-    <!-- ══ LIMITED OFFER BANNER ══ -->
-    <style>
-    @keyframes dep-offer-pulse{0%,100%{box-shadow:0 0 18px rgba(255,215,0,.25),0 4px 16px rgba(0,0,0,.4)}50%{box-shadow:0 0 32px rgba(255,215,0,.5),0 4px 22px rgba(0,0,0,.55)}}
-    @keyframes dep-offer-fire{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.18) rotate(4deg)}}
-    @keyframes dep-offer-badge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-    @keyframes dep-ticker{0%{opacity:1}49%{opacity:1}50%{opacity:0}100%{opacity:0}}
-    .dep-offer-banner{
-      background:linear-gradient(135deg,rgba(20,12,0,.95),rgba(40,22,0,.92));
-      border:1.5px solid rgba(255,193,7,.45);
-      border-radius:16px;margin-bottom:12px;
-      overflow:hidden;position:relative;
-      animation:dep-offer-pulse 2.4s ease-in-out infinite;
-    }
-    .dep-offer-banner::before{
-      content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
-      background:linear-gradient(90deg,transparent,rgba(255,215,0,.07),transparent);
-      animation:shim 2.8s infinite;pointer-events:none;
-    }
-    .dep-offer-top{
-      background:linear-gradient(90deg,rgba(255,152,0,.18),rgba(255,193,7,.1),rgba(255,152,0,.18));
-      border-bottom:1px solid rgba(255,193,7,.2);
-      padding:7px 12px;display:flex;align-items:center;gap:7px;
-    }
-    .dep-offer-fire{font-size:18px;animation:dep-offer-fire 1.4s ease-in-out infinite;display:inline-block}
-    .dep-offer-live{display:flex;align-items:center;gap:5px;flex:1}
-    .dep-offer-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;box-shadow:0 0 6px #ff4444;animation:live-dot 1s ease-in-out infinite}
-    .dep-offer-live-txt{font-size:11px;font-weight:800;color:#FFD740;letter-spacing:.5px;text-transform:uppercase}
-    .dep-offer-badge{
-      background:linear-gradient(135deg,#ff8f00,#FFD700);border-radius:20px;
-      padding:3px 11px;font-size:12px;font-weight:800;color:#1a0a00;
-      animation:dep-offer-badge 2s ease-in-out infinite;flex-shrink:0;
-    }
-    .dep-offer-body{padding:10px 14px 12px;display:flex;align-items:center;gap:12px}
-    .dep-offer-icon{font-size:36px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,215,0,.5))}
-    .dep-offer-text{flex:1}
-    .dep-offer-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:3px;line-height:1.2}
-    .dep-offer-title span{color:#FFD700}
-    .dep-offer-sub{font-size:11px;color:rgba(255,215,0,.65);font-weight:600;line-height:1.5}
-    .dep-offer-pct{
-      flex-shrink:0;text-align:center;
-      background:linear-gradient(135deg,rgba(255,152,0,.2),rgba(255,215,0,.12));
-      border:1.5px solid rgba(255,193,7,.4);border-radius:12px;padding:8px 12px;
-    }
-    .dep-offer-pct-num{font-size:26px;font-weight:800;color:#FFD700;line-height:1;text-shadow:0 0 12px rgba(255,215,0,.6)}
-    .dep-offer-pct-lbl{font-size:9px;color:rgba(255,215,0,.65);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
-    /* Preview bonus rows */
-    .dep-preview-box{background:rgba(124,179,66,.07);border:1px solid rgba(124,179,66,.16);border-radius:10px;padding:9px 12px;margin-bottom:10px}
-    .dep-preview-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
-    .dep-preview-divider{height:1px;background:rgba(255,255,255,.07);margin:5px 0}
-    .dep-preview-label{font-size:11px;color:var(--muted);font-weight:600}
-    .dep-preview-label-total{font-size:13px;font-weight:800;color:#fff}
-    .dep-preview-val{font-size:16px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:5px}
-    .dep-preview-bonus-val{font-size:14px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:4px}
-    .dep-preview-total-val{font-size:18px;font-weight:800;color:#FFD700;display:flex;align-items:center;gap:5px;text-shadow:0 0 10px rgba(255,215,0,.4)}
-    .dep-preview-bonus-tag{background:rgba(255,152,0,.18);border:1px solid rgba(255,193,7,.35);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800;color:#FFD740;margin-left:4px}
-    </style>
-
-    <div class="dep-offer-banner">
-      <div class="dep-offer-top">
-        <span class="dep-offer-fire">🔥</span>
-        <div class="dep-offer-live">
-          <div class="dep-offer-dot"></div>
-          <span class="dep-offer-live-txt" data-i18n="offerLiveTag">Limited Time Offer — Active Now</span>
-        </div>
-        <div class="dep-offer-badge" data-i18n="offerBonusTag">BONUS</div>
-      </div>
-      <div class="dep-offer-body">
-        <div class="dep-offer-icon">🎋</div>
-        <div class="dep-offer-text">
-          <div class="dep-offer-title" data-i18n="offerTitle">Get <span>+50% Extra</span> Bamboo<br>on every deposit!</div>
-          <div class="dep-offer-sub" data-i18n="offerSub">⏳ Temporary offer — don't miss it<br>Deposit now and get more Bamboo instantly</div>
-        </div>
-        <div class="dep-offer-pct">
-          <div class="dep-offer-pct-num">+50%</div>
-          <div class="dep-offer-pct-lbl" data-i18n="offerBonusPctLbl">BONUS</div>
-        </div>
-      </div>
-    </div>
-    <!-- ══ END OFFER BANNER ══ -->
-
-    <div class="wd-form">
+    <div class="wd-form" style="margin:0 12px">
+      <!-- Wallet connect row -->
       <div class="wal-row">
         <div class="wl-inf">
           <div class="wll" data-i18n="labelWallet">Wallet</div>
@@ -2482,13 +2426,19 @@ async function doUpgradeStat(bikeLevel, stat){
         </div>
         <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
       </div>
+      <!-- Info notice -->
       <div class="dep-warn">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div class="dep-warn-txt">
+        <i class="fas fa-info-circle"></i>
+        <div>
           <strong data-i18n="important">IMPORTANT:</strong> <span data-i18n="depositWarning1">Your User ID</span>
           <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
           <span data-i18n="depositWarning2">must be the ONLY comment in the transaction.</span>
         </div>
+      </div>
+      <!-- Simple: 1 TON = 1 TON -->
+      <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:10px 14px;margin-bottom:10px;text-align:center">
+        <div style="font-size:13px;font-weight:800;color:#00D4FF">💎 1 TON = 1 TON balance</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:600" data-i18n="depositSimpleNote">Instant • No conversion • Direct to balance</div>
       </div>
       <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
       <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="1" oninput="updDepPreview()">
@@ -2498,31 +2448,12 @@ async function doUpgradeStat(bikeLevel, stat){
         <span class="prbtn" onclick="setDepAmt(5)">5</span>
         <span class="prbtn" onclick="setDepAmt(10)">10</span>
       </div>
-      <div class="dep-preview-box">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px">📊 <span data-i18n="rateLabel">Rate:</span> <strong style="color:var(--bamboo)">1 TON = 10,000 Bamboo</strong></div>
-        <!-- You will receive row -->
-        <div class="dep-preview-row">
-          <span class="dep-preview-label" data-i18n="youWillReceive">You will receive:</span>
-          <span id="depBambooPreview" class="dep-preview-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:18px;height:18px;object-fit:contain"> 0 Bamboo
-          </span>
-        </div>
-        <!-- Bonus row -->
-        <div class="dep-preview-row" id="depBonusRow" style="display:none">
-          <span class="dep-preview-label"><span data-i18n="offerBonusRow">🎁 50% Bonus:</span> <span class="dep-preview-bonus-tag">+50%</span></span>
-          <span id="depBonusPreview" class="dep-preview-bonus-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain"> 0 Bamboo
-          </span>
-        </div>
-        <!-- Divider -->
-        <div class="dep-preview-divider" id="depTotalDivider" style="display:none"></div>
-        <!-- Total row -->
-        <div class="dep-preview-row" id="depTotalRow" style="display:none">
-          <span class="dep-preview-label-total" data-i18n="offerTotalRow">🏆 Total:</span>
-          <span id="depTotalPreview" class="dep-preview-total-val">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain"> 0 Bamboo
-          </span>
-        </div>
+      <!-- Preview -->
+      <div style="background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--muted);font-weight:600" data-i18n="youWillReceive">You will receive:</span>
+        <span id="depTonPreview" style="font-size:18px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:5px">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;border-radius:50%"> 0 TON
+        </span>
       </div>
       <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
       <div class="tx-status" id="depositStatus">
@@ -2532,228 +2463,360 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
   </div>
 
-  <!-- NEW SEASON PREP -->
+  <!-- WITHDRAW TAB -->
   <div class="ftcont" id="ft-withdraw">
-    <style>
-      /* ═══ NEW SEASON S2 STYLES ═══ */
-      .sns-page{padding:0 0 14px}
-
-      /* ── Hero card ── */
-      .sns-hero-card{
-        position:relative;border-radius:20px;overflow:hidden;
-        margin-bottom:12px;min-height:170px;
-        border:1px solid rgba(255,215,0,.28);
-        box-shadow:0 6px 32px rgba(0,0,0,.55);
-      }
-      .sns-hero-bg{
-        position:absolute;inset:0;
-        background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f103107d-cd63-46d0-9b5a-1eaf1850bd66.jpg') center top / cover no-repeat;
-        filter:brightness(.78) saturate(1.1);
-      }
-      .sns-hero-overlay{
-        position:absolute;inset:0;
-        background:linear-gradient(180deg,rgba(0,0,0,.06) 0%,rgba(2,8,2,.5) 55%,rgba(2,8,2,.88) 100%);
-      }
-      .sns-hero-content{
-        position:relative;z-index:2;padding:14px 16px 16px;
-        display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:170px;
-      }
-      .sns-hero-badge{
-        display:inline-flex;align-items:center;gap:5px;
-        background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.45);
-        border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;
-        color:#FFD700;letter-spacing:.4px;margin-bottom:6px;backdrop-filter:blur(8px);
-      }
-      .sns-hero-title{font-size:22px;font-weight:800;color:#FFD700;text-shadow:0 2px 18px rgba(255,215,0,.55);margin-bottom:2px;text-align:center}
-      .sns-hero-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;text-align:center}
-
-      /* ── Allocation rows ── */
-      .sns-rows-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-      .sns-row{
-        /* glassmorphism: semi-dark + blur */
-        background:rgba(6,18,6,.68);
-        border:1px solid rgba(255,255,255,.18);
-        border-radius:16px;padding:11px 13px;
-        display:flex;align-items:center;gap:10px;
-        backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-        box-shadow:0 2px 12px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
-        position:relative;overflow:hidden;
-      }
-      .sns-row::before{
-        content:'';position:absolute;inset:0;
-        background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 55%);
-        pointer-events:none;border-radius:16px;
-      }
-      .sns-row.sns-row-ton{border-color:rgba(0,212,255,.22)}
-      .sns-row-icon-wrap{
-        width:42px;height:42px;border-radius:12px;flex-shrink:0;
-        display:flex;align-items:center;justify-content:center;
-      }
-      .sns-row-icon-wrap.green{background:rgba(124,179,66,.18);border:1px solid rgba(124,179,66,.28)}
-      .sns-row-icon-wrap.blue{background:rgba(66,165,245,.15);border:1px solid rgba(66,165,245,.22)}
-      .sns-row-icon-wrap.cyan{background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.22)}
-      .sns-row-icon-img{width:28px;height:28px;object-fit:contain}
-      .sns-row-icon-emoji{font-size:20px;line-height:1}
-      .sns-row-body{flex:1;min-width:0}
-      .sns-row-title{font-size:12px;font-weight:800;color:rgba(255,255,255,.92);margin-bottom:1px;line-height:1.2}
-      .sns-row-desc{font-size:9.5px;color:rgba(255,255,255,.35);font-weight:600;line-height:1.3}
-      .sns-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;min-width:80px}
-      .sns-spin{width:18px;height:18px;border:2px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:sns-rotate .7s linear infinite}
-      @keyframes sns-rotate{to{transform:rotate(360deg)}}
-
-      /* value displays */
-      .sns-val-coins{font-size:17px;font-weight:800;color:#FFD700;line-height:1;text-align:right;text-shadow:0 0 10px rgba(255,215,0,.35)}
-      .sns-val-ton{font-size:16px;font-weight:800;color:#00D4FF;line-height:1;text-align:right;text-shadow:0 0 10px rgba(0,212,255,.35)}
-      .sns-val-badge{
-        display:inline-flex;align-items:center;gap:3px;
-        background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.28);
-        border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800;color:#00F27A;margin-bottom:1px;
-      }
-      .sns-val-sub{font-size:9px;color:rgba(255,255,255,.25);font-weight:600;text-align:right;line-height:1.3}
-      .sns-empty-tag{font-size:10px;color:rgba(255,255,255,.22);font-weight:600;font-style:italic;text-align:right}
-
-      /* ── Total card ── */
-      .sns-total-card{
-        background:rgba(6,18,6,.75);
-        border:1.5px solid rgba(255,215,0,.32);
-        border-radius:20px;
-        backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-        box-shadow:0 0 30px rgba(255,215,0,.07),0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);
-        position:relative;overflow:hidden;padding:16px 18px 14px;text-align:center;
-      }
-      .sns-total-card::before{
-        content:'';position:absolute;inset:0;
-        background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.06) 0%,transparent 65%);
-        pointer-events:none;
-      }
-      .sns-total-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:10px;text-align:center}
-      .sns-total-coins-num{font-size:36px;font-weight:800;color:#FFD700;text-shadow:0 0 18px rgba(255,215,0,.4);line-height:1;margin-bottom:4px}
-      .sns-total-coins-unit{font-size:12px;font-weight:700;color:rgba(255,215,0,.5);letter-spacing:.8px}
-      .sns-cup-img{position:absolute;right:-8px;bottom:-8px;width:90px;opacity:.12;pointer-events:none}
-    </style>
-
-    <div class="sns-page">
-
-      <!-- Hero Card -->
-      <div class="sns-hero-card">
-        <div class="sns-hero-bg"></div>
-        <div class="sns-hero-overlay"></div>
-        <div class="sns-hero-content">
-          <div class="sns-hero-badge">🌟 <span data-i18n="snsSeasonBadge">Season 2</span></div>
-          <div class="sns-hero-title" id="sns-hero-main-title">Season 2 Preparation</div>
-          <div class="sns-hero-sub" id="sns-hero-sub-txt">Your progress carries forward</div>
+    <div style="margin:0 12px">
+      <!-- Balance display -->
+      <div class="wd-top">
+        <div class="big" id="wdTonBal">0.000</div>
+        <div class="sub" style="display:flex;align-items:center;justify-content:center;gap:4px">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px;height:16px;border-radius:50%">
+          <span data-i18n="availableBalance">TON Available</span>
         </div>
       </div>
-
-      <!-- Allocation rows -->
-      <div class="sns-rows-wrap">
-
-        <!-- Row 1: Current Coins — outputs COINS -->
-        <div class="sns-row" id="sns-row-coins">
-          <div class="sns-row-icon-wrap green">
-            <span class="sns-row-icon-emoji">🏛️</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowCoinsTitle">Current Coins</div>
-            <div class="sns-row-desc" data-i18n="snsRowCoinsDesc">Carry Over: 20%</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
+      <!-- Wallet address input -->
+      <div class="wd-form">
+        <label class="flabel" data-i18n="walletAddress">TON Wallet Address</label>
+        <input type="text" id="wdAddrInput" class="finput" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
+        <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
+        <input type="number" id="wdAmtInput" class="finput" placeholder="0.1" step="0.01" min="0.1">
+        <!-- 1:1 note -->
+        <div style="background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;text-align:center;font-size:12px;color:var(--muted);font-weight:600">
+          💸 <span data-i18n="withdrawRate">1 TON = 1 TON</span> &nbsp;•&nbsp; Min: 0.1 TON
         </div>
-
-        <!-- Row 2: Referrals — outputs COINS -->
-        <div class="sns-row" id="sns-row-refs">
-          <div class="sns-row-icon-wrap blue">
-            <span class="sns-row-icon-emoji">👥</span>
-          </div>
-          <div class="sns-row-body">
-            <div class="sns-row-title" data-i18n="snsRowRefsTitle">Referrals</div>
-            <div class="sns-row-desc" data-i18n="snsRowRefsDesc">Active Referrals Bonus</div>
-          </div>
-          <div class="sns-row-right"><div class="sns-spin"></div></div>
-        </div>
-
+        <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover">
+          <span data-i18n="withdrawBtn">Withdraw</span>
+        </button>
+        <div class="wd-err-banner" id="wdErrBanner"></div>
       </div>
-
-      <!-- Total: Coins allocation -->
-      <div class="sns-total-card" id="sns-total" style="display:none">
-        <img class="sns-cup-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a5a5d66f-4452-4abe-b641-b44cd46d436d.png" onerror="this.style.display='none'">
-        <div class="sns-total-lbl" data-i18n="snsTotalLbl">🎯 Total Season Allocation</div>
-        <div class="sns-total-coins-num" id="sns-total-coins-num">0</div>
-        <div class="sns-total-coins-unit">COINS</div>
+      <!-- Withdrawal history -->
+      <div class="hist-box" style="margin-top:10px">
+        <div class="hist-hdr">📋 <span data-i18n="wdHistory">Withdrawal History</span></div>
+        <div id="wdHistList"><div class="hist-empty" data-i18n="noWithdrawals">No withdrawals yet</div></div>
       </div>
-
     </div>
   </div>
 
-  <!-- EXCHANGE -->
+  <!-- MISSIONS TAB -->
+  <div class="ftcont" id="ft-missions">
+    <div style="margin:0 12px">
+      <div style="font-size:15px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:6px">🎯 <span data-i18n="missionsTitle">Missions</span></div>
 
-  <!-- REFERRALS -->
+      <!-- Bike Purchase Missions -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏍️ <span data-i18n="bikeMissions">Bike Missions</span></div>
+      <div id="bikeMissionsList"></div>
+
+      <!-- Race Missions -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🏁 <span data-i18n="raceMissions">Race Missions</span></div>
+      <div id="raceMissionsList"></div>
+
+      <!-- Mining Missions -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">⛏️ <span data-i18n="mineMissions">Mining Missions</span></div>
+      <div id="mineMissionsList"></div>
+    </div>
+  </div>
+
+  <!-- PARTNERSHIP TAB -->
+  <div class="ftcont" id="ft-partnership">
+    <div style="margin:0 12px">
+      <!-- Partnership info card -->
+      <div style="background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(0,0,0,.4));border:1.5px solid rgba(255,215,0,.3);border-radius:18px;padding:16px;margin-bottom:14px">
+        <div style="font-size:16px;font-weight:800;color:#FFD700;margin-bottom:8px;display:flex;align-items:center;gap:6px">🤝 <span data-i18n="partnershipTitle">Channel Partnership</span></div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.8" data-i18n="partnershipInfo">
+          Promote our game to earn TON rewards!<br>
+          Post about Bali Rally on your Telegram channel and submit the link for review.
+        </div>
+        <div style="margin-top:10px;background:rgba(0,0,0,.28);border-radius:10px;padding:10px 12px">
+          <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:6px" data-i18n="partnerRequirements">📋 Requirements:</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.9">
+            • <span data-i18n="req1">Channel must have 1,000+ real subscribers</span><br>
+            • <span data-i18n="req2">Subscribers must be genuine (not bots)</span><br>
+            • <span data-i18n="req3">Post must be about Bali Rally / our game</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:9px 12px;text-align:center">
+          <div style="font-size:11px;color:rgba(255,255,255,.5);font-weight:600" data-i18n="rewardRange">Reward Range</div>
+          <div style="font-size:18px;font-weight:800;color:#00D4FF;margin-top:2px">0.1 TON – 1,000 TON</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35);font-weight:600;margin-top:1px" data-i18n="basedOnQuality">Based on post quality & reach</div>
+        </div>
+      </div>
+      <!-- Submit post -->
+      <div class="wd-form">
+        <label class="flabel" data-i18n="postLinkLabel">Post Link</label>
+        <input type="text" id="partnerPostLink" class="finput" placeholder="https://t.me/yourchannel/123" data-i18n-ph="postLinkPh">
+        <button class="btn-prim" onclick="submitPartnerPost()" data-i18n="submitPost">📤 Submit Post for Review</button>
+      </div>
+      <!-- Post history -->
+      <div class="hist-box" style="margin-top:12px">
+        <div class="hist-hdr">📋 <span data-i18n="postHistory">Post History</span></div>
+        <div id="partnerPostsList"><div class="hist-empty" data-i18n="noPostsYet">No posts submitted yet</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERRALS TAB -->
   <div class="ftcont" id="ft-referrals">
-    <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="friendsTitle">Friends & Referrals</span></div>
-    <div class="ref-prog-card">
-      <div class="pg-title"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/15fbd061-8b44-44ee-8d01-78162480b21c.png" style="width:32px;height:32px;object-fit:contain"> <span data-i18n="refProgTitle">Referral Program</span></div>
-      <div class="ref-bonus-badge">
-        <span class="rbb-pct">20%</span>
-        <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
+    <div style="margin:0 12px">
+      <!-- Note about active referrals -->
+      <div style="background:rgba(0,242,122,.07);border:1px solid rgba(0,242,122,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:rgba(0,242,122,.8);font-weight:600">
+        ℹ️ <span data-i18n="activeRefNote">Only <strong style="color:#00F27A">active referrals</strong> are counted. A referral becomes active when they make their first withdrawal from the bot.</span>
       </div>
-      <div class="ref-link-row">
-        <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
-        <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+      <!-- Referral program card -->
+      <div class="ref-prog-card">
+        <div class="ref-bonus-badge">
+          <span class="rbb-pct">20%</span>
+          <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
+        </div>
+        <div class="ref-link-row">
+          <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
+          <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
-    </div>
-    <div class="hist-box" style="margin-bottom:10px">
-      <div class="hist-hdr" style="justify-content:space-between">
-        <span><i class="fas fa-history"></i> <span data-i18n="recentRefs">Recent Referrals</span></span>
-        <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
+
+      <!-- Referral Missions sub-tabs -->
+      <div style="display:flex;gap:7px;margin:10px 0">
+        <div class="ref-sub-tab active" data-rst="friends" onclick="switchRefSubTab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
+        <div class="ref-sub-tab" data-rst="missions" onclick="switchRefSubTab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
       </div>
-      <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
+
+      <!-- Friends list -->
+      <div class="ref-sub-cont active" id="rst-friends">
+        <div class="hist-box">
+          <div class="hist-hdr" style="justify-content:space-between">
+            <span><i class="fas fa-users"></i> <span data-i18n="recentRefs">Referrals</span></span>
+            <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
+          </div>
+          <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
+        </div>
+      </div>
+
+      <!-- Referral Missions -->
+      <div class="ref-sub-cont" id="rst-missions">
+        <div id="refMissionsList"></div>
+      </div>
     </div>
   </div>
 
-  <div class="ftcont" id="ft-exchange">
-    <div class="swap-card">
-      <!-- FROM: Bamboo (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapFrom">FROM</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:38px;height:38px;object-fit:contain">
-            <span class="swap-currency-name">Bamboo</span>
-          </div>
-          <div class="swap-input-wrap">
-            <input type="number" class="swap-input" id="swapFromAmt" placeholder="0" oninput="updSwapCalc()">
-            <button class="swap-max-btn" onclick="swapMax()" data-i18n="maxBtn">MAX</button>
-          </div>
-        </div>
-        <div class="swap-balance" id="swapFromBal"><span data-i18n="balance">Balance:</span> 0 Bamboo</div>
-      </div>
-      <div class="swap-divider">
-        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:3px solid var(--card);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--bamboo-glow)">↓</div>
-      </div>
-      <!-- TO: Coins (fixed) -->
-      <div class="swap-section">
-        <div class="swap-label" data-i18n="swapTo">TO</div>
-        <div class="swap-currency-row">
-          <div class="swap-currency-info">
-            <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/561b20f9-2900-4845-a7ac-55242dc38c28.png" style="width:38px;height:38px;object-fit:contain;border-radius:50%">
-            <span class="swap-currency-name">Coins</span>
-          </div>
-          <div class="swap-output-wrap"><div class="swap-output" id="swapToAmt">0</div></div>
-        </div>
-        <div class="swap-balance" id="swapToBal"><span data-i18n="balance">Balance:</span> 0 Coins</div>
-      </div>
-      <div class="swap-rate" data-i18n="swapRate">📊 300 Bamboo = 10 Coins</div>
-      <button class="btn-prim" style="margin-top:10px" onclick="doExchange()" data-i18n="exchangeNow">⚡ Exchange Now</button>
-    </div>
-    <div class="hist-box" style="margin-top:12px">
-      <div class="hist-hdr" data-i18n="exchangeHist">📋 Exchange History</div>
-      <div id="exchHist"><div class="hist-empty" data-i18n="noConversions">No conversions yet</div></div>
-    </div>
-  </div>
 </div>
 
+<!-- MISSION JS (inline) -->
+<script>
+const MISSION_DEFS = {
+  BIKE: [
+    { id:'bt5',  icon:'🏍️', title:'Buy 5 Bikes',  desc:'Purchase 5 bikes total',  reward:2,   total:5  },
+    { id:'bt10', icon:'🏆', title:'Buy 10 Bikes', desc:'Purchase 10 bikes total', reward:20,  total:10 },
+  ],
+  RACE: [
+    { id:'rc10', icon:'🏁', title:'10 Races',  desc:'Race 10 times',  reward:0.5, total:10 },
+    { id:'rc20', icon:'🔥', title:'20 Races',  desc:'Race 20 times',  reward:1,   total:20 },
+    { id:'rc50', icon:'🌟', title:'50 Races',  desc:'Race 50 times',  reward:3,   total:50 },
+  ],
+  MINE: [
+    { id:'mt20', icon:'⛏️', title:'Mine 20 Times', desc:'Send bike to mine 20 times (each send counts)', reward:1, total:20 },
+    { id:'mt50', icon:'💎', title:'Mine 50 Times', desc:'Send bike to mine 50 times', reward:3, total:50 },
+  ],
+};
 
+const REF_MISSION_DEFS = [
+  { id:'rt10',   n:10,   ton:0.1,  icon:'👥' },
+  { id:'rt50',   n:50,   ton:0.5,  icon:'👥' },
+  { id:'rt100',  n:100,  ton:1,    icon:'👥' },
+  { id:'rt200',  n:200,  ton:2,    icon:'👥' },
+  { id:'rt500',  n:500,  ton:5,    icon:'👥' },
+  { id:'rt1000', n:1000, ton:10,   icon:'🏆' },
+];
+
+function renderMissions(){
+  const user = S.user || {};
+  const completedMissions = S.completedMissions || [];
+  const totalBikes = user.totalBikesBought || 0;
+  const totalRaces = user.totalRacesPlayed || 0;
+  const totalMine  = user.totalMiningRuns  || 0;
+
+  function missionCard(m, current, type){
+    const done = completedMissions.includes(m.id);
+    const prog = Math.min(current, m.total);
+    const pct  = Math.round(prog / m.total * 100);
+    const canClaim = !done && current >= m.total;
+    return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;backdrop-filter:blur(6px)">
+        <div style="font-size:32px;flex-shrink:0;width:44px;text-align:center">${m.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">${m.title}</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px">${m.desc}</div>
+          <div style="height:8px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;margin-bottom:3px">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--bamboo),#b5e04a);border-radius:4px;transition:width .4s"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600">${prog}/${m.total}</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:3px;margin-bottom:5px;white-space:nowrap">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px;height:14px;border-radius:50%"> +${m.reward} TON
+          </div>
+          ${done
+            ? '<div style="background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#00F27A">✅ Done</div>'
+            : canClaim
+              ? `<button onclick="claimMission('${m.id}')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-size:11px;font-weight:800;cursor:pointer">🎁 Claim</button>`
+              : '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted)">🔒</div>'
+          }
+        </div>
+      </div>`;
+  }
+
+  const bl = document.getElementById('bikeMissionsList');
+  if(bl) bl.innerHTML = MISSION_DEFS.BIKE.map(m=>missionCard(m,totalBikes,'BIKE')).join('');
+  const rl = document.getElementById('raceMissionsList');
+  if(rl) rl.innerHTML = MISSION_DEFS.RACE.map(m=>missionCard(m,totalRaces,'RACE')).join('');
+  const ml = document.getElementById('mineMissionsList');
+  if(ml) ml.innerHTML = MISSION_DEFS.MINE.map(m=>missionCard(m,totalMine,'MINE')).join('');
+}
+
+function renderRefMissions(){
+  const completedTasks = S.doneTasks || [];
+  const activeRefs = (S.refs||[]).filter(r=>r.hasWithdrawn).length;
+  const el = document.getElementById('refMissionsList');
+  if(!el) return;
+  el.innerHTML = REF_MISSION_DEFS.map(m=>{
+    const done = completedTasks.includes(m.id);
+    const prog = Math.min(activeRefs, m.n);
+    const pct  = Math.round(prog/m.n*100);
+    const canClaim = !done && activeRefs >= m.n;
+    return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="font-size:28px;flex-shrink:0;width:44px;text-align:center">${m.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">Invite ${m.n} Active Users</div>
+          <div style="height:8px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;margin-bottom:3px">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#42a5f5,#00D4FF);border-radius:4px"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);font-weight:600">${prog}/${m.n} active</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:3px;margin-bottom:5px;white-space:nowrap">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px;height:14px;border-radius:50%"> +${m.ton} TON
+          </div>
+          ${done
+            ? '<div style="background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#00F27A">✅ Done</div>'
+            : canClaim
+              ? `<button onclick="claimRefMission('${m.id}')" style="background:linear-gradient(135deg,#1976d2,#0d47a1);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-size:11px;font-weight:800;cursor:pointer">🎁 Claim</button>`
+              : '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted)">🔒</div>'
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function claimMission(taskId){
+  if(!debounce('mission_'+taskId)) return;
+  try{
+    showNotif('⏳ Claiming...','w');
+    const res = await api('claimMissionTask',{taskId});
+    if(!S.completedMissions) S.completedMissions = [];
+    S.completedMissions.push(taskId);
+    S.user.tonBalance = res.tonBalance;
+    syncTopbar(); syncFinanceHeader();
+    renderMissions();
+    showNotif(`✅ +${res.tonAdded} TON added!`,'s');
+  }catch(e){
+    showNotif(`❌ ${e.message}`,'e');
+  }
+}
+
+async function claimRefMission(taskId){
+  if(!debounce('refmission_'+taskId)) return;
+  try{
+    showNotif('⏳ Claiming...','w');
+    const res = await api('claimTask',{taskId});
+    if(!S.doneTasks) S.doneTasks = [];
+    S.doneTasks.push(taskId);
+    S.user.tonBalance = res.tonBalance;
+    syncTopbar(); syncFinanceHeader();
+    renderRefMissions();
+    showNotif(`✅ +${res.tonAdded} TON added!`,'s');
+  }catch(e){
+    showNotif(`❌ ${e.message}`,'e');
+  }
+}
+
+function renderPartnerPosts(){
+  const posts = S.partnerPosts || [];
+  const el = document.getElementById('partnerPostsList');
+  if(!el) return;
+  if(!posts.length){ el.innerHTML = '<div class="hist-empty">No posts submitted yet</div>'; return; }
+  el.innerHTML = posts.map(p=>{
+    const statusColor = p.status==='approved'?'#00F27A':p.status==='rejected'?'#ff8a80':'#FFD740';
+    const statusLabel = p.status==='approved'?'✅ Approved':p.status==='rejected'?'❌ Rejected':'⏳ Pending';
+    const short = p.link.length>40?p.link.slice(0,40)+'...':p.link;
+    return `<div class="hist-row">
+      <div>
+        <div class="hist-l" style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${short}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">${new Date(p.ts).toLocaleDateString()}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;font-weight:800;color:${statusColor}">${statusLabel}</div>
+        ${p.reward?`<div style="font-size:11px;font-weight:800;color:#00D4FF;margin-top:1px">+${p.reward} TON</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function submitPartnerPost(){
+  const link = (document.getElementById('partnerPostLink')?.value||'').trim();
+  if(!link||!link.includes('t.me/')){ showNotif('❌ Enter a valid Telegram post link','e'); return; }
+  if(!debounce('partnerPost')) return;
+  try{
+    showNotif('⏳ Submitting...','w');
+    const res = await api('submitPartnerPost',{link});
+    document.getElementById('partnerPostLink').value='';
+    if(!S.partnerPosts) S.partnerPosts=[];
+    S.partnerPosts.unshift({postId:res.postId,link,status:'pending',reward:0,ts:Date.now()});
+    renderPartnerPosts();
+    showNotif('✅ Post submitted for review!','s');
+  }catch(e){
+    showNotif(`❌ ${e.message}`,'e');
+  }
+}
+
+function switchRefSubTab(el, tab){
+  document.querySelectorAll('.ref-sub-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ref-sub-cont').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const cont = document.getElementById('rst-'+tab);
+  if(cont) cont.classList.add('active');
+}
+
+function syncFinanceHeader(){
+  const user = S.user||{};
+  const tonBal = user.tonBalance||0;
+  const el = document.getElementById('finTonBal');
+  if(el) el.textContent = tonBal.toFixed(3);
+  const wdEl = document.getElementById('wdTonBal');
+  if(wdEl) wdEl.textContent = tonBal.toFixed(3);
+  // User photo
+  const avEl = document.getElementById('finUserAvatar');
+  if(avEl && user.photoUrl){
+    avEl.innerHTML = `<img src="${user.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  }
+  const nameEl = document.getElementById('finUserName');
+  if(nameEl){
+    const name = user.firstName||(S._tgName)||'Player';
+    const uname = user.username?`@${user.username}`:'';
+    nameEl.innerHTML = `${esc(name)} ${uname?`<span style="font-size:12px;color:rgba(255,255,255,.5)">${esc(uname)}</span>`:''}`;
+  }
+  // Lang flags on finance page
+  const langFl = document.getElementById('langFlagFin');
+  const langLbl = document.getElementById('langLblFin');
+  if(langFl) langFl.textContent = document.getElementById('langFlag')?.textContent||'🇬🇧';
+  if(langLbl) langLbl.textContent = document.getElementById('langLbl')?.textContent||'EN';
+}
+</script>
+<style>
+.ref-sub-tab{flex:1;padding:8px;text-align:center;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted)}
+.ref-sub-tab.active{background:rgba(124,179,66,.2);border-color:var(--bamboo);color:var(--bamboo)}
+.ref-sub-cont{display:none}.ref-sub-cont.active{display:block}
+</style>
 
 <!-- HELP BUTTON -->
 <button id="helpBtn" onclick="openModal('helpModal')" style="position:fixed;bottom:84px;right:14px;z-index:190;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));border:2px solid rgba(124,179,66,.55);color:var(--bamboo);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(124,179,66,.35),0 4px 16px rgba(0,0,0,.5);transition:transform .18s;">?</button>
@@ -2937,13 +3000,9 @@ async function doUpgradeStat(bikeLevel, stat){
    CONFIG — 🔧 edit these before deploying
 ════════════════════════════════════════════ */
 const CFG = {
-  API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // ✏️ ضع رابط Railway هنا
+  API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // ✏️ ضع رابط Workers هنا
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
-  RATE         : 30,
-  MIN_WD       : 200,
-  TON_PER_COIN : 0.00005,
-  TON_USD      : 3.5,
-  FREE_WD_LIMIT: 200,
+  MIN_WD_TON   : 0.1,
   REF_BONUS    : 20,
   BOT_USERNAME : 'PandaBamboBot',
   BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
@@ -3288,7 +3347,9 @@ async function loadState(){
     S.wdHist    = d.wdHistory   || [];
     S.balLog    = d.balanceLog  || [];
     S.doneTasks = d.completedTasks || [];
+    S.completedMissions = d.completedMissions || [];
     S.tasks     = d.tasks || { partner:[], community:[] };
+    S.partnerPosts = d.partnerPosts || [];
     // Mark data as successfully loaded from server
     S._dataLoaded = true;
     // 🔔 Show in-app notification if new referral joined
@@ -3419,10 +3480,10 @@ function updateUI(){
   if(mineTopTon) mineTopTon.textContent=tonBal.toFixed(2)+' TON';
   const gTon = document.getElementById('garageTonBal');
   if(gTon) gTon.textContent = tonBal.toFixed(2);
-  // Coins for withdraw
-  if(document.getElementById('wdCoinsDisp')) document.getElementById('wdCoinsDisp').textContent = fmt(u.coins||0);
   updateRefUI();
   renderWdHist();
+  renderWdHistNew();
+  syncFinanceHeader();
 }
 
 
@@ -3458,6 +3519,15 @@ function goNav(el){
   hideFab(); // always hide when changing main section
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionFriends'){renderMiningPage();}
+  if(el.dataset.s==='sectionFinance'){
+    syncFinanceHeader();
+    renderWdHistNew();
+    const activeTab=document.querySelector('#sectionFinance .ftab.active');
+    const tabId=activeTab?.dataset?.ft||'deposit';
+    if(tabId==='missions') renderMissions();
+    else if(tabId==='partnership') renderPartnerPosts();
+    else if(tabId==='referrals'){ renderRefMissions(); updateRefUI(); }
+  }
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
     // Delay so browser reflow completes and offsetWidth is accurate
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
@@ -3730,7 +3800,7 @@ let _exchInFlight=false;
 /* ════ WITHDRAW ════ */
 function updWdPrev(){
   const a=parseFloat(document.getElementById('wdAmt').value)||0;
-  document.getElementById('wdTonVal').textContent=(a*CFG.TON_PER_COIN).toFixed(4);
+  document.getElementById('wdTonVal').textContent=(a*0.00001).toFixed(4);
 }
 function goToTasksPartner(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -3747,12 +3817,12 @@ function goToTasksPartner(){
 
 async function doWithdraw(){
   if(!debounce('withdraw')) return;
-  const addr=(document.getElementById('wdAddr').value||'').trim();
-  const amt=parseFloat(document.getElementById('wdAmt').value)||0;
+  const addr=(document.getElementById('wdAddrInput')?.value||document.getElementById('wdAddr')?.value||'').trim();
+  const amt=parseFloat(document.getElementById('wdAmtInput')?.value||document.getElementById('wdAmt')?.value)||0;
   const u=S.user;
   if(!addr||addr.length<10){showNotif('Enter valid TON address!','e');return;}
-  if(amt<CFG.MIN_WD){showNotif(`Min ${CFG.MIN_WD} Coins!`,'e');return;}
-  if(amt>(u.coins||0)){showNotif('Not enough Coins!','e');return;}
+  if(amt<0.1){showNotif('Min 0.1 TON!','e');return;}
+  if(amt>(u.tonBalance||0)){showNotif('Not enough TON!','e');return;}
 
   // Fix 9+10: check partner tasks locally first (fast feedback)
   const partnerTasks=S.tasks?.partner||[];
@@ -3766,20 +3836,20 @@ async function doWithdraw(){
   try{
     // Get device fingerprint (hardware-based, survives VPN/IP change)
     const fp = await getOrComputeFp();
-    const res=await api('withdraw',{address:addr,amount:amt,deviceFingerprint:fp});
-    u.coins-=amt;
-    S.wdHist.unshift({amt,addr,ts:Date.now(),status:'pending'});
-    document.getElementById('wdAddr').value='';
-    document.getElementById('wdAmt').value='';
-    updWdPrev(); updateUI(); renderWdHist();
-    showNotif(`✅ Withdrawal requested: ${fmt(amt)} Coins`,'s');
+    const res=await api('withdraw',{address:addr,amount:amt});
+    u.tonBalance=res.tonBalance;
+    S.wdHist.unshift({amt,address:addr,ts:Date.now(),status:'pending'});
+    if(document.getElementById('wdAddrInput')) document.getElementById('wdAddrInput').value='';
+    if(document.getElementById('wdAmtInput')) document.getElementById('wdAmtInput').value='';
+    syncTopbar(); syncFinanceHeader(); renderWdHistNew(); updateUI();
+    showNotif(`✅ Withdrawal requested: ${amt} TON`,'s');
   }catch(e){
     const msg=e.message||'';
     const errCode=e.errorCode||'';
-    if(errCode==='MULTI_ACCOUNT'||msg.includes('MULTI_ACCOUNT')){
+    if(errCode==='WALLET_USED'||msg.includes('WALLET_USED')||errCode==='MULTI_ACCOUNT'||msg.includes('MULTI_ACCOUNT')){
       const lang=localStorage.getItem('pandaLang')||'en';
       const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-      showNotif(T.multiAccount||'⚠️ Multiple accounts detected — one device per account 🐼','e');
+      showNotif(T.walletUsed||T.multiAccount||'⚠️ This wallet is already used by another account. Please use a different wallet address.','e');
     } else {
       showNotif(`❌ ${msg}`,'e');
     }
@@ -3925,6 +3995,33 @@ function _depReqLine3(lang){
   };
   return m[lang]||m['en'];
 }
+function renderWdHistNew(){
+  const el=document.getElementById('wdHistList');
+  if(!el) return;
+  if(!S.wdHist||!S.wdHist.length){el.innerHTML='<div class="hist-empty">No withdrawals yet</div>';return;}
+  el.innerHTML=S.wdHist.slice(0,20).map(h=>{
+    const rawStatus=(h.status||'pending').toLowerCase();
+    const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'?'rejected':rawStatus;
+    const sc={approved:'sb-approved',pending:'sb-pending',rejected:'sb-rejected'}[normStatus]||'sb-pending';
+    const statusIcon={approved:'✅',pending:'⏳',rejected:'❌'}[normStatus]||'⏳';
+    const statusText={approved:'Approved',pending:'Pending',rejected:'Rejected'}[normStatus]||normStatus;
+    const amtTon=h.amt||h.amount||0;
+    const dateStr=h.ts?new Date(h.ts).toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const addrShort=(h.address||h.addr||'—').slice(0,16)+'...';
+    return `<div class="hist-row">
+      <div>
+        <div class="hist-l">${addrShort}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:1px">${dateStr}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hist-r" style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px;height:14px;border-radius:50%"> ${amtTon} TON
+        </div>
+        <span class="stat-badge ${sc}" style="font-size:10px">${statusIcon} ${statusText}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 function renderWdHist(){
   const el=document.getElementById('wdHist');
   if(!el) return;
@@ -3937,7 +4034,7 @@ function renderWdHist(){
     const statusIcon={approved:'✅',pending:'⏳',rejected:'❌'}[normStatus]||'⏳';
     const statusColor={approved:'var(--neon-green)',pending:'var(--coin)',rejected:'#ff8a80'}[normStatus]||'var(--coin)';
     const statusText={approved:'Approved',pending:'Pending',rejected:'Rejected'}[normStatus]||normStatus.charAt(0).toUpperCase()+normStatus.slice(1);
-    const tonVal=((h.amt||0)*CFG.TON_PER_COIN).toFixed(4);
+    const tonVal=((h.amt||0)*0.00001).toFixed(4);
     const amt=h.amt||0;
     // Fix date: always use en-US locale to avoid RTL/Arabic date display issues
     const ts=h.ts||null;
@@ -3986,8 +4083,13 @@ function switchFinTab(el,t){
   document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.ftcont').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById(`ft-${t}`).classList.add('active');
-  if(t==='withdraw' && S._dataLoaded) loadSeasonAlloc();
+  const cont=document.getElementById('ft-'+t);
+  if(cont) cont.classList.add('active');
+  if(t==='missions') renderMissions();
+  if(t==='partnership') renderPartnerPosts();
+  if(t==='referrals'){ renderRefMissions(); updateRefUI(); }
+  if(t==='withdraw'){ syncFinanceHeader(); renderWdHistNew(); }
+  if(t==='deposit') syncFinanceHeader();
 }
 function goToFinanceDeposit(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -3997,7 +4099,8 @@ function goToFinanceDeposit(){
   document.getElementById('sectionFinance').classList.add('active');
   const dt=document.querySelector('.ftab[data-ft="deposit"]');
   if(dt) switchFinTab(dt,'deposit');
-  document.getElementById('depositUserIdDisplay').textContent=S.userId||'???';
+  const uid_el=document.getElementById('depositUserIdDisplay');
+  if(uid_el) uid_el.textContent=S.userId||'???';
 }
 function goToFinanceWithdraw(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -4007,7 +4110,6 @@ function goToFinanceWithdraw(){
   document.getElementById('sectionFinance').classList.add('active');
   const wt=document.querySelector('.ftab[data-ft="withdraw"]');
   if(wt) switchFinTab(wt,'withdraw');
-  if(S._dataLoaded) loadSeasonAlloc();
 }
 
 /* ════ REFERRAL ════ */
@@ -4046,30 +4148,14 @@ function copyRefLink(){
 const TON_TO_BAMBOO=50000;
 function setDepAmt(v){document.getElementById('depositAmountInput').value=Math.max(1,v);updDepPreview();}
 function updDepPreview(){
-  const ton=parseFloat(document.getElementById('depositAmountInput').value)||0;
-  const bam=Math.floor(ton*TON_TO_BAMBOO);
-  const bonus=Math.floor(bam*0.5);
-  const total=bam+bonus;
-  const bamImg='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:20px;height:20px;object-fit:contain">';
-  const bamImgSm='<img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f8c-7876-4dc6-8542-d4f615704e46.png" style="width:16px;height:16px;object-fit:contain">';
-  const el=document.getElementById('depBambooPreview');
-  if(el) el.innerHTML=`${bamImg} ${fmt(bam)} Bamboo`;
-  const bonusRow=document.getElementById('depBonusRow');
-  const bonusEl=document.getElementById('depBonusPreview');
-  const divider=document.getElementById('depTotalDivider');
-  const totalRow=document.getElementById('depTotalRow');
-  const totalEl=document.getElementById('depTotalPreview');
-  if(ton>0){
-    if(bonusRow) bonusRow.style.display='flex';
-    if(divider)  divider.style.display='block';
-    if(totalRow) totalRow.style.display='flex';
-    if(bonusEl)  bonusEl.innerHTML=`${bamImgSm} +${fmt(bonus)} Bamboo`;
-    if(totalEl)  totalEl.innerHTML=`${bamImg} ${fmt(total)} Bamboo`;
-  } else {
-    if(bonusRow) bonusRow.style.display='none';
-    if(divider)  divider.style.display='none';
-    if(totalRow) totalRow.style.display='none';
-  }
+  const ton=parseFloat(document.getElementById('depositAmountInput')?.value)||0;
+  const tonIcon='<img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">';
+  const el=document.getElementById('depTonPreview');
+  if(el) el.innerHTML=`${tonIcon} ${ton>0?ton.toFixed(2):'0'} TON`;
+  // enable/disable submit button
+  const walletConnected=!!S.wallet;
+  const btn=document.getElementById('submitDepositBtn');
+  if(btn) btn.disabled=(ton<1||!walletConnected);
 }
 
 /* ════ TON CONNECT ════ */
@@ -4088,17 +4174,23 @@ async function initTON(){
 function onWConn(w){
   S.wallet={address:w.account.address,chain:w.account.chain,appName:w.device.appName};
   const sh=`${S.wallet.address.substring(0,6)}...${S.wallet.address.slice(-4)}`;
-  document.getElementById('walletAddressDisplay').textContent=`${sh} · ${S.wallet.appName}`;
-  document.getElementById('connectWalletBtn').innerHTML='<i class="fas fa-unlink"></i> Disconnect';
-  document.getElementById('connectWalletBtn').onclick=disconnectWallet;
-  document.getElementById('submitDepositBtn').disabled=false;
+  const wad = document.getElementById('walletAddressDisplay');
+  if(wad){ wad.textContent=`${sh} · ${S.wallet.appName}`; wad.dataset.connected='1'; }
+  const connBtn = document.getElementById('connectWalletBtn');
+  if(connBtn){ connBtn.innerHTML='<i class="fas fa-unlink"></i> Disconnect'; connBtn.onclick=disconnectWallet; }
+  // Fill withdraw address input with full wallet address
+  const wdAddr = document.getElementById('wdAddrInput');
+  if(wdAddr && !wdAddr.value) wdAddr.value = S.wallet.address;
+  updDepPreview();
 }
 function onWDisc(){
   S.wallet=null;
-  document.getElementById('walletAddressDisplay').textContent='Not connected';
-  document.getElementById('connectWalletBtn').innerHTML='<i class="fas fa-plug"></i> Connect';
-  document.getElementById('connectWalletBtn').onclick=connectWallet;
-  document.getElementById('submitDepositBtn').disabled=true;
+  const wad = document.getElementById('walletAddressDisplay');
+  if(wad){ wad.textContent='Not connected'; delete wad.dataset.connected; }
+  const connBtn = document.getElementById('connectWalletBtn');
+  if(connBtn){ connBtn.innerHTML='<i class="fas fa-plug"></i> Connect'; connBtn.onclick=connectWallet; }
+  const btn = document.getElementById('submitDepositBtn');
+  if(btn) btn.disabled=true;
 }
 async function connectWallet(){if(S.tonUI)await S.tonUI.openModal();}
 async function disconnectWallet(){if(S.tonUI)await S.tonUI.disconnect();}
@@ -4434,6 +4526,27 @@ async function init(){
 const TRANSLATIONS = {
   ar:{
     navHome:'الرئيسية',navMarket:'السوق',navTasks:'المهام',navFriends:'أصدقاء',navFinance:'مالية',
+    tabMissions:'المهام',
+    tabPartnership:'الشراكة',
+    tabReferrals:'الإحالات',
+    missionsTitle:'المهام',
+    bikeMissions:'مهام الدراجات',
+    raceMissions:'مهام السباق',
+    mineMissions:'مهام التعدين',
+    partnershipTitle:'شراكة القناة',
+    req1:'1,000+ مشترك حقيقي',
+    req2:'مشتركون حقيقيون (ليسوا بوتات)',
+    req3:'منشور عن Bali Rally',
+    postLinkLabel:'رابط المنشور',
+    submitPost:'📤 إرسال للمراجعة',
+    postHistory:'سجل المنشورات',
+    noPostsYet:'لا توجد منشورات',
+    activeRefNote:'الإحالات النشطة فقط تُحسب. تصبح نشطة عند أول سحب.',
+    availableBalance:'TON المتاح',
+    withdrawRate:'1 TON = 1 TON',
+    depositSimpleNote:'فوري • بدون تحويل',
+    wdHistory:'سجل السحوبات',
+    noWithdrawals:'لا توجد سحوبات',
     labelCoins:'كوينز',labelBamboo:'بامبو',
     statAccrued:'المتراكم',statRateDay:'المعدل/يوم',statBambooDay:'بامبو/يوم',
     claimBtn:'جمع Bamboo',lvLabel:'مستوى ',
@@ -4544,6 +4657,36 @@ const TRANSLATIONS = {
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
     tabDeposit:'💰 Deposit',tabWithdraw:'🌟 Season 2',tabExchange:'⚡ Exchange',
+    tabMissions:'Missions',
+    tabPartnership:'Partnership',
+    tabReferrals:'Referrals',
+    missionsTitle:'Missions',
+    bikeMissions:'Bike Missions',
+    raceMissions:'Race Missions',
+    mineMissions:'Mining Missions',
+    partnershipTitle:'Channel Partnership',
+    partnershipInfo:'Promote our game to earn TON rewards! Post about Bali Rally on your Telegram channel and submit the link for review.',
+    partnerRequirements:'Requirements:',
+    req1:'Channel must have 1,000+ real subscribers',
+    req2:'Subscribers must be genuine (not bots)',
+    req3:'Post must be about Bali Rally / our game',
+    rewardRange:'Reward Range',
+    basedOnQuality:'Based on post quality & reach',
+    postLinkLabel:'Post Link',
+    postLinkPh:'https://t.me/yourchannel/123',
+    submitPost:'📤 Submit Post for Review',
+    postHistory:'Post History',
+    noPostsYet:'No posts submitted yet',
+    activeRefNote:'Only active referrals are counted. A referral becomes active when they make their first withdrawal.',
+    friendsList:'Friends',
+    refMissions:'Ref Missions',
+    availableBalance:'TON Available',
+    withdrawRate:'1 TON = 1 TON',
+    depositSimpleNote:'Instant • No conversion • Direct to balance',
+    walletAddress:'TON Wallet Address',
+    walletPlaceholder:'UQA...',
+    wdHistory:'Withdrawal History',
+    noWithdrawals:'No withdrawals yet',
     tabReferralTxt:'Referral',tabSocialTxt:'Social',
     tabPartner:'⭐ Partner',tabCommunity:'🌍 Community',floatAdd:'➕ Add Task',
     friendsTitle:'Friends & Referrals',refProgTitle:'Referral Program',
@@ -4646,6 +4789,27 @@ const TRANSLATIONS = {
   },
   ru:{
     navHome:'Главная',navMarket:'Рынок',navTasks:'Задания',navFriends:'Друзья',navFinance:'Финансы',
+    tabMissions:'Задания',
+    tabPartnership:'Партнёрство',
+    tabReferrals:'Рефералы',
+    missionsTitle:'Задания',
+    bikeMissions:'Задания с байками',
+    raceMissions:'Гоночные задания',
+    mineMissions:'Задания по майнингу',
+    partnershipTitle:'Партнёрство',
+    req1:'1000+ реальных подписчиков',
+    req2:'Реальные подписчики (не боты)',
+    req3:'Пост о Bali Rally',
+    postLinkLabel:'Ссылка на пост',
+    submitPost:'📤 Отправить',
+    postHistory:'История постов',
+    noPostsYet:'Нет постов',
+    activeRefNote:'Считаются только активные рефералы (сделавшие вывод).',
+    availableBalance:'TON Доступно',
+    withdrawRate:'1 TON = 1 TON',
+    depositSimpleNote:'Мгновенно • Без конвертации',
+    wdHistory:'История выводов',
+    noWithdrawals:'Выводов нет',
     labelCoins:'Коины',labelBamboo:'Бамбук',
     statAccrued:'Накоплено',statRateDay:'Темп/день',statBambooDay:'Бамбук/день',
     claimBtn:'Забрать Bamboo',lvLabel:'Ур.',
@@ -4752,6 +4916,27 @@ const TRANSLATIONS = {
   },
   es:{
     navHome:'Inicio',navMarket:'Mercado',navTasks:'Tareas',navFriends:'Amigos',navFinance:'Finanzas',
+    tabMissions:'Misiones',
+    tabPartnership:'Asociación',
+    tabReferrals:'Referidos',
+    missionsTitle:'Misiones',
+    bikeMissions:'Misiones de motos',
+    raceMissions:'Misiones de carrera',
+    mineMissions:'Misiones de minería',
+    partnershipTitle:'Asociación',
+    req1:'1,000+ suscriptores reales',
+    req2:'Suscriptores reales (no bots)',
+    req3:'Post sobre Bali Rally',
+    postLinkLabel:'Enlace del post',
+    submitPost:'📤 Enviar',
+    postHistory:'Historial',
+    noPostsYet:'Sin posts',
+    activeRefNote:'Solo referidos activos cuentan (que hayan retirado).',
+    availableBalance:'TON Disponible',
+    withdrawRate:'1 TON = 1 TON',
+    depositSimpleNote:'Instantáneo • Sin conversión',
+    wdHistory:'Historial de retiros',
+    noWithdrawals:'Sin retiros',
     labelCoins:'Monedas',labelBamboo:'Bambú',
     statAccrued:'Acumulado',statRateDay:'Tasa/Día',statBambooDay:'Bambú/día',
     claimBtn:'Reclamar Bamboo',lvLabel:'Nv.',
@@ -4858,6 +5043,27 @@ const TRANSLATIONS = {
   },
   fr:{
     navHome:'Accueil',navMarket:'Marché',navTasks:'Tâches',navFriends:'Amis',navFinance:'Finance',
+    tabMissions:'Missions',
+    tabPartnership:'Partenariat',
+    tabReferrals:'Parrainages',
+    missionsTitle:'Missions',
+    bikeMissions:'Missions motos',
+    raceMissions:'Missions course',
+    mineMissions:'Missions minage',
+    partnershipTitle:'Partenariat',
+    req1:'1 000+ vrais abonnés',
+    req2:'Abonnés réels (pas de bots)',
+    req3:'Post sur Bali Rally',
+    postLinkLabel:'Lien du post',
+    submitPost:'📤 Soumettre',
+    postHistory:'Historique posts',
+    noPostsYet:'Aucun post',
+    activeRefNote:'Seuls les filleuls actifs comptent (ayant retiré).',
+    availableBalance:'TON Disponible',
+    withdrawRate:'1 TON = 1 TON',
+    depositSimpleNote:'Instantané • Sans conversion',
+    wdHistory:'Historique retraits',
+    noWithdrawals:'Aucun retrait',
     labelCoins:'Pièces',labelBamboo:'Bambou',
     statAccrued:'Accumulé',statRateDay:'Taux/Jour',statBambooDay:'Bambou/jour',
     claimBtn:'Réclamer Bamboo',lvLabel:'Nv.',
@@ -4964,6 +5170,22 @@ const TRANSLATIONS = {
   }
 };
 
+
+/* ════ SOUND TOGGLE ════ */
+let _soundEnabled = localStorage.getItem('soundEnabled') !== '0';
+function toggleSound(){
+  _soundEnabled = !_soundEnabled;
+  localStorage.setItem('soundEnabled', _soundEnabled ? '1' : '0');
+  const btn = document.getElementById('soundBtn');
+  if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
+  showNotif(_soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF', 'w');
+}
+// Init sound button state on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('soundBtn');
+  if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
+});
+
 function toggleLangMenu(){
   const m=document.getElementById('langMenu');
   m.style.display = m.style.display==='none' ? 'block' : 'none';
@@ -4980,6 +5202,7 @@ function setLang(lang,flag,code){
   localStorage.setItem('pandaLang',lang);
   applyLang(lang,flag,code);
   document.getElementById('langMenu').style.display='none';
+  if(typeof syncFinanceHeader==="function") syncFinanceHeader();
 }
 function applyLang(lang,flag,code){
   const t=TRANSLATIONS[lang]||TRANSLATIONS['en'];
@@ -5010,10 +5233,8 @@ function applyLang(lang,flag,code){
   const navKeys=['navHome','navMarket','navTasks','navFriends','navFinance'];
   navItems.forEach((el,i)=>{if(navKeys[i]) el.textContent=t[navKeys[i]];});
 
-  // ── Finance tabs ──
-  const ftabs=document.querySelectorAll('.ftab');
-  const ftabKeys=['tabDeposit','tabWithdraw','tabExchange'];
-  ftabs.forEach((el,i)=>{if(ftabKeys[i]) el.textContent=t[ftabKeys[i]];});
+  // ── Finance tabs ── (handled by data-i18n)
+  // Finance tab labels use data-i18n spans inside, updated by universal engine above
 
   // ── Task tabs ──
   document.querySelectorAll('.ttab[data-t]').forEach(el=>{
@@ -5048,15 +5269,7 @@ function applyLang(lang,flag,code){
   const floatBtn=document.getElementById('floatAddTask');
   if(floatBtn) floatBtn.innerHTML=`➕ ${t.floatAdd}`;
 
-  // ── Season 2 Banner ──
-  const s2badge=document.getElementById('s2BadgeTxt'); if(s2badge) s2badge.textContent=t.s2BadgeTxt||'Coming Soon';
-  const s2title=document.getElementById('s2BannerTitle'); if(s2title) s2title.textContent=t.s2BannerTitle||'Season 2 Preparation';
-  const s2sub=document.getElementById('s2BannerSub'); if(s2sub) s2sub.textContent=t.s2BannerSub||'🎯 Check your allocation →';
-  const s2tap=document.getElementById('s2TapTxt'); if(s2tap) s2tap.textContent=t.s2TapTxt||'Tap';
-
-  // ── Season 2 Alloc Page Hero ──
-  const snsHeroMain=document.getElementById('sns-hero-main-title'); if(snsHeroMain) snsHeroMain.textContent=t.snsHeroTitle||'Season 2 Preparation';
-  const snsHeroSub=document.getElementById('sns-hero-sub-txt'); if(snsHeroSub) snsHeroSub.textContent=t.snsHeroSub||'Your progress carries forward';
+  // Season 2 removed
 
   // ── walletAddressDisplay: only if still showing default ──
   const wadEl=document.getElementById('walletAddressDisplay');

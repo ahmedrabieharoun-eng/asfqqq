@@ -2385,7 +2385,7 @@ async function doUpgradeStat(bikeLevel, stat){
 })();
 </script>
 
-<!-- FINANCE -->
+<!-- FINANCE (PROFILE) -->
 <div class="sec" id="sectionFinance">
 
   <!-- FINANCE PROFILE HEADER -->
@@ -2406,65 +2406,115 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
   </div>
 
-  <!-- Finance Tabs (bottom style like image) -->
-  <div class="fin-tabs" style="margin:8px 12px 12px">
-    <div class="ftab active" data-ft="deposit" onclick="switchFinTab(this,'deposit')">💰 <span data-i18n="tabDeposit">Deposit</span></div>
-    <div class="ftab" data-ft="withdraw" onclick="switchFinTab(this,'withdraw')">📤 <span data-i18n="tabWithdraw">Withdraw</span></div>
-    <div class="ftab" data-ft="missions" onclick="switchFinTab(this,'missions')">🎯 <span data-i18n="tabMissions">Missions</span></div>
-    <div class="ftab" data-ft="partnership" onclick="switchFinTab(this,'partnership')">🤝 <span data-i18n="tabPartnership">Partnership</span></div>
-    <div class="ftab" data-ft="referrals" onclick="switchFinTab(this,'referrals')">👥 <span data-i18n="tabReferrals">Referrals</span></div>
-  </div>
-
-  <!-- DEPOSIT TAB -->
-  <div class="ftcont active" id="ft-deposit">
-    <div class="wd-form" style="margin:0 12px">
-      <!-- Wallet connect row -->
-      <div class="wal-row">
-        <div class="wl-inf">
-          <div class="wll" data-i18n="labelWallet">Wallet</div>
-          <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
-        </div>
-        <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
-      </div>
-      <!-- Info notice -->
-      <div class="dep-warn">
-        <i class="fas fa-info-circle"></i>
-        <div>
-          <strong data-i18n="important">IMPORTANT:</strong> <span data-i18n="depositWarning1">Your User ID</span>
-          <span id="depositUserIdDisplay" style="background:rgba(255,255,255,.14);padding:2px 7px;border-radius:10px;font-weight:800"></span>
-          <span data-i18n="depositWarning2">must be the ONLY comment in the transaction.</span>
+  <!-- PROFILE CARDS GRID -->
+  <div style="padding:0 12px 16px">
+    <!-- Row 1: Deposit + Withdraw -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <!-- Deposit Card -->
+      <div onclick="openProfilePage('deposit')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7f694191-2573-44e8-bdea-58902d795f89.png" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">💰 Deposit</span>
         </div>
       </div>
-      <!-- Simple: 1 TON = 1 TON -->
-      <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:10px 14px;margin-bottom:10px;text-align:center">
-        <div style="font-size:13px;font-weight:800;color:#00D4FF">💎 1 TON = 1 TON balance</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;font-weight:600" data-i18n="depositSimpleNote">Instant • No conversion • Direct to balance</div>
+      <!-- Withdraw Card -->
+      <div onclick="openProfilePage('withdraw')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/39783016-fb77-417e-905e-ddd718a53934.png" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">📤 Withdraw</span>
+        </div>
       </div>
-      <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
-      <input type="number" id="depositAmountInput" class="finput" placeholder="1" step="0.1" min="1" oninput="updDepPreview()">
-      <div class="preset-row" style="margin-bottom:8px">
-        <span class="prbtn" onclick="setDepAmt(1)">1</span>
-        <span class="prbtn" onclick="setDepAmt(2)">2</span>
-        <span class="prbtn" onclick="setDepAmt(5)">5</span>
-        <span class="prbtn" onclick="setDepAmt(10)">10</span>
+    </div>
+    <!-- Row 2: Referrals + Missions -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <!-- Referrals Card -->
+      <div onclick="openProfilePage('referrals')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/aef1eeee-0d4c-41da-bc9d-d5af83bbfe45.png" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">👥 Referrals</span>
+        </div>
       </div>
-      <!-- Preview -->
-      <div style="background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:12px;color:var(--muted);font-weight:600" data-i18n="youWillReceive">You will receive:</span>
-        <span id="depTonPreview" style="font-size:18px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:5px">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;border-radius:50%"> 0 TON
-        </span>
+      <!-- Missions Card -->
+      <div onclick="openProfilePage('missions')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+        <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fffbfe35-03da-45fa-9908-ed470673933a.png" style="width:100%;height:100%;object-fit:cover;display:block">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">🎯 Missions</span>
+        </div>
       </div>
-      <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
-      <div class="tx-status" id="depositStatus">
-        <div class="txsi">⏳</div><div class="txsm" data-i18n="processingDeposit">Processing deposit...</div>
-        <div class="txsd" id="depositStatusDetail"></div>
+    </div>
+    <!-- Row 3: Partnership (full width) -->
+    <div onclick="openProfilePage('partnership')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;height:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/27148563-abfa-4b07-882d-801bb38fac29.png" style="width:100%;height:100%;object-fit:cover;display:block">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:12px">
+        <span style="font-size:16px;font-weight:800;color:#fff">🤝 Partnership</span>
       </div>
     </div>
   </div>
 
-  <!-- WITHDRAW TAB -->
-  <div class="ftcont" id="ft-withdraw">
+  <!-- HIDDEN TABS CONTENT (shown as sub-pages) -->
+  <div id="ft-deposit" class="ftcont" style="display:none"></div>
+  <div id="ft-withdraw" class="ftcont" style="display:none"></div>
+  <div id="ft-missions" class="ftcont" style="display:none"></div>
+  <div id="ft-partnership" class="ftcont" style="display:none"></div>
+  <div id="ft-referrals" class="ftcont" style="display:none"></div>
+
+</div>
+
+<!-- SUB-PAGES OVERLAY -->
+<div id="profileSubPage" style="display:none;position:fixed;inset:0;z-index:150;background:var(--g1);overflow-y:auto;padding-bottom:108px">
+  <!-- Back button + topbar visible -->
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:10">
+    <button onclick="closeProfilePage()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer">←</button>
+    <span id="profileSubPageTitle" style="font-size:16px;font-weight:800;color:#fff">Page</span>
+  </div>
+  <div id="profileSubPageContent" style="padding:12px 0"></div>
+</div>
+
+  <!-- ═══ DEPOSIT PAGE CONTENT (shown inside overlay) ═══ -->
+  <div id="page-deposit-content" style="display:none">
+    <div style="margin:0 12px">
+      <!-- Wallet connect card -->
+      <div class="wd-form" style="margin-bottom:12px">
+        <div class="wal-row">
+          <div class="wl-inf">
+            <div class="wll" data-i18n="labelWallet">Wallet</div>
+            <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
+          </div>
+          <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
+        </div>
+        <label class="flabel" data-i18n="amountTON">Amount (TON) — Min: 1 TON</label>
+        <input type="number" id="depositAmountInput" class="finput" placeholder="Min: 1 TON" step="0.1" min="1" oninput="updDepPreview()">
+        <div class="preset-row" style="margin-bottom:8px">
+          <span class="prbtn" onclick="setDepAmt(1)">1</span>
+          <span class="prbtn" onclick="setDepAmt(2)">2</span>
+          <span class="prbtn" onclick="setDepAmt(5)">5</span>
+          <span class="prbtn" onclick="setDepAmt(10)">10</span>
+        </div>
+        <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
+        <div class="tx-status" id="depositStatus">
+          <div class="txsi">⏳</div><div class="txsm" data-i18n="processingDeposit">Processing deposit...</div>
+          <div class="txsd" id="depositStatusDetail"></div>
+        </div>
+      </div>
+      <!-- Manual deposit card -->
+      <div class="wd-form" style="margin-bottom:0">
+        <div style="font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:10px;display:flex;align-items:center;gap:6px">📋 Manual Deposit</div>
+        <label class="flabel">Wallet Address</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <input type="text" class="finput" id="manualWalletAddr" readonly value="UQBTon_Wallet_Address_Here" style="margin-bottom:0;flex:1">
+          <button onclick="copyText('manualWalletAddr')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <label class="flabel">Comment (Your User ID)</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="text" class="finput" id="manualCommentId" readonly style="margin-bottom:0;flex:1">
+          <button onclick="copyText('manualCommentId')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ WITHDRAW PAGE CONTENT (shown inside overlay) ═══ -->
+  <div id="page-withdraw-content" style="display:none">
     <div style="margin:0 12px">
       <!-- Balance display -->
       <div class="wd-top">
@@ -2478,12 +2528,8 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="wd-form">
         <label class="flabel" data-i18n="walletAddress">TON Wallet Address</label>
         <input type="text" id="wdAddrInput" class="finput" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
-        <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
-        <input type="number" id="wdAmtInput" class="finput" placeholder="0.1" step="0.01" min="0.1">
-        <!-- 1:1 note -->
-        <div style="background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;text-align:center;font-size:12px;color:var(--muted);font-weight:600">
-          💸 <span data-i18n="withdrawRate">1 TON = 1 TON</span> &nbsp;•&nbsp; Min: 0.1 TON
-        </div>
+        <label class="flabel" data-i18n="amountTON">Amount (TON) — Min: 1 TON</label>
+        <input type="number" id="wdAmtInput" class="finput" placeholder="Min: 1 TON" step="0.1" min="1">
         <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
           <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover">
           <span data-i18n="withdrawBtn">Withdraw</span>
@@ -2498,27 +2544,24 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
   </div>
 
-  <!-- MISSIONS TAB -->
-  <div class="ftcont" id="ft-missions">
+  <!-- ═══ MISSIONS PAGE CONTENT (shown inside overlay) ═══ -->
+  <div id="page-missions-content" style="display:none">
     <div style="margin:0 12px">
       <div style="font-size:15px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:6px">🎯 <span data-i18n="missionsTitle">Missions</span></div>
-
       <!-- Bike Purchase Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏍️ <span data-i18n="bikeMissions">Bike Missions</span></div>
       <div id="bikeMissionsList"></div>
-
       <!-- Race Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🏁 <span data-i18n="raceMissions">Race Missions</span></div>
       <div id="raceMissionsList"></div>
-
       <!-- Mining Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">⛏️ <span data-i18n="mineMissions">Mining Missions</span></div>
       <div id="mineMissionsList"></div>
     </div>
   </div>
 
-  <!-- PARTNERSHIP TAB -->
-  <div class="ftcont" id="ft-partnership">
+  <!-- ═══ PARTNERSHIP PAGE CONTENT (shown inside overlay) ═══ -->
+  <div id="page-partnership-content" style="display:none">
     <div style="margin:0 12px">
       <!-- Partnership info card -->
       <div style="background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(0,0,0,.4));border:1.5px solid rgba(255,215,0,.3);border-radius:18px;padding:16px;margin-bottom:14px">
@@ -2555,18 +2598,14 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
   </div>
 
-  <!-- REFERRALS TAB -->
-  <div class="ftcont" id="ft-referrals">
+  <!-- ═══ REFERRALS PAGE CONTENT (shown inside overlay) ═══ -->
+  <div id="page-referrals-content" style="display:none">
     <div style="margin:0 12px">
-      <!-- Note about active referrals -->
-      <div style="background:rgba(0,242,122,.07);border:1px solid rgba(0,242,122,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:rgba(0,242,122,.8);font-weight:600">
-        ℹ️ <span data-i18n="activeRefNote">Only <strong style="color:#00F27A">active referrals</strong> are counted. A referral becomes active when they make their first withdrawal from the bot.</span>
-      </div>
       <!-- Referral program card -->
       <div class="ref-prog-card">
         <div class="ref-bonus-badge">
           <span class="rbb-pct">20%</span>
-          <span class="rbb-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
+          <span class="rbb-txt" data-i18n="refCommission">العمولة على شراء الدراجات</span>
         </div>
         <div class="ref-link-row">
           <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
@@ -2574,13 +2613,11 @@ async function doUpgradeStat(bikeLevel, stat){
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
       </div>
-
       <!-- Referral Missions sub-tabs -->
       <div style="display:flex;gap:7px;margin:10px 0">
         <div class="ref-sub-tab active" data-rst="friends" onclick="switchRefSubTab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
         <div class="ref-sub-tab" data-rst="missions" onclick="switchRefSubTab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
       </div>
-
       <!-- Friends list -->
       <div class="ref-sub-cont active" id="rst-friends">
         <div class="hist-box">
@@ -2591,9 +2628,11 @@ async function doUpgradeStat(bikeLevel, stat){
           <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
         </div>
       </div>
-
       <!-- Referral Missions -->
       <div class="ref-sub-cont" id="rst-missions">
+        <div style="background:rgba(0,242,122,.07);border:1px solid rgba(0,242,122,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:rgba(0,242,122,.8);font-weight:600">
+          ℹ️ <span data-i18n="activeRefNote">Only <strong style="color:#00F27A">active referrals</strong> are counted. A referral becomes active when they make their first withdrawal from the bot.</span>
+        </div>
         <div id="refMissionsList"></div>
       </div>
     </div>
@@ -2827,7 +2866,7 @@ function syncFinanceHeader(){
   <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Гараж</div></div>
   <div class="ni" data-s="sectionTasks"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/31752193-26ac-4df8-b717-96af866765c6.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Tasks</div></div>
   <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Farm</div></div>
-  <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Finance</div></div>
+  <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Profile</div></div>
 </nav>
 
 <!-- HELP MODAL -->
@@ -3517,19 +3556,18 @@ function goNav(el){
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab(); // always hide when changing main section
-  if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
-  if(el.dataset.s==='sectionFriends'){renderMiningPage();}
+  // Hide topbar only on Finance/Profile page
+  const topbar = document.querySelector('.hub-topbar');
   if(el.dataset.s==='sectionFinance'){
+    if(topbar) topbar.style.display='none';
     syncFinanceHeader();
     renderWdHistNew();
-    const activeTab=document.querySelector('#sectionFinance .ftab.active');
-    const tabId=activeTab?.dataset?.ft||'deposit';
-    if(tabId==='missions') renderMissions();
-    else if(tabId==='partnership') renderPartnerPosts();
-    else if(tabId==='referrals'){ renderRefMissions(); updateRefUI(); }
+  } else {
+    if(topbar) topbar.style.display='';
   }
+  if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
+  if(el.dataset.s==='sectionFriends'){renderMiningPage();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
-    // Delay so browser reflow completes and offsetWidth is accurate
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
     else setTimeout(window._raceInit,60);
   }
@@ -4079,28 +4117,61 @@ function renderWdHist(){
 }
 
 /* ════ FINANCE NAV ════ */
-function switchFinTab(el,t){
-  document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.ftcont').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-  const cont=document.getElementById('ft-'+t);
-  if(cont) cont.classList.add('active');
-  if(t==='missions') renderMissions();
-  if(t==='partnership') renderPartnerPosts();
-  if(t==='referrals'){ renderRefMissions(); updateRefUI(); }
-  if(t==='withdraw'){ syncFinanceHeader(); renderWdHistNew(); }
-  if(t==='deposit') syncFinanceHeader();
+function switchFinTab(el,t){ /* legacy - redirect to openProfilePage */ openProfilePage(t); }
+
+function openProfilePage(page){
+  const titles = {
+    deposit:'💰 Deposit', withdraw:'📤 Withdraw',
+    missions:'🎯 Missions', partnership:'🤝 Partnership', referrals:'👥 Referrals'
+  };
+  const overlay = document.getElementById('profileSubPage');
+  const content = document.getElementById('profileSubPageContent');
+  const title   = document.getElementById('profileSubPageTitle');
+  if(!overlay||!content) return;
+  // Get source content
+  const src = document.getElementById('page-'+page+'-content');
+  if(!src) return;
+  content.innerHTML = src.innerHTML;
+  title.textContent = titles[page]||page;
+  overlay.style.display='block';
+  // Show topbar in sub-pages (they have their own back button)
+  const topbar = document.querySelector('.hub-topbar');
+  if(topbar) topbar.style.display='';
+  // Re-init page specific data
+  if(page==='missions'){renderMissions();}
+  else if(page==='partnership'){renderPartnerPosts();}
+  else if(page==='referrals'){renderRefMissions();updateRefUI();}
+  else if(page==='withdraw'||page==='deposit'){syncFinanceHeader();renderWdHistNew();}
+  // Set user ID in manual deposit
+  const cidEl=document.getElementById('manualCommentId');
+  if(cidEl) cidEl.value=S.userId||'???';
 }
+
+function closeProfilePage(){
+  const overlay = document.getElementById('profileSubPage');
+  if(overlay) overlay.style.display='none';
+  // Hide topbar again when going back to Profile main
+  const topbar = document.querySelector('.hub-topbar');
+  if(topbar) topbar.style.display='none';
+}
+
+function copyText(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  try{
+    navigator.clipboard.writeText(el.value||el.textContent||'').then(()=>showNotif('✅ Copied!','s')).catch(()=>{});
+  }catch(e){}
+}
+
 function goToFinanceDeposit(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const dt=document.querySelector('.ftab[data-ft="deposit"]');
-  if(dt) switchFinTab(dt,'deposit');
-  const uid_el=document.getElementById('depositUserIdDisplay');
-  if(uid_el) uid_el.textContent=S.userId||'???';
+  const topbar=document.querySelector('.hub-topbar');
+  if(topbar) topbar.style.display='none';
+  openProfilePage('deposit');
 }
 function goToFinanceWithdraw(){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
@@ -4108,16 +4179,17 @@ function goToFinanceWithdraw(){
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const wt=document.querySelector('.ftab[data-ft="withdraw"]');
-  if(wt) switchFinTab(wt,'withdraw');
+  const topbar=document.querySelector('.hub-topbar');
+  if(topbar) topbar.style.display='none';
+  openProfilePage('withdraw');
 }
 
 /* ════ REFERRAL ════ */
 function updateRefUI(){
   // Fix 7: use bot app deep link
   const link=`${CFG.BOT_APP_LINK}?startapp=${encodeURIComponent(S.userId||'000')}`;
-  document.getElementById('refLinkInp').value=link;
-  document.getElementById('depositUserIdDisplay').textContent=esc(S.userId||'...');
+  const refEl=document.getElementById('refLinkInp');
+  if(refEl) refEl.value=link;
   const cntEl=document.getElementById('totalRefsDisp');
   if(cntEl) cntEl.textContent=`${S.refs.length} Friends`;
   const listEl=document.getElementById('recentRefsList');

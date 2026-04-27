@@ -27,7 +27,7 @@
 }
 body{
   font-family:'Fredoka',cursive;font-weight:800;
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png') center center / cover no-repeat fixed;
+  background:#000;
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
@@ -202,14 +202,13 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .info-row:last-child{border-bottom:none}
 .il{font-size:12px;color:var(--muted);font-weight:600}
 .iv{font-size:13px;font-weight:800;color:var(--bamboo)}
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(5,10,5,.95);border-top:1px solid rgba(255,255,255,.06);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px 8px;cursor:pointer;transition:all .2s;position:relative;gap:1px;min-height:72px;}
-.ni-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:transform .2s;overflow:visible;}
-.ni-icon img{width:40px;height:40px;object-fit:contain;filter:grayscale(1) brightness(0.5);transition:filter .25s,transform .25s;}
-.ni.active .ni-icon{transform:scale(1.1)}
-.ni.active .ni-icon img{filter:grayscale(0) brightness(1) drop-shadow(0 0 8px #39FF14) drop-shadow(0 0 16px #39FF14);}
-.ni-lbl{font-size:9px;font-weight:800;color:rgba(255,255,255,.3);transition:color .2s;line-height:1;margin-top:3px;}
-.ni.active .ni-lbl{color:#39FF14;text-shadow:0 0 8px #39FF14;}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,.97);border-top:1px solid rgba(255,255,255,.08);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;transition:all .2s;position:relative;gap:3px;min-height:68px;}
+.ni-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;transition:all .2s;overflow:visible;font-size:24px;}
+.ni-icon svg{width:26px;height:26px;fill:rgba(255,255,255,.38);transition:fill .2s;}
+.ni.active .ni-icon svg{fill:#39FF14;filter:drop-shadow(0 0 6px #39FF1488);}
+.ni-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.38);transition:color .2s;line-height:1;margin-top:1px;}
+.ni.active .ni-lbl{color:#39FF14;text-shadow:0 0 8px #39FF1466;}
 /* Particles */
 /* ════ LOADING SCREEN — RASEEN ════ */
 #loadingScreen{
@@ -435,9 +434,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .btn-prim:not(:disabled){animation:prim-glow 2.2s ease-in-out infinite!important}
 @keyframes wd-glow{0%,100%{box-shadow:0 0 14px var(--coin-glow)}50%{box-shadow:0 0 28px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.2)}}
 .btn-wd:not(:disabled){animation:wd-glow 2.2s ease-in-out infinite!important}
-@keyframes nav-bounce{0%,100%{transform:scale(1.1) translateY(0)}50%{transform:scale(1.1) translateY(-3px)}}
+@keyframes nav-bounce{0%,100%{transform:scale(1.15) translateY(0)}50%{transform:scale(1.15) translateY(-4px)}}
 .ni.active .ni-icon{animation:nav-bounce 1.8s ease-in-out infinite!important}
-@keyframes lbl-glow{0%,100%{color:#39FF14;text-shadow:0 0 6px #39FF14}50%{color:#39FF14;text-shadow:0 0 14px #39FF14,0 0 28px rgba(57,255,20,.5)}}
+@keyframes lbl-glow{0%,100%{color:var(--bamboo)}50%{color:#b5e04a;text-shadow:0 0 8px rgba(124,179,66,.8)}}
 .ni.active .ni-lbl{animation:lbl-glow 2s ease-in-out infinite!important}
 @keyframes rbb-pulse{0%,100%{border-color:rgba(124,179,66,.18)}50%{border-color:rgba(124,179,66,.5)}}
 .ref-bonus-badge{animation:rbb-pulse 2.5s ease-in-out infinite!important}
@@ -487,77 +486,89 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 
 <!-- TOPBAR -->
 <style>
+/* ══ HERO HEADER ══ */
+.hub-hero{
+  position:relative;width:100%;height:260px;overflow:hidden;
+}
+.hub-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.hub-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.1) 45%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.88) 100%);
+}
 .hub-topbar{
+  position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
   padding:12px 14px 8px;
-  position:sticky;top:0;z-index:100;
+  z-index:10;
   gap:10px;
   background:transparent;
 }
-/* Left: avatar + name pill */
-.hub-tb-left{
-  display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:40px;
-  padding:5px 14px 5px 5px;
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  flex:1;min-width:0;
+/* الكارت شفاف — بدون كارت */
+.hub-tb-card{
+  flex:1;
+  display:flex;align-items:center;
+  gap:10px;
+  background:transparent;
+  border:none;
+  padding:0;
 }
+/* صورة المستخدم على اليسار */
 .hub-tb-avatar{
-  width:38px;height:38px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.25);
+  width:46px;height:46px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.8);
   overflow:hidden;flex-shrink:0;
-  background:rgba(255,255,255,.1);
+  background:rgba(255,255,255,.15);
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
 .hub-tb-avatar img{width:100%;height:100%;object-fit:cover}
+/* اسم المستخدم */
 .hub-tb-name{
-  font-size:14px;font-weight:800;color:#fff;
+  flex:1;font-size:15px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
-/* Right: TON balance pill + green + button */
-.hub-tb-right{
-  display:flex;align-items:center;gap:8px;
-  flex-shrink:0;
-}
+/* خانة TON أقصى اليمين */
 .hub-tb-ton{
   display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:40px;padding:6px 12px;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:6px 12px;
   flex-shrink:0;
 }
-.hub-tb-ton-diamond{
-  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#00aaff,#0055ff);
-  border-radius:50%;font-size:10px;flex-shrink:0;
-}
+.hub-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
 .hub-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
 .hub-tb-plus{
-  width:30px;height:30px;border-radius:50%;
+  width:26px;height:26px;border-radius:50%;
   background:linear-gradient(135deg,#43A047,#66BB6A);
-  border:none;color:#fff;font-size:20px;font-weight:900;line-height:1;
+  border:none;color:#fff;font-size:18px;font-weight:900;line-height:1;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;box-shadow:0 0 10px rgba(76,175,80,.6);flex-shrink:0;
+  cursor:pointer;box-shadow:0 0 8px rgba(76,175,80,.55);flex-shrink:0;
 }
 #uavatar{display:none!important}
 </style>
 
-<div class="hub-topbar">
-  <!-- Left: avatar + name -->
-  <div class="hub-tb-left">
-    <div class="hub-tb-avatar" id="hubAvatar"><span>🏍️</span></div>
-    <span class="hub-tb-name" id="hubUserName">Player</span>
-  </div>
-  <!-- Right: TON balance + plus button -->
-  <div class="hub-tb-right">
-    <div class="hub-tb-ton">
-      <div class="hub-tb-ton-diamond">💎</div>
-      <span class="hub-tb-ton-val" id="tbCoins">0</span>
+<div class="hub-hero">
+  <img class="hub-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2e3e4cd2-2d2f-4c24-9bda-579dfab53703.png" alt="hero moto">
+  <div class="hub-hero-overlay"></div>
+  <!-- floating topbar -->
+  <div class="hub-topbar">
+    <div class="hub-tb-card">
+      <div class="hub-tb-avatar" id="hubAvatar"><span>🏍️</span></div>
+      <span class="hub-tb-name" id="hubUserName">Player</span>
+      <div class="hub-tb-ton">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
+        <span class="hub-tb-ton-val" id="tbCoins">0</span>
+        <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
+      </div>
     </div>
-    <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
+  </div>
+  <!-- hero bottom text -->
+  <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
+    <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
+      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;">🏆 По цене ↓</div>
+    </div>
   </div>
 </div>
 <!-- hidden legacy for JS compat -->
@@ -585,7 +596,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes notif-slide{0%,100%{transform:translateX(0)}50%{transform:translateX(-6px)}}
 @keyframes promo-ken{0%{transform:scale(1)}100%{transform:scale(1.06)}}
 
-.bk-page{padding:0 12px 24px}
+.bk-page{padding:0 10px 24px}
 
 /* ── Page title row ── */
 .bk-title-row{
@@ -637,84 +648,71 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .bk-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}
 .bk-dot.active{background:#fff;width:18px;border-radius:3px}
 
-/* ── Bike card — dark themed like reference image ── */
-/* Card color palette per level */
-:root{
-  --bk1:#39FF14; --bk1-dim:rgba(57,255,20,.12);
-  --bk2:#8A2BE2; --bk2-dim:rgba(138,43,226,.12);
-  --bk3:#FF007A; --bk3-dim:rgba(255,0,122,.12);
-  --bk4:#FF1A1A; --bk4-dim:rgba(255,26,26,.12);
-  --bk5:#FF7A00; --bk5-dim:rgba(255,122,0,.12);
-  --bk6:#0066FF; --bk6-dim:rgba(0,102,255,.12);
-  --bk7:#00E5FF; --bk7-dim:rgba(0,229,255,.12);
-  --bk8:#00C9A7; --bk8-dim:rgba(0,201,167,.12);
-  --bk9:#FFD600; --bk9-dim:rgba(255,214,0,.12);
-  --bk10:#F2F2F2; --bk10-dim:rgba(242,242,242,.12);
-}
+/* ── Bike card — dark neon design ── */
 .bk-card{
-  background:#111;
   border-radius:18px;
-  margin-bottom:12px;
+  margin-bottom:10px;
   overflow:hidden;
-  box-shadow:0 4px 24px rgba(0,0,0,.6);
+  box-shadow:0 4px 20px rgba(0,0,0,.6);
   animation:bk-card-in .32s ease both;
   position:relative;
-  border:1px solid rgba(255,255,255,.07);
 }
 .bk-card.owned{
   animation:bk-owned-pulse 2.5s ease-in-out infinite;
 }
-/* Shimmer on hover/tap */
 .bk-card::after{
   content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
   animation:bk-shimmer 3.8s infinite;pointer-events:none;
 }
 
 /* Card top — image + stats */
 .bk-card-top{
   display:flex;align-items:stretch;min-height:130px;
+  position:relative;
 }
 /* Left: bike image */
 .bk-card-imgbox{
-  width:130px;flex-shrink:0;
-  background:rgba(0,0,0,.4);
+  width:145px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  padding:0;overflow:hidden;position:relative;
+  padding:0;overflow:hidden;
 }
 .bk-card-imgbox img{
   width:100%;height:100%;object-fit:cover;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
 }
 
-/* Right: name + stats grid */
+/* Right: name + stats — uses card bg image */
 .bk-card-info{
   flex:1;padding:12px 14px 10px;display:flex;flex-direction:column;justify-content:center;
-  background:#111;position:relative;overflow:hidden;
+  position:relative;overflow:hidden;
 }
-/* Brush stroke accent at bottom right of info area */
-.bk-card-info::after{
-  content:'';position:absolute;bottom:-10px;right:-10px;width:70px;height:50px;
-  opacity:.35;pointer-events:none;
-  transform:skewX(-15deg);
+.bk-card-info-bg{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:1;
 }
+.bk-card-info-content{position:relative;z-index:2;}
+
 .bk-card-nameline{
   display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
 }
 .bk-card-name{
-  font-size:16px;font-weight:800;letter-spacing:.2px;font-style:italic;
+  font-size:18px;font-weight:800;letter-spacing:.2px;
+  font-style:italic;
 }
 .bk-card-arrow{
   width:28px;height:28px;border-radius:50%;
   border:2px solid currentColor;
   display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:800;flex-shrink:0;opacity:.85;
+  font-size:15px;font-weight:800;flex-shrink:0;cursor:pointer;
+  background:rgba(0,0,0,.25);
 }
-/* 2×2 stats grid — exactly like reference */
+/* 2×2 stats grid */
 .bk-stats-grid{
   display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;
 }
 .bk-stat-cell{}
-.bk-stat-label{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:1px}
+.bk-stat-label{font-size:11px;font-weight:600;margin-bottom:1px;opacity:.75;}
 .bk-stat-value{font-size:20px;font-weight:800;color:#fff;line-height:1.1}
 
 /* Card bottom — buy/owned button */
@@ -723,64 +721,16 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   font-size:15px;font-weight:800;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
   letter-spacing:.3px;transition:opacity .18s;
-  background:rgba(0,0,0,.3);
+}
+.bk-card-btn.buy-btn{
+  background:linear-gradient(90deg,#43A047,#66BB6A);
   color:#fff;
 }
 .bk-card-btn.buy-btn:active{opacity:.82}
 .bk-card-btn.owned-btn{
+  background:linear-gradient(90deg,#2e7d32,#388E3C);
   color:#fff;cursor:default;
-  background:rgba(0,0,0,.3);
 }
-/* Per-level color theming applied via JS */
-.bk-card[data-lv="1"]  .bk-card-name{color:#39FF14}
-.bk-card[data-lv="1"]  .bk-card-arrow{color:#39FF14;border-color:#39FF14}
-.bk-card[data-lv="1"]  .bk-card-info::after{background:#39FF14}
-.bk-card[data-lv="1"]  .bk-card-btn.owned-btn,.bk-card[data-lv="1"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(57,255,20,.15),rgba(57,255,20,.08));border-top:1px solid rgba(57,255,20,.2);}
-
-.bk-card[data-lv="2"]  .bk-card-name{color:#8A2BE2}
-.bk-card[data-lv="2"]  .bk-card-arrow{color:#8A2BE2;border-color:#8A2BE2}
-.bk-card[data-lv="2"]  .bk-card-info::after{background:#8A2BE2}
-.bk-card[data-lv="2"]  .bk-card-btn.owned-btn,.bk-card[data-lv="2"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(138,43,226,.15),rgba(138,43,226,.08));border-top:1px solid rgba(138,43,226,.2);}
-
-.bk-card[data-lv="3"]  .bk-card-name{color:#FF007A}
-.bk-card[data-lv="3"]  .bk-card-arrow{color:#FF007A;border-color:#FF007A}
-.bk-card[data-lv="3"]  .bk-card-info::after{background:#FF007A}
-.bk-card[data-lv="3"]  .bk-card-btn.owned-btn,.bk-card[data-lv="3"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,0,122,.15),rgba(255,0,122,.08));border-top:1px solid rgba(255,0,122,.2);}
-
-.bk-card[data-lv="4"]  .bk-card-name{color:#FF1A1A}
-.bk-card[data-lv="4"]  .bk-card-arrow{color:#FF1A1A;border-color:#FF1A1A}
-.bk-card[data-lv="4"]  .bk-card-info::after{background:#FF1A1A}
-.bk-card[data-lv="4"]  .bk-card-btn.owned-btn,.bk-card[data-lv="4"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,26,26,.15),rgba(255,26,26,.08));border-top:1px solid rgba(255,26,26,.2);}
-
-.bk-card[data-lv="5"]  .bk-card-name{color:#FF7A00}
-.bk-card[data-lv="5"]  .bk-card-arrow{color:#FF7A00;border-color:#FF7A00}
-.bk-card[data-lv="5"]  .bk-card-info::after{background:#FF7A00}
-.bk-card[data-lv="5"]  .bk-card-btn.owned-btn,.bk-card[data-lv="5"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,122,0,.15),rgba(255,122,0,.08));border-top:1px solid rgba(255,122,0,.2);}
-
-.bk-card[data-lv="6"]  .bk-card-name{color:#0066FF}
-.bk-card[data-lv="6"]  .bk-card-arrow{color:#0066FF;border-color:#0066FF}
-.bk-card[data-lv="6"]  .bk-card-info::after{background:#0066FF}
-.bk-card[data-lv="6"]  .bk-card-btn.owned-btn,.bk-card[data-lv="6"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,102,255,.15),rgba(0,102,255,.08));border-top:1px solid rgba(0,102,255,.2);}
-
-.bk-card[data-lv="7"]  .bk-card-name{color:#00E5FF}
-.bk-card[data-lv="7"]  .bk-card-arrow{color:#00E5FF;border-color:#00E5FF}
-.bk-card[data-lv="7"]  .bk-card-info::after{background:#00E5FF}
-.bk-card[data-lv="7"]  .bk-card-btn.owned-btn,.bk-card[data-lv="7"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,229,255,.15),rgba(0,229,255,.08));border-top:1px solid rgba(0,229,255,.2);}
-
-.bk-card[data-lv="8"]  .bk-card-name{color:#00C9A7}
-.bk-card[data-lv="8"]  .bk-card-arrow{color:#00C9A7;border-color:#00C9A7}
-.bk-card[data-lv="8"]  .bk-card-info::after{background:#00C9A7}
-.bk-card[data-lv="8"]  .bk-card-btn.owned-btn,.bk-card[data-lv="8"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,201,167,.15),rgba(0,201,167,.08));border-top:1px solid rgba(0,201,167,.2);}
-
-.bk-card[data-lv="9"]  .bk-card-name{color:#FFD600}
-.bk-card[data-lv="9"]  .bk-card-arrow{color:#FFD600;border-color:#FFD600}
-.bk-card[data-lv="9"]  .bk-card-info::after{background:#FFD600}
-.bk-card[data-lv="9"]  .bk-card-btn.owned-btn,.bk-card[data-lv="9"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,214,0,.15),rgba(255,214,0,.08));border-top:1px solid rgba(255,214,0,.2);}
-
-.bk-card[data-lv="10"] .bk-card-name{color:#F2F2F2}
-.bk-card[data-lv="10"] .bk-card-arrow{color:#F2F2F2;border-color:#F2F2F2}
-.bk-card[data-lv="10"] .bk-card-info::after{background:#F2F2F2}
-.bk-card[data-lv="10"] .bk-card-btn.owned-btn,.bk-card[data-lv="10"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(242,242,242,.12),rgba(242,242,242,.06));border-top:1px solid rgba(242,242,242,.15);}
 /* ══ BIKE DETAIL MODAL STYLES ══ */
 .bk-detail-overlay{
   display:none;position:fixed;inset:0;z-index:600;
@@ -790,7 +740,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .bk-detail-overlay.open{display:flex}
 .bk-detail-sheet{
   width:100%;max-width:480px;
-  background:#f5f5e8;
+  background:#111;
   border-radius:24px 24px 0 0;
   overflow:hidden;
   animation:su .3s ease;
@@ -799,53 +749,53 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .bk-detail-img{
   width:100%;height:200px;object-fit:cover;display:block;
 }
-.bk-detail-body{padding:16px 18px 24px;}
+.bk-detail-body{padding:16px 18px 24px;background:transparent;}
 .bk-detail-class{
   display:inline-flex;align-items:center;
-  background:#e8e8d8;border-radius:20px;
-  padding:4px 14px;font-size:13px;font-weight:700;color:#555;
+  background:rgba(255,255,255,.1);border-radius:20px;
+  padding:4px 14px;font-size:13px;font-weight:700;color:rgba(255,255,255,.7);
   margin-bottom:14px;
 }
 .bk-detail-section-title{
-  font-size:17px;font-weight:800;color:#222;margin-bottom:12px;
+  font-size:17px;font-weight:800;color:#fff;margin-bottom:12px;
 }
 /* Stat bars */
 .bk-detail-stat{
   display:flex;align-items:center;gap:10px;margin-bottom:10px;
 }
 .bk-detail-stat-name{
-  font-size:14px;font-weight:700;color:#333;width:90px;flex-shrink:0;
+  font-size:14px;font-weight:700;color:rgba(255,255,255,.8);width:90px;flex-shrink:0;
 }
 .bk-detail-bar-wrap{
-  flex:1;height:14px;background:#e0e0cf;border-radius:7px;overflow:hidden;
+  flex:1;height:14px;background:rgba(255,255,255,.1);border-radius:7px;overflow:hidden;
 }
 .bk-detail-bar-fill{
   height:100%;border-radius:7px;
-  background:linear-gradient(90deg,#ff8a80,#ff5252);
+  background:linear-gradient(90deg,#39FF14,#00C9A7);
   transition:width .4s ease;
 }
 .bk-detail-stat-val{
-  font-size:14px;font-weight:800;color:#222;width:34px;text-align:right;flex-shrink:0;
+  font-size:14px;font-weight:800;color:#fff;width:34px;text-align:right;flex-shrink:0;
 }
 /* Earnings section */
 .bk-detail-earn-title{
-  font-size:17px;font-weight:800;color:#222;margin:16px 0 10px;
+  font-size:17px;font-weight:800;color:#fff;margin:16px 0 10px;
 }
 .bk-detail-earn-row{
   display:flex;align-items:center;gap:10px;
   padding:10px 0;
-  border-bottom:1px solid rgba(0,0,0,.07);
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
 .bk-detail-earn-row:last-child{border-bottom:none;}
 .bk-detail-ton-icon{
   width:28px;height:28px;border-radius:50%;object-fit:contain;flex-shrink:0;
 }
 .bk-detail-earn-val{
-  font-size:15px;font-weight:800;color:#222;flex:1;
+  font-size:15px;font-weight:800;color:#fff;flex:1;
 }
-.bk-detail-earn-arrow{font-size:16px;color:#888;}
+.bk-detail-earn-arrow{font-size:16px;color:rgba(255,255,255,.4);}
 .bk-detail-earn-period{
-  font-size:14px;font-weight:700;color:#555;
+  font-size:14px;font-weight:700;color:rgba(255,255,255,.6);
 }
 /* Close + buy btn */
 .bk-detail-actions{
@@ -853,7 +803,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 }
 .bk-detail-close-btn{
   flex-shrink:0;width:44px;height:44px;border-radius:50%;
-  background:#e0e0cf;border:none;font-size:20px;cursor:pointer;
+  background:rgba(255,255,255,.15);border:none;font-size:20px;cursor:pointer;color:#fff;
   display:flex;align-items:center;justify-content:center;
 }
 .bk-detail-buy-btn{
@@ -875,48 +825,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </div>
 
 <div class="sec active" id="sectionHome">
-<div class="bk-page">
-
-  <!-- Hero Banner matching reference -->
-  <style>
-  .bk-hero{
-    position:relative;border-radius:20px;overflow:hidden;
-    margin-bottom:14px;height:160px;
-    background:#0a0a0a;
-  }
-  .bk-hero-bg{position:absolute;inset:0;overflow:hidden;}
-  .bk-hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.6;animation:promo-ken 8s ease-in-out infinite alternate;}
-  .bk-hero-overlay{
-    position:absolute;inset:0;
-    background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.3) 60%,transparent 100%);
-  }
-  .bk-hero-content{
-    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 16px;
-  }
-  .bk-hero-title{font-size:28px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px;text-shadow:0 2px 12px rgba(0,0,0,.8);}
-  .bk-hero-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:.5px;}
-  .bk-hero-sub span{color:rgba(255,255,255,.4);margin:0 5px;}
-  </style>
-
-  <div class="bk-hero">
-    <div class="bk-hero-bg">
-      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2e3e4cd2-2d2f-4c24-9bda-579dfab53703.png" onerror="this.src='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png'">
-    </div>
-    <div class="bk-hero-overlay"></div>
-    <div class="bk-hero-content">
-      <div class="bk-hero-title">Motorcycles</div>
-      <div class="bk-hero-sub">Collect<span>•</span>Upgrade<span>•</span>Dominate</div>
-    </div>
-  </div>
-
-  <!-- Page title + sort -->
-  <div class="bk-title-row">
-    <div class="bk-page-title" style="display:none">Мотоциклы</div>
-    <div style="flex:1"></div>
-    <div class="bk-sort-btn">
-      <span>🏆</span><span>By Price ↓</span>
-    </div>
-  </div>
+<div class="bk-page" style="padding-top:0;">
 
   <!-- Bike cards list -->
   <div id="bikesGrid"></div>
@@ -941,19 +850,23 @@ const BIKES = [
 
 const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
 
-/* Bike card images (colored versions) */
-const BIKE_CARD_IMGS = {
-  1:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png',
-  2:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0475e654-4c10-420b-981a-8fa44f48dcd6.png',
-  3:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b46cbb24-5c10-4d60-965b-5425d14d8057.png',
-  4:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ecfd607-921f-49d7-bb9e-73e8072dc4a7.png',
-  5:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/79068472-1e06-49cf-a4e0-1b9ddb37825c.png',
-  6:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6246f464-1218-4a3d-a10c-356bdd33c3fe.png',
-  7:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0a0c0b62-9eb8-421e-b501-17246678f1df.png',
-  8:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7aea332b-77fc-49fe-8c2c-a79b37e80f03.png',
-  9:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/84ff2e86-fbbe-4085-bb4b-1d60e8fabe80.png',
-  10: 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/68cf2a51-6959-4dd7-a66f-12e3c0e25563.png',
-};
+// Colored card backgrounds for each bike level
+const BIKE_CARD_IMGS = [
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png', // green
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b46cbb24-5c10-4d60-965b-5425d14d8057.png', // pink/magenta
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0475e654-4c10-420b-981a-8fa44f48dcd6.png', // purple
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ecfd607-921f-49d7-bb9e-73e8072dc4a7.png', // red
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/79068472-1e06-49cf-a4e0-1b9ddb37825c.png', // orange
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6246f464-1218-4a3d-a10c-356bdd33c3fe.png', // dark blue
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0a0c0b62-9eb8-421e-b501-17246678f1df.png', // sky blue
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7aea332b-77fc-49fe-8c2c-a79b37e80f03.png', // teal
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/84ff2e86-fbbe-4085-bb4b-1d60e8fabe80.png', // yellow
+  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/68cf2a51-6959-4dd7-a66f-12e3c0e25563.png', // white/gray
+];
+const BIKE_NAME_COLORS = [
+  '#39FF14','#FF007A','#8A2BE2','#FF1A1A','#FF7A00',
+  '#0066FF','#00E5FF','#00C9A7','#FFD600','#F2F2F2'
+];
 
 function renderBikes(){
   const grid = document.getElementById('bikesGrid');
@@ -962,40 +875,42 @@ function renderBikes(){
   grid.innerHTML = '';
   BIKES.forEach((b,i)=>{
     const isOwned = ownedBikes.includes(b.lv);
+    const cardImg = BIKE_CARD_IMGS[i % BIKE_CARD_IMGS.length];
+    const nameColor = BIKE_NAME_COLORS[i % BIKE_NAME_COLORS.length];
     const div = document.createElement('div');
     div.className = 'bk-card' + (isOwned ? ' owned' : '');
-    div.setAttribute('data-lv', b.lv);
     div.style.animationDelay = (i*0.06)+'s';
-    const cardImg = BIKE_CARD_IMGS[b.lv] || b.img;
     const btnHtml = isOwned
       ? `<button class="bk-card-btn owned-btn" disabled>✅ В вашем гараже</button>`
       : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">Купить за ${b.price} TON</button>`;
     div.innerHTML = `
       <div class="bk-card-top">
         <div class="bk-card-imgbox">
-          <img src="${cardImg}" onerror="this.style.opacity='.2'">
+          <img src="${b.img}" onerror="this.style.opacity='.2'">
         </div>
-        <div class="bk-card-info">
-          <div class="bk-card-nameline">
-            <div class="bk-card-name">${b.name}</div>
-            <div class="bk-card-arrow" onclick="openBikeDetail(${b.lv})" style="cursor:pointer;">›</div>
-          </div>
-          <div class="bk-stats-grid">
-            <div class="bk-stat-cell">
-              <div class="bk-stat-label">Скорость</div>
-              <div class="bk-stat-value">${b.speed}</div>
+        <div class="bk-card-info" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
+          <div class="bk-card-info-content">
+            <div class="bk-card-nameline">
+              <div class="bk-card-name" style="color:${nameColor};text-shadow:0 0 12px ${nameColor}88;">${b.name}</div>
+              <div class="bk-card-arrow" style="color:${nameColor};border-color:${nameColor};" onclick="openBikeDetail(${b.lv})">›</div>
             </div>
-            <div class="bk-stat-cell">
-              <div class="bk-stat-label">Нитро</div>
-              <div class="bk-stat-value">${b.nitro}</div>
-            </div>
-            <div class="bk-stat-cell">
-              <div class="bk-stat-label">Разгон</div>
-              <div class="bk-stat-value">${b.accel}</div>
-            </div>
-            <div class="bk-stat-cell">
-              <div class="bk-stat-label">Маневры</div>
-              <div class="bk-stat-value">${b.maneuver}</div>
+            <div class="bk-stats-grid">
+              <div class="bk-stat-cell">
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">Скорость</div>
+                <div class="bk-stat-value">${b.speed}</div>
+              </div>
+              <div class="bk-stat-cell">
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">Нитро</div>
+                <div class="bk-stat-value">${b.nitro}</div>
+              </div>
+              <div class="bk-stat-cell">
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">Разгон</div>
+                <div class="bk-stat-value">${b.accel}</div>
+              </div>
+              <div class="bk-stat-cell">
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">Маневры</div>
+                <div class="bk-stat-value">${b.maneuver}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1013,6 +928,10 @@ function openBikeDetail(lv){
   const ownedBikes = (S.user && S.user.ownedBikes) ? S.user.ownedBikes : [];
   const isOwned = ownedBikes.includes(b.lv);
 
+  const idx = BIKES.indexOf(b);
+  const cardImg = BIKE_CARD_IMGS[idx % BIKE_CARD_IMGS.length];
+  const nameColor = BIKE_NAME_COLORS[idx % BIKE_NAME_COLORS.length];
+
   // Max stat values for bar calculation
   const maxSpeed    = 1800, maxNitro = 1100, maxAccel = 550, maxManeuver = 250;
 
@@ -1028,29 +947,29 @@ function openBikeDetail(lv){
 
   document.getElementById('bikeDetailSheet').innerHTML = `
     <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
-    <div class="bk-detail-body">
+    <div class="bk-detail-body" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
       <div class="bk-detail-class">Класс: Уровень ${b.lv}</div>
 
-      <div class="bk-detail-section-title">Характеристики:</div>
+      <div class="bk-detail-section-title" style="color:${nameColor};">Характеристики:</div>
 
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Скорость</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.speed}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Разгон</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.accel}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Маневры</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.maneuver}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Нитро</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.nitro}</div>
       </div>
 
@@ -2982,11 +2901,41 @@ function syncFinanceHeader(){
 
 <!-- NAV -->
 <nav class="bnav">
-  <div class="ni active" data-s="sectionHome"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9673391c-2709-4b49-af99-e81dd04504e4.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Home</div></div>
-  <div class="ni" data-s="sectionMarket"   onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/464b4999-a99e-4dea-a46c-990daded922a.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Гараж</div></div>
-  <div class="ni" data-s="sectionTasks"    onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/31752193-26ac-4df8-b717-96af866765c6.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Tasks</div></div>
-  <div class="ni" data-s="sectionFriends"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/69bc3575-7fd0-44ab-8d1f-df9d03aaa707.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Farm</div></div>
-  <div class="ni" data-s="sectionFinance"  onclick="goNav(this)"><div class="ni-icon"><img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e3973cc4-ce72-49fe-ac24-5c408d4ada84.png" style="width:52px;height:52px;object-fit:contain"></div><div class="ni-lbl">Profile</div></div>
+  <!-- Home -->
+  <div class="ni active" data-s="sectionHome" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </div>
+    <div class="ni-lbl">Home</div>
+  </div>
+  <!-- Garage -->
+  <div class="ni" data-s="sectionMarket" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9.3V4h-3v2.6L12 3 2 12h3v8h5v-5h4v5h5v-8h3l-3-2.7zM17 18h-1v-5H8v5H7v-7.81l5-4.5 5 4.5V18z"/></svg>
+    </div>
+    <div class="ni-lbl">Garage</div>
+  </div>
+  <!-- Racing -->
+  <div class="ni" data-s="sectionTasks" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 10h-2v5h2v-5zm6 0h-2v5h2v-5zm8.5 7H2v2h19v-2zm-2.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>
+    </div>
+    <div class="ni-lbl">Racing</div>
+  </div>
+  <!-- Farm -->
+  <div class="ni" data-s="sectionFriends" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 8C8 10 5.9 16.17 3.82 19.5c1.91 1.31 4.13 1.5 6.18 1.5C14.5 21 19 19 22 14c-3 1-4.5 0-5.5-2 1-2 .5-4-1.5-4zm-5 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+    </div>
+    <div class="ni-lbl">Farm</div>
+  </div>
+  <!-- Profile -->
+  <div class="ni" data-s="sectionFinance" onclick="goNav(this)">
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+    </div>
+    <div class="ni-lbl">Profile</div>
+  </div>
 </nav>
 
 <!-- HELP MODAL -->
@@ -3676,14 +3625,14 @@ function goNav(el){
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab(); // always hide when changing main section
-  // Hide topbar only on Finance/Profile page
-  const topbar = document.querySelector('.hub-topbar');
+  // Show/hide hero on Finance/Profile page
+  const hero = document.querySelector('.hub-hero');
   if(el.dataset.s==='sectionFinance'){
-    if(topbar) topbar.style.display='none';
+    if(hero) hero.style.display='none';
     syncFinanceHeader();
     renderWdHistNew();
   } else {
-    if(topbar) topbar.style.display='';
+    if(hero) hero.style.display='';
   }
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionFriends'){renderMiningPage();}
@@ -4255,7 +4204,7 @@ function openProfilePage(page){
   title.textContent = titles[page]||page;
   overlay.style.display='block';
   // Show topbar in sub-pages (they have their own back button)
-  const topbar = document.querySelector('.hub-topbar');
+  const topbar = document.querySelector('.hub-hero');
   if(topbar) topbar.style.display='';
   // Re-init page specific data
   if(page==='missions'){renderMissions();}
@@ -4271,7 +4220,7 @@ function closeProfilePage(){
   const overlay = document.getElementById('profileSubPage');
   if(overlay) overlay.style.display='none';
   // Hide topbar again when going back to Profile main
-  const topbar = document.querySelector('.hub-topbar');
+  const topbar = document.querySelector('.hub-hero');
   if(topbar) topbar.style.display='none';
 }
 
@@ -4289,7 +4238,7 @@ function goToFinanceDeposit(){
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const topbar=document.querySelector('.hub-topbar');
+  const topbar=document.querySelector('.hub-hero');
   if(topbar) topbar.style.display='none';
   openProfilePage('deposit');
 }
@@ -4299,7 +4248,7 @@ function goToFinanceWithdraw(){
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const topbar=document.querySelector('.hub-topbar');
+  const topbar=document.querySelector('.hub-hero');
   if(topbar) topbar.style.display='none';
   openProfilePage('withdraw');
 }

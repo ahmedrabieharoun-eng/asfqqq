@@ -202,13 +202,14 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .info-row:last-child{border-bottom:none}
 .il{font-size:12px;color:var(--muted);font-weight:600}
 .iv{font-size:13px;font-weight:800;color:var(--bamboo)}
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(0,0,0,.86);border-top:1px solid rgba(124,179,66,.15);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(5,10,5,.95);border-top:1px solid rgba(255,255,255,.06);display:flex;backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0);}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px 8px;cursor:pointer;transition:all .2s;position:relative;gap:1px;min-height:72px;}
-.ni-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;transition:transform .2s;overflow:visible;}
-.ni-icon img{width:52px;height:52px;object-fit:contain;}
-.ni.active .ni-icon{transform:scale(1.15)}
-.ni-lbl{font-size:9px;font-weight:800;color:var(--muted);transition:color .2s;line-height:1;margin-top:1px;}
-.ni.active .ni-lbl{color:var(--bamboo)}
+.ni-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:transform .2s;overflow:visible;}
+.ni-icon img{width:40px;height:40px;object-fit:contain;filter:grayscale(1) brightness(0.5);transition:filter .25s,transform .25s;}
+.ni.active .ni-icon{transform:scale(1.1)}
+.ni.active .ni-icon img{filter:grayscale(0) brightness(1) drop-shadow(0 0 8px #39FF14) drop-shadow(0 0 16px #39FF14);}
+.ni-lbl{font-size:9px;font-weight:800;color:rgba(255,255,255,.3);transition:color .2s;line-height:1;margin-top:3px;}
+.ni.active .ni-lbl{color:#39FF14;text-shadow:0 0 8px #39FF14;}
 /* Particles */
 /* ════ LOADING SCREEN — RASEEN ════ */
 #loadingScreen{
@@ -434,9 +435,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .btn-prim:not(:disabled){animation:prim-glow 2.2s ease-in-out infinite!important}
 @keyframes wd-glow{0%,100%{box-shadow:0 0 14px var(--coin-glow)}50%{box-shadow:0 0 28px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.2)}}
 .btn-wd:not(:disabled){animation:wd-glow 2.2s ease-in-out infinite!important}
-@keyframes nav-bounce{0%,100%{transform:scale(1.15) translateY(0)}50%{transform:scale(1.15) translateY(-4px)}}
+@keyframes nav-bounce{0%,100%{transform:scale(1.1) translateY(0)}50%{transform:scale(1.1) translateY(-3px)}}
 .ni.active .ni-icon{animation:nav-bounce 1.8s ease-in-out infinite!important}
-@keyframes lbl-glow{0%,100%{color:var(--bamboo)}50%{color:#b5e04a;text-shadow:0 0 8px rgba(124,179,66,.8)}}
+@keyframes lbl-glow{0%,100%{color:#39FF14;text-shadow:0 0 6px #39FF14}50%{color:#39FF14;text-shadow:0 0 14px #39FF14,0 0 28px rgba(57,255,20,.5)}}
 .ni.active .ni-lbl{animation:lbl-glow 2s ease-in-out infinite!important}
 @keyframes rbb-pulse{0%,100%{border-color:rgba(124,179,66,.18)}50%{border-color:rgba(124,179,66,.5)}}
 .ref-bonus-badge{animation:rbb-pulse 2.5s ease-in-out infinite!important}
@@ -488,70 +489,75 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <style>
 .hub-topbar{
   display:flex;align-items:center;
-  padding:10px 14px 8px;
+  padding:12px 14px 8px;
   position:sticky;top:0;z-index:100;
   gap:10px;
-  /* شفاف بالكامل — الكارت في الداخل هو اللي بيتشاف */
   background:transparent;
 }
-/* الكارت الشفاف اللي بيلف كل الشريط */
-.hub-tb-card{
-  flex:1;
-  display:flex;align-items:center;
-  gap:10px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:20px;
-  padding:8px 12px;
+/* Left: avatar + name pill */
+.hub-tb-left{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:40px;
+  padding:5px 14px 5px 5px;
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
+  flex:1;min-width:0;
 }
-/* صورة المستخدم على اليسار */
 .hub-tb-avatar{
-  width:40px;height:40px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.3);
+  width:38px;height:38px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.25);
   overflow:hidden;flex-shrink:0;
   background:rgba(255,255,255,.1);
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
 .hub-tb-avatar img{width:100%;height:100%;object-fit:cover}
-/* اسم المستخدم */
 .hub-tb-name{
-  flex:1;font-size:14px;font-weight:800;color:#fff;
+  font-size:14px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-/* خانة TON أقصى اليمين */
-.hub-tb-ton{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:14px;padding:5px 10px;
+/* Right: TON balance pill + green + button */
+.hub-tb-right{
+  display:flex;align-items:center;gap:8px;
   flex-shrink:0;
 }
-.hub-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
+.hub-tb-ton{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:40px;padding:6px 12px;
+  flex-shrink:0;
+}
+.hub-tb-ton-diamond{
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#00aaff,#0055ff);
+  border-radius:50%;font-size:10px;flex-shrink:0;
+}
 .hub-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
 .hub-tb-plus{
-  width:26px;height:26px;border-radius:50%;
+  width:30px;height:30px;border-radius:50%;
   background:linear-gradient(135deg,#43A047,#66BB6A);
-  border:none;color:#fff;font-size:18px;font-weight:900;line-height:1;
+  border:none;color:#fff;font-size:20px;font-weight:900;line-height:1;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;box-shadow:0 0 8px rgba(76,175,80,.55);flex-shrink:0;
+  cursor:pointer;box-shadow:0 0 10px rgba(76,175,80,.6);flex-shrink:0;
 }
 #uavatar{display:none!important}
 </style>
 
 <div class="hub-topbar">
-  <div class="hub-tb-card">
-    <!-- صورة المستخدم يسار -->
+  <!-- Left: avatar + name -->
+  <div class="hub-tb-left">
     <div class="hub-tb-avatar" id="hubAvatar"><span>🏍️</span></div>
-    <!-- اسم المستخدم -->
     <span class="hub-tb-name" id="hubUserName">Player</span>
-    <!-- خانة TON أقصى اليمين -->
+  </div>
+  <!-- Right: TON balance + plus button -->
+  <div class="hub-tb-right">
     <div class="hub-tb-ton">
-      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
+      <div class="hub-tb-ton-diamond">💎</div>
       <span class="hub-tb-ton-val" id="tbCoins">0</span>
-      <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
     </div>
+    <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
   </div>
 </div>
 <!-- hidden legacy for JS compat -->
@@ -631,15 +637,29 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .bk-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}
 .bk-dot.active{background:#fff;width:18px;border-radius:3px}
 
-/* ── Bike card — matches reference exactly ── */
+/* ── Bike card — dark themed like reference image ── */
+/* Card color palette per level */
+:root{
+  --bk1:#39FF14; --bk1-dim:rgba(57,255,20,.12);
+  --bk2:#8A2BE2; --bk2-dim:rgba(138,43,226,.12);
+  --bk3:#FF007A; --bk3-dim:rgba(255,0,122,.12);
+  --bk4:#FF1A1A; --bk4-dim:rgba(255,26,26,.12);
+  --bk5:#FF7A00; --bk5-dim:rgba(255,122,0,.12);
+  --bk6:#0066FF; --bk6-dim:rgba(0,102,255,.12);
+  --bk7:#00E5FF; --bk7-dim:rgba(0,229,255,.12);
+  --bk8:#00C9A7; --bk8-dim:rgba(0,201,167,.12);
+  --bk9:#FFD600; --bk9-dim:rgba(255,214,0,.12);
+  --bk10:#F2F2F2; --bk10-dim:rgba(242,242,242,.12);
+}
 .bk-card{
-  background:#fff;
+  background:#111;
   border-radius:18px;
   margin-bottom:12px;
   overflow:hidden;
-  box-shadow:0 4px 20px rgba(0,0,0,.35);
+  box-shadow:0 4px 24px rgba(0,0,0,.6);
   animation:bk-card-in .32s ease both;
   position:relative;
+  border:1px solid rgba(255,255,255,.07);
 }
 .bk-card.owned{
   animation:bk-owned-pulse 2.5s ease-in-out infinite;
@@ -647,7 +667,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 /* Shimmer on hover/tap */
 .bk-card::after{
   content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
   animation:bk-shimmer 3.8s infinite;pointer-events:none;
 }
 
@@ -658,41 +678,44 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 /* Left: bike image */
 .bk-card-imgbox{
   width:130px;flex-shrink:0;
-  background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%);
+  background:rgba(0,0,0,.4);
   display:flex;align-items:center;justify-content:center;
-  padding:0;overflow:hidden;
-}
-.bk-card.owned .bk-card-imgbox{
-  background:linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);
+  padding:0;overflow:hidden;position:relative;
 }
 .bk-card-imgbox img{
   width:100%;height:100%;object-fit:cover;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));
 }
 
 /* Right: name + stats grid */
 .bk-card-info{
   flex:1;padding:12px 14px 10px;display:flex;flex-direction:column;justify-content:center;
+  background:#111;position:relative;overflow:hidden;
+}
+/* Brush stroke accent at bottom right of info area */
+.bk-card-info::after{
+  content:'';position:absolute;bottom:-10px;right:-10px;width:70px;height:50px;
+  opacity:.35;pointer-events:none;
+  transform:skewX(-15deg);
 }
 .bk-card-nameline{
   display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
 }
 .bk-card-name{
-  font-size:16px;font-weight:800;color:#1565C0;letter-spacing:.2px;
+  font-size:16px;font-weight:800;letter-spacing:.2px;font-style:italic;
 }
 .bk-card-arrow{
-  width:26px;height:26px;border-radius:50%;
-  background:rgba(21,101,192,.08);
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid currentColor;
   display:flex;align-items:center;justify-content:center;
-  color:#1565C0;font-size:14px;font-weight:800;flex-shrink:0;
+  font-size:16px;font-weight:800;flex-shrink:0;opacity:.85;
 }
 /* 2×2 stats grid — exactly like reference */
 .bk-stats-grid{
   display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;
 }
 .bk-stat-cell{}
-.bk-stat-label{font-size:11px;color:#888;font-weight:600;margin-bottom:1px}
-.bk-stat-value{font-size:20px;font-weight:800;color:#222;line-height:1.1}
+.bk-stat-label{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;margin-bottom:1px}
+.bk-stat-value{font-size:20px;font-weight:800;color:#fff;line-height:1.1}
 
 /* Card bottom — buy/owned button */
 .bk-card-btn{
@@ -700,16 +723,64 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   font-size:15px;font-weight:800;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
   letter-spacing:.3px;transition:opacity .18s;
-}
-.bk-card-btn.buy-btn{
-  background:linear-gradient(90deg,#43A047,#66BB6A);
+  background:rgba(0,0,0,.3);
   color:#fff;
 }
 .bk-card-btn.buy-btn:active{opacity:.82}
 .bk-card-btn.owned-btn{
-  background:linear-gradient(90deg,#388E3C,#4CAF50);
   color:#fff;cursor:default;
+  background:rgba(0,0,0,.3);
 }
+/* Per-level color theming applied via JS */
+.bk-card[data-lv="1"]  .bk-card-name{color:#39FF14}
+.bk-card[data-lv="1"]  .bk-card-arrow{color:#39FF14;border-color:#39FF14}
+.bk-card[data-lv="1"]  .bk-card-info::after{background:#39FF14}
+.bk-card[data-lv="1"]  .bk-card-btn.owned-btn,.bk-card[data-lv="1"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(57,255,20,.15),rgba(57,255,20,.08));border-top:1px solid rgba(57,255,20,.2);}
+
+.bk-card[data-lv="2"]  .bk-card-name{color:#8A2BE2}
+.bk-card[data-lv="2"]  .bk-card-arrow{color:#8A2BE2;border-color:#8A2BE2}
+.bk-card[data-lv="2"]  .bk-card-info::after{background:#8A2BE2}
+.bk-card[data-lv="2"]  .bk-card-btn.owned-btn,.bk-card[data-lv="2"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(138,43,226,.15),rgba(138,43,226,.08));border-top:1px solid rgba(138,43,226,.2);}
+
+.bk-card[data-lv="3"]  .bk-card-name{color:#FF007A}
+.bk-card[data-lv="3"]  .bk-card-arrow{color:#FF007A;border-color:#FF007A}
+.bk-card[data-lv="3"]  .bk-card-info::after{background:#FF007A}
+.bk-card[data-lv="3"]  .bk-card-btn.owned-btn,.bk-card[data-lv="3"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,0,122,.15),rgba(255,0,122,.08));border-top:1px solid rgba(255,0,122,.2);}
+
+.bk-card[data-lv="4"]  .bk-card-name{color:#FF1A1A}
+.bk-card[data-lv="4"]  .bk-card-arrow{color:#FF1A1A;border-color:#FF1A1A}
+.bk-card[data-lv="4"]  .bk-card-info::after{background:#FF1A1A}
+.bk-card[data-lv="4"]  .bk-card-btn.owned-btn,.bk-card[data-lv="4"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,26,26,.15),rgba(255,26,26,.08));border-top:1px solid rgba(255,26,26,.2);}
+
+.bk-card[data-lv="5"]  .bk-card-name{color:#FF7A00}
+.bk-card[data-lv="5"]  .bk-card-arrow{color:#FF7A00;border-color:#FF7A00}
+.bk-card[data-lv="5"]  .bk-card-info::after{background:#FF7A00}
+.bk-card[data-lv="5"]  .bk-card-btn.owned-btn,.bk-card[data-lv="5"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,122,0,.15),rgba(255,122,0,.08));border-top:1px solid rgba(255,122,0,.2);}
+
+.bk-card[data-lv="6"]  .bk-card-name{color:#0066FF}
+.bk-card[data-lv="6"]  .bk-card-arrow{color:#0066FF;border-color:#0066FF}
+.bk-card[data-lv="6"]  .bk-card-info::after{background:#0066FF}
+.bk-card[data-lv="6"]  .bk-card-btn.owned-btn,.bk-card[data-lv="6"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,102,255,.15),rgba(0,102,255,.08));border-top:1px solid rgba(0,102,255,.2);}
+
+.bk-card[data-lv="7"]  .bk-card-name{color:#00E5FF}
+.bk-card[data-lv="7"]  .bk-card-arrow{color:#00E5FF;border-color:#00E5FF}
+.bk-card[data-lv="7"]  .bk-card-info::after{background:#00E5FF}
+.bk-card[data-lv="7"]  .bk-card-btn.owned-btn,.bk-card[data-lv="7"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,229,255,.15),rgba(0,229,255,.08));border-top:1px solid rgba(0,229,255,.2);}
+
+.bk-card[data-lv="8"]  .bk-card-name{color:#00C9A7}
+.bk-card[data-lv="8"]  .bk-card-arrow{color:#00C9A7;border-color:#00C9A7}
+.bk-card[data-lv="8"]  .bk-card-info::after{background:#00C9A7}
+.bk-card[data-lv="8"]  .bk-card-btn.owned-btn,.bk-card[data-lv="8"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(0,201,167,.15),rgba(0,201,167,.08));border-top:1px solid rgba(0,201,167,.2);}
+
+.bk-card[data-lv="9"]  .bk-card-name{color:#FFD600}
+.bk-card[data-lv="9"]  .bk-card-arrow{color:#FFD600;border-color:#FFD600}
+.bk-card[data-lv="9"]  .bk-card-info::after{background:#FFD600}
+.bk-card[data-lv="9"]  .bk-card-btn.owned-btn,.bk-card[data-lv="9"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(255,214,0,.15),rgba(255,214,0,.08));border-top:1px solid rgba(255,214,0,.2);}
+
+.bk-card[data-lv="10"] .bk-card-name{color:#F2F2F2}
+.bk-card[data-lv="10"] .bk-card-arrow{color:#F2F2F2;border-color:#F2F2F2}
+.bk-card[data-lv="10"] .bk-card-info::after{background:#F2F2F2}
+.bk-card[data-lv="10"] .bk-card-btn.owned-btn,.bk-card[data-lv="10"] .bk-card-btn.buy-btn{background:linear-gradient(90deg,rgba(242,242,242,.12),rgba(242,242,242,.06));border-top:1px solid rgba(242,242,242,.15);}
 /* ══ BIKE DETAIL MODAL STYLES ══ */
 .bk-detail-overlay{
   display:none;position:fixed;inset:0;z-index:600;
@@ -806,11 +877,44 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <div class="sec active" id="sectionHome">
 <div class="bk-page">
 
+  <!-- Hero Banner matching reference -->
+  <style>
+  .bk-hero{
+    position:relative;border-radius:20px;overflow:hidden;
+    margin-bottom:14px;height:160px;
+    background:#0a0a0a;
+  }
+  .bk-hero-bg{position:absolute;inset:0;overflow:hidden;}
+  .bk-hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.6;animation:promo-ken 8s ease-in-out infinite alternate;}
+  .bk-hero-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.3) 60%,transparent 100%);
+  }
+  .bk-hero-content{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 16px;
+  }
+  .bk-hero-title{font-size:28px;font-weight:800;color:#fff;line-height:1;margin-bottom:4px;text-shadow:0 2px 12px rgba(0,0,0,.8);}
+  .bk-hero-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);letter-spacing:.5px;}
+  .bk-hero-sub span{color:rgba(255,255,255,.4);margin:0 5px;}
+  </style>
+
+  <div class="bk-hero">
+    <div class="bk-hero-bg">
+      <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2e3e4cd2-2d2f-4c24-9bda-579dfab53703.png" onerror="this.src='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/848f5854-5038-441c-83e3-a1c27608ec08.png'">
+    </div>
+    <div class="bk-hero-overlay"></div>
+    <div class="bk-hero-content">
+      <div class="bk-hero-title">Motorcycles</div>
+      <div class="bk-hero-sub">Collect<span>•</span>Upgrade<span>•</span>Dominate</div>
+    </div>
+  </div>
+
   <!-- Page title + sort -->
   <div class="bk-title-row">
-    <div class="bk-page-title">Мотоциклы</div>
+    <div class="bk-page-title" style="display:none">Мотоциклы</div>
+    <div style="flex:1"></div>
     <div class="bk-sort-btn">
-      <span>🏆</span><span>По цене ↑</span>
+      <span>🏆</span><span>By Price ↓</span>
     </div>
   </div>
 
@@ -837,6 +941,20 @@ const BIKES = [
 
 const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
 
+/* Bike card images (colored versions) */
+const BIKE_CARD_IMGS = {
+  1:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png',
+  2:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0475e654-4c10-420b-981a-8fa44f48dcd6.png',
+  3:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b46cbb24-5c10-4d60-965b-5425d14d8057.png',
+  4:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ecfd607-921f-49d7-bb9e-73e8072dc4a7.png',
+  5:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/79068472-1e06-49cf-a4e0-1b9ddb37825c.png',
+  6:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6246f464-1218-4a3d-a10c-356bdd33c3fe.png',
+  7:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0a0c0b62-9eb8-421e-b501-17246678f1df.png',
+  8:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7aea332b-77fc-49fe-8c2c-a79b37e80f03.png',
+  9:  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/84ff2e86-fbbe-4085-bb4b-1d60e8fabe80.png',
+  10: 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/68cf2a51-6959-4dd7-a66f-12e3c0e25563.png',
+};
+
 function renderBikes(){
   const grid = document.getElementById('bikesGrid');
   if(!grid) return;
@@ -846,14 +964,16 @@ function renderBikes(){
     const isOwned = ownedBikes.includes(b.lv);
     const div = document.createElement('div');
     div.className = 'bk-card' + (isOwned ? ' owned' : '');
+    div.setAttribute('data-lv', b.lv);
     div.style.animationDelay = (i*0.06)+'s';
+    const cardImg = BIKE_CARD_IMGS[b.lv] || b.img;
     const btnHtml = isOwned
       ? `<button class="bk-card-btn owned-btn" disabled>✅ В вашем гараже</button>`
       : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">Купить за ${b.price} TON</button>`;
     div.innerHTML = `
       <div class="bk-card-top">
         <div class="bk-card-imgbox">
-          <img src="${b.img}" onerror="this.style.opacity='.2'">
+          <img src="${cardImg}" onerror="this.style.opacity='.2'">
         </div>
         <div class="bk-card-info">
           <div class="bk-card-nameline">

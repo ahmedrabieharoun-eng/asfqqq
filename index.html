@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1464,19 +1462,22 @@ async function doUpgradeStat(bikeLevel, stat){
       const nm = document.getElementById('mineUserName');
       const tb = document.getElementById('mineTonBal');
       if(av){
-        const photo = u.photoUrl;
-        if(photo && !av.dataset.photo){
-          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='🏍️'">`;
-          av.dataset.photo = '1';
+        const photo = u.photoUrl || (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user && S.tg.initDataUnsafe.user.photo_url) || null;
+        const currentPhoto = av.dataset.photoSrc || '';
+        if(photo && photo !== currentPhoto){
+          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>'">`;
+          av.dataset.photoSrc = photo;
+        } else if(!photo && !av.querySelector('img')){
+          av.innerHTML = '<span>🏍️</span>';
         }
       }
       if(nm){
-        const name = (window.S && S._tgName) || u.firstName || u.name || 'Player';
-        nm.textContent = name;
+        const name = (window.S && S._tgName) || u.firstName || u.username || u.name || 'Player';
+        if(nm.textContent !== name) nm.textContent = name;
       }
       if(tb){
         const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-        tb.textContent = (Number(bal)||0).toFixed(2);
+        tb.textContent = (Number(bal)||0).toFixed(3);
       }
     }catch(e){}
   }
@@ -1612,8 +1613,11 @@ async function doUpgradeStat(bikeLevel, stat){
   position:relative;width:100%;height:240px;overflow:hidden;
   flex-shrink:0;
 }
-.gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;;filter:brightness(.5);}
-.gr-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.55) 45%,rgba(0,0,0,.95) 100%);}
+.gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.gr-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
+}
 /* topbar inside hero — scrolls WITH page */
 .gr-hero-topbar{
   position:absolute;top:0;left:0;right:0;
@@ -3128,54 +3132,32 @@ async function doUpgradeStat(bikeLevel, stat){
     .pf-balrow{display:flex;align-items:baseline;gap:8px;}
     .pf-balval{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;}
     .pf-baltkn{font-size:13px;font-weight:800;color:#00F27A;}
-    /* PROFILE HERO — same pattern as home/garage hero */
-    .pf-hero{position:relative;width:100%;height:240px;overflow:hidden;background:#000;}
-    .pf-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.55);}
-    .pf-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.85) 100%);}
-    .pf-hero-actions{position:absolute;top:12px;right:12px;display:flex;gap:8px;z-index:10;}
-    .pf-hero-topbar{position:absolute;top:14px;left:12px;right:120px;z-index:9;}
-    .pf-hero-tb-card{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.55);border:1px solid rgba(0,242,122,.45);border-radius:18px;padding:6px 10px 6px 6px;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,.5);}
-    .pf-hero-tb-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid #00F27A;background:#000;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 12px rgba(0,242,122,.45);}
-    .pf-hero-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
-    .pf-hero-tb-nameblock{display:flex;flex-direction:column;min-width:0;flex:1;}
-    .pf-hero-tb-name{font-size:14px;font-weight:800;color:#fff;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
-    .pf-hero-tb-handle{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
-    .pf-hero-tb-ton{display:none;}
-    .pf-hero-center{position:absolute;left:14px;right:14px;bottom:14px;z-index:8;}
-    .pf-hero-title{font-size:30px;font-weight:900;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.3px;line-height:1;}
-    .pf-hero-sub{margin-top:6px;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);}
-    /* Hidden — moved into hero card */
-    .pf-userrow,.pf-balcard{display:none!important;}
-
   </style>
 
-  <!-- HERO (same topbar pattern as home/garage) -->
-  <div class="pf-hero">
-    <img class="pf-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897.png" alt="profile hero">
-    <div class="pf-hero-overlay"></div>
-    <!-- Top action buttons (lang + sound) -->
-    <div class="pf-hero-actions">
-      <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
-      <button class="pf-tb-icon" onclick="toggleSound()" id="soundBtn" aria-label="Sound">🔊</button>
+  <!-- TOPBAR: Lang + Sound buttons -->
+  <div class="pf-topbar">
+    <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
+    <button class="pf-tb-icon" onclick="toggleSound()" id="soundBtn" aria-label="Sound">🔊</button>
+  </div>
+
+  <!-- USER ROW: avatar + name -->
+  <div class="pf-userrow">
+    <div class="pf-avatar" id="finUserAvatar"><span>🏍️</span></div>
+    <div class="pf-nameblock">
+      <div class="pf-name" id="finUserName">Player</div>
+      <div class="pf-uname" id="finUserHandle"></div>
     </div>
-    <!-- Player card: avatar + name + TON balance -->
-    <div class="pf-hero-topbar">
-      <div class="pf-hero-tb-card">
-        <div class="pf-hero-tb-avatar" id="finUserAvatar"><span>🏍️</span></div>
-        <div class="pf-hero-tb-nameblock">
-          <span class="pf-hero-tb-name" id="finUserName">Player</span>
-          <span class="pf-hero-tb-handle" id="finUserHandle"></span>
-        </div>
-        <div class="pf-hero-tb-ton">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
-          <span class="pf-hero-tb-ton-val" id="finTonBal">0.00</span>
-        </div>
+  </div>
+
+  <!-- TOTAL BALANCE CARD -->
+  <div class="pf-balcard">
+    <div class="pf-balicon"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON"></div>
+    <div style="flex:1;min-width:0">
+      <div class="pf-ballbl" data-i18n="totalBalance">Total Balance</div>
+      <div class="pf-balrow">
+        <span class="pf-balval" id="finTonBal">0.00</span>
+        <span class="pf-baltkn">TON</span>
       </div>
-    </div>
-    <!-- Title at bottom of hero -->
-    <div class="pf-hero-center">
-      <div class="pf-hero-title">Profile</div>
-      <div class="pf-hero-sub" data-i18n="totalBalance">Total Balance</div>
     </div>
   </div>
 
@@ -6058,17 +6040,16 @@ function toggleSound(){
 document.addEventListener('DOMContentLoaded', ()=>{
   const btn = document.getElementById('soundBtn');
   if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
-  // Always set up a one-time gesture handler so audio kicks in on first interaction
-  const startOnGesture = ()=>{
-    if(_soundEnabled) _playBgMusic();
-    document.removeEventListener('click', startOnGesture);
-    document.removeEventListener('touchstart', startOnGesture);
-    document.removeEventListener('keydown', startOnGesture);
-  };
-  document.addEventListener('click', startOnGesture);
-  document.addEventListener('touchstart', startOnGesture);
-  document.addEventListener('keydown', startOnGesture);
-  if(_soundEnabled) _playBgMusic();
+  if(_soundEnabled){
+    _playBgMusic();
+    const startOnGesture = ()=>{
+      if(_soundEnabled) _playBgMusic();
+      document.removeEventListener('click', startOnGesture);
+      document.removeEventListener('touchstart', startOnGesture);
+    };
+    document.addEventListener('click', startOnGesture, {once:false});
+    document.addEventListener('touchstart', startOnGesture, {once:false});
+  }
 });
 
 function toggleLangMenu(){
@@ -6080,10 +6061,8 @@ function toggleLangMenu(){
 }
 function closeLangMenuOutside(e){
   const m=document.getElementById('langMenu');
-  if(!m) return;
-  // Ignore clicks on any language toggle button (home OR profile)
-  if(e.target.closest && (e.target.closest('#langBtn')||e.target.closest('#langBtnFin')||e.target.closest('.lang-opt'))) return;
-  if(!m.contains(e.target)) m.style.display='none';
+  const btn=document.getElementById('langBtn');
+  if(m && !m.contains(e.target) && !btn.contains(e.target)) m.style.display='none';
 }
 function setLang(lang,flag,code){
   localStorage.setItem('pandaLang',lang);
@@ -6093,10 +6072,8 @@ function setLang(lang,flag,code){
 }
 function applyLang(lang,flag,code){
   const t=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-  const _lf=document.getElementById('langFlag'); if(_lf) _lf.textContent=flag;
-  const _lc=document.getElementById('langCode'); if(_lc) _lc.textContent=code;
-  const _lfF=document.getElementById('langFlagFin'); if(_lfF) _lfF.textContent=flag;
-  const _llF=document.getElementById('langLblFin');  if(_llF) _llF.textContent=code;
+  document.getElementById('langFlag').textContent=flag;
+  document.getElementById('langCode').textContent=code;
   document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang));
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
 

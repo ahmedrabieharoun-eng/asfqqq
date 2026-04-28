@@ -668,24 +668,24 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 
 /* Card top — image + stats */
 .bk-card-top{
-  display:flex;align-items:stretch;min-height:130px;
+  display:flex;align-items:stretch;height:130px;
   position:relative;
 }
 /* Left: bike image */
 .bk-card-imgbox{
-  width:130px;flex-shrink:0;
+  width:130px;height:130px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   padding:0;overflow:hidden;
 }
 .bk-card-imgbox img{
-  width:100%;height:100%;object-fit:cover;
+  width:130px;height:130px;object-fit:cover;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
 }
 
 /* Right: name + stats — uses card bg image */
 .bk-card-info{
-  flex:1;padding:10px 12px 10px;display:flex;flex-direction:column;justify-content:center;
-  position:relative;overflow:hidden;min-width:0;
+  flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;min-width:0;height:130px;
 }
 .bk-card-info-bg{
   position:absolute;inset:0;background-size:cover;background-position:center;
@@ -697,7 +697,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
 }
 .bk-card-name{
-  font-size:19px;font-weight:800;letter-spacing:.2px;
+  font-size:17px;font-weight:800;letter-spacing:.2px;
   font-style:italic;
 }
 .bk-card-arrow{
@@ -709,11 +709,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 }
 /* 2×2 stats grid */
 .bk-stats-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;
+  display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;
 }
-.bk-stat-cell{}
-.bk-stat-label{font-size:12px;font-weight:700;margin-bottom:1px;opacity:.85;}
-.bk-stat-value{font-size:22px;font-weight:800;color:#fff;line-height:1.1}
+.bk-stat-cell{overflow:hidden;}
+.bk-stat-label{font-size:13px;font-weight:700;margin-bottom:1px;opacity:.85;}
+.bk-stat-value{font-size:clamp(18px,4.5vw,26px);font-weight:800;color:#fff;line-height:1.1;white-space:nowrap;}
 
 /* Card bottom — buy/owned button */
 .bk-card-btn{

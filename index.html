@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -828,9 +829,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   </div>
   <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
     <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
-      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;">🏆 По цене ↓</div>
+    <div style="display:flex;align-items:center;gap:10px;width:100%;">
+      <div style="flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
+      <div style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(6px);white-space:nowrap;">🏆 By price ↓</div>
     </div>
   </div>
 </div>
@@ -1152,22 +1153,25 @@ function renderGarage(){
     _garageSelectedLv = owned[0].lv;
   }
 
-  // Render horizontal thumb cards
+  // Render horizontal thumb cards — unified frame color, dim non-active
   if(trackEl){
     trackEl.innerHTML = '';
+    const ACTIVE_COLOR = '#7cb342'; // unified bamboo green for active highlight
     owned.forEach((b,i) => {
       const idx = BIKES.indexOf(b);
-      const color = BIKE_NAME_COLORS[idx % BIKE_NAME_COLORS.length];
-      const cardBg = BIKE_CARD_IMGS[idx % BIKE_CARD_IMGS.length];
       const isActive = b.lv === _garageSelectedLv;
       const noNum = ownedBikes.indexOf(b.lv)+1;
       const thumb = document.createElement('div');
       thumb.className = 'gr-bike-thumb' + (isActive?' active':'');
-      thumb.style.borderColor = color;
-      thumb.style.boxShadow = isActive ? `0 0 12px ${color}66, 0 0 0 1px ${color}44` : 'none';
+      // Unified neutral border for inactive, glowing bamboo for active
+      thumb.style.borderColor = isActive ? ACTIVE_COLOR : 'rgba(255,255,255,0.12)';
+      thumb.style.boxShadow = isActive
+        ? `0 0 14px rgba(124,179,66,.55), 0 0 0 1px ${ACTIVE_COLOR}`
+        : 'none';
+      thumb.style.opacity = isActive ? '1' : '0.55';
       thumb.innerHTML = `
-        <div class="gr-bike-thumb-no" style="color:${color}">No ${noNum}</div>
-        <img class="gr-bike-thumb-img" src="${b.img}" onerror="this.style.opacity='.3'">
+        <div class="gr-bike-thumb-no" style="color:${isActive?ACTIVE_COLOR:'rgba(255,255,255,.55)'}">No ${noNum}</div>
+        <img class="gr-bike-thumb-img" src="${b.img}" onerror="this.style.opacity='.3'" style="${isActive?'':'filter:grayscale(.45) brightness(.75);'}">
         <div class="gr-bike-thumb-label">Bike Level ${b.lv}</div>
       `;
       thumb.onclick = () => { _garageSelectedLv = b.lv; renderGarage(); };
@@ -1755,96 +1759,265 @@ async function doUpgradeStat(bikeLevel, stat){
   padding:0 !important;
   position:fixed;
   top:0;left:0;right:0;bottom:78px;
-  overflow:hidden;
+  overflow-y:auto;
   z-index:5;
+  /* page background image with darker overlay so text reads well */
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
+    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat fixed;
 }
 .race-wrap{
   display:flex;flex-direction:column;align-items:center;
-  height:100%;overflow:hidden;padding:0;background:transparent;
+  min-height:100%;overflow:visible;padding:0;background:transparent;
 }
 
 /* ── Phase: Bike Selection ── */
-#raceSelectPhase{width:100%;animation:fi .3s ease}
-.race-header-flags{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:6px 16px 0;margin-top:60px;
+#raceSelectPhase{width:100%;animation:fi .3s ease;padding-bottom:160px;}
+
+/* ── Floating topbar (avatar + name) | (TON balance) ── */
+.race-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px 4px;width:100%;gap:10px;
 }
-.race-flag-img{width:132px;opacity:.85;flex-shrink:0;}
-.race-header-title{
-  text-align:center;flex:1;font-size:17px;font-weight:800;color:#fff;line-height:1.25;
+.race-tb-user{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.race-tb-avatar{
+  width:42px;height:42px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.85);
+  overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
 }
-.race-header-title span{color:#2196F3;display:block;font-size:17px;font-weight:800;}
+.race-tb-avatar img{width:100%;height:100%;object-fit:cover}
+.race-tb-name{
+  font-size:15px;font-weight:800;color:#fff;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
+}
+.race-tb-ton{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);
+  border-radius:22px;padding:6px 12px;flex-shrink:0;
+  backdrop-filter:blur(8px);
+}
+.race-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
+.race-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
+.race-tb-plus{
+  width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#3dba3d,#2a962a);color:#fff;
+  font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  margin-left:2px;
+}
+
+/* ── Big SELECT BIKE title ── */
+.race-title-block{
+  text-align:center;margin:14px 0 8px;padding:0 14px;width:100%;
+}
+.race-title-row{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.race-title-chev{
+  color:var(--bamboo);font-size:22px;font-weight:900;
+  text-shadow:0 0 10px var(--bamboo-glow);
+}
+.race-title-main{
+  font-size:30px;font-weight:800;color:#fff;letter-spacing:1px;
+  text-shadow:0 2px 14px rgba(0,0,0,.9);font-style:italic;
+}
+.race-title-sub{
+  margin-top:4px;font-size:13px;font-weight:700;color:var(--bamboo);
+  font-style:italic;text-shadow:0 1px 6px rgba(0,0,0,.8);
+}
+
+/* ── Big bike carousel card ── */
 .race-carousel-outer{position:relative;width:100%;overflow:hidden;padding:4px 0 6px;}
 .race-carousel-track{
   display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
-  will-change:transform;padding:4px 20px;
+  will-change:transform;padding:4px 16px;
 }
 .race-bike-slide{
-  flex:0 0 calc(100% - 80px);
+  flex:0 0 calc(100% - 32px);
   background:rgba(8,18,8,.88);
-  border:1.5px solid rgba(124,179,66,.15);
-  border-radius:20px;overflow:hidden;
+  border:1.5px solid rgba(255,255,255,.06);
+  border-radius:22px;overflow:hidden;
   box-shadow:0 6px 24px rgba(0,0,0,.5);
   position:relative;
-  transition:border-color .3s,box-shadow .3s,flex-basis .3s,transform .3s;
-  transform:scale(0.88);transform-origin:center center;opacity:0.7;
+  transition:border-color .3s,box-shadow .3s,transform .3s,opacity .3s;
+  transform:scale(0.94);opacity:0.75;
 }
 .race-bike-slide.active{
-  flex:0 0 calc(100% - 40px);
-  border-color:rgba(124,179,66,.6);
-  box-shadow:0 0 0 2.5px rgba(124,179,66,.25),0 12px 40px rgba(0,0,0,.7);
+  border-color:rgba(124,179,66,.85);
+  box-shadow:
+    0 0 0 2px rgba(124,179,66,.55),
+    0 0 24px rgba(124,179,66,.35),
+    0 12px 40px rgba(0,0,0,.7);
   transform:scale(1);opacity:1;
 }
 .race-bike-img-wrap{
-  width:100%;height:160px;position:relative;overflow:hidden;
-  background:rgba(6,14,6,.9);transition:height .3s ease;
+  width:100%;height:230px;position:relative;overflow:hidden;
+  background:rgba(6,14,6,.9);
 }
-.race-bike-slide.active .race-bike-img-wrap{height:210px;}
 .race-bike-img-wrap img{
   width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
-.race-upgrade-link{
-  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
-  color:rgba(255,255,255,.82);font-size:13px;font-weight:700;
-  text-decoration:underline;cursor:pointer;white-space:nowrap;
-  text-shadow:0 1px 6px rgba(0,0,0,.95);
+/* bike brand/name on top-left of the big card */
+.race-bike-brand{
+  position:absolute;top:14px;left:16px;z-index:3;
+  color:var(--bamboo);font-size:14px;font-weight:800;
+  text-shadow:0 2px 8px rgba(0,0,0,.95);line-height:1.1;
 }
-.race-stats-outer{width:100%;padding:4px 16px 0;}
-.race-stats-row{display:grid;grid-template-columns:repeat(4,1fr);}
-.race-stat-item{display:flex;flex-direction:column;align-items:center;padding:2px 0;}
-.race-stat-lbl{font-size:12px;color:rgba(232,245,233,.55);font-weight:600;margin-bottom:3px;}
-.race-stat-val{font-size:22px;font-weight:800;color:#fff}
-.race-dots{display:flex;gap:6px;margin:12px 0 0;justify-content:center;width:100%;}
-.race-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);transition:all .2s;cursor:pointer;}
+.race-bike-model{
+  position:absolute;top:32px;left:16px;z-index:3;
+  color:#fff;font-size:24px;font-weight:800;
+  text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;
+}
+/* carousel side arrows */
+.race-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:18px;font-weight:800;cursor:pointer;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+.race-arrow.left{left:24px;}
+.race-arrow.right{right:24px;}
+.race-arrow:active{transform:translateY(-50%) scale(.92);}
+
+.race-dots{display:flex;gap:6px;margin:10px 0 0;justify-content:center;width:100%;}
+.race-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .2s;cursor:pointer;}
 .race-dot.active{background:var(--bamboo);width:22px;border-radius:4px;}
+
+/* ── Owned-bike thumbnails strip (under big card) ── */
+.race-thumbs-outer{
+  width:100%;padding:14px 12px 0;overflow:hidden;
+}
+.race-thumbs-track{
+  display:flex;gap:8px;overflow-x:auto;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding:4px 2px 8px;
+}
+.race-thumbs-track::-webkit-scrollbar{display:none}
+.race-thumb{
+  flex:0 0 calc(20% - 7px);
+  min-width:64px;
+  border-radius:14px;overflow:hidden;cursor:pointer;
+  background:rgba(0,0,0,.55);
+  border:1.5px solid rgba(255,255,255,.08);
+  position:relative;transition:all .25s;
+  scroll-snap-align:start;opacity:.55;
+}
+.race-thumb.active{
+  border-color:var(--bamboo);
+  box-shadow:0 0 0 1px var(--bamboo),0 0 14px rgba(124,179,66,.55);
+  opacity:1;transform:translateY(-2px);
+}
+.race-thumb-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;}
+.race-thumb-name{
+  font-size:9.5px;font-weight:800;color:#fff;
+  text-align:center;padding:3px 2px 1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.race-thumb-lvl{
+  font-size:9px;font-weight:700;color:rgba(255,255,255,.6);
+  text-align:center;padding:0 2px 4px;
+}
+.race-thumb-check{
+  position:absolute;top:4px;right:4px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--bamboo);color:#000;font-size:11px;font-weight:900;
+  display:none;align-items:center;justify-content:center;
+}
+.race-thumb.active .race-thumb-check{display:flex;}
+
+/* ── Stats card (under thumbnails) ── */
+.race-stats-card{
+  margin:14px 12px 0;
+  background:rgba(10,20,10,.78);
+  border:1px solid rgba(124,179,66,.25);
+  border-radius:18px;
+  padding:14px 14px;
+  display:flex;align-items:center;gap:12px;
+  backdrop-filter:blur(8px);
+}
+.race-stats-list{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.race-stat-row{
+  display:grid;grid-template-columns:22px 78px 1fr 32px;
+  align-items:center;gap:8px;
+}
+.race-stat-icon{
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:var(--bamboo);
+}
+.race-stat-icon img{width:22px;height:22px;object-fit:contain;}
+.race-stat-name{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);}
+.race-stat-bar{height:7px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;}
+.race-stat-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#FFA000,#FFD600);}
+.race-stat-num{font-size:13px;font-weight:800;color:#fff;text-align:right;}
+/* Hex level badge */
+.race-level-hex{
+  flex-shrink:0;width:88px;height:96px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+  -webkit-clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:rgba(0,0,0,.7);
+}
+.race-level-hex::before{
+  content:'';position:absolute;inset:2px;
+  background:rgba(8,18,8,.95);
+  -webkit-clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  z-index:0;
+}
+.race-level-hex-border{
+  position:absolute;inset:0;
+  background:var(--bamboo);
+  -webkit-clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  z-index:-1;
+  filter:drop-shadow(0 0 6px var(--bamboo-glow));
+}
+.race-level-hex > *{position:relative;z-index:1;}
+.race-level-hex .lbl{
+  font-size:11px;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:1px;
+}
+.race-level-hex .num{
+  font-size:32px;font-weight:800;color:#fff;line-height:1;margin-top:2px;
+}
+
+/* ── Start race button (floating bottom) ── */
 .race-start-fixed{
-  position:fixed;bottom:68px;left:0;right:0;
-  padding:0 16px 8px;
-  background:linear-gradient(to top,rgba(3,7,3,.95) 60%,transparent);
-  z-index:50;
+  position:fixed;bottom:84px;left:0;right:0;
+  padding:10px 14px 0;
+  z-index:50;pointer-events:none;
 }
+.race-start-fixed > *{pointer-events:auto;}
 .race-start-btn{
-  width:100%;padding:17px;border:none;border-radius:50px;
-  background:linear-gradient(135deg,#3dba3d,#2a962a);
+  width:100%;padding:16px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#7cb342,#5a9028);
   color:#fff;font-size:18px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 22px rgba(61,186,61,.5);
-  transition:transform .15s,box-shadow .15s;
-  letter-spacing:.3px;position:relative;overflow:hidden;
+  box-shadow:0 6px 26px rgba(124,179,66,.55),inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .15s;
+  letter-spacing:.5px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;gap:10px;
 }
+.race-start-btn .chev{font-size:20px;font-weight:900;}
 .race-start-btn::after{
   content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
   transform:skewX(-20deg);animation:race-shim 2.8s infinite;
 }
 @keyframes race-shim{0%{left:-60%}100%{left:160%}}
-.race-start-btn:active{transform:scale(.97);box-shadow:0 2px 10px rgba(61,186,61,.3);}
+.race-start-btn:active{transform:scale(.97);}
 .race-stake-lbl{
-  text-align:center;font-size:13px;color:rgba(255,255,255,.6);
-  font-weight:700;margin:8px 0 0;
-  display:flex;align-items:center;justify-content:center;gap:5px;
+  text-align:center;font-size:13px;color:rgba(255,255,255,.85);
+  font-weight:700;margin:6px 0 0;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  text-shadow:0 1px 6px rgba(0,0,0,.8);
 }
+.race-stake-lbl .v{color:#fff;font-weight:800;}
+.race-stake-lbl img{width:16px;height:16px;border-radius:50%;}
 
 /* ── Dev overlay kept for compat ── */
 .race-dev-overlay{
@@ -1991,29 +2164,61 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ── SELECT PHASE ── -->
     <div id="raceSelectPhase" style="width:100%">
-      <div class="race-header-flags">
-        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/08f607cb-6de9-4cad-9b1f-bda6bdf85cd8.png" onerror="this.style.opacity=0">
-        <div class="race-header-title">
-          Выберите мотоцикл
-          <span id="raceBikeName">—</span>
+
+      <!-- Floating topbar: avatar+name | TON balance -->
+      <div class="race-topbar">
+        <div class="race-tb-user">
+          <div class="race-tb-avatar" id="raceAvatar"><span>🏍️</span></div>
+          <span class="race-tb-name" id="raceUserName">Player</span>
         </div>
-        <img class="race-flag-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/56554316-8b60-4260-b26a-32824d80ef08.png" onerror="this.style.opacity=0">
+        <div class="race-tb-ton">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
+          <span class="race-tb-ton-val" id="raceTonBal">0</span>
+          <button class="race-tb-plus" onclick="goToFinanceDeposit()">+</button>
+        </div>
       </div>
+
+      <!-- Big SELECT BIKE title -->
+      <div class="race-title-block">
+        <div class="race-title-row">
+          <span class="race-title-chev">»</span>
+          <span class="race-title-main">SELECT BIKE</span>
+          <span class="race-title-chev">«</span>
+        </div>
+        <div class="race-title-sub">Choose your bike and dominate the track</div>
+      </div>
+
+      <!-- Big bike carousel -->
       <div class="race-carousel-outer" id="raceCarouselOuter">
+        <button class="race-arrow left"  onclick="raceArrow(-1)" aria-label="prev">‹</button>
         <div class="race-carousel-track" id="raceCarouselTrack"></div>
-      </div>
-      <div class="race-stats-outer" id="raceStatsOuter">
-        <div class="race-stats-row" id="raceStatsRow"></div>
+        <button class="race-arrow right" onclick="raceArrow(1)"  aria-label="next">›</button>
       </div>
       <div class="race-dots" id="raceDots"></div>
+
+      <!-- Owned-bike thumbnails -->
+      <div class="race-thumbs-outer">
+        <div class="race-thumbs-track" id="raceThumbsTrack"></div>
+      </div>
+
+      <!-- Stats card with hex level badge -->
+      <div class="race-stats-card" id="raceStatsCard">
+        <div class="race-stats-list" id="raceStatsList"></div>
+        <div class="race-level-hex">
+          <div class="race-level-hex-border"></div>
+          <div class="lbl">LEVEL</div>
+          <div class="num" id="raceLevelNum">1</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ── START FIXED BOTTOM ── -->
     <div class="race-start-fixed" id="raceStartFixed">
-      <button class="race-start-btn" onclick="startRace()">Старт</button>
+      <button class="race-start-btn" onclick="startRace()">Start Race <span class="chev">»</span></button>
       <div class="race-stake-lbl">
-        Ставка за старт — 0.5
-        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">
+        Entry Fee: <span class="v">0.5</span>
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
       </div>
     </div>
 
@@ -2351,6 +2556,19 @@ async function doUpgradeStat(bikeLevel, stat){
      CAROUSEL INIT
   ═══════════════════════════════════════════ */
   window._raceInit = function(){
+    /* Update floating topbar (avatar + name + ton balance) */
+    try{
+      const av=document.getElementById('raceAvatar');
+      const nm=document.getElementById('raceUserName');
+      const tb=document.getElementById('raceTonBal');
+      if(S && S.user){
+        const photoUrl = S.user.photoUrl||(S?.tg?.initDataUnsafe?.user?.photo_url)||null;
+        if(av && photoUrl) av.innerHTML = `<img src="${photoUrl}" onerror="this.parentNode.innerHTML='<span>🏍️</span>'">`;
+        if(nm) nm.textContent = S.user.firstName||S._tgName||'Player';
+        if(tb) tb.textContent = (S.user.tonBalance||0).toFixed(2);
+      }
+    }catch(e){}
+
     _raceBikes = [];
     if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
       S.user.ownedBikes.forEach(lv=>{
@@ -2363,19 +2581,23 @@ async function doUpgradeStat(bikeLevel, stat){
     const sf = document.getElementById('raceStartFixed');
     if(sf) sf.style.display = 'block';
     if(_raceBikes.length === 0){
-      track.innerHTML = '<div style="min-width:calc(100% - 48px);text-align:center;padding:40px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>Нет доступных байков.<br>Купите в <span style="color:var(--bamboo);cursor:pointer" onclick="goNavBySection(\'sectionMarket\')">Гараже</span></div></div>';
-      document.getElementById('raceDots').innerHTML='';
-      const nameEl=document.getElementById('raceBikeName');if(nameEl)nameEl.textContent='Нет байков';
-      const sr=document.getElementById('raceStatsRow');if(sr)sr.innerHTML='';
+      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.7);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>No bikes available.<br>Buy one in the <span style="color:var(--bamboo);cursor:pointer;text-decoration:underline" onclick="goNavBySection(\'sectionMarket\')">Garage</span></div></div>';
+      const dotsEl=document.getElementById('raceDots'); if(dotsEl) dotsEl.innerHTML='';
+      const thEl=document.getElementById('raceThumbsTrack'); if(thEl) thEl.innerHTML='';
+      const sl=document.getElementById('raceStatsList'); if(sl) sl.innerHTML='';
+      const lvNum=document.getElementById('raceLevelNum'); if(lvNum) lvNum.textContent='-';
       return;
     }
     _raceIdx = 0;
     _buildCarousel();
+    _buildThumbs();
   };
 
   window.goNavBySection = function(s){
     const el=document.querySelector('.ni[data-s="'+s+'"]');if(el)goNav(el);
   };
+
+  window.raceArrow = function(dir){ _goSlide(_raceIdx + (dir>0?1:-1)); };
 
   function _buildCarousel(){
     const track=document.getElementById('raceCarouselTrack');
@@ -2392,10 +2614,15 @@ async function doUpgradeStat(bikeLevel, stat){
       const img=document.createElement('img');
       img.src=b.img;img.alt=b.name;
       img.onerror=function(){this.style.opacity='.2';};
-      const up=document.createElement('span');
-      up.className='race-upgrade-link';up.textContent='Прокачать';
-      up.onclick=()=>goNavBySection('sectionHome');
-      wrap.appendChild(img);wrap.appendChild(up);
+      const brand=document.createElement('div');
+      brand.className='race-bike-brand';
+      brand.textContent='Bike';
+      const model=document.createElement('div');
+      model.className='race-bike-model';
+      model.textContent='Level '+b.lv;
+      wrap.appendChild(img);
+      wrap.appendChild(brand);
+      wrap.appendChild(model);
       slide.appendChild(wrap);track.appendChild(slide);
       const dot=document.createElement('div');
       dot.className='race-dot'+(i===0?' active':'');
@@ -2411,17 +2638,65 @@ async function doUpgradeStat(bikeLevel, stat){
     _attachSwipe();
   }
 
-  function _renderStats(b){
-    const statsRow=document.getElementById('raceStatsRow');
-    if(!statsRow) return;
-    const stats=(typeof getBikeCurrentStats==='function')?getBikeCurrentStats(b):{speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
-    statsRow.innerHTML='';
-    [['Скорость',stats.speed],['Разгон',stats.accel],['Маневры',stats.maneuver],['Нитро',stats.nitro]].forEach(([label,value])=>{
-      const item=document.createElement('div');
-      item.className='race-stat-item';
-      item.innerHTML='<div class="race-stat-lbl">'+label+'</div><div class="race-stat-val">'+value+'</div>';
-      statsRow.appendChild(item);
+  function _buildThumbs(){
+    const tr = document.getElementById('raceThumbsTrack');
+    if(!tr) return;
+    tr.innerHTML = '';
+    _raceBikes.forEach((b,i)=>{
+      const t = document.createElement('div');
+      t.className = 'race-thumb' + (i===_raceIdx?' active':'');
+      t.dataset.idx = i;
+      t.innerHTML = `
+        <div class="race-thumb-check">✓</div>
+        <img class="race-thumb-img" src="${b.img}" onerror="this.style.opacity='.2'">
+        <div class="race-thumb-name">Level ${b.lv}</div>
+        <div class="race-thumb-lvl">Lv ${b.lv}</div>
+      `;
+      t.onclick = ()=>_goSlide(i);
+      tr.appendChild(t);
     });
+  }
+
+  function _renderStats(b){
+    const list=document.getElementById('raceStatsList');
+    const lvNum=document.getElementById('raceLevelNum');
+    if(!list) return;
+    const stats=(typeof getBikeCurrentStats==='function')?getBikeCurrentStats(b):{speed:b.speed,nitro:b.nitro,accel:b.accel,maneuver:b.maneuver};
+    const max={speed:b.speed*2,accel:b.accel*2,maneuver:b.maneuver*2,nitro:b.nitro*2};
+    function pct(k){ return Math.min(100, Math.round(stats[k]/max[k]*100)); }
+    const ICONS = {
+      speed:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png',
+      accel:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png',
+      maneuver:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png',
+      nitro:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png'
+    };
+    list.innerHTML = `
+      <div class="race-stat-row">
+        <div class="race-stat-icon"><img src="${ICONS.speed}"></div>
+        <div class="race-stat-name">Speed</div>
+        <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('speed')}%"></div></div>
+        <div class="race-stat-num">${stats.speed}</div>
+      </div>
+      <div class="race-stat-row">
+        <div class="race-stat-icon"><img src="${ICONS.accel}"></div>
+        <div class="race-stat-name">Acceleration</div>
+        <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('accel')}%"></div></div>
+        <div class="race-stat-num">${stats.accel}</div>
+      </div>
+      <div class="race-stat-row">
+        <div class="race-stat-icon"><img src="${ICONS.maneuver}"></div>
+        <div class="race-stat-name">Handling</div>
+        <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('maneuver')}%"></div></div>
+        <div class="race-stat-num">${stats.maneuver}</div>
+      </div>
+      <div class="race-stat-row">
+        <div class="race-stat-icon"><img src="${ICONS.nitro}"></div>
+        <div class="race-stat-name">Nitro</div>
+        <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('nitro')}%"></div></div>
+        <div class="race-stat-num">${stats.nitro}</div>
+      </div>
+    `;
+    if(lvNum) lvNum.textContent = b.lv;
   }
 
   function _goSlide(i){
@@ -2432,38 +2707,23 @@ async function doUpgradeStat(bikeLevel, stat){
     const gap=12;
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
+    document.querySelectorAll('.race-thumb').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
     requestAnimationFrame(()=>{
       requestAnimationFrame(()=>{
         const slides=track.querySelectorAll('.race-bike-slide');
         const outerW=(outer&&outer.offsetWidth>0)?outer.offsetWidth:320;
-        const trackPadding=20;
-        const activeCardW=outerW-40;
-        const inactiveCardW=outerW-80;
-        let activeLeft=trackPadding;
-        for(let j=0;j<_raceIdx;j++){
-          const s=slides[j];
-          const w=(s&&s.offsetWidth>10)?s.offsetWidth:inactiveCardW;
-          activeLeft+=w+gap;
-        }
-        const activeCard=slides[_raceIdx];
-        const activeW=(activeCard&&activeCard.offsetWidth>10)?activeCard.offsetWidth:activeCardW;
-        let offset=activeLeft+activeW/2-outerW/2;
-        let totalTrackW=trackPadding;
-        const n=slides.length;
-        slides.forEach((s,j)=>{
-          const w=(s&&s.offsetWidth>10)?s.offsetWidth:(j===_raceIdx?activeCardW:inactiveCardW);
-          totalTrackW+=w+(j<n-1?gap:0);
-        });
-        totalTrackW+=trackPadding;
-        const maxOffset=Math.max(0,totalTrackW-outerW);
-        offset=Math.max(0,Math.min(offset,maxOffset));
+        const trackPadding=16;
+        const slideW = outerW - 32;
+        let activeLeft = trackPadding + _raceIdx * (slideW + gap);
+        let offset = activeLeft + slideW/2 - outerW/2;
+        const totalTrackW = trackPadding*2 + slides.length*slideW + (slides.length-1)*gap;
+        const maxOffset = Math.max(0, totalTrackW - outerW);
+        offset = Math.max(0, Math.min(offset, maxOffset));
         track.style.transform='translateX(-'+offset+'px)';
       });
     });
     const b=_raceBikes[_raceIdx];
     if(b){
-      const nameEl=document.getElementById('raceBikeName');
-      if(nameEl)nameEl.textContent=b.name+' №'+b.lv;
       _renderStats(b);
     }
   }

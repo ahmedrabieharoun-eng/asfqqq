@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -496,11 +495,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <!-- TOPBAR -->
 <style>
 /* ══ HERO HEADER ══ */
-/* جعل قسم الصفحة الرئيسية يملأ كامل العرض بدون حواف جانبية (مثل الجراج) */
-#sectionHome{padding:0!important;}
 .hub-hero{
   position:relative;width:100%;height:260px;overflow:hidden;
-  margin:0;
 }
 .hub-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
 .hub-hero-overlay{
@@ -510,9 +506,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .hub-topbar{
   position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
-  padding:12px 14px 8px;
+  padding:12px 0 8px;
   z-index:10;
-  gap:10px;
+  gap:0;
   background:transparent;
 }
 /* الكارت شفاف — بدون كارت */
@@ -522,7 +518,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   gap:10px;
   background:transparent;
   border:none;
-  padding:0;
+  padding:0 14px;
 }
 /* صورة المستخدم على اليسار */
 .hub-tb-avatar{
@@ -1458,40 +1454,33 @@ async function doUpgradeStat(bikeLevel, stat){
     document.getElementById('mineSheetOverlay').classList.remove('open');
     document.getElementById('mineBottomSheet').classList.remove('open');
   }
-  /* Sync floating Mine topbar with user data — uses SAME sources as syncTopbar (home page) */
+  /* Sync floating Mine topbar with user data — same source as syncTopbar */
   function syncMineTopbar(){
     try{
       const u = (window.S && S.user) || {};
-      const tgUser = (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user) || {};
       const av = document.getElementById('mineAvatar');
       const nm = document.getElementById('mineUserName');
       const tb = document.getElementById('mineTonBal');
-      // ── Avatar: prefer S.user.photoUrl, fallback to Telegram photo_url
       if(av){
-        const photo = u.photoUrl || tgUser.photo_url || null;
+        const photo = u.photoUrl || (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user && S.tg.initDataUnsafe.user.photo_url) || null;
         const currentPhoto = av.dataset.photoSrc || '';
         if(photo && photo !== currentPhoto){
-          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>';this.parentNode.dataset.photoSrc='';">`;
+          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>'">`;
           av.dataset.photoSrc = photo;
         } else if(!photo && !av.querySelector('img')){
           av.innerHTML = '<span>🏍️</span>';
         }
       }
-      // ── Name: same priority as home topbar (S._tgName first, then Telegram first_name + last_name)
       if(nm){
-        const tgName = ((tgUser.first_name||'') + ' ' + (tgUser.last_name||'')).trim();
-        const name = (window.S && S._tgName) || tgName || tgUser.username || u.firstName || u.username || u.name || 'Player';
+        const name = (window.S && S._tgName) || u.firstName || u.username || u.name || 'Player';
         if(nm.textContent !== name) nm.textContent = name;
       }
-      // ── TON balance: identical formatting to home topbar (.toFixed(2))
       if(tb){
         const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-        tb.textContent = (Number(bal)||0).toFixed(2);
+        tb.textContent = (Number(bal)||0).toFixed(3);
       }
-    }catch(e){ console.warn('syncMineTopbar:', e.message); }
+    }catch(e){}
   }
-  // Expose globally so it can be called from BootSeq + intervals
-  window.syncMineTopbar = syncMineTopbar;
   </script>
 </div>
 
@@ -4204,6 +4193,7 @@ async function loadState(){
     }
     if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId, d.pendingDeposit.txHash);
     syncTopbar();
+    if(typeof syncMineTopbar==='function') syncMineTopbar();
   }catch(e){
     console.warn('loadState:', e.message);
     // If data was never loaded yet, don't call updateUI (keeps UI in loading state)
@@ -5352,8 +5342,6 @@ async function init(){
   // Pre-build race carousel so bikes appear instantly when user opens race section
   try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
-  // Also sync Farm page topbar so user data appears immediately on first open
-  try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers

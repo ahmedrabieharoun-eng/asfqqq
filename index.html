@@ -547,30 +547,6 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 #uavatar{display:none!important}
 </style>
 
-<div class="hub-hero">
-  <img class="hub-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2e3e4cd2-2d2f-4c24-9bda-579dfab53703.png" alt="hero moto">
-  <div class="hub-hero-overlay"></div>
-  <!-- floating topbar -->
-  <div class="hub-topbar">
-    <div class="hub-tb-card">
-      <div class="hub-tb-avatar" id="hubAvatar"><span>🏍️</span></div>
-      <span class="hub-tb-name" id="hubUserName">Player</span>
-      <div class="hub-tb-ton">
-        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
-        <span class="hub-tb-ton-val" id="tbCoins">0</span>
-        <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
-      </div>
-    </div>
-  </div>
-  <!-- hero bottom text -->
-  <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
-    <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
-      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;">🏆 По цене ↓</div>
-    </div>
-  </div>
-</div>
 <!-- hidden legacy for JS compat -->
 <div id="uavatar" style="display:none!important"></div>
 
@@ -834,11 +810,34 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </div>
 
 <div class="sec active" id="sectionHome">
-<div class="bk-page" style="padding-top:0;">
 
+<!-- HOME HERO — lives inside sectionHome so it hides with the section -->
+<div class="hub-hero">
+  <img class="hub-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2e3e4cd2-2d2f-4c24-9bda-579dfab53703.png" alt="hero moto">
+  <div class="hub-hero-overlay"></div>
+  <div class="hub-topbar">
+    <div class="hub-tb-card">
+      <div class="hub-tb-avatar" id="hubAvatar"><span>🏍️</span></div>
+      <span class="hub-tb-name" id="hubUserName">Player</span>
+      <div class="hub-tb-ton">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
+        <span class="hub-tb-ton-val" id="tbCoins">0</span>
+        <button class="hub-tb-plus" onclick="goToFinanceDeposit()">+</button>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
+    <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
+      <div style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;">🏆 По цене ↓</div>
+    </div>
+  </div>
+</div>
+
+<div class="bk-page" style="padding-top:0;">
   <!-- Bike cards list -->
   <div id="bikesGrid"></div>
-
 </div>
 </div>
 
@@ -3934,22 +3933,10 @@ function goNav(el){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
-  hideFab(); // always hide when changing main section
-  // Show/hide hero on Finance/Profile page
-  const hero = document.querySelector('.hub-hero');
-  if(el.dataset.s==='sectionFinance'){
-    if(hero) hero.style.display='none';
-    syncFinanceHeader();
-    renderWdHistNew();
-  } else if(el.dataset.s==='sectionMarket'){
-    if(hero) hero.style.display='none'; // Garage has its own hero
-    renderGarage();
-  } else if(el.dataset.s==='sectionHome'){
-    if(hero) hero.style.display='';
-    renderBikes();syncTopbar();
-  } else {
-    if(hero) hero.style.display='none';
-  }
+  hideFab();
+  if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew();}
+  if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
+  if(el.dataset.s==='sectionMarket'){renderGarage();}
   if(el.dataset.s==='sectionFriends'){renderMiningPage();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
@@ -4518,9 +4505,6 @@ function openProfilePage(page){
   content.innerHTML = src.innerHTML;
   title.textContent = titles[page]||page;
   overlay.style.display='block';
-  // Show topbar in sub-pages (they have their own back button)
-  const topbar = document.querySelector('.hub-hero');
-  if(topbar) topbar.style.display='';
   // Re-init page specific data
   if(page==='missions'){renderMissions();}
   else if(page==='partnership'){renderPartnerPosts();}
@@ -4534,9 +4518,6 @@ function openProfilePage(page){
 function closeProfilePage(){
   const overlay = document.getElementById('profileSubPage');
   if(overlay) overlay.style.display='none';
-  // Hide topbar again when going back to Profile main
-  const topbar = document.querySelector('.hub-hero');
-  if(topbar) topbar.style.display='none';
 }
 
 function copyText(id){
@@ -4553,8 +4534,6 @@ function goToFinanceDeposit(){
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const topbar=document.querySelector('.hub-hero');
-  if(topbar) topbar.style.display='none';
   openProfilePage('deposit');
 }
 function goToFinanceWithdraw(){
@@ -4563,8 +4542,6 @@ function goToFinanceWithdraw(){
   const fn=document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
   document.getElementById('sectionFinance').classList.add('active');
-  const topbar=document.querySelector('.hub-hero');
-  if(topbar) topbar.style.display='none';
   openProfilePage('withdraw');
 }
 

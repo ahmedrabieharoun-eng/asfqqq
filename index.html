@@ -470,9 +470,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </style>
 </head>
 <body>
-<!-- BACKGROUND MUSIC: instrumental rock loop, controlled by toggleSound -->
+<!-- BACKGROUND MUSIC: simple instrumental cycling loop, controlled by toggleSound -->
 <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1718e49890.mp3?filename=powerful-energetic-sport-rock-trailer-110815.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/download/audio/2023/05/30/audio_4e98febd34.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/download/audio/2022/10/30/audio_347111d564.mp3" type="audio/mpeg">
 </audio>
 
 <!-- LOADING SCREEN -->
@@ -3232,33 +3233,33 @@ async function doUpgradeStat(bikeLevel, stat){
   <style>
     #sectionFinance{padding:0!important;position:relative;min-height:100vh;background:#000;}
 
-    /* Full-width hero with bike image as page background */
-    .pf-hero{position:relative;width:100%;height:360px;overflow:hidden;}
+    /* Full-width hero with bike image as page background — shorter card */
+    .pf-hero{position:relative;width:100%;height:240px;overflow:hidden;}
     .pf-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;display:block;}
     .pf-hero-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.45) 40%,rgba(0,0,0,0) 70%);}
-    .pf-hero-bottom{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 100%);pointer-events:none;}
+    .pf-hero-bottom{position:absolute;left:0;right:0;bottom:0;height:80px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 100%);pointer-events:none;}
 
     /* Top-right: EN dropdown + music icon (square cards like reference) */
-    .pf-actions{position:absolute;top:18px;right:14px;z-index:11;display:flex;gap:10px;}
+    .pf-actions{position:absolute;top:14px;right:14px;z-index:11;display:flex;gap:10px;}
     .pf-tb-btn{background:rgba(20,20,20,.85);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:38px;}
     .pf-tb-icon{width:38px;height:38px;border-radius:12px;background:rgba(20,20,20,.85);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);}
 
-    /* Left-aligned avatar + name (NOT centered, like reference) */
-    .pf-topbar{position:absolute;top:74px;left:16px;z-index:10;display:flex;align-items:center;gap:14px;}
-    .pf-tb-avatar{width:64px;height:64px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid #00F27A;background:#000;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 20px rgba(0,242,122,.4);}
+    /* Left-aligned avatar + name — no green ring */
+    .pf-topbar{position:absolute;top:60px;left:16px;z-index:10;display:flex;align-items:center;gap:12px;}
+    .pf-tb-avatar{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.18);background:#111;display:flex;align-items:center;justify-content:center;font-size:22px;}
     .pf-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
     .pf-tb-info{display:flex;flex-direction:column;gap:2px;}
-    .pf-tb-name{font-size:22px;font-weight:900;color:#fff;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.8);}
-    .pf-tb-handle{font-size:13px;font-weight:600;color:rgba(255,255,255,.6);text-shadow:0 1px 4px rgba(0,0,0,.8);}
+    .pf-tb-name{font-size:19px;font-weight:900;color:#fff;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.85);}
+    .pf-tb-handle{font-size:12px;font-weight:600;color:rgba(255,255,255,.62);text-shadow:0 1px 4px rgba(0,0,0,.8);}
 
-    /* Total Balance card — green outlined, sits over hero bottom */
-    .pf-balcard{position:absolute;left:16px;right:auto;top:178px;width:auto;max-width:62%;background:rgba(0,0,0,.55);border:1.5px solid rgba(0,242,122,.55);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:10;}
-    .pf-balicon{width:46px;height:46px;border-radius:50%;background:rgba(0,242,122,.18);border:1px solid rgba(0,242,122,.55);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .pf-balicon img{width:28px;height:28px;}
-    .pf-ballbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.65);}
+    /* Total Balance card — neutral border, no green */
+    .pf-balcard{position:absolute;left:16px;right:auto;top:138px;width:auto;max-width:62%;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:10;}
+    .pf-balicon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .pf-balicon img{width:24px;height:24px;}
+    .pf-ballbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.65);}
     .pf-balrow{display:flex;align-items:baseline;gap:6px;margin-top:2px;}
-    .pf-balval{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;line-height:1;}
-    .pf-baltkn{font-size:11px;font-weight:800;color:#00F27A;}
+    .pf-balval{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px;line-height:1;}
+    .pf-baltkn{font-size:11px;font-weight:800;color:#fff;opacity:.85;}
 
     /* legacy hidden — kept for code compat */
     #finUserAvatar,#finUserName,#finUserHandle{display:none;}
@@ -6202,28 +6203,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 function toggleLangMenu(){
   const m=document.getElementById('langMenu');
-  m.style.display = m.style.display==='none' ? 'block' : 'none';
-  if(m.style.display==='block'){
+  if(!m) return;
+  const willOpen = m.style.display==='none' || m.style.display==='';
+  m.style.display = willOpen ? 'block' : 'none';
+  if(willOpen){
     setTimeout(()=>document.addEventListener('click',closeLangMenuOutside,{once:true}),10);
   }
 }
 function closeLangMenuOutside(e){
-  const m=document.getElementById('langMenu');
+  const m=document.getElementById('langMenu'); if(!m) return;
   const btn=document.getElementById('langBtn');
-  if(m && !m.contains(e.target) && !btn.contains(e.target)) m.style.display='none';
+  const btnFin=document.getElementById('langBtnFin');
+  if(m.contains(e.target)) return;
+  if(btn && btn.contains(e.target)) return;
+  if(btnFin && btnFin.contains(e.target)) return;
+  m.style.display='none';
 }
 function setLang(lang,flag,code){
-  localStorage.setItem('pandaLang',lang);
-  applyLang(lang,flag,code);
-  document.getElementById('langMenu').style.display='none';
-  if(typeof syncFinanceHeader==="function") syncFinanceHeader();
+  try{
+    localStorage.setItem('pandaLang',lang);
+    applyLang(lang,flag,code);
+  }catch(err){ console.error('setLang error',err); }
+  const m=document.getElementById('langMenu'); if(m) m.style.display='none';
+  if(typeof syncFinanceHeader==="function") try{syncFinanceHeader();}catch(e){}
+  if(typeof showNotif==='function') showNotif(flag+' '+code, 'w');
 }
 function applyLang(lang,flag,code){
   const t=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-  document.getElementById('langFlag').textContent=flag;
-  document.getElementById('langCode').textContent=code;
+  // Top header lang button (may be absent on some pages)
+  const lf=document.getElementById('langFlag'); if(lf) lf.textContent=flag;
+  const lc=document.getElementById('langCode'); if(lc) lc.textContent=code;
+  // Profile page lang button
+  const lfF=document.getElementById('langFlagFin'); if(lfF) lfF.textContent=flag;
+  const lcF=document.getElementById('langLblFin'); if(lcF) lcF.textContent=code;
   document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang));
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.documentElement.lang=lang;
 
   // ── Loading screen text (if still visible) ──
   const ldStat=document.getElementById('ldStatus');

@@ -840,10 +840,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
     </div>
   </div>
   <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
-    <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;" data-i18n="motorcycles">Motorcycles</div>
+    <div style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
     <div style="display:flex;align-items:center;gap:10px;width:100%;">
-      <div style="flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);" data-i18n="collectTagline">Collect • Upgrade • Dominate</div>
-      <div style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(6px);white-space:nowrap;" data-i18n="byPrice">🏆 By price ↓</div>
+      <div style="flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
+      <div style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(6px);white-space:nowrap;">🏆 By price ↓</div>
     </div>
   </div>
 </div>
@@ -1229,25 +1229,25 @@ function renderGarage(){
             <div>
               <div class="gr-sel-stat-row">
                 <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png">
-                <div class="gr-sel-stat-name" data-i18n="speed">Speed</div>
+                <div class="gr-sel-stat-name">Speed</div>
                 <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('speed')}%"></div></div>
                 <div class="gr-sel-stat-val">${cs.speed}</div>
               </div>
               <div class="gr-sel-stat-row">
                 <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png">
-                <div class="gr-sel-stat-name" data-i18n="accel">Accel</div>
+                <div class="gr-sel-stat-name">Accel</div>
                 <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('accel')}%"></div></div>
                 <div class="gr-sel-stat-val">${cs.accel}</div>
               </div>
               <div class="gr-sel-stat-row">
                 <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png">
-                <div class="gr-sel-stat-name" data-i18n="handling">Handling</div>
+                <div class="gr-sel-stat-name">Handling</div>
                 <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('maneuver')}%"></div></div>
                 <div class="gr-sel-stat-val">${cs.maneuver}</div>
               </div>
               <div class="gr-sel-stat-row">
                 <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png">
-                <div class="gr-sel-stat-name" data-i18n="nitro">Nitro</div>
+                <div class="gr-sel-stat-name">Nitro</div>
                 <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('nitro')}%"></div></div>
                 <div class="gr-sel-stat-val">${cs.nitro}</div>
               </div>
@@ -1276,7 +1276,7 @@ function renderGarage(){
       if(isMax){
         btnHtml = `<button class="gr-upg-btn-new maxed" disabled>✅ MAX</button>`;
       } else {
-        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>${lt('upgrade')}</button>`;
+        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>Upgrade</button>`;
       }
       return `
         <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
@@ -1296,11 +1296,11 @@ function renderGarage(){
     }
 
     upgEl.innerHTML = `
-      <div class="gr-upg-section-title">${lt('upgrades')}</div>
-      ${upgRowNew('speed',lt('speed'))}
-      ${upgRowNew('accel',lt('acceleration'))}
-      ${upgRowNew('maneuver',lt('handling'))}
-      ${upgRowNew('nitro',lt('nitro'))}
+      <div class="gr-upg-section-title">Upgrades</div>
+      ${upgRowNew('speed','Speed')}
+      ${upgRowNew('accel','Acceleration')}
+      ${upgRowNew('maneuver','Handling')}
+      ${upgRowNew('nitro','Nitro')}
     `;
   }
 }
@@ -1953,9 +1953,9 @@ async function doUpgradeStat(bikeLevel, stat){
     <div class="gr-hero-center">
       <div class="gr-hero-title-row">
         <img class="gr-hero-wrench" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png" alt="">
-        <div class="gr-hero-title" data-i18n="garage">Garage</div>
+        <div class="gr-hero-title">Garage</div>
       </div>
-      <div class="gr-hero-sub" data-i18n="garageSub">Upgrade your bikes for racing</div>
+      <div class="gr-hero-sub">Upgrade your bikes for racing</div>
     </div>
   </div>
 
@@ -1976,8 +1976,8 @@ async function doUpgradeStat(bikeLevel, stat){
     <div id="garageEmptyState" style="display:none">
       <div class="gr-empty-new">
         <div class="gr-empty-new-icon">🏍️</div>
-        <div data-i18n="noBikesYet">You don't own any motorcycles yet</div>
-        <div style="font-size:12px;margin-top:6px;color:rgba(255,255,255,.3)" data-i18n="buyBikeToUpgrade">Buy a bike to start upgrading</div>
+        <div>У вас пока нет мотоциклов</div>
+        <div style="font-size:12px;margin-top:6px;color:rgba(255,255,255,.3)">Buy a bike to start upgrading</div>
       </div>
     </div>
   </div>
@@ -2415,10 +2415,10 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="race-title-block">
         <div class="race-title-row">
           <span class="race-title-chev">»</span>
-          <span class="race-title-main" data-i18n="selectBike">SELECT BIKE</span>
+          <span class="race-title-main">SELECT BIKE</span>
           <span class="race-title-chev">«</span>
         </div>
-        <div class="race-title-sub" data-i18n="selectBikeSub">Choose your bike and dominate the track</div>
+        <div class="race-title-sub">Choose your bike and dominate the track</div>
       </div>
 
       <!-- Big bike carousel -->
@@ -2439,7 +2439,7 @@ async function doUpgradeStat(bikeLevel, stat){
         <div class="race-stats-list" id="raceStatsList"></div>
         <div class="race-level-hex">
           <div class="race-level-hex-border"></div>
-          <div class="lbl" data-i18n="level">LEVEL</div>
+          <div class="lbl">LEVEL</div>
           <div class="num" id="raceLevelNum">1</div>
         </div>
       </div>
@@ -2448,9 +2448,9 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ── START FIXED BOTTOM ── -->
     <div class="race-start-fixed" id="raceStartFixed">
-      <button class="race-start-btn" onclick="startRace()"><span data-i18n="startRace">Start Race</span> <span class="chev">»</span></button>
+      <button class="race-start-btn" onclick="startRace()">Start Race <span class="chev">»</span></button>
       <div class="race-stake-lbl">
-        <span data-i18n="entryFee">Entry Fee:</span> <span class="v">0.5</span>
+        Entry Fee: <span class="v">0.5</span>
         <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
       </div>
     </div>
@@ -2512,17 +2512,17 @@ async function doUpgradeStat(bikeLevel, stat){
         <div class="rsr-vs">
           <div class="rsr-side">
             <div class="rsr-av" id="rsrAv1">🏍️</div>
-            <div class="rsr-sname" id="rsrName1" data-i18n="you">You</div>
+            <div class="rsr-sname" id="rsrName1">You</div>
             <div class="rsr-sspd" id="rsrSpd1">— km/h</div>
           </div>
-          <div class="rsr-sep" data-i18n="vs">VS</div>
+          <div class="rsr-sep">VS</div>
           <div class="rsr-side">
             <div class="rsr-av" id="rsrAv2">🤖</div>
-            <div class="rsr-sname" id="rsrName2" data-i18n="opponent">Opponent</div>
+            <div class="rsr-sname" id="rsrName2">Opponent</div>
             <div class="rsr-sspd" id="rsrSpd2">— km/h</div>
           </div>
         </div>
-        <button class="rsr-btn" onclick="raceGoBack()"><span data-i18n="continue">Continue</span> →</button>
+        <button class="rsr-btn" onclick="raceGoBack()">Продолжить →</button>
       </div>
 
     </div>
@@ -2906,25 +2906,25 @@ async function doUpgradeStat(bikeLevel, stat){
     list.innerHTML = `
       <div class="race-stat-row">
         <div class="race-stat-icon"><img src="${ICONS.speed}"></div>
-        <div class="race-stat-name" data-i18n="speed">Speed</div>
+        <div class="race-stat-name">Speed</div>
         <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('speed')}%"></div></div>
         <div class="race-stat-num">${stats.speed}</div>
       </div>
       <div class="race-stat-row">
         <div class="race-stat-icon"><img src="${ICONS.accel}"></div>
-        <div class="race-stat-name" data-i18n="acceleration">Acceleration</div>
+        <div class="race-stat-name">Acceleration</div>
         <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('accel')}%"></div></div>
         <div class="race-stat-num">${stats.accel}</div>
       </div>
       <div class="race-stat-row">
         <div class="race-stat-icon"><img src="${ICONS.maneuver}"></div>
-        <div class="race-stat-name" data-i18n="handling">Handling</div>
+        <div class="race-stat-name">Handling</div>
         <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('maneuver')}%"></div></div>
         <div class="race-stat-num">${stats.maneuver}</div>
       </div>
       <div class="race-stat-row">
         <div class="race-stat-icon"><img src="${ICONS.nitro}"></div>
-        <div class="race-stat-name" data-i18n="nitro">Nitro</div>
+        <div class="race-stat-name">Nitro</div>
         <div class="race-stat-bar"><div class="race-stat-fill" style="width:${pct('nitro')}%"></div></div>
         <div class="race-stat-num">${stats.nitro}</div>
       </div>
@@ -3402,16 +3402,16 @@ async function doUpgradeStat(bikeLevel, stat){
       </div>
       <!-- Manual deposit card -->
       <div class="wd-form" style="margin-bottom:0">
-        <div style="font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:10px;display:flex;align-items:center;gap:6px">📋 <span data-i18n="manualDeposit">Manual Deposit</span></div>
-        <label class="flabel" data-i18n="walletAddress">Wallet Address</label>
+        <div style="font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:10px;display:flex;align-items:center;gap:6px">📋 Manual Deposit</div>
+        <label class="flabel">Wallet Address</label>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <input type="text" class="finput" id="manualWalletAddr" readonly value="UQBTon_Wallet_Address_Here" style="margin-bottom:0;flex:1">
-          <button onclick="copyText('manualWalletAddr')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+          <button onclick="copyText('manualWalletAddr')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
         </div>
-        <label class="flabel" data-i18n="commentUserId">Comment (Your User ID)</label>
+        <label class="flabel">Comment (Your User ID)</label>
         <div style="display:flex;align-items:center;gap:8px">
           <input type="text" class="finput" id="manualCommentId" readonly style="margin-bottom:0;flex:1">
-          <button onclick="copyText('manualCommentId')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
+          <button onclick="copyText('manualCommentId')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
         </div>
       </div>
     </div>
@@ -3687,7 +3687,7 @@ function renderPartnerPosts(){
   const posts = S.partnerPosts || [];
   const el = document.getElementById('partnerPostsList');
   if(!el) return;
-  if(!posts.length){ el.innerHTML = '<div class="hist-empty">'+lt('noPostsYet')+'</div>'; return; }
+  if(!posts.length){ el.innerHTML = '<div class="hist-empty">No posts submitted yet</div>'; return; }
   el.innerHTML = posts.map(p=>{
     const statusColor = p.status==='approved'?'#00F27A':p.status==='rejected'?'#ff8a80':'#FFD740';
     const statusLabel = p.status==='approved'?'✅ Approved':p.status==='rejected'?'❌ Rejected':'⏳ Pending';
@@ -3751,16 +3751,11 @@ function syncFinanceHeader(){
   if(handleEl){
     handleEl.textContent = user.username?`@${user.username}`:'';
   }
-  // Lang flags on finance page — derive from saved language so it persists
+  // Lang flags on finance page
   const langFl = document.getElementById('langFlagFin');
   const langLbl = document.getElementById('langLblFin');
-  const _meta = {ar:['🇸🇦','AR'],en:['🇬🇧','EN'],ru:['🇷🇺','RU'],es:['🇪🇸','ES'],fr:['🇫🇷','FR']};
-  const _cur = localStorage.getItem('pandaLang')||'en';
-  const _m = _meta[_cur]||_meta['en'];
-  const _topFlag = document.getElementById('langFlag')?.textContent;
-  const _topCode = document.getElementById('langCode')?.textContent;
-  if(langFl) langFl.textContent = (_topFlag && _topFlag.trim()) ? _topFlag : _m[0];
-  if(langLbl) langLbl.textContent = (_topCode && _topCode.trim()) ? _topCode : _m[1];
+  if(langFl) langFl.textContent = document.getElementById('langFlag')?.textContent||'🇬🇧';
+  if(langLbl) langLbl.textContent = document.getElementById('langLbl')?.textContent||'EN';
 }
 </script>
 <style>
@@ -4561,8 +4556,8 @@ function buildTaskCard(t,cat){
 
 function renderSocTasks(){
   const p=S.tasks?.partner||[], c=S.tasks?.community||[];
-  const spl=document.getElementById('socPartnerList'); if(spl) spl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):'<div class="hist-empty">'+lt('noPartnerTasks')+'</div>';
-  const scl=document.getElementById('socCommunityList'); if(scl) scl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):'<div class="hist-empty">'+lt('noCommunityTasks')+'</div>';
+  const spl=document.getElementById('socPartnerList'); if(spl) spl.innerHTML=p.length?p.map(t=>buildTaskCard(t,'partner')).join(''):'<div class="hist-empty">No partner tasks yet</div>';
+  const scl=document.getElementById('socCommunityList'); if(scl) scl.innerHTML=c.length?c.map(t=>buildTaskCard(t,'community')).join(''):'<div class="hist-empty">No community tasks yet</div>';
 }
 
 function switchRefTab(tab){
@@ -4971,7 +4966,7 @@ function _depReqLine3(lang){
 function renderWdHistNew(){
   const el=document.getElementById('wdHistList');
   if(!el) return;
-  if(!S.wdHist||!S.wdHist.length){el.innerHTML='<div class="hist-empty">'+lt('noWithdrawals')+'</div>';return;}
+  if(!S.wdHist||!S.wdHist.length){el.innerHTML='<div class="hist-empty">No withdrawals yet</div>';return;}
   el.innerHTML=S.wdHist.slice(0,20).map(h=>{
     const rawStatus=(h.status||'pending').toLowerCase();
     const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'?'rejected':rawStatus;
@@ -4998,7 +4993,7 @@ function renderWdHistNew(){
 function renderWdHist(){
   const el=document.getElementById('wdHist');
   if(!el) return;
-  if(!S.wdHist.length){el.innerHTML='<div class="hist-empty">'+lt('noWithdrawals')+'</div>';return;}
+  if(!S.wdHist.length){el.innerHTML='<div class="hist-empty">No withdrawals yet</div>';return;}
   el.innerHTML=S.wdHist.slice(0,20).map((h,idx)=>{
     // Normalise legacy status values from old DB records
     const rawStatus = (h.status||'pending').toLowerCase();
@@ -5056,8 +5051,8 @@ function switchFinTab(el,t){ /* legacy - redirect to openProfilePage */ openProf
 
 function openProfilePage(page){
   const titles = {
-    deposit:'💰 '+lt('cardDeposit'), withdraw:'📤 '+lt('cardWithdraw'),
-    missions:'🎯 '+lt('cardMissions'), partnership:'🤝 '+lt('cardPartnership'), referrals:'👥 '+lt('cardReferrals')
+    deposit:'💰 Deposit', withdraw:'📤 Withdraw',
+    missions:'🎯 Missions', partnership:'🤝 Partnership', referrals:'👥 Referrals'
   };
   const overlay = document.getElementById('profileSubPage');
   const content = document.getElementById('profileSubPageContent');
@@ -5068,8 +5063,6 @@ function openProfilePage(page){
   if(!src) return;
   content.innerHTML = src.innerHTML;
   title.textContent = titles[page]||page;
-  // Re-translate copied content
-  try{ const _l=localStorage.getItem('pandaLang')||'en'; const _meta={ar:['🇸🇦','AR'],en:['🇬🇧','EN'],ru:['🇷🇺','RU'],es:['🇪🇸','ES'],fr:['🇫🇷','FR']}; if(_meta[_l]) applyLang(_l,_meta[_l][0],_meta[_l][1]); }catch(e){}
   overlay.style.display='block';
   // Re-init page specific data
   if(page==='missions'){renderMissions();}
@@ -5122,7 +5115,7 @@ function updateRefUI(){
   const listEl=document.getElementById('recentRefsList');
   if(listEl){
     if(!S.refs.length){
-      listEl.innerHTML='<div class="hist-empty">'+lt('noReferrals')+'</div>';
+      listEl.innerHTML=`<div class="hist-empty">No referrals yet</div>`;
     } else {
       listEl.innerHTML=S.refs.slice(0,20).map(r=>`
         <div class="ref-list-item">
@@ -5652,22 +5645,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'الكوينز الحالية',snsRowCoinsDesc:'ترحيل: 20%',
     snsRowRefsTitle:'الإحالات',snsRowRefsDesc:'مكافأة الإحالات النشطة',
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
-    motorcycles:'الدراجات',collectTagline:'اجمع • طوّر • سيطر',byPrice:'🏆 حسب السعر ↓',
-    garage:'الجراج',garageSub:'طوّر دراجاتك للسباق',noBikesYet:'لا تملك أي دراجات بعد',buyBikeToUpgrade:'اشترِ دراجة للبدء بالتطوير',
-    upgrade:'تطوير',upgrades:'التطويرات',
-    speed:'السرعة',acceleration:'التسارع',accel:'التسارع',handling:'التحكم',nitro:'النيترو',
-    selectBike:'اختر الدراجة',selectBikeSub:'اختر دراجتك وسيطر على المضمار',level:'المستوى',startRace:'ابدأ السباق',entryFee:'رسوم الدخول:',
-    you:'أنت',opponent:'الخصم',vs:'ضد',continue:'متابعة',
-    manualDeposit:'إيداع يدوي',commentUserId:'الملاحظة (معرّف المستخدم)',
-    noPartnerTasks:'لا توجد مهام شركاء بعد',noCommunityTasks:'لا توجد مهام مجتمع بعد',
-    motorcycles:'Motorcycles',collectTagline:'Collect • Upgrade • Dominate',byPrice:'🏆 By price ↓',
-    garage:'Garage',garageSub:'Upgrade your bikes for racing',noBikesYet:"You don't own any motorcycles yet",buyBikeToUpgrade:'Buy a bike to start upgrading',
-    upgrade:'Upgrade',upgrades:'Upgrades',
-    speed:'Speed',acceleration:'Acceleration',accel:'Accel',handling:'Handling',nitro:'Nitro',
-    selectBike:'SELECT BIKE',selectBikeSub:'Choose your bike and dominate the track',level:'LEVEL',startRace:'Start Race',entryFee:'Entry Fee:',
-    you:'You',opponent:'Opponent',vs:'VS',continue:'Continue',
-    manualDeposit:'Manual Deposit',commentUserId:'Comment (Your User ID)',
-    noPartnerTasks:'No partner tasks yet',noCommunityTasks:'No community tasks yet',
   },
   en:{
     navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
@@ -5804,14 +5781,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Current Coins',snsRowCoinsDesc:'Carry Over: 20%',
     snsRowRefsTitle:'Referrals',snsRowRefsDesc:'Active Referrals Bonus',
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
-    motorcycles:'Мотоциклы',collectTagline:'Собирай • Прокачивай • Доминируй',byPrice:'🏆 По цене ↓',
-    garage:'Гараж',garageSub:'Прокачивайте мотоциклы для гонок',noBikesYet:'У вас пока нет мотоциклов',buyBikeToUpgrade:'Купите мотоцикл чтобы начать прокачку',
-    upgrade:'Улучшить',upgrades:'Улучшения',
-    speed:'Скорость',acceleration:'Ускорение',accel:'Ускор.',handling:'Управление',nitro:'Нитро',
-    selectBike:'ВЫБОР МОТОЦИКЛА',selectBikeSub:'Выберите мотоцикл и покорите трассу',level:'УРОВЕНЬ',startRace:'Начать гонку',entryFee:'Взнос:',
-    you:'Вы',opponent:'Соперник',vs:'VS',continue:'Продолжить',
-    manualDeposit:'Ручной депозит',commentUserId:'Комментарий (Ваш ID)',
-    noPartnerTasks:'Партнёрских задач пока нет',noCommunityTasks:'Задач сообщества пока нет',
   },
   ru:{
     navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
@@ -5939,14 +5908,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Текущие монеты',snsRowCoinsDesc:'Перенос: 20%',
     snsRowRefsTitle:'Рефералы',snsRowRefsDesc:'Бонус за активных рефералов',
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
-    motorcycles:'Motocicletas',collectTagline:'Colecciona • Mejora • Domina',byPrice:'🏆 Por precio ↓',
-    garage:'Garaje',garageSub:'Mejora tus motos para las carreras',noBikesYet:'Aún no tienes motocicletas',buyBikeToUpgrade:'Compra una moto para empezar a mejorar',
-    upgrade:'Mejorar',upgrades:'Mejoras',
-    speed:'Velocidad',acceleration:'Aceleración',accel:'Acel.',handling:'Manejo',nitro:'Nitro',
-    selectBike:'ELIGE MOTO',selectBikeSub:'Elige tu moto y domina la pista',level:'NIVEL',startRace:'Iniciar carrera',entryFee:'Entrada:',
-    you:'Tú',opponent:'Rival',vs:'VS',continue:'Continuar',
-    manualDeposit:'Depósito manual',commentUserId:'Comentario (Tu ID)',
-    noPartnerTasks:'Aún no hay tareas de socios',noCommunityTasks:'Aún no hay tareas de comunidad',
   },
   es:{
     navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
@@ -6074,14 +6035,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Monedas actuales',snsRowCoinsDesc:'Transferencia: 20%',
     snsRowRefsTitle:'Referidos',snsRowRefsDesc:'Bono referidos activos',
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
-    motorcycles:'Motos',collectTagline:'Collectionne • Améliore • Domine',byPrice:'🏆 Par prix ↓',
-    garage:'Garage',garageSub:'Améliorez vos motos pour les courses',noBikesYet:"Vous n'avez pas encore de motos",buyBikeToUpgrade:'Achetez une moto pour commencer',
-    upgrade:'Améliorer',upgrades:'Améliorations',
-    speed:'Vitesse',acceleration:'Accélération',accel:'Accél.',handling:'Maniabilité',nitro:'Nitro',
-    selectBike:'CHOISIR MOTO',selectBikeSub:'Choisissez votre moto et dominez la piste',level:'NIVEAU',startRace:'Démarrer course',entryFee:'Frais:',
-    you:'Vous',opponent:'Adversaire',vs:'VS',continue:'Continuer',
-    manualDeposit:'Dépôt manuel',commentUserId:'Commentaire (Votre ID)',
-    noPartnerTasks:'Aucune tâche de partenaire',noCommunityTasks:'Aucune tâche communautaire',
   },
   fr:{
     navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',

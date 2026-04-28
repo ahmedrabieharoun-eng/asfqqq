@@ -1095,7 +1095,7 @@ function syncTopbar(){
 // Hook into page load
 document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ renderBikes(); syncTopbar(); }, 800);
-  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); }, 3000);
+  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); if(typeof syncProfileTopbar==='function') syncProfileTopbar(); }, 3000);
 });
 
 /* ════ GARAGE SYSTEM ════════════════════════════════════════════
@@ -1522,6 +1522,69 @@ async function doUpgradeStat(bikeLevel, stat){
           return r;
         };
         window.syncTopbar._mineHooked = true;
+      }
+    }catch(e){}
+  })();
+
+  /* ══ PROFILE TOPBAR SYNC — mirror Home topbar into Profile hero ══ */
+  function syncProfileTopbar(){
+    try{
+      const av = document.getElementById('pfAvatar');
+      const nm = document.getElementById('pfUserName');
+      const tp = document.getElementById('pfTonPill');
+      const fb = document.getElementById('finTonBal');
+
+      const srcAv = document.getElementById('hubAvatar');
+      const srcNm = document.getElementById('hubUserName');
+      const srcTb = document.getElementById('tbCoins');
+
+      const u = (window.S && S.user) || {};
+      const tgUser = (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user) || {};
+
+      if(av){
+        const srcImg = srcAv && srcAv.querySelector('img');
+        const photo = (srcImg && srcImg.src) || u.photoUrl || tgUser.photo_url || null;
+        const cur = av.dataset.photoSrc || '';
+        if(photo && photo !== cur){
+          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>';this.parentNode.dataset.photoSrc='';">`;
+          av.dataset.photoSrc = photo;
+        } else if(!photo && !av.querySelector('img')){
+          av.innerHTML = '<span>🏍️</span>';
+        }
+      }
+      if(nm){
+        const homeName = srcNm ? (srcNm.textContent||'').trim() : '';
+        const tgName = ((tgUser.first_name||'') + ' ' + (tgUser.last_name||'')).trim();
+        const name = (homeName && homeName !== 'Player') ? homeName
+                   : ((window.S && S._tgName) || tgName || tgUser.username || u.firstName || u.username || u.name || 'Player');
+        if(nm.textContent !== name) nm.textContent = name;
+      }
+      if(tp){
+        let val = srcTb ? (srcTb.textContent||'').trim() : '';
+        if(!val || val === '0'){
+          const bal = (u.tonBalance!=null ? u.tonBalance : 0);
+          val = (Number(bal)||0).toFixed(2);
+        }
+        if(tp.textContent !== val) tp.textContent = val;
+      }
+      if(fb){
+        const bal = (u.tonBalance!=null ? u.tonBalance : 0);
+        const v = (Number(bal)||0).toFixed(2);
+        if(fb.textContent !== v) fb.textContent = v;
+      }
+    }catch(e){ console.warn('syncProfileTopbar:', e.message); }
+  }
+  window.syncProfileTopbar = syncProfileTopbar;
+  (function(){
+    try{
+      const _orig = window.syncTopbar;
+      if(typeof _orig === 'function' && !_orig._pfHooked){
+        window.syncTopbar = function(){
+          const r = _orig.apply(this, arguments);
+          try{ syncProfileTopbar(); }catch(e){}
+          return r;
+        };
+        window.syncTopbar._pfHooked = true;
       }
     }catch(e){}
   })();
@@ -3152,46 +3215,89 @@ async function doUpgradeStat(bikeLevel, stat){
 <!-- FINANCE (PROFILE) -->
 <div class="sec" id="sectionFinance">
 
-  <!-- ══ PROFILE PAGE — image-4 design ══ -->
+  <!-- ══ PROFILE PAGE — Home-style hero header ══ -->
   <style>
-    #sectionFinance{
-      padding:0!important;min-height:100vh;
-      background:
-        linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
-        url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897.png') center top/cover no-repeat;
-    }
-    .pf-topbar{position:relative;display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:14px 14px 4px;}
-    .pf-tb-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:6px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:36px;}
-    .pf-tb-icon{width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);}
-    .pf-userrow{display:flex;align-items:center;gap:14px;padding:8px 16px 14px;}
-    .pf-avatar{width:74px;height:74px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid #00F27A;box-shadow:0 0 18px rgba(0,242,122,.5);background:#000;display:flex;align-items:center;justify-content:center;font-size:28px;}
-    .pf-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
-    .pf-nameblock{display:flex;flex-direction:column;min-width:0;flex:1;}
-    .pf-name{font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .pf-uname{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .pf-balcard{margin:0 16px 16px;background:rgba(0,0,0,.55);border:1px solid rgba(0,242,122,.45);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);}
+    #sectionFinance{padding:0!important;}
+
+    /* ===== HERO CARD (matches Home page style) ===== */
+    .pf-hero{position:relative;width:100%;height:260px;overflow:hidden;}
+    .pf-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+    .pf-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.85) 100%);}
+
+    /* TOPBAR inside hero — avatar + name + TON balance pill */
+    .pf-topbar{position:absolute;top:14px;left:12px;right:12px;z-index:10;display:flex;justify-content:center;}
+    .pf-tb-card{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 10px 6px 6px;backdrop-filter:blur(8px);max-width:100%;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+    .pf-tb-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid #00F27A;background:#000;display:flex;align-items:center;justify-content:center;font-size:16px;}
+    .pf-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+    .pf-tb-name{font-size:13px;font-weight:800;color:#fff;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pf-tb-ton{display:flex;align-items:center;gap:6px;background:rgba(0,242,122,.15);border:1px solid rgba(0,242,122,.45);border-radius:999px;padding:4px 6px 4px 8px;}
+    .pf-tb-ton img{width:18px;height:18px;}
+    .pf-tb-ton-val{font-size:13px;font-weight:800;color:#fff;}
+    .pf-tb-plus{width:24px;height:24px;border-radius:50%;border:none;background:#00F27A;color:#000;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+
+    /* Hero bottom title */
+    .pf-hero-title{position:absolute;bottom:14px;left:14px;right:14px;z-index:10;}
+    .pf-hero-title h1{font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin:0 0 5px;letter-spacing:-.3px;}
+    .pf-hero-title .sub{display:flex;align-items:center;gap:10px;}
+    .pf-hero-title .sub-lbl{flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);}
+    .pf-hero-title .sub-pill{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;backdrop-filter:blur(6px);white-space:nowrap;}
+
+    /* Lang/Sound floating top-right (above hero) */
+    .pf-actions{position:absolute;top:14px;right:12px;z-index:11;display:flex;gap:8px;}
+    .pf-tb-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:6px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:32px;}
+    .pf-tb-icon{width:32px;height:32px;border-radius:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);}
+
+    /* ===== Total Balance card under hero ===== */
+    .pf-balcard{margin:14px 16px 16px;background:rgba(0,0,0,.55);border:1px solid rgba(0,242,122,.45);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);}
     .pf-balicon{width:54px;height:54px;border-radius:50%;background:rgba(0,242,122,.18);border:1px solid rgba(0,242,122,.45);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .pf-balicon img{width:32px;height:32px;}
     .pf-ballbl{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);}
     .pf-balrow{display:flex;align-items:baseline;gap:8px;}
     .pf-balval{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;}
     .pf-baltkn{font-size:13px;font-weight:800;color:#00F27A;}
+
+    /* legacy hidden — kept for code compat */
+    #finUserAvatar,#finUserName,#finUserHandle{display:none;}
   </style>
 
-  <!-- TOPBAR: Lang + Sound buttons -->
-  <div class="pf-topbar">
-    <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
-    <button class="pf-tb-icon" onclick="toggleSound()" id="soundBtn" aria-label="Sound">🔊</button>
-  </div>
+  <!-- HERO HEADER (image fills the card, no side gaps) -->
+  <div class="pf-hero">
+    <img class="pf-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897.png" alt="profile hero">
+    <div class="pf-hero-overlay"></div>
 
-  <!-- USER ROW: avatar + name -->
-  <div class="pf-userrow">
-    <div class="pf-avatar" id="finUserAvatar"><span>🏍️</span></div>
-    <div class="pf-nameblock">
-      <div class="pf-name" id="finUserName">Player</div>
-      <div class="pf-uname" id="finUserHandle"></div>
+    <!-- top-right Lang + Sound -->
+    <div class="pf-actions">
+      <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
+      <button class="pf-tb-icon" onclick="toggleSound()" id="soundBtn" aria-label="Sound">🔊</button>
+    </div>
+
+    <!-- centered topbar: avatar + name + TON pill -->
+    <div class="pf-topbar">
+      <div class="pf-tb-card">
+        <div class="pf-tb-avatar" id="pfAvatar"><span>🏍️</span></div>
+        <span class="pf-tb-name" id="pfUserName">Player</span>
+        <div class="pf-tb-ton">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
+          <span class="pf-tb-ton-val" id="pfTonPill">0</span>
+          <button class="pf-tb-plus" onclick="goToFinanceDeposit()">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- bottom title -->
+    <div class="pf-hero-title">
+      <h1 data-i18n="navFinance">Profile</h1>
+      <div class="sub">
+        <div class="sub-lbl">Manage • Earn • Withdraw</div>
+        <div class="sub-pill">⚡ TON Wallet</div>
+      </div>
     </div>
   </div>
+
+  <!-- Hidden legacy nodes kept so existing code that updates them doesn't break -->
+  <div id="finUserAvatar"><span>🏍️</span></div>
+  <div id="finUserName">Player</div>
+  <div id="finUserHandle"></div>
 
   <!-- TOTAL BALANCE CARD -->
   <div class="pf-balcard">
@@ -4391,7 +4497,7 @@ function goNav(el){
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab();
-  if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew();}
+  if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew();if(typeof syncProfileTopbar==='function')syncProfileTopbar();}
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionMarket'){renderGarage();}
   if(el.dataset.s==='sectionFriends'){renderMiningPage(); if(typeof syncMineTopbar==='function') syncMineTopbar();}
@@ -5387,6 +5493,7 @@ async function init(){
   syncTopbar();
   // Also sync Farm page topbar so user data appears immediately on first open
   try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
+  try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers

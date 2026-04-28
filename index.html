@@ -28,7 +28,10 @@
 }
 body{
   font-family:'Fredoka',cursive;font-weight:800;
-  background:#000;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
+    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat fixed,
+    #000;
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
@@ -343,7 +346,8 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .orbit-item img{width:100%;height:100%;object-fit:contain;}
 .ptc{position:fixed;pointer-events:none;z-index:400;font-size:17px;animation:ptup .9s ease-out forwards}
 @keyframes ptup{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-74px) scale(.4);opacity:0}}
-::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar{width:0;height:0;display:none}
+*{scrollbar-width:none;-ms-overflow-style:none;}
 @keyframes cup-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
 @keyframes cup-glow{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.15)}}
 @keyframes comp-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,165,0,.7))}50%{filter:drop-shadow(0 0 20px rgba(255,165,0,1))}}
@@ -354,7 +358,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-shimmer{0%{opacity:.4;transform:scaleX(.6)}50%{opacity:1;transform:scaleX(1)}100%{opacity:.4;transform:scaleX(.6)}}
 @keyframes podium-rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes winning-pulse{0%,100%{box-shadow:0 0 0 rgba(76,175,80,0)}50%{box-shadow:0 0 18px rgba(76,175,80,.35)}}
-::-webkit-scrollbar-thumb{background:var(--bamboo);border-radius:2px}
+::-webkit-scrollbar-thumb{background:transparent;display:none}
 .pg-title{font-size:19px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:7px}
 .topbar-main{display:flex;align-items:center;gap:8px;padding:9px 12px 7px;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(124,179,66,.12);}
 .uavatar{width:48px;height:48px;border-radius:50%;background:var(--glass);overflow:hidden;flex-shrink:0;position:relative;}
@@ -516,12 +520,12 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 /* صورة المستخدم على اليسار */
 .hub-tb-avatar{
   width:46px;height:46px;border-radius:50%;
-  border:2.5px solid rgba(255,255,255,.8);
+  border:none;
   overflow:hidden;flex-shrink:0;
-  background:rgba(255,255,255,.15);
+  background:transparent;
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
-.hub-tb-avatar img{width:100%;height:100%;object-fit:cover}
+.hub-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 /* اسم المستخدم */
 .hub-tb-name{
   flex:1;font-size:15px;font-weight:800;color:#fff;
@@ -1084,7 +1088,7 @@ function syncTopbar(){
 // Hook into page load
 document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ renderBikes(); syncTopbar(); }, 800);
-  setInterval(()=>{ syncTopbar(); }, 3000);
+  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); }, 3000);
 });
 
 /* ════ GARAGE SYSTEM ════════════════════════════════════════════
@@ -1184,7 +1188,8 @@ function renderGarage(){
   _garageSelectedLv = b.lv;
   const bidx = BIKES.indexOf(b);
   const bColor = BIKE_NAME_COLORS[bidx % BIKE_NAME_COLORS.length];
-  const bCardBg = BIKE_CARD_IMGS[bidx % BIKE_CARD_IMGS.length];
+  // Stats-card background is FIXED to level-1 card image for all bikes (per design)
+  const bCardBg = BIKE_CARD_IMGS[0];
   const cs = getBikeCurrentStats(b);
   const maxStats = {speed:b.speed*2,nitro:b.nitro*2,accel:b.accel*2,maneuver:b.maneuver*2};
 
@@ -1327,32 +1332,104 @@ async function doUpgradeStat(bikeLevel, stat){
 <div class="sec" id="sectionFriends">
   <style>
     #sectionFriends{padding:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:78px;z-index:5}
-    .mine-map{position:absolute;inset:0;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/1b008c8e-e32b-4e14-bbe7-c611e8f1c6a8.png') center center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
-    .mine-map::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.22) 100%);pointer-events:none;z-index:1}
-    .mine-garage-fab{position:relative;z-index:10;margin:0 16px 20px;background:#fff;border-radius:50px;padding:15px 28px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:900;color:#20251f;box-shadow:0 6px 28px rgba(0,0,0,.28);cursor:pointer;border:none;width:calc(100% - 32px);letter-spacing:.2px}
+    .mine-map{position:absolute;inset:0;background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e44ea9db-c50f-4be7-82b6-b74540fc7034.png') center center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+    .mine-map::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.15) 35%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1}
+
+    /* Floating topbar (avatar+name | TON balance) — same style as home topbar but no background */
+    .mine-topbar{
+      position:absolute;top:0;left:0;right:0;z-index:20;
+      display:flex;align-items:center;
+      padding:12px 14px 8px;gap:10px;background:transparent;
+    }
+    .mine-tb-card{flex:1;display:flex;align-items:center;gap:10px;}
+    .mine-tb-avatar{
+      width:46px;height:46px;border-radius:50%;
+      border:none;overflow:hidden;flex-shrink:0;background:transparent;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+    }
+    .mine-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
+    .mine-tb-name{
+      flex:1;font-size:15px;font-weight:800;color:#fff;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      text-shadow:0 1px 8px rgba(0,0,0,.9);
+    }
+    .mine-tb-ton{
+      display:flex;align-items:center;gap:6px;
+      background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);
+      border-radius:20px;padding:6px 12px;flex-shrink:0;
+    }
+    .mine-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
+    .mine-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
+    .mine-tb-plus{
+      width:26px;height:26px;border-radius:50%;
+      background:linear-gradient(135deg,#43A047,#66BB6A);
+      border:none;color:#fff;font-size:18px;font-weight:900;line-height:1;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;box-shadow:0 0 8px rgba(76,175,80,.55);flex-shrink:0;
+    }
+
+    /* Headline overlay describing what the page does */
+    .mine-headline{
+      position:absolute;left:0;right:0;top:74px;z-index:15;
+      text-align:center;padding:0 22px;pointer-events:none;
+    }
+    .mine-headline-title{
+      font-size:28px;font-weight:900;color:#fff;
+      text-shadow:0 2px 12px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.6);
+      letter-spacing:.4px;margin-bottom:8px;
+    }
+    .mine-headline-sub{
+      font-size:14px;font-weight:700;color:rgba(255,255,255,.92);
+      text-shadow:0 1px 8px rgba(0,0,0,.95);
+      line-height:1.45;max-width:340px;margin:0 auto;
+    }
+
+    .mine-garage-fab{position:relative;z-index:10;margin:0 16px 20px;background:linear-gradient(135deg,#43A047,#2E7D32);border-radius:50px;padding:15px 28px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:900;color:#fff;box-shadow:0 6px 28px rgba(0,0,0,.45),0 0 14px rgba(76,175,80,.45);cursor:pointer;border:none;width:calc(100% - 32px);letter-spacing:.2px;text-shadow:0 1px 4px rgba(0,0,0,.5);}
     .mine-garage-fab:active{transform:scale(.97)}
-    .mine-sheet-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(3px)}
+
+    /* Dark bottom sheet */
+    .mine-sheet-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
     .mine-sheet-overlay.open{display:block}
-    .mine-bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#f6f9df;border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.28);padding:16px 18px 110px;min-height:340px;max-height:82vh;overflow-y:auto;color:#20251f;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
+    .mine-bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#0f1410;border-top:1px solid rgba(124,179,66,.28);border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.55);padding:16px 18px 110px;min-height:340px;max-height:82vh;overflow-y:auto;color:#fff;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
     .mine-bottom-sheet.open{transform:translateY(0)}
-    .mine-handle{width:140px;height:5px;background:rgba(0,0,0,.18);border-radius:10px;margin:0 auto 20px}
+    .mine-handle{width:140px;height:5px;background:rgba(255,255,255,.22);border-radius:10px;margin:0 auto 20px}
     .mine-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-    .mine-garage-title{font-size:22px;font-weight:900}
-    .mine-earned{font-size:15px;font-weight:800;white-space:nowrap;color:#2b2f2a}
-    .mine-to-balance{border:none;border-radius:15px;background:#e8f5e0;color:#3a6e28;border:1.5px solid #a8d88a;padding:10px 14px;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 3px 12px rgba(0,0,0,.06);cursor:pointer;white-space:nowrap}
+    .mine-garage-title{font-size:22px;font-weight:900;color:#fff;}
+    .mine-earned{font-size:15px;font-weight:800;white-space:nowrap;color:#e8f5e0}
+    .mine-to-balance{border:none;border-radius:15px;background:linear-gradient(135deg,#43A047,#2E7D32);color:#fff;padding:10px 14px;font-size:12px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 3px 12px rgba(76,175,80,.4);cursor:pointer;white-space:nowrap}
     .mine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .mine-car-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 3px 10px rgba(31,47,23,.13);border:1px solid rgba(0,0,0,.06)}
-    .mine-card-img{height:96px;position:relative;overflow:hidden;background:#dce8cd}
+    /* Inner bike sub-cards: BLACK background (per user request) instead of white */
+    .mine-car-card{background:#000;border-radius:12px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.5);border:1px solid rgba(124,179,66,.25)}
+    .mine-card-img{height:96px;position:relative;overflow:hidden;background:#0a0a0a}
     .mine-card-img img{width:100%;height:100%;object-fit:cover;display:block}
-    .mine-card-name{position:absolute;left:9px;top:8px;color:#fff;font-size:15px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.75);max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .mine-card-body{padding:8px 10px 10px;background:#fbfff4}
-    .mine-in-garage{font-size:14px;font-weight:900;color:#30352f;margin-bottom:8px}
-    .mine-rate-line{font-size:11px;font-weight:800;color:#64705f;margin:-4px 0 8px}
-    .mine-action-btn{width:100%;height:39px;border:none;border-radius:8px;background:#45ba3d;color:#fff;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(69,186,61,.28)}
-    .mine-action-btn.wait{background:#bfeeb5;color:#4d5e48;box-shadow:none;cursor:default}
-    .mine-empty{grid-column:1/-1;text-align:center;color:#6d7564;font-size:15px;font-weight:800;padding:28px 14px}
+    .mine-card-name{position:absolute;left:9px;top:8px;color:#fff;font-size:15px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.9);max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mine-card-body{padding:8px 10px 10px;background:#000}
+    .mine-in-garage{font-size:14px;font-weight:900;color:#fff;margin-bottom:8px}
+    .mine-rate-line{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);margin:-4px 0 8px}
+    .mine-action-btn{width:100%;height:39px;border:none;border-radius:8px;background:linear-gradient(135deg,#45ba3d,#2E7D32);color:#fff;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(69,186,61,.35)}
+    .mine-action-btn.wait{background:rgba(124,179,66,.18);color:rgba(255,255,255,.55);box-shadow:none;cursor:default}
+    .mine-empty{grid-column:1/-1;text-align:center;color:rgba(255,255,255,.55);font-size:15px;font-weight:800;padding:28px 14px}
   </style>
   <div class="mine-map">
+    <!-- Floating topbar -->
+    <div class="mine-topbar">
+      <div class="mine-tb-card">
+        <div class="mine-tb-avatar" id="mineAvatar"><span>🏍️</span></div>
+        <div class="mine-tb-name" id="mineUserName">Player</div>
+      </div>
+      <div class="mine-tb-ton">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
+        <span class="mine-tb-ton-val" id="mineTonBal">0.00</span>
+        <button class="mine-tb-plus" onclick="goNavBySection('sectionFinance')" aria-label="Deposit">+</button>
+      </div>
+    </div>
+
+    <!-- Headline describing the page -->
+    <div class="mine-headline">
+      <div class="mine-headline-title">⛏️ Mining</div>
+      <div class="mine-headline-sub">Rent out your motorcycle for 24 hours and earn TON automatically. Tap “Garage” below to start mining with your bikes.</div>
+    </div>
+
     <button class="mine-garage-fab" onclick="openMineSheet()">Гараж 🚗</button>
   </div>
   <div class="mine-sheet-overlay" id="mineSheetOverlay" onclick="closeMineSheet()"></div>
@@ -1373,6 +1450,28 @@ async function doUpgradeStat(bikeLevel, stat){
   function closeMineSheet(){
     document.getElementById('mineSheetOverlay').classList.remove('open');
     document.getElementById('mineBottomSheet').classList.remove('open');
+  }
+  /* Sync floating Mine topbar with user data (avatar/name/ton) */
+  function syncMineTopbar(){
+    try{
+      const u = (window.S && S.user) || {};
+      const tg = (window.S && S.tg) || {};
+      const av = document.getElementById('mineAvatar');
+      const nm = document.getElementById('mineUserName');
+      const tb = document.getElementById('mineTonBal');
+      if(av){
+        const photo = u.photoUrl || tg.photo_url;
+        if(photo){ av.innerHTML = `<img src="${photo}" onerror="this.parentNode.innerHTML='🏍️'">`; }
+      }
+      if(nm){
+        const first = (tg.first_name || u.firstName || u.username || 'Player');
+        nm.textContent = first;
+      }
+      if(tb){
+        const bal = (u.tonBalance!=null ? u.tonBalance : 0);
+        tb.textContent = (Number(bal)||0).toFixed(2);
+      }
+    }catch(e){}
   }
   </script>
 </div>
@@ -1516,12 +1615,12 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:10px;}
 .gr-hero-tb-avatar{
   width:46px;height:46px;border-radius:50%;
-  border:2.5px solid rgba(255,255,255,.8);
+  border:none;
   overflow:hidden;flex-shrink:0;
-  background:rgba(255,255,255,.15);
+  background:transparent;
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
-.gr-hero-tb-avatar img{width:100%;height:100%;object-fit:cover}
+.gr-hero-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 .gr-hero-tb-name{
   flex:1;font-size:15px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -1546,7 +1645,7 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:4px;text-align:center;}
 
 /* ══ GARAGE BODY ══ */
-.gr-body{padding:0 12px 32px;background:#000;}
+.gr-body{padding:0 12px 32px;background:transparent;}
 
 /* ══ OWNED BIKES HORIZONTAL SCROLL ══ */
 .gr-owned-scroll-outer{margin:14px 0 10px;overflow:hidden;position:relative;}
@@ -1761,10 +1860,7 @@ async function doUpgradeStat(bikeLevel, stat){
   top:0;left:0;right:0;bottom:78px;
   overflow-y:auto;
   z-index:5;
-  /* page background image with darker overlay so text reads well */
-  background:
-    linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
-    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat fixed;
+  background:transparent;
 }
 .race-wrap{
   display:flex;flex-direction:column;align-items:center;
@@ -1782,11 +1878,11 @@ async function doUpgradeStat(bikeLevel, stat){
 .race-tb-user{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
 .race-tb-avatar{
   width:42px;height:42px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.85);
-  overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.12);
+  border:none;
+  overflow:hidden;flex-shrink:0;background:transparent;
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
-.race-tb-avatar img{width:100%;height:100%;object-fit:cover}
+.race-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 .race-tb-name{
   font-size:15px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -1933,7 +2029,9 @@ async function doUpgradeStat(bikeLevel, stat){
 /* ── Stats card (under thumbnails) ── */
 .race-stats-card{
   margin:14px 12px 0;
-  background:rgba(10,20,10,.78);
+  background:
+    linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.62)),
+    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png') center/cover no-repeat;
   border:1px solid rgba(124,179,66,.25);
   border-radius:18px;
   padding:14px 14px;
@@ -1942,18 +2040,18 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .race-stats-list{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
 .race-stat-row{
-  display:grid;grid-template-columns:22px 78px 1fr 32px;
-  align-items:center;gap:8px;
+  display:grid;grid-template-columns:46px 92px 1fr 44px;
+  align-items:center;gap:10px;
 }
 .race-stat-icon{
-  width:22px;height:22px;display:flex;align-items:center;justify-content:center;
-  font-size:15px;color:var(--bamboo);
+  width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:var(--bamboo);border-radius:10px;overflow:hidden;
 }
-.race-stat-icon img{width:22px;height:22px;object-fit:contain;}
-.race-stat-name{font-size:12px;font-weight:700;color:rgba(255,255,255,.85);}
-.race-stat-bar{height:7px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;}
-.race-stat-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#FFA000,#FFD600);}
-.race-stat-num{font-size:13px;font-weight:800;color:#fff;text-align:right;}
+.race-stat-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+.race-stat-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);}
+.race-stat-bar{height:9px;background:rgba(255,255,255,.14);border-radius:5px;overflow:hidden;}
+.race-stat-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#FFA000,#FFD600);}
+.race-stat-num{font-size:15px;font-weight:800;color:#fff;text-align:right;}
 /* Hex level badge */
 .race-level-hex{
   flex-shrink:0;width:88px;height:96px;
@@ -4197,7 +4295,7 @@ function goNav(el){
   if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew();}
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionMarket'){renderGarage();}
-  if(el.dataset.s==='sectionFriends'){renderMiningPage();}
+  if(el.dataset.s==='sectionFriends'){renderMiningPage(); if(typeof syncMineTopbar==='function') syncMineTopbar();}
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
     else setTimeout(window._raceInit,60);

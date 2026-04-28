@@ -1114,13 +1114,9 @@ function getBikeCurrentStats(b){
   };
 }
 
-let _selectedBikeLv = null;
-
 function renderGarage(){
-  const thumbsRow = document.getElementById('garageThumbsRow');
   const list = document.getElementById('garageList');
-  if(!list || !thumbsRow) return;
-
+  if(!list) return;
   const ownedBikes = S.user.ownedBikes||[];
   const owned = BIKES.filter(b=>ownedBikes.includes(b.lv));
 
@@ -1129,7 +1125,6 @@ function renderGarage(){
   if(gTon) gTon.textContent = (S.user.tonBalance||0).toFixed(2);
 
   if(!owned.length){
-    thumbsRow.innerHTML = '';
     list.innerHTML = `
       <div class="gr-empty">
         <div class="gr-empty-icon">🏍️</div>
@@ -1139,59 +1134,56 @@ function renderGarage(){
     return;
   }
 
-  // default selection
-  if(!_selectedBikeLv || !owned.find(b=>b.lv===_selectedBikeLv)){
-    _selectedBikeLv = owned[0].lv;
-  }
-
-  // Render thumbnails
-  thumbsRow.innerHTML = '';
+  list.innerHTML = '';
   owned.forEach((b, i) => {
-    const thumb = document.createElement('div');
-    thumb.className = 'gr-thumb' + (b.lv===_selectedBikeLv?' active':'');
-    thumb.dataset.lv = b.lv;
-    thumb.onclick = () => { _selectedBikeLv = b.lv; renderGarage(); };
-    thumb.innerHTML = `
-      <div class="gr-thumb-badge">№${i+1}</div>
-      <img class="gr-thumb-img" src="${b.img}" onerror="this.style.opacity='.3'">
-      <div class="gr-thumb-body">
-        <div class="gr-thumb-name">${b.name}</div>
-        <div class="gr-thumb-owned">В гараже ✓</div>
+    const cs = getBikeCurrentStats(b);
+    const card = document.createElement('div');
+    card.className = 'gr-card';
+    card.style.animationDelay = (i*0.07)+'s';
+    card.innerHTML = `
+      <div class="gr-card-img-wrap">
+        <img src="${b.img}" onerror="this.style.opacity='.3'">
+        <div class="gr-card-img-overlay"></div>
+        <div class="gr-card-num">№${ownedBikes.indexOf(b.lv)+1}</div>
+      </div>
+      <div class="gr-card-nameline">
+        <div class="gr-card-name">${b.name}</div>
+        <button class="gr-arrow-btn" onclick="openGrDetail(${b.lv})">›</button>
+      </div>
+      <div class="gr-stats-grid">
+        <div class="gr-stat"><div class="gr-stat-lbl">Скорость</div><div class="gr-stat-val">${cs.speed}</div></div>
+        <div class="gr-stat"><div class="gr-stat-lbl">Разгон</div><div class="gr-stat-val">${cs.accel}</div></div>
+        <div class="gr-stat"><div class="gr-stat-lbl">Маневры</div><div class="gr-stat-val">${cs.maneuver}</div></div>
+        <div class="gr-stat"><div class="gr-stat-lbl">Нитро</div><div class="gr-stat-val">${cs.nitro}</div></div>
       </div>
     `;
-    thumbsRow.appendChild(thumb);
+    list.appendChild(card);
   });
-
-  // Render selected bike detail
-  openGrDetail(_selectedBikeLv, true);
 }
 
-function openGrDetail(lv, inline=false){
+function openGrDetail(lv){
   const b = BIKES.find(x=>x.lv===lv);
   if(!b) return;
   const cs = getBikeCurrentStats(b);
   const upgs = cs.upgs;
-  const upgPrice = Math.round(b.price/4);
+  const upgPrice = (b.price/4).toFixed(2);
   const tonBal = S.user.tonBalance||0;
 
   const maxStats = {
-    speed: b.speed*2, nitro: b.nitro*2,
-    accel: b.accel*2, maneuver: b.maneuver*2,
+    speed   : b.speed*2,    nitro   : b.nitro*2,
+    accel   : b.accel*2,    maneuver: b.maneuver*2,
   };
 
-  function statBarRow(stat, label, colorClass){
+  // Build stat bars — max based on doubled value
+  function statBar(stat, label){
     const cur = cs[stat];
     const max = maxStats[stat];
-    const pct = Math.min(100, Math.round(cur/max*100));
-    const icon = STAT_ICONS[stat];
+    const pct = Math.round(cur/max*100);
     return `
-      <div class="gr-stat-bar-row">
-        <div class="gr-stat-bar-icon">${icon}</div>
-        <div class="gr-stat-bar-name">${label}</div>
-        <div class="gr-stat-bar-track">
-          <div class="gr-stat-bar-fill ${colorClass}" style="width:${pct}%"></div>
-        </div>
-        <div class="gr-stat-bar-val">${cur}</div>
+      <div class="gr-bar-row">
+        <div class="gr-bar-name">${label}</div>
+        <div class="gr-bar-wrap"><div class="gr-bar-fill" style="width:${pct}%"></div></div>
+        <div class="gr-bar-val">${cur}</div>
       </div>
     `;
   }
@@ -1200,97 +1192,50 @@ function openGrDetail(lv, inline=false){
     const upg = upgs[stat]||0;
     const maxUpg = Math.floor(b[stat]/UPGRADE_INC[stat]);
     const isMax = upg>=maxUpg;
-    const canAfford = tonBal>=upgPrice;
-    const lvText = `Уровень: ${upg} / ${maxUpg}`;
-    const icon = STAT_ICONS[stat];
-    let btn = '';
+    const canAfford = tonBal>=parseFloat(upgPrice);
+    let btnContent = '';
     if(isMax){
-      btn = `<button class="gr-upg-btn maxed" disabled>✅ MAX</button>`;
+      btnContent = `<button class="gr-upg-btn maxed" disabled>✅ MAX</button>`;
     } else {
       const dis = canAfford ? '' : 'disabled';
-      btn = `
-        <div class="gr-upg-cost">
-          <div class="gr-upg-gem">💎 ${upgPrice}</div>
-          <button class="gr-upg-btn" onclick="doUpgradeStat(${lv},'${stat}')" ${dis}>Прокачать</button>
-        </div>
-      `;
+      btnContent = `<button class="gr-upg-btn" onclick="doUpgradeStat(${lv},'${stat}')" ${dis}>${upgPrice} TON</button>`;
     }
     return `
       <div class="gr-upg-item">
-        <div class="gr-upg-icon">${icon}</div>
-        <div class="gr-upg-info">
-          <div class="gr-upg-name">${label} +${UPGRADE_INC[stat]}</div>
-          <div class="gr-upg-level">${lvText}</div>
-        </div>
-        ${btn}
+        <div class="gr-upg-icon">${STAT_ICONS[stat]}</div>
+        <div class="gr-upg-name">${label} +${UPGRADE_INC[stat]}</div>
+        ${btnContent}
       </div>
     `;
   }
 
-  const totalUpgCost = upgPrice * 4;
-  const canAffordAll = tonBal >= totalUpgCost;
-
-  const html = `
-    <div class="gr-detail-panel">
-      <!-- Top: image + stats -->
-      <div class="gr-detail-top">
-        <div class="gr-detail-bike-img">
-          <img src="${b.img}" onerror="this.style.opacity='.3'">
-        </div>
-        <div class="gr-detail-right">
-          <div class="gr-detail-name">${b.name}</div>
-          <div class="gr-detail-badge">✦ COMMON</div>
-          <!-- XP row -->
-          <div class="gr-xp-row">
-            <div class="gr-xp-circle">${b.lv}</div>
-            <div class="gr-xp-info">
-              <div class="gr-xp-bar-wrap"><div class="gr-xp-bar-fill" style="width:0%"></div></div>
-              <div class="gr-xp-label">0 / 250 XP</div>
-            </div>
-            <div class="gr-xp-boost">
-              <div class="gr-xp-boost-val">+10%</div>
-              <div class="gr-xp-boost-lbl">XP Boost</div>
-            </div>
-          </div>
-          ${statBarRow('speed','Скорость','speed')}
-          ${statBarRow('accel','Разгон','accel')}
-          ${statBarRow('maneuver','Маневры','maneuver')}
-          ${statBarRow('nitro','Нитро','nitro')}
-        </div>
-      </div>
-      <!-- Upgrade section -->
-      <div class="gr-upg-section">
-        <div class="gr-upg-title">Прокачка автомобиля</div>
-        ${upgRow('speed','Скорость')}
-        ${upgRow('accel','Разгон')}
-        ${upgRow('maneuver','Маневры')}
-        ${upgRow('nitro','Нитро')}
-        <button class="gr-upg-all-btn" ${canAffordAll?'':'disabled'} onclick="upgradeAll(${lv})">
-          Улучшить всё &nbsp; 💎 ${totalUpgCost}
-        </button>
+  document.getElementById('grDetailSheet').innerHTML = `
+    <img class="gr-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
+    <div class="gr-detail-body">
+      <div class="gr-detail-class">Уровень ${b.lv}</div>
+      ${statBar('speed','Скорость')}
+      ${statBar('accel','Разгон')}
+      ${statBar('maneuver','Маневры')}
+      ${statBar('nitro','Нитро')}
+      <div class="gr-detail-sec-title" style="margin-top:18px;">Прокачка автомобиля:</div>
+      ${upgRow('speed','Скорость')}
+      ${upgRow('accel','Разгон')}
+      ${upgRow('maneuver','Маневры')}
+      ${upgRow('nitro','Нитро')}
+      <div class="gr-detail-actions">
+        <button class="gr-detail-close-btn" onclick="closeGrDetailForce()">✕</button>
       </div>
     </div>
   `;
-
-  if(inline){
-    document.getElementById('garageList').innerHTML = html;
-  } else {
-    _selectedBikeLv = lv;
-    renderGarage();
-  }
-}
-
-async function upgradeAll(lv){
-  for(const stat of ['speed','accel','maneuver','nitro']){
-    await doUpgradeStat(lv, stat);
-  }
+  document.getElementById('grDetailOverlay').classList.add('open');
 }
 
 function closeGrDetail(e){
-  // no-op in new design (no overlay)
+  if(e && e.target!==document.getElementById('grDetailOverlay')) return;
+  document.getElementById('grDetailOverlay').classList.remove('open');
 }
 function closeGrDetailForce(){
-  // no-op in new design
+  document.getElementById('grDetailOverlay').classList.remove('open');
 }
 
 let _upgradeInFlight = false;
@@ -1308,6 +1253,8 @@ async function doUpgradeStat(bikeLevel, stat){
     S.user.bikeUpgrades = res.bikeUpgrades;
     syncTopbar();
     renderGarage();
+    // Re-open detail to show updated stats
+    openGrDetail(bikeLevel);
     showNotif(`✅ ${STAT_LABELS[stat]} улучшена! +${UPGRADE_INC[stat]}`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Failed'}`,'e');
@@ -1373,250 +1320,131 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <!-- GARAGE -->
 <style>
-/* ════ GARAGE STYLES — NEW DESIGN ════ */
-
-/* Page wrapper */
-#sectionMarket{
-  padding:0!important;
-  background:#0d1a0d;
+/* ════ GARAGE STYLES ════ */
+.gr-card{
+  background:#fff;border-radius:18px;margin-bottom:14px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);position:relative;
+  animation:bk-card-in .32s ease both;
 }
-.gr-page-wrap{
-  display:flex;flex-direction:column;
-  height:100%;
-  padding-bottom:4px;
+.gr-card-img-wrap{
+  width:100%;height:180px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1a3a1a,#2d5a2d);
 }
-
-/* ── Top header ── */
-.gr-header{
+.gr-card-img-wrap img{width:100%;height:100%;object-fit:cover;}
+.gr-card-img-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.6) 100%);
+}
+.gr-card-num{
+  position:absolute;bottom:10px;left:14px;
+  font-size:13px;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:.5px;
+}
+.gr-card-nameline{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px 8px;
+  padding:12px 14px 4px;
 }
-.gr-header-title{
-  font-size:22px;font-weight:800;color:#fff;letter-spacing:.3px;
+.gr-card-name{font-size:18px;font-weight:800;color:#1a1a1a;}
+.gr-arrow-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(21,101,192,.1);border:none;color:#1565C0;font-size:18px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
-.gr-header-right{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  border-radius:20px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,.7);font-weight:700;cursor:pointer;
+.gr-stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);padding:4px 14px 14px;
 }
+.gr-stat{text-align:center;padding:6px 2px;}
+.gr-stat-lbl{font-size:11px;color:#888;font-weight:600;margin-bottom:2px}
+.gr-stat-val{font-size:22px;font-weight:800;color:#222}
 
-/* ── Horizontal scroll bike thumbnails ── */
-.gr-scroll-wrap{
-  overflow-x:auto;display:flex;gap:10px;
-  padding:0 14px 10px;
-  scrollbar-width:none;
-  flex-shrink:0;
+/* Detail overlay */
+.gr-detail-overlay{
+  display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  align-items:flex-end;justify-content:center;
 }
-.gr-scroll-wrap::-webkit-scrollbar{display:none}
+.gr-detail-overlay.open{display:flex}
+.gr-detail-sheet{
+  width:100%;max-width:480px;
+  background:#f5f5e8;
+  border-radius:24px 24px 0 0;
+  overflow:hidden;animation:su .3s ease;
+  max-height:92vh;overflow-y:auto;
+}
+.gr-detail-img{width:100%;height:200px;object-fit:cover;display:block;}
+.gr-detail-body{padding:16px 18px 24px;}
+.gr-detail-class{
+  display:inline-flex;align-items:center;
+  background:#e8e8d8;border-radius:20px;
+  padding:4px 14px;font-size:13px;font-weight:700;color:#555;margin-bottom:14px;
+}
+.gr-detail-sec-title{font-size:17px;font-weight:800;color:#222;margin-bottom:12px;}
 
-.gr-thumb{
-  flex-shrink:0;width:110px;
-  border-radius:16px;overflow:hidden;cursor:pointer;
-  border:2px solid transparent;
-  transition:border-color .2s, transform .2s;
-  background:#111c11;
-  position:relative;
-}
-.gr-thumb.active{
-  border-color:#4CAF50;
-  box-shadow:0 0 12px rgba(76,175,80,.5);
-}
-.gr-thumb:active{transform:scale(.95)}
+/* Stat bars */
+.gr-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.gr-bar-name{font-size:14px;font-weight:700;color:#333;width:90px;flex-shrink:0}
+.gr-bar-wrap{flex:1;height:14px;background:#e0e0cf;border-radius:7px;overflow:hidden;}
+.gr-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,#ff5252,#ff9800,#8bc34a);transition:width .4s ease;}
+.gr-bar-val{font-size:14px;font-weight:800;color:#222;width:40px;text-align:right;flex-shrink:0}
 
-.gr-thumb-img{
-  width:100%;height:80px;object-fit:cover;display:block;
-}
-.gr-thumb-body{
-  padding:5px 7px 7px;
-}
-.gr-thumb-num{
-  font-size:9px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:1px;
-}
-.gr-thumb-name{
-  font-size:10px;font-weight:800;color:#fff;line-height:1.2;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.gr-thumb-owned{
-  font-size:9px;color:#4CAF50;font-weight:700;
-}
-.gr-thumb-badge{
-  position:absolute;top:5px;left:5px;
-  background:rgba(0,0,0,.6);border-radius:6px;
-  padding:2px 6px;font-size:9px;font-weight:800;color:#fff;
-}
-
-/* ── Selected bike detail panel ── */
-.gr-detail-panel{
-  margin:0 14px;
-  background:linear-gradient(145deg,#111e11,#0a140a);
-  border:1px solid rgba(76,175,80,.18);
-  border-radius:20px;overflow:hidden;
-  flex:1;
-}
-.gr-detail-top{
-  display:flex;align-items:stretch;
-  min-height:200px;position:relative;
-}
-
-/* Left: big bike image */
-.gr-detail-bike-img{
-  width:48%;flex-shrink:0;position:relative;overflow:hidden;
-}
-.gr-detail-bike-img img{
-  width:100%;height:100%;object-fit:cover;display:block;
-}
-.gr-detail-bike-img::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent 60%,#111e11 100%);
-}
-
-/* Right: name + badge + stats bars */
-.gr-detail-right{
-  flex:1;padding:14px 14px 14px 6px;
-  display:flex;flex-direction:column;justify-content:center;
-  position:relative;z-index:2;
-}
-.gr-detail-name{
-  font-size:18px;font-weight:800;color:#4CAF50;
-  margin-bottom:3px;
-}
-.gr-detail-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.28);
-  border-radius:8px;padding:2px 8px;font-size:10px;font-weight:800;color:#81C784;
-  margin-bottom:8px;
-}
-
-/* XP row */
-.gr-xp-row{
-  display:flex;align-items:center;gap:8px;margin-bottom:10px;
-}
-.gr-xp-circle{
-  width:38px;height:38px;border-radius:50%;
-  border:2px solid #4CAF50;background:rgba(76,175,80,.1);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:800;color:#4CAF50;flex-shrink:0;
-}
-.gr-xp-info{flex:1}
-.gr-xp-bar-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-bottom:3px;}
-.gr-xp-bar-fill{height:100%;background:#4CAF50;border-radius:3px;width:0%;}
-.gr-xp-label{font-size:9px;color:rgba(255,255,255,.4);font-weight:700}
-.gr-xp-boost{
-  flex-shrink:0;background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.2);
-  border-radius:8px;padding:4px 8px;text-align:center;
-}
-.gr-xp-boost-val{font-size:11px;font-weight:800;color:#4CAF50}
-.gr-xp-boost-lbl{font-size:8px;color:rgba(255,255,255,.4);font-weight:700}
-
-/* Stat bars inside detail */
-.gr-stat-bar-row{
-  display:flex;align-items:center;gap:8px;margin-bottom:7px;
-}
-.gr-stat-bar-icon{
-  width:22px;height:22px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:6px;overflow:hidden;
-}
-.gr-stat-bar-icon img{width:100%;height:100%;object-fit:cover;}
-.gr-stat-bar-name{
-  font-size:11px;font-weight:700;color:rgba(255,255,255,.75);
-  width:58px;flex-shrink:0;
-}
-.gr-stat-bar-track{
-  flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;
-}
-.gr-stat-bar-fill{
-  height:100%;border-radius:4px;
-  transition:width .4s ease;
-}
-.gr-stat-bar-fill.speed{background:linear-gradient(90deg,#ff9800,#ffcc02)}
-.gr-stat-bar-fill.accel{background:linear-gradient(90deg,#4CAF50,#8bc34a)}
-.gr-stat-bar-fill.maneuver{background:linear-gradient(90deg,#e040fb,#ea80fc)}
-.gr-stat-bar-fill.nitro{background:linear-gradient(90deg,#00bcd4,#40c4ff)}
-.gr-stat-bar-val{
-  font-size:13px;font-weight:800;color:#fff;
-  width:32px;text-align:right;flex-shrink:0;
-}
-
-/* ── Upgrade section ── */
-.gr-upg-section{
-  padding:14px 14px 10px;
-  border-top:1px solid rgba(255,255,255,.06);
-}
+/* Upgrade section */
 .gr-upg-title{
-  font-size:15px;font-weight:800;color:#fff;margin-bottom:12px;
+  font-size:17px;font-weight:800;color:#222;
+  padding:14px 0 8px;border-top:1px solid #ebebdf;margin-top:6px;
 }
 .gr-upg-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;margin-bottom:8px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:14px;
-  min-height:62px;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;margin-bottom:8px;
+  background:#fff;border-radius:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);
+  min-height:72px;
 }
-.gr-upg-icon{
-  flex-shrink:0;width:44px;height:44px;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:10px;overflow:hidden;
-  background:rgba(76,175,80,.08);
-}
-.gr-upg-icon img{width:100%;height:100%;object-fit:cover;}
-.gr-upg-info{flex:1;min-width:0}
-.gr-upg-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:2px;}
-.gr-upg-level{font-size:10px;color:rgba(255,255,255,.4);font-weight:600}
-.gr-upg-cost{
-  display:flex;align-items:center;gap:5px;
-  flex-shrink:0;
-}
-.gr-upg-gem{
-  display:flex;align-items:center;gap:3px;
-  background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.2);
-  border-radius:8px;padding:4px 8px;
-  font-size:12px;font-weight:800;color:#fff;
-}
+.gr-upg-icon{flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;color:#43A047;background:transparent;border-radius:10px;border:2px solid transparent;overflow:hidden;}
+.gr-upg-name{flex:1;font-size:16px;font-weight:700;color:#222;}
 .gr-upg-btn{
-  background:linear-gradient(135deg,#43A047,#66BB6A);
-  border:none;border-radius:10px;padding:9px 14px;
-  color:#fff;font-size:13px;font-weight:800;cursor:pointer;
-  white-space:nowrap;box-shadow:0 3px 10px rgba(76,175,80,.3);
-}
-.gr-upg-btn:disabled{background:rgba(255,255,255,.08);color:rgba(255,255,255,.3);box-shadow:none;cursor:default;}
-.gr-upg-btn.maxed{background:linear-gradient(135deg,#1565C0,#1976D2);cursor:default;}
-
-/* ── Upgrade All button ── */
-.gr-upg-all-btn{
-  width:100%;margin:4px 0 8px;padding:14px;
   background:linear-gradient(90deg,#43A047,#66BB6A);
-  border:none;border-radius:14px;
-  color:#fff;font-size:16px;font-weight:800;cursor:pointer;
-  box-shadow:0 4px 16px rgba(76,175,80,.35);
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:12px;padding:10px 18px;
+  color:#fff;font-size:14px;font-weight:800;cursor:pointer;
+  white-space:nowrap;box-shadow:0 3px 10px rgba(76,175,80,.35);
+  min-width:90px;text-align:center;
 }
-.gr-upg-all-btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+.gr-upg-btn:disabled{background:#e0e0e0;color:#aaa;box-shadow:none;cursor:default;}
+.gr-upg-btn.maxed{background:linear-gradient(90deg,#1565C0,#1976D2);box-shadow:none;cursor:default;}
+
+.gr-detail-actions{display:flex;gap:10px;margin-top:18px;}
+.gr-detail-close-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:#e0e0cf;border:none;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Garage topbar */
+.gr-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0 10px;
+}
+.gr-page-title{font-size:22px;font-weight:800;color:#fff;}
+.gr-ton-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;padding:5px 12px;
+}
+.gr-ton-val{font-size:15px;font-weight:800;color:#fff}
 
 /* empty state */
-.gr-empty{text-align:center;padding:60px 20px;color:rgba(255,255,255,.4);font-size:14px;font-weight:600;}
+.gr-empty{text-align:center;padding:60px 20px;color:rgba(255,255,255,.5);font-size:14px;font-weight:600;}
 .gr-empty-icon{font-size:60px;margin-bottom:14px}
-
-/* ── old overlay (keep for compat, hidden) ── */
-.gr-detail-overlay{display:none!important}
 </style>
 
 <div class="sec" id="sectionMarket">
-  <div class="gr-page-wrap">
-    <!-- Header -->
-    <div class="gr-header">
-      <div class="gr-header-title">🏍️ Гараж</div>
-      <div class="gr-header-right">По цене ▾</div>
+  <div style="padding:0 0 4px">
+    <div class="gr-topbar">
+      <div class="gr-page-title">🏍️ Гараж</div>
     </div>
-    <!-- Horizontal bike thumbnails -->
-    <div class="gr-scroll-wrap" id="garageThumbsRow"></div>
-    <!-- Selected bike detail -->
     <div id="garageList"></div>
   </div>
 </div>
 
-<!-- GARAGE DETAIL OVERLAY (kept for compat) -->
+<!-- GARAGE DETAIL OVERLAY -->
 <div class="gr-detail-overlay" id="grDetailOverlay" onclick="closeGrDetail(event)">
   <div class="gr-detail-sheet" id="grDetailSheet"></div>
 </div>

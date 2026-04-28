@@ -470,6 +470,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 </style>
 </head>
 <body>
+<!-- BACKGROUND MUSIC: instrumental rock loop, controlled by toggleSound -->
+<audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1718e49890.mp3?filename=powerful-energetic-sport-rock-trailer-110815.mp3" type="audio/mpeg">
+</audio>
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
@@ -1451,21 +1455,23 @@ async function doUpgradeStat(bikeLevel, stat){
     document.getElementById('mineSheetOverlay').classList.remove('open');
     document.getElementById('mineBottomSheet').classList.remove('open');
   }
-  /* Sync floating Mine topbar with user data (avatar/name/ton) */
+  /* Sync floating Mine topbar with user data — same source as syncTopbar */
   function syncMineTopbar(){
     try{
       const u = (window.S && S.user) || {};
-      const tg = (window.S && S.tg) || {};
       const av = document.getElementById('mineAvatar');
       const nm = document.getElementById('mineUserName');
       const tb = document.getElementById('mineTonBal');
       if(av){
-        const photo = u.photoUrl || tg.photo_url;
-        if(photo){ av.innerHTML = `<img src="${photo}" onerror="this.parentNode.innerHTML='🏍️'">`; }
+        const photo = u.photoUrl;
+        if(photo && !av.dataset.photo){
+          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='🏍️'">`;
+          av.dataset.photo = '1';
+        }
       }
       if(nm){
-        const first = (tg.first_name || u.firstName || u.username || 'Player');
-        nm.textContent = first;
+        const name = (window.S && S._tgName) || u.firstName || u.name || 'Player';
+        nm.textContent = name;
       }
       if(tb){
         const bal = (u.tonBalance!=null ? u.tonBalance : 0);
@@ -1596,7 +1602,11 @@ async function doUpgradeStat(bikeLevel, stat){
 <!-- GARAGE SECTION -->
 <style>
 /* ══ GARAGE HERO ══ */
-#sectionMarket{padding:0!important; overflow-y:auto; height:calc(100vh - 78px);}
+#sectionMarket{padding:0!important; overflow-y:auto; height:calc(100vh - 78px);
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.7) 40%,rgba(0,0,0,.92) 100%),
+    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat;
+}
 .gr-hero{
   position:relative;width:100%;height:240px;overflow:hidden;
   flex-shrink:0;
@@ -1604,7 +1614,7 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
 .gr-hero-overlay{
   position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.1) 40%,rgba(0,0,0,.6) 80%,rgba(0,0,0,.9) 100%);
+  background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
 }
 /* topbar inside hero — scrolls WITH page */
 .gr-hero-topbar{
@@ -1860,7 +1870,9 @@ async function doUpgradeStat(bikeLevel, stat){
   top:0;left:0;right:0;bottom:78px;
   overflow-y:auto;
   z-index:5;
-  background:transparent;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.7) 40%,rgba(0,0,0,.9) 100%),
+    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat;
 }
 .race-wrap{
   display:flex;flex-direction:column;align-items:center;
@@ -1873,7 +1885,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* ── Floating topbar (avatar + name) | (TON balance) ── */
 .race-topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 14px 4px;width:100%;gap:10px;
+  padding:12px 14px 6px;width:100%;gap:10px;box-sizing:border-box;
 }
 .race-tb-user{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
 .race-tb-avatar{
@@ -3094,23 +3106,61 @@ async function doUpgradeStat(bikeLevel, stat){
 <!-- FINANCE (PROFILE) -->
 <div class="sec" id="sectionFinance">
 
-  <!-- FINANCE PROFILE HEADER -->
-  <div id="finProfileHeader" style="display:flex;flex-direction:column;align-items:center;padding:18px 0 10px;position:relative">
-    <!-- Sound button left -->
-    <button onclick="toggleSound()" id="soundBtn" style="position:absolute;left:14px;top:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px)">🔊</button>
-    <!-- Language button right -->
-    <button onclick="toggleLangMenu()" style="position:absolute;right:14px;top:18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:5px"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
-    <!-- User photo circle -->
-    <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;border:3px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:8px" id="finUserAvatar"><span>🏍️</span></div>
-    <!-- User name -->
-    <div style="font-size:16px;font-weight:800;color:#fff;text-align:center" id="finUserName">Player</div>
-    <!-- TON balance -->
-    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px">
-      <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">
-      <span style="font-size:18px;font-weight:800;color:#fff" id="finTonBal">0.00</span>
-      <span style="font-size:12px;color:rgba(255,255,255,.6);font-weight:700">TON</span>
+  <!-- ══ PROFILE PAGE — image-4 design ══ -->
+  <style>
+    #sectionFinance{
+      padding:0!important;min-height:100vh;
+      background:
+        linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
+        url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897.png') center top/cover no-repeat;
+    }
+    .pf-topbar{position:relative;display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:14px 14px 4px;}
+    .pf-tb-btn{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:6px 12px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:36px;}
+    .pf-tb-icon{width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);}
+    .pf-userrow{display:flex;align-items:center;gap:14px;padding:8px 16px 14px;}
+    .pf-avatar{width:74px;height:74px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid #00F27A;box-shadow:0 0 18px rgba(0,242,122,.5);background:#000;display:flex;align-items:center;justify-content:center;font-size:28px;}
+    .pf-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+    .pf-nameblock{display:flex;flex-direction:column;min-width:0;flex:1;}
+    .pf-name{font-size:24px;font-weight:900;color:#fff;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pf-uname{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .pf-balcard{margin:0 16px 16px;background:rgba(0,0,0,.55);border:1px solid rgba(0,242,122,.45);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.5);}
+    .pf-balicon{width:54px;height:54px;border-radius:50%;background:rgba(0,242,122,.18);border:1px solid rgba(0,242,122,.45);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .pf-balicon img{width:32px;height:32px;}
+    .pf-ballbl{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);}
+    .pf-balrow{display:flex;align-items:baseline;gap:8px;}
+    .pf-balval{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+    .pf-baltkn{font-size:13px;font-weight:800;color:#00F27A;}
+  </style>
+
+  <!-- TOPBAR: Lang + Sound buttons -->
+  <div class="pf-topbar">
+    <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span></button>
+    <button class="pf-tb-icon" onclick="toggleSound()" id="soundBtn" aria-label="Sound">🔊</button>
+  </div>
+
+  <!-- USER ROW: avatar + name -->
+  <div class="pf-userrow">
+    <div class="pf-avatar" id="finUserAvatar"><span>🏍️</span></div>
+    <div class="pf-nameblock">
+      <div class="pf-name" id="finUserName">Player</div>
+      <div class="pf-uname" id="finUserHandle"></div>
     </div>
   </div>
+
+  <!-- TOTAL BALANCE CARD -->
+  <div class="pf-balcard">
+    <div class="pf-balicon"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON"></div>
+    <div style="flex:1;min-width:0">
+      <div class="pf-ballbl" data-i18n="totalBalance">Total Balance</div>
+      <div class="pf-balrow">
+        <span class="pf-balval" id="finTonBal">0.00</span>
+        <span class="pf-baltkn">TON</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- legacy hidden header (kept for code compat) -->
+  <div id="finProfileHeader" style="display:none"></div>
 
   <!-- PROFILE CARDS GRID -->
   <div style="padding:0 12px 16px">
@@ -3120,14 +3170,14 @@ async function doUpgradeStat(bikeLevel, stat){
       <div onclick="openProfilePage('deposit')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/7f694191-2573-44e8-bdea-58902d795f89.png" style="width:100%;height:100%;object-fit:cover;display:block">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
-          <span style="font-size:14px;font-weight:800;color:#fff">💰 Deposit</span>
+          <span style="font-size:14px;font-weight:800;color:#fff">💰 <span data-i18n="cardDeposit">Deposit</span></span>
         </div>
       </div>
       <!-- Withdraw Card -->
       <div onclick="openProfilePage('withdraw')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/39783016-fb77-417e-905e-ddd718a53934.png" style="width:100%;height:100%;object-fit:cover;display:block">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
-          <span style="font-size:14px;font-weight:800;color:#fff">📤 Withdraw</span>
+          <span style="font-size:14px;font-weight:800;color:#fff">📤 <span data-i18n="cardWithdraw">Withdraw</span></span>
         </div>
       </div>
     </div>
@@ -3137,14 +3187,14 @@ async function doUpgradeStat(bikeLevel, stat){
       <div onclick="openProfilePage('referrals')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/aef1eeee-0d4c-41da-bc9d-d5af83bbfe45.png" style="width:100%;height:100%;object-fit:cover;display:block">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
-          <span style="font-size:14px;font-weight:800;color:#fff">👥 Referrals</span>
+          <span style="font-size:14px;font-weight:800;color:#fff">👥 <span data-i18n="cardReferrals">Referrals</span></span>
         </div>
       </div>
       <!-- Missions Card -->
       <div onclick="openProfilePage('missions')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/fffbfe35-03da-45fa-9908-ed470673933a.png" style="width:100%;height:100%;object-fit:cover;display:block">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
-          <span style="font-size:14px;font-weight:800;color:#fff">🎯 Missions</span>
+          <span style="font-size:14px;font-weight:800;color:#fff">🎯 <span data-i18n="cardMissions">Missions</span></span>
         </div>
       </div>
     </div>
@@ -3152,7 +3202,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <div onclick="openProfilePage('partnership')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;height:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
       <img src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/27148563-abfa-4b07-882d-801bb38fac29.png" style="width:100%;height:100%;object-fit:cover;display:block">
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:12px">
-        <span style="font-size:16px;font-weight:800;color:#fff">🤝 Partnership</span>
+        <span style="font-size:16px;font-weight:800;color:#fff">🤝 <span data-i18n="cardPartnership">Partnership</span></span>
       </div>
     </div>
   </div>
@@ -3547,8 +3597,11 @@ function syncFinanceHeader(){
   const nameEl = document.getElementById('finUserName');
   if(nameEl){
     const name = user.firstName||(S._tgName)||'Player';
-    const uname = user.username?`@${user.username}`:'';
-    nameEl.innerHTML = `${esc(name)} ${uname?`<span style="font-size:12px;color:rgba(255,255,255,.5)">${esc(uname)}</span>`:''}`;
+    nameEl.textContent = name;
+  }
+  const handleEl = document.getElementById('finUserHandle');
+  if(handleEl){
+    handleEl.textContent = user.username?`@${user.username}`:'';
   }
   // Lang flags on finance page
   const langFl = document.getElementById('langFlagFin');
@@ -5316,7 +5369,7 @@ async function init(){
 /* ════ LANGUAGE SYSTEM ════ */
 const TRANSLATIONS = {
   ar:{
-    navHome:'الرئيسية',navMarket:'السوق',navTasks:'المهام',navFriends:'أصدقاء',navFinance:'مالية',
+    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',
     tabMissions:'المهام',
     tabPartnership:'الشراكة',
     tabReferrals:'الإحالات',
@@ -5443,7 +5496,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
   },
   en:{
-    navHome:'Home',navMarket:'Market',navTasks:'Tasks',navFriends:'Friends',navFinance:'Finance',
+    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
     labelCoins:'Coins',labelBamboo:'Bamboo',
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
@@ -5579,7 +5632,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
   },
   ru:{
-    navHome:'Главная',navMarket:'Рынок',navTasks:'Задания',navFriends:'Друзья',navFinance:'Финансы',
+    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
     tabMissions:'Задания',
     tabPartnership:'Партнёрство',
     tabReferrals:'Рефералы',
@@ -5706,7 +5759,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
   },
   es:{
-    navHome:'Inicio',navMarket:'Mercado',navTasks:'Tareas',navFriends:'Amigos',navFinance:'Finanzas',
+    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
     tabMissions:'Misiones',
     tabPartnership:'Asociación',
     tabReferrals:'Referidos',
@@ -5833,7 +5886,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
   },
   fr:{
-    navHome:'Accueil',navMarket:'Marché',navTasks:'Tâches',navFriends:'Amis',navFinance:'Finance',
+    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
     tabMissions:'Missions',
     tabPartnership:'Partenariat',
     tabReferrals:'Parrainages',
@@ -5962,19 +6015,39 @@ const TRANSLATIONS = {
 };
 
 
-/* ════ SOUND TOGGLE ════ */
+/* ════ SOUND TOGGLE + BACKGROUND MUSIC ════ */
 let _soundEnabled = localStorage.getItem('soundEnabled') !== '0';
+function _bgMusicEl(){ return document.getElementById('bgMusic'); }
+function _playBgMusic(){
+  const a = _bgMusicEl(); if(!a) return;
+  try{ a.volume = 0.35; a.play().catch(()=>{}); }catch(e){}
+}
+function _pauseBgMusic(){
+  const a = _bgMusicEl(); if(!a) return;
+  try{ a.pause(); }catch(e){}
+}
 function toggleSound(){
   _soundEnabled = !_soundEnabled;
   localStorage.setItem('soundEnabled', _soundEnabled ? '1' : '0');
   const btn = document.getElementById('soundBtn');
   if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
-  showNotif(_soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF', 'w');
+  if(_soundEnabled) _playBgMusic(); else _pauseBgMusic();
+  if(typeof showNotif==='function') showNotif(_soundEnabled ? '🔊 Music ON' : '🔇 Music OFF', 'w');
 }
-// Init sound button state on load
+// Init sound button + try autoplay; fallback: start on first user gesture
 document.addEventListener('DOMContentLoaded', ()=>{
   const btn = document.getElementById('soundBtn');
   if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
+  if(_soundEnabled){
+    _playBgMusic();
+    const startOnGesture = ()=>{
+      if(_soundEnabled) _playBgMusic();
+      document.removeEventListener('click', startOnGesture);
+      document.removeEventListener('touchstart', startOnGesture);
+    };
+    document.addEventListener('click', startOnGesture, {once:false});
+    document.addEventListener('touchstart', startOnGesture, {once:false});
+  }
 });
 
 function toggleLangMenu(){

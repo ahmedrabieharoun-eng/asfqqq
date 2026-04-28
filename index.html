@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -495,8 +496,11 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 <!-- TOPBAR -->
 <style>
 /* ══ HERO HEADER ══ */
+/* جعل قسم الصفحة الرئيسية يملأ كامل العرض بدون حواف جانبية (مثل الجراج) */
+#sectionHome{padding:0!important;}
 .hub-hero{
   position:relative;width:100%;height:260px;overflow:hidden;
+  margin:0;
 }
 .hub-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
 .hub-hero-overlay{
@@ -506,9 +510,9 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .hub-topbar{
   position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
-  padding:12px 0 8px;
+  padding:12px 14px 8px;
   z-index:10;
-  gap:0;
+  gap:10px;
   background:transparent;
 }
 /* الكارت شفاف — بدون كارت */
@@ -518,7 +522,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   gap:10px;
   background:transparent;
   border:none;
-  padding:0 14px;
+  padding:0;
 }
 /* صورة المستخدم على اليسار */
 .hub-tb-avatar{
@@ -1454,33 +1458,73 @@ async function doUpgradeStat(bikeLevel, stat){
     document.getElementById('mineSheetOverlay').classList.remove('open');
     document.getElementById('mineBottomSheet').classList.remove('open');
   }
-  /* Sync floating Mine topbar with user data — same source as syncTopbar */
+  /* Sync floating Mine topbar with user data
+     Strategy: MIRROR the already-rendered Home topbar DOM (hubAvatar / hubUserName / tbCoins).
+     This guarantees Farm shows the exact same data as Home — if Home loaded it, Farm gets it. */
   function syncMineTopbar(){
     try{
-      const u = (window.S && S.user) || {};
       const av = document.getElementById('mineAvatar');
       const nm = document.getElementById('mineUserName');
       const tb = document.getElementById('mineTonBal');
+
+      // Source-of-truth elements from the Home topbar (already populated on boot)
+      const srcAv = document.getElementById('hubAvatar');
+      const srcNm = document.getElementById('hubUserName');
+      const srcTb = document.getElementById('tbCoins');
+
+      // Also keep state-based fallbacks
+      const u = (window.S && S.user) || {};
+      const tgUser = (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user) || {};
+
+      // ── Avatar: mirror Home avatar's <img> if present, else fallbacks
       if(av){
-        const photo = u.photoUrl || (window.S && S.tg && S.tg.initDataUnsafe && S.tg.initDataUnsafe.user && S.tg.initDataUnsafe.user.photo_url) || null;
+        const srcImg = srcAv && srcAv.querySelector('img');
+        const photo = (srcImg && srcImg.src) || u.photoUrl || tgUser.photo_url || null;
         const currentPhoto = av.dataset.photoSrc || '';
         if(photo && photo !== currentPhoto){
-          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>'">`;
+          av.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML='<span>🏍️</span>';this.parentNode.dataset.photoSrc='';">`;
           av.dataset.photoSrc = photo;
         } else if(!photo && !av.querySelector('img')){
           av.innerHTML = '<span>🏍️</span>';
         }
       }
+
+      // ── Name: mirror Home name text if it's not the default placeholder
       if(nm){
-        const name = (window.S && S._tgName) || u.firstName || u.username || u.name || 'Player';
+        const homeName = srcNm ? (srcNm.textContent||'').trim() : '';
+        const tgName = ((tgUser.first_name||'') + ' ' + (tgUser.last_name||'')).trim();
+        const name = (homeName && homeName !== 'Player') ? homeName
+                   : ((window.S && S._tgName) || tgName || tgUser.username || u.firstName || u.username || u.name || 'Player');
         if(nm.textContent !== name) nm.textContent = name;
       }
+
+      // ── TON balance: mirror Home tbCoins text directly
       if(tb){
-        const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-        tb.textContent = (Number(bal)||0).toFixed(3);
+        let val = srcTb ? (srcTb.textContent||'').trim() : '';
+        if(!val || val === '0'){
+          const bal = (u.tonBalance!=null ? u.tonBalance : 0);
+          val = (Number(bal)||0).toFixed(2);
+        }
+        if(tb.textContent !== val) tb.textContent = val;
+      }
+    }catch(e){ console.warn('syncMineTopbar:', e.message); }
+  }
+  // Expose globally so it can be called from BootSeq + intervals
+  window.syncMineTopbar = syncMineTopbar;
+  // Also re-sync whenever the Home topbar updates: hook into syncTopbar
+  (function(){
+    try{
+      const _origSync = window.syncTopbar;
+      if(typeof _origSync === 'function' && !_origSync._mineHooked){
+        window.syncTopbar = function(){
+          const r = _origSync.apply(this, arguments);
+          try{ syncMineTopbar(); }catch(e){}
+          return r;
+        };
+        window.syncTopbar._mineHooked = true;
       }
     }catch(e){}
-  }
+  })();
   </script>
 </div>
 
@@ -4193,7 +4237,6 @@ async function loadState(){
     }
     if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId, d.pendingDeposit.txHash);
     syncTopbar();
-    if(typeof syncMineTopbar==='function') syncMineTopbar();
   }catch(e){
     console.warn('loadState:', e.message);
     // If data was never loaded yet, don't call updateUI (keeps UI in loading state)
@@ -5342,6 +5385,8 @@ async function init(){
   // Pre-build race carousel so bikes appear instantly when user opens race section
   try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
+  // Also sync Farm page topbar so user data appears immediately on first open
+  try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers

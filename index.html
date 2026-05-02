@@ -4392,7 +4392,7 @@ function renderRefMissions(){
     'rt500': 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/18746e47-31d7-49e5-b676-4d7f6be92d8f.jpg',
     'rt1000':'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b137bd77-2403-42c8-8183-cb4a25c93cd1.jpg',
   };
-  const BG = "url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png')";
+  const PAGE_BG = "url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png')";
 
   el.innerHTML = REF_MISSION_DEFS.map(m=>{
     const done = completedTasks.includes(m.id);
@@ -4400,11 +4400,12 @@ function renderRefMissions(){
     const pct  = Math.round(prog/m.n*100);
     const canClaim = !done && activeRefs >= m.n;
     const img = MISSION_IMGS[m.id] || '';
+    const cardBG = img ? `url('${img}')` : PAGE_BG;
     return `
       <div style="
         border:1.5px solid rgba(199,125,255,.25);border-radius:16px;
         display:flex;align-items:center;gap:0;margin-bottom:10px;overflow:hidden;
-        background-image:linear-gradient(rgba(0,0,0,.68),rgba(0,0,0,.78)),${BG};
+        background-image:linear-gradient(rgba(0,0,0,.68),rgba(0,0,0,.78)),${cardBG};
         background-size:cover;background-position:center;
         backdrop-filter:blur(8px);
       ">

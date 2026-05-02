@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3364,14 +3365,55 @@ async function doUpgradeStat(bikeLevel, stat){
 
 </div>
 
-<!-- SUB-PAGES OVERLAY -->
+<!-- SUB-PAGES OVERLAY (REDESIGNED) -->
+<style>
+  /* ===== Profile sub-page redesign ===== */
+  #profileSubPage{--psp-accent:#42a5f5;--psp-accent-glow:rgba(66,165,245,.45);}
+  #profileSubPage[data-page="deposit"]    {--psp-accent:#1E9BFF;--psp-accent-glow:rgba(30,155,255,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/90ea6293-3f5f-4da0-84d4-bf975c4d5ffc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b15a663f-ec8d-4eb7-85c9-1d0e97480151.png');}
+  #profileSubPage[data-page="withdraw"]   {--psp-accent:#3DDC84;--psp-accent-glow:rgba(61,220,132,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png');}
+  #profileSubPage[data-page="referrals"]  {--psp-accent:#A855F7;--psp-accent-glow:rgba(168,85,247,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');}
+  #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png');}
+  #profileSubPage[data-page="partnership"]{--psp-accent:#FFC233;--psp-accent-glow:rgba(255,194,51,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');}
+  .psp-hero{position:relative;height:200px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
+  .psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.45) 60%,var(--g1) 100%);pointer-events:none}
+  .psp-hero-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:14px 14px 10px;z-index:3}
+  .psp-back{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);color:var(--psp-accent);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow)}
+  .psp-title{font-size:22px;font-weight:800;color:var(--psp-accent);text-shadow:0 0 18px var(--psp-accent-glow);display:flex;align-items:center;gap:8px}
+  .psp-userrow{position:absolute;left:14px;right:14px;bottom:14px;display:flex;align-items:center;gap:12px;z-index:3}
+  .psp-avatar{width:56px;height:56px;border-radius:50%;border:2px solid var(--psp-accent);box-shadow:0 0 16px var(--psp-accent-glow);overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  .psp-avatar img{width:100%;height:100%;object-fit:cover}
+  .psp-username{flex:1;min-width:0;font-size:18px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .psp-balcard{background:rgba(0,0,0,.65);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);border-radius:14px;padding:8px 12px;min-width:118px;box-shadow:0 0 14px var(--psp-accent-glow)}
+  .psp-ballbl{font-size:10px;color:rgba(255,255,255,.7);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .psp-ballbl i{color:var(--psp-accent)}
+  .psp-balrow{display:flex;align-items:baseline;gap:4px;margin-top:2px}
+  .psp-balval{font-size:18px;font-weight:800;color:#fff}
+  .psp-baltkn{font-size:10px;color:var(--psp-accent);font-weight:700}
+  .psp-body{padding:14px 0 8px}
+  /* Card backgrounds for inner cards inside sub-pages */
+  #profileSubPage .wd-form, #profileSubPage .hist-box, #profileSubPage .ref-prog-card, #profileSubPage .mission-card, #profileSubPage [data-psp-card]{
+    position:relative;background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg);background-size:cover;background-position:center;border:1.5px solid var(--psp-accent)!important;box-shadow:0 6px 22px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.2) inset;
+  }
+  #profileSubPage .flabel{color:#fff!important}
+  #profileSubPage .btn-prim, #profileSubPage .btn-wd{background:linear-gradient(135deg,var(--psp-accent),color-mix(in srgb,var(--psp-accent) 70%, #000))!important;color:#fff!important;box-shadow:0 6px 18px var(--psp-accent-glow)!important}
+  #profileSubPage .hist-hdr{color:var(--psp-accent)!important}
+</style>
 <div id="profileSubPage" style="display:none;position:fixed;inset:0;z-index:150;background:var(--g1);overflow-y:auto;padding-bottom:108px">
-  <!-- Back button + topbar visible -->
-  <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:10">
-    <button onclick="closeProfilePage()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer">←</button>
-    <span id="profileSubPageTitle" style="font-size:16px;font-weight:800;color:#fff">Page</span>
+  <div class="psp-hero">
+    <div class="psp-hero-bar">
+      <button class="psp-back" onclick="closeProfilePage()">←</button>
+      <span class="psp-title" id="profileSubPageTitle">Page</span>
+    </div>
+    <div class="psp-userrow">
+      <div class="psp-avatar" id="pspAvatar"><span>🏍️</span></div>
+      <div class="psp-username" id="pspUserName">Player</div>
+      <div class="psp-balcard">
+        <div class="psp-ballbl"><span>Balance</span> <i class="fas fa-wallet"></i></div>
+        <div class="psp-balrow"><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
+      </div>
+    </div>
   </div>
-  <div id="profileSubPageContent" style="padding:12px 0"></div>
+  <div class="psp-body" id="profileSubPageContent"></div>
 </div>
 
   <!-- ═══ DEPOSIT PAGE CONTENT (shown inside overlay) ═══ -->
@@ -5063,7 +5105,21 @@ function openProfilePage(page){
   if(!src) return;
   content.innerHTML = src.innerHTML;
   title.textContent = titles[page]||page;
+  overlay.setAttribute('data-page', page);
+  // Sync topbar user info + balance
+  try{
+    const av = document.getElementById('pspAvatar');
+    const srcAv = document.getElementById('pfAvatar');
+    if(av && srcAv) av.innerHTML = srcAv.innerHTML;
+    const nm = document.getElementById('pspUserName');
+    const srcNm = document.getElementById('pfUserName');
+    if(nm && srcNm) nm.textContent = srcNm.textContent || 'Player';
+    const bv = document.getElementById('pspBalVal');
+    const srcBv = document.getElementById('finTonBal');
+    if(bv && srcBv) bv.textContent = srcBv.textContent || '0.00';
+  }catch(e){}
   overlay.style.display='block';
+  overlay.scrollTop = 0;
   // Re-init page specific data
   if(page==='missions'){renderMissions();}
   else if(page==='partnership'){renderPartnerPosts();}

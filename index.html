@@ -160,6 +160,124 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .wtab.active{border-color:var(--coin);color:var(--coin);background:rgba(255,215,0,.1)}
 .wtcont{display:none}.wtcont.active{display:block}
 .wd-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;margin-bottom:10px;backdrop-filter:blur(6px)}
+
+/* ══ NEW WITHDRAW PAGE DESIGN ══ */
+.wd-new-section-title{
+  font-size:16px;font-weight:800;color:#fff;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.wd-new-wallet-card{
+  background:rgba(6,20,6,.88);
+  border:1.5px solid rgba(157,255,61,.3);
+  border-radius:18px;padding:18px 16px;margin-bottom:10px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2)inset;
+  position:relative;overflow:hidden;
+  background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg,none);
+  background-size:cover;background-position:center;
+}
+.wd-new-wallet-card .flabel{
+  font-size:12px;font-weight:700;color:rgba(255,255,255,.7);
+  margin-bottom:6px;display:block;letter-spacing:.2px;
+}
+.wd-new-addr-input{
+  width:100%;background:rgba(0,0,0,.42);
+  border:1.5px solid rgba(157,255,61,.22);
+  border-radius:12px;padding:12px 14px;
+  color:#fff;font-size:13px;font-weight:600;
+  font-family:'Fredoka',cursive;
+  outline:none;margin-bottom:14px;
+  transition:border-color .2s;
+}
+.wd-new-addr-input:focus{border-color:rgba(157,255,61,.55)}
+.wd-new-addr-input::placeholder{color:rgba(255,255,255,.28)}
+.wd-new-amount-wrap{
+  position:relative;
+  background:rgba(0,0,0,.42);
+  border:1.5px solid rgba(157,255,61,.22);
+  border-radius:12px;
+  display:flex;align-items:center;
+  overflow:hidden;
+  margin-bottom:14px;
+}
+.wd-new-amount-input{
+  flex:1;background:transparent;border:none;
+  color:rgba(255,255,255,.45);font-size:14px;font-weight:600;
+  font-family:'Fredoka',cursive;
+  padding:12px 14px;outline:none;
+  min-width:0;
+}
+.wd-new-amount-input::placeholder{color:rgba(255,255,255,.28)}
+.wd-new-max-btn{
+  background:transparent;border:none;
+  color:#9DFF3D;font-size:14px;font-weight:800;
+  padding:12px 16px;cursor:pointer;
+  font-family:'Fredoka',cursive;
+  flex-shrink:0;
+}
+.wd-new-max-btn:active{color:#7acc28}
+.btn-wd-new{
+  width:100%;padding:15px;
+  background:linear-gradient(135deg,#3a9e1e,#5cc827,#3a9e1e);
+  border:none;border-radius:14px;
+  color:#fff;font-size:16px;font-weight:800;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  box-shadow:0 0 20px rgba(92,200,39,.45),0 4px 16px rgba(0,0,0,.4);
+  transition:all .18s;
+  font-family:'Fredoka',cursive;
+}
+.btn-wd-new:active{transform:scale(.97)}
+.btn-wd-new:disabled{opacity:.42;cursor:default;box-shadow:none}
+@keyframes wd-new-glow{
+  0%,100%{box-shadow:0 0 20px rgba(92,200,39,.45),0 4px 16px rgba(0,0,0,.4)}
+  50%{box-shadow:0 0 36px rgba(92,200,39,.8),0 0 60px rgba(92,200,39,.25),0 4px 16px rgba(0,0,0,.4)}
+}
+.btn-wd-new:not(:disabled){animation:wd-new-glow 2.2s ease-in-out infinite}
+.wd-new-hist-card{
+  background:rgba(6,20,6,.88);
+  border:1.5px solid rgba(157,255,61,.3);
+  border-radius:18px;overflow:hidden;
+  backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(0,0,0,.55);
+  position:relative;
+  background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg,none);
+  background-size:cover;background-position:center;
+}
+.wd-new-hist-hdr{
+  padding:14px 16px;font-size:15px;font-weight:800;color:#fff;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.wd-new-hist-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.wd-new-hist-row:last-child{border-bottom:none}
+.wd-new-hist-icon{
+  width:38px;height:38px;border-radius:50%;
+  background:#0098EA;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 10px rgba(0,152,234,.4);
+}
+.wd-new-hist-icon img{width:22px;height:22px;object-fit:contain;filter:brightness(10)}
+.wd-new-hist-info{flex:1;min-width:0}
+.wd-new-hist-addr{
+  font-size:13px;font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:180px;
+}
+.wd-new-hist-date{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px;font-weight:500}
+.wd-new-hist-right{text-align:right;flex-shrink:0}
+.wd-new-hist-amt{font-size:14px;font-weight:800;color:#fff;margin-bottom:5px}
+.stat-badge-new{
+  padding:4px 11px;border-radius:20px;
+  font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.stat-badge-new.pending{background:rgba(255,168,0,.12);color:#FFAA00;border:1px solid rgba(255,168,0,.3)}
+.stat-badge-new.approved{background:rgba(0,200,80,.12);color:#00C850;border:1px solid rgba(0,200,80,.3)}
+.stat-badge-new.rejected,.stat-badge-new.cancelled{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
 .ton-row{display:flex;gap:7px;margin-bottom:11px}
 .ton-chip{flex:1;background:rgba(0,0,0,.24);border:1px solid var(--border);border-radius:10px;padding:9px;text-align:center}
 .ton-chip .tcl{font-size:10px;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:4px;font-weight:500}
@@ -3726,31 +3844,34 @@ async function doUpgradeStat(bikeLevel, stat){
   <!-- ═══ WITHDRAW PAGE CONTENT (shown inside overlay) ═══ -->
   <div id="page-withdraw-content" style="display:none">
     <div style="margin:0 12px">
-      <!-- Balance display -->
-      <div class="wd-top">
-        <div class="big" id="wdTonBal">0.000</div>
-        <div class="sub" style="display:flex;align-items:center;justify-content:center;gap:4px">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:16px;height:16px;border-radius:50%">
-          <span data-i18n="availableBalance">TON Available</span>
+      <!-- Hidden element for JS compatibility -->
+      <span id="wdTonBal" style="display:none">0.000</span>
+
+      <!-- Wallet Address Section -->
+      <div class="wd-new-wallet-card">
+        <div class="wd-new-section-title">
+          <span data-i18n="walletAddress">Wallet Address</span>
         </div>
-      </div>
-      <!-- Wallet address input -->
-      <div class="wd-form">
         <label class="flabel" data-i18n="walletAddress">TON Wallet Address</label>
-        <input type="text" id="wdAddrInput" class="finput" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
-        <label class="flabel" data-i18n="amountTON">Amount (TON) — Min: 1 TON</label>
-        <input type="number" id="wdAmtInput" class="finput" placeholder="Min: 1 TON" step="0.1" min="1">
-        <button class="btn-wd" id="wdBtn" onclick="doWithdraw()">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover">
-          <span data-i18n="withdrawBtn">Withdraw</span>
+        <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
+        <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
+        <div class="wd-new-amount-wrap">
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 1 TON" step="0.1" min="1">
+          <button class="wd-new-max-btn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||''">Max</button>
+        </div>
+        <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0">
+          <span data-i18n="withdrawBtn">Request Withdrawal</span>
         </button>
-        <div class="wd-err-banner" id="wdErrBanner"></div>
+        <div class="wd-err-banner" id="wdErrBanner" style="margin-top:10px"></div>
       </div>
-      <!-- Withdrawal history -->
-      <div class="hist-box" style="margin-top:10px">
-        <div class="hist-hdr">📋 <span data-i18n="wdHistory">Withdrawal History</span></div>
+
+      <!-- Withdrawal History -->
+      <div class="wd-new-hist-card" style="margin-top:10px">
+        <div class="wd-new-hist-hdr">📋 <span data-i18n="wdHistory">Withdrawal History</span></div>
         <div id="wdHistList"><div class="hist-empty" data-i18n="noWithdrawals">No withdrawals yet</div></div>
       </div>
+
     </div>
   </div>
 
@@ -5275,23 +5396,26 @@ function renderWdHistNew(){
   if(!S.wdHist||!S.wdHist.length){el.innerHTML='<div class="hist-empty">No withdrawals yet</div>';return;}
   el.innerHTML=S.wdHist.slice(0,20).map(h=>{
     const rawStatus=(h.status||'pending').toLowerCase();
-    const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'?'rejected':rawStatus;
-    const sc={approved:'sb-approved',pending:'sb-pending',rejected:'sb-rejected'}[normStatus]||'sb-pending';
-    const statusIcon={approved:'✅',pending:'⏳',rejected:'❌'}[normStatus]||'⏳';
-    const statusText={approved:'Approved',pending:'Pending',rejected:'Rejected'}[normStatus]||normStatus;
+    const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'?'cancelled':rawStatus==='rejected'?'cancelled':rawStatus;
+    const statusIcon={approved:'✅',pending:'⏳',cancelled:'❌'}[normStatus]||'⏳';
+    const statusText={approved:'Approved',pending:'Pending',cancelled:'Cancelled'}[normStatus]||normStatus;
+    const statusCls={approved:'approved',pending:'pending',cancelled:'cancelled'}[normStatus]||'pending';
     const amtTon=h.amt||h.amount||0;
-    const dateStr=h.ts?new Date(h.ts).toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const addrShort=(h.address||h.addr||'—').slice(0,16)+'...';
-    return `<div class="hist-row">
-      <div>
-        <div class="hist-l">${addrShort}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:1px">${dateStr}</div>
+    const ts=h.ts||h.d||null;
+    const dateStr=ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})+' \u2022 '+new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'--';
+    const fullAddr=h.address||h.addr||'--';
+    const addrShort=fullAddr.length>28?fullAddr.slice(0,8)+'...'+fullAddr.slice(-6):fullAddr;
+    return `<div class="wd-new-hist-row">
+      <div class="wd-new-hist-icon">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
       </div>
-      <div style="text-align:right">
-        <div class="hist-r" style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px;height:14px;border-radius:50%"> ${amtTon} TON
-        </div>
-        <span class="stat-badge ${sc}" style="font-size:10px">${statusIcon} ${statusText}</span>
+      <div class="wd-new-hist-info">
+        <div class="wd-new-hist-addr">${addrShort}</div>
+        <div class="wd-new-hist-date">${dateStr}</div>
+      </div>
+      <div class="wd-new-hist-right">
+        <div class="wd-new-hist-amt">${amtTon} TON</div>
+        <span class="stat-badge-new ${statusCls}">${statusIcon} ${statusText}</span>
       </div>
     </div>`;
   }).join('');

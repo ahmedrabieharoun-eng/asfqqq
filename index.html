@@ -3680,7 +3680,7 @@ async function doUpgradeStat(bikeLevel, stat){
             <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
           </div>
           <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" step="0.1" min="1" oninput="updDepPreview()">
-          <div class="dep-amt-suffix">TON <i class="fas fa-chevron-down"></i></div>
+          <div class="dep-amt-suffix">TON</div>
         </div>
         <div class="dep-preset-row">
           <span class="dep-prbtn" onclick="setDepAmt(1)">1 TON</span>
@@ -3703,16 +3703,7 @@ async function doUpgradeStat(bikeLevel, stat){
           <div class="dep-step">3</div>
           <div class="dep-card-title">Manual Deposit</div>
         </div>
-        <!-- TON logo floating right -->
-        <div style="position:absolute;right:12px;top:50%;transform:translateY(-42%);width:68px;height:68px;pointer-events:none;">
-          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 16px rgba(0,152,234,.7)) drop-shadow(0 0 28px rgba(26,143,255,.4))">
-            <circle cx="28" cy="28" r="28" fill="#0098EA" opacity="0.15"/>
-            <circle cx="28" cy="28" r="21" fill="none" stroke="#0098EA" stroke-width="1.5" opacity="0.45"/>
-            <path d="M37.5 15h-19a2.5 2.5 0 00-1.923 4.09l17.5 21A2.5 2.5 0 0038 38.5V17.5A2.5 2.5 0 0037.5 15z" fill="#1a8fff"/>
-            <path d="M18.5 15h19a2.5 2.5 0 011.923 4.09l-17.5 21A2.5 2.5 0 0118 38.5V17.5A2.5 2.5 0 0118.5 15z" fill="#1a8fff" opacity="0.45"/>
-          </svg>
-        </div>
-        <div style="padding-right:82px">
+        <div style="padding-right:0">
           <label class="flabel">Wallet Address</label>
           <div class="dep-manual-input">
             <input type="text" class="finput" id="manualWalletAddr" readonly value="UQB...Ton_Wallet_Address_Here">

@@ -3369,26 +3369,33 @@ async function doUpgradeStat(bikeLevel, stat){
 <style>
   /* ===== Profile sub-page redesign ===== */
   #profileSubPage{--psp-accent:#42a5f5;--psp-accent-glow:rgba(66,165,245,.45);}
-  #profileSubPage[data-page="deposit"]    {--psp-accent:#1E9BFF;--psp-accent-glow:rgba(30,155,255,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/90ea6293-3f5f-4da0-84d4-bf975c4d5ffc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b15a663f-ec8d-4eb7-85c9-1d0e97480151.png');}
-  #profileSubPage[data-page="withdraw"]   {--psp-accent:#3DDC84;--psp-accent-glow:rgba(61,220,132,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png');}
-  #profileSubPage[data-page="referrals"]  {--psp-accent:#A855F7;--psp-accent-glow:rgba(168,85,247,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');}
-  #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png');}
-  #profileSubPage[data-page="partnership"]{--psp-accent:#FFC233;--psp-accent-glow:rgba(255,194,51,.5); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');}
-  .psp-hero{position:relative;height:200px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
-  .psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.45) 60%,var(--g1) 100%);pointer-events:none}
-  .psp-hero-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:14px 14px 10px;z-index:3}
-  .psp-back{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);color:var(--psp-accent);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow)}
-  .psp-title{font-size:22px;font-weight:800;color:var(--psp-accent);text-shadow:0 0 18px var(--psp-accent-glow);display:flex;align-items:center;gap:8px}
-  .psp-userrow{position:absolute;left:14px;right:14px;bottom:14px;display:flex;align-items:center;gap:12px;z-index:3}
-  .psp-avatar{width:56px;height:56px;border-radius:50%;border:2px solid var(--psp-accent);box-shadow:0 0 16px var(--psp-accent-glow);overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  #profileSubPage[data-page="deposit"]    {--psp-accent:#1E9BFF;--psp-accent-glow:rgba(30,155,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/90ea6293-3f5f-4da0-84d4-bf975c4d5ffc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b15a663f-ec8d-4eb7-85c9-1d0e97480151.png');}
+  #profileSubPage[data-page="withdraw"]   {--psp-accent:#9DFF3D;--psp-accent-glow:rgba(157,255,61,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png');}
+  #profileSubPage[data-page="referrals"]  {--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');}
+  #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png');}
+  #profileSubPage[data-page="partnership"]{--psp-accent:#FFB84D;--psp-accent-glow:rgba(255,184,77,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');}
+  .psp-hero{position:relative;height:230px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
+  .psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,var(--g1) 100%);pointer-events:none}
+  .psp-hero-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:16px 16px 10px;z-index:3}
+  .psp-back{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);color:var(--psp-accent);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow)}
+  .psp-title{font-size:26px;font-weight:800;color:var(--psp-accent);text-shadow:0 0 22px var(--psp-accent-glow);display:flex;align-items:center;gap:10px;letter-spacing:.3px}
+  .psp-userrow{position:absolute;left:14px;right:14px;bottom:16px;display:flex;align-items:center;gap:12px;z-index:3}
+  .psp-avatar{width:62px;height:62px;border-radius:50%;border:2.5px solid var(--psp-accent);box-shadow:0 0 18px var(--psp-accent-glow);overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
   .psp-avatar img{width:100%;height:100%;object-fit:cover}
-  .psp-username{flex:1;min-width:0;font-size:18px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .psp-balcard{background:rgba(0,0,0,.65);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);border-radius:14px;padding:8px 12px;min-width:118px;box-shadow:0 0 14px var(--psp-accent-glow)}
-  .psp-ballbl{font-size:10px;color:rgba(255,255,255,.7);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}
-  .psp-ballbl i{color:var(--psp-accent)}
-  .psp-balrow{display:flex;align-items:baseline;gap:4px;margin-top:2px}
-  .psp-balval{font-size:18px;font-weight:800;color:#fff}
-  .psp-baltkn{font-size:10px;color:var(--psp-accent);font-weight:700}
+  .psp-username{flex:1;min-width:0;font-size:20px;font-weight:800;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px}
+  .psp-username::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--psp-accent);box-shadow:0 0 8px var(--psp-accent-glow);flex-shrink:0}
+  .psp-balcard{background:rgba(0,0,0,.55);backdrop-filter:blur(12px);border:1.5px solid var(--psp-accent);border-radius:14px;padding:10px 14px;min-width:140px;box-shadow:0 0 16px var(--psp-accent-glow)}
+  .psp-ballbl{font-size:11px;color:rgba(255,255,255,.85);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .psp-ballbl i{color:var(--psp-accent);font-size:14px}
+  .psp-balrow{display:flex;align-items:baseline;gap:5px;margin-top:3px}
+  .psp-balrow .ton-icon{width:18px;height:18px;border-radius:50%;background:#0098EA;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;margin-right:2px;align-self:center}
+  .psp-balval{font-size:20px;font-weight:800;color:#fff}
+  .psp-baltkn{font-size:11px;color:rgba(255,255,255,.75);font-weight:700}
+  /* Withdraw: big title top-left, no back button */
+  #profileSubPage[data-page="withdraw"] .psp-back{display:none}
+  #profileSubPage[data-page="withdraw"] .psp-title{font-size:34px;font-weight:900}
+  /* Partnership accent text color tweak (gold) */
+  #profileSubPage[data-page="partnership"] .psp-username::after{display:none}
   .psp-body{padding:14px 0 8px}
   /* Card backgrounds for inner cards inside sub-pages */
   #profileSubPage .wd-form, #profileSubPage .hist-box, #profileSubPage .ref-prog-card, #profileSubPage .mission-card, #profileSubPage [data-psp-card]{
@@ -3408,8 +3415,8 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="psp-avatar" id="pspAvatar"><span>🏍️</span></div>
       <div class="psp-username" id="pspUserName">Player</div>
       <div class="psp-balcard">
-        <div class="psp-ballbl"><span>Balance</span> <i class="fas fa-wallet"></i></div>
-        <div class="psp-balrow"><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
+        <div class="psp-ballbl"><span id="pspBalLbl">Balance</span> <i class="fas fa-wallet"></i></div>
+        <div class="psp-balrow"><span class="ton-icon">💎</span><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
       </div>
     </div>
   </div>
@@ -5093,18 +5100,25 @@ function switchFinTab(el,t){ /* legacy - redirect to openProfilePage */ openProf
 
 function openProfilePage(page){
   const titles = {
-    deposit:'💰 Deposit', withdraw:'📤 Withdraw',
-    missions:'🎯 Missions', partnership:'🤝 Partnership', referrals:'👥 Referrals'
+    deposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
+    withdraw:'Withdraw',
+    missions:'Missions',
+    partnership:'Partnership',
+    referrals:'Referrals'
+  };
+  const balLabels = {
+    deposit:'Balance', withdraw:'Available Balance',
+    missions:'Available Balance', referrals:'Available Balance',
+    partnership:'Total Earned'
   };
   const overlay = document.getElementById('profileSubPage');
   const content = document.getElementById('profileSubPageContent');
   const title   = document.getElementById('profileSubPageTitle');
   if(!overlay||!content) return;
-  // Get source content
   const src = document.getElementById('page-'+page+'-content');
   if(!src) return;
   content.innerHTML = src.innerHTML;
-  title.textContent = titles[page]||page;
+  title.innerHTML = titles[page]||page;
   overlay.setAttribute('data-page', page);
   // Sync topbar user info + balance
   try{
@@ -5113,19 +5127,31 @@ function openProfilePage(page){
     if(av && srcAv) av.innerHTML = srcAv.innerHTML;
     const nm = document.getElementById('pspUserName');
     const srcNm = document.getElementById('pfUserName');
-    if(nm && srcNm) nm.textContent = srcNm.textContent || 'Player';
+    if(nm){
+      // username text node only (the ::after dot is CSS)
+      nm.textContent = (srcNm && srcNm.textContent) ? srcNm.textContent : 'Player';
+    }
+    const lbl = document.getElementById('pspBalLbl');
+    if(lbl) lbl.textContent = balLabels[page]||'Balance';
     const bv = document.getElementById('pspBalVal');
     const srcBv = document.getElementById('finTonBal');
-    if(bv && srcBv) bv.textContent = srcBv.textContent || '0.00';
+    if(bv){
+      if(page==='partnership'){
+        // Total earned from partnership posts (approved sum) or fallback
+        let earned = 0;
+        try{ (S.partnerPosts||[]).forEach(p=>{ if(p.status==='approved') earned += (+p.reward||0); }); }catch(e){}
+        bv.textContent = earned ? earned.toFixed(2) : '0.00';
+      } else {
+        bv.textContent = (srcBv && srcBv.textContent) ? srcBv.textContent : '0.00';
+      }
+    }
   }catch(e){}
   overlay.style.display='block';
   overlay.scrollTop = 0;
-  // Re-init page specific data
   if(page==='missions'){renderMissions();}
   else if(page==='partnership'){renderPartnerPosts();}
   else if(page==='referrals'){renderRefMissions();updateRefUI();}
   else if(page==='withdraw'||page==='deposit'){syncFinanceHeader();renderWdHistNew();}
-  // Set user ID in manual deposit
   const cidEl=document.getElementById('manualCommentId');
   if(cidEl) cidEl.value=S.userId||'???';
 }

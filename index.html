@@ -167,10 +167,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   display:flex;align-items:center;gap:7px;
 }
 .wd-new-wallet-card{
-  border:1.5px solid rgba(157,255,61,.3);
+  border:1px solid rgba(157,255,61,.2);
   border-radius:16px;padding:14px 13px;margin-bottom:9px;
   backdrop-filter:blur(12px);
-  box-shadow:0 6px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2)inset;
+  box-shadow:0 4px 18px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.2)inset;
   position:relative;overflow:hidden;
   background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),var(--psp-cardbg,url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'));
   background-size:cover;background-position:center;
@@ -234,10 +234,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 }
 .btn-wd-new:not(:disabled){animation:wd-new-glow 2.2s ease-in-out infinite}
 .wd-new-hist-card{
-  border:1.5px solid rgba(157,255,61,.3);
+  border:1px solid rgba(157,255,61,.2);
   border-radius:16px;overflow:hidden;
   backdrop-filter:blur(12px);
-  box-shadow:0 6px 24px rgba(0,0,0,.55);
+  box-shadow:0 4px 18px rgba(0,0,0,.5);
   position:relative;
   background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),var(--psp-cardbg,url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'));
   background-size:cover;background-position:center;
@@ -3485,7 +3485,7 @@ async function doUpgradeStat(bikeLevel, stat){
   /* ===== Profile sub-page redesign ===== */
   #profileSubPage{--psp-accent:#42a5f5;--psp-accent-glow:rgba(66,165,245,.45);}
   #profileSubPage[data-page="deposit"]    {--psp-accent:#1E9BFF;--psp-accent-glow:rgba(30,155,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/90ea6293-3f5f-4da0-84d4-bf975c4d5ffc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b15a663f-ec8d-4eb7-85c9-1d0e97480151.png');background:linear-gradient(180deg,#020c1a 0%,#041428 100%)!important;}
-  #profileSubPage[data-page="withdraw"]   {--psp-accent:#9DFF3D;--psp-accent-glow:rgba(157,255,61,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png');}
+  #profileSubPage[data-page="withdraw"]   {--psp-accent:#9DFF3D;--psp-accent-glow:rgba(157,255,61,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png') center/cover fixed !important;}
   #profileSubPage[data-page="referrals"]  {--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');}
   #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png');}
   #profileSubPage[data-page="partnership"]{--psp-accent:#FFB84D;--psp-accent-glow:rgba(255,184,77,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');}
@@ -3858,10 +3858,8 @@ async function doUpgradeStat(bikeLevel, stat){
 
       <!-- Wallet Address Section -->
       <div class="wd-new-wallet-card">
-        <div class="wd-new-section-title">
-          <span data-i18n="walletAddress">Wallet Address</span>
-        </div>
-        <label class="flabel" data-i18n="walletAddress">TON Wallet Address</label>
+        <div class="wd-new-section-title">Wallet Address</div>
+        <label class="flabel">TON Wallet Address</label>
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
@@ -3869,7 +3867,7 @@ async function doUpgradeStat(bikeLevel, stat){
           <button class="wd-new-max-btn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||''">Max</button>
         </div>
         <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
-          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0">
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0">
           <span data-i18n="withdrawBtn">Request Withdrawal</span>
         </button>
         <div class="wd-err-banner" id="wdErrBanner" style="margin-top:10px"></div>

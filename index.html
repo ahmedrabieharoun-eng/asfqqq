@@ -3942,13 +3942,28 @@ async function doUpgradeStat(bikeLevel, stat){
       /* ── REFERRALS PAGE REDESIGN ── */
       #page-referrals-content {
         background-image:
-          linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.88) 100%),
-          var(--psp-cardbg, url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'));
+          linear-gradient(180deg,rgba(0,0,0,.82) 0%,rgba(0,0,0,.68) 40%,rgba(0,0,0,.90) 100%),
+          url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');
         background-size: cover;
         background-position: center;
+        background-attachment: fixed;
         min-height: 100%;
         padding-bottom: 20px;
       }
+      /* ── Shrink the top hero bar for referrals ── */
+      #profileSubPage[data-page="referrals"] .psp-hero { height: 145px }
+      #profileSubPage[data-page="referrals"] .psp-hero-bar { padding: 10px 13px 7px }
+      #profileSubPage[data-page="referrals"] .psp-back { width:30px; height:30px; font-size:14px }
+      #profileSubPage[data-page="referrals"] .psp-title { font-size:16px }
+      #profileSubPage[data-page="referrals"] .psp-userrow { bottom:9px; left:11px; right:11px; gap:8px }
+      #profileSubPage[data-page="referrals"] .psp-avatar { width:38px; height:38px; font-size:16px }
+      #profileSubPage[data-page="referrals"] .psp-username { font-size:12px }
+      #profileSubPage[data-page="referrals"] .psp-username::after { width:5px; height:5px }
+      #profileSubPage[data-page="referrals"] .psp-balcard { padding:5px 9px; min-width:100px }
+      #profileSubPage[data-page="referrals"] .psp-ballbl { font-size:8px }
+      #profileSubPage[data-page="referrals"] .psp-balval { font-size:13px }
+      #profileSubPage[data-page="referrals"] .psp-baltkn { font-size:8px }
+
       .ref2-commission-card {
         margin: 0 11px 10px;
         background: rgba(0,0,0,.45);
@@ -3956,6 +3971,8 @@ async function doUpgradeStat(bikeLevel, stat){
         border-radius: 16px;
         padding: 11px 13px;
         backdrop-filter: blur(10px);
+        background-image: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.72)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');
+        background-size: cover; background-position: center;
       }
       .ref2-pct-row { display:flex; align-items:center; gap:8px; margin-bottom:9px }
       .ref2-pct { font-size:26px; font-weight:800; color:#C77DFF; line-height:1 }
@@ -3965,26 +3982,27 @@ async function doUpgradeStat(bikeLevel, stat){
       .ref2-copy-btn { background:linear-gradient(135deg,#9D5CFF,#6a0dad); border:none; border-radius:10px; padding:7px 13px; color:#fff; font-size:11px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap }
       .ref2-share-note { font-size:10px; color:rgba(199,125,255,.7); font-weight:600 }
 
-      /* Stats grid */
+      /* Stats grid — centered content */
       .ref2-stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin:0 11px 10px }
       .ref2-stat-card {
-        background: rgba(0,0,0,.48);
         border: 1.5px solid rgba(199,125,255,.22);
-        border-radius:14px; padding:10px 11px;
+        border-radius:14px; padding:12px 10px;
         backdrop-filter:blur(8px);
         position:relative; overflow:hidden;
-        background-image: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.7)), var(--psp-cardbg, url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'));
+        background-image: linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.74)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');
         background-size: cover; background-position:center;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+        min-height:76px;
       }
-      .ref2-stat-lbl { font-size:9px; color:rgba(255,255,255,.6); font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:5px; text-transform:uppercase; letter-spacing:.3px }
-      .ref2-stat-num { font-size:22px; font-weight:800; color:#fff; line-height:1 }
-      .ref2-stat-sub { font-size:9px; color:rgba(255,255,255,.45); font-weight:600; margin-top:2px }
+      .ref2-stat-lbl { font-size:8.5px; color:rgba(255,255,255,.6); font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:.3px; justify-content:center }
+      .ref2-stat-num { font-size:24px; font-weight:800; color:#fff; line-height:1 }
+      .ref2-stat-sub { font-size:8.5px; color:rgba(255,255,255,.4); font-weight:600; margin-top:3px }
       .ref2-stat-card.active .ref2-stat-num { color:#00F27A }
-      .ref2-stat-card.active { border-color:rgba(0,242,122,.3) }
+      .ref2-stat-card.active { border-color:rgba(0,242,122,.35) }
       .ref2-stat-card.inactive .ref2-stat-num { color:#ff6b6b }
-      .ref2-stat-card.inactive { border-color:rgba(255,107,107,.3) }
-      .ref2-stat-card.earned .ref2-stat-num { font-size:17px; color:#C77DFF }
-      .ref2-stat-card.earned { border-color:rgba(199,125,255,.4) }
+      .ref2-stat-card.inactive { border-color:rgba(255,107,107,.35) }
+      .ref2-stat-card.earned .ref2-stat-num { font-size:18px; color:#C77DFF }
+      .ref2-stat-card.earned { border-color:rgba(199,125,255,.45) }
 
       /* Filters row */
       .ref2-filters-row { display:flex; gap:7px; margin:0 11px 9px; align-items:center }
@@ -4082,7 +4100,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- Friends sub-content -->
     <div id="ref2-cont-friends">
-      <!-- Filters row -->
+      <!-- Filters row — ABOVE the list -->
       <div class="ref2-filters-row">
         <!-- Type filter (left) -->
         <div class="ref2-filter-btn" id="ref2TypeFilterBtn" onclick="toggleRef2Dropdown('type')">
@@ -4133,7 +4151,7 @@ async function doUpgradeStat(bikeLevel, stat){
           </div>
         </div>
       </div>
-      <!-- List -->
+      <!-- List card — BELOW filters -->
       <div class="ref2-list-card">
         <div id="ref2FriendsList"><div class="ref2-empty">No referrals yet</div></div>
       </div>

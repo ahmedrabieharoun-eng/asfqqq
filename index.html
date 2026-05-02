@@ -3938,42 +3938,330 @@ async function doUpgradeStat(bikeLevel, stat){
 
   <!-- ═══ REFERRALS PAGE CONTENT (shown inside overlay) ═══ -->
   <div id="page-referrals-content" style="display:none">
-    <div style="margin:0 12px">
-      <!-- Referral program card -->
-      <div class="ref-prog-card">
-        <div class="ref-bonus-badge">
-          <span class="rbb-pct">20%</span>
-          <span class="rbb-txt" data-i18n="refCommission">العمولة على شراء الدراجات</span>
-        </div>
-        <div class="ref-link-row">
-          <input class="ref-inp" id="refLinkInp" readonly data-i18n-ph="refLinkPh" placeholder="Your referral link...">
-          <button class="btn-copy" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="refNote">📤 Share this link with friends</div>
+    <style>
+      /* ── REFERRALS PAGE REDESIGN ── */
+      #page-referrals-content {
+        background-image:
+          linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.88) 100%),
+          var(--psp-cardbg, url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'));
+        background-size: cover;
+        background-position: center;
+        min-height: 100%;
+        padding-bottom: 20px;
+      }
+      .ref2-commission-card {
+        margin: 0 11px 10px;
+        background: rgba(0,0,0,.45);
+        border: 1.5px solid rgba(199,125,255,.3);
+        border-radius: 16px;
+        padding: 11px 13px;
+        backdrop-filter: blur(10px);
+      }
+      .ref2-pct-row { display:flex; align-items:center; gap:8px; margin-bottom:9px }
+      .ref2-pct { font-size:26px; font-weight:800; color:#C77DFF; line-height:1 }
+      .ref2-pct-txt { font-size:11px; color:rgba(255,255,255,.75); font-weight:600; line-height:1.3 }
+      .ref2-link-row { display:flex; gap:6px; margin-bottom:5px }
+      .ref2-inp { flex:1; background:rgba(0,0,0,.4); border:1px solid rgba(199,125,255,.25); border-radius:10px; padding:7px 10px; color:#fff; font-size:10px; font-family:'Fredoka',cursive; font-weight:600; outline:none }
+      .ref2-copy-btn { background:linear-gradient(135deg,#9D5CFF,#6a0dad); border:none; border-radius:10px; padding:7px 13px; color:#fff; font-size:11px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap }
+      .ref2-share-note { font-size:10px; color:rgba(199,125,255,.7); font-weight:600 }
+
+      /* Stats grid */
+      .ref2-stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin:0 11px 10px }
+      .ref2-stat-card {
+        background: rgba(0,0,0,.48);
+        border: 1.5px solid rgba(199,125,255,.22);
+        border-radius:14px; padding:10px 11px;
+        backdrop-filter:blur(8px);
+        position:relative; overflow:hidden;
+        background-image: linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.7)), var(--psp-cardbg, url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'));
+        background-size: cover; background-position:center;
+      }
+      .ref2-stat-lbl { font-size:9px; color:rgba(255,255,255,.6); font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:5px; text-transform:uppercase; letter-spacing:.3px }
+      .ref2-stat-num { font-size:22px; font-weight:800; color:#fff; line-height:1 }
+      .ref2-stat-sub { font-size:9px; color:rgba(255,255,255,.45); font-weight:600; margin-top:2px }
+      .ref2-stat-card.active .ref2-stat-num { color:#00F27A }
+      .ref2-stat-card.active { border-color:rgba(0,242,122,.3) }
+      .ref2-stat-card.inactive .ref2-stat-num { color:#ff6b6b }
+      .ref2-stat-card.inactive { border-color:rgba(255,107,107,.3) }
+      .ref2-stat-card.earned .ref2-stat-num { font-size:17px; color:#C77DFF }
+      .ref2-stat-card.earned { border-color:rgba(199,125,255,.4) }
+
+      /* Filters row */
+      .ref2-filters-row { display:flex; gap:7px; margin:0 11px 9px; align-items:center }
+      .ref2-filter-btn {
+        flex:1; display:flex; align-items:center; gap:5px; justify-content:center;
+        background:rgba(0,0,0,.45); border:1.5px solid rgba(199,125,255,.22);
+        border-radius:11px; padding:7px 9px; cursor:pointer; font-size:10px;
+        font-weight:700; color:rgba(255,255,255,.75); position:relative;
+        backdrop-filter:blur(6px); transition:all .18s;
+      }
+      .ref2-filter-btn i { font-size:10px; color:#C77DFF }
+      .ref2-filter-dropdown {
+        position:absolute; top:calc(100% + 5px); left:0; right:0; z-index:50;
+        background:rgba(12,5,25,.96); border:1.5px solid rgba(199,125,255,.35);
+        border-radius:12px; overflow:hidden; backdrop-filter:blur(14px);
+        display:none; min-width:140px;
+      }
+      .ref2-filter-dropdown.open { display:block }
+      .ref2-filter-opt {
+        padding:9px 13px; font-size:10px; font-weight:700; color:rgba(255,255,255,.75);
+        cursor:pointer; display:flex; align-items:center; gap:7px;
+        border-bottom:1px solid rgba(255,255,255,.05); transition:background .12s;
+      }
+      .ref2-filter-opt:last-child { border-bottom:none }
+      .ref2-filter-opt:hover, .ref2-filter-opt.active { background:rgba(199,125,255,.15); color:#C77DFF }
+      .ref2-filter-opt .fopt-check { margin-left:auto; color:#C77DFF; font-size:11px; opacity:0 }
+      .ref2-filter-opt.active .fopt-check { opacity:1 }
+
+      /* Sub tabs (Friends / Ref Missions) */
+      .ref2-subtabs { display:flex; gap:7px; margin:0 11px 9px }
+      .ref2-stab { flex:1; padding:8px; text-align:center; background:rgba(0,0,0,.38); border:1.5px solid rgba(199,125,255,.18); border-radius:11px; font-size:10px; font-weight:700; cursor:pointer; color:rgba(255,255,255,.6); transition:all .18s }
+      .ref2-stab.active { background:rgba(199,125,255,.18); border-color:rgba(199,125,255,.55); color:#C77DFF }
+
+      /* Friends list card */
+      .ref2-list-card {
+        margin:0 11px; background:rgba(0,0,0,.45); border:1.5px solid rgba(199,125,255,.2);
+        border-radius:16px; overflow:hidden; backdrop-filter:blur(8px);
+        background-image:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.75)),var(--psp-cardbg,url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'));
+        background-size:cover;background-position:center;
+      }
+      .ref2-list-item { display:flex; align-items:center; gap:9px; padding:9px 13px; border-bottom:1px solid rgba(255,255,255,.05) }
+      .ref2-list-item:last-child { border-bottom:none }
+      .ref2-av { width:36px; height:36px; border-radius:50%; background:rgba(199,125,255,.2); border:2px solid rgba(199,125,255,.5); display:flex; align-items:center; justify-content:center; font-size:16px; overflow:hidden; flex-shrink:0 }
+      .ref2-av img { width:100%; height:100%; object-fit:cover }
+      .ref2-li-info { flex:1; min-width:0 }
+      .ref2-li-name { font-size:11px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+      .ref2-li-date { font-size:9px; color:rgba(255,255,255,.45); font-weight:600; margin-top:1px }
+      .ref2-li-earn { display:flex; align-items:center; gap:4px; font-size:11px; font-weight:800; color:#C77DFF; white-space:nowrap; flex-shrink:0 }
+      .ref2-li-earn img { width:15px; height:15px; border-radius:50%; object-fit:cover }
+      .ref2-empty { padding:20px; text-align:center; color:rgba(255,255,255,.35); font-size:11px; font-weight:600 }
+    </style>
+
+    <!-- Commission card -->
+    <div class="ref2-commission-card">
+      <div class="ref2-pct-row">
+        <span class="ref2-pct">20%</span>
+        <span class="ref2-pct-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
       </div>
-      <!-- Referral Missions sub-tabs -->
-      <div style="display:flex;gap:7px;margin:10px 0">
-        <div class="ref-sub-tab active" data-rst="friends" onclick="switchRefSubTab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
-        <div class="ref-sub-tab" data-rst="missions" onclick="switchRefSubTab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
+      <div class="ref2-link-row">
+        <input class="ref2-inp" id="refLinkInp" readonly placeholder="Your referral link...">
+        <button class="ref2-copy-btn" onclick="copyRefLink()"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
       </div>
-      <!-- Friends list -->
-      <div class="ref-sub-cont active" id="rst-friends">
-        <div class="hist-box">
-          <div class="hist-hdr" style="justify-content:space-between">
-            <span><i class="fas fa-users"></i> <span data-i18n="recentRefs">Referrals</span></span>
-            <span class="ref-count-badge" id="totalRefsDisp">0 Friends</span>
-          </div>
-          <div id="recentRefsList"><div class="hist-empty" data-i18n="noReferrals">No referrals yet</div></div>
-        </div>
+      <div class="ref2-share-note" data-i18n="refNote">🎁 Share this link with friends</div>
+    </div>
+
+    <!-- Stats grid (4 boxes) -->
+    <div class="ref2-stats-grid">
+      <div class="ref2-stat-card">
+        <div class="ref2-stat-lbl"><i class="fas fa-users" style="color:#C77DFF"></i> Total Referrals</div>
+        <div class="ref2-stat-num" id="ref2TotalCount">0</div>
+        <div class="ref2-stat-sub">Friends</div>
       </div>
-      <!-- Referral Missions -->
-      <div class="ref-sub-cont" id="rst-missions">
-        <div style="background:rgba(0,242,122,.07);border:1px solid rgba(0,242,122,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:rgba(0,242,122,.8);font-weight:600">
-          ℹ️ <span data-i18n="activeRefNote">Only <strong style="color:#00F27A">active referrals</strong> are counted. A referral becomes active when they make their first withdrawal from the bot.</span>
-        </div>
-        <div id="refMissionsList"></div>
+      <div class="ref2-stat-card active">
+        <div class="ref2-stat-lbl"><i class="fas fa-user-check" style="color:#00F27A"></i> Active Referrals</div>
+        <div class="ref2-stat-num" id="ref2ActiveCount">0</div>
+        <div class="ref2-stat-sub">Friends</div>
+      </div>
+      <div class="ref2-stat-card inactive">
+        <div class="ref2-stat-lbl"><i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Referrals</div>
+        <div class="ref2-stat-num" id="ref2InactiveCount">0</div>
+        <div class="ref2-stat-sub">Friends</div>
+      </div>
+      <div class="ref2-stat-card earned">
+        <div class="ref2-stat-lbl"><i class="fas fa-wallet" style="color:#C77DFF"></i> Total Earned</div>
+        <div class="ref2-stat-num" id="ref2TotalEarned">0</div>
+        <div class="ref2-stat-sub" style="display:flex;align-items:center;gap:3px"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:11px;height:11px;border-radius:50%"> TON</div>
       </div>
     </div>
+
+    <!-- Sub tabs -->
+    <div class="ref2-subtabs">
+      <div class="ref2-stab active" data-rst="friends" onclick="switchRef2Tab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
+      <div class="ref2-stab" data-rst="missions" onclick="switchRef2Tab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
+    </div>
+
+    <!-- Friends sub-content -->
+    <div id="ref2-cont-friends">
+      <!-- Filters row -->
+      <div class="ref2-filters-row">
+        <!-- Type filter (left) -->
+        <div class="ref2-filter-btn" id="ref2TypeFilterBtn" onclick="toggleRef2Dropdown('type')">
+          <i class="fas fa-filter"></i>
+          <span id="ref2TypeLabel">All Referrals</span>
+          <i class="fas fa-chevron-down" style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.4)"></i>
+          <div class="ref2-filter-dropdown" id="ref2TypeDropdown">
+            <div class="ref2-filter-opt active" data-val="all" onclick="setRef2TypeFilter(this,'all')">
+              <i class="fas fa-users" style="color:#C77DFF"></i> All Referrals
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="active" onclick="setRef2TypeFilter(this,'active')">
+              <i class="fas fa-user-check" style="color:#00F27A"></i> Active Referrals Only
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="top" onclick="setRef2TypeFilter(this,'top')">
+              <i class="fas fa-star" style="color:#FFD700"></i> Top Earners
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="inactive" onclick="setRef2TypeFilter(this,'inactive')">
+              <i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Referrals Only
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+          </div>
+        </div>
+        <!-- Date filter (right) -->
+        <div class="ref2-filter-btn" id="ref2DateFilterBtn" onclick="toggleRef2Dropdown('date')">
+          <i class="fas fa-calendar-alt"></i>
+          <span id="ref2DateLabel">Last 7 Days</span>
+          <i class="fas fa-chevron-down" style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.4)"></i>
+          <div class="ref2-filter-dropdown" id="ref2DateDropdown">
+            <div class="ref2-filter-opt active" data-val="7" onclick="setRef2DateFilter(this,7,'Last 7 Days')">
+              <i class="fas fa-clock" style="color:#C77DFF"></i> Last 7 Days
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="1" onclick="setRef2DateFilter(this,1,'Today')">
+              <i class="fas fa-sun" style="color:#FFD700"></i> Today
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="30" onclick="setRef2DateFilter(this,30,'Last Month')">
+              <i class="fas fa-calendar" style="color:#00D4FF"></i> Last Month
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="ref2-filter-opt" data-val="0" onclick="setRef2DateFilter(this,0,'All Time')">
+              <i class="fas fa-infinity" style="color:#00F27A"></i> All Time
+              <span class="fopt-check"><i class="fas fa-check"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- List -->
+      <div class="ref2-list-card">
+        <div id="ref2FriendsList"><div class="ref2-empty">No referrals yet</div></div>
+      </div>
+    </div>
+
+    <!-- Missions sub-content -->
+    <div id="ref2-cont-missions" style="display:none">
+      <div style="margin:0 11px;background:rgba(0,242,122,.07);border:1px solid rgba(0,242,122,.2);border-radius:12px;padding:10px 13px;margin-bottom:12px;font-size:10px;color:rgba(0,242,122,.8);font-weight:600">
+        ℹ️ <span data-i18n="activeRefNote">Only <strong style="color:#00F27A">active referrals</strong> are counted. A referral becomes active when they make their first withdrawal from the bot.</span>
+      </div>
+      <div style="margin:0 11px" id="refMissionsList"></div>
+    </div>
+
+    <script>
+    // ── REF2 STATE ──
+    window._ref2TypeFilter = 'all';
+    window._ref2DateDays   = 7;
+
+    function switchRef2Tab(el, tab){
+      document.querySelectorAll('.ref2-stab').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('ref2-cont-friends').style.display  = tab==='friends'  ? 'block' : 'none';
+      document.getElementById('ref2-cont-missions').style.display = tab==='missions' ? 'block' : 'none';
+      if(tab==='missions') renderRefMissions();
+    }
+
+    function toggleRef2Dropdown(which){
+      const typeD = document.getElementById('ref2TypeDropdown');
+      const dateD = document.getElementById('ref2DateDropdown');
+      if(which==='type'){
+        const open = typeD.classList.contains('open');
+        typeD.classList.toggle('open',!open);
+        dateD.classList.remove('open');
+      } else {
+        const open = dateD.classList.contains('open');
+        dateD.classList.toggle('open',!open);
+        typeD.classList.remove('open');
+      }
+      event.stopPropagation();
+    }
+
+    document.addEventListener('click', function(){
+      document.getElementById('ref2TypeDropdown').classList.remove('open');
+      document.getElementById('ref2DateDropdown').classList.remove('open');
+    });
+
+    function setRef2TypeFilter(el, val){
+      window._ref2TypeFilter = val;
+      document.querySelectorAll('#ref2TypeDropdown .ref2-filter-opt').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('ref2TypeLabel').textContent = el.querySelector('i').nextSibling.textContent.trim();
+      document.getElementById('ref2TypeDropdown').classList.remove('open');
+      renderRef2List();
+      event.stopPropagation();
+    }
+
+    function setRef2DateFilter(el, days, label){
+      window._ref2DateDays = days;
+      document.querySelectorAll('#ref2DateDropdown .ref2-filter-opt').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('ref2DateLabel').textContent = label;
+      document.getElementById('ref2DateDropdown').classList.remove('open');
+      renderRef2List();
+      event.stopPropagation();
+    }
+
+    function renderRef2List(){
+      const TON_ICON = '<img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:15px;height:15px;border-radius:50%;object-fit:cover">';
+      const listEl = document.getElementById('ref2FriendsList');
+      if(!listEl) return;
+      let refs = S.refs || [];
+
+      // Date filter
+      if(window._ref2DateDays > 0){
+        const cutoff = Date.now() - window._ref2DateDays * 86400000;
+        refs = refs.filter(r=>{
+          if(!r.date) return true;
+          const d = new Date(r.date);
+          return isNaN(d.getTime()) ? true : d.getTime() >= cutoff;
+        });
+      }
+
+      // Type filter
+      if(window._ref2TypeFilter === 'active')   refs = refs.filter(r=>r.hasDeposited);
+      else if(window._ref2TypeFilter === 'inactive') refs = refs.filter(r=>!r.hasDeposited);
+      else if(window._ref2TypeFilter === 'top')  refs = [...refs].sort((a,b)=>(b.earned||0)-(a.earned||0));
+
+      if(!refs.length){
+        listEl.innerHTML = '<div class="ref2-empty">No referrals found</div>';
+        return;
+      }
+
+      listEl.innerHTML = refs.slice(0,30).map(r=>`
+        <div class="ref2-list-item">
+          <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🐼'">` :'🐼'}</div>
+          <div class="ref2-li-info">
+            <div class="ref2-li-name">${esc(r.name||'Friend')}</div>
+            <div class="ref2-li-date">${esc(r.date||'Joined recently')}</div>
+          </div>
+          <div class="ref2-li-earn">+${fmt(r.earned||0)} ${TON_ICON}</div>
+        </div>`).join('');
+    }
+
+    function updateRef2Stats(){
+      const refs = S.refs || [];
+      const total    = refs.length;
+      const active   = refs.filter(r=>r.hasDeposited).length;
+      const inactive = total - active;
+      const totalEarned = refs.reduce((s,r)=>s+(r.earned||0),0);
+
+      const t = document.getElementById('ref2TotalCount');
+      const a = document.getElementById('ref2ActiveCount');
+      const i = document.getElementById('ref2InactiveCount');
+      const e = document.getElementById('ref2TotalEarned');
+      if(t) t.textContent = total;
+      if(a) a.textContent = active;
+      if(i) i.textContent = inactive;
+      if(e) e.textContent = totalEarned.toFixed(2);
+
+      // Also update the old badge used elsewhere
+      const cntEl = document.getElementById('totalRefsDisp');
+      if(cntEl) cntEl.textContent = `${total} Friends`;
+      // Also fill the link input
+      const link=`${CFG.BOT_APP_LINK}?startapp=${encodeURIComponent(S.userId||'000')}`;
+      const refEl=document.getElementById('refLinkInp');
+      if(refEl) refEl.value=link;
+    }
+    </script>
   </div>
 
 </div>
@@ -5582,22 +5870,9 @@ function updateRefUI(){
   if(refEl) refEl.value=link;
   const cntEl=document.getElementById('totalRefsDisp');
   if(cntEl) cntEl.textContent=`${S.refs.length} Friends`;
-  const listEl=document.getElementById('recentRefsList');
-  if(listEl){
-    if(!S.refs.length){
-      listEl.innerHTML=`<div class="hist-empty">No referrals yet</div>`;
-    } else {
-      listEl.innerHTML=S.refs.slice(0,20).map(r=>`
-        <div class="ref-list-item">
-          <div class="rli-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🐼'">` :'🐼'}</div>
-          <div class="rli-info">
-            <div class="rli-name">${esc(r.name||'Friend')}</div>
-            <div class="rli-date">${esc(r.date||'Joined recently')}</div>
-          </div>
-          <div class="rli-earn">+${fmt(r.earned||0)} <img src="${BAM_URL}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle"></div>
-        </div>`).join('');
-    }
-  }
+  // Update new ref2 stats and list
+  if(typeof updateRef2Stats==='function') updateRef2Stats();
+  if(typeof renderRef2List==='function') renderRef2List();
 }
 function copyRefLink(){
   const v=document.getElementById('refLinkInp').value;

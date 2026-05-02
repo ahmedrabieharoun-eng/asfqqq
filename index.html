@@ -3982,21 +3982,21 @@ async function doUpgradeStat(bikeLevel, stat){
       .ref2-copy-btn { background:linear-gradient(135deg,#9D5CFF,#6a0dad); border:none; border-radius:10px; padding:7px 13px; color:#fff; font-size:11px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap }
       .ref2-share-note { font-size:10px; color:rgba(199,125,255,.7); font-weight:600 }
 
-      /* Stats grid — centered content */
-      .ref2-stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin:0 11px 10px }
+      /* Stats grid — 4 cards in one row */
+      .ref2-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:0 11px 10px }
       .ref2-stat-card {
         border: 1.5px solid rgba(199,125,255,.22);
-        border-radius:14px; padding:12px 10px;
+        border-radius:12px; padding:8px 5px;
         backdrop-filter:blur(8px);
         position:relative; overflow:hidden;
         background-image: linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.74)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png');
         background-size: cover; background-position:center;
         display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-        min-height:76px;
+        min-height:62px;
       }
-      .ref2-stat-lbl { font-size:8.5px; color:rgba(255,255,255,.6); font-weight:700; display:flex; align-items:center; gap:4px; margin-bottom:6px; text-transform:uppercase; letter-spacing:.3px; justify-content:center }
-      .ref2-stat-num { font-size:24px; font-weight:800; color:#fff; line-height:1 }
-      .ref2-stat-sub { font-size:8.5px; color:rgba(255,255,255,.4); font-weight:600; margin-top:3px }
+      .ref2-stat-lbl { font-size:7px; color:rgba(255,255,255,.6); font-weight:700; display:flex; align-items:center; gap:3px; margin-bottom:4px; text-transform:uppercase; letter-spacing:.2px; justify-content:center; flex-wrap:wrap; line-height:1.2 }
+      .ref2-stat-num { font-size:18px; font-weight:800; color:#fff; line-height:1 }
+      .ref2-stat-sub { font-size:7px; color:rgba(255,255,255,.4); font-weight:600; margin-top:2px }
       .ref2-stat-card.active .ref2-stat-num { color:#00F27A }
       .ref2-stat-card.active { border-color:rgba(0,242,122,.35) }
       .ref2-stat-card.inactive .ref2-stat-num { color:#ff6b6b }
@@ -4034,7 +4034,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
       /* Sub tabs (Friends / Ref Missions) */
       .ref2-subtabs { display:flex; gap:7px; margin:0 11px 9px }
-      .ref2-stab { flex:1; padding:8px; text-align:center; background:rgba(0,0,0,.38); border:1.5px solid rgba(199,125,255,.18); border-radius:11px; font-size:10px; font-weight:700; cursor:pointer; color:rgba(255,255,255,.6); transition:all .18s }
+      .ref2-stab { flex:1; padding:11px 8px; text-align:center; background:rgba(0,0,0,.38); border:1.5px solid rgba(199,125,255,.18); border-radius:13px; font-size:13px; font-weight:800; cursor:pointer; color:rgba(255,255,255,.6); transition:all .18s }
       .ref2-stab.active { background:rgba(199,125,255,.18); border-color:rgba(199,125,255,.55); color:#C77DFF }
 
       /* Friends list card */
@@ -4069,87 +4069,87 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="ref2-share-note" data-i18n="refNote">🎁 Share this link with friends</div>
     </div>
 
-    <!-- Stats grid (4 boxes) -->
+    <!-- Sub tabs ABOVE stats -->
+    <div class="ref2-subtabs">
+      <div class="ref2-stab active" data-rst="friends" onclick="switchRef2Tab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
+      <div class="ref2-stab" data-rst="missions" onclick="switchRef2Tab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
+    </div>
+
+    <!-- Stats grid (4 boxes in one row) -->
     <div class="ref2-stats-grid">
       <div class="ref2-stat-card">
-        <div class="ref2-stat-lbl"><i class="fas fa-users" style="color:#C77DFF"></i> Total Referrals</div>
+        <div class="ref2-stat-lbl"><i class="fas fa-users" style="color:#C77DFF"></i> Total</div>
         <div class="ref2-stat-num" id="ref2TotalCount">0</div>
         <div class="ref2-stat-sub">Friends</div>
       </div>
       <div class="ref2-stat-card active">
-        <div class="ref2-stat-lbl"><i class="fas fa-user-check" style="color:#00F27A"></i> Active Referrals</div>
+        <div class="ref2-stat-lbl"><i class="fas fa-user-check" style="color:#00F27A"></i> Active</div>
         <div class="ref2-stat-num" id="ref2ActiveCount">0</div>
         <div class="ref2-stat-sub">Friends</div>
       </div>
       <div class="ref2-stat-card inactive">
-        <div class="ref2-stat-lbl"><i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Referrals</div>
+        <div class="ref2-stat-lbl"><i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive</div>
         <div class="ref2-stat-num" id="ref2InactiveCount">0</div>
         <div class="ref2-stat-sub">Friends</div>
       </div>
       <div class="ref2-stat-card earned">
-        <div class="ref2-stat-lbl"><i class="fas fa-wallet" style="color:#C77DFF"></i> Total Earned</div>
+        <div class="ref2-stat-lbl"><i class="fas fa-wallet" style="color:#C77DFF"></i> Earned</div>
         <div class="ref2-stat-num" id="ref2TotalEarned">0</div>
-        <div class="ref2-stat-sub" style="display:flex;align-items:center;gap:3px"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:11px;height:11px;border-radius:50%"> TON</div>
+        <div class="ref2-stat-sub" style="display:flex;align-items:center;gap:2px;justify-content:center"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:9px;height:9px;border-radius:50%"> TON</div>
       </div>
     </div>
 
-    <!-- Sub tabs -->
-    <div class="ref2-subtabs">
-      <div class="ref2-stab active" data-rst="friends" onclick="switchRef2Tab(this,'friends')">👥 <span data-i18n="friendsList">Friends</span></div>
-      <div class="ref2-stab" data-rst="missions" onclick="switchRef2Tab(this,'missions')">🎯 <span data-i18n="refMissions">Ref Missions</span></div>
+    <!-- Dropdowns rendered outside buttons to avoid clipping -->
+    <div class="ref2-filter-dropdown" id="ref2TypeDropdown">
+      <div class="ref2-filter-opt active" data-val="all" onclick="setRef2TypeFilter(this,'all')">
+        <i class="fas fa-users" style="color:#C77DFF"></i> All Referrals
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="active" onclick="setRef2TypeFilter(this,'active')">
+        <i class="fas fa-user-check" style="color:#00F27A"></i> Active Referrals Only
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="top" onclick="setRef2TypeFilter(this,'top')">
+        <i class="fas fa-star" style="color:#FFD700"></i> Top Earners
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="inactive" onclick="setRef2TypeFilter(this,'inactive')">
+        <i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Referrals Only
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+    </div>
+    <div class="ref2-filter-dropdown" id="ref2DateDropdown">
+      <div class="ref2-filter-opt active" data-val="7" onclick="setRef2DateFilter(this,7,'Last 7 Days')">
+        <i class="fas fa-clock" style="color:#C77DFF"></i> Last 7 Days
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="1" onclick="setRef2DateFilter(this,1,'Today')">
+        <i class="fas fa-sun" style="color:#FFD700"></i> Today
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="30" onclick="setRef2DateFilter(this,30,'Last Month')">
+        <i class="fas fa-calendar" style="color:#00D4FF"></i> Last Month
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
+      <div class="ref2-filter-opt" data-val="0" onclick="setRef2DateFilter(this,0,'All Time')">
+        <i class="fas fa-infinity" style="color:#00F27A"></i> All Time
+        <span class="fopt-check"><i class="fas fa-check"></i></span>
+      </div>
     </div>
 
     <!-- Friends sub-content -->
     <div id="ref2-cont-friends">
       <!-- Filters row — ABOVE the list -->
       <div class="ref2-filters-row">
-        <!-- Type filter (left) -->
         <div class="ref2-filter-btn" id="ref2TypeFilterBtn" onclick="toggleRef2Dropdown('type')">
           <i class="fas fa-filter"></i>
           <span id="ref2TypeLabel">All Referrals</span>
           <i class="fas fa-chevron-down" style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.4)"></i>
-          <div class="ref2-filter-dropdown" id="ref2TypeDropdown">
-            <div class="ref2-filter-opt active" data-val="all" onclick="setRef2TypeFilter(this,'all')">
-              <i class="fas fa-users" style="color:#C77DFF"></i> All Referrals
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="active" onclick="setRef2TypeFilter(this,'active')">
-              <i class="fas fa-user-check" style="color:#00F27A"></i> Active Referrals Only
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="top" onclick="setRef2TypeFilter(this,'top')">
-              <i class="fas fa-star" style="color:#FFD700"></i> Top Earners
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="inactive" onclick="setRef2TypeFilter(this,'inactive')">
-              <i class="fas fa-user-times" style="color:#ff6b6b"></i> Inactive Referrals Only
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-          </div>
         </div>
-        <!-- Date filter (right) -->
         <div class="ref2-filter-btn" id="ref2DateFilterBtn" onclick="toggleRef2Dropdown('date')">
           <i class="fas fa-calendar-alt"></i>
           <span id="ref2DateLabel">Last 7 Days</span>
           <i class="fas fa-chevron-down" style="margin-left:auto;font-size:8px;color:rgba(255,255,255,.4)"></i>
-          <div class="ref2-filter-dropdown" id="ref2DateDropdown">
-            <div class="ref2-filter-opt active" data-val="7" onclick="setRef2DateFilter(this,7,'Last 7 Days')">
-              <i class="fas fa-clock" style="color:#C77DFF"></i> Last 7 Days
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="1" onclick="setRef2DateFilter(this,1,'Today')">
-              <i class="fas fa-sun" style="color:#FFD700"></i> Today
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="30" onclick="setRef2DateFilter(this,30,'Last Month')">
-              <i class="fas fa-calendar" style="color:#00D4FF"></i> Last Month
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-            <div class="ref2-filter-opt" data-val="0" onclick="setRef2DateFilter(this,0,'All Time')">
-              <i class="fas fa-infinity" style="color:#00F27A"></i> All Time
-              <span class="fopt-check"><i class="fas fa-check"></i></span>
-            </div>
-          </div>
         </div>
       </div>
       <!-- List card — BELOW filters -->
@@ -4176,6 +4176,11 @@ async function doUpgradeStat(bikeLevel, stat){
       el.classList.add('active');
       document.getElementById('ref2-cont-friends').style.display  = tab==='friends'  ? 'block' : 'none';
       document.getElementById('ref2-cont-missions').style.display = tab==='missions' ? 'block' : 'none';
+      // Hide commission card + stats + filters on missions tab
+      const commCard = document.querySelector('.ref2-commission-card');
+      const statsGrid = document.querySelector('.ref2-stats-grid');
+      if(commCard) commCard.style.display = tab==='missions' ? 'none' : '';
+      if(statsGrid) statsGrid.style.display = tab==='missions' ? 'none' : '';
       if(tab==='missions') renderRefMissions();
     }
 
@@ -4378,30 +4383,53 @@ function renderRefMissions(){
   const activeRefs = (S.refs||[]).filter(r=>r.hasWithdrawn).length;
   const el = document.getElementById('refMissionsList');
   if(!el) return;
+
+  const MISSION_IMGS = {
+    'rt10':  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/526844fa-1d9a-48bd-a3fb-580ef3ff33f2.jpg',
+    'rt50':  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2bbf18f9-c70f-4efd-b688-ec3473c600cb.jpg',
+    'rt100': 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/01c40a72-9880-42ae-8f57-19c2c21108db.jpg',
+    'rt200': 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3944d4e9-a95c-462a-ac04-8b86ad32ccb9.jpg',
+    'rt500': 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/18746e47-31d7-49e5-b676-4d7f6be92d8f.jpg',
+    'rt1000':'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b137bd77-2403-42c8-8183-cb4a25c93cd1.jpg',
+  };
+  const BG = "url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png')";
+
   el.innerHTML = REF_MISSION_DEFS.map(m=>{
     const done = completedTasks.includes(m.id);
     const prog = Math.min(activeRefs, m.n);
     const pct  = Math.round(prog/m.n*100);
     const canClaim = !done && activeRefs >= m.n;
+    const img = MISSION_IMGS[m.id] || '';
     return `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <div style="font-size:28px;flex-shrink:0;width:44px;text-align:center">${m.icon}</div>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">Invite ${m.n} Active Users</div>
-          <div style="height:8px;background:rgba(0,0,0,.4);border-radius:4px;overflow:hidden;margin-bottom:3px">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#42a5f5,#00D4FF);border-radius:4px"></div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);font-weight:600">${prog}/${m.n} active</div>
+      <div style="
+        border:1.5px solid rgba(199,125,255,.25);border-radius:16px;
+        display:flex;align-items:center;gap:0;margin-bottom:10px;overflow:hidden;
+        background-image:linear-gradient(rgba(0,0,0,.68),rgba(0,0,0,.78)),${BG};
+        background-size:cover;background-position:center;
+        backdrop-filter:blur(8px);
+      ">
+        <!-- Big image left -->
+        <div style="width:100px;height:100px;flex-shrink:0;overflow:hidden;border-radius:14px;margin:8px;box-shadow:0 4px 16px rgba(0,0,0,.6)">
+          <img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.style.display='none'">
         </div>
-        <div style="flex-shrink:0;text-align:center">
-          <div style="font-size:11px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:3px;margin-bottom:5px;white-space:nowrap">
+        <!-- Info -->
+        <div style="flex:1;padding:10px 8px 10px 0;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:1px">Invite ${m.n} Active Users</div>
+          <div style="font-size:11px;font-weight:800;color:#00D4FF;display:flex;align-items:center;gap:4px;margin-bottom:7px">
             <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:14px;height:14px;border-radius:50%"> +${m.ton} TON
           </div>
+          <div style="height:7px;background:rgba(0,0,0,.5);border-radius:4px;overflow:hidden;margin-bottom:4px;border:1px solid rgba(255,255,255,.06)">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C77DFF,#a040ff);border-radius:4px;transition:width .4s"></div>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700">${prog}/${m.n} active</div>
+        </div>
+        <!-- Button -->
+        <div style="flex-shrink:0;padding:10px 10px 10px 4px">
           ${done
-            ? '<div style="background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#00F27A">✅ Done</div>'
+            ? '<div style="background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.3);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:800;color:#00F27A">✅ Done</div>'
             : canClaim
-              ? `<button onclick="claimRefMission('${m.id}')" style="background:linear-gradient(135deg,#1976d2,#0d47a1);border:none;border-radius:8px;padding:6px 12px;color:#fff;font-size:11px;font-weight:800;cursor:pointer">🎁 Claim</button>`
-              : '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--muted)">🔒</div>'
+              ? `<button onclick="claimRefMission('${m.id}')" style="background:linear-gradient(135deg,#9D5CFF,#6a0dad);border:none;border-radius:10px;padding:8px 13px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 0 12px rgba(157,92,255,.5)">🎁 Claim</button>`
+              : '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:12px;font-weight:600;color:rgba(255,255,255,.3)">🔒</div>'
           }
         </div>
       </div>`;

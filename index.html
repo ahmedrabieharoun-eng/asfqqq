@@ -3411,13 +3411,25 @@ async function doUpgradeStat(bikeLevel, stat){
     background: linear-gradient(180deg,#020c1a 0%,#041428 40%,#020c1a 100%)!important;
   }
 
-  /* Hero: full-width motorbike banner with city bg */
+  /* Hero: tighter height */
   #profileSubPage[data-page="deposit"] .psp-hero{
-    height:260px;
-    background-image: linear-gradient(180deg,rgba(2,12,26,.3) 0%,rgba(2,12,26,.15) 40%,rgba(2,12,26,.95) 100%), var(--psp-hero);
+    height:195px;
+    background-image: linear-gradient(180deg,rgba(2,12,26,.25) 0%,rgba(2,12,26,.1) 40%,rgba(2,12,26,.97) 100%), var(--psp-hero);
     background-size:cover;background-position:center top;
   }
   #profileSubPage[data-page="deposit"] .psp-hero::after{display:none}
+  /* Tighter hero bar & user row */
+  #profileSubPage[data-page="deposit"] .psp-hero-bar{padding:10px 14px 8px}
+  #profileSubPage[data-page="deposit"] .psp-back{width:34px;height:34px;font-size:17px}
+  #profileSubPage[data-page="deposit"] .psp-title{font-size:18px}
+  #profileSubPage[data-page="deposit"] .psp-userrow{bottom:10px;left:12px;right:12px;gap:9px}
+  #profileSubPage[data-page="deposit"] .psp-avatar{width:44px;height:44px;font-size:19px}
+  #profileSubPage[data-page="deposit"] .psp-username{font-size:14px}
+  #profileSubPage[data-page="deposit"] .psp-username::after{width:6px;height:6px}
+  #profileSubPage[data-page="deposit"] .psp-balcard{padding:6px 10px;min-width:110px}
+  #profileSubPage[data-page="deposit"] .psp-ballbl{font-size:9px}
+  #profileSubPage[data-page="deposit"] .psp-balval{font-size:15px}
+  #profileSubPage[data-page="deposit"] .psp-baltkn{font-size:9px}
 
   /* Back button: circular blue glow */
   #profileSubPage[data-page="deposit"] .psp-back{
@@ -3455,186 +3467,165 @@ async function doUpgradeStat(bikeLevel, stat){
     background:linear-gradient(180deg,#020c1a 0%,#041428 100%);
   }
 
-  /* Cards */
+  /* Cards - smaller, with background image */
   .dep-card{
-    position:relative;border-radius:18px;padding:16px;margin-bottom:12px;
-    background:rgba(4,20,42,.82);
+    position:relative;border-radius:14px;padding:12px 12px 10px;margin-bottom:9px;
+    background:linear-gradient(rgba(2,14,30,.78),rgba(4,18,38,.85)),url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b15a663f-ec8d-4eb7-85c9-1d0e97480151.png') center/cover no-repeat;
     border:1px solid rgba(26,143,255,.28);
-    backdrop-filter:blur(14px);
-    box-shadow:0 4px 24px rgba(0,0,0,.55), 0 0 0 1px rgba(26,143,255,.08) inset;
+    backdrop-filter:blur(10px);
+    box-shadow:0 4px 18px rgba(0,0,0,.55);
     overflow:hidden;
   }
-  /* Card inner background image overlay */
-  .dep-card::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,rgba(26,143,255,.04) 0%,transparent 60%);
-    pointer-events:none;border-radius:18px;
-  }
+  .dep-card::before{display:none}
 
-  .dep-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .dep-card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 
   /* Step number badge */
   .dep-step{
-    width:28px;height:28px;border-radius:8px;
+    width:24px;height:24px;border-radius:7px;
     background:linear-gradient(135deg,#1a8fff,#0a5fcc);
-    color:#fff;font-size:14px;font-weight:900;
+    color:#fff;font-size:12px;font-weight:900;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 14px rgba(26,143,255,.7);flex-shrink:0;
+    box-shadow:0 0 12px rgba(26,143,255,.7);flex-shrink:0;
   }
-  .dep-card-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px}
+  .dep-card-title{font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px}
 
   /* Connect wallet body */
-  .dep-wal-body{display:flex;align-items:center;gap:10px}
+  .dep-wal-body{display:flex;align-items:center;gap:8px}
   .dep-wal-info{
-    flex:1;min-width:0;display:flex;align-items:center;gap:10px;
+    flex:1;min-width:0;display:flex;align-items:center;gap:8px;
     background:rgba(2,12,26,.65);
-    border:1px solid rgba(26,143,255,.4);
-    border-radius:14px;padding:11px 13px;
-    box-shadow:0 0 12px rgba(26,143,255,.15) inset;
+    border:1px solid rgba(26,143,255,.35);
+    border-radius:11px;padding:8px 10px;
+    box-shadow:0 0 10px rgba(26,143,255,.12) inset;
   }
   .dep-wal-icon{
-    width:40px;height:40px;border-radius:50%;
+    width:34px;height:34px;border-radius:50%;
     background:rgba(26,143,255,.12);
-    border:1.5px solid rgba(26,143,255,.55);
+    border:1.5px solid rgba(26,143,255,.5);
     display:flex;align-items:center;justify-content:center;
-    color:#1a8fff;font-size:18px;flex-shrink:0;
-    box-shadow:0 0 12px rgba(26,143,255,.4);
+    color:#1a8fff;font-size:15px;flex-shrink:0;
+    box-shadow:0 0 10px rgba(26,143,255,.35);
   }
   .dep-wal-text{flex:1;min-width:0}
-  .dep-wal-lbl{font-size:11px;color:rgba(255,255,255,.65);font-weight:600;margin-bottom:3px}
+  .dep-wal-lbl{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:2px}
   .dep-wal-addr{
-    font-size:13px;font-weight:800;color:#fff;
-    display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:800;color:#fff;
+    display:flex;align-items:center;gap:5px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .dep-wal-addr .conn-dot{width:8px;height:8px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676;flex-shrink:0;display:none}
+  .dep-wal-addr .conn-dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 7px #00e676;flex-shrink:0;display:none}
   .dep-wal-addr.is-connected .conn-dot{display:inline-block}
-  .dep-wal-addr .conn-lbl{font-size:10px;color:#00e676;font-weight:800;display:none}
+  .dep-wal-addr .conn-lbl{font-size:9px;color:#00e676;font-weight:800;display:none}
   .dep-wal-addr.is-connected .conn-lbl{display:inline}
 
   /* Disconnect/Connect button */
   .dep-btn-conn{
     background:rgba(2,12,26,.7);
     border:1.5px solid rgba(26,143,255,.55);
-    border-radius:14px;padding:11px 16px;
-    color:#1a8fff;font-size:13px;font-weight:800;cursor:pointer;
+    border-radius:11px;padding:9px 13px;
+    color:#1a8fff;font-size:12px;font-weight:800;cursor:pointer;
     white-space:nowrap;flex-shrink:0;
-    box-shadow:0 0 14px rgba(26,143,255,.3);
-    display:flex;align-items:center;gap:7px;
-    min-width:120px;justify-content:center;
+    box-shadow:0 0 12px rgba(26,143,255,.25);
+    display:flex;align-items:center;gap:6px;
+    min-width:100px;justify-content:center;
     transition:.2s;
   }
   .dep-btn-conn:active{background:rgba(26,143,255,.15)}
   .dep-btn-conn.is-disconnect{
-    background:rgba(26,143,255,.1);
-    border-color:rgba(26,143,255,.65);
+    background:rgba(26,143,255,.08);
+    border-color:rgba(26,143,255,.6);
     color:#1a8fff;
   }
 
-  /* Amount input */
-  .dep-amt-wrap{position:relative;margin-bottom:12px}
+  /* Amount input - smaller */
+  .dep-amt-wrap{position:relative;margin-bottom:10px}
   .dep-amt-wrap .finput{
-    padding-left:46px!important;padding-right:70px!important;
+    padding-left:42px!important;padding-right:62px!important;
     background:rgba(2,12,26,.65)!important;
-    border:1.5px solid rgba(26,143,255,.45)!important;
-    border-radius:14px!important;height:50px;
-    font-size:16px;font-weight:700;margin-bottom:0!important;
+    border:1.5px solid rgba(26,143,255,.4)!important;
+    border-radius:12px!important;height:44px;
+    font-size:14px;font-weight:700;margin-bottom:0!important;
     color:#fff;
-    box-shadow:0 0 12px rgba(26,143,255,.12) inset;
+    box-shadow:0 0 10px rgba(26,143,255,.1) inset;
   }
   .dep-amt-wrap .finput::placeholder{color:rgba(255,255,255,.3)}
   .dep-amt-icon{
-    position:absolute;left:10px;top:50%;transform:translateY(-50%);
-    width:30px;height:30px;border-radius:50%;
+    position:absolute;left:9px;top:50%;transform:translateY(-50%);
+    width:26px;height:26px;border-radius:50%;
     background:#0098EA;
     display:flex;align-items:center;justify-content:center;
-    color:#fff;font-size:14px;font-weight:900;pointer-events:none;
-    box-shadow:0 0 10px rgba(0,152,234,.6);
+    pointer-events:none;
+    box-shadow:0 0 9px rgba(0,152,234,.6);overflow:hidden;
   }
+  .dep-amt-icon img{width:100%;height:100%;object-fit:cover}
   .dep-amt-suffix{
-    position:absolute;right:12px;top:50%;transform:translateY(-50%);
-    font-size:14px;font-weight:800;color:#fff;
-    display:flex;align-items:center;gap:5px;pointer-events:none;
+    position:absolute;right:11px;top:50%;transform:translateY(-50%);
+    font-size:13px;font-weight:800;color:#fff;
+    display:flex;align-items:center;gap:4px;pointer-events:none;
   }
-  .dep-amt-suffix i{font-size:10px;color:rgba(255,255,255,.6)}
+  .dep-amt-suffix i{font-size:9px;color:rgba(255,255,255,.55)}
 
-  /* Preset chips */
-  .dep-preset-row{display:flex;gap:8px;margin-bottom:14px}
+  /* Preset chips - smaller */
+  .dep-preset-row{display:flex;gap:7px;margin-bottom:10px}
   .dep-prbtn{
-    flex:1;padding:11px 6px;text-align:center;
+    flex:1;padding:8px 4px;text-align:center;
     background:rgba(2,12,26,.65);
-    border:1.5px solid rgba(26,143,255,.3);
-    border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:#fff;transition:.15s;
-    box-shadow:none;
+    border:1.5px solid rgba(26,143,255,.28);
+    border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;color:#fff;transition:.15s;
   }
   .dep-prbtn.active,.dep-prbtn:active{
     border-color:#1a8fff;
-    background:rgba(26,143,255,.18);
-    box-shadow:0 0 12px rgba(26,143,255,.35);
+    background:rgba(26,143,255,.16);
+    box-shadow:0 0 10px rgba(26,143,255,.3);
     color:#1a8fff;
   }
 
-  /* Primary deposit button */
+  /* Primary deposit button - slightly smaller */
   .dep-btn-prim{
-    width:100%;padding:15px;
+    width:100%;padding:13px;
     background:linear-gradient(135deg,#1a6fff,#0a4fc7)!important;
-    border:none;border-radius:14px;color:#fff!important;
-    font-size:16px;font-weight:800;cursor:pointer;
-    box-shadow:0 6px 24px rgba(26,111,255,.55)!important;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    letter-spacing:.3px;
-    transition:.2s;
+    border:none;border-radius:12px;color:#fff!important;
+    font-size:15px;font-weight:800;cursor:pointer;
+    box-shadow:0 5px 20px rgba(26,111,255,.5)!important;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    letter-spacing:.3px;transition:.2s;
   }
   .dep-btn-prim:active{transform:scale(.98)}
-  .dep-btn-prim:disabled{opacity:.45;cursor:default;box-shadow:none!important}
+  .dep-btn-prim:disabled{opacity:.4;cursor:default;box-shadow:none!important}
 
-  /* Manual deposit inputs */
-  .dep-manual-input{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  /* Manual deposit inputs - smaller */
+  .dep-manual-input{display:flex;align-items:center;gap:7px;margin-bottom:8px}
   .dep-manual-input .finput{
     background:rgba(2,12,26,.65)!important;
-    border:1px solid rgba(26,143,255,.3)!important;
-    border-radius:12px!important;margin-bottom:0!important;
-    flex:1;height:44px;color:#fff;font-weight:600;font-size:13px;
+    border:1px solid rgba(26,143,255,.28)!important;
+    border-radius:10px!important;margin-bottom:0!important;
+    flex:1;height:38px;color:#fff;font-weight:600;font-size:12px;
   }
   .dep-copy-btn{
     background:rgba(26,143,255,.1);
-    border:1.5px solid rgba(26,143,255,.45);
-    border-radius:12px;padding:0 14px;
-    color:#1a8fff;font-size:12px;font-weight:800;cursor:pointer;
-    flex-shrink:0;display:flex;align-items:center;gap:6px;height:44px;
-    white-space:nowrap;box-shadow:0 0 10px rgba(26,143,255,.2);
+    border:1.5px solid rgba(26,143,255,.4);
+    border-radius:10px;padding:0 11px;
+    color:#1a8fff;font-size:11px;font-weight:800;cursor:pointer;
+    flex-shrink:0;display:flex;align-items:center;gap:5px;height:38px;
+    white-space:nowrap;box-shadow:0 0 8px rgba(26,143,255,.18);
     transition:.15s;
   }
-  .dep-copy-btn:active{background:rgba(26,143,255,.25)}
+  .dep-copy-btn:active{background:rgba(26,143,255,.22)}
 
   .dep-manual-foot{
-    display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:10px;
-    border-top:1px dashed rgba(26,143,255,.25);
-    font-size:12px;color:rgba(255,255,255,.7);font-weight:600;
+    display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;
+    border-top:1px dashed rgba(26,143,255,.22);
+    font-size:11px;color:rgba(255,255,255,.65);font-weight:600;
   }
   .dep-manual-foot i{color:#1a8fff}
   .dep-manual-foot b{color:#1a8fff;font-weight:900}
 
-  /* Manual deposit TON logo */
-  .dep-ton-logo-big{
-    position:absolute;right:16px;top:50%;transform:translateY(-50%);
-    width:80px;height:80px;opacity:.85;
-  }
   .dep-manual-card{position:relative;overflow:hidden}
 
-  /* Flabel override inside deposit */
   #page-deposit-content .flabel{
-    color:rgba(255,255,255,.75)!important;font-size:12px;font-weight:700;margin-bottom:6px;
+    color:rgba(255,255,255,.7)!important;font-size:11px;font-weight:700;margin-bottom:5px;
   }
-
-  /* Label with shield icon for manual deposit warning */
-  .dep-send-only{
-    display:flex;align-items:center;gap:6px;
-    font-size:12px;font-weight:700;color:rgba(255,255,255,.65);
-    margin-top:4px;
-  }
-  .dep-send-only i{color:#1a8fff}
-  .dep-send-only b{color:#1a8fff}
 </style>
 <div id="profileSubPage" style="display:none;position:fixed;inset:0;z-index:150;background:var(--g1);overflow-y:auto;padding-bottom:108px">
   <div class="psp-hero">
@@ -3647,7 +3638,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="psp-username" id="pspUserName">Player</div>
       <div class="psp-balcard">
         <div class="psp-ballbl"><span id="pspBalLbl">Balance</span> <i class="fas fa-wallet"></i></div>
-        <div class="psp-balrow"><span class="ton-icon">💎</span><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
+        <div class="psp-balrow"><img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:18px;height:18px;border-radius:50%;object-fit:cover;flex-shrink:0"><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
       </div>
     </div>
   </div>
@@ -3659,7 +3650,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <div style="margin:0 12px">
 
       <!-- ① Connect Wallet card -->
-      <div class="dep-card" style="margin-bottom:12px">
+      <div class="dep-card" style="margin-bottom:9px">
         <div class="dep-card-hdr">
           <div class="dep-step">1</div>
           <div class="dep-card-title" data-i18n="connectWalletTitle">Connect Wallet</div>
@@ -3669,24 +3660,24 @@ async function doUpgradeStat(bikeLevel, stat){
             <div class="dep-wal-icon"><i class="fas fa-wallet"></i></div>
             <div class="dep-wal-text">
               <div class="dep-wal-lbl" data-i18n="labelWallet">Wallet</div>
-              <div class="dep-wal-addr" id="walletAddressDisplay" data-i18n="notConnected">Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span></div>
+              <div class="dep-wal-addr" id="walletAddressDisplay">Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span></div>
             </div>
           </div>
           <button class="dep-btn-conn" id="connectWalletBtn" onclick="connectWallet()">
-            <i class="fas fa-unlink"></i> <span data-i18n="connectBtn">Disconnect</span>
+            <i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span>
           </button>
         </div>
       </div>
 
       <!-- ② Amount card -->
-      <div class="dep-card" style="margin-bottom:12px">
+      <div class="dep-card" style="margin-bottom:9px">
         <div class="dep-card-hdr">
           <div class="dep-step">2</div>
           <div class="dep-card-title" data-i18n="amountTONTitle">Amount (TON)</div>
         </div>
         <div class="dep-amt-wrap">
-          <div class="dep-amt-icon" style="font-size:16px;background:#0098EA;border:none">
-            <svg width="16" height="16" viewBox="0 0 56 56" fill="none"><path d="M28 0C12.536 0 0 12.536 0 28s12.536 28 28 28 28-12.536 28-28S43.464 0 28 0z" fill="#0098EA"/><path d="M37.5 15h-19a2.5 2.5 0 00-1.923 4.09l17.5 21A2.5 2.5 0 0038 38.5V17.5A2.5 2.5 0 0037.5 15z" fill="white"/><path d="M18.5 15h19a2.5 2.5 0 011.923 4.09l-17.5 21A2.5 2.5 0 0118 38.5V17.5A2.5 2.5 0 0118.5 15z" fill="white" opacity="0.6"/></svg>
+          <div class="dep-amt-icon">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
           </div>
           <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" step="0.1" min="1" oninput="updDepPreview()">
           <div class="dep-amt-suffix">TON <i class="fas fa-chevron-down"></i></div>
@@ -3713,15 +3704,15 @@ async function doUpgradeStat(bikeLevel, stat){
           <div class="dep-card-title">Manual Deposit</div>
         </div>
         <!-- TON logo floating right -->
-        <div style="position:absolute;right:14px;top:50%;transform:translateY(-40%);width:82px;height:82px;opacity:.9;pointer-events:none;">
-          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 18px rgba(0,152,234,.7)) drop-shadow(0 0 32px rgba(26,143,255,.45))">
-            <circle cx="28" cy="28" r="28" fill="#0098EA" opacity="0.18"/>
-            <circle cx="28" cy="28" r="22" fill="none" stroke="#0098EA" stroke-width="2" opacity="0.5"/>
+        <div style="position:absolute;right:12px;top:50%;transform:translateY(-42%);width:68px;height:68px;pointer-events:none;">
+          <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 16px rgba(0,152,234,.7)) drop-shadow(0 0 28px rgba(26,143,255,.4))">
+            <circle cx="28" cy="28" r="28" fill="#0098EA" opacity="0.15"/>
+            <circle cx="28" cy="28" r="21" fill="none" stroke="#0098EA" stroke-width="1.5" opacity="0.45"/>
             <path d="M37.5 15h-19a2.5 2.5 0 00-1.923 4.09l17.5 21A2.5 2.5 0 0038 38.5V17.5A2.5 2.5 0 0037.5 15z" fill="#1a8fff"/>
-            <path d="M18.5 15h19a2.5 2.5 0 011.923 4.09l-17.5 21A2.5 2.5 0 0118 38.5V17.5A2.5 2.5 0 0118.5 15z" fill="#1a8fff" opacity="0.5"/>
+            <path d="M18.5 15h19a2.5 2.5 0 011.923 4.09l-17.5 21A2.5 2.5 0 0118 38.5V17.5A2.5 2.5 0 0118.5 15z" fill="#1a8fff" opacity="0.45"/>
           </svg>
         </div>
-        <div style="padding-right:96px">
+        <div style="padding-right:82px">
           <label class="flabel">Wallet Address</label>
           <div class="dep-manual-input">
             <input type="text" class="finput" id="manualWalletAddr" readonly value="UQB...Ton_Wallet_Address_Here">

@@ -3404,6 +3404,45 @@ async function doUpgradeStat(bikeLevel, stat){
   #profileSubPage .flabel{color:#fff!important}
   #profileSubPage .btn-prim, #profileSubPage .btn-wd{background:linear-gradient(135deg,var(--psp-accent),color-mix(in srgb,var(--psp-accent) 70%, #000))!important;color:#fff!important;box-shadow:0 6px 18px var(--psp-accent-glow)!important}
   #profileSubPage .hist-hdr{color:var(--psp-accent)!important}
+
+  /* ====== DEPOSIT PAGE — redesigned cards ====== */
+  .dep-card{position:relative;border-radius:16px;padding:14px 14px 14px;margin-bottom:12px}
+  .dep-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .dep-step{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--psp-accent),color-mix(in srgb,var(--psp-accent) 55%, #000));color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--psp-accent-glow);flex-shrink:0}
+  .dep-card-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:.2px}
+  /* Connect wallet body */
+  .dep-wal-body{display:flex;align-items:center;gap:10px}
+  .dep-wal-info{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);border:1px solid var(--psp-accent);border-radius:14px;padding:10px 12px;box-shadow:0 0 10px var(--psp-accent-glow) inset}
+  .dep-wal-icon{width:38px;height:38px;border-radius:50%;background:rgba(30,155,255,.18);border:1.5px solid var(--psp-accent);display:flex;align-items:center;justify-content:center;color:var(--psp-accent);font-size:16px;flex-shrink:0;box-shadow:0 0 10px var(--psp-accent-glow)}
+  .dep-wal-text{flex:1;min-width:0}
+  .dep-wal-lbl{font-size:11px;color:rgba(255,255,255,.7);font-weight:600}
+  .dep-wal-addr{font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dep-wal-addr .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--neon-green);box-shadow:0 0 6px var(--neon-green);flex-shrink:0;display:none}
+  .dep-wal-addr.is-connected .conn-dot{display:inline-block}
+  .dep-wal-addr .conn-lbl{font-size:10px;color:var(--neon-green);font-weight:800;display:none}
+  .dep-wal-addr.is-connected .conn-lbl{display:inline}
+  .dep-btn-conn{background:linear-gradient(135deg,var(--psp-accent),color-mix(in srgb,var(--psp-accent) 65%, #000));border:none;border-radius:14px;padding:10px 16px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow);display:flex;align-items:center;gap:6px;min-width:118px;justify-content:center}
+  .dep-btn-conn.is-disconnect{background:rgba(0,0,0,.5);border:1.5px solid var(--psp-accent);color:var(--psp-accent);box-shadow:0 0 10px var(--psp-accent-glow)}
+  /* Amount input */
+  .dep-amt-wrap{position:relative;margin-bottom:10px}
+  .dep-amt-wrap .finput{padding-left:42px!important;padding-right:60px!important;background:rgba(0,0,0,.45)!important;border:1.5px solid var(--psp-accent)!important;border-radius:14px!important;height:46px;font-size:14px;font-weight:700;margin-bottom:0!important;box-shadow:0 0 10px var(--psp-accent-glow) inset}
+  .dep-amt-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(30,155,255,.18);border:1.5px solid var(--psp-accent);display:flex;align-items:center;justify-content:center;color:var(--psp-accent);font-size:13px;font-weight:900;pointer-events:none}
+  .dep-amt-suffix{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:4px;pointer-events:none}
+  .dep-amt-suffix i{font-size:10px;color:var(--psp-accent)}
+  /* Preset chips */
+  .dep-preset-row{display:flex;gap:8px;margin-bottom:12px}
+  .dep-prbtn{flex:1;padding:10px 6px;text-align:center;background:rgba(0,0,0,.45);border:1.5px solid rgba(30,155,255,.35);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;color:#fff;transition:.15s}
+  .dep-prbtn.active,.dep-prbtn:active{border-color:var(--psp-accent);background:rgba(30,155,255,.18);box-shadow:0 0 10px var(--psp-accent-glow)}
+  /* Primary deposit button */
+  .dep-btn-prim{width:100%;padding:14px;background:linear-gradient(135deg,#1E9BFF,#0a6dc7)!important;border:none;border-radius:14px;color:#fff!important;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px var(--psp-accent-glow)!important;display:flex;align-items:center;justify-content:center;gap:8px}
+  .dep-btn-prim:disabled{opacity:.55;cursor:default;box-shadow:none!important}
+  /* Manual deposit */
+  .dep-manual-input{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .dep-manual-input .finput{background:rgba(0,0,0,.45)!important;border:1.5px solid var(--psp-accent)!important;border-radius:12px!important;margin-bottom:0!important;flex:1;height:42px;color:#fff;font-weight:700}
+  .dep-copy-btn{background:rgba(30,155,255,.15);border:1.5px solid var(--psp-accent);border-radius:12px;padding:10px 14px;color:var(--psp-accent);font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:6px;height:42px;white-space:nowrap;box-shadow:0 0 10px var(--psp-accent-glow)}
+  .dep-manual-foot{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(30,155,255,.3);font-size:11px;color:rgba(255,255,255,.75);font-weight:600}
+  .dep-manual-foot i{color:var(--psp-accent)}
+  .dep-manual-foot b{color:var(--psp-accent);font-weight:900}
 </style>
 <div id="profileSubPage" style="display:none;position:fixed;inset:0;z-index:150;background:var(--g1);overflow-y:auto;padding-bottom:108px">
   <div class="psp-hero">
@@ -3426,43 +3465,74 @@ async function doUpgradeStat(bikeLevel, stat){
   <!-- ═══ DEPOSIT PAGE CONTENT (shown inside overlay) ═══ -->
   <div id="page-deposit-content" style="display:none">
     <div style="margin:0 12px">
-      <!-- Wallet connect card -->
-      <div class="wd-form" style="margin-bottom:12px">
-        <div class="wal-row">
-          <div class="wl-inf">
-            <div class="wll" data-i18n="labelWallet">Wallet</div>
-            <div class="wla" id="walletAddressDisplay" data-i18n="notConnected">Not connected</div>
+
+      <!-- ① Connect Wallet card -->
+      <div class="wd-form dep-card" data-psp-card style="margin-bottom:12px">
+        <div class="dep-card-hdr">
+          <div class="dep-step">1</div>
+          <div class="dep-card-title" data-i18n="connectWalletTitle">Connect Wallet</div>
+        </div>
+        <div class="dep-wal-body">
+          <div class="dep-wal-info">
+            <div class="dep-wal-icon"><i class="fas fa-wallet"></i></div>
+            <div class="dep-wal-text">
+              <div class="dep-wal-lbl" data-i18n="labelWallet">Wallet</div>
+              <div class="dep-wal-addr" id="walletAddressDisplay" data-i18n="notConnected">Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span></div>
+            </div>
           </div>
-          <button class="btn-conn" id="connectWalletBtn" onclick="connectWallet()"><i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span></button>
+          <button class="dep-btn-conn" id="connectWalletBtn" onclick="connectWallet()">
+            <i class="fas fa-plug"></i> <span data-i18n="connectBtn">Connect</span>
+          </button>
         </div>
-        <label class="flabel" data-i18n="amountTON">Amount (TON) — Min: 1 TON</label>
-        <input type="number" id="depositAmountInput" class="finput" placeholder="Min: 1 TON" step="0.1" min="1" oninput="updDepPreview()">
-        <div class="preset-row" style="margin-bottom:8px">
-          <span class="prbtn" onclick="setDepAmt(1)">1</span>
-          <span class="prbtn" onclick="setDepAmt(2)">2</span>
-          <span class="prbtn" onclick="setDepAmt(5)">5</span>
-          <span class="prbtn" onclick="setDepAmt(10)">10</span>
+      </div>
+
+      <!-- ② Amount card -->
+      <div class="wd-form dep-card" data-psp-card style="margin-bottom:12px">
+        <div class="dep-card-hdr">
+          <div class="dep-step">2</div>
+          <div class="dep-card-title" data-i18n="amountTONTitle">Amount (TON)</div>
         </div>
-        <button class="btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()"><i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span></button>
+        <div class="dep-amt-wrap">
+          <div class="dep-amt-icon">💎</div>
+          <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" step="0.1" min="1" oninput="updDepPreview()">
+          <div class="dep-amt-suffix">TON <i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="dep-preset-row">
+          <span class="dep-prbtn" onclick="setDepAmt(1)">1 TON</span>
+          <span class="dep-prbtn" onclick="setDepAmt(2)">2 TON</span>
+          <span class="dep-prbtn" onclick="setDepAmt(5)">5 TON</span>
+          <span class="dep-prbtn" onclick="setDepAmt(10)">10 TON</span>
+        </div>
+        <button class="btn-prim dep-btn-prim" id="submitDepositBtn" disabled onclick="window.initiateDeposit()">
+          <i class="fas fa-arrow-down"></i> <span data-i18n="depositBtn">Deposit TON</span>
+        </button>
         <div class="tx-status" id="depositStatus">
           <div class="txsi">⏳</div><div class="txsm" data-i18n="processingDeposit">Processing deposit...</div>
           <div class="txsd" id="depositStatusDetail"></div>
         </div>
       </div>
-      <!-- Manual deposit card -->
-      <div class="wd-form" style="margin-bottom:0">
-        <div style="font-size:13px;font-weight:800;color:var(--bamboo);margin-bottom:10px;display:flex;align-items:center;gap:6px">📋 Manual Deposit</div>
+
+      <!-- ③ Manual deposit card -->
+      <div class="wd-form dep-card" data-psp-card style="margin-bottom:0">
+        <div class="dep-card-hdr">
+          <div class="dep-step">3</div>
+          <div class="dep-card-title">Manual Deposit</div>
+        </div>
         <label class="flabel">Wallet Address</label>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <input type="text" class="finput" id="manualWalletAddr" readonly value="UQBTon_Wallet_Address_Here" style="margin-bottom:0;flex:1">
-          <button onclick="copyText('manualWalletAddr')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
+        <div class="dep-manual-input">
+          <input type="text" class="finput" id="manualWalletAddr" readonly value="UQBTon_Wallet_Address_Here">
+          <button class="dep-copy-btn" onclick="copyText('manualWalletAddr')"><i class="fas fa-copy"></i> Copy</button>
         </div>
         <label class="flabel">Comment (Your User ID)</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="text" class="finput" id="manualCommentId" readonly style="margin-bottom:0;flex:1">
-          <button onclick="copyText('manualCommentId')" style="background:linear-gradient(135deg,var(--bamboo),#4e7a20);border:none;border-radius:10px;padding:10px 13px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:5px"><i class="fas fa-copy"></i> Copy</button>
+        <div class="dep-manual-input">
+          <input type="text" class="finput" id="manualCommentId" readonly>
+          <button class="dep-copy-btn" onclick="copyText('manualCommentId')"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <div class="dep-manual-foot">
+          <i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.
         </div>
       </div>
+
     </div>
   </div>
 
@@ -5249,9 +5319,9 @@ function onWConn(w){
   S.wallet={address:w.account.address,chain:w.account.chain,appName:w.device.appName};
   const sh=`${S.wallet.address.substring(0,6)}...${S.wallet.address.slice(-4)}`;
   const wad = document.getElementById('walletAddressDisplay');
-  if(wad){ wad.textContent=`${sh} · ${S.wallet.appName}`; wad.dataset.connected='1'; }
+  if(wad){ wad.innerHTML=`${sh}<span class="conn-dot"></span><span class="conn-lbl">Connected</span>`; wad.classList.add('is-connected'); wad.dataset.connected='1'; }
   const connBtn = document.getElementById('connectWalletBtn');
-  if(connBtn){ connBtn.innerHTML='<i class="fas fa-unlink"></i> Disconnect'; connBtn.onclick=disconnectWallet; }
+  if(connBtn){ connBtn.innerHTML='<i class="fas fa-unlink"></i> Disconnect'; connBtn.onclick=disconnectWallet; connBtn.classList.add('is-disconnect'); }
   // Fill withdraw address input with full wallet address
   const wdAddr = document.getElementById('wdAddrInput');
   if(wdAddr && !wdAddr.value) wdAddr.value = S.wallet.address;
@@ -5260,9 +5330,9 @@ function onWConn(w){
 function onWDisc(){
   S.wallet=null;
   const wad = document.getElementById('walletAddressDisplay');
-  if(wad){ wad.textContent='Not connected'; delete wad.dataset.connected; }
+  if(wad){ wad.innerHTML='Not connected<span class="conn-dot"></span><span class="conn-lbl">Connected</span>'; wad.classList.remove('is-connected'); delete wad.dataset.connected; }
   const connBtn = document.getElementById('connectWalletBtn');
-  if(connBtn){ connBtn.innerHTML='<i class="fas fa-plug"></i> Connect'; connBtn.onclick=connectWallet; }
+  if(connBtn){ connBtn.innerHTML='<i class="fas fa-plug"></i> Connect'; connBtn.onclick=connectWallet; connBtn.classList.remove('is-disconnect'); }
   const btn = document.getElementById('submitDepositBtn');
   if(btn) btn.disabled=true;
 }
@@ -6367,7 +6437,7 @@ function applyLang(lang,flag,code){
 
   // ── Connect wallet button (keep icon) ──
   const connBtn=document.getElementById('connectWalletBtn');
-  if(connBtn) connBtn.innerHTML=`<i class="fas fa-plug"></i> ${t.connectBtn}`;
+  if(connBtn && !connBtn.classList.contains('is-disconnect')) connBtn.innerHTML=`<i class="fas fa-plug"></i> ${t.connectBtn}`;
 
   // ── Withdraw button (keep image) ──
   const wdBtn=document.getElementById('wdBtn');
@@ -6382,10 +6452,11 @@ function applyLang(lang,flag,code){
 
   // Season 2 removed
 
-  // ── walletAddressDisplay: only if still showing default ──
+  // ── walletAddressDisplay: only if still showing default (not connected) ──
   const wadEl=document.getElementById('walletAddressDisplay');
-  if(wadEl && (wadEl.textContent==='Not connected'||wadEl.textContent===TRANSLATIONS['en'].notConnected||wadEl.dataset.defaultShown==='1')){
-    wadEl.textContent=t.notConnected; wadEl.dataset.defaultShown='1';
+  if(wadEl && !wadEl.classList.contains('is-connected')){
+    wadEl.innerHTML=`${t.notConnected}<span class="conn-dot"></span><span class="conn-lbl">Connected</span>`;
+    wadEl.dataset.defaultShown='1';
   }
 }
 

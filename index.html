@@ -4005,20 +4005,21 @@ async function doUpgradeStat(bikeLevel, stat){
       .ref2-stat-card.earned { border-color:rgba(199,125,255,.45) }
 
       /* Filters row */
-      .ref2-filters-row { display:flex; gap:7px; margin:0 11px 9px; align-items:center }
+      .ref2-filters-row { display:flex; gap:7px; margin:0 11px 9px; align-items:center; position:relative; z-index:100 }
       .ref2-filter-btn {
         flex:1; display:flex; align-items:center; gap:5px; justify-content:center;
         background:rgba(0,0,0,.45); border:1.5px solid rgba(199,125,255,.22);
         border-radius:11px; padding:7px 9px; cursor:pointer; font-size:10px;
         font-weight:700; color:rgba(255,255,255,.75); position:relative;
-        backdrop-filter:blur(6px); transition:all .18s;
+        backdrop-filter:blur(6px); transition:all .18s; z-index:100;
       }
       .ref2-filter-btn i { font-size:10px; color:#C77DFF }
       .ref2-filter-dropdown {
-        position:absolute; top:calc(100% + 5px); left:0; right:0; z-index:50;
-        background:rgba(12,5,25,.96); border:1.5px solid rgba(199,125,255,.35);
-        border-radius:12px; overflow:hidden; backdrop-filter:blur(14px);
-        display:none; min-width:140px;
+        position:fixed; z-index:9999;
+        background:rgba(12,5,25,.97); border:1.5px solid rgba(199,125,255,.45);
+        border-radius:12px; overflow:hidden; backdrop-filter:blur(18px);
+        display:none; min-width:170px;
+        box-shadow:0 8px 32px rgba(0,0,0,.8);
       }
       .ref2-filter-dropdown.open { display:block }
       .ref2-filter-opt {
@@ -4179,43 +4180,59 @@ async function doUpgradeStat(bikeLevel, stat){
     }
 
     function toggleRef2Dropdown(which){
+      event.stopPropagation();
       const typeD = document.getElementById('ref2TypeDropdown');
       const dateD = document.getElementById('ref2DateDropdown');
+      const typeBtn = document.getElementById('ref2TypeFilterBtn');
+      const dateBtn = document.getElementById('ref2DateFilterBtn');
+
+      function positionDropdown(dropdown, btn){
+        const rect = btn.getBoundingClientRect();
+        dropdown.style.top  = (rect.bottom + 5) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = rect.width + 'px';
+      }
+
       if(which==='type'){
         const open = typeD.classList.contains('open');
-        typeD.classList.toggle('open',!open);
         dateD.classList.remove('open');
+        dateD.style.display = 'none';
+        if(!open){ positionDropdown(typeD, typeBtn); typeD.style.display='block'; typeD.classList.add('open'); }
+        else { typeD.style.display='none'; typeD.classList.remove('open'); }
       } else {
         const open = dateD.classList.contains('open');
-        dateD.classList.toggle('open',!open);
         typeD.classList.remove('open');
+        typeD.style.display = 'none';
+        if(!open){ positionDropdown(dateD, dateBtn); dateD.style.display='block'; dateD.classList.add('open'); }
+        else { dateD.style.display='none'; dateD.classList.remove('open'); }
       }
-      event.stopPropagation();
     }
 
     document.addEventListener('click', function(){
-      document.getElementById('ref2TypeDropdown').classList.remove('open');
-      document.getElementById('ref2DateDropdown').classList.remove('open');
+      ['ref2TypeDropdown','ref2DateDropdown'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el){ el.classList.remove('open'); el.style.display='none'; }
+      });
     });
 
     function setRef2TypeFilter(el, val){
+      event.stopPropagation();
       window._ref2TypeFilter = val;
       document.querySelectorAll('#ref2TypeDropdown .ref2-filter-opt').forEach(x=>x.classList.remove('active'));
       el.classList.add('active');
-      document.getElementById('ref2TypeLabel').textContent = el.querySelector('i').nextSibling.textContent.trim();
-      document.getElementById('ref2TypeDropdown').classList.remove('open');
+      document.getElementById('ref2TypeLabel').textContent = el.innerText.replace('✓','').trim().split('\n')[0].trim();
+      const d=document.getElementById('ref2TypeDropdown'); d.classList.remove('open'); d.style.display='none';
       renderRef2List();
-      event.stopPropagation();
     }
 
     function setRef2DateFilter(el, days, label){
+      event.stopPropagation();
       window._ref2DateDays = days;
       document.querySelectorAll('#ref2DateDropdown .ref2-filter-opt').forEach(x=>x.classList.remove('active'));
       el.classList.add('active');
       document.getElementById('ref2DateLabel').textContent = label;
-      document.getElementById('ref2DateDropdown').classList.remove('open');
+      const d=document.getElementById('ref2DateDropdown'); d.classList.remove('open'); d.style.display='none';
       renderRef2List();
-      event.stopPropagation();
     }
 
     function renderRef2List(){

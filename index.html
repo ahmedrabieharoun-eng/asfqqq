@@ -163,30 +163,29 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 
 /* ══ NEW WITHDRAW PAGE DESIGN ══ */
 .wd-new-section-title{
-  font-size:16px;font-weight:800;color:#fff;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:800;color:#fff;margin-bottom:10px;
+  display:flex;align-items:center;gap:7px;
 }
 .wd-new-wallet-card{
-  background:rgba(6,20,6,.88);
   border:1.5px solid rgba(157,255,61,.3);
-  border-radius:18px;padding:18px 16px;margin-bottom:10px;
+  border-radius:16px;padding:14px 13px;margin-bottom:9px;
   backdrop-filter:blur(12px);
   box-shadow:0 6px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2)inset;
   position:relative;overflow:hidden;
-  background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg,none);
+  background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),var(--psp-cardbg,url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'));
   background-size:cover;background-position:center;
 }
 .wd-new-wallet-card .flabel{
-  font-size:12px;font-weight:700;color:rgba(255,255,255,.7);
-  margin-bottom:6px;display:block;letter-spacing:.2px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.7);
+  margin-bottom:5px;display:block;letter-spacing:.2px;
 }
 .wd-new-addr-input{
   width:100%;background:rgba(0,0,0,.42);
   border:1.5px solid rgba(157,255,61,.22);
-  border-radius:12px;padding:12px 14px;
-  color:#fff;font-size:13px;font-weight:600;
+  border-radius:10px;padding:9px 12px;
+  color:#fff;font-size:12px;font-weight:600;
   font-family:'Fredoka',cursive;
-  outline:none;margin-bottom:14px;
+  outline:none;margin-bottom:11px;
   transition:border-color .2s;
 }
 .wd-new-addr-input:focus{border-color:rgba(157,255,61,.55)}
@@ -195,34 +194,34 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   position:relative;
   background:rgba(0,0,0,.42);
   border:1.5px solid rgba(157,255,61,.22);
-  border-radius:12px;
+  border-radius:10px;
   display:flex;align-items:center;
   overflow:hidden;
-  margin-bottom:14px;
+  margin-bottom:11px;
 }
 .wd-new-amount-input{
   flex:1;background:transparent;border:none;
-  color:rgba(255,255,255,.45);font-size:14px;font-weight:600;
+  color:rgba(255,255,255,.45);font-size:12px;font-weight:600;
   font-family:'Fredoka',cursive;
-  padding:12px 14px;outline:none;
+  padding:9px 12px;outline:none;
   min-width:0;
 }
 .wd-new-amount-input::placeholder{color:rgba(255,255,255,.28)}
 .wd-new-max-btn{
   background:transparent;border:none;
-  color:#9DFF3D;font-size:14px;font-weight:800;
-  padding:12px 16px;cursor:pointer;
+  color:#9DFF3D;font-size:12px;font-weight:800;
+  padding:9px 14px;cursor:pointer;
   font-family:'Fredoka',cursive;
   flex-shrink:0;
 }
 .wd-new-max-btn:active{color:#7acc28}
 .btn-wd-new{
-  width:100%;padding:15px;
+  width:100%;padding:12px;
   background:linear-gradient(135deg,#3a9e1e,#5cc827,#3a9e1e);
-  border:none;border-radius:14px;
-  color:#fff;font-size:16px;font-weight:800;
+  border:none;border-radius:12px;
+  color:#fff;font-size:14px;font-weight:800;
   cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:9px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
   box-shadow:0 0 20px rgba(92,200,39,.45),0 4px 16px rgba(0,0,0,.4);
   transition:all .18s;
   font-family:'Fredoka',cursive;
@@ -235,45 +234,45 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 }
 .btn-wd-new:not(:disabled){animation:wd-new-glow 2.2s ease-in-out infinite}
 .wd-new-hist-card{
-  background:rgba(6,20,6,.88);
   border:1.5px solid rgba(157,255,61,.3);
-  border-radius:18px;overflow:hidden;
+  border-radius:16px;overflow:hidden;
   backdrop-filter:blur(12px);
   box-shadow:0 6px 24px rgba(0,0,0,.55);
   position:relative;
-  background-image:linear-gradient(rgba(0,0,0,.66),rgba(0,0,0,.78)),var(--psp-cardbg,none);
+  background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),var(--psp-cardbg,url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'));
   background-size:cover;background-position:center;
 }
 .wd-new-hist-hdr{
-  padding:14px 16px;font-size:15px;font-weight:800;color:#fff;
-  display:flex;align-items:center;gap:8px;
+  padding:11px 14px;font-size:13px;font-weight:800;color:#fff;
+  display:flex;align-items:center;gap:7px;
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 .wd-new-hist-row{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);
 }
 .wd-new-hist-row:last-child{border-bottom:none}
 .wd-new-hist-icon{
-  width:38px;height:38px;border-radius:50%;
+  width:34px;height:34px;border-radius:50%;
   background:#0098EA;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 10px rgba(0,152,234,.4);
+  box-shadow:0 0 8px rgba(0,152,234,.4);
+  overflow:hidden;
 }
-.wd-new-hist-icon img{width:22px;height:22px;object-fit:contain;filter:brightness(10)}
+.wd-new-hist-icon img{width:100%;height:100%;object-fit:cover}
 .wd-new-hist-info{flex:1;min-width:0}
 .wd-new-hist-addr{
-  font-size:13px;font-weight:700;color:#fff;
+  font-size:11px;font-weight:700;color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:180px;
+  max-width:160px;
 }
-.wd-new-hist-date{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px;font-weight:500}
+.wd-new-hist-date{font-size:10px;color:rgba(255,255,255,.38);margin-top:2px;font-weight:500}
 .wd-new-hist-right{text-align:right;flex-shrink:0}
-.wd-new-hist-amt{font-size:14px;font-weight:800;color:#fff;margin-bottom:5px}
+.wd-new-hist-amt{font-size:12px;font-weight:800;color:#fff;margin-bottom:4px}
 .stat-badge-new{
-  padding:4px 11px;border-radius:20px;
-  font-size:11px;font-weight:800;
-  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:800;
+  display:inline-flex;align-items:center;gap:4px;
 }
 .stat-badge-new.pending{background:rgba(255,168,0,.12);color:#FFAA00;border:1px solid rgba(255,168,0,.3)}
 .stat-badge-new.approved{background:rgba(0,200,80,.12);color:#00C850;border:1px solid rgba(0,200,80,.3)}
@@ -3507,9 +3506,19 @@ async function doUpgradeStat(bikeLevel, stat){
   .psp-balrow .ton-icon{width:18px;height:18px;border-radius:50%;background:#0098EA;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;margin-right:2px;align-self:center}
   .psp-balval{font-size:20px;font-weight:800;color:#fff}
   .psp-baltkn{font-size:11px;color:rgba(255,255,255,.75);font-weight:700}
-  /* Withdraw: big title top-left, no back button */
-  #profileSubPage[data-page="withdraw"] .psp-back{display:none}
-  #profileSubPage[data-page="withdraw"] .psp-title{font-size:34px;font-weight:900}
+  /* Withdraw: show back button like deposit, shrink header to match deposit size */
+  #profileSubPage[data-page="withdraw"] .psp-back{display:flex;width:34px;height:34px;font-size:17px}
+  #profileSubPage[data-page="withdraw"] .psp-title{font-size:28px;font-weight:900}
+  #profileSubPage[data-page="withdraw"] .psp-hero{height:195px}
+  #profileSubPage[data-page="withdraw"] .psp-hero-bar{padding:10px 14px 8px}
+  #profileSubPage[data-page="withdraw"] .psp-userrow{bottom:10px;left:12px;right:12px;gap:9px}
+  #profileSubPage[data-page="withdraw"] .psp-avatar{width:44px;height:44px;font-size:19px}
+  #profileSubPage[data-page="withdraw"] .psp-username{font-size:14px}
+  #profileSubPage[data-page="withdraw"] .psp-username::after{width:6px;height:6px}
+  #profileSubPage[data-page="withdraw"] .psp-balcard{padding:6px 10px;min-width:110px}
+  #profileSubPage[data-page="withdraw"] .psp-ballbl{font-size:9px}
+  #profileSubPage[data-page="withdraw"] .psp-balval{font-size:15px}
+  #profileSubPage[data-page="withdraw"] .psp-baltkn{font-size:9px}
   /* Partnership accent text color tweak (gold) */
   #profileSubPage[data-page="partnership"] .psp-username::after{display:none}
   .psp-body{padding:14px 0 8px}
@@ -5407,7 +5416,7 @@ function renderWdHistNew(){
     const addrShort=fullAddr.length>28?fullAddr.slice(0,8)+'...'+fullAddr.slice(-6):fullAddr;
     return `<div class="wd-new-hist-row">
       <div class="wd-new-hist-icon">
-        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON">
+        <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" alt="TON" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
       </div>
       <div class="wd-new-hist-info">
         <div class="wd-new-hist-addr">${addrShort}</div>

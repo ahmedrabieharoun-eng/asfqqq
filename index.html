@@ -3489,8 +3489,7 @@ async function doUpgradeStat(bikeLevel, stat){
   #profileSubPage[data-page="referrals"]  {--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'); background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png') center/cover fixed !important;}
   #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png'); background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png') center/cover fixed !important;}
   #profileSubPage[data-page="missions"] .psp-hero{height:130px}
-  #profileSubPage[data-page="missions"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(10,3,28,1) 100%)}
-  #profileSubPage[data-page="missions"] .psp-hero-bar{padding:8px 12px 6px}
+  #profileSubPage[data-page="missions"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(25,5,60,1) 100%)}
   #profileSubPage[data-page="missions"] .psp-back{width:28px;height:28px;font-size:13px}
   #profileSubPage[data-page="missions"] .psp-title{font-size:14px}
   #profileSubPage[data-page="missions"] .psp-userrow{bottom:7px;left:10px;right:10px;gap:7px}
@@ -4362,13 +4361,12 @@ function renderMissions(){
     const prog = Math.min(current, m.total);
     const pct  = Math.round(prog / m.total * 100);
     const canClaim = !done && current >= m.total;
-    const cardBG = m.img ? `url('${m.img}')` : MISSIONS_CARD_BG;
+    const cardBG = MISSIONS_CARD_BG;
     return `
       <div style="
         border:1.5px solid rgba(157,92,255,.25);border-radius:16px;
         display:flex;align-items:center;gap:0;margin-bottom:10px;overflow:hidden;
-        background-image:linear-gradient(rgba(0,0,0,.68),rgba(0,0,0,.78)),${cardBG};
-        background-size:cover;background-position:center;
+        background:rgba(0,0,0,.82);
         backdrop-filter:blur(8px);
       ">
         <div style="width:100px;height:100px;flex-shrink:0;overflow:hidden;border-radius:14px;margin:8px;box-shadow:0 4px 16px rgba(0,0,0,.6)">

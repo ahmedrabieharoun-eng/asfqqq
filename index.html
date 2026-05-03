@@ -2015,10 +2015,19 @@ async function doUpgradeStat(bikeLevel, stat){
 /* ══ UPGRADE MODAL ══ */
 .gr-upg-modal-overlay{
   display:none;position:fixed;inset:0;z-index:700;
-  background:rgba(0,0,0,.45);
+  background:transparent;
   flex-direction:column;align-items:stretch;justify-content:flex-end;
-  /* cursor on backdrop = close signal */
   cursor:pointer;
+}
+.gr-upg-modal-overlay::before{
+  content:'';
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:0;
+  pointer-events:none;
+}
+.gr-upg-modal-sheet{
+  position:relative;z-index:1;
 }
 .gr-upg-modal-overlay.open{display:flex}
 .gr-upg-modal-sheet{
@@ -2029,6 +2038,7 @@ async function doUpgradeStat(bikeLevel, stat){
   display:flex;flex-direction:column;
   cursor:default;
   animation:upg-slide-up .32s cubic-bezier(.4,0,.2,1);
+  position:relative;z-index:1;
 }
 @keyframes upg-slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .gr-upg-modal-hero{

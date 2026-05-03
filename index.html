@@ -2068,7 +2068,7 @@ async function doUpgradeStat(bikeLevel, stat){
   text-shadow:0 2px 12px rgba(0,0,0,.95);
 }
 .gr-upg-modal-body{
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png') center/cover no-repeat fixed;
+  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png') center/cover no-repeat;
   padding:18px 16px 110px;
   overflow-y:auto;
   flex:1;
@@ -2076,8 +2076,8 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .gr-upg-modal-body::before{
   content:'';
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.72);
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.68);
   z-index:0;
   pointer-events:none;
 }

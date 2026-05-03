@@ -3488,9 +3488,10 @@ async function doUpgradeStat(bikeLevel, stat){
   #profileSubPage[data-page="withdraw"]   {--psp-accent:#9DFF3D;--psp-accent-glow:rgba(157,255,61,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d61caadc-2aed-42c0-a9b1-84e97d8040cc.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9222f5eb-c18b-42c0-9776-9f64d4e53942.png') center/cover fixed !important;}
   #profileSubPage[data-page="referrals"]  {--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/da884438-0462-4c40-88c3-562cf9fb51ea.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png'); background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/4d98081c-dfab-4d8c-b6c2-09701c151362.png') center/cover fixed !important;}
   #profileSubPage[data-page="missions"]   {--psp-accent:#9D5CFF;--psp-accent-glow:rgba(157,92,255,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/95d4b691-a543-49bb-81fa-c159f7794afb.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d4b8ff57-cd92-4a86-a1ff-dfe4e8c022e6.png');}
-  #profileSubPage[data-page="partnership"]{--psp-accent:#FFB84D;--psp-accent-glow:rgba(255,184,77,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');}
+  #profileSubPage[data-page="partnership"]{--psp-accent:#FFB84D;--psp-accent-glow:rgba(255,184,77,.55); --psp-hero:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/e772f5bf-aba4-4af2-a929-c907811b0840.png'); --psp-cardbg:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png'); background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)), url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png') center/cover fixed !important;}
   .psp-hero{position:relative;height:230px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
   .psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,var(--g1) 100%);pointer-events:none}
+  #profileSubPage[data-page="referrals"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(30,5,50,1) 100%)}
   .psp-hero-bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:12px;padding:16px 16px 10px;z-index:3}
   .psp-back{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(10px);border:1.5px solid var(--psp-accent);color:var(--psp-accent);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 0 14px var(--psp-accent-glow)}
   .psp-title{font-size:26px;font-weight:800;color:var(--psp-accent);text-shadow:0 0 22px var(--psp-accent-glow);display:flex;align-items:center;gap:10px;letter-spacing:.3px}
@@ -3858,7 +3859,6 @@ async function doUpgradeStat(bikeLevel, stat){
 
       <!-- Wallet Address Section -->
       <div class="wd-new-wallet-card">
-        <div class="wd-new-section-title">Wallet Address</div>
         <label class="flabel">TON Wallet Address</label>
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
@@ -3902,7 +3902,7 @@ async function doUpgradeStat(bikeLevel, stat){
   <div id="page-partnership-content" style="display:none">
     <div style="margin:0 12px">
       <!-- Partnership info card -->
-      <div style="background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(0,0,0,.4));border:1.5px solid rgba(255,215,0,.3);border-radius:18px;padding:16px;margin-bottom:14px">
+      <div style="background-image:linear-gradient(135deg,rgba(0,0,0,.65),rgba(0,0,0,.78)),url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b29d7276-28a2-485b-90b8-a8f096606f6c.png');background-size:cover;background-position:center;border:1.5px solid rgba(255,215,0,.3);border-radius:18px;padding:16px;margin-bottom:14px">
         <div style="font-size:16px;font-weight:800;color:#FFD700;margin-bottom:8px;display:flex;align-items:center;gap:6px">🤝 <span data-i18n="partnershipTitle">Channel Partnership</span></div>
         <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.8" data-i18n="partnershipInfo">
           Promote our game to earn TON rewards!<br>

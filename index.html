@@ -1320,56 +1320,16 @@ function renderGarage(){
   function pct(stat){ return Math.min(100,Math.round(cs[stat]/maxStats[stat]*100)); }
 
   if(detailEl){
-    // Stat bar: % = current / max (max = base * 2)
-    function pct(stat){ 
-      const cur = cs[stat];
-      const maxVal = maxStats[stat];
-      return maxVal > 0 ? Math.min(100, Math.round(cur / maxVal * 100)) : 0;
-    }
     detailEl.innerHTML = `
       <div class="gr-sel-wrap">
-        <!-- Left: card bg + bike image -->
         <div class="gr-sel-img-side">
           <div class="gr-sel-bg" style="background-image:url('${bCardBg}')"></div>
           <img class="gr-sel-bike-img" src="${b.img}" onerror="this.style.opacity='.3'">
           <div class="gr-sel-bike-name" style="color:${bColor}">${b.name}</div>
         </div>
-        <!-- Right: also uses card bg with dark overlay -->
-        <div class="gr-sel-right">
-          <div class="gr-sel-right-bg" style="background-image:url('${bCardBg}')"></div>
-          <div class="gr-sel-right-content">
-            <div class="gr-sel-level-badge" style="border-color:${bColor}">
-              Level
-              <span class="lv-num">${b.lv}</span>
-            </div>
-            <div>
-              <div class="gr-sel-stat-row">
-                <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a4381c9-4e96-404a-b52c-fb14f4fd0b4a.png">
-                <div class="gr-sel-stat-name">Speed</div>
-                <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('speed')}%"></div></div>
-                <div class="gr-sel-stat-val">${cs.speed}</div>
-              </div>
-              <div class="gr-sel-stat-row">
-                <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/89286e70-78c0-4d6e-a850-2f17c5263622.png">
-                <div class="gr-sel-stat-name">Accel</div>
-                <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('accel')}%"></div></div>
-                <div class="gr-sel-stat-val">${cs.accel}</div>
-              </div>
-              <div class="gr-sel-stat-row">
-                <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9e729fba-39b5-4b46-be3d-c9e9a784bda0.png">
-                <div class="gr-sel-stat-name">Handling</div>
-                <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('maneuver')}%"></div></div>
-                <div class="gr-sel-stat-val">${cs.maneuver}</div>
-              </div>
-              <div class="gr-sel-stat-row">
-                <img class="gr-sel-stat-icon" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/41ff0b55-d90f-4bd7-b964-d108589e3ef9.png">
-                <div class="gr-sel-stat-name">Nitro</div>
-                <div class="gr-sel-stat-bar-wrap"><div class="gr-sel-stat-bar-fill" style="width:${pct('nitro')}%"></div></div>
-                <div class="gr-sel-stat-val">${cs.nitro}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <button class="gr-sel-upgrade-btn" onclick="openUpgModal(${b.lv})">
+          \u26A1 Upgrade Your Bike
+        </button>
       </div>
     `;
   }
@@ -1426,6 +1386,65 @@ function openGrDetail(lv){
 }
 function closeGrDetail(){}
 function closeGrDetailForce(){}
+
+function openUpgModal(lv){
+  const b = BIKES.find(x=>x.lv===lv);
+  if(!b) return;
+  const imgEl = document.getElementById('grUpgModalBikeImg');
+  const nameEl = document.getElementById('grUpgModalBikeName');
+  if(imgEl) imgEl.src = b.img;
+  if(nameEl) nameEl.textContent = b.name;
+  const bodyEl = document.getElementById('grUpgModalBody');
+  if(bodyEl){
+    const bCardBg = BIKE_CARD_IMGS[0];
+    const cs = getBikeCurrentStats(b);
+    const upgs = cs.upgs;
+    const upgPrice = (b.price/4).toFixed(2);
+    const tonBal = S.user.tonBalance||0;
+    function upgRowModal(stat,label){
+      const upg = upgs[stat]||0;
+      const maxUpg = Math.floor(b[stat]/UPGRADE_INC[stat]);
+      const isMax = upg>=maxUpg;
+      const canAfford = tonBal>=parseFloat(upgPrice);
+      const dotCount = Math.min(Math.max(maxUpg,1),16);
+      const dots = Array.from({length:dotCount},(_,i)=>`<div class="gr-upg-dot${i<upg?' filled':''}"></div>`).join('');
+      let btnHtml = '';
+      if(isMax){
+        btnHtml = `<button class="gr-upg-btn-new maxed" disabled>✅ MAX</button>`;
+      } else {
+        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}');setTimeout(()=>openUpgModal(${b.lv}),700)" ${canAfford?'':'disabled'}>Upgrade</button>`;
+      }
+      return `
+        <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
+          <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
+          <div class="gr-upg-info-new">
+            <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
+            <div class="gr-upg-level-new">Level ${upg} / ${maxUpg}</div>
+            <div class="gr-upg-dots">${dots}</div>
+          </div>
+          <div class="gr-upg-price-new">
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
+            ${upgPrice}
+          </div>
+          ${btnHtml}
+        </div>
+      `;
+    }
+    bodyEl.innerHTML = `
+      <div class="gr-upg-section-title">Upgrades</div>
+      ${upgRowModal('speed','Speed')}
+      ${upgRowModal('accel','Acceleration')}
+      ${upgRowModal('maneuver','Handling')}
+      ${upgRowModal('nitro','Nitro')}
+    `;
+  }
+  document.getElementById('grUpgModalOverlay').classList.add('open');
+  document.getElementById('grUpgModalOverlay').scrollTop = 0;
+}
+
+function closeUpgModal(){
+  document.getElementById('grUpgModalOverlay').classList.remove('open');
+}
 
 let _upgradeInFlight = false;
 async function doUpgradeStat(bikeLevel, stat){
@@ -1931,20 +1950,21 @@ async function doUpgradeStat(bikeLevel, stat){
   background:rgba(0,0,0,.6);
 }
 
-/* ══ SELECTED BIKE DETAIL — card bg + bike image + stats ══ */
+/* ══ SELECTED BIKE DETAIL — full image card ══ */
 .gr-sel-wrap{
-  display:flex;gap:0;
   border-radius:18px;
   overflow:hidden;
   margin-bottom:14px;
   border:1px solid rgba(255,255,255,.08);
-  min-height:190px;
   position:relative;
   background:#000;
+  display:flex;
+  flex-direction:column;
 }
-/* Left: card background image + bike on top */
+/* Full-width bike image */
 .gr-sel-img-side{
-  width:44%;flex-shrink:0;position:relative;overflow:hidden;
+  width:100%;position:relative;overflow:hidden;
+  height:220px;
 }
 .gr-sel-bg{
   position:absolute;inset:0;
@@ -1952,46 +1972,33 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .gr-sel-bg::after{
   content:'';position:absolute;inset:0;
-  background:rgba(0,0,0,.1);
+  background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.45) 100%);
 }
 .gr-sel-bike-img{
   position:relative;z-index:2;
   width:100%;height:100%;object-fit:cover;display:block;
 }
 .gr-sel-bike-name{
-  position:absolute;bottom:8px;left:8px;right:8px;
-  font-size:14px;font-weight:800;
+  position:absolute;bottom:52px;left:14px;right:14px;
+  font-size:20px;font-weight:800;
   text-shadow:0 2px 10px rgba(0,0,0,.99);
   z-index:3;line-height:1.2;
 }
-/* Right: card background + level + stats */
-.gr-sel-right{
-  flex:1;position:relative;overflow:hidden;
+/* Upgrade button pinned at bottom of card */
+.gr-sel-upgrade-btn{
+  width:100%;padding:16px;border:none;
+  background:linear-gradient(90deg,#2E7D32,#43A047,#66BB6A);
+  color:#fff;font-size:17px;font-weight:900;
+  cursor:pointer;letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 -4px 20px rgba(76,175,80,.35);
+  transition:opacity .18s;
+  position:relative;z-index:3;
 }
-.gr-sel-right-bg{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center;background-repeat:no-repeat;
-}
-.gr-sel-right-bg::after{
-  content:'';position:absolute;inset:0;
-  background:rgba(0,0,0,.72);
-}
-.gr-sel-right-content{
-  position:relative;z-index:2;
-  padding:12px 12px 12px 10px;
-  display:flex;flex-direction:column;gap:8px;height:100%;
-}
-.gr-sel-level-badge{
-  align-self:flex-start;
-  border:2px solid;border-radius:12px;
-  padding:4px 10px;text-align:center;
-  font-size:10px;font-weight:800;color:rgba(255,255,255,.85);
-  background:rgba(0,0,0,.45);
-}
-.gr-sel-level-badge .lv-num{
-  font-size:22px;font-weight:800;color:#fff;line-height:1;display:block;
-}
-/* stat rows — bigger icons */
+.gr-sel-upgrade-btn:active{opacity:.82}
+/* Hide right side — no longer used */
+.gr-sel-right{display:none;}
+/* stat rows — kept for upgrade modal */
 .gr-sel-stat-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
 .gr-sel-stat-icon{
   width:32px;height:32px;flex-shrink:0;
@@ -2002,6 +2009,46 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-sel-stat-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;}
 .gr-sel-stat-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#FFA000,#FFD600);transition:width .4s ease;}
 .gr-sel-stat-val{font-size:12px;font-weight:800;color:#fff;width:28px;text-align:right;flex-shrink:0;}
+
+/* ══ UPGRADE MODAL ══ */
+.gr-upg-modal-overlay{
+  display:none;position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  flex-direction:column;align-items:stretch;justify-content:flex-start;
+  overflow-y:auto;
+}
+.gr-upg-modal-overlay.open{display:flex}
+.gr-upg-modal-hero{
+  width:100%;
+  height:260px;
+  position:relative;overflow:hidden;flex-shrink:0;
+}
+.gr-upg-modal-hero img.gr-upg-modal-bike-img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+.gr-upg-modal-hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.2) 0%,rgba(0,0,0,.65) 100%);
+  pointer-events:none;
+}
+.gr-upg-modal-back-btn{
+  position:absolute;top:14px;left:14px;z-index:10;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.gr-upg-modal-bike-name{
+  position:absolute;bottom:14px;left:16px;right:16px;z-index:10;
+  font-size:22px;font-weight:900;color:#fff;
+  text-shadow:0 2px 12px rgba(0,0,0,.95);
+}
+.gr-upg-modal-body{
+  background:#0f1410;
+  padding:18px 16px 110px;
+  flex:1;
+}
 
 /* ══ UPGRADES SECTION ══ */
 .gr-upg-section-title{font-size:15px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:10px;margin-top:4px;}
@@ -2085,8 +2132,8 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- selected bike detail + stats -->
     <div id="garageSelDetail"></div>
 
-    <!-- upgrades for selected bike -->
-    <div id="garageUpgSection"></div>
+    <!-- upgrades section — hidden, shown inside modal only -->
+    <div id="garageUpgSection" style="display:none"></div>
 
     <!-- empty state -->
     <div id="garageEmptyState" style="display:none">
@@ -2099,7 +2146,15 @@ async function doUpgradeStat(bikeLevel, stat){
   </div>
 </div>
 
-<!-- GARAGE DETAIL OVERLAY removed — integrated into main page -->
+<!-- UPGRADE BIKE MODAL -->
+<div class="gr-upg-modal-overlay" id="grUpgModalOverlay">
+  <div class="gr-upg-modal-hero">
+    <button class="gr-upg-modal-back-btn" onclick="closeUpgModal()">‹</button>
+    <img class="gr-upg-modal-bike-img" id="grUpgModalBikeImg" src="" alt="">
+    <div class="gr-upg-modal-bike-name" id="grUpgModalBikeName"></div>
+  </div>
+  <div class="gr-upg-modal-body" id="grUpgModalBody"></div>
+</div>
 
 <style>
 /* ── Race Section ── */

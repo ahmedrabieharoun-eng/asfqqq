@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAG RACE — MOTORCYCLES</title>
+<title>DRAG RACE — MOTORCYCLES v6 GLB RIDER</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
@@ -65,7 +65,7 @@
   #vignette {
     position:absolute; top:0; left:0; width:100%; height:100%;
     pointer-events:none; z-index:5;
-    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.80) 100%);
   }
   #speed-overlay {
     position:absolute; top:0; left:0; width:100%; height:100%;
@@ -81,6 +81,11 @@
 
   /* HUD */
   #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }
+  #hud-inner {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    transition: opacity 0.6s ease;
+  }
+  #hud-inner.hud-hidden { opacity:0; pointer-events:none; }
   #p1-hud {
     position:absolute; top:16px; left:16px;
     background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
@@ -165,13 +170,55 @@
     text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;
   }
   @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+  /* ── INTRO UI ── */
+  #skip-hint {
+    position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+    font-size:11px; color:rgba(255,255,255,0.38); letter-spacing:3px;
+    text-transform:uppercase; pointer-events:none;
+    animation:blink 1.8s ease-in-out infinite;
+    display:none; z-index:20;
+  }
+  #intro-title {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    text-align:center; pointer-events:none; z-index:20; display:none;
+    opacity:0; transition:opacity 0.8s ease;
+  }
+  #intro-title .t1 {
+    font-size:72px; font-weight:900; letter-spacing:12px; color:#fff;
+    text-shadow:0 0 60px rgba(255,180,0,0.9), 0 0 120px rgba(255,100,0,0.5), 4px 4px 0 #000;
+    text-transform:uppercase; line-height:1;
+  }
+  #intro-title .t2 {
+    font-size:13px; letter-spacing:8px; color:rgba(255,180,0,0.8); margin-top:10px;
+    text-transform:uppercase;
+  }
+  #rev-text {
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    text-align:center; pointer-events:none; z-index:20; display:none;
+    font-size:15px; letter-spacing:6px; color:rgba(255,140,0,0.85);
+    text-transform:uppercase;
+    animation:blink 0.4s ease-in-out infinite;
+  }
+
+  /* ── DEBUG OVERLAY ── */
+  #debug-overlay {
+    position:absolute; bottom:12px; right:12px; z-index:30;
+    background:rgba(0,0,0,0.62); border:1px solid rgba(255,255,255,0.18);
+    border-radius:7px; padding:7px 12px; font-size:11px;
+    color:rgba(255,255,255,0.75); letter-spacing:1px; font-family:monospace;
+    pointer-events:all; cursor:pointer; user-select:none;
+    transition:opacity 0.3s;
+  }
+  #debug-overlay.hidden { opacity:0; pointer-events:none; }
+  #debug-overlay span { color:#FFB800; font-weight:bold; }
 </style>
 </head>
 <body>
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="display:none!important">
   <div id="loading-logo">DRAG<span>RACE</span></div>
-  <div id="loading-subtitle">🏆 Tropical Edition</div>
+  <div id="loading-subtitle">🏆 Cinematic Edition v6</div>
   <div id="loading-bar-wrap">
     <div id="loading-bar"></div>
   </div>
@@ -188,44 +235,55 @@
   <div id="vignette"></div>
   <div id="speed-overlay"></div>
   <div id="lens-flare"></div>
+
+  <!-- Intro overlays -->
+  <div id="intro-title">
+    <div class="t1">DRAG RACE</div>
+    <div class="t2">🏍 Cinematic Edition</div>
+  </div>
+  <div id="rev-text">⚡ ENGINE REV — READY ⚡</div>
+  <div id="skip-hint">Press SPACE to skip intro</div>
+
   <div id="hud">
-    <div id="p1-hud">
-      <div class="car-name">🏍 Player 1</div>
-      <div class="speed-gauge-wrap">
-        <span class="speed-num" id="p1-speed">0</span>
-        <span class="speed-unit">km/h</span>
+    <div id="hud-inner" class="hud-hidden">
+      <div id="p1-hud">
+        <div class="car-name">🏍 Player 1</div>
+        <div class="speed-gauge-wrap">
+          <span class="speed-num" id="p1-speed">0</span>
+          <span class="speed-unit">km/h</span>
+        </div>
+        <div class="rpm-label">RPM</div>
+        <div class="rpm-bar-bg"><div class="rpm-fill" id="p1-rpm" style="width:0%"></div></div>
+        <div class="gear-row">
+          <span class="gear-label">GEAR</span>
+          <span class="gear-num" id="p1-gear">N</span>
+        </div>
       </div>
-      <div class="rpm-label">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p1-rpm" style="width:0%"></div></div>
-      <div class="gear-row">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p1-gear">N</span>
+      <div id="timer-hud">
+        <div class="timer-label">⏱ Race Time</div>
+        <div class="timer-value" id="timer-val">0.000</div>
       </div>
-    </div>
-    <div id="timer-hud">
-      <div class="timer-label">⏱ Race Time</div>
-      <div class="timer-value" id="timer-val">0.000</div>
-    </div>
-    <div id="p2-hud">
-      <div class="car-name">Player 2 🏍</div>
-      <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
-        <span class="speed-num" id="p2-speed">0</span>
-        <span class="speed-unit">km/h</span>
+      <div id="p2-hud">
+        <div class="car-name">Player 2 🏍</div>
+        <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
+          <span class="speed-num" id="p2-speed">0</span>
+          <span class="speed-unit">km/h</span>
+        </div>
+        <div class="rpm-label" style="text-align:right">RPM</div>
+        <div class="rpm-bar-bg"><div class="rpm-fill" id="p2-rpm" style="width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);"></div></div>
+        <div class="gear-row" style="flex-direction:row-reverse;">
+          <span class="gear-label">GEAR</span>
+          <span class="gear-num" id="p2-gear">N</span>
+        </div>
       </div>
-      <div class="rpm-label" style="text-align:right">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p2-rpm" style="width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);"></div></div>
-      <div class="gear-row" style="flex-direction:row-reverse;">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p2-gear">N</span>
+      <div class="prog-wrap" id="p1-prog-wrap">
+        <div class="prog-label">P1 Progress</div>
+        <div class="prog-bg"><div id="p1-fill"></div></div>
       </div>
-    </div>
-    <div class="prog-wrap" id="p1-prog-wrap">
-      <div class="prog-label">P1 Progress</div>
-      <div class="prog-bg"><div id="p1-fill"></div></div>
-    </div>
-    <div class="prog-wrap" id="p2-prog-wrap">
-      <div class="prog-label" style="text-align:right">P2 Progress</div>
-      <div class="prog-bg"><div id="p2-fill"></div></div>
+      <div class="prog-wrap" id="p2-prog-wrap">
+        <div class="prog-label" style="text-align:right">P2 Progress</div>
+        <div class="prog-bg"><div id="p2-fill"></div></div>
+      </div>
     </div>
     <div id="countdown"></div>
     <div id="winner-banner">
@@ -237,6 +295,13 @@
     </div>
     <div id="launch-hint" style="display:none">Press SPACE or tap to launch</div>
   </div>
+
+  <!-- DEBUG OVERLAY — click to dismiss -->
+  <div id="debug-overlay" title="Click to hide">
+    wheels: <span id="dbg-wheels">?</span> |
+    rider: <span id="dbg-rider">?</span> |
+    phase: <span id="dbg-phase">idle</span>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -245,6 +310,15 @@
 <script>
 (function(){
 'use strict';
+
+// ─── DEBUG OVERLAY ────────────────────────────────────────────
+const dbgOverlay = document.getElementById('debug-overlay');
+dbgOverlay.addEventListener('click', () => { dbgOverlay.classList.add('hidden'); });
+function dbgSet(wheels, rider, phase){
+  document.getElementById('dbg-wheels').textContent = wheels;
+  document.getElementById('dbg-rider').textContent  = rider;
+  document.getElementById('dbg-phase').textContent  = phase;
+}
 
 // ─── IMAGE URLs ──────────────────────────────────────────────
 const URL_SKY      = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0283923f-92e7-4fa1-9174-3b65fb3787eb.jpg';
@@ -262,21 +336,19 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreferen
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.LinearToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// FIX #5: Slightly clearer sky color 0x7BBCE0 → 0x6FB2D9
 scene.background = new THREE.Color(0x6FB2D9);
 
 // ─── CAMERA ──────────────────────────────────────────────────
-// FIX #4: FOV 52 → 48 (more cinematic), position closer & lower
-const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);
-camera.position.set(0, 4.0, -13);
-camera.lookAt(0, 1.5, 0);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 3000);
+camera.position.set(0, 3.2, -10);
+camera.lookAt(0, 1.4, 5);
 window.addEventListener('resize', ()=>{
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth/window.innerHeight;
@@ -284,7 +356,7 @@ window.addEventListener('resize', ()=>{
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  LOADING MANAGER
+//  LOADING MANAGER — tracks bike + rider + wheel
 // ═══════════════════════════════════════════════════════════════
 let _loadTotal = 0, _loadDone = 0;
 const _loadItems = {};
@@ -304,15 +376,11 @@ function loadProgress(key){
   _loadDone++;
   const pct = (_loadDone / _loadTotal) * 90;
   setLoadBar(pct);
-  const labels = { sky:'Sky loaded', grass:'Terrain loaded', palm:'Trees loaded',
-    bush:'Vegetation loaded', forest:'Forest loaded', mountain:'Mountains loaded',
-    model:'Bikes loaded' };
-  setLoadStatus(labels[key] || 'Loading assets...');
 }
 function checkAllLoaded(){
   setLoadBar(100);
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('launch-hint').style.display = 'block';
+  beginIntro();
 }
 
 // Patch TL.load to auto-track
@@ -465,11 +533,10 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-const hemi = new THREE.HemisphereLight(0x99DDFF, 0x558833, 0.45);
+const hemi = new THREE.HemisphereLight(0x99DDFF, 0x558833, 0.75);
 scene.add(hemi);
 
-// FIX #5: Reduce sun intensity 2.4 → 1.6
-const sun = new THREE.DirectionalLight(0xFFF5E0, 1.8);
+const sun = new THREE.DirectionalLight(0xFFEFCC, 1.6);
 sun.position.set(-60, 100, -80);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
@@ -482,11 +549,11 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-const skyFill = new THREE.DirectionalLight(0x66AAEE, 0.2);
+const skyFill = new THREE.DirectionalLight(0x66AAEE, 0.4);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-const groundBounce = new THREE.DirectionalLight(0x77BB44, 0.08);
+const groundBounce = new THREE.DirectionalLight(0x77BB44, 0.25);
 groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
@@ -562,7 +629,7 @@ road.receiveShadow=true;
 scene.add(road);
 
 const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.9, metalness:0.0 });
+const gMat = new THREE.MeshBasicMaterial({ map: grassTex });
 [-400, 400].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
@@ -614,7 +681,7 @@ makeArmco(-TRACK_WIDTH/2-1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
 // ═══════════════════════════════════════════════════════════════
-//  START LINE GANTRY (F1 Style)
+//  START LINE GANTRY
 // ═══════════════════════════════════════════════════════════════
 (function buildStartGantry(){
   const z=8;
@@ -694,157 +761,395 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 // ═══════════════════════════════════════════════════════════════
 const car1 = new THREE.Group();
 car1.position.set(-4.5, 0, 5);
-car1.rotation.y = Math.PI;   // outer group faces +Z (toward finish)
+car1.rotation.y = Math.PI;
 scene.add(car1);
 
 const car2 = new THREE.Group();
 car2.position.set(4.5, 0, 5);
-car2.rotation.y = Math.PI;   // outer group faces +Z (toward finish)
+car2.rotation.y = Math.PI;
 scene.add(car2);
 
 car1._wheels = [];
 car2._wheels = [];
+car1._rider = null;
+car2._rider = null;
 let modelsLoaded = false;
 
-// ── DEBUG PLACEHOLDER CUBES (visible while loading) ──────────
+// Debug placeholders while loading
 const debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);
 const debugMat1 = new THREE.MeshBasicMaterial({ color: 0xFFDD00, side: THREE.DoubleSide });
 const debugMat2 = new THREE.MeshBasicMaterial({ color: 0x00AAFF, side: THREE.DoubleSide });
 const debugCube1 = new THREE.Mesh(debugGeo, debugMat1);
 const debugCube2 = new THREE.Mesh(debugGeo, debugMat2);
-debugCube1.position.set(0, 0.75, 0);
-debugCube2.position.set(0, 0.75, 0);
-debugCube1.frustumCulled = false;
-debugCube2.frustumCulled = false;
+debugCube1.position.set(0, 0.75, 0); debugCube1.frustumCulled = false;
+debugCube2.position.set(0, 0.75, 0); debugCube2.frustumCulled = false;
 car1.add(debugCube1);
 car2.add(debugCube2);
 
 // ═══════════════════════════════════════════════════════════════
-//  MODEL SETUP HELPERS
+//  GLB TEMPLATES — loaded once, cloned per player
 // ═══════════════════════════════════════════════════════════════
+let riderTemplate = null;   // glb_fatboi_moto_rider.glb scene
+let wheelTemplate = null;   // motorcycle_wheel.glb scene
 
-function setupBikeModel(model, tintColor){
-  const wheels = [];
-  const allMeshes = [];
+// Load counters: all 3 must finish (or fail gracefully) before game starts
+let _bikeReady = false, _riderReady = false, _wheelReady = false;
 
-  model.traverse(function(child){
-    if(child.isMesh){
-      child.castShadow = true;
-      child.receiveShadow = false;
-      child.frustumCulled = false;
-      const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.forEach(function(mat){
-        if(!mat) return;
-        mat.side = THREE.DoubleSide;
-        if(mat.transparent && mat.opacity < 0.05){ mat.opacity=1.0; mat.transparent=false; }
-        mat.needsUpdate = true;
-      });
-      child.geometry.computeBoundingSphere();
-      child.geometry.computeBoundingBox();
-      allMeshes.push(child);
-    }
-  });
-
-  // Detect wheels by name first
-  const wheelPattern = /wheel|tire|tyre|rim|roue|rueda/i;
-  allMeshes.forEach(function(mesh){
-    if(wheelPattern.test(mesh.name)) wheels.push(mesh);
-  });
-
-  // Fallback: detect wheels by geometry aspect ratio (round = wheel-like)
-  const geometricWheels = [];
-  if(wheels.length === 0){
-    allMeshes.forEach(function(mesh){
-      const bb = new THREE.Box3().setFromObject(mesh);
-      const sz = new THREE.Vector3(); bb.getSize(sz);
-      const minDim = Math.min(sz.x, sz.y, sz.z);
-      const maxDim = Math.max(sz.x, sz.y, sz.z);
-      // Wheel: thin disc shape (one dim much smaller than other two)
-      if(minDim < maxDim * 0.35 && maxDim > 0.2 && maxDim < 2.5){
-        geometricWheels.push(mesh);
-      }
-    });
+function checkModelsReady(){
+  if(_bikeReady && _riderReady && _wheelReady){
+    modelsLoaded = true;
+    loadProgress('model');
+    dracoLoader.dispose();
+    checkAllLoaded();
   }
-
-  const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;
-
-  const nonWheelMeshes = allMeshes.filter(m => !detectedWheels.includes(m));
-  if(nonWheelMeshes.length > 0){
-    nonWheelMeshes.sort((a,b) => b.geometry.boundingSphere.radius - a.geometry.boundingSphere.radius);
-    const bodyMesh = nonWheelMeshes[0];
-    try {
-      if(Array.isArray(bodyMesh.material)){
-        bodyMesh.material = bodyMesh.material.map(function(mat){
-          const m = mat.clone();
-          m.emissive = new THREE.Color(tintColor);
-          m.emissiveIntensity = 0.12;
-          return m;
-        });
-      } else {
-        const m = bodyMesh.material.clone();
-        m.emissive = new THREE.Color(tintColor);
-        m.emissiveIntensity = 0.12;
-        bodyMesh.material = m;
-      }
-    } catch(e){}
-  }
-
-  return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };
 }
 
-/**
- * fitBikeToGround — scale model so its Z-depth ≈ TARGET_LENGTH (7 units),
- * center X/Z at 0, and snap bottom Y to 0.
- *
- * FIX #2: TARGET_LENGTH increased from 5 → 7 (bigger bikes).
- * FIX #1: Auto-orient logic replaced with a fixed inner-model flip of Math.PI
- *         so the bike faces forward (handlebars toward finish line) after the
- *         outer group's Math.PI rotation cancels out.
- *         (Old auto-detect: if(size.x > size.z) rotate Math.PI/2 — replaced below)
- */
+// ═══════════════════════════════════════════════════════════════
+//  fitBikeToGround — scales inner model so it's ~7 units long
+// ═══════════════════════════════════════════════════════════════
 function fitBikeToGround(innerModel){
-  // Step 1: force world matrix update for all descendants
   innerModel.updateMatrixWorld(true);
   let box = new THREE.Box3().setFromObject(innerModel);
   let size = new THREE.Vector3();
   box.getSize(size);
 
-  // FIX #1: Apply fixed 180° Y-flip to the inner model.
-  // The outer car1/car2 group already has rotation.y = Math.PI.
-  // Adding another Math.PI here on the inner model makes the net
-  // rotation = 0, but the GLB's own forward (+Z or -Z) determines
-  // final orientation. Flip so handlebars point toward +Z (finish).
-  // NOTE: Old auto-orient (if size.x > size.z → rotate Math.PI/2) is removed.
   innerModel.rotation.y = Math.PI;
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
 
-  // If still sideways after the flip (some GLBs are truly 90° off axis),
-  // apply an additional quarter-turn:
-  // if(size.x > size.z * 1.5){ innerModel.rotation.y += Math.PI/2; }
-
-  // Step 2: Scale so Z-depth (forward) = TARGET_LENGTH
-  // FIX #3: Increased from 5.0 → 7.0 for bigger bikes
   const TARGET_LENGTH = 7.0;
-  const currentDepth = Math.max(size.z, size.x, 0.001); // use longest axis for robust scaling
+  const currentDepth = Math.max(size.z, size.x, 0.001);
   const scaleFactor = TARGET_LENGTH / currentDepth;
   innerModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-  // Step 3: Recompute bbox after scale
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
   const center = new THREE.Vector3();
   box.getCenter(center);
 
-  // Step 4: Center X and Z at 0; bottom Y at 0
   innerModel.position.x = -center.x;
   innerModel.position.z = -center.z;
   innerModel.position.y = -box.min.y;
 }
 
-// ── RED PLACEHOLDER BOXES (shown if model fails to load entirely) ──
+// ═══════════════════════════════════════════════════════════════
+//  GLB RIDER — attach per bike
+// ═══════════════════════════════════════════════════════════════
+function attachGLBRider(carGroup, playerIndex){
+  if(!riderTemplate){
+    console.warn('[rider] template not available, skipping');
+    return;
+  }
+  try {
+    const riderInstance = riderTemplate.clone(true);
+
+    // ── Auto-fit: scale so Y-height ≈ 1.0 (sitting human) ──
+    riderInstance.updateMatrixWorld(true);
+    const rBox = new THREE.Box3().setFromObject(riderInstance);
+    const rSize = new THREE.Vector3();
+    rBox.getSize(rSize);
+    const rCenter = new THREE.Vector3();
+    rBox.getCenter(rCenter);
+
+    const targetHeight = 1.0; // sitting rider
+    const s = targetHeight / Math.max(rSize.y, 0.001);
+    riderInstance.scale.set(s, s, s);
+
+    // Center XZ, bottom at local Y=0
+    riderInstance.position.x = -rCenter.x * s;
+    riderInstance.position.z = -rCenter.z * s;
+    riderInstance.position.y = -rBox.min.y * s;
+
+    // ── Tint: traverse meshes and clone materials per player ──
+    const emissiveColor = playerIndex === 0 ? 0xCC2200 : 0x1E40AF;
+    const emissiveIntensity = 0.05;
+    riderInstance.traverse(function(child){
+      if(!child.isMesh) return;
+      child.frustumCulled = false;
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      const newMats = mats.map(function(mat){
+        if(!mat) return mat;
+        const m = mat.clone();
+        m.emissive = new THREE.Color(emissiveColor);
+        m.emissiveIntensity = emissiveIntensity;
+        m.needsUpdate = true;
+        return m;
+      });
+      child.material = Array.isArray(child.material) ? newMats : newMats[0];
+    });
+
+    // ── Find bike's world bounding box to place rider on seat ──
+    carGroup.updateMatrixWorld(true);
+    const bikeBox = new THREE.Box3().setFromObject(carGroup);
+    const bikeBoxSize = new THREE.Vector3();
+    bikeBox.getSize(bikeBoxSize);
+
+    // Seat position in world space
+    const seatY_world = bikeBox.max.y - 0.45;
+    const seatX_world = (bikeBox.min.x + bikeBox.max.x) * 0.5;
+    const seatZ_world = (bikeBox.min.z + bikeBox.max.z) * 0.5 - 0.25;
+
+    // Convert world seat position to carGroup local space
+    const seatWorld = new THREE.Vector3(seatX_world, seatY_world, seatZ_world);
+    const seatLocal = carGroup.worldToLocal(seatWorld.clone());
+
+    // The rider's bottom Y is 0 in its own space; position it so bottom lands on seatLocal
+    const riderFinalPos = new THREE.Vector3(
+      seatLocal.x + riderInstance.position.x,
+      seatLocal.y,
+      seatLocal.z + riderInstance.position.z
+    );
+
+    // ── Orientation: carGroup already has rotation.y=Math.PI
+    //    If rider ends up backwards, add Math.PI flip ──
+    riderInstance.rotation.y = Math.PI; // flip to match bike's forward direction
+
+    // ── Mount animation: start offset, animate to target ──
+    const startPos = new THREE.Vector3(
+      riderFinalPos.x + (playerIndex === 0 ? -2.0 : 2.0),
+      riderFinalPos.y + 2.5,
+      riderFinalPos.z
+    );
+
+    riderInstance.position.copy(startPos);
+    riderInstance._targetPos = riderFinalPos.clone();
+    riderInstance._startPos  = startPos.clone();
+    riderInstance._mounted   = false;
+
+    carGroup.add(riderInstance);
+    carGroup._rider = riderInstance;
+
+    console.log('[rider] loaded, scale:', s.toFixed(4),
+      'bbox:', [rSize.x.toFixed(3), rSize.y.toFixed(3), rSize.z.toFixed(3)],
+      '| player:', playerIndex,
+      '| seatLocal:', [seatLocal.x.toFixed(3), seatLocal.y.toFixed(3), seatLocal.z.toFixed(3)]);
+  } catch(e) {
+    console.error('[rider] attachGLBRider failed:', e);
+    carGroup._rider = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GLB WHEEL INTEGRATION
+// ═══════════════════════════════════════════════════════════════
+function attachGLBWheels(bikeModel, carGroup){
+  if(!wheelTemplate){
+    console.warn('[wheel] template not available, skipping');
+    return [];
+  }
+
+  // ── Step 1: find and HIDE original bike wheels ──
+  const wheelPattern = /wheel|tire|tyre|rim|hub/i;
+  const allMeshes = [];
+  bikeModel.traverse(c=>{ if(c.isMesh) allMeshes.push(c); });
+
+  // Tier 1: name-based detection
+  let origWheelMeshes = allMeshes.filter(m => {
+    if(wheelPattern.test(m.name)) return true;
+    let p = m.parent;
+    while(p && p !== bikeModel){
+      if(wheelPattern.test(p.name||'')) return true;
+      p = p.parent;
+    }
+    return false;
+  });
+
+  // Tier 2: geometry analysis if tier 1 found < 2
+  if(origWheelMeshes.length < 2){
+    bikeModel.updateMatrixWorld(true);
+    const modelBox = new THREE.Box3().setFromObject(bikeModel);
+    const modelH = modelBox.max.y - modelBox.min.y;
+    const tier2 = allMeshes.filter(m => {
+      m.updateWorldMatrix(true,false);
+      const bbox = new THREE.Box3().setFromObject(m);
+      const sz = new THREE.Vector3(); bbox.getSize(sz);
+      const ct = new THREE.Vector3(); bbox.getCenter(ct);
+      const maxXY = Math.max(sz.x,sz.y), minXY = Math.min(sz.x,sz.y);
+      if(maxXY < 0.001) return false;
+      if(minXY/maxXY < 0.55) return false;
+      const minDim=Math.min(sz.x,sz.y,sz.z), maxDim=Math.max(sz.x,sz.y,sz.z);
+      if(minDim/maxDim > 0.65) return false;
+      const relY=(ct.y-modelBox.min.y)/Math.max(modelH,0.001);
+      if(relY > 0.45) return false;
+      if(maxXY < modelH*0.12) return false;
+      return true;
+    });
+    origWheelMeshes = [...new Set([...origWheelMeshes, ...tier2])].slice(0,4);
+  }
+
+  // Hide original wheels (keep in scene, just invisible)
+  origWheelMeshes.forEach(m=>{ m.visible=false; });
+  console.log('[bike] hiding original wheels:', origWheelMeshes.length,
+    '| names:', origWheelMeshes.map(m=>m.name||'(unnamed)'));
+
+  // ── Step 2: Record original wheel world positions ──
+  // Get world Z of each original wheel to classify front/rear
+  bikeModel.updateMatrixWorld(true);
+  let wheelPositions = origWheelMeshes.map(m => {
+    m.updateWorldMatrix(true,false);
+    const wb = new THREE.Box3().setFromObject(m);
+    const wc = new THREE.Vector3(); wb.getCenter(wc);
+    const wb_sz = new THREE.Vector3(); wb.getSize(wb_sz);
+    const diameter = Math.max(wb_sz.x, wb_sz.y);
+    return { worldCenter: wc.clone(), diameter };
+  });
+
+  // Sort by world Z: higher Z = front (in bike's local space, before outer Math.PI flip)
+  wheelPositions.sort((a,b) => b.worldCenter.z - a.worldCenter.z);
+
+  // If no wheels detected at all: estimate front/rear from bike bounding box
+  if(wheelPositions.length === 0){
+    bikeModel.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(bikeModel);
+    const bc = new THREE.Vector3(); bb.getCenter(bc);
+    const bs = new THREE.Vector3(); bb.getSize(bs);
+    const estimatedDiameter = bb.max.y * 0.85;
+    wheelPositions = [
+      { worldCenter: new THREE.Vector3(bc.x, estimatedDiameter/2, bb.max.z - estimatedDiameter*0.5), diameter: estimatedDiameter },
+      { worldCenter: new THREE.Vector3(bc.x, estimatedDiameter/2, bb.min.z + estimatedDiameter*0.5), diameter: estimatedDiameter }
+    ];
+    console.log('[wheel] no original wheels found, estimating positions from bbox');
+  } else if(wheelPositions.length === 1){
+    // Duplicate: estimate the other from the bike extents
+    bikeModel.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(bikeModel);
+    const bc = new THREE.Vector3(); bb.getCenter(bc);
+    const knownZ = wheelPositions[0].worldCenter.z;
+    const otherZ = knownZ < bc.z
+      ? bb.max.z - wheelPositions[0].diameter * 0.5
+      : bb.min.z + wheelPositions[0].diameter * 0.5;
+    wheelPositions.push({
+      worldCenter: new THREE.Vector3(bc.x, wheelPositions[0].worldCenter.y, otherZ),
+      diameter: wheelPositions[0].diameter
+    });
+    wheelPositions.sort((a,b) => b.worldCenter.z - a.worldCenter.z);
+  }
+
+  // Use at most 2 (front/rear)
+  const frontPos = wheelPositions[0];
+  const rearPos  = wheelPositions[wheelPositions.length > 1 ? 1 : 0];
+
+  // ── Step 3: Inspect wheel GLB ──
+  const templateMeshes = [];
+  wheelTemplate.traverse(c=>{ if(c.isMesh) templateMeshes.push(c); });
+  console.log('[wheel] loaded, found', templateMeshes.length, 'wheel meshes in template');
+
+  // ── Step 4: Spawn GLB wheels ──
+  const newWheelPivots = [];
+
+  function spawnOneWheel(targetWorldPos, targetDiameter, label){
+    // Clone template
+    const wClone = wheelTemplate.clone(true);
+    wClone.traverse(c=>{
+      if(c.isMesh){ c.frustumCulled=false; c.castShadow=false; }
+    });
+
+    // Compute clone bounding box
+    wClone.updateMatrixWorld(true);
+    const cloneBox = new THREE.Box3().setFromObject(wClone);
+    const cloneSize = new THREE.Vector3(); cloneBox.getSize(cloneSize);
+    const cloneDiameter = Math.max(cloneSize.x, cloneSize.y, 0.001);
+
+    // Scale to match target diameter
+    const scaleFactor = (targetDiameter > 0.1 ? targetDiameter : 0.8) / cloneDiameter;
+    wClone.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    // Create pivot group at wheel center
+    const pivotGroup = new THREE.Group();
+
+    // Convert world position to carGroup local space
+    const localPos = carGroup.worldToLocal(targetWorldPos.clone());
+    pivotGroup.position.copy(localPos);
+
+    // Add clone centered within pivot
+    wClone.updateMatrixWorld(true);
+    const cb2 = new THREE.Box3().setFromObject(wClone);
+    const cc = new THREE.Vector3(); cb2.getCenter(cc);
+    wClone.position.sub(cc.multiplyScalar(1/scaleFactor));
+
+    pivotGroup.add(wClone);
+    carGroup.add(pivotGroup);
+
+    // Rotation axis: wheels spin on X axis; if the GLB wheel's natural axis is different,
+    // add a correction rotation to the clone
+    // motorcycle_wheel.glb presumably has its axle along local X → rotation.x spins it
+    // If it appears sideways, uncomment: wClone.rotation.y = Math.PI/2;
+
+    console.log('[wheel] spawned', label,
+      'at local:', [localPos.x.toFixed(3), localPos.y.toFixed(3), localPos.z.toFixed(3)],
+      '| scale:', scaleFactor.toFixed(4),
+      '| targetDiam:', (targetDiameter||0).toFixed(3));
+
+    return pivotGroup;
+  }
+
+  const frontPivot = spawnOneWheel(frontPos.worldCenter, frontPos.diameter, 'FRONT');
+  const rearPivot  = spawnOneWheel(rearPos.worldCenter,  rearPos.diameter,  'REAR');
+
+  newWheelPivots.push(frontPivot, rearPivot);
+  console.log('[bike] attaching new wheels at:',
+    [frontPos.worldCenter.x.toFixed(3), frontPos.worldCenter.y.toFixed(3), frontPos.worldCenter.z.toFixed(3)],
+    'and',
+    [rearPos.worldCenter.x.toFixed(3),  rearPos.worldCenter.y.toFixed(3),  rearPos.worldCenter.z.toFixed(3)]);
+
+  return newWheelPivots;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BIKE MODEL SETUP — applied after bike GLB loads
+// ═══════════════════════════════════════════════════════════════
+function setupBikeModel(model, tintColor, carGroup){
+  model.traverse(function(child){
+    if(child.isMesh){
+      child.castShadow = false;
+      child.receiveShadow = false;
+      child.frustumCulled = false;
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(function(mat){
+        if(!mat) return;
+        mat.side = THREE.DoubleSide;
+        if(mat.transparent && mat.opacity < 0.05){
+          mat.opacity = 1.0; mat.transparent = false;
+        }
+        mat.needsUpdate = true;
+      });
+      child.geometry.computeBoundingSphere();
+    }
+  });
+
+  // Tint the largest mesh as body
+  const allMeshes = [];
+  model.traverse(c=>{ if(c.isMesh) allMeshes.push(c); });
+  if(allMeshes.length > 0){
+    allMeshes.sort((a,b)=> b.geometry.boundingSphere.radius - a.geometry.boundingSphere.radius);
+    const bodyMesh = allMeshes[0];
+    try {
+      if(Array.isArray(bodyMesh.material)){
+        bodyMesh.material = bodyMesh.material.map(function(mat){
+          const m = mat.clone();
+          m.emissive = new THREE.Color(tintColor);
+          m.emissiveIntensity = 0.08;
+          return m;
+        });
+      } else {
+        const m = bodyMesh.material.clone();
+        m.emissive = new THREE.Color(tintColor);
+        m.emissiveIntensity = 0.08;
+        bodyMesh.material = m;
+      }
+    } catch(e){}
+  }
+
+  // Attach GLB wheels (hides original, spawns new)
+  const wheelPivots = attachGLBWheels(model, carGroup);
+  return wheelPivots;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FALLBACK BOXES
+// ═══════════════════════════════════════════════════════════════
 function spawnFallbackBoxes(){
   [car1, car2].forEach(function(car, idx){
     const color = idx === 0 ? 0xFF2200 : 0xFF6600;
@@ -860,13 +1165,18 @@ function spawnFallbackBoxes(){
       wheel.rotation.z = Math.PI / 2;
       wheel.position.set(0, 0.55, zOff);
       wheel.frustumCulled = false;
-      car.add(wheel);
+      const pivot = new THREE.Group();
+      pivot.position.copy(wheel.position);
+      wheel.position.set(0,0,0);
+      car.add(pivot);
+      pivot.add(wheel);
+      car._wheels.push(pivot);
     });
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  GLB LOADING — relative path first, catbox fallback, then boxes
+//  GLB LOADERS
 // ═══════════════════════════════════════════════════════════════
 const dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -876,224 +1186,158 @@ gltfLoader.setDRACOLoader(dracoLoader);
 
 const BIKE_URL_PRIMARY  = 'motorcycle.glb';
 const BIKE_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
+const RIDER_URL         = 'glb_fatboi_moto_rider.glb';
+const WHEEL_URL         = 'motorcycle_wheel.glb';
 
-trackLoad('model');
+// Track 3 model loads
+trackLoad('model');   // covers all 3 — we report 'model' when all 3 done
 
+// ─── applyBikeGltf — called once bike + rider + wheel are all ready ───
 function applyBikeGltf(gltf){
   const bikeModel = gltf.scene;
 
-  // Clone for P1
+  // ── BIKE 1 ──
   const bike1Model = bikeModel.clone(true);
   fitBikeToGround(bike1Model);
-  const r1 = setupBikeModel(bike1Model, 0xFFCC00);
-  car1._wheels = r1.namedWheels;
-  car1._allWheelMeshes = r1.allDetected;
   car1.remove(debugCube1);
   car1.add(bike1Model);
-  addProceduralRider(car1, 0xFFCC00);
+  car1._wheels = setupBikeModel(bike1Model, 0xFFCC00, car1);
 
-  // Clone for P2
+  // ── BIKE 2 ──
   const bike2Model = bikeModel.clone(true);
   fitBikeToGround(bike2Model);
-  const r2 = setupBikeModel(bike2Model, 0x1E88E5);
-  car2._wheels = r2.namedWheels;
-  car2._allWheelMeshes = r2.allDetected;
   car2.remove(debugCube2);
   car2.add(bike2Model);
-  addProceduralRider(car2, 0x1E88E5);
+  car2._wheels = setupBikeModel(bike2Model, 0x1E88E5, car2);
 
-  modelsLoaded = true;
-  loadProgress('model');
-  dracoLoader.dispose();
-  checkAllLoaded();
+  // ── RIDERS — GLB based ──
+  car1.updateMatrixWorld(true);
+  car2.updateMatrixWorld(true);
+  attachGLBRider(car1, 0);
+  attachGLBRider(car2, 1);
+
+  const totalWheels = car1._wheels.length + car2._wheels.length;
+  const riderOk = (car1._rider != null) && (car2._rider != null);
+  dbgSet(totalWheels, riderOk ? 'yes' : 'NO!', 'loaded');
+
+  _bikeReady = true;
+  checkModelsReady();
 }
 
+// ─── Load Rider GLB ───
+setLoadStatus('Loading rider...');
+gltfLoader.load(
+  RIDER_URL,
+  function(gltf){
+    riderTemplate = gltf.scene;
+    console.log('[rider] template loaded successfully');
+    setLoadStatus('Rider loaded ✓');
+    _riderReady = true;
+    checkModelsReady();
+  },
+  function(xhr){ if(xhr.total>0) setLoadStatus('Loading rider... '+Math.round(xhr.loaded/xhr.total*100)+'%'); },
+  function(err){
+    console.error('[rider] GLB failed to load:', err);
+    setLoadStatus('Rider unavailable — continuing');
+    riderTemplate = null;
+    _riderReady = true; // fail gracefully
+    checkModelsReady();
+  }
+);
+
+// ─── Load Wheel GLB ───
+setLoadStatus('Loading wheels...');
+gltfLoader.load(
+  WHEEL_URL,
+  function(gltf){
+    wheelTemplate = gltf.scene;
+    // Count how many meshes
+    let meshCount = 0;
+    wheelTemplate.traverse(c=>{ if(c.isMesh) meshCount++; });
+    console.log('[wheel] loaded, found', meshCount, 'wheel meshes in template');
+    setLoadStatus('Wheels loaded ✓');
+    _wheelReady = true;
+    checkModelsReady();
+  },
+  function(xhr){ if(xhr.total>0) setLoadStatus('Loading wheels... '+Math.round(xhr.loaded/xhr.total*100)+'%'); },
+  function(err){
+    console.error('[wheel] GLB failed to load:', err);
+    setLoadStatus('Wheels unavailable — continuing');
+    wheelTemplate = null;
+    _wheelReady = true; // fail gracefully
+    checkModelsReady();
+  }
+);
+
+// ─── Load Bike GLB (with fallback) ───
 function loadBikeWithFallback(){
+  setLoadStatus('Loading bikes...');
   gltfLoader.load(
     BIKE_URL_PRIMARY,
-    function(gltf){
-      applyBikeGltf(gltf);
-    },
-    function(xhr){
-      if(xhr.total > 0){
-        const pct = Math.round(xhr.loaded / xhr.total * 100);
-        setLoadStatus('Loading bikes... ' + pct + '%');
-      }
-    },
+    function(gltf){ applyBikeGltf(gltf); },
+    function(xhr){ if(xhr.total > 0){ const pct=Math.round(xhr.loaded/xhr.total*100); setLoadStatus('Loading bikes... '+pct+'%'); } },
     function(err){
       setLoadStatus('Retrying from fallback...');
       gltfLoader.load(
         BIKE_URL_FALLBACK,
-        function(gltf){
-          applyBikeGltf(gltf);
-        },
-        function(xhr2){
-          if(xhr2.total > 0){
-            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
-            setLoadStatus('Fallback loading... ' + pct2 + '%');
-          }
-        },
+        function(gltf){ applyBikeGltf(gltf); },
+        function(xhr2){ if(xhr2.total > 0){ const pct2=Math.round(xhr2.loaded/xhr2.total*100); setLoadStatus('Fallback loading... '+pct2+'%'); } },
         function(err2){
           setLoadStatus('Model unavailable — using placeholder');
-          car1.remove(debugCube1);
-          car2.remove(debugCube2);
+          car1.remove(debugCube1); car2.remove(debugCube2);
           spawnFallbackBoxes();
-          modelsLoaded = true;
-          loadProgress('model');
-          checkAllLoaded();
+          car1.updateMatrixWorld(true);
+          car2.updateMatrixWorld(true);
+          // Still try GLB riders on fallback boxes
+          attachGLBRider(car1, 0);
+          attachGLBRider(car2, 1);
+          const riderOk = (car1._rider != null) && (car2._rider != null);
+          dbgSet(car1._wheels.length + car2._wheels.length, riderOk ? 'yes' : 'NO!', 'fallback');
+          _bikeReady = true;
+          checkModelsReady();
         }
       );
     }
   );
 }
 
-
-// ═══════════════════════════════════════════════════════════════
-//  PROCEDURAL RIDER — r128 compatible (no CapsuleGeometry)
-// ═══════════════════════════════════════════════════════════════
-function makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){
-  // Capsule = cylinder + 2 hemispheres
-  const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
-  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10), mat);
-  g.add(cyl);
-  const top = new THREE.Mesh(new THREE.SphereGeometry(rt,10,8,0,Math.PI*2,0,Math.PI/2), mat);
-  top.position.y = h/2; g.add(top);
-  const bot = new THREE.Mesh(new THREE.SphereGeometry(rb,10,8,0,Math.PI*2,Math.PI/2,Math.PI/2), mat);
-  bot.position.y = -h/2; g.add(bot);
-  g.traverse(c=>{ if(c.isMesh) c.frustumCulled=false; });
-  return g;
-}
-
-function addProceduralRider(carGroup, helmetColor){
-  const suitCol  = 0x1a1a2e;
-  const bootCol  = 0x0d0d0d;
-  const gloveCol = 0x111111;
-  const skinCol  = 0x8B5E3C;
-
-  function smat(col, rough=0.75, metal=0.0){
-    return new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
-  }
-
-  const rg = new THREE.Group();
-
-  // ── TORSO ──
-  const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
-  torso.rotation.x = -0.65;
-  torso.position.set(0, 1.20, 0.10);
-  rg.add(torso);
-
-  // Chest stripe (team color)
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
-  stripe.position.set(0, 1.22, -0.13);
-  rg.add(stripe);
-
-  // ── NECK ──
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
-  neck.position.set(0, 1.50, 0.00);
-  rg.add(neck);
-
-  // ── HELMET ──
-  const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
-  helmet.scale.set(1.0, 1.08, 1.12);
-  helmet.position.set(0, 1.66, -0.04);
-  rg.add(helmet);
-
-  // Visor
-  const visorMat = new THREE.MeshStandardMaterial({
-    color:0x0a0a1a, roughness:0.02, metalness:0.9,
-    transparent:true, opacity:0.80, side:THREE.FrontSide
-  });
-  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);
-  visor.position.set(0, 1.62, 0.09);
-  visor.scale.set(1, 0.82, 0.88);
-  visor.frustumCulled = false;
-  rg.add(visor);
-
-  // Helmet chin
-  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
-  chin.position.set(0, 1.56, 0.10);
-  chin.scale.set(1,0.75,1.1);
-  chin.frustumCulled=false;
-  rg.add(chin);
-
-  // ── UPPER ARMS ──
-  [[-1],[1]].forEach(([side])=>{
-    const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
-    ua.rotation.z = side * 1.05;
-    ua.rotation.x = -0.45;
-    ua.position.set(side*0.27, 1.26, 0.08);
-    rg.add(ua);
-
-    // Forearm
-    const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
-    fa.rotation.z = side * 0.45;
-    fa.rotation.x = -0.95;
-    fa.position.set(side*0.32, 1.04, 0.28);
-    rg.add(fa);
-
-    // Glove
-    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
-    glove.position.set(side*0.34, 0.90, 0.42);
-    glove.frustumCulled=false;
-    rg.add(glove);
-  });
-
-  // ── LEGS (crouched racing) ──
-  [[-1],[1]].forEach(([side])=>{
-    const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
-    thigh.rotation.x = 1.25;
-    thigh.position.set(side*0.14, 0.95, 0.30);
-    rg.add(thigh);
-
-    const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);
-    shin.rotation.x = -0.80;
-    shin.position.set(side*0.14, 0.66, 0.50);
-    rg.add(shin);
-
-    // Boot
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
-    boot.position.set(side*0.14, 0.52, 0.60);
-    boot.frustumCulled=false;
-    rg.add(boot);
-  });
-
-  rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });
-  carGroup.add(rg);
-  carGroup._rider = rg;
-}
-
-
 loadBikeWithFallback();
 
 // ═══════════════════════════════════════════════════════════════
-//  PARTICLE SYSTEM — MAX_P 150
+//  PARTICLES
 // ═══════════════════════════════════════════════════════════════
-const MAX_P=150;
-const pGeo=new THREE.BufferGeometry();
-const pPos2=new Float32Array(MAX_P*3);
-const pSz=new Float32Array(MAX_P);
-const pLf=new Float32Array(MAX_P);
-const pVx=new Float32Array(MAX_P), pVy=new Float32Array(MAX_P), pVz2=new Float32Array(MAX_P);
-const pTy=new Uint8Array(MAX_P);
+const MAX_P = 300;
+const pGeo = new THREE.BufferGeometry();
+const pPos2 = new Float32Array(MAX_P*3);
+const pSz = new Float32Array(MAX_P);
+const pLf = new Float32Array(MAX_P);
+const pVx = new Float32Array(MAX_P), pVy = new Float32Array(MAX_P), pVz2 = new Float32Array(MAX_P);
+const pTy = new Uint8Array(MAX_P);
 for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pPos2[i*3+1]=9999; pPos2[i*3+2]=9999; pLf[i]=0; pSz[i]=0; }
 pGeo.setAttribute('position',new THREE.BufferAttribute(pPos2,3));
 pGeo.setAttribute('size',new THREE.BufferAttribute(pSz,1));
+
 const pC=document.createElement('canvas'); pC.width=64; pC.height=64;
 const pCx=pC.getContext('2d');
 const pG=pCx.createRadialGradient(32,32,0,32,32,32);
 pG.addColorStop(0,'rgba(255,255,255,1)'); pG.addColorStop(0.5,'rgba(255,255,255,0.4)'); pG.addColorStop(1,'rgba(255,255,255,0)');
 pCx.fillStyle=pG; pCx.fillRect(0,0,64,64);
-const particleMat=new THREE.PointsMaterial({map:new THREE.CanvasTexture(pC),size:1.4,transparent:true,opacity:0.55,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending});
-const particles=new THREE.Points(pGeo,particleMat);
+const particleMat = new THREE.PointsMaterial({
+  map:new THREE.CanvasTexture(pC), size:1.4, transparent:true, opacity:0.55,
+  sizeAttenuation:true, depthWrite:false, blending:THREE.AdditiveBlending
+});
+const particles = new THREE.Points(pGeo, particleMat);
 scene.add(particles);
 let pIdx2=0;
+
 function spawnP(x,y,z,vx,vy,vz,type){
   const i=pIdx2%MAX_P; pIdx2++;
   pPos2[i*3]=x; pPos2[i*3+1]=y; pPos2[i*3+2]=z;
-  pLf[i]=1.0; pSz[i]=type===3?0.3:(type===0?2.5:1.1);
-  pVx[i]=vx+(Math.random()-0.5)*0.5; pVy[i]=vy+Math.random()*0.25; pVz2[i]=vz+(Math.random()-0.5)*0.35;
+  pLf[i]=1.0;
+  pSz[i] = (type===4) ? 1.8 : (type===3 ? 0.3 : (type===0 ? 2.5 : 1.1));
+  pVx[i]=vx+(Math.random()-0.5)*0.5;
+  pVy[i]=vy+Math.random()*0.25;
+  pVz2[i]=vz+(Math.random()-0.5)*0.35;
   pTy[i]=type;
 }
 
@@ -1105,31 +1349,197 @@ const gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];
 const gearThr=[0,14,38,70,106,148,198];
 const MAX_SPD=325;
 
-const state={phase:'idle',timer:0,raceStart:0,
+const INTRO_ARRIVAL_END  = 3.0;
+const INTRO_MOUNT_END    = 5.0;
+const INTRO_REV_END      = 7.5;
+
+const state={
+  phase:'idle', timer:0, raceStart:0,
+  introTimer:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
-  p2:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0}};
-let p1M=1,p2M=1,cShake=0;
+  p2:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0}
+};
+let p1M=1, p2M=1, cShake=0;
+let targetFOV = 45;
+let currentFOV = 45;
+
+const camOff = new THREE.Vector3(0, 3.2, -10);
+const camLookY = 1.4;
+const camLookAhead = 4;
+
+const _camPosLerp = new THREE.Vector3();
+let _camInTransition = false;
+let _camTransTimer = 0;
+const _camTransDur = 0.6;
 
 function getGear(spd){ for(let g=gearThr.length-1;g>=0;g--) if(spd>=gearThr[g]) return g+1; return 1; }
+function hideHUD(){ document.getElementById('hud-inner').classList.add('hud-hidden'); }
+function showHUD(){ document.getElementById('hud-inner').classList.remove('hud-hidden'); }
 
 function resetGame(){
-  state.phase='idle'; state.timer=0; state.raceStart=0;
+  state.phase='idle'; state.timer=0; state.raceStart=0; state.introTimer=0;
   state.p1={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
   state.p2={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
   car1.position.set(-4.5,0,START_Z); car2.position.set(4.5,0,START_Z);
+  car1.rotation.x=0; car1.rotation.z=0;
+  car2.rotation.x=0; car2.rotation.z=0;
   document.getElementById('winner-banner').style.display='none';
   document.getElementById('countdown').style.display='none';
   document.getElementById('launch-hint').style.display='block';
+  document.getElementById('skip-hint').style.display='none';
+  document.getElementById('intro-title').style.display='none';
+  document.getElementById('rev-text').style.display='none';
+  hideHUD();
   p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;
-  cShake=0;
+  cShake=0; targetFOV=45; currentFOV=45; camera.fov=45;
+  camera.updateProjectionMatrix();
+  _camInTransition=false; _camTransTimer=0;
+  [car1,car2].forEach(car => {
+    if(car._rider){
+      car._rider.position.copy(car._rider._startPos);
+      car._rider._mounted=false;
+    }
+  });
   for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
-  document.getElementById('timer-val').textContent = '0.000';
+  document.getElementById('timer-val').textContent='0.000';
+  dbgSet(
+    car1._wheels.length + car2._wheels.length,
+    (car1._rider != null && car2._rider != null) ? 'yes' : 'NO!',
+    'idle'
+  );
 }
 
-function startCountdown(){
-  if(state.phase!=='idle') return;
+// ═══════════════════════════════════════════════════════════════
+//  CINEMATIC INTRO SEQUENCE
+// ═══════════════════════════════════════════════════════════════
+function beginIntro(){
   document.getElementById('launch-hint').style.display='none';
+  state.phase='intro_arrival';
+  state.introTimer=0;
+
+  const introTitle = document.getElementById('intro-title');
+  introTitle.style.display='block';
+  setTimeout(()=>{ introTitle.style.opacity='1'; }, 50);
+  setTimeout(()=>{ introTitle.style.opacity='0'; }, 2000);
+  setTimeout(()=>{ introTitle.style.display='none'; }, 2800);
+
+  document.getElementById('skip-hint').style.display='block';
+}
+
+function skipIntro(){
+  document.getElementById('skip-hint').style.display='none';
+  document.getElementById('intro-title').style.display='none';
+  document.getElementById('rev-text').style.display='none';
+  [car1,car2].forEach(car=>{
+    if(car._rider){
+      car._rider.position.copy(car._rider._targetPos);
+      car._rider._mounted=true;
+    }
+  });
+  startCountdown();
+}
+
+function updateIntro(dt){
+  if(state.phase==='idle'||state.phase==='countdown'||state.phase==='racing'||state.phase==='finished') return;
+  state.introTimer += dt;
+  const t = state.introTimer;
+
+  // ── PHASE 1: intro_arrival (0–3s) ──
+  if(state.phase==='intro_arrival'){
+    const nt = Math.min(t / INTRO_ARRIVAL_END, 1.0);
+    const cx = Math.sin(nt * Math.PI * 0.7) * 14;
+    const cy = 2.5 + (1-nt) * 4;
+    const cz = -25 + nt * 12;
+    camera.position.set(cx, cy, cz);
+    camera.lookAt(0, 1.2, 5);
+    if(t >= INTRO_ARRIVAL_END){
+      state.phase='rider_mount';
+      document.getElementById('rev-text').style.display='none';
+    }
+    return;
+  }
+
+  // ── PHASE 2: rider_mount (3–5s) ──
+  if(state.phase==='rider_mount'){
+    const nt = Math.min((t - INTRO_ARRIVAL_END) / (INTRO_MOUNT_END - INTRO_ARRIVAL_END), 1.0);
+    const ease = nt < 0.5 ? 2*nt*nt : -1+(4-2*nt)*nt;
+
+    [car1,car2].forEach(car=>{
+      if(car._rider && !car._rider._mounted){
+        car._rider.position.lerpVectors(car._rider._startPos, car._rider._targetPos, ease);
+        if(ease >= 0.99) car._rider._mounted = true;
+      }
+    });
+
+    const camT = (t - INTRO_ARRIVAL_END) / (INTRO_MOUNT_END - INTRO_ARRIVAL_END);
+    const camX = 12 - camT * 6;
+    const camY = 3.5 - camT * 0.5;
+    const camZ = 5 - camT * 4;
+    camera.position.set(camX, camY, camZ);
+    camera.lookAt(0, 1.5, 5);
+
+    if(t >= INTRO_MOUNT_END){
+      state.phase='rev_engine';
+      document.getElementById('rev-text').style.display='block';
+    }
+    return;
+  }
+
+  // ── PHASE 3: rev_engine (5–7.5s) ──
+  if(state.phase==='rev_engine'){
+    const nt = (t - INTRO_MOUNT_END) / (INTRO_REV_END - INTRO_MOUNT_END);
+
+    const jitter = Math.sin(t * 28) * 0.025 * nt;
+    const jitter2 = Math.cos(t * 22) * 0.018 * nt;
+    car1.rotation.z = jitter;   car1.rotation.x = jitter2;
+    car2.rotation.z = -jitter;  car2.rotation.x = jitter2;
+
+    // Spin rear wheel at high RPM — use index 1 (rear) if available
+    const rearWheelIdx = car1._wheels.length > 1 ? 1 : 0;
+    if(car1._wheels[rearWheelIdx]) car1._wheels[rearWheelIdx].rotation.x += 0.38 * dt * 60;
+    if(car2._wheels[rearWheelIdx]) car2._wheels[rearWheelIdx].rotation.x += 0.38 * dt * 60;
+
+    // Dense smoke
+    [[car1, state.p1],[car2, state.p2]].forEach(([c])=>{
+      const cx = c.position.x, cy = c.position.y+0.2, cz = c.position.z - 1.5;
+      for(let i=0;i<6;i++){
+        spawnP(
+          cx + (Math.random()-0.5)*0.8, cy + Math.random()*0.3, cz + (Math.random()-0.5)*0.5,
+          (Math.random()-0.5)*0.3, 0.06 + Math.random()*0.12, -(0.1 + Math.random()*0.3), 4
+        );
+      }
+    });
+
+    const heroX = 8 * Math.cos(nt * 0.4);
+    const heroY = 1.5;
+    const heroZ = 3;
+    camera.position.lerp(new THREE.Vector3(heroX, heroY, heroZ), 0.06);
+    camera.lookAt(new THREE.Vector3(0, 1.3, 5));
+    targetFOV = 50 - nt * 6;
+
+    if(t >= INTRO_REV_END){
+      car1.rotation.z=0; car1.rotation.x=0;
+      car2.rotation.z=0; car2.rotation.x=0;
+      document.getElementById('rev-text').style.display='none';
+      document.getElementById('skip-hint').style.display='none';
+      _camInTransition = true;
+      _camTransTimer = 0;
+      _camPosLerp.copy(camera.position);
+      startCountdown();
+    }
+    return;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COUNTDOWN
+// ═══════════════════════════════════════════════════════════════
+function startCountdown(){
+  if(state.phase==='countdown'||state.phase==='racing'||state.phase==='finished') return;
   state.phase='countdown';
+  showHUD();
+  targetFOV=55;
+
   const el=document.getElementById('countdown');
   el.style.display='block'; el.classList.remove('go');
   for(let li=0;li<5;li++){
@@ -1153,46 +1563,108 @@ function startCountdown(){
     el.style.animation='none'; el.offsetHeight; el.style.animation='countPulse 0.6s ease-out';
     idx++;
     if(idx<4) setTimeout(step,900);
-    else{ setTimeout(()=>{ el.style.display='none'; state.phase='racing'; state.raceStart=performance.now(); cShake=0.22; },700); }
+    else{
+      setTimeout(()=>{
+        el.style.display='none';
+        state.phase='racing';
+        state.raceStart=performance.now();
+        cShake=0.22;
+        targetFOV=45;
+      },700);
+    }
   }
   step();
 }
 
 window.addEventListener('keydown',e=>{
-  if(e.code==='Space'||e.key===' '){ e.preventDefault(); if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); }
+  if(e.code==='Space'||e.key===' '){
+    e.preventDefault();
+    if(state.phase==='intro_arrival'||state.phase==='rider_mount'||state.phase==='rev_engine') skipIntro();
+    else if(state.phase==='idle') beginIntro();
+    else if(state.phase==='finished') resetGame();
+  }
 });
-document.getElementById('canvas-container').addEventListener('click',()=>{ if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); });
+document.getElementById('canvas-container').addEventListener('click',()=>{
+  if(state.phase==='intro_arrival'||state.phase==='rider_mount'||state.phase==='rev_engine') skipIntro();
+  else if(state.phase==='idle') beginIntro();
+  else if(state.phase==='finished') resetGame();
+});
 document.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPropagation(); resetGame(); });
 
 // ═══════════════════════════════════════════════════════════════
-//  CAMERA
-// ═══════════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════════
-//  CAMERA — low chase cam behind the bikes
+//  CAMERA — CINEMATIC CHASE CAM
 // ═══════════════════════════════════════════════════════════════
 function updateCamera(dt){
-  // Follow the average position of both bikes
-  const midZ = (state.p1.pos + state.p2.pos) * 0.5;
+  const phase = state.phase;
+  if(phase==='intro_arrival'||phase==='rider_mount'||phase==='rev_engine') return;
 
-  // Shake
-  const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
-  const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
+  const midZ=(state.p1.pos+state.p2.pos)*0.5;
+  const avgSpeed=(state.p1.speed+state.p2.speed)*0.5;
+  const time = performance.now() * 0.001;
 
-  // Camera: sit 9 units BEHIND bikes, 1.8 units HIGH, slightly left of center
-  const camTargetZ = midZ - 9.0;
-  const camTargetY = 1.8 + shY;
-  const camTargetX = sh;
+  if(phase==='countdown'){
+    if(_camInTransition){
+      _camTransTimer += dt;
+      const tT = Math.min(_camTransTimer / _camTransDur, 1.0);
+      const ease = tT < 0.5 ? 2*tT*tT : -1+(4-2*tT)*tT;
+      const targetPos = new THREE.Vector3(
+        Math.sin(time * 0.4) * 2,
+        5.5,
+        midZ - 17
+      );
+      camera.position.lerpVectors(_camPosLerp, targetPos, ease);
+      camera.lookAt(new THREE.Vector3(0, 1.8, midZ + 5));
+      if(tT >= 1.0) _camInTransition = false;
+    } else {
+      const camX = Math.sin(time * 0.4) * 2;
+      camera.position.lerp(new THREE.Vector3(camX, 5.5, midZ - 17), 0.04);
+      camera.lookAt(new THREE.Vector3(0, 1.8, midZ + 5));
+    }
+    targetFOV = 52;
 
-  camera.position.x += (camTargetX - camera.position.x) * 0.15;
-  camera.position.y += (camTargetY - camera.position.y) * 0.10;
-  camera.position.z += (camTargetZ - camera.position.z) * 0.14;
+  } else if(phase==='racing'){
+    const elapsed=(performance.now()-state.raceStart)/1000;
 
-  // Look toward a point AHEAD of the bikes (finish direction)
-  const lookZ = midZ + 16;
-  camera.lookAt(new THREE.Vector3(0, 1.1, lookZ));
+    if(elapsed < 1.5){
+      const zoomT = elapsed / 1.5;
+      targetFOV = 55 - zoomT * 10;
+    } else {
+      targetFOV = 45;
+    }
 
-  if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.8);
+    if(avgSpeed > 200){
+      const punch = Math.sin(time * 0.003) * 3;
+      targetFOV = 45 + punch * (avgSpeed / MAX_SPD);
+    }
+
+    const sway = (avgSpeed / MAX_SPD) * 0.5;
+    const sh = cShake * Math.sin(time * 90) * 0.12;
+    const heightOsc = Math.sin(time * 1.5) * 0.08 * (avgSpeed / MAX_SPD);
+
+    const targetPos = new THREE.Vector3(
+      camOff.x + sh + Math.sin(time * 0.8) * sway,
+      camOff.y + Math.abs(sh) * 0.4 + heightOsc,
+      midZ + camOff.z
+    );
+    camera.position.lerp(targetPos, 0.09);
+    camera.lookAt(new THREE.Vector3(0, camLookY, midZ + camLookAhead));
+
+    const bankAngle = Math.sin(time * 0.5) * 0.01;
+    camera.rotation.z = bankAngle;
+
+    if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.75);
+    document.getElementById('speed-overlay').style.opacity = ((avgSpeed / MAX_SPD) * 0.35).toFixed(2);
+
+  } else {
+    const sh = cShake * Math.sin(time * 90) * 0.12;
+    const targetPos = new THREE.Vector3(camOff.x + sh, camOff.y + Math.abs(sh) * 0.4, midZ + camOff.z);
+    camera.position.lerp(targetPos, 0.06);
+    camera.lookAt(new THREE.Vector3(0, camLookY, midZ + camLookAhead));
+  }
+
+  currentFOV += (targetFOV - currentFOV) * Math.min(dt * 4, 1.0);
+  camera.fov = currentFOV;
+  camera.updateProjectionMatrix();
 
   skyGroup.position.set(camera.position.x, 0, camera.position.z);
   sun.position.set(-80, 100, midZ + 50);
@@ -1207,7 +1679,8 @@ function updatePhysics(dt){
   if(state.phase!=='racing') return;
   const elapsed=(performance.now()-state.raceStart)/1000;
   state.timer=elapsed;
-  function updateCar(cs,mult){
+
+  function updateCar(cs, mult){
     if(cs.finished) return;
     cs.gear=getGear(cs.speed);
     const ga=gears[Math.min(cs.gear,gears.length-1)];
@@ -1218,46 +1691,28 @@ function updatePhysics(dt){
   }
   updateCar(state.p1,p1M); updateCar(state.p2,p2M);
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
+
+  // v6: wheel rotation speed 0.08 — very visible spinning
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
-    const spd = spds[ci];
-    const rotAmt = spd * 0.052 * dt;
-    // Named wheels first
     if(c._wheels && c._wheels.length > 0){
-      c._wheels.forEach(w=>{ w.rotation.x += rotAmt; });
+      c._wheels.forEach(w=>{ w.rotation.x += spds[ci] * 0.08 * dt; });
     }
-    // Geometric wheels fallback
-    if(c._allWheelMeshes && c._allWheelMeshes.length > 0){
-      c._allWheelMeshes.forEach(w=>{ w.rotation.x += rotAmt; });
-    }
-    // Nuclear fallback: if NOTHING detected, spin ALL meshes that look round
-    if((!c._wheels || c._wheels.length===0) && (!c._allWheelMeshes || c._allWheelMeshes.length===0)){
-      c.traverse(function(child){
-        if(!child.isMesh || child._isRiderPart) return;
-        const bb = child.geometry && child.geometry.boundingBox;
-        if(!bb) return;
-        const sx = bb.max.x - bb.min.x;
-        const sy = bb.max.y - bb.min.y;
-        const sz = bb.max.z - bb.min.z;
-        const thin = Math.min(sx,sy,sz) < Math.max(sx,sy,sz)*0.4;
-        if(thin) child.rotation.x += rotAmt;
+    if(c._useWobble && c.children.length > 0){
+      const wobble = Math.sin(performance.now() * 0.008 * (spds[ci] / 60 + 1)) * 0.015;
+      c.children.forEach(child => {
+        if(child.isMesh || child.isGroup){ child.rotation.z = wobble; }
       });
     }
   });
+
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
-  // Animate rider lean — more aggressive lean at high speed
-  [car1, car2].forEach((car, ci)=>{
-    if(car._rider){
-      const spd = spds[ci];
-      const leanX = -0.18 * (spd / MAX_SPD); // lean forward with speed
-      car._rider.rotation.x = leanX;
-    }
-  });
   const now=performance.now();
   if(!state.p1.finished&&state.p1.pos>=FINISH_Z){ state.p1.finished=true; state.p1.finTime=(now-state.raceStart)/1000; }
   if(!state.p2.finished&&state.p2.pos>=FINISH_Z){ state.p2.finished=true; state.p2.finTime=(now-state.raceStart)/1000; }
+
   if(state.p1.finished&&state.p2.finished&&state.phase==='racing'){
     state.phase='finished';
     const w=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';
@@ -1302,6 +1757,17 @@ function spawnCarParticles(){
 function updateParticles(dt){
   for(let i=0;i<MAX_P;i++){
     if(pLf[i]<=0) continue;
+    if(pTy[i]===4){
+      pLf[i] -= dt * 0.5;
+      if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }
+      pPos2[i*3]   += pVx[i]*dt*1.5;
+      pPos2[i*3+1] += pVy[i]*dt*2.5;
+      pPos2[i*3+2] += pVz2[i]*dt*1.5;
+      pVy[i] += dt*0.04;
+      pSz[i] *= (1 + dt*0.9);
+      pSz[i] = Math.min(pSz[i], 8.0);
+      continue;
+    }
     const rate=pTy[i]===0?0.55:(pTy[i]===3?3.2:1.15);
     pLf[i]-=dt*rate;
     if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }
@@ -1317,6 +1783,7 @@ function updateParticles(dt){
 //  HUD
 // ═══════════════════════════════════════════════════════════════
 function updateHUD(){
+  if(state.phase==='intro_arrival'||state.phase==='rider_mount'||state.phase==='rev_engine'||state.phase==='idle') return;
   document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);
   document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);
   const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);
@@ -1329,13 +1796,12 @@ function updateHUD(){
   const prog=FINISH_Z-START_Z;
   document.getElementById('p1-fill').style.width=Math.min((state.p1.pos-START_Z)/prog*100,100)+'%';
   document.getElementById('p2-fill').style.width=Math.min((state.p2.pos-START_Z)/prog*100,100)+'%';
-  const avgS=(state.p1.speed+state.p2.speed)/2;
-  // FIX #5: Reduce speed-overlay strength from *0.5 → *0.25
-  document.getElementById('speed-overlay').style.opacity=(avgS/MAX_SPD*0.25).toFixed(2);
+  if(state.phase!=='racing') document.getElementById('speed-overlay').style.opacity='0';
   const lf=document.getElementById('lens-flare');
   const fa=Math.abs(Math.sin(Date.now()*0.00045));
   if(fa>0.62&&state.phase==='racing'){ lf.style.display='block'; lf.style.left=(38+fa*18)+'%'; lf.style.top='16%'; lf.style.opacity=((fa-0.62)*1.4).toFixed(2); }
   else lf.style.display='none';
+  document.getElementById('dbg-phase').textContent=state.phase;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1345,6 +1811,7 @@ let lastT=0, hudFrame=0;
 function animate(time){
   requestAnimationFrame(animate);
   const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
+  updateIntro(dt);
   updatePhysics(dt);
   spawnCarParticles();
   updateParticles(dt);

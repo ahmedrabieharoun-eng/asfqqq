@@ -740,6 +740,7 @@ function setupBikeModel(model, tintColor){
         mat.needsUpdate = true;
       });
       child.geometry.computeBoundingSphere();
+      child.geometry.computeBoundingBox();
       allMeshes.push(child);
     }
   });
@@ -948,95 +949,121 @@ function loadBikeWithFallback(){
 
 
 // ═══════════════════════════════════════════════════════════════
-//  PROCEDURAL RIDER — human figure sitting on bike
+//  PROCEDURAL RIDER — r128 compatible (no CapsuleGeometry)
 // ═══════════════════════════════════════════════════════════════
-function addProceduralRider(carGroup, helmetColor){
-  const skinColor  = 0x8B5E3C;
-  const suitColor  = 0x111111; // dark racing suit
-  const bootColor  = 0x222222;
+function makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){
+  // Capsule = cylinder + 2 hemispheres
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
+  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10), mat);
+  g.add(cyl);
+  const top = new THREE.Mesh(new THREE.SphereGeometry(rt,10,8,0,Math.PI*2,0,Math.PI/2), mat);
+  top.position.y = h/2; g.add(top);
+  const bot = new THREE.Mesh(new THREE.SphereGeometry(rb,10,8,0,Math.PI*2,Math.PI/2,Math.PI/2), mat);
+  bot.position.y = -h/2; g.add(bot);
+  g.traverse(c=>{ if(c.isMesh) c.frustumCulled=false; });
+  return g;
+}
 
-  function mat(col, rough=0.6, metal=0.0, emissInt=0){
-    const m = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
-    if(emissInt>0){ m.emissive=new THREE.Color(col); m.emissiveIntensity=emissInt; }
-    return m;
+function addProceduralRider(carGroup, helmetColor){
+  const suitCol  = 0x1a1a2e;
+  const bootCol  = 0x0d0d0d;
+  const gloveCol = 0x111111;
+  const skinCol  = 0x8B5E3C;
+
+  function smat(col, rough=0.75, metal=0.0){
+    return new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
   }
 
-  const riderGroup = new THREE.Group();
+  const rg = new THREE.Group();
 
-  // Torso — leaned forward aggressively
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.45, 8, 12), mat(suitColor, 0.8));
-  torso.rotation.x = -0.7; // lean forward
-  torso.position.set(0, 1.18, 0.15);
-  riderGroup.add(torso);
+  // ── TORSO ──
+  const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
+  torso.rotation.x = -0.65;
+  torso.position.set(0, 1.20, 0.10);
+  rg.add(torso);
 
-  // Chest logo stripe
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.10, 0.01), mat(helmetColor, 0.5, 0, 0.05));
-  stripe.position.set(0, 1.22, -0.20);
-  riderGroup.add(stripe);
+  // Chest stripe (team color)
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
+  stripe.position.set(0, 1.22, -0.13);
+  rg.add(stripe);
 
-  // Neck
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.12, 10), mat(skinColor, 0.7));
-  neck.position.set(0, 1.48, -0.02);
-  riderGroup.add(neck);
+  // ── NECK ──
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
+  neck.position.set(0, 1.50, 0.00);
+  rg.add(neck);
 
-  // Helmet — round with visor
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.21, 20, 16), mat(helmetColor, 0.3, 0.1));
-  helmet.position.set(0, 1.65, -0.06);
-  helmet.scale.set(1, 1.05, 1.1);
-  riderGroup.add(helmet);
+  // ── HELMET ──
+  const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
+  helmet.scale.set(1.0, 1.08, 1.12);
+  helmet.position.set(0, 1.66, -0.04);
+  rg.add(helmet);
 
-  // Visor — dark reflective
-  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.155, 16, 10, 0, Math.PI*0.9, 0.6, 1.0),
-    new THREE.MeshStandardMaterial({color:0x111122, roughness:0.05, metalness:0.8, transparent:true, opacity:0.85, side:THREE.FrontSide}));
-  visor.position.set(0, 1.63, 0.10);
-  visor.scale.set(1, 0.85, 0.9);
-  riderGroup.add(visor);
+  // Visor
+  const visorMat = new THREE.MeshStandardMaterial({
+    color:0x0a0a1a, roughness:0.02, metalness:0.9,
+    transparent:true, opacity:0.80, side:THREE.FrontSide
+  });
+  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);
+  visor.position.set(0, 1.62, 0.09);
+  visor.scale.set(1, 0.82, 0.88);
+  visor.frustumCulled = false;
+  rg.add(visor);
 
-  // Upper arms
-  [[-0.28, 0.10], [0.28, 0.10]].forEach(([x, z])=>{
-    const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.28, 6, 8), mat(suitColor, 0.8));
-    arm.rotation.z = x < 0 ? 1.1 : -1.1;
-    arm.rotation.x = -0.5;
-    arm.position.set(x, 1.25, z);
-    riderGroup.add(arm);
+  // Helmet chin
+  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
+  chin.position.set(0, 1.56, 0.10);
+  chin.scale.set(1,0.75,1.1);
+  chin.frustumCulled=false;
+  rg.add(chin);
+
+  // ── UPPER ARMS ──
+  [[-1],[1]].forEach(([side])=>{
+    const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
+    ua.rotation.z = side * 1.05;
+    ua.rotation.x = -0.45;
+    ua.position.set(side*0.27, 1.26, 0.08);
+    rg.add(ua);
+
     // Forearm
-    const fa = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.22, 6, 8), mat(suitColor, 0.8));
-    fa.rotation.z = x < 0 ? 0.5 : -0.5;
-    fa.rotation.x = -0.9;
-    fa.position.set(x*1.1, 1.05, z+0.18);
-    riderGroup.add(fa);
+    const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
+    fa.rotation.z = side * 0.45;
+    fa.rotation.x = -0.95;
+    fa.position.set(side*0.32, 1.04, 0.28);
+    rg.add(fa);
+
+    // Glove
+    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
+    glove.position.set(side*0.34, 0.90, 0.42);
+    glove.frustumCulled=false;
+    rg.add(glove);
   });
 
-  // Thighs (crouched racing position)
-  [[-0.14], [0.14]].forEach(([x])=>{
-    const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.10, 0.30, 6, 8), mat(suitColor, 0.8));
-    thigh.rotation.x = 1.2;
-    thigh.position.set(x, 0.95, 0.32);
-    riderGroup.add(thigh);
-    // Shin
-    const shin = new THREE.Mesh(new THREE.CapsuleGeometry(0.075, 0.28, 6, 8), mat(suitColor, 0.8));
-    shin.rotation.x = -0.8;
-    shin.position.set(x, 0.68, 0.48);
-    riderGroup.add(shin);
+  // ── LEGS (crouched racing) ──
+  [[-1],[1]].forEach(([side])=>{
+    const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
+    thigh.rotation.x = 1.25;
+    thigh.position.set(side*0.14, 0.95, 0.30);
+    rg.add(thigh);
+
+    const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);
+    shin.rotation.x = -0.80;
+    shin.position.set(side*0.14, 0.66, 0.50);
+    rg.add(shin);
+
     // Boot
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.10, 0.22), mat(bootColor, 0.9));
-    boot.position.set(x, 0.55, 0.55);
-    riderGroup.add(boot);
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
+    boot.position.set(side*0.14, 0.52, 0.60);
+    boot.frustumCulled=false;
+    rg.add(boot);
   });
 
-  // Gloves
-  [[-0.31, 0.36], [0.31, 0.36]].forEach(([x, z])=>{
-    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 8), mat(0x1a1a1a, 0.7));
-    glove.position.set(x, 0.90, z);
-    riderGroup.add(glove);
-  });
-
-  // Make all rider parts not frustum culled
-  riderGroup.traverse(c=>{ if(c.isMesh) c.frustumCulled=false; });
-
-  carGroup.add(riderGroup);
-  carGroup._rider = riderGroup;
+  rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });
+  carGroup.add(rg);
+  carGroup._rider = rg;
 }
+
 
 loadBikeWithFallback();
 
@@ -1141,21 +1168,35 @@ document.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPr
 //  CAMERA
 // ═══════════════════════════════════════════════════════════════
 
-// Camera follows bikes from behind at low sporty angle
-const CAM_BEHIND = -10;
-const CAM_HEIGHT = 2.2;
-const CAM_LOOK_AHEAD = 20;
+// ═══════════════════════════════════════════════════════════════
+//  CAMERA — low chase cam behind the bikes
+// ═══════════════════════════════════════════════════════════════
 function updateCamera(dt){
-  const midZ=(state.p1.pos+state.p2.pos)*0.5;
-  const sh=cShake*Math.sin(Date.now()*0.11)*0.10;
-  const shY=cShake*Math.abs(Math.sin(Date.now()*0.07))*0.05;
-  const targetPos=new THREE.Vector3(sh, CAM_HEIGHT+shY, midZ+CAM_BEHIND);
-  camera.position.lerp(targetPos,0.13);
-  camera.lookAt(new THREE.Vector3(0,1.0,midZ+CAM_LOOK_AHEAD));
-  if(cShake>0) cShake=Math.max(0,cShake-dt*0.8);
-  skyGroup.position.set(camera.position.x,0,camera.position.z);
-  sun.position.set(-80,100,midZ+50);
-  sun.target.position.set(0,0,midZ);
+  // Follow the average position of both bikes
+  const midZ = (state.p1.pos + state.p2.pos) * 0.5;
+
+  // Shake
+  const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
+  const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
+
+  // Camera: sit 9 units BEHIND bikes, 1.8 units HIGH, slightly left of center
+  const camTargetZ = midZ - 9.0;
+  const camTargetY = 1.8 + shY;
+  const camTargetX = sh;
+
+  camera.position.x += (camTargetX - camera.position.x) * 0.15;
+  camera.position.y += (camTargetY - camera.position.y) * 0.10;
+  camera.position.z += (camTargetZ - camera.position.z) * 0.14;
+
+  // Look toward a point AHEAD of the bikes (finish direction)
+  const lookZ = midZ + 16;
+  camera.lookAt(new THREE.Vector3(0, 1.1, lookZ));
+
+  if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.8);
+
+  skyGroup.position.set(camera.position.x, 0, camera.position.z);
+  sun.position.set(-80, 100, midZ + 50);
+  sun.target.position.set(0, 0, midZ);
   sun.target.updateMatrixWorld();
 }
 
@@ -1179,14 +1220,28 @@ function updatePhysics(dt){
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
-    const spd=spds[ci];
-    // Rotate named wheels
+    const spd = spds[ci];
+    const rotAmt = spd * 0.052 * dt;
+    // Named wheels first
     if(c._wheels && c._wheels.length > 0){
-      c._wheels.forEach(w=>{ w.rotation.x += spd * 0.055 * dt; });
+      c._wheels.forEach(w=>{ w.rotation.x += rotAmt; });
     }
-    // Fallback: rotate ALL meshes that look like wheels (circular cross-section)
+    // Geometric wheels fallback
     if(c._allWheelMeshes && c._allWheelMeshes.length > 0){
-      c._allWheelMeshes.forEach(w=>{ w.rotation.x += spd * 0.055 * dt; });
+      c._allWheelMeshes.forEach(w=>{ w.rotation.x += rotAmt; });
+    }
+    // Nuclear fallback: if NOTHING detected, spin ALL meshes that look round
+    if((!c._wheels || c._wheels.length===0) && (!c._allWheelMeshes || c._allWheelMeshes.length===0)){
+      c.traverse(function(child){
+        if(!child.isMesh || child._isRiderPart) return;
+        const bb = child.geometry && child.geometry.boundingBox;
+        if(!bb) return;
+        const sx = bb.max.x - bb.min.x;
+        const sy = bb.max.y - bb.min.y;
+        const sz = bb.max.z - bb.min.z;
+        const thin = Math.min(sx,sy,sz) < Math.max(sx,sy,sz)*0.4;
+        if(thin) child.rotation.x += rotAmt;
+      });
     }
   });
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);

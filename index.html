@@ -282,7 +282,7 @@ window.addEventListener('resize', ()=>{
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  LOADING MANAGER — tracks all assets
+//  LOADING MANAGER
 // ═══════════════════════════════════════════════════════════════
 let _loadTotal = 0, _loadDone = 0;
 const _loadItems = {};
@@ -314,7 +314,6 @@ function checkAllLoaded(){
 }
 
 // Patch TL.load to auto-track
-const _origLoad = THREE.TextureLoader.prototype.load;
 const TL = new THREE.TextureLoader();
 const _tlLoad = TL.load.bind(TL);
 TL.load = function(url, onLoad, onProgress, onError){
@@ -688,25 +687,72 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 })();
 
 // ═══════════════════════════════════════════════════════════════
-//  MOTORCYCLE MODEL LOADING (traverse-based, defensive)
+//  BIKE GROUPS
+// ═══════════════════════════════════════════════════════════════
+const car1 = new THREE.Group();
+car1.position.set(-4.5, 0, 5);
+car1.rotation.y = Math.PI;
+scene.add(car1);
+
+const car2 = new THREE.Group();
+car2.position.set(4.5, 0, 5);
+car2.rotation.y = Math.PI;
+scene.add(car2);
+
+car1._wheels = [];
+car2._wheels = [];
+let modelsLoaded = false;
+
+// ── DEBUG PLACEHOLDER CUBES (visible while loading) ──────────
+// Yellow cube for P1, Blue cube for P2
+// These sit at rider-visible height so user can confirm positioning.
+const debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);
+const debugMat1 = new THREE.MeshBasicMaterial({ color: 0xFFDD00, side: THREE.DoubleSide });
+const debugMat2 = new THREE.MeshBasicMaterial({ color: 0x00AAFF, side: THREE.DoubleSide });
+const debugCube1 = new THREE.Mesh(debugGeo, debugMat1);
+const debugCube2 = new THREE.Mesh(debugGeo, debugMat2);
+debugCube1.position.set(0, 0.75, 0);  // lift to ground level
+debugCube2.position.set(0, 0.75, 0);
+debugCube1.frustumCulled = false;
+debugCube2.frustumCulled = false;
+car1.add(debugCube1);
+car2.add(debugCube2);
+
+// ═══════════════════════════════════════════════════════════════
+//  MODEL SETUP HELPERS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * setupBikeModel — defensive traverse-based setup.
- * Works for any unknown GLB motorcycle model.
- * - Finds wheels by name heuristic (wheel/tire/tyre/rim)
- * - Optionally tints largest non-wheel mesh with emissive color hint
- * - Keeps original textures intact
+ * Traverse all meshes in the model and apply bulletproof visibility fixes:
+ * - frustumCulled = false  (prevents invisible-bounding-sphere culling)
+ * - material side = DoubleSide (prevents backface-cull issues from mirrored UVs)
+ * - fix any accidentally-transparent materials (opacity < 0.05 → opaque)
+ * - subtle emissive tint on body mesh for player identification
  */
 function setupBikeModel(model, tintColor){
   const wheels = [];
-
-  // Collect all meshes and their bounding sphere sizes
   const allMeshes = [];
+
   model.traverse(function(child){
     if(child.isMesh){
       child.castShadow = false;
       child.receiveShadow = false;
+      child.frustumCulled = false; // CRITICAL: prevents culling when bbox is wrong
+
+      // Fix materials
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach(function(mat){
+        if(!mat) return;
+        mat.side = THREE.DoubleSide;
+        // Fix accidentally-transparent materials from GLB import quirks
+        if(mat.transparent && mat.opacity < 0.05){
+          console.warn('[BikeDebug] Fixed near-zero opacity on material:', mat.name || '(unnamed)');
+          mat.opacity = 1.0;
+          mat.transparent = false;
+        }
+        mat.needsUpdate = true;
+      });
+
       child.geometry.computeBoundingSphere();
       allMeshes.push(child);
     }
@@ -715,16 +761,12 @@ function setupBikeModel(model, tintColor){
   // Identify wheel meshes by name heuristic
   const wheelPattern = /wheel|tire|tyre|rim/i;
   allMeshes.forEach(function(mesh){
-    if(wheelPattern.test(mesh.name)){
-      wheels.push(mesh);
-    }
+    if(wheelPattern.test(mesh.name)) wheels.push(mesh);
   });
 
-  // Find largest non-wheel mesh (likely the body) and apply subtle emissive tint
-  // We clone the material to avoid sharing mutations
+  // Apply subtle emissive tint to largest non-wheel mesh (body)
   const nonWheelMeshes = allMeshes.filter(m => !wheels.includes(m));
   if(nonWheelMeshes.length > 0){
-    // Sort by bounding sphere radius descending — largest = body
     nonWheelMeshes.sort((a,b) => b.geometry.boundingSphere.radius - a.geometry.boundingSphere.radius);
     const bodyMesh = nonWheelMeshes[0];
     try {
@@ -741,104 +783,176 @@ function setupBikeModel(model, tintColor){
         m.emissiveIntensity = 0.08;
         bodyMesh.material = m;
       }
-    } catch(e){
-      // If material cloning fails, skip tinting silently
-    }
+    } catch(e){ /* skip tinting silently */ }
   }
 
   return wheels;
 }
 
 /**
- * Auto-scale and position a bike model so:
- * - Its Z-axis length (depth) is roughly 4 units
- * - Its bottom sits at Y = 0
- * Also auto-detects forward orientation: if bounding box width > depth,
- * the model is sideways — rotate inner model by PI/2 on Y.
+ * fitBikeToGround — scale model so its Z-depth ≈ TARGET_LENGTH (5 units),
+ * center X/Z at 0, and snap bottom Y to 0.
+ *
+ * Uses updateMatrixWorld(true) before sampling bounding box so nested
+ * groups are correctly accounted for — fixes the common "wrong bbox from root" bug.
  */
 function fitBikeToGround(innerModel){
-  const box = new THREE.Box3().setFromObject(innerModel);
-  const size = new THREE.Vector3();
+  // Step 1: force world matrix update for all descendants
+  innerModel.updateMatrixWorld(true);
+  let box = new THREE.Box3().setFromObject(innerModel);
+  let size = new THREE.Vector3();
   box.getSize(size);
 
-  // Auto-orient: if model is wider than deep, rotate 90° so it faces forward (Z axis)
+  console.log('[BikeDebug] BEFORE fit — size:', size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2),
+              '| min:', box.min.x.toFixed(2), box.min.y.toFixed(2), box.min.z.toFixed(2));
+
+  // Step 2: Auto-orient — if model is wider (X) than deep (Z), rotate 90° around Y
   if(size.x > size.z){
+    console.log('[BikeDebug] Auto-rotating model 90° (was sideways, W:', size.x.toFixed(2), '> D:', size.z.toFixed(2), ')');
     innerModel.rotation.y = Math.PI / 2;
-    // Recompute after rotation
-    box.setFromObject(innerModel);
+    innerModel.updateMatrixWorld(true);
+    box = new THREE.Box3().setFromObject(innerModel);
     box.getSize(size);
   }
 
-  // Scale so Z-length (depth / forward dimension) is ~4 units
-  const targetLength = 4.0;
-  const currentLength = Math.max(size.z, 0.001);
-  const scaleFactor = targetLength / currentLength;
+  // Step 3: Scale so Z-depth (forward) = TARGET_LENGTH
+  const TARGET_LENGTH = 5.0;
+  const currentDepth = Math.max(size.z, 0.001);
+  const scaleFactor = TARGET_LENGTH / currentDepth;
   innerModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-  // Recompute bounding box after scaling to find ground offset
-  box.setFromObject(innerModel);
-  const minY = box.min.y;
-  // Translate model so its lowest point sits at Y=0
-  innerModel.position.y = -minY;
+  // Step 4: Recompute bbox after scale
+  innerModel.updateMatrixWorld(true);
+  box = new THREE.Box3().setFromObject(innerModel);
+  box.getSize(size);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+
+  // Step 5: Center X and Z at 0; bottom Y at 0
+  innerModel.position.x = -center.x;
+  innerModel.position.z = -center.z;
+  innerModel.position.y = -box.min.y;
+
+  // Re-check after centering
+  innerModel.updateMatrixWorld(true);
+  box = new THREE.Box3().setFromObject(innerModel);
+  box.getSize(size);
+
+  console.log('[BikeDebug] AFTER fit — size:', size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2),
+              '| pos:', innerModel.position.x.toFixed(2), innerModel.position.y.toFixed(2), innerModel.position.z.toFixed(2),
+              '| scale:', innerModel.scale.x.toFixed(3));
 }
 
-const car1 = new THREE.Group();
-car1.position.set(-4.5, 0, 5);
-car1.rotation.y = Math.PI;
-scene.add(car1);
+// ── RED PLACEHOLDER BOXES (shown if model fails to load entirely) ──
+function spawnFallbackBoxes(){
+  console.warn('[BikeDebug] Model load failed after all retries — spawning red placeholder boxes.');
+  [car1, car2].forEach(function(car, idx){
+    const color = idx === 0 ? 0xFF2200 : 0xFF6600;
+    const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: false, side: THREE.DoubleSide });
+    // Rough motorcycle silhouette from 3 boxes
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 3.6), mat);
+    body.position.set(0, 1.2, 0); body.frustumCulled = false; car.add(body);
+    const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), mat);
+    front.position.set(0, 1.5, 1.6); front.frustumCulled = false; car.add(front);
+    const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 16);
+    const wMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
+    [-1.6, 1.6].forEach(function(zOff){
+      const wheel = new THREE.Mesh(wGeo, wMat);
+      wheel.rotation.z = Math.PI / 2;
+      wheel.position.set(0, 0.55, zOff);
+      wheel.frustumCulled = false;
+      car.add(wheel);
+    });
+  });
+}
 
-const car2 = new THREE.Group();
-car2.position.set(4.5, 0, 5);
-car2.rotation.y = Math.PI;
-scene.add(car2);
-
-car1._wheels = [];
-car2._wheels = [];
-let modelsLoaded = false;
-
+// ═══════════════════════════════════════════════════════════════
+//  GLB LOADING — relative path first, catbox fallback, then boxes
+// ═══════════════════════════════════════════════════════════════
 const dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
 
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
+const BIKE_URL_PRIMARY  = 'motorcycle.glb';                        // relative — works on GitHub Pages
+const BIKE_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';  // absolute fallback
+
 trackLoad('model');
-gltfLoader.load(
-  'https://files.catbox.moe/bmgbx2.glb',
-  function(gltf){
-    const bikeModel = gltf.scene;
 
-    // Clone for P1
-    const bike1Model = bikeModel.clone(true);
-    fitBikeToGround(bike1Model);
-    car1._wheels = setupBikeModel(bike1Model, 0xFFCC00);
-    car1.add(bike1Model);
+function applyBikeGltf(gltf){
+  const bikeModel = gltf.scene;
 
-    // Clone for P2
-    const bike2Model = bikeModel.clone(true);
-    fitBikeToGround(bike2Model);
-    car2._wheels = setupBikeModel(bike2Model, 0x1E88E5);
-    car2.add(bike2Model);
+  // Clone for P1
+  const bike1Model = bikeModel.clone(true);
+  fitBikeToGround(bike1Model);
+  car1._wheels = setupBikeModel(bike1Model, 0xFFCC00);
+  // Remove debug placeholder now that real model is ready
+  car1.remove(debugCube1);
+  car1.add(bike1Model);
 
-    modelsLoaded = true;
-    loadProgress('model');
-    dracoLoader.dispose();
-    checkAllLoaded();
-  },
-  function(xhr){
-    if(xhr.total > 0){
-      const pct = Math.round(xhr.loaded / xhr.total * 100);
-      setLoadStatus('Loading bikes... ' + pct + '%');
+  // Clone for P2
+  const bike2Model = bikeModel.clone(true);
+  fitBikeToGround(bike2Model);
+  car2._wheels = setupBikeModel(bike2Model, 0x1E88E5);
+  car2.remove(debugCube2);
+  car2.add(bike2Model);
+
+  modelsLoaded = true;
+  loadProgress('model');
+  dracoLoader.dispose();
+  checkAllLoaded();
+  console.log('[BikeDebug] Bikes added to scene successfully.');
+}
+
+function loadBikeWithFallback(){
+  console.log('[BikeDebug] Trying primary URL:', BIKE_URL_PRIMARY);
+  gltfLoader.load(
+    BIKE_URL_PRIMARY,
+    function(gltf){
+      console.log('[BikeDebug] Primary URL succeeded.');
+      applyBikeGltf(gltf);
+    },
+    function(xhr){
+      if(xhr.total > 0){
+        const pct = Math.round(xhr.loaded / xhr.total * 100);
+        setLoadStatus('Loading bikes... ' + pct + '%');
+      }
+    },
+    function(err){
+      console.warn('[BikeDebug] Primary URL failed:', err && (err.message || err));
+      console.log('[BikeDebug] Trying fallback URL:', BIKE_URL_FALLBACK);
+      setLoadStatus('Retrying from fallback...');
+      gltfLoader.load(
+        BIKE_URL_FALLBACK,
+        function(gltf){
+          console.log('[BikeDebug] Fallback URL succeeded.');
+          applyBikeGltf(gltf);
+        },
+        function(xhr2){
+          if(xhr2.total > 0){
+            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
+            setLoadStatus('Fallback loading... ' + pct2 + '%');
+          }
+        },
+        function(err2){
+          const msg = err2 && (err2.message || String(err2));
+          console.error('[BikeDebug] Fallback URL also failed:', msg);
+          setLoadStatus('Model unavailable — using placeholder');
+          // Remove loading cubes and show red placeholder boxes
+          car1.remove(debugCube1);
+          car2.remove(debugCube2);
+          spawnFallbackBoxes();
+          modelsLoaded = true;
+          loadProgress('model');
+          checkAllLoaded();
+        }
+      );
     }
-  },
-  function(error){
-    console.error('Bike model load failed:', error);
-    setLoadStatus('Bikes failed — continuing...');
-    modelsLoaded = true;
-    loadProgress('model');
-    checkAllLoaded();
-  }
-);
+  );
+}
+
+loadBikeWithFallback();
 
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — MAX_P 150
@@ -896,19 +1010,11 @@ function resetGame(){
   p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;
   cShake=0;
   for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
-  if(!modelsLoaded){
-    document.getElementById('timer-val').textContent = 'Loading...';
-  } else {
-    document.getElementById('timer-val').textContent = '0.000';
-  }
+  document.getElementById('timer-val').textContent = '0.000';
 }
 
 function startCountdown(){
   if(state.phase!=='idle') return;
-  if(!modelsLoaded){
-    document.getElementById('timer-val').textContent = 'Loading...';
-    return;
-  }
   document.getElementById('launch-hint').style.display='none';
   state.phase='countdown';
   const el=document.getElementById('countdown');
@@ -1070,15 +1176,6 @@ function updateHUD(){
   if(fa>0.62&&state.phase==='racing'){ lf.style.display='block'; lf.style.left=(38+fa*18)+'%'; lf.style.top='16%'; lf.style.opacity=((fa-0.62)*1.4).toFixed(2); }
   else lf.style.display='none';
 }
-
-function initAudio(){
-  // Audio disabled
-  return;
-}
-
-function updateSound(dt){ /* Audio disabled */ }
-function playScreech(){ /* Audio disabled */ }
-function playGearShiftPop(){ /* Audio disabled */ }
 
 // ═══════════════════════════════════════════════════════════════
 //  MAIN LOOP

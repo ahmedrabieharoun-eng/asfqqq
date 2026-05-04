@@ -65,7 +65,7 @@
   #vignette {
     position:absolute; top:0; left:0; width:100%; height:100%;
     pointer-events:none; z-index:5;
-    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.80) 100%);
+    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
   }
   #speed-overlay {
     position:absolute; top:0; left:0; width:100%; height:100%;
@@ -262,9 +262,8 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreferen
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// FIX #4: Reduce exposure from 1.7 → 1.25 (less overexposed/hazy)
-renderer.toneMappingExposure = 1.25;
+renderer.toneMapping = THREE.LinearToneMapping;
+renderer.toneMappingExposure = 1.0;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
 
@@ -466,8 +465,7 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// FIX #5: Reduce HemisphereLight intensity 1.1 → 0.75
-const hemi = new THREE.HemisphereLight(0x99DDFF, 0x558833, 0.75);
+const hemi = new THREE.HemisphereLight(0x99DDFF, 0x558833, 0.45);
 scene.add(hemi);
 
 // FIX #5: Reduce sun intensity 2.4 → 1.6
@@ -484,13 +482,11 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// FIX #5: Reduce skyFill intensity 0.85 → 0.4
-const skyFill = new THREE.DirectionalLight(0x66AAEE, 0.4);
+const skyFill = new THREE.DirectionalLight(0x66AAEE, 0.2);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-// FIX #5: Reduce groundBounce intensity 0.45 → 0.25
-const groundBounce = new THREE.DirectionalLight(0x77BB44, 0.25);
+const groundBounce = new THREE.DirectionalLight(0x77BB44, 0.08);
 groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 

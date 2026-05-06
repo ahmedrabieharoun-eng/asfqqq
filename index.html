@@ -478,12 +478,16 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-const hemi = new THREE.HemisphereLight(0x99DDFF, 0x558833, 0.45);
+// Ambient — ensures model never goes fully black
+const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(ambient);
+
+const hemi = new THREE.HemisphereLight(0xCCEEFF, 0x886644, 0.6);
 scene.add(hemi);
 
-// FIX #5: Reduce sun intensity 2.4 → 1.6
-const sun = new THREE.DirectionalLight(0xFFF5E0, 1.8);
-sun.position.set(-60, 100, -80);
+// Main sun — front-left of bikes so they're lit from viewer side
+const sun = new THREE.DirectionalLight(0xFFF5E0, 2.2);
+sun.position.set(-40, 60, -120);  // front-left of start line
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
@@ -495,11 +499,11 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-const skyFill = new THREE.DirectionalLight(0x66AAEE, 0.2);
+const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.5);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-const groundBounce = new THREE.DirectionalLight(0x77BB44, 0.08);
+const groundBounce = new THREE.DirectionalLight(0x998866, 0.15);
 groundBounce.position.set(0, -10, 0);
 scene.add(groundBounce);
 
@@ -707,12 +711,12 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 // ═══════════════════════════════════════════════════════════════
 const car1 = new THREE.Group();
 car1.position.set(-4.5, 0, 5);
-car1.rotation.y = Math.PI;   // outer group faces +Z (toward finish)
+car1.rotation.y = 0;   // use GLB native orientation
 scene.add(car1);
 
 const car2 = new THREE.Group();
 car2.position.set(4.5, 0, 5);
-car2.rotation.y = Math.PI;   // outer group faces +Z (toward finish)
+car2.rotation.y = 0;   // use GLB native orientation
 scene.add(car2);
 
 car1._wheels = [];
@@ -736,7 +740,7 @@ car2.add(debugCube2);
 //  MODEL SETUP HELPERS
 // ═══════════════════════════════════════════════════════════════
 
-function setupBikeModel(model){
+function setupBikeModel(model, bodyColor, accentColor){
   const wheels = [];
   const allMeshes = [];
 
@@ -773,6 +777,46 @@ function setupBikeModel(model){
   }
 
   const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;
+
+  // Apply color tinting if provided — matches real bike paint
+  if(bodyColor !== undefined){
+    allMeshes.forEach(function(mesh){
+      if(detectedWheels.includes(mesh)) return; // skip wheels
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      mats.forEach(function(mat){
+        if(!mat) return;
+        // Clone mat to avoid affecting both bikes
+        const m = mat.clone();
+        // Tint: multiply existing color toward bodyColor
+        // Use HSL blend so we preserve light/dark variation of model
+        const orig = m.color ? m.color.clone() : new THREE.Color(1,1,1);
+        const tint = new THREE.Color(bodyColor);
+        // Blend 60% tint + 40% original to keep model detail
+        m.color = new THREE.Color(
+          orig.r * 0.4 + tint.r * 0.6,
+          orig.g * 0.4 + tint.g * 0.6,
+          orig.b * 0.4 + tint.b * 0.6
+        );
+        if(accentColor !== undefined && mat.metalness > 0.3){
+          const acc = new THREE.Color(accentColor);
+          m.color = new THREE.Color(
+            orig.r * 0.3 + acc.r * 0.7,
+            orig.g * 0.3 + acc.g * 0.7,
+            orig.b * 0.3 + acc.b * 0.7
+          );
+        }
+        m.needsUpdate = true;
+        if(Array.isArray(mesh.material)){
+          // replace in array — find index
+          const idx = mesh.material.indexOf(mat);
+          if(idx !== -1) mesh.material[idx] = m;
+        } else {
+          mesh.material = m;
+        }
+      });
+    });
+  }
+
   return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };
 }
 
@@ -865,7 +909,7 @@ function applyBikeGltf(gltf){
   // Clone for P1
   const bike1Model = bikeModel.clone(true);
   fitBikeToGround(bike1Model);
-  const r1 = setupBikeModel(bike1Model);
+  const r1 = setupBikeModel(bike1Model, 0x1a2e0a, 0xC8A94A);  // P1: dark green + gold
   car1._wheels = r1.namedWheels;
   car1._allWheelMeshes = r1.allDetected;
   car1.remove(debugCube1);
@@ -875,7 +919,7 @@ function applyBikeGltf(gltf){
   // Clone for P2
   const bike2Model = bikeModel.clone(true);
   fitBikeToGround(bike2Model);
-  const r2 = setupBikeModel(bike2Model);
+  const r2 = setupBikeModel(bike2Model, 0x0a1a3a, 0x4488CC);  // P2: dark blue + silver
   car2._wheels = r2.namedWheels;
   car2._allWheelMeshes = r2.allDetected;
   car2.remove(debugCube2);

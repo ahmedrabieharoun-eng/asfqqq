@@ -723,7 +723,7 @@ car2.add(debugCube2);
 //  MODEL SETUP HELPERS
 // ═══════════════════════════════════════════════════════════════
 
-function setupBikeModel(model, tintColor){
+function setupBikeModel(model){
   const wheels = [];
   const allMeshes = [];
 
@@ -732,13 +732,7 @@ function setupBikeModel(model, tintColor){
       child.castShadow = true;
       child.receiveShadow = false;
       child.frustumCulled = false;
-      const mats = Array.isArray(child.material) ? child.material : [child.material];
-      mats.forEach(function(mat){
-        if(!mat) return;
-        mat.side = THREE.DoubleSide;
-        if(mat.transparent && mat.opacity < 0.05){ mat.opacity=1.0; mat.transparent=false; }
-        mat.needsUpdate = true;
-      });
+      // Keep original model materials exactly as-is
       child.geometry.computeBoundingSphere();
       child.geometry.computeBoundingBox();
       allMeshes.push(child);
@@ -759,7 +753,6 @@ function setupBikeModel(model, tintColor){
       const sz = new THREE.Vector3(); bb.getSize(sz);
       const minDim = Math.min(sz.x, sz.y, sz.z);
       const maxDim = Math.max(sz.x, sz.y, sz.z);
-      // Wheel: thin disc shape (one dim much smaller than other two)
       if(minDim < maxDim * 0.35 && maxDim > 0.2 && maxDim < 2.5){
         geometricWheels.push(mesh);
       }
@@ -767,28 +760,6 @@ function setupBikeModel(model, tintColor){
   }
 
   const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;
-
-  const nonWheelMeshes = allMeshes.filter(m => !detectedWheels.includes(m));
-  if(nonWheelMeshes.length > 0){
-    nonWheelMeshes.sort((a,b) => b.geometry.boundingSphere.radius - a.geometry.boundingSphere.radius);
-    const bodyMesh = nonWheelMeshes[0];
-    try {
-      if(Array.isArray(bodyMesh.material)){
-        bodyMesh.material = bodyMesh.material.map(function(mat){
-          const m = mat.clone();
-          m.emissive = new THREE.Color(tintColor);
-          m.emissiveIntensity = 0.12;
-          return m;
-        });
-      } else {
-        const m = bodyMesh.material.clone();
-        m.emissive = new THREE.Color(tintColor);
-        m.emissiveIntensity = 0.12;
-        bodyMesh.material = m;
-      }
-    } catch(e){}
-  }
-
   return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };
 }
 
@@ -885,7 +856,7 @@ function applyBikeGltf(gltf){
   // Clone for P1
   const bike1Model = bikeModel.clone(true);
   fitBikeToGround(bike1Model);
-  const r1 = setupBikeModel(bike1Model, 0xFFCC00);
+  const r1 = setupBikeModel(bike1Model);
   car1._wheels = r1.namedWheels;
   car1._allWheelMeshes = r1.allDetected;
   car1.remove(debugCube1);
@@ -895,7 +866,7 @@ function applyBikeGltf(gltf){
   // Clone for P2
   const bike2Model = bikeModel.clone(true);
   fitBikeToGround(bike2Model);
-  const r2 = setupBikeModel(bike2Model, 0x1E88E5);
+  const r2 = setupBikeModel(bike2Model);
   car2._wheels = r2.namedWheels;
   car2._allWheelMeshes = r2.allDetected;
   car2.remove(debugCube2);

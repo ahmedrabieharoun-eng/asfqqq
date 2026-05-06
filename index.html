@@ -168,17 +168,19 @@
 
   /* Camera mode button */
   #camBtn{
-    position:fixed; bottom:56px; right:12px; z-index:200;
-    background:rgba(0,0,0,0.72); border:1.5px solid rgba(255,255,255,0.25);
-    color:#fff; font-size:12px; font-weight:700; letter-spacing:0.5px;
-    padding:8px 14px; border-radius:20px; cursor:pointer;
-    backdrop-filter:blur(6px); transition:background 0.2s, transform 0.1s;
+    position:fixed; bottom:70px; right:14px; z-index:99999;
+    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);
+    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;
+    padding:10px 18px; border-radius:24px; cursor:pointer;
+    transition:background 0.2s, transform 0.1s;
     font-family:'Segoe UI',sans-serif; user-select:none;
+    pointer-events:all; touch-action:manipulation;
   }
-  #camBtn:active{ transform:scale(0.93); background:rgba(255,255,255,0.15); }
+  #camBtn:active{ transform:scale(0.90); }
 </style>
 </head>
 <body>
+<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="display:none!important">
   <div id="loading-logo">DRAG<span>RACE</span></div>
@@ -1376,14 +1378,6 @@ setTimeout(checkAllLoaded, 500);
 
 })();
 
-// Inject camera button into DOM
-(function(){
-  const btn = document.createElement('button');
-  btn.id = 'camBtn';
-  btn.textContent = '🎥 Chase';
-  btn.onclick = cycleCam;
-  document.body.appendChild(btn);
-})();
 </script>
 </body>
 </html>

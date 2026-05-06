@@ -182,8 +182,8 @@
 </style>
 </head>
 <body>
-<!-- FIX #4: Default camera label updated to Top view -->
-<button id="camBtn" onclick="cycleCam()">🔼 Top</button>
+<!-- FIX #2: Default camera label updated to Chase view -->
+<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="display:none!important">
   <div id="loading-logo">DRAG<span>RACE</span></div>
@@ -479,15 +479,12 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// FIX #5: Keep ambient neutral white
 const ambient = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambient);
 
-// FIX #5: Hemisphere both white/neutral — no color tinting
 const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
 scene.add(hemi);
 
-// FIX #5: Sun color changed from 0xFFF5E0 (warm) to pure white 0xffffff
 const sun = new THREE.DirectionalLight(0xffffff, 2.2);
 sun.position.set(-40, 60, -120);
 sun.castShadow = true;
@@ -504,8 +501,6 @@ scene.add(sun.target);
 const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.5);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
-
-// FIX #5: groundBounce (orange tint) REMOVED — do not add to scene
 
 // ═══════════════════════════════════════════════════════════════
 //  SKY
@@ -550,7 +545,8 @@ scene.add(skyGroup);
 //  TRACK
 // ═══════════════════════════════════════════════════════════════
 const TRACK_LENGTH = 1100;
-const TRACK_WIDTH  = 24;
+// FIX #3: Narrower road — was 24, now 14
+const TRACK_WIDTH  = 14;
 const FINISH_Z     = 860;
 const asphaltTex   = makeAsphaltTexture(2048, 2048);
 const normalTex    = makeAsphaltNormal(512,512);
@@ -561,9 +557,7 @@ grassTex.repeat.set(40, 140);
 grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 grassTex.encoding = THREE.sRGBEncoding;
 
-// FIX #2: Road geometry — FLAT, remove the camber/crown deformation loop
 const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
-// (Removed the Y-offset loop that created road camber — road is now perfectly flat)
 roadGeo.computeVertexNormals();
 const roadMat = new THREE.MeshStandardMaterial({
   map:asphaltTex, normalMap:normalTex,
@@ -707,13 +701,15 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 //  BIKE GROUPS
 // ═══════════════════════════════════════════════════════════════
 const car1 = new THREE.Group();
-car1.position.set(-4.5, 0, 5);
-car1.rotation.y = 0;   // neutral — inner model handles orientation
+// FIX #3: Reduced spacing — was -4.5, now -3
+car1.position.set(-3, 0, 5);
+car1.rotation.y = 0;
 scene.add(car1);
 
 const car2 = new THREE.Group();
-car2.position.set(4.5, 0, 5);
-car2.rotation.y = 0;   // neutral — inner model handles orientation
+// FIX #3: Reduced spacing — was 4.5, now 3
+car2.position.set(3, 0, 5);
+car2.rotation.y = 0;
 scene.add(car2);
 
 car1._wheels = [];
@@ -736,8 +732,6 @@ car2.add(debugCube2);
 // ═══════════════════════════════════════════════════════════════
 //  MODEL SETUP HELPERS
 // ═══════════════════════════════════════════════════════════════
-
-// FIX #5: setupBikeModel — no color tinting, leave materials completely untouched
 function setupBikeModel(model){
   const wheels = [];
   const allMeshes = [];
@@ -747,20 +741,17 @@ function setupBikeModel(model){
       child.castShadow = true;
       child.receiveShadow = false;
       child.frustumCulled = false;
-      // Keep original model materials exactly as-is — NO cloning, NO tinting
       child.geometry.computeBoundingSphere();
       child.geometry.computeBoundingBox();
       allMeshes.push(child);
     }
   });
 
-  // Detect wheels by name first
   const wheelPattern = /wheel|tire|tyre|rim|roue|rueda/i;
   allMeshes.forEach(function(mesh){
     if(wheelPattern.test(mesh.name)) wheels.push(mesh);
   });
 
-  // Fallback: detect wheels by geometry aspect ratio (round = wheel-like)
   const geometricWheels = [];
   if(wheels.length === 0){
     allMeshes.forEach(function(mesh){
@@ -779,16 +770,11 @@ function setupBikeModel(model){
 }
 
 /**
- * fitBikeToGround — FIX #1, #2, #3 applied here.
+ * fitBikeToGround
  *
- * FIX #1: Bike orientation — when X is the longest axis (bike is sideways),
- *   use +Math.PI/2 instead of -Math.PI/2 so bike faces +Z (toward finish).
- *   Removed F-key flip handler complexity.
- *
- * FIX #2: Road is now flat (camber loop removed above). Bike Y grounding
- *   uses -box.min.y which is correct.
- *
- * FIX #3: TARGET_LENGTH changed from 7.0 to 4.5 (smaller bikes).
+ * FIX #1: Bike orientation corrected.
+ *   - Sideways branch: use -Math.PI/2 (reverted from +Math.PI/2)
+ *   - Else branch: use 0 instead of Math.PI (no flip)
  */
 function fitBikeToGround(innerModel){
   innerModel.updateMatrixWorld(true);
@@ -800,17 +786,16 @@ function fitBikeToGround(innerModel){
   console.log('Longest axis:', size.x > size.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
 
   if(size.x > size.z * 1.2){
-    // FIX #1: GLB is sideways — use +Math.PI/2 so front faces +Z (finish line)
-    innerModel.rotation.y = Math.PI / 2;
+    // FIX #1: GLB is sideways — use -Math.PI/2 so front faces +Z (finish line)
+    innerModel.rotation.y = -Math.PI / 2;
   } else {
-    // GLB already aligned on Z axis — flip 180° to face +Z
-    innerModel.rotation.y = Math.PI;
+    // FIX #1: GLB already aligned on Z axis — no flip needed (was Math.PI)
+    innerModel.rotation.y = 0;
   }
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
 
-  // FIX #3: Smaller bikes — TARGET_LENGTH 7.0 → 4.5
   const TARGET_LENGTH = 4.5;
   const currentDepth = Math.max(size.z, size.x, 0.001);
   const scaleFactor = TARGET_LENGTH / currentDepth;
@@ -822,7 +807,6 @@ function fitBikeToGround(innerModel){
   const center = new THREE.Vector3();
   box.getCenter(center);
 
-  // FIX #2: Ground bike — bottom Y at 0
   innerModel.position.x = -center.x;
   innerModel.position.z = -center.z;
   innerModel.position.y = -box.min.y;
@@ -863,8 +847,6 @@ const BIKE_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
 trackLoad('model');
 
-// FIX #1: Removed F-key flip handler (no longer needed with correct rotation)
-
 function applyBikeGltf(gltf){
   const bikeModel = gltf.scene;
 
@@ -874,8 +856,6 @@ function applyBikeGltf(gltf){
   console.log('GLB native size — X:', testSize.x.toFixed(2), 'Y:', testSize.y.toFixed(2), 'Z:', testSize.z.toFixed(2));
   console.log('Longest axis:', testSize.x > testSize.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
 
-  // FIX #5: No color args — setupBikeModel leaves all materials untouched
-  // Clone for P1
   const bike1Model = bikeModel.clone(true);
   fitBikeToGround(bike1Model);
   const r1 = setupBikeModel(bike1Model);
@@ -884,7 +864,6 @@ function applyBikeGltf(gltf){
   car1.remove(debugCube1);
   car1.add(bike1Model);
 
-  // Clone for P2
   const bike2Model = bikeModel.clone(true);
   fitBikeToGround(bike2Model);
   const r2 = setupBikeModel(bike2Model);
@@ -1095,7 +1074,8 @@ function resetGame(){
   state.phase='idle'; state.timer=0; state.raceStart=0;
   state.p1={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
   state.p2={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
-  car1.position.set(-4.5,0,START_Z); car2.position.set(4.5,0,START_Z);
+  // FIX #3: Updated starting positions to match narrower spacing
+  car1.position.set(-3,0,START_Z); car2.position.set(3,0,START_Z);
   document.getElementById('winner-banner').style.display='none';
   document.getElementById('countdown').style.display='none';
   document.getElementById('launch-hint').style.display='block';
@@ -1152,31 +1132,25 @@ function cycleCam(){
   document.getElementById('camBtn').textContent = CAM_MODES[camMode];
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  CAMERA — multiple modes, NO cinematic intro (starts in top view)
-// ═══════════════════════════════════════════════════════════════
-// FIX #4: Default camMode = 1 (top view), cinematic skipped
-let camMode = 1; // 0=chase, 1=top, 2=side, 3=low-front
+// FIX #2: Default camMode = 0 (chase cam), cinematic skipped
+let camMode = 0; // 0=chase, 1=top, 2=side, 3=low-front
 const CAM_MODES = ['🎥 Chase', '🔼 Top', '↔️ Side', '🏁 Front'];
-let cinematicTimer = 0;    // FIX #4: skip cinematic
-let cinematicDone  = true; // FIX #4: start immediately in chosen cam mode
+let cinematicTimer = 0;    // skip cinematic
+let cinematicDone  = true; // start immediately in chosen cam mode
 
 function updateCamera(dt){
   const midZ = (state.p1.pos + state.p2.pos) * 0.5;
   const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
   const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
 
-  // Cinematic intro skipped (cinematicDone = true from start)
-
   let tX, tY, tZ, lX=0, lY=1.1, lZ;
 
   if(camMode === 0){
-    // Chase cam — behind & low
-    tX = sh; tY = 2.2 + shY; tZ = midZ - 9.0;
-    lZ = midZ + 16;
+    // FIX #2: Chase cam — behind & elevated, looking far down the road toward finish
+    tX = sh; tY = 4.5 + shY; tZ = midZ - 11.0;
+    lZ = midZ + 25;
   } else if(camMode === 1){
-    // FIX #4: Sports broadcast top-down angle — angled, not pure 90°
-    // Camera sits high above and slightly behind midpoint, looks slightly ahead
+    // Sports broadcast top-down angle
     tX = 0; tY = 25; tZ = midZ - 4;
     lX = 0; lY = 0; lZ = midZ + 2;
   } else if(camMode === 2){
@@ -1327,7 +1301,6 @@ function updateHUD(){
   const prog=FINISH_Z-START_Z;
   document.getElementById('p1-fill').style.width=Math.min((state.p1.pos-START_Z)/prog*100,100)+'%';
   document.getElementById('p2-fill').style.width=Math.min((state.p2.pos-START_Z)/prog*100,100)+'%';
-  // FIX #5: speed-overlay opacity set to 0 always — no color tinting
   document.getElementById('speed-overlay').style.opacity='0';
   const lf=document.getElementById('lens-flare');
   const fa=Math.abs(Math.sin(Date.now()*0.00045));

@@ -62,11 +62,13 @@
     50%{transform:translateY(-10px);opacity:1;}
   }
 
+  /* FIX #5: Remove vignette tint — set background to none */
   #vignette {
     position:absolute; top:0; left:0; width:100%; height:100%;
     pointer-events:none; z-index:5;
-    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+    background:none;
   }
+  /* FIX #5: speed-overlay opacity multiplier set to 0 via JS; keep element */
   #speed-overlay {
     position:absolute; top:0; left:0; width:100%; height:100%;
     pointer-events:none; z-index:6; opacity:0; transition:opacity 0.25s;
@@ -180,7 +182,8 @@
 </style>
 </head>
 <body>
-<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
+<!-- FIX #4: Default camera label updated to Top view -->
+<button id="camBtn" onclick="cycleCam()">🔼 Top</button>
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="display:none!important">
   <div id="loading-logo">DRAG<span>RACE</span></div>
@@ -282,11 +285,9 @@ renderer.physicallyCorrectLights = false;
 
 // ─── SCENE ───────────────────────────────────────────────────
 const scene = new THREE.Scene();
-// FIX #5: Slightly clearer sky color 0x7BBCE0 → 0x6FB2D9
 scene.background = new THREE.Color(0x6FB2D9);
 
 // ─── CAMERA ──────────────────────────────────────────────────
-// FIX #4: FOV 52 → 48 (more cinematic), position closer & lower
 const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);
 camera.position.set(0, 4.0, -13);
 camera.lookAt(0, 1.5, 0);
@@ -478,16 +479,17 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// Ambient — ensures model never goes fully black
+// FIX #5: Keep ambient neutral white
 const ambient = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambient);
 
-const hemi = new THREE.HemisphereLight(0xCCEEFF, 0x886644, 0.6);
+// FIX #5: Hemisphere both white/neutral — no color tinting
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
 scene.add(hemi);
 
-// Main sun — front-left of bikes so they're lit from viewer side
-const sun = new THREE.DirectionalLight(0xFFF5E0, 2.2);
-sun.position.set(-40, 60, -120);  // front-left of start line
+// FIX #5: Sun color changed from 0xFFF5E0 (warm) to pure white 0xffffff
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-40, 60, -120);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
@@ -503,9 +505,7 @@ const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.5);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-const groundBounce = new THREE.DirectionalLight(0x998866, 0.15);
-groundBounce.position.set(0, -10, 0);
-scene.add(groundBounce);
+// FIX #5: groundBounce (orange tint) REMOVED — do not add to scene
 
 // ═══════════════════════════════════════════════════════════════
 //  SKY
@@ -561,12 +561,9 @@ grassTex.repeat.set(40, 140);
 grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 grassTex.encoding = THREE.sRGBEncoding;
 
+// FIX #2: Road geometry — FLAT, remove the camber/crown deformation loop
 const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
-const rPos = roadGeo.attributes.position;
-for(let i=0;i<rPos.count;i++){
-  const x = rPos.getX(i);
-  rPos.setY(i, rPos.getY(i) - Math.abs(x/TRACK_WIDTH)*0.04);
-}
+// (Removed the Y-offset loop that created road camber — road is now perfectly flat)
 roadGeo.computeVertexNormals();
 const roadMat = new THREE.MeshStandardMaterial({
   map:asphaltTex, normalMap:normalTex,
@@ -711,12 +708,12 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 // ═══════════════════════════════════════════════════════════════
 const car1 = new THREE.Group();
 car1.position.set(-4.5, 0, 5);
-car1.rotation.y = 0;   // use GLB native orientation
+car1.rotation.y = 0;   // neutral — inner model handles orientation
 scene.add(car1);
 
 const car2 = new THREE.Group();
 car2.position.set(4.5, 0, 5);
-car2.rotation.y = 0;   // use GLB native orientation
+car2.rotation.y = 0;   // neutral — inner model handles orientation
 scene.add(car2);
 
 car1._wheels = [];
@@ -740,7 +737,8 @@ car2.add(debugCube2);
 //  MODEL SETUP HELPERS
 // ═══════════════════════════════════════════════════════════════
 
-function setupBikeModel(model, bodyColor, accentColor){
+// FIX #5: setupBikeModel — no color tinting, leave materials completely untouched
+function setupBikeModel(model){
   const wheels = [];
   const allMeshes = [];
 
@@ -749,7 +747,7 @@ function setupBikeModel(model, bodyColor, accentColor){
       child.castShadow = true;
       child.receiveShadow = false;
       child.frustumCulled = false;
-      // Keep original model materials exactly as-is
+      // Keep original model materials exactly as-is — NO cloning, NO tinting
       child.geometry.computeBoundingSphere();
       child.geometry.computeBoundingBox();
       allMeshes.push(child);
@@ -777,92 +775,54 @@ function setupBikeModel(model, bodyColor, accentColor){
   }
 
   const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;
-
-  // Apply color tinting if provided — matches real bike paint
-  if(bodyColor !== undefined){
-    allMeshes.forEach(function(mesh){
-      if(detectedWheels.includes(mesh)) return; // skip wheels
-      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      mats.forEach(function(mat){
-        if(!mat) return;
-        // Clone mat to avoid affecting both bikes
-        const m = mat.clone();
-        // Tint: multiply existing color toward bodyColor
-        // Use HSL blend so we preserve light/dark variation of model
-        const orig = m.color ? m.color.clone() : new THREE.Color(1,1,1);
-        const tint = new THREE.Color(bodyColor);
-        // Blend 60% tint + 40% original to keep model detail
-        m.color = new THREE.Color(
-          orig.r * 0.4 + tint.r * 0.6,
-          orig.g * 0.4 + tint.g * 0.6,
-          orig.b * 0.4 + tint.b * 0.6
-        );
-        if(accentColor !== undefined && mat.metalness > 0.3){
-          const acc = new THREE.Color(accentColor);
-          m.color = new THREE.Color(
-            orig.r * 0.3 + acc.r * 0.7,
-            orig.g * 0.3 + acc.g * 0.7,
-            orig.b * 0.3 + acc.b * 0.7
-          );
-        }
-        m.needsUpdate = true;
-        if(Array.isArray(mesh.material)){
-          // replace in array — find index
-          const idx = mesh.material.indexOf(mat);
-          if(idx !== -1) mesh.material[idx] = m;
-        } else {
-          mesh.material = m;
-        }
-      });
-    });
-  }
-
   return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };
 }
 
 /**
- * fitBikeToGround — scale model so its Z-depth ≈ TARGET_LENGTH (7 units),
- * center X/Z at 0, and snap bottom Y to 0.
+ * fitBikeToGround — FIX #1, #2, #3 applied here.
  *
- * FIX #2: TARGET_LENGTH increased from 5 → 7 (bigger bikes).
- * FIX #1: Auto-orient logic replaced with a fixed inner-model flip of Math.PI
- *         so the bike faces forward (handlebars toward finish line) after the
- *         outer group's Math.PI rotation cancels out.
- *         (Old auto-detect: if(size.x > size.z) rotate Math.PI/2 — replaced below)
+ * FIX #1: Bike orientation — when X is the longest axis (bike is sideways),
+ *   use +Math.PI/2 instead of -Math.PI/2 so bike faces +Z (toward finish).
+ *   Removed F-key flip handler complexity.
+ *
+ * FIX #2: Road is now flat (camber loop removed above). Bike Y grounding
+ *   uses -box.min.y which is correct.
+ *
+ * FIX #3: TARGET_LENGTH changed from 7.0 to 4.5 (smaller bikes).
  */
 function fitBikeToGround(innerModel){
-  // Step 1: force world matrix update for all descendants
   innerModel.updateMatrixWorld(true);
   let box = new THREE.Box3().setFromObject(innerModel);
   let size = new THREE.Vector3();
   box.getSize(size);
 
-  // Bike direction: outer car group has rotation.y = Math.PI
-  // Inner model rotation.y = 0 → net = Math.PI → bike faces +Z (finish line)
-  innerModel.rotation.y = 0;
+  console.log('GLB native size — X:', size.x.toFixed(2), 'Y:', size.y.toFixed(2), 'Z:', size.z.toFixed(2));
+  console.log('Longest axis:', size.x > size.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
+
+  if(size.x > size.z * 1.2){
+    // FIX #1: GLB is sideways — use +Math.PI/2 so front faces +Z (finish line)
+    innerModel.rotation.y = Math.PI / 2;
+  } else {
+    // GLB already aligned on Z axis — flip 180° to face +Z
+    innerModel.rotation.y = Math.PI;
+  }
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
 
-  // If still sideways after the flip (some GLBs are truly 90° off axis),
-  // apply an additional quarter-turn:
-  // if(size.x > size.z * 1.5){ innerModel.rotation.y += Math.PI/2; }
-
-  // Step 2: Scale so Z-depth (forward) = TARGET_LENGTH
-  // FIX #3: Increased from 5.0 → 7.0 for bigger bikes
-  const TARGET_LENGTH = 7.0;
-  const currentDepth = Math.max(size.z, size.x, 0.001); // use longest axis for robust scaling
+  // FIX #3: Smaller bikes — TARGET_LENGTH 7.0 → 4.5
+  const TARGET_LENGTH = 4.5;
+  const currentDepth = Math.max(size.z, size.x, 0.001);
   const scaleFactor = TARGET_LENGTH / currentDepth;
   innerModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-  // Step 3: Recompute bbox after scale
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
   const center = new THREE.Vector3();
   box.getCenter(center);
 
-  // Step 4: Center X and Z at 0; bottom Y at 0
+  // FIX #2: Ground bike — bottom Y at 0
   innerModel.position.x = -center.x;
   innerModel.position.z = -center.z;
   innerModel.position.y = -box.min.y;
@@ -903,28 +863,35 @@ const BIKE_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
 trackLoad('model');
 
+// FIX #1: Removed F-key flip handler (no longer needed with correct rotation)
+
 function applyBikeGltf(gltf){
   const bikeModel = gltf.scene;
 
+  const testBox = new THREE.Box3().setFromObject(bikeModel);
+  const testSize = new THREE.Vector3();
+  testBox.getSize(testSize);
+  console.log('GLB native size — X:', testSize.x.toFixed(2), 'Y:', testSize.y.toFixed(2), 'Z:', testSize.z.toFixed(2));
+  console.log('Longest axis:', testSize.x > testSize.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
+
+  // FIX #5: No color args — setupBikeModel leaves all materials untouched
   // Clone for P1
   const bike1Model = bikeModel.clone(true);
   fitBikeToGround(bike1Model);
-  const r1 = setupBikeModel(bike1Model, 0x1a2e0a, 0xC8A94A);  // P1: dark green + gold
+  const r1 = setupBikeModel(bike1Model);
   car1._wheels = r1.namedWheels;
   car1._allWheelMeshes = r1.allDetected;
   car1.remove(debugCube1);
   car1.add(bike1Model);
-  // No procedural rider — model includes rider
 
   // Clone for P2
   const bike2Model = bikeModel.clone(true);
   fitBikeToGround(bike2Model);
-  const r2 = setupBikeModel(bike2Model, 0x0a1a3a, 0x4488CC);  // P2: dark blue + silver
+  const r2 = setupBikeModel(bike2Model);
   car2._wheels = r2.namedWheels;
   car2._allWheelMeshes = r2.allDetected;
   car2.remove(debugCube2);
   car2.add(bike2Model);
-  // No procedural rider — model includes rider
 
   modelsLoaded = true;
   loadProgress('model');
@@ -976,7 +943,6 @@ function loadBikeWithFallback(){
 //  PROCEDURAL RIDER — r128 compatible (no CapsuleGeometry)
 // ═══════════════════════════════════════════════════════════════
 function makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){
-  // Capsule = cylinder + 2 hemispheres
   const g = new THREE.Group();
   const mat = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
   const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10), mat);
@@ -1001,30 +967,25 @@ function addProceduralRider(carGroup, helmetColor){
 
   const rg = new THREE.Group();
 
-  // ── TORSO ──
   const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
   torso.rotation.x = -0.65;
   torso.position.set(0, 1.20, 0.10);
   rg.add(torso);
 
-  // Chest stripe (team color)
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
   stripe.position.set(0, 1.22, -0.13);
   rg.add(stripe);
 
-  // ── NECK ──
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
   neck.position.set(0, 1.50, 0.00);
   rg.add(neck);
 
-  // ── HELMET ──
   const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
   const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
   helmet.scale.set(1.0, 1.08, 1.12);
   helmet.position.set(0, 1.66, -0.04);
   rg.add(helmet);
 
-  // Visor
   const visorMat = new THREE.MeshStandardMaterial({
     color:0x0a0a1a, roughness:0.02, metalness:0.9,
     transparent:true, opacity:0.80, side:THREE.FrontSide
@@ -1035,14 +996,12 @@ function addProceduralRider(carGroup, helmetColor){
   visor.frustumCulled = false;
   rg.add(visor);
 
-  // Helmet chin
   const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
   chin.position.set(0, 1.56, 0.10);
   chin.scale.set(1,0.75,1.1);
   chin.frustumCulled=false;
   rg.add(chin);
 
-  // ── UPPER ARMS ──
   [[-1],[1]].forEach(([side])=>{
     const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
     ua.rotation.z = side * 1.05;
@@ -1050,21 +1009,18 @@ function addProceduralRider(carGroup, helmetColor){
     ua.position.set(side*0.27, 1.26, 0.08);
     rg.add(ua);
 
-    // Forearm
     const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
     fa.rotation.z = side * 0.45;
     fa.rotation.x = -0.95;
     fa.position.set(side*0.32, 1.04, 0.28);
     rg.add(fa);
 
-    // Glove
     const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
     glove.position.set(side*0.34, 0.90, 0.42);
     glove.frustumCulled=false;
     rg.add(glove);
   });
 
-  // ── LEGS (crouched racing) ──
   [[-1],[1]].forEach(([side])=>{
     const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
     thigh.rotation.x = 1.25;
@@ -1076,7 +1032,6 @@ function addProceduralRider(carGroup, helmetColor){
     shin.position.set(side*0.14, 0.66, 0.50);
     rg.add(shin);
 
-    // Boot
     const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
     boot.position.set(side*0.14, 0.52, 0.60);
     boot.frustumCulled=false;
@@ -1198,37 +1153,20 @@ function cycleCam(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  CAMERA — multiple modes + cinematic intro
+//  CAMERA — multiple modes, NO cinematic intro (starts in top view)
 // ═══════════════════════════════════════════════════════════════
-let camMode = 0; // 0=chase, 1=top, 2=side, 3=low-front
+// FIX #4: Default camMode = 1 (top view), cinematic skipped
+let camMode = 1; // 0=chase, 1=top, 2=side, 3=low-front
 const CAM_MODES = ['🎥 Chase', '🔼 Top', '↔️ Side', '🏁 Front'];
-let cinematicTimer = 4.0; // seconds of cinematic intro
-let cinematicDone  = false;
+let cinematicTimer = 0;    // FIX #4: skip cinematic
+let cinematicDone  = true; // FIX #4: start immediately in chosen cam mode
 
 function updateCamera(dt){
   const midZ = (state.p1.pos + state.p2.pos) * 0.5;
   const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
   const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
 
-  // ── CINEMATIC INTRO (before race starts) ──
-  if(!cinematicDone){
-    cinematicTimer -= dt;
-    // Drone shot: high above, slowly tilting down to chase position
-    const t = Math.max(0, Math.min(1, 1 - cinematicTimer/4.0));
-    const eased = t < 0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; // ease in-out
-    const startY = 28, endY = 2.2;
-    const startZ = midZ - 2, endZ = midZ - 9;
-    camera.position.x = sh * eased;
-    camera.position.y = startY + (endY - startY) * eased + shY;
-    camera.position.z = startZ + (endZ - startZ) * eased;
-    camera.lookAt(new THREE.Vector3(0, 1.0, midZ + 6));
-    if(cinematicTimer <= 0) cinematicDone = true;
-    skyGroup.position.set(camera.position.x, 0, camera.position.z);
-    sun.position.set(-80, 100, midZ+50);
-    sun.target.position.set(0,0,midZ);
-    sun.target.updateMatrixWorld();
-    return;
-  }
+  // Cinematic intro skipped (cinematicDone = true from start)
 
   let tX, tY, tZ, lX=0, lY=1.1, lZ;
 
@@ -1237,9 +1175,10 @@ function updateCamera(dt){
     tX = sh; tY = 2.2 + shY; tZ = midZ - 9.0;
     lZ = midZ + 16;
   } else if(camMode === 1){
-    // Top-down cam — directly above
-    tX = 0; tY = 22; tZ = midZ;
-    lX = 0; lY = 0; lZ = midZ + 0.01;
+    // FIX #4: Sports broadcast top-down angle — angled, not pure 90°
+    // Camera sits high above and slightly behind midpoint, looks slightly ahead
+    tX = 0; tY = 25; tZ = midZ - 4;
+    lX = 0; lY = 0; lZ = midZ + 2;
   } else if(camMode === 2){
     // Side cam — perpendicular view
     tX = 18; tY = 3.5; tZ = midZ;
@@ -1285,15 +1224,12 @@ function updatePhysics(dt){
   ws.forEach((c,ci)=>{
     const spd = spds[ci];
     const rotAmt = spd * 0.052 * dt;
-    // Named wheels first
     if(c._wheels && c._wheels.length > 0){
       c._wheels.forEach(w=>{ w.rotation.x += rotAmt; });
     }
-    // Geometric wheels fallback
     if(c._allWheelMeshes && c._allWheelMeshes.length > 0){
       c._allWheelMeshes.forEach(w=>{ w.rotation.x += rotAmt; });
     }
-    // Nuclear fallback: if NOTHING detected, spin ALL meshes that look round
     if((!c._wheels || c._wheels.length===0) && (!c._allWheelMeshes || c._allWheelMeshes.length===0)){
       c.traverse(function(child){
         if(!child.isMesh || child._isRiderPart) return;
@@ -1310,11 +1246,10 @@ function updatePhysics(dt){
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
-  // Animate rider lean — more aggressive lean at high speed
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){
       const spd = spds[ci];
-      const leanX = -0.18 * (spd / MAX_SPD); // lean forward with speed
+      const leanX = -0.18 * (spd / MAX_SPD);
       car._rider.rotation.x = leanX;
     }
   });
@@ -1392,9 +1327,8 @@ function updateHUD(){
   const prog=FINISH_Z-START_Z;
   document.getElementById('p1-fill').style.width=Math.min((state.p1.pos-START_Z)/prog*100,100)+'%';
   document.getElementById('p2-fill').style.width=Math.min((state.p2.pos-START_Z)/prog*100,100)+'%';
-  const avgS=(state.p1.speed+state.p2.speed)/2;
-  // FIX #5: Reduce speed-overlay strength from *0.5 → *0.25
-  document.getElementById('speed-overlay').style.opacity=(avgS/MAX_SPD*0.25).toFixed(2);
+  // FIX #5: speed-overlay opacity set to 0 always — no color tinting
+  document.getElementById('speed-overlay').style.opacity='0';
   const lf=document.getElementById('lens-flare');
   const fa=Math.abs(Math.sin(Date.now()*0.00045));
   if(fa>0.62&&state.phase==='racing'){ lf.style.display='block'; lf.style.left=(38+fa*18)+'%'; lf.style.top='16%'; lf.style.opacity=((fa-0.62)*1.4).toFixed(2); }

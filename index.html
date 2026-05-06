@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -891,7 +890,10 @@ function applyBikeGltf(gltf){
   car1._allWheelMeshes = r1.allDetected;
   car1.remove(debugCube1);
   car1.add(bike1Model);
-  addProceduralRider(car1, 0xFFCC00);
+  // حساب أبعاد الدراجة الفعلية بعد الـ fit
+  bike1Model.updateMatrixWorld(true);
+  const bb1 = new THREE.Box3().setFromObject(bike1Model);
+  addProceduralRider(car1, 0xFFCC00, bb1);
 
   // Clone for P2
   const bike2Model = bikeModel.clone(true);
@@ -901,7 +903,10 @@ function applyBikeGltf(gltf){
   car2._allWheelMeshes = r2.allDetected;
   car2.remove(debugCube2);
   car2.add(bike2Model);
-  addProceduralRider(car2, 0x1E88E5);
+  // حساب أبعاد الدراجة الفعلية بعد الـ fit
+  bike2Model.updateMatrixWorld(true);
+  const bb2 = new THREE.Box3().setFromObject(bike2Model);
+  addProceduralRider(car2, 0x1E88E5, bb2);
 
   modelsLoaded = true;
   loadProgress('model');
@@ -966,7 +971,16 @@ function makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){
   return g;
 }
 
-function addProceduralRider(carGroup, helmetColor){
+function addProceduralRider(carGroup, helmetColor, bikeBB){
+  // ── الدراجة TARGET_LENGTH=7.0 → ارتفاعها الحقيقي ~2.0 وحدة
+  // نحسب موضع المقعد من الـ bounding box الفعلي
+  const seatY = bikeBB ? (bikeBB.max.y * 0.72) : 1.35;   // فوق المقعد مباشرة
+  const seatZ = bikeBB ? -(bikeBB.max.z - bikeBB.min.z) * 0.04 : -0.2; // وسط المقعد
+
+  // السايق يكون بنفس نسبة الدراجة — الدراجة طولها 7 فالسايق ~1.8م واقفاً
+  // الـ scale ثابت لأن الدراجة دايماً بنفس الحجم بعد fitBikeToGround
+  const S = 0.72; // scale السايق بالنسبة لوحدات الـ scene
+
   const suitCol  = 0x1a1a2e;
   const bootCol  = 0x0d0d0d;
   const gloveCol = 0x111111;
@@ -976,29 +990,38 @@ function addProceduralRider(carGroup, helmetColor){
     return new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
   }
 
+  // كل الأبعاد الداخلية بالـ S scale
+  function mc(rt,rb,h,col){ return makeCapsule(rt*S,rb*S,h*S,col,0.8); }
+
   const rg = new THREE.Group();
 
-  // ── TORSO ──
-  const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
-  torso.rotation.x = -0.65;
-  torso.position.set(0, 1.20, 0.10);
+  // ── PELVIS (قاعدة الجلوس) ──
+  const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.32*S, 0.18*S, 0.28*S), smat(suitCol,0.8));
+  pelvis.position.set(0, 0, 0); // مرجع = فوق المقعد
+  rg.add(pelvis);
+
+  // ── TORSO — منحني للأمام ──
+  const torso = mc(0.20, 0.22, 0.44, suitCol);
+  torso.rotation.x = -0.95;
+  torso.position.set(0, 0.38*S, 0.22*S);
   rg.add(torso);
 
-  // Chest stripe (team color)
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
-  stripe.position.set(0, 1.22, -0.13);
+  // شريط لون الفريق
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28*S,0.09*S,0.02*S), smat(helmetColor,0.4));
+  stripe.position.set(0, 0.40*S, 0.04*S);
   rg.add(stripe);
 
   // ── NECK ──
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
-  neck.position.set(0, 1.50, 0.00);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075*S,0.09*S,0.11*S,10), smat(skinCol,0.8));
+  neck.rotation.x = -0.4;
+  neck.position.set(0, 0.62*S, 0.38*S);
   rg.add(neck);
 
   // ── HELMET ──
   const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20*S, 20, 16), helmetMat);
   helmet.scale.set(1.0, 1.08, 1.12);
-  helmet.position.set(0, 1.66, -0.04);
+  helmet.position.set(0, 0.76*S, 0.52*S);
   rg.add(helmet);
 
   // Visor
@@ -1006,86 +1029,68 @@ function addProceduralRider(carGroup, helmetColor){
     color:0x0a0a1a, roughness:0.02, metalness:0.9,
     transparent:true, opacity:0.80, side:THREE.FrontSide
   });
-  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);
-  visor.position.set(0, 1.62, 0.09);
+  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148*S,16,12,0.25,2.6,0.55,0.95), visorMat);
+  visor.position.set(0, 0.72*S, 0.64*S);
   visor.scale.set(1, 0.82, 0.88);
   visor.frustumCulled = false;
   rg.add(visor);
 
-  // Helmet chin
-  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
-  chin.position.set(0, 1.56, 0.10);
+  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13*S,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
+  chin.position.set(0, 0.66*S, 0.62*S);
   chin.scale.set(1,0.75,1.1);
   chin.frustumCulled=false;
   rg.add(chin);
 
-  // ── UPPER ARMS ──
+  // ── UPPER ARMS + FOREARMS + GLOVES — ممتدة للأمام نحو الجادون ──
   [[-1],[1]].forEach(([side])=>{
-    const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
-    ua.rotation.z = side * 1.05;
-    ua.rotation.x = -0.45;
-    ua.position.set(side*0.27, 1.26, 0.08);
+    const ua = mc(0.065, 0.075, 0.26, suitCol);
+    ua.rotation.z = side * 0.30;
+    ua.rotation.x = -1.05;
+    ua.position.set(side*0.24*S, 0.45*S, 0.28*S);
     rg.add(ua);
 
-    // Forearm
-    const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
-    fa.rotation.z = side * 0.45;
-    fa.rotation.x = -0.95;
-    fa.position.set(side*0.32, 1.04, 0.28);
+    const fa = mc(0.052, 0.062, 0.24, suitCol);
+    fa.rotation.z = side * 0.15;
+    fa.rotation.x = -0.45;
+    fa.position.set(side*0.23*S, 0.22*S, 0.62*S);
     rg.add(fa);
 
-    // Glove
-    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
-    glove.position.set(side*0.34, 0.90, 0.42);
+    // جلوف فوق الجادون
+    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.068*S,10,8), smat(gloveCol,0.6));
+    glove.position.set(side*0.22*S, 0.10*S, 0.80*S);
     glove.frustumCulled=false;
     rg.add(glove);
   });
 
-  // ── LEGS (crouched racing) ──
+  // ── LEGS — ركبة مثنية، قدم على الدريل ──
   [[-1],[1]].forEach(([side])=>{
-    const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
-    thigh.rotation.x = 1.25;
-    thigh.position.set(side*0.14, 0.95, 0.30);
+    // فخذ — ميال للأمام وللجنب
+    const thigh = mc(0.10, 0.11, 0.34, suitCol);
+    thigh.rotation.x = 1.30;
+    thigh.rotation.z = side * 0.12;
+    thigh.position.set(side*0.18*S, -0.08*S, 0.14*S);
     rg.add(thigh);
 
-    const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);
-    shin.rotation.x = -0.80;
-    shin.position.set(side*0.14, 0.66, 0.50);
+    // ساق — نازل للأسفل
+    const shin = mc(0.075, 0.085, 0.30, suitCol);
+    shin.rotation.x = -0.55;
+    shin.rotation.z = side * 0.08;
+    shin.position.set(side*0.18*S, -0.34*S, 0.36*S);
     rg.add(shin);
 
-    // Boot
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
-    boot.position.set(side*0.14, 0.52, 0.60);
+    // بوت — على وتد الدراجة
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.12*S,0.10*S,0.22*S), smat(bootCol,0.9));
+    boot.position.set(side*0.18*S, -0.50*S, 0.42*S);
     boot.frustumCulled=false;
     rg.add(boot);
   });
 
-  rg.traverse(c=>{ 
-    if(c.isMesh){ 
-      c.frustumCulled=false; 
-      c._isRiderPart=true; 
-    } 
-  });
+  rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });
 
-  // ===== FIX RIDER POSITION =====
+  // ── وضع السايق على المقعد بالظبط ──
+  rg.position.set(0, seatY, seatZ);
 
-  // تكبير السواق
-  rg.scale.set(1.8, 1.8, 1.8);
-
-  // مكان السواق فوق الدراجة
-  rg.position.set(
-      0,
-      0.15,
-      -0.45
-  );
-
-  // ميل الجسم لقدام
-  rg.rotation.x = -0.18;
-
-  // إضافة السواق للدراجة
   carGroup.add(rg);
-
-  // حفظه داخل الجروب
   carGroup._rider = rg;
 }
 
@@ -1272,12 +1277,14 @@ function updatePhysics(dt){
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
-  // Animate rider lean — more aggressive lean at high speed
+  // Animate rider lean + wobble
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){
       const spd = spds[ci];
-      const leanX = -0.18 * (spd / MAX_SPD); // lean forward with speed
+      const leanX = -0.12 * (spd / MAX_SPD);
+      const wobble = Math.sin(Date.now() * 0.008 + ci * 2.5) * 0.015;
       car._rider.rotation.x = leanX;
+      car._rider.rotation.z = wobble;
     }
   });
   const now=performance.now();

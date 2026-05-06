@@ -165,6 +165,17 @@
     text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;
   }
   @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+  /* Camera mode button */
+  #camBtn{
+    position:fixed; bottom:56px; right:12px; z-index:200;
+    background:rgba(0,0,0,0.72); border:1.5px solid rgba(255,255,255,0.25);
+    color:#fff; font-size:12px; font-weight:700; letter-spacing:0.5px;
+    padding:8px 14px; border-radius:20px; cursor:pointer;
+    backdrop-filter:blur(6px); transition:background 0.2s, transform 0.1s;
+    font-family:'Segoe UI',sans-serif; user-select:none;
+  }
+  #camBtn:active{ transform:scale(0.93); background:rgba(255,255,255,0.15); }
 </style>
 </head>
 <body>
@@ -780,13 +791,9 @@ function fitBikeToGround(innerModel){
   let size = new THREE.Vector3();
   box.getSize(size);
 
-  // FIX #1: Apply fixed 180° Y-flip to the inner model.
-  // The outer car1/car2 group already has rotation.y = Math.PI.
-  // Adding another Math.PI here on the inner model makes the net
-  // rotation = 0, but the GLB's own forward (+Z or -Z) determines
-  // final orientation. Flip so handlebars point toward +Z (finish).
-  // NOTE: Old auto-orient (if size.x > size.z → rotate Math.PI/2) is removed.
-  innerModel.rotation.y = Math.PI;
+  // Bike direction: outer car group has rotation.y = Math.PI
+  // Inner model rotation.y = 0 → net = Math.PI → bike faces +Z (finish line)
+  innerModel.rotation.y = 0;
   innerModel.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(innerModel);
   box.getSize(size);
@@ -1139,35 +1146,74 @@ document.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPr
 //  CAMERA
 // ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-//  CAMERA — low chase cam behind the bikes
-// ═══════════════════════════════════════════════════════════════
-function updateCamera(dt){
-  // Follow the average position of both bikes
-  const midZ = (state.p1.pos + state.p2.pos) * 0.5;
+function cycleCam(){
+  camMode = (camMode + 1) % CAM_MODES.length;
+  document.getElementById('camBtn').textContent = CAM_MODES[camMode];
+}
 
-  // Shake
+// ═══════════════════════════════════════════════════════════════
+//  CAMERA — multiple modes + cinematic intro
+// ═══════════════════════════════════════════════════════════════
+let camMode = 0; // 0=chase, 1=top, 2=side, 3=low-front
+const CAM_MODES = ['🎥 Chase', '🔼 Top', '↔️ Side', '🏁 Front'];
+let cinematicTimer = 4.0; // seconds of cinematic intro
+let cinematicDone  = false;
+
+function updateCamera(dt){
+  const midZ = (state.p1.pos + state.p2.pos) * 0.5;
   const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
   const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
 
-  // Camera: sit 9 units BEHIND bikes, 1.8 units HIGH, slightly left of center
-  const camTargetZ = midZ - 9.0;
-  const camTargetY = 1.8 + shY;
-  const camTargetX = sh;
+  // ── CINEMATIC INTRO (before race starts) ──
+  if(!cinematicDone){
+    cinematicTimer -= dt;
+    // Drone shot: high above, slowly tilting down to chase position
+    const t = Math.max(0, Math.min(1, 1 - cinematicTimer/4.0));
+    const eased = t < 0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; // ease in-out
+    const startY = 28, endY = 2.2;
+    const startZ = midZ - 2, endZ = midZ - 9;
+    camera.position.x = sh * eased;
+    camera.position.y = startY + (endY - startY) * eased + shY;
+    camera.position.z = startZ + (endZ - startZ) * eased;
+    camera.lookAt(new THREE.Vector3(0, 1.0, midZ + 6));
+    if(cinematicTimer <= 0) cinematicDone = true;
+    skyGroup.position.set(camera.position.x, 0, camera.position.z);
+    sun.position.set(-80, 100, midZ+50);
+    sun.target.position.set(0,0,midZ);
+    sun.target.updateMatrixWorld();
+    return;
+  }
 
-  camera.position.x += (camTargetX - camera.position.x) * 0.15;
-  camera.position.y += (camTargetY - camera.position.y) * 0.10;
-  camera.position.z += (camTargetZ - camera.position.z) * 0.14;
+  let tX, tY, tZ, lX=0, lY=1.1, lZ;
 
-  // Look toward a point AHEAD of the bikes (finish direction)
-  const lookZ = midZ + 16;
-  camera.lookAt(new THREE.Vector3(0, 1.1, lookZ));
+  if(camMode === 0){
+    // Chase cam — behind & low
+    tX = sh; tY = 2.2 + shY; tZ = midZ - 9.0;
+    lZ = midZ + 16;
+  } else if(camMode === 1){
+    // Top-down cam — directly above
+    tX = 0; tY = 22; tZ = midZ;
+    lX = 0; lY = 0; lZ = midZ + 0.01;
+  } else if(camMode === 2){
+    // Side cam — perpendicular view
+    tX = 18; tY = 3.5; tZ = midZ;
+    lX = 0; lY = 2; lZ = midZ;
+  } else {
+    // Low front cam — facing the bikes
+    tX = sh * 0.5; tY = 1.4 + shY * 0.5; tZ = midZ + 14;
+    lZ = midZ - 5;
+  }
+
+  const lerpSpd = camMode === 1 ? 0.06 : 0.13;
+  camera.position.x += (tX - camera.position.x) * lerpSpd;
+  camera.position.y += (tY - camera.position.y) * (lerpSpd * 0.8);
+  camera.position.z += (tZ - camera.position.z) * lerpSpd;
+  camera.lookAt(new THREE.Vector3(lX, lY, lZ));
 
   if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.8);
-
   skyGroup.position.set(camera.position.x, 0, camera.position.z);
-  sun.position.set(-80, 100, midZ + 50);
-  sun.target.position.set(0, 0, midZ);
+  sun.position.set(-80, 100, midZ+50);
+  sun.target.position.set(0,0,midZ);
   sun.target.updateMatrixWorld();
 }
 
@@ -1328,6 +1374,15 @@ requestAnimationFrame(animate);
 setLoadStatus('Loading track & environment...');
 setTimeout(checkAllLoaded, 500);
 
+})();
+
+// Inject camera button into DOM
+(function(){
+  const btn = document.createElement('button');
+  btn.id = 'camBtn';
+  btn.textContent = '🎥 Chase';
+  btn.onclick = cycleCam;
+  document.body.appendChild(btn);
 })();
 </script>
 </body>

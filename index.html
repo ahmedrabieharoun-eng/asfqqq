@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -978,27 +977,28 @@ function addProceduralRider(carGroup, helmetColor){
 
   const rg = new THREE.Group();
 
-  // ── TORSO ──
+  // ── TORSO — منحني للأمام وضعية Racing ──
   const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
-  torso.rotation.x = -0.65;
-  torso.position.set(0, 1.20, 0.10);
+  torso.rotation.x = -1.0;
+  torso.position.set(0, 0.95, 0.25);
   rg.add(torso);
 
   // Chest stripe (team color)
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
-  stripe.position.set(0, 1.22, -0.13);
+  stripe.position.set(0, 0.97, 0.04);
   rg.add(stripe);
 
   // ── NECK ──
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
-  neck.position.set(0, 1.50, 0.00);
+  neck.rotation.x = -0.5;
+  neck.position.set(0, 1.22, 0.30);
   rg.add(neck);
 
-  // ── HELMET ──
+  // ── HELMET — ماسي للأمام ──
   const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
   const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
   helmet.scale.set(1.0, 1.08, 1.12);
-  helmet.position.set(0, 1.66, -0.04);
+  helmet.position.set(0, 1.35, 0.42);
   rg.add(helmet);
 
   // Visor
@@ -1007,60 +1007,70 @@ function addProceduralRider(carGroup, helmetColor){
     transparent:true, opacity:0.80, side:THREE.FrontSide
   });
   const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);
-  visor.position.set(0, 1.62, 0.09);
+  visor.position.set(0, 1.31, 0.56);
   visor.scale.set(1, 0.82, 0.88);
   visor.frustumCulled = false;
   rg.add(visor);
 
   // Helmet chin
   const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
-  chin.position.set(0, 1.56, 0.10);
+  chin.position.set(0, 1.26, 0.54);
   chin.scale.set(1,0.75,1.1);
   chin.frustumCulled=false;
   rg.add(chin);
 
-  // ── UPPER ARMS ──
+  // ── UPPER ARMS — ممتدة للأمام نحو الجادون ──
   [[-1],[1]].forEach(([side])=>{
     const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
-    ua.rotation.z = side * 1.05;
-    ua.rotation.x = -0.45;
-    ua.position.set(side*0.27, 1.26, 0.08);
+    ua.rotation.z = side * 0.35;
+    ua.rotation.x = -1.1;
+    ua.position.set(side*0.24, 1.05, 0.30);
     rg.add(ua);
 
-    // Forearm
+    // Forearm — ممتدة للأمام تمسك الجادون
     const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
-    fa.rotation.z = side * 0.45;
-    fa.rotation.x = -0.95;
-    fa.position.set(side*0.32, 1.04, 0.28);
+    fa.rotation.z = side * 0.20;
+    fa.rotation.x = -0.55;
+    fa.position.set(side*0.22, 0.82, 0.68);
     rg.add(fa);
 
-    // Glove
+    // Glove — فوق الجادون
     const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
-    glove.position.set(side*0.34, 0.90, 0.42);
+    glove.position.set(side*0.22, 0.70, 0.82);
     glove.frustumCulled=false;
     rg.add(glove);
   });
 
-  // ── LEGS (crouched racing) ──
+  // ── LEGS (crouched racing — ركبة مثنية) ──
   [[-1],[1]].forEach(([side])=>{
     const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
-    thigh.rotation.x = 1.25;
-    thigh.position.set(side*0.14, 0.95, 0.30);
+    thigh.rotation.x = 1.45;
+    thigh.position.set(side*0.14, 0.72, 0.18);
     rg.add(thigh);
 
     const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);
-    shin.rotation.x = -0.80;
-    shin.position.set(side*0.14, 0.66, 0.50);
+    shin.rotation.x = -0.60;
+    shin.position.set(side*0.14, 0.46, 0.38);
     rg.add(shin);
 
     // Boot
     const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
-    boot.position.set(side*0.14, 0.52, 0.60);
+    boot.position.set(side*0.14, 0.32, 0.48);
     boot.frustumCulled=false;
     rg.add(boot);
   });
 
   rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });
+
+  // ── وضع السايق فوق الدراجة مباشرة ──
+  // الدراجة بعد fitBikeToGround يكون قاعها عند Y=0 وارتفاعها ~1.5
+  // فالسايق يبدأ من فوق مقعد الدراجة (Y≈0.85)
+  rg.position.set(
+    0,      // في المنتصف
+    0.82,   // فوق مقعد الدراجة
+    -0.30   // شوية للخلف (نحو المقعد مش المقدمة)
+  );
+
   carGroup.add(rg);
   carGroup._rider = rg;
 }
@@ -1248,12 +1258,16 @@ function updatePhysics(dt){
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
-  // Animate rider lean — more aggressive lean at high speed
+  // Animate rider — lean forward with speed + subtle vibration
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){
       const spd = spds[ci];
-      const leanX = -0.18 * (spd / MAX_SPD); // lean forward with speed
+      // ميل للأمام مع السرعة
+      const leanX = -0.15 * (spd / MAX_SPD);
+      // اهتزاز جانبي طبيعي خفيف
+      const wobble = Math.sin(Date.now() * 0.008 + ci * 2.5) * 0.018 * (1 - spd / MAX_SPD * 0.5);
       car._rider.rotation.x = leanX;
+      car._rider.rotation.z = wobble;
     }
   });
   const now=performance.now();

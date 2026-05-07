@@ -278,9 +278,9 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreferen
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.LinearToneMapping;
-// FIX 3: Lower exposure so road doesn't blow out (was 1.0)
-renderer.toneMappingExposure = 0.85;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+// COLOR FIX: Increased exposure so bike colors match the original model
+renderer.toneMappingExposure = 1.2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
 
@@ -481,14 +481,14 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// FIX 3: Lower ambient intensity (was 0.9) — keeps bikes lit, darkens road
-const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+// COLOR FIX: Higher ambient so bike colors show correctly (was 0.55)
+const ambient = new THREE.AmbientLight(0xffffff, 1.2);
 scene.add(ambient);
 
-const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xffffff, 1.4); // FIX 3: was 2.2
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); // COLOR FIX: was 1.4
 sun.position.set(-40, 60, -120);
 sun.castShadow = true;
 // FIX 2: Smaller shadow map for performance (was 1024)
@@ -502,8 +502,8 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// FIX 3: Lower sky fill intensity (was 0.5)
-const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.25);
+// COLOR FIX: Brighter sky fill (was 0.25)
+const skyFill = new THREE.DirectionalLight(0xffffff, 0.5);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
@@ -748,6 +748,20 @@ function setupBikeModel(model){
       child.geometry.computeBoundingSphere();
       child.geometry.computeBoundingBox();
       allMeshes.push(child);
+
+      // COLOR FIX: Ensure textures have correct encoding and materials show original colors
+      if(child.material){
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(function(mat){
+          if(mat.map) mat.map.encoding = THREE.sRGBEncoding;
+          if(mat.emissiveMap) mat.emissiveMap.encoding = THREE.sRGBEncoding;
+          // Prevent metalness from darkening the model
+          if(mat.metalness !== undefined && mat.metalness > 0.5) mat.metalness = 0.3;
+          // Ensure roughness doesn't make model look muddy
+          if(mat.roughness !== undefined && mat.roughness > 0.9) mat.roughness = 0.7;
+          mat.needsUpdate = true;
+        });
+      }
     }
   });
 

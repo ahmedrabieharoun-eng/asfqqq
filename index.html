@@ -2400,7 +2400,8 @@ async function doUpgradeStat(bikeLevel, stat){
   box-shadow:0 6px 24px rgba(0,0,0,.5);
   position:relative;
   transition:border-color .3s,box-shadow .3s,transform .3s,opacity .3s;
-  transform:scale(0.94);opacity:0.75;
+  transform:scale(0.94);opacity:0;pointer-events:none;
+  display:none;
 }
 .race-bike-slide.active{
   border-color:rgba(124,179,66,.85);
@@ -2408,7 +2409,8 @@ async function doUpgradeStat(bikeLevel, stat){
     0 0 0 2px rgba(124,179,66,.55),
     0 0 24px rgba(124,179,66,.35),
     0 12px 40px rgba(0,0,0,.7);
-  transform:scale(1);opacity:1;
+  transform:scale(1);opacity:1;pointer-events:auto;
+  display:block;
 }
 .race-bike-img-wrap{
   width:100%;height:230px;position:relative;overflow:hidden;
@@ -3203,7 +3205,6 @@ async function doUpgradeStat(bikeLevel, stat){
         track.querySelectorAll('.race-bike-slide').forEach(s=>{s.style.transition='';});
       });
     });
-    _attachSwipe();
   }
 
   function _buildThumbs(){
@@ -3271,41 +3272,22 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceIdx=Math.max(0,Math.min(_raceBikes.length-1,i));
     const track=document.getElementById('raceCarouselTrack');
     if(!track) return;
-    const outer=document.getElementById('raceCarouselOuter');
-    const gap=12;
+    /* Only show the active slide — hide all others */
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-thumb').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
+    /* No translateX needed — only active card is displayed */
+    track.style.transform='';
+    /* Scroll active thumb into view */
     requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        const slides=track.querySelectorAll('.race-bike-slide');
-        const outerW=(outer&&outer.offsetWidth>0)?outer.offsetWidth:320;
-        const trackPadding=16;
-        const slideW = outerW - 32;
-        let activeLeft = trackPadding + _raceIdx * (slideW + gap);
-        let offset = activeLeft + slideW/2 - outerW/2;
-        const totalTrackW = trackPadding*2 + slides.length*slideW + (slides.length-1)*gap;
-        const maxOffset = Math.max(0, totalTrackW - outerW);
-        offset = Math.max(0, Math.min(offset, maxOffset));
-        track.style.transform='translateX(-'+offset+'px)';
-      });
+      const activeTh=document.querySelector('.race-thumb.active');
+      if(activeTh) activeTh.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     });
     const b=_raceBikes[_raceIdx];
-    if(b){
-      _renderStats(b);
-    }
+    if(b) _renderStats(b);
   }
 
-  function _attachSwipe(){
-    const outer=document.getElementById('raceCarouselOuter');
-    if(!outer||outer._swipeAttached) return;
-    outer._swipeAttached=true;
-    outer.addEventListener('touchstart',e=>{_touchStartX=e.touches[0].clientX;},{passive:true});
-    outer.addEventListener('touchend',e=>{
-      const dx=e.changedTouches[0].clientX-_touchStartX;
-      if(Math.abs(dx)>40){dx<0?_goSlide(_raceIdx+1):_goSlide(_raceIdx-1);}
-    },{passive:true});
-  }
+  /* swipe on big carousel card disabled — navigation is via thumbnails only */
 
   /* ═══════════════════════════════════════════
      START RACE

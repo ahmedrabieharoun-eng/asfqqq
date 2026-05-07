@@ -877,6 +877,7 @@ function onModelLoadComplete(){
     modelsLoaded = true;
     dracoLoader.dispose();
     checkAllLoaded();
+    try{ window.parent && window.parent.postMessage({type:'race-ready'},'*'); }catch(e){}
   }
 }
 

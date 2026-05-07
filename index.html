@@ -10,7 +10,57 @@
   #canvas-container { position:relative; width:100vw; height:100vh; }
   canvas { display:block; width:100%!important; height:100%!important; }
 
-
+  /* ── LOADING SCREEN ── */
+  #loading-screen {
+    position:fixed; inset:0; z-index:999;
+    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  #loading-logo {
+    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
+    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
+    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
+  }
+  #loading-logo span { color:#FFB800; }
+  @keyframes logoPulse {
+    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
+    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
+  }
+  #loading-subtitle {
+    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
+    text-transform:uppercase; margin-bottom:60px;
+  }
+  #loading-bar-wrap {
+    width:320px; height:5px; background:rgba(255,255,255,0.08);
+    border-radius:10px; overflow:hidden; margin-bottom:18px;
+    box-shadow:0 0 20px rgba(255,180,0,0.15);
+  }
+  #loading-bar {
+    height:100%; width:0%; border-radius:10px;
+    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
+    transition:width 0.25s ease;
+    box-shadow:0 0 10px rgba(255,180,0,0.6);
+  }
+  #loading-status {
+    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
+    text-transform:uppercase; min-height:16px; text-align:center;
+  }
+  #loading-dots {
+    margin-top:50px; display:flex; gap:10px; align-items:center;
+  }
+  .load-dot {
+    width:8px; height:8px; border-radius:50%;
+    animation:dotBounce 1.2s ease-in-out infinite;
+  }
+  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
+  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
+  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
+  @keyframes dotBounce {
+    0%,100%{transform:translateY(0);opacity:0.3;}
+    50%{transform:translateY(-10px);opacity:1;}
+  }
 
   /* FIX #5: Remove vignette tint — set background to none */
   #vignette {
@@ -133,7 +183,20 @@
 </head>
 <body>
 <button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
-
+<!-- LOADING SCREEN -->
+<div id="loading-screen" style="display:none!important">
+  <div id="loading-logo">DRAG<span>RACE</span></div>
+  <div id="loading-subtitle">🏆 Tropical Edition</div>
+  <div id="loading-bar-wrap">
+    <div id="loading-bar"></div>
+  </div>
+  <div id="loading-status">Initializing...</div>
+  <div id="loading-dots">
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+  </div>
+</div>
 
 <div id="canvas-container">
   <canvas id="c"></canvas>
@@ -216,7 +279,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// Natural exposure - not too bright, not too dark
+// Natural exposure — not washed out
 renderer.toneMappingExposure = 0.85;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
@@ -241,8 +304,8 @@ window.addEventListener('resize', ()=>{
 let _loadTotal = 0, _loadDone = 0;
 const _loadItems = {};
 
-function setLoadStatus(msg){}
-function setLoadBar(pct){}
+function setLoadStatus(msg){ document.getElementById('loading-status').textContent = msg; }
+function setLoadBar(pct){ document.getElementById('loading-bar').style.width = Math.min(pct,100)+'%'; }
 
 function trackLoad(key){
   if(_loadItems[key]) return;
@@ -262,6 +325,8 @@ function loadProgress(key){
   setLoadStatus(labels[key] || 'Loading assets...');
 }
 function checkAllLoaded(){
+  setLoadBar(100);
+  document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('launch-hint').style.display = 'block';
 }
 
@@ -416,16 +481,16 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// LIGHTING FIX: Reduced global ambient so environment looks natural, not washed out
-const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+// LIGHTING FIX: Natural ambient — not too bright, not too dark
+const ambient = new THREE.AmbientLight(0xfff8f0, 0.55);
 scene.add(ambient);
 
-// Hemisphere: natural sky/ground tones, reduced intensity
-const hemi = new THREE.HemisphereLight(0xB0C8E8, 0x5A7A3A, 0.45);
+// Hemisphere: warm sky top, natural ground bounce
+const hemi = new THREE.HemisphereLight(0x8FC8E8, 0x4a7a3a, 0.45);
 scene.add(hemi);
 
-// Sun: realistic angle, reduced so grass/road don't look bleached
-const sun = new THREE.DirectionalLight(0xFFF8E8, 1.0);
+// Sun: natural daylight intensity, warm-white
+const sun = new THREE.DirectionalLight(0xfff5e0, 1.1);
 sun.position.set(-40, 60, -120);
 sun.castShadow = true;
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
@@ -438,34 +503,28 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// Sky fill: very subtle, just to soften shadows
-const skyFill = new THREE.DirectionalLight(0xffffff, 0.20);
+// Sky fill: subtle only
+const skyFill = new THREE.DirectionalLight(0xffffff, 0.2);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
-// ── BIKE SPOTLIGHTS: focused on each bike to reveal colors & details ──
-const bikeSpot1 = new THREE.SpotLight(0xffffff, 4.5, 18, Math.PI/5, 0.35, 1.5);
-bikeSpot1.position.set(-3, 9, 2);
-bikeSpot1.target = car1;
-bikeSpot1.castShadow = false;
-scene.add(bikeSpot1);
-scene.add(bikeSpot1.target);
+// ── BIKE SPOT LIGHTS: strong focused light on each bike to reveal colors ──
+const bikeLight1 = new THREE.PointLight(0xffffff, 3.5, 12);
+bikeLight1.position.set(-3, 5, 5); // above car1
+scene.add(bikeLight1);
 
-const bikeSpot2 = new THREE.SpotLight(0xffffff, 4.5, 18, Math.PI/5, 0.35, 1.5);
-bikeSpot2.position.set(3, 9, 2);
-bikeSpot2.target = car2;
-bikeSpot2.castShadow = false;
-scene.add(bikeSpot2);
-scene.add(bikeSpot2.target);
+const bikeLight2 = new THREE.PointLight(0xffffff, 3.5, 12);
+bikeLight2.position.set(3, 5, 5); // above car2
+scene.add(bikeLight2);
 
-// Side fill lights on bikes to show colors from sides
-const bikeFill1 = new THREE.PointLight(0xffffff, 1.8, 8, 2);
-bikeFill1.position.set(-5, 3, 2);
-scene.add(bikeFill1);
+// Front fill lights for bikes (from front-below to reveal details)
+const bikeFront1 = new THREE.PointLight(0xfff0e0, 1.8, 8);
+bikeFront1.position.set(-3, 2, 2);
+scene.add(bikeFront1);
 
-const bikeFill2 = new THREE.PointLight(0xffffff, 1.8, 8, 2);
-bikeFill2.position.set(5, 3, 2);
-scene.add(bikeFill2);
+const bikeFront2 = new THREE.PointLight(0xfff0e0, 1.8, 8);
+bikeFront2.position.set(3, 2, 2);
+scene.add(bikeFront2);
 
 // ═══════════════════════════════════════════════════════════════
 //  SKY
@@ -536,7 +595,7 @@ road.receiveShadow=true;
 scene.add(road);
 
 const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.95, metalness:0.0, color: 0xCCDDBB });
+const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.9, metalness:0.0 });
 [-400, 400].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
@@ -1214,16 +1273,6 @@ function updateCamera(dt){
     sun.position.set(-80, 100, midZ+50);
     sun.target.position.set(0,0,midZ);
     sun.target.updateMatrixWorld();
-
-    // Track bike spotlights during cinematic too
-    bikeSpot1.position.set(car1.position.x - 1, car1.position.y + 9, car1.position.z + 2);
-    bikeSpot1.target.position.copy(car1.position);
-    bikeSpot1.target.updateMatrixWorld();
-    bikeFill1.position.set(car1.position.x - 5, car1.position.y + 3, car1.position.z);
-    bikeSpot2.position.set(car2.position.x + 1, car2.position.y + 9, car2.position.z + 2);
-    bikeSpot2.target.position.copy(car2.position);
-    bikeSpot2.target.updateMatrixWorld();
-    bikeFill2.position.set(car2.position.x + 5, car2.position.y + 3, car2.position.z);
     return;
   }
   // ── END CINEMATIC ──
@@ -1259,17 +1308,6 @@ function updateCamera(dt){
   sun.position.set(-80, 100, midZ+50);
   sun.target.position.set(0,0,midZ);
   sun.target.updateMatrixWorld();
-
-  // Track bike spotlights to follow each bike
-  bikeSpot1.position.set(car1.position.x - 1, car1.position.y + 9, car1.position.z + 2);
-  bikeSpot1.target.position.copy(car1.position);
-  bikeSpot1.target.updateMatrixWorld();
-  bikeFill1.position.set(car1.position.x - 5, car1.position.y + 3, car1.position.z);
-
-  bikeSpot2.position.set(car2.position.x + 1, car2.position.y + 9, car2.position.z + 2);
-  bikeSpot2.target.position.copy(car2.position);
-  bikeSpot2.target.updateMatrixWorld();
-  bikeFill2.position.set(car2.position.x + 5, car2.position.y + 3, car2.position.z);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1320,6 +1358,14 @@ function updatePhysics(dt){
   });
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
+
+  // Move bike lights with the bikes
+  if(typeof bikeLight1 !== 'undefined'){
+    bikeLight1.position.set(car1.position.x, car1.position.y + 5, car1.position.z);
+    bikeFront1.position.set(car1.position.x, car1.position.y + 2, car1.position.z + 2);
+    bikeLight2.position.set(car2.position.x, car2.position.y + 5, car2.position.z);
+    bikeFront2.position.set(car2.position.x, car2.position.y + 2, car2.position.z + 2);
+  }
 
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){

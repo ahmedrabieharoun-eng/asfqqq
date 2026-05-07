@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2794,9 +2795,34 @@ async function doUpgradeStat(bikeLevel, stat){
       <button class="race-dev-back" onclick="document.getElementById('raceDevOverlay').classList.remove('show')">← Назад</button>
     </div>
 
-    <!-- ══ RACE ANIMATION PHASE (Full Screen) ══ -->
+    <!-- ══ RACE ANIMATION PHASE (Full Screen, embedded engine) ══ -->
     <div id="raceAnimPhase">
-      <iframe id="raceIframe" style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:200;display:none;" allowfullscreen></iframe>
+      <iframe id="raceEngineFrame" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000" allow="autoplay; fullscreen"></iframe>
+
+      <!-- Result overlay (shown after race finishes) -->
+      <div id="rsResultOverlay">
+        <div class="rsr-emoji" id="rsrEmoji">🏆</div>
+        <div class="rsr-title" id="rsrTitle">Victory!</div>
+        <div class="rsr-reward" id="rsrReward" style="display:none">
+          <span id="rsrRewardTxt">+0.9 TON</span>
+          <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
+        </div>
+        <div class="rsr-vs">
+          <div class="rsr-side">
+            <div class="rsr-av" id="rsrAv1">🏍️</div>
+            <div class="rsr-sname" id="rsrName1">You</div>
+            <div class="rsr-sspd" id="rsrSpd1">— km/h</div>
+          </div>
+          <div class="rsr-sep">VS</div>
+          <div class="rsr-side">
+            <div class="rsr-av" id="rsrAv2">🤖</div>
+            <div class="rsr-sname" id="rsrName2">Opponent</div>
+            <div class="rsr-sspd" id="rsrSpd2">— km/h</div>
+          </div>
+        </div>
+        <button class="rsr-btn" onclick="raceGoBack()">Продолжить →</button>
+      </div>
+
     </div>
 
     <!-- Compat placeholder -->
@@ -2809,47 +2835,259 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   RACE ENGINE — 3D Drag Race (iframe blob)
+   BALI RALLY — Race Engine v3.0
+   Canvas-based road rendering for correct perspective
 ══════════════════════════════════════════════════════════════ */
 (function(){
 
-  /* ─── Internal state ─── */
-  let _raceBikes        = [];
+  /* ─── State ── */
   let _raceIdx          = 0;
+  let _raceBikes        = [];
+  let _raceActive       = false;
+  let _raceRafId        = null;
+  let _raceAnimInterval = null;
   let _raceSelectedBike = null;
   let _raceStarted      = false;
-  let _raceActive       = false;
   let _touchStartX      = 0;
+
+  /* Road canvas animation state */
+  let _roadScroll    = 0;
+  let _finishVisible = false;
+  let _finishPos     = 0;    /* 0=at horizon, 1=at bottom */
+  let _bgImg         = null; /* preloaded background image */
+  let _finishImg     = null; /* preloaded finish banner image */
 
   const OPP_NAMES = [
     '@Kilorok','@SpeedKing','@TurboMax','@NitroX','@RallyAce',
     '@DustRider','@JungleRun','@FastWave','@RaceKing','@DriftMaster'
   ];
 
-  /* ─── Embedded 3D race HTML (blob URL) ─── */
-  const _raceHtmlSrc = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>DRAG RACE \u2014 MOTORCYCLES</title>\n<style>\n  * { margin:0; padding:0; box-sizing:border-box; }\n  body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }\n  #canvas-container { position:relative; width:100vw; height:100vh; }\n  canvas { display:block; width:100%!important; height:100%!important; }\n\n  /* \u2500\u2500 LOADING SCREEN \u2500\u2500 */\n  #loading-screen {\n    position:fixed; inset:0; z-index:999;\n    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);\n    display:flex; flex-direction:column; align-items:center; justify-content:center;\n    transition:opacity 0.9s ease, visibility 0.9s ease;\n  }\n  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }\n  #loading-logo {\n    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;\n    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);\n    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;\n  }\n  #loading-logo span { color:#FFB800; }\n  @keyframes logoPulse {\n    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}\n    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}\n  }\n  #loading-subtitle {\n    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;\n    text-transform:uppercase; margin-bottom:60px;\n  }\n  #loading-bar-wrap {\n    width:320px; height:5px; background:rgba(255,255,255,0.08);\n    border-radius:10px; overflow:hidden; margin-bottom:18px;\n    box-shadow:0 0 20px rgba(255,180,0,0.15);\n  }\n  #loading-bar {\n    height:100%; width:0%; border-radius:10px;\n    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);\n    transition:width 0.25s ease;\n    box-shadow:0 0 10px rgba(255,180,0,0.6);\n  }\n  #loading-status {\n    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;\n    text-transform:uppercase; min-height:16px; text-align:center;\n  }\n  #loading-dots {\n    margin-top:50px; display:flex; gap:10px; align-items:center;\n  }\n  .load-dot {\n    width:8px; height:8px; border-radius:50%;\n    animation:dotBounce 1.2s ease-in-out infinite;\n  }\n  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }\n  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }\n  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }\n  @keyframes dotBounce {\n    0%,100%{transform:translateY(0);opacity:0.3;}\n    50%{transform:translateY(-10px);opacity:1;}\n  }\n\n  /* FIX #5: Remove vignette tint \u2014 set background to none */\n  #vignette {\n    position:absolute; top:0; left:0; width:100%; height:100%;\n    pointer-events:none; z-index:5;\n    background:none;\n  }\n  /* FIX #5: speed-overlay opacity multiplier set to 0 via JS; keep element */\n  #speed-overlay {\n    position:absolute; top:0; left:0; width:100%; height:100%;\n    pointer-events:none; z-index:6; opacity:0; transition:opacity 0.25s;\n    background:radial-gradient(ellipse at center, transparent 20%, rgba(180,200,255,0.05) 100%);\n  }\n  #lens-flare {\n    position:absolute; pointer-events:none; z-index:8;\n    width:260px; height:260px; border-radius:50%;\n    background:radial-gradient(circle, rgba(255,248,200,0.55) 0%, rgba(255,210,80,0.18) 40%, transparent 70%);\n    display:none; transform:translate(-50%,-50%); filter:blur(8px);\n  }\n\n  /* HUD */\n  #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }\n  #p1-hud {\n    position:absolute; top:16px; left:16px;\n    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);\n    border:1px solid rgba(255,180,0,0.5); border-radius:10px;\n    padding:8px 12px; min-width:140px;\n    backdrop-filter:blur(12px);\n    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);\n  }\n  #p2-hud {\n    position:absolute; top:16px; right:16px;\n    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);\n    border:1px solid rgba(0,160,255,0.5); border-radius:10px;\n    padding:8px 12px; min-width:140px; text-align:right;\n    backdrop-filter:blur(12px);\n    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);\n  }\n  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }\n  #p1-hud .car-name { color:#FFB800; }\n  #p2-hud .car-name { color:#00CFFF; }\n  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }\n  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }\n  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }\n  .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }\n  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }\n  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }\n  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }\n  .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }\n  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }\n  #p2-hud .gear-row { flex-direction:row-reverse; }\n  #p2-hud .gear-num { color:#00CFFF; }\n  #timer-hud {\n    position:absolute; top:16px; left:50%; transform:translateX(-50%);\n    background:rgba(0,0,0,0.68); border:1px solid rgba(255,255,255,0.14);\n    border-radius:8px; padding:6px 16px; text-align:center;\n    backdrop-filter:blur(12px); box-shadow:0 4px 22px rgba(0,0,0,0.5);\n  }\n  .timer-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }\n  .timer-value { font-size:20px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }\n  .prog-wrap { position:absolute; bottom:28px; width:38%; }\n  #p1-prog-wrap { left:5%; }\n  #p2-prog-wrap { right:5%; }\n  .prog-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }\n  #p2-prog-wrap .prog-label { text-align:right; }\n  .prog-bg { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }\n  #p1-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#FFB800,#FF4400); width:0%; transition:width 0.05s; }\n  #p2-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#0088FF,#AA00FF); width:0%; transition:width 0.05s; }\n  #countdown {\n    position:absolute; top:50%; left:50%;\n    transform:translate(-50%,-50%) scale(1);\n    font-size:160px; font-weight:900; color:#fff;\n    text-shadow:0 0 40px rgba(255,60,60,0.95),0 0 80px rgba(255,60,60,0.5),5px 5px 0 #000;\n    letter-spacing:4px; pointer-events:none; display:none; text-align:center; white-space:nowrap;\n    animation:countPulse 0.6s ease-out;\n  }\n  #countdown.go { color:#00FF88; text-shadow:0 0 40px rgba(0,255,120,0.95),0 0 80px rgba(0,255,120,0.5),5px 5px 0 #003300; font-size:180px; }\n  @keyframes countPulse {\n    0%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}\n    40%{opacity:1;}\n    100%{transform:translate(-50%,-50%) scale(1);opacity:1;}\n  }\n  #winner-banner {\n    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);\n    background:rgba(0,0,0,0.9); border:2px solid #FFB800; border-radius:20px;\n    padding:40px 70px; text-align:center; display:none; pointer-events:all; z-index:25;\n    backdrop-filter:blur(20px) saturate(1.4);\n    box-shadow:0 0 80px rgba(255,180,0,0.4),0 20px 60px rgba(0,0,0,0.7);\n  }\n  #winner-title { font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:5px; text-transform:uppercase; margin-bottom:10px; }\n  #winner-name { font-size:56px; font-weight:900; color:#FFB800; text-shadow:0 0 30px rgba(255,180,0,0.7); margin-bottom:10px; }\n  #winner-time { font-size:18px; color:rgba(255,255,255,0.7); margin-bottom:5px; }\n  #winner-margin { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:32px; }\n  #race-again-btn {\n    background:linear-gradient(135deg,#FFB800,#FF5500); color:#000; border:none; border-radius:50px;\n    padding:15px 50px; font-size:16px; font-weight:800; cursor:pointer;\n    text-transform:uppercase; letter-spacing:3px; transition:transform 0.12s,box-shadow 0.12s;\n    pointer-events:all; box-shadow:0 4px 20px rgba(255,100,0,0.4);\n  }\n  #race-again-btn:hover { transform:scale(1.06); box-shadow:0 8px 36px rgba(255,140,0,0.6); }\n  #launch-hint {\n    position:absolute; bottom:60px; left:50%; transform:translateX(-50%);\n    font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:3px;\n    text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;\n  }\n  @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }\n\n  /* Camera mode button */\n  #camBtn{\n    position:fixed; bottom:70px; right:14px; z-index:99999;\n    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);\n    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;\n    padding:10px 18px; border-radius:24px; cursor:pointer;\n    transition:background 0.2s, transform 0.1s;\n    font-family:'Segoe UI',sans-serif; user-select:none;\n    pointer-events:all; touch-action:manipulation;\n  }\n  #camBtn:active{ transform:scale(0.90); }\n</style>\n</head>\n<body>\n<button id=\"camBtn\" onclick=\"cycleCam()\">\ud83c\udfa5 Chase</button>\n<!-- LOADING SCREEN -->\n<div id=\"loading-screen\" style=\"display:none!important\">\n  <div id=\"loading-logo\">DRAG<span>RACE</span></div>\n  <div id=\"loading-subtitle\">\ud83c\udfc6 Tropical Edition</div>\n  <div id=\"loading-bar-wrap\">\n    <div id=\"loading-bar\"></div>\n  </div>\n  <div id=\"loading-status\">Initializing...</div>\n  <div id=\"loading-dots\">\n    <div class=\"load-dot\"></div>\n    <div class=\"load-dot\"></div>\n    <div class=\"load-dot\"></div>\n  </div>\n</div>\n\n<div id=\"canvas-container\">\n  <canvas id=\"c\"></canvas>\n  <div id=\"vignette\"></div>\n  <div id=\"speed-overlay\"></div>\n  <div id=\"lens-flare\"></div>\n  <div id=\"hud\">\n    <div id=\"p1-hud\">\n      <div class=\"car-name\">\ud83c\udfcd Player 1</div>\n      <div class=\"speed-gauge-wrap\">\n        <span class=\"speed-num\" id=\"p1-speed\">0</span>\n        <span class=\"speed-unit\">km/h</span>\n      </div>\n      <div class=\"rpm-label\">RPM</div>\n      <div class=\"rpm-bar-bg\"><div class=\"rpm-fill\" id=\"p1-rpm\" style=\"width:0%\"></div></div>\n      <div class=\"gear-row\">\n        <span class=\"gear-label\">GEAR</span>\n        <span class=\"gear-num\" id=\"p1-gear\">N</span>\n      </div>\n    </div>\n    <div id=\"timer-hud\">\n      <div class=\"timer-label\">\u23f1 Race Time</div>\n      <div class=\"timer-value\" id=\"timer-val\">0.000</div>\n    </div>\n    <div id=\"p2-hud\">\n      <div class=\"car-name\">Player 2 \ud83c\udfcd</div>\n      <div class=\"speed-gauge-wrap\" style=\"flex-direction:row-reverse;width:100%;\">\n        <span class=\"speed-num\" id=\"p2-speed\">0</span>\n        <span class=\"speed-unit\">km/h</span>\n      </div>\n      <div class=\"rpm-label\" style=\"text-align:right\">RPM</div>\n      <div class=\"rpm-bar-bg\"><div class=\"rpm-fill\" id=\"p2-rpm\" style=\"width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);\"></div></div>\n      <div class=\"gear-row\" style=\"flex-direction:row-reverse;\">\n        <span class=\"gear-label\">GEAR</span>\n        <span class=\"gear-num\" id=\"p2-gear\">N</span>\n      </div>\n    </div>\n    <div class=\"prog-wrap\" id=\"p1-prog-wrap\">\n      <div class=\"prog-label\">P1 Progress</div>\n      <div class=\"prog-bg\"><div id=\"p1-fill\"></div></div>\n    </div>\n    <div class=\"prog-wrap\" id=\"p2-prog-wrap\">\n      <div class=\"prog-label\" style=\"text-align:right\">P2 Progress</div>\n      <div class=\"prog-bg\"><div id=\"p2-fill\"></div></div>\n    </div>\n    <div id=\"countdown\"></div>\n    <div id=\"winner-banner\">\n      <div id=\"winner-title\">\ud83c\udfc6 WINNER</div>\n      <div id=\"winner-name\">Player 1</div>\n      <div id=\"winner-time\">Time: 0.000s</div>\n      <div id=\"winner-margin\">Won by 0.000s</div>\n      <button id=\"race-again-btn\">\ud83d\udd01 Race Again</button>\n    </div>\n    <div id=\"launch-hint\" style=\"display:none\">Press SPACE or tap to launch</div>\n  </div>\n</div>\n\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js\"></script>\n<script src=\"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js\"></script>\n<script src=\"https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js\"></script>\n<script>\n(function(){\n'use strict';\n\n// \u2500\u2500\u2500 IMAGE URLs \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nconst URL_SKY      = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0283923f-92e7-4fa1-9174-3b65fb3787eb.jpg';\nconst URL_MOUNTAIN = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dbae7089-ceee-43a4-95ff-6821267cfe5b.jpg';\nconst URL_GRASS    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2b70430a-30b5-46e2-9fc7-ce262e388893.jpg';\nconst URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3928c54e-b10d-4d5e-8672-fc0062585db0.png';\nconst URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b260a10e-10db-43ca-854c-48b74fb24ef8.png';\nconst URL_BUSH2    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/25cfa60d-c358-4d87-b386-d9379515fc09.png';\nconst URL_FOREST   = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a90fb8e-890f-422f-811d-e00c619311eb.png';\nconst URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/8d9d07e8-6107-4cfd-ba07-1202d0e2481b.png';\n\n// \u2500\u2500\u2500 RENDERER \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nconst canvas = document.getElementById('c');\nconst renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance', logarithmicDepthBuffer:false });\n// FIX 2: Lower pixel ratio for performance (was 1.5)\nrenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));\nrenderer.setSize(window.innerWidth, window.innerHeight);\nrenderer.shadowMap.enabled = false;\nrenderer.toneMapping = THREE.LinearToneMapping;\n// FIX 3: Lower exposure so road doesn't blow out (was 1.0)\nrenderer.toneMappingExposure = 0.85;\nrenderer.outputEncoding = THREE.sRGBEncoding;\nrenderer.physicallyCorrectLights = false;\n\n// \u2500\u2500\u2500 SCENE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nconst scene = new THREE.Scene();\nscene.background = new THREE.Color(0x6FB2D9);\n\n// \u2500\u2500\u2500 CAMERA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nconst camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);\n// \u0646\u0628\u062f\u0623 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u0642\u062f\u0627\u0645 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u0645\u0628\u0627\u0634\u0631\u0629\u064b (START_Z=5)\ncamera.position.set(0, 1.5, 12);\ncamera.lookAt(0, 1.2, 5);\nwindow.addEventListener('resize', ()=>{\n  renderer.setSize(window.innerWidth, window.innerHeight);\n  camera.aspect = window.innerWidth/window.innerHeight;\n  camera.updateProjectionMatrix();\n});\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  LOADING MANAGER\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nlet _loadTotal = 0, _loadDone = 0;\nconst _loadItems = {};\n\nfunction setLoadStatus(msg){ document.getElementById('loading-status').textContent = msg; }\nfunction setLoadBar(pct){ document.getElementById('loading-bar').style.width = Math.min(pct,100)+'%'; }\n\nfunction trackLoad(key){\n  if(_loadItems[key]) return;\n  _loadItems[key] = false;\n  _loadTotal++;\n  setLoadBar((_loadDone/_loadTotal)*90);\n}\nfunction loadProgress(key){\n  if(_loadItems[key]) return;\n  _loadItems[key] = true;\n  _loadDone++;\n  const pct = (_loadDone / _loadTotal) * 90;\n  setLoadBar(pct);\n  const labels = { sky:'Sky loaded', grass:'Terrain loaded', palm:'Trees loaded',\n    bush:'Vegetation loaded', forest:'Forest loaded', mountain:'Mountains loaded',\n    model1:'Left bike loaded', model2:'Right bike loaded' };\n  setLoadStatus(labels[key] || 'Loading assets...');\n}\nfunction checkAllLoaded(){\n  setLoadBar(100);\n  document.getElementById('loading-screen').style.display = 'none';\n  document.getElementById('launch-hint').style.display = 'block';\n}\n\n// Patch TL.load to auto-track\nconst TL = new THREE.TextureLoader();\nconst _tlLoad = TL.load.bind(TL);\nTL.load = function(url, onLoad, onProgress, onError){\n  trackLoad(url);\n  return _tlLoad(url, (tex)=>{ loadProgress(url); if(onLoad) onLoad(tex); }, onProgress, onError);\n};\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  PROCEDURAL TEXTURE HELPERS\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction fbmNoise(ctx, w, h, scale, octaves, baseAlpha){\n  for(let o=0;o<octaves;o++){\n    const f=scale*Math.pow(2,o), a=baseAlpha/Math.pow(2,o);\n    for(let x=0;x<w;x+=Math.max(1,Math.floor(w/f))){\n      for(let y=0;y<h;y+=Math.max(1,Math.floor(h/f))){\n        const v=Math.floor(Math.random()*80-40);\n        const sz=Math.max(1,Math.floor(w/f));\n        ctx.fillStyle=`rgba(${128+v},${128+v},${128+v},${a})`;\n        ctx.fillRect(x,y,sz,sz);\n      }\n    }\n  }\n}\n\nfunction makeAsphaltTexture(w,h){\n  const c=document.createElement('canvas'); c.width=w; c.height=h;\n  const ctx=c.getContext('2d');\n  // FIX 3: Realistic dark warm-grey asphalt base (was #141414)\n  ctx.fillStyle='#2a2a2c'; ctx.fillRect(0,0,w,h);\n  fbmNoise(ctx,w,h,5,4,0.38);\n  for(let i=0;i<12;i++){\n    const x=Math.random()*w, y=Math.random()*h;\n    const rx=30+Math.random()*80, ry=20+Math.random()*60;\n    const g2=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));\n    const warmR=Math.floor(35+Math.random()*20), warmG=Math.floor(30+Math.random()*15);\n    g2.addColorStop(0,`rgba(${warmR},${warmG},18,0.12)`);\n    g2.addColorStop(1,'rgba(0,0,0,0)');\n    ctx.fillStyle=g2; ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2);\n    ctx.fill();\n  }\n  for(let i=0;i<10;i++){\n    const x=Math.random()*w, y=Math.random()*h;\n    const rx=25+Math.random()*70, ry=18+Math.random()*50;\n    const g2=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));\n    g2.addColorStop(0,'rgba(30,38,48,0.14)');\n    g2.addColorStop(1,'rgba(0,0,0,0)');\n    ctx.fillStyle=g2;\n    ctx.beginPath(); ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2); ctx.fill();\n  }\n  for(let i=0;i<14;i++){\n    const x=Math.random()*w, y=Math.random()*h;\n    const r=8+Math.random()*25;\n    const g2=ctx.createRadialGradient(x,y,0,x,y,r);\n    g2.addColorStop(0,'rgba(5,5,8,0.30)');\n    g2.addColorStop(0.5,'rgba(10,8,15,0.15)');\n    g2.addColorStop(1,'rgba(0,0,0,0)');\n    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);\n  }\n  for(let i=0;i<8;i++){\n    const x=Math.random()*w, y=Math.random()*h;\n    const r=12+Math.random()*30;\n    const g2=ctx.createRadialGradient(x,y,0,x,y,r);\n    g2.addColorStop(0,'rgba(60,65,70,0.08)');\n    g2.addColorStop(1,'rgba(0,0,0,0)');\n    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);\n  }\n  for(let i=0;i<1300;i++){\n    const x=Math.random()*w, y=Math.random()*h, r=0.5+Math.random()*2.5;\n    const v=Math.floor(48+Math.random()*50);\n    ctx.beginPath(); ctx.ellipse(x,y,r,r*0.65,Math.random()*Math.PI,0,Math.PI*2);\n    ctx.fillStyle=`rgb(${v},${v},${v})`; ctx.fill();\n  }\n  for(let i=0;i<8;i++){\n    const xm=w*0.28+Math.random()*(w*0.44);\n    const ym=Math.random()*h;\n    const len=40+Math.random()*120;\n    ctx.strokeStyle=`rgba(6,6,6,${0.18+Math.random()*0.18})`; ctx.lineWidth=3+Math.random()*7;\n    ctx.lineCap='round';\n    ctx.beginPath(); ctx.moveTo(xm+(Math.random()-0.5)*3,ym);\n    ctx.lineTo(xm+(Math.random()-0.5)*5,ym+len); ctx.stroke();\n  }\n  for(let i=0;i<24;i++){\n    const xm=40+Math.random()*(w-80);\n    const ym=Math.random()*h;\n    const len=30+Math.random()*100;\n    const ang=(Math.random()-0.5)*0.6;\n    ctx.strokeStyle=`rgba(6,6,6,${0.18+Math.random()*0.20})`; ctx.lineWidth=0.8+Math.random()*1.8;\n    ctx.lineCap='round';\n    ctx.beginPath(); ctx.moveTo(xm,ym);\n    let cx2=xm, cy2=ym;\n    const steps=3+Math.floor(Math.random()*4);\n    for(let s=0;s<steps;s++){\n      cx2+=(Math.random()-0.5)*14+Math.sin(ang)*12;\n      cy2+=len/steps*(0.7+Math.random()*0.6);\n      ctx.lineTo(cx2,cy2);\n    }\n    ctx.stroke();\n    if(Math.random()<0.5){\n      const bx=xm+(Math.random()-0.5)*20, by=ym+len*0.3;\n      ctx.beginPath(); ctx.moveTo(bx,by);\n      ctx.lineTo(bx+(Math.random()-0.5)*22,by+20+Math.random()*30);\n      ctx.strokeStyle=`rgba(6,6,6,${0.10+Math.random()*0.12})`; ctx.lineWidth=0.6+Math.random()*1.0;\n      ctx.stroke();\n    }\n  }\n  for(let i=0;i<18;i++){\n    const x=20+Math.random()*(w-40), y=Math.random()*h;\n    const r=1.5+Math.random()*5;\n    const g2=ctx.createRadialGradient(x,y,0,x,y,r);\n    g2.addColorStop(0,'rgba(4,4,4,0.55)');\n    g2.addColorStop(0.6,'rgba(10,10,10,0.25)');\n    g2.addColorStop(1,'rgba(0,0,0,0)');\n    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);\n  }\n  ctx.strokeStyle='rgba(255,255,255,0.70)'; ctx.lineWidth=9+Math.random()*2;\n  ctx.setLineDash([88,72]);\n  ctx.beginPath(); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.stroke();\n  ctx.setLineDash([]);\n  [18, w-18].forEach(x=>{\n    ctx.strokeStyle='rgba(255,255,255,0.70)';\n    ctx.lineWidth=6+Math.random()*2;\n    ctx.beginPath(); ctx.moveTo(x+(Math.random()-0.5)*1.5,0); ctx.lineTo(x+(Math.random()-0.5)*1.5,h); ctx.stroke();\n  });\n  const tex=new THREE.CanvasTexture(c);\n  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;\n  tex.repeat.set(1, 25);\n  tex.anisotropy=renderer.capabilities.getMaxAnisotropy();\n  return tex;\n}\n\nfunction makeAsphaltNormal(w,h){\n  const c=document.createElement('canvas'); c.width=w; c.height=h;\n  const ctx=c.getContext('2d');\n  ctx.fillStyle='rgb(128,128,255)'; ctx.fillRect(0,0,w,h);\n  for(let x=0;x<w;x+=3){\n    for(let y=0;y<h;y+=3){\n      const nx=Math.floor(128+(Math.random()-0.5)*40);\n      const ny=Math.floor(128+(Math.random()-0.5)*40);\n      ctx.fillStyle=`rgb(${nx},${ny},255)`; ctx.fillRect(x,y,3,3);\n    }\n  }\n  const tex=new THREE.CanvasTexture(c);\n  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;\n  tex.repeat.set(6,90);\n  return tex;\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  LIGHTING\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// \u0627\u0644\u0625\u0636\u0627\u0621\u0629 \u0627\u0644\u0639\u0627\u0645\u0629 \u2014 \u0632\u064a \u0627\u0644\u0623\u0635\u0644\nconst ambient = new THREE.AmbientLight(0xffffff, 0.55);\nscene.add(ambient);\n\nconst hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);\nscene.add(hemi);\n\nconst sun = new THREE.DirectionalLight(0xffffff, 1.4);\nsun.position.set(-40, 60, -120);\nsun.castShadow = true;\n// FIX 2: Smaller shadow map for performance (was 1024)\nsun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;\nsun.shadow.camera.near = 1; sun.shadow.camera.far = 600;\nsun.shadow.camera.left = -150; sun.shadow.camera.right = 150;\nsun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;\nsun.shadow.radius = 3;\nsun.shadow.bias = -0.0002;\nsun.shadow.normalBias = 0.02;\nscene.add(sun);\nscene.add(sun.target);\n\n// FIX 3: Lower sky fill intensity (was 0.5)\nconst skyFill = new THREE.DirectionalLight(0xAADDFF, 0.25);\nskyFill.position.set(0, 100, 0);\nscene.add(skyFill);\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  SKY\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst skyGroup = new THREE.Group();\nscene.add(skyGroup);\n\n(function buildSky(){\n  const skyTex = TL.load(URL_SIDE_BG);\n  skyTex.encoding = THREE.sRGBEncoding;\n  skyTex.wrapS = THREE.RepeatWrapping;\n\n  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });\n  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };\n  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);\n  skyFront.position.set(0, 60, -580);\n  skyGroup.add(skyFront);\n\n  const skyTexL = TL.load(URL_SIDE_BG);\n  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);\n  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });\n\n  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);\n  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;\n  skyGroup.add(skyLeft);\n\n  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());\n  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;\n  skyGroup.add(skyRight);\n\n  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());\n  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;\n  skyGroup.add(skyBack);\n\n  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),\n    new THREE.MeshBasicMaterial({color:0x6FB2D9, side:THREE.FrontSide, depthWrite:false, fog:false}));\n  skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;\n  skyGroup.add(skyTop);\n})();\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  TRACK\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst TRACK_LENGTH = 1100;\nconst TRACK_WIDTH  = 14;\nconst FINISH_Z     = 860;\n// FIX 2: Reduced texture resolution for performance (was 2048x2048)\nconst asphaltTex   = makeAsphaltTexture(512, 512);\n\nconst grassTex = TL.load(URL_GRASS);\ngrassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;\ngrassTex.repeat.set(40, 140);\ngrassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();\ngrassTex.encoding = THREE.sRGBEncoding;\n\nconst roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 4, 20);\nroadGeo.computeVertexNormals();\nconst roadMat = new THREE.MeshLambertMaterial({\n  map:asphaltTex\n});\nconst road = new THREE.Mesh(roadGeo, roadMat);\nroad.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);\nroad.receiveShadow=false;\nroad.frustumCulled=true;\nscene.add(road);\n\nconst gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);\nconst gMat = new THREE.MeshLambertMaterial({ map: grassTex });\n[-400, 400].forEach(x=>{\n  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;\n  g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);\n});\n\nconst dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});\n[-1,1].forEach(side => {\n  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);\n  dirt.rotation.x = -Math.PI/2;\n  dirt.position.set(side * (TRACK_WIDTH/2 + 2), 0.005, TRACK_LENGTH/2);\n  scene.add(dirt);\n});\n\nconst curbMat = new THREE.MeshLambertMaterial({ color:0xE8E0D0 });\nfunction makeCurb(x, zCenter, length){\n  const cg=new THREE.BoxGeometry(0.7,0.12,length);\n  const c=new THREE.Mesh(cg,curbMat); c.position.set(x,0.06,zCenter);\n  c.receiveShadow=c.castShadow=true; scene.add(c);\n  const stripeW=3;\n  for(let z=-length/2;z<length/2;z+=stripeW*2){\n    const sg=new THREE.BoxGeometry(0.72,0.13,stripeW);\n    const sc=new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ color:0xCC2200, roughness:0.65 }));\n    sc.position.set(x,0.065,zCenter+z+stripeW/2); scene.add(sc);\n  }\n}\nmakeCurb(-TRACK_WIDTH/2-0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);\nmakeCurb( TRACK_WIDTH/2+0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);\n\nconst armcoMat = new THREE.MeshLambertMaterial({ color:0xCCCCCC });\nfunction makeArmco(x, zCenter, length){\n  const ag=new THREE.BoxGeometry(0.2,0.6,length);\n  const a=new THREE.Mesh(ag,armcoMat); a.position.set(x,0.5,zCenter); a.castShadow=true; scene.add(a);\n  const postCount = Math.floor(length/3)+1;\n  const postGeo=new THREE.CylinderGeometry(0.05,0.06,1.1,8);\n  const postMat=new THREE.MeshStandardMaterial({color:0xAAAAAA,metalness:0.6,roughness:0.4});\n  const postInst=new THREE.InstancedMesh(postGeo,postMat,postCount);\n  postInst.castShadow=true;\n  const dummy=new THREE.Object3D();\n  let idx=0;\n  for(let z=-length/2;z<length/2;z+=3){\n    dummy.position.set(x,0.55,zCenter+z);\n    dummy.updateMatrix();\n    postInst.setMatrixAt(idx++,dummy.matrix);\n  }\n  postInst.instanceMatrix.needsUpdate=true;\n  scene.add(postInst);\n}\nmakeArmco(-TRACK_WIDTH/2-1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);\nmakeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  START LINE GANTRY (F1 Style)\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n(function buildStartGantry(){\n  const z=8;\n  const gantryMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.85,roughness:0.2});\n  const poleMat=new THREE.MeshStandardMaterial({color:0x333333,metalness:0.8,roughness:0.25});\n  [-TRACK_WIDTH/2-1, TRACK_WIDTH/2+1].forEach(x=>{\n    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.25,11,14),poleMat);\n    p.position.set(x,5.5,z); p.castShadow=true; scene.add(p);\n  });\n  const hb=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,TRACK_WIDTH+4,14),gantryMat);\n  hb.rotation.z=Math.PI/2; hb.position.set(0,11,z); hb.castShadow=true; scene.add(hb);\n  const lightColors=[0xFF0000,0xFF0000,0xFF0000,0xFF0000,0xFF8800];\n  for(let i=0;i<5;i++){\n    const lg=new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8),\n      new THREE.MeshStandardMaterial({color:lightColors[i],emissive:lightColors[i],emissiveIntensity:0.4}));\n    lg.position.set(-3+(i*1.5),11.5,z+0.2); scene.add(lg);\n    scene.userData['light_'+i]=lg;\n  }\n  const slC=document.createElement('canvas'); slC.width=512; slC.height=128;\n  const slCtx=slC.getContext('2d');\n  const ts=32;\n  for(let bx=0;bx<512;bx+=ts) for(let by=0;by<128;by+=ts){\n    slCtx.fillStyle=((bx/ts+by/ts)%2===0)?'#fff':'#000';\n    slCtx.fillRect(bx,by,ts,ts);\n  }\n  const slTex=new THREE.CanvasTexture(slC);\n  const sl=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,3),\n    new THREE.MeshStandardMaterial({map:slTex,roughness:0.6,metalness:0.05}));\n  sl.rotation.x=-Math.PI/2; sl.position.set(0,0.012,z); scene.add(sl);\n})();\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  FINISH GATE\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n(function buildFinish(){\n  const finZ=FINISH_Z;\n  const poleMat=new THREE.MeshStandardMaterial({color:0xBBBBBB,metalness:0.88,roughness:0.18});\n  [-TRACK_WIDTH/2-0.6, TRACK_WIDTH/2+0.6].forEach(x=>{\n    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.26,14,14),poleMat);\n    p.position.set(x,7,finZ); p.castShadow=true; scene.add(p);\n    const bp=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.25,10),poleMat);\n    bp.position.set(x,0.12,finZ); scene.add(bp);\n  });\n  const crossGeo=new THREE.CylinderGeometry(0.15,0.15,TRACK_WIDTH+2.5,12);\n  crossGeo.applyMatrix4(new THREE.Matrix4().makeRotationZ(Math.PI/2));\n  const cross=new THREE.Mesh(crossGeo,poleMat); cross.position.set(0,14,finZ); cross.castShadow=true; scene.add(cross);\n  [[-1,1],[1,1]].forEach(([sx])=>{\n    const dg=new THREE.CylinderGeometry(0.08,0.08,8,8);\n    dg.applyMatrix4(new THREE.Matrix4().makeRotationZ(sx*0.5));\n    const d=new THREE.Mesh(dg,poleMat); d.position.set(sx*(TRACK_WIDTH/2-1),10,finZ); scene.add(d);\n  });\n  const banC=document.createElement('canvas'); banC.width=1024; banC.height=200;\n  const bCtx=banC.getContext('2d');\n  const ts2=40;\n  for(let bx=0;bx<1024;bx+=ts2) for(let by=0;by<200;by+=ts2){\n    bCtx.fillStyle=((bx/ts2+by/ts2)%2===0)?'#000':'#fff';\n    bCtx.fillRect(bx,by,ts2,ts2);\n  }\n  bCtx.font='bold 120px Arial'; bCtx.textAlign='center'; bCtx.textBaseline='middle';\n  bCtx.fillStyle='rgba(255,200,0,1)'; bCtx.fillText('FINISH',512,100);\n  const banGeo=new THREE.PlaneGeometry(TRACK_WIDTH+2,3,20,4);\n  const banPos=banGeo.attributes.position;\n  for(let i=0;i<banPos.count;i++){\n    const x=banPos.getX(i);\n    banPos.setZ(i, Math.sin(x*0.3+0.5)*0.12);\n  }\n  banGeo.computeVertexNormals();\n  const banMat=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(banC),side:THREE.DoubleSide,roughness:0.7});\n  const banner=new THREE.Mesh(banGeo,banMat); banner.position.set(0,12.5,finZ); scene.add(banner);\n  const lMat=new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.55,metalness:0.08});\n  const line=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,2.5),lMat);\n  line.rotation.x=-Math.PI/2; line.position.set(0,0.012,finZ); scene.add(line);\n})();\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  BIKE GROUPS\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst car1 = new THREE.Group();\ncar1.position.set(-3, 0, 5);\ncar1.rotation.y = 0;\nscene.add(car1);\n\nconst car2 = new THREE.Group();\ncar2.position.set(3, 0, 5);\ncar2.rotation.y = 0;\nscene.add(car2);\n\ncar1._wheels = [];\ncar2._wheels = [];\nlet modelsLoaded = false;\n\n// \u0625\u0636\u0627\u0621\u0629 \u062e\u0627\u0635\u0629 \u0628\u0643\u0644 \u062f\u0631\u0627\u062c\u0629 \u2014 PointLight \u0628\u0633 (SpotLight \u0645\u0643\u0644\u0641 \u0639\u0644\u0649 \u0627\u0644\u0640 GPU)\nconst bikeLight1 = new THREE.PointLight(0xffffff, 3.5, 7);\nbikeLight1.position.set(-3, 3, 5);\nscene.add(bikeLight1);\n\nconst bikeLight2 = new THREE.PointLight(0xffffff, 3.5, 7);\nbikeLight2.position.set(3, 3, 5);\nscene.add(bikeLight2);\n\n// \u2500\u2500 DEBUG PLACEHOLDER CUBES (visible while loading) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nconst debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);\nconst debugMat1 = new THREE.MeshBasicMaterial({ color: 0xFFDD00, side: THREE.DoubleSide });\nconst debugMat2 = new THREE.MeshBasicMaterial({ color: 0x00AAFF, side: THREE.DoubleSide });\nconst debugCube1 = new THREE.Mesh(debugGeo, debugMat1);\nconst debugCube2 = new THREE.Mesh(debugGeo, debugMat2);\ndebugCube1.position.set(0, 0.75, 0);\ndebugCube2.position.set(0, 0.75, 0);\ndebugCube1.frustumCulled = false;\ndebugCube2.frustumCulled = false;\ncar1.add(debugCube1);\ncar2.add(debugCube2);\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  MODEL SETUP HELPERS\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction setupBikeModel(model){\n  const wheels = [];\n  const allMeshes = [];\n\n  model.traverse(function(child){\n    if(child.isMesh){\n      child.castShadow = true;\n      child.receiveShadow = false;\n      child.frustumCulled = false;\n      child.geometry.computeBoundingSphere();\n      child.geometry.computeBoundingBox();\n      allMeshes.push(child);\n\n      // COLOR FIX: Ensure textures have correct encoding and materials show original colors\n      if(child.material){\n        const mats = Array.isArray(child.material) ? child.material : [child.material];\n        mats.forEach(function(mat){\n          if(mat.map) mat.map.encoding = THREE.sRGBEncoding;\n          if(mat.emissiveMap) mat.emissiveMap.encoding = THREE.sRGBEncoding;\n          // Prevent metalness from darkening the model\n          if(mat.metalness !== undefined && mat.metalness > 0.5) mat.metalness = 0.3;\n          // Ensure roughness doesn't make model look muddy\n          if(mat.roughness !== undefined && mat.roughness > 0.9) mat.roughness = 0.7;\n          mat.needsUpdate = true;\n        });\n      }\n    }\n  });\n\n  const wheelPattern = /wheel|tire|tyre|rim|roue|rueda/i;\n  allMeshes.forEach(function(mesh){\n    if(wheelPattern.test(mesh.name)) wheels.push(mesh);\n  });\n\n  const geometricWheels = [];\n  if(wheels.length === 0){\n    allMeshes.forEach(function(mesh){\n      const bb = new THREE.Box3().setFromObject(mesh);\n      const sz = new THREE.Vector3(); bb.getSize(sz);\n      const minDim = Math.min(sz.x, sz.y, sz.z);\n      const maxDim = Math.max(sz.x, sz.y, sz.z);\n      if(minDim < maxDim * 0.35 && maxDim > 0.2 && maxDim < 2.5){\n        geometricWheels.push(mesh);\n      }\n    });\n  }\n\n  const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;\n  return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };\n}\n\nfunction fitBikeToGround(innerModel){\n  innerModel.updateMatrixWorld(true);\n  let box = new THREE.Box3().setFromObject(innerModel);\n  let size = new THREE.Vector3();\n  box.getSize(size);\n\n  console.log('GLB native size \u2014 X:', size.x.toFixed(2), 'Y:', size.y.toFixed(2), 'Z:', size.z.toFixed(2));\n  console.log('Longest axis:', size.x > size.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');\n\n  if(size.x > size.z * 1.2){\n    innerModel.rotation.y = -Math.PI / 2;\n  } else {\n    innerModel.rotation.y = 0;\n  }\n  innerModel.updateMatrixWorld(true);\n  box = new THREE.Box3().setFromObject(innerModel);\n  box.getSize(size);\n\n  const TARGET_LENGTH = 4.5;\n  const currentDepth = Math.max(size.z, size.x, 0.001);\n  const scaleFactor = TARGET_LENGTH / currentDepth;\n  innerModel.scale.set(scaleFactor, scaleFactor, scaleFactor);\n\n  innerModel.updateMatrixWorld(true);\n  box = new THREE.Box3().setFromObject(innerModel);\n  box.getSize(size);\n  const center = new THREE.Vector3();\n  box.getCenter(center);\n\n  innerModel.position.x = -center.x;\n  innerModel.position.z = -center.z;\n  innerModel.position.y = -box.min.y;\n}\n\n// \u2500\u2500 RED PLACEHOLDER BOXES (shown if a model fails to load entirely) \u2500\u2500\nfunction spawnFallbackBox(car, colorHex){\n  const mat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: false, side: THREE.DoubleSide });\n  const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 3.6), mat);\n  body.position.set(0, 1.2, 0); body.frustumCulled = false; car.add(body);\n  const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), mat);\n  front.position.set(0, 1.5, 1.6); front.frustumCulled = false; car.add(front);\n  const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 16);\n  const wMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });\n  [-1.6, 1.6].forEach(function(zOff){\n    const wheel = new THREE.Mesh(wGeo, wMat);\n    wheel.rotation.z = Math.PI / 2;\n    wheel.position.set(0, 0.55, zOff);\n    wheel.frustumCulled = false;\n    car.add(wheel);\n  });\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  GLB LOADING \u2014 Two separate loads, one per lane\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst dracoLoader = new THREE.DRACOLoader();\ndracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');\n\nconst gltfLoader = new THREE.GLTFLoader();\ngltfLoader.setDRACOLoader(dracoLoader);\n\n// car1 (left lane, x=-3) \u2014 uses \"bike with rider 2.glb\"\nconst BIKE1_URL_PRIMARY  = 'bike with rider 2.glb';\nconst BIKE1_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';\n\n// car2 (right lane, x=+3) \u2014 uses \"bike with rider.glb\"\nconst BIKE2_URL_PRIMARY  = 'bike with rider.glb';\nconst BIKE2_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';\n\n// Track two independent model loads\ntrackLoad('model1');\ntrackLoad('model2');\n\n// Counter: call checkAllLoaded only after both loads complete (success or fallback)\nlet modelsFinishedCount = 0;\nfunction onModelLoadComplete(){\n  modelsFinishedCount++;\n  if(modelsFinishedCount >= 2){\n    modelsLoaded = true;\n    dracoLoader.dispose();\n    checkAllLoaded();\n  }\n}\n\n// Apply a loaded GLB scene to car1 (left lane)\nfunction applyBike1Gltf(gltf){\n  const bikeModel = gltf.scene;\n  fitBikeToGround(bikeModel);\n  const r = setupBikeModel(bikeModel);\n  car1._wheels = r.namedWheels;\n  car1._allWheelMeshes = r.allDetected;\n  car1.remove(debugCube1);\n  car1.add(bikeModel);\n  loadProgress('model1');\n  onModelLoadComplete();\n}\n\n// Apply a loaded GLB scene to car2 (right lane)\nfunction applyBike2Gltf(gltf){\n  const bikeModel = gltf.scene;\n  fitBikeToGround(bikeModel);\n  const r = setupBikeModel(bikeModel);\n  car2._wheels = r.namedWheels;\n  car2._allWheelMeshes = r.allDetected;\n  car2.remove(debugCube2);\n  car2.add(bikeModel);\n  loadProgress('model2');\n  onModelLoadComplete();\n}\n\n// Load left-lane bike (bike with rider 2.glb) \u2192 car1\nfunction loadBike1(){\n  gltfLoader.load(\n    BIKE1_URL_PRIMARY,\n    function(gltf){ applyBike1Gltf(gltf); },\n    function(xhr){\n      if(xhr.total > 0){\n        const pct = Math.round(xhr.loaded / xhr.total * 100);\n        setLoadStatus('Loading left bike... ' + pct + '%');\n      }\n    },\n    function(err){\n      setLoadStatus('Left bike: retrying fallback...');\n      gltfLoader.load(\n        BIKE1_URL_FALLBACK,\n        function(gltf){ applyBike1Gltf(gltf); },\n        function(xhr2){\n          if(xhr2.total > 0){\n            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);\n            setLoadStatus('Left bike fallback... ' + pct2 + '%');\n          }\n        },\n        function(err2){\n          setLoadStatus('Left bike unavailable \u2014 using placeholder');\n          car1.remove(debugCube1);\n          spawnFallbackBox(car1, 0xFF2200);\n          loadProgress('model1');\n          onModelLoadComplete();\n        }\n      );\n    }\n  );\n}\n\n// Load right-lane bike (bike with rider.glb) \u2192 car2\nfunction loadBike2(){\n  gltfLoader.load(\n    BIKE2_URL_PRIMARY,\n    function(gltf){ applyBike2Gltf(gltf); },\n    function(xhr){\n      if(xhr.total > 0){\n        const pct = Math.round(xhr.loaded / xhr.total * 100);\n        setLoadStatus('Loading right bike... ' + pct + '%');\n      }\n    },\n    function(err){\n      setLoadStatus('Right bike: retrying fallback...');\n      gltfLoader.load(\n        BIKE2_URL_FALLBACK,\n        function(gltf){ applyBike2Gltf(gltf); },\n        function(xhr2){\n          if(xhr2.total > 0){\n            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);\n            setLoadStatus('Right bike fallback... ' + pct2 + '%');\n          }\n        },\n        function(err2){\n          setLoadStatus('Right bike unavailable \u2014 using placeholder');\n          car2.remove(debugCube2);\n          spawnFallbackBox(car2, 0xFF6600);\n          loadProgress('model2');\n          onModelLoadComplete();\n        }\n      );\n    }\n  );\n}\n\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  PROCEDURAL RIDER \u2014 r128 compatible (no CapsuleGeometry)\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){\n  const g = new THREE.Group();\n  const mat = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});\n  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10), mat);\n  g.add(cyl);\n  const top = new THREE.Mesh(new THREE.SphereGeometry(rt,10,8,0,Math.PI*2,0,Math.PI/2), mat);\n  top.position.y = h/2; g.add(top);\n  const bot = new THREE.Mesh(new THREE.SphereGeometry(rb,10,8,0,Math.PI*2,Math.PI/2,Math.PI/2), mat);\n  bot.position.y = -h/2; g.add(bot);\n  g.traverse(c=>{ if(c.isMesh) c.frustumCulled=false; });\n  return g;\n}\n\nfunction addProceduralRider(carGroup, helmetColor){\n  const suitCol  = 0x1a1a2e;\n  const bootCol  = 0x0d0d0d;\n  const gloveCol = 0x111111;\n  const skinCol  = 0x8B5E3C;\n\n  function smat(col, rough=0.75, metal=0.0){\n    return new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});\n  }\n\n  const rg = new THREE.Group();\n\n  const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);\n  torso.rotation.x = -0.65;\n  torso.position.set(0, 1.20, 0.10);\n  rg.add(torso);\n\n  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));\n  stripe.position.set(0, 1.22, -0.13);\n  rg.add(stripe);\n\n  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));\n  neck.position.set(0, 1.50, 0.00);\n  rg.add(neck);\n\n  const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});\n  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);\n  helmet.scale.set(1.0, 1.08, 1.12);\n  helmet.position.set(0, 1.66, -0.04);\n  rg.add(helmet);\n\n  const visorMat = new THREE.MeshStandardMaterial({\n    color:0x0a0a1a, roughness:0.02, metalness:0.9,\n    transparent:true, opacity:0.80, side:THREE.FrontSide\n  });\n  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);\n  visor.position.set(0, 1.62, 0.09);\n  visor.scale.set(1, 0.82, 0.88);\n  visor.frustumCulled = false;\n  rg.add(visor);\n\n  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);\n  chin.position.set(0, 1.56, 0.10);\n  chin.scale.set(1,0.75,1.1);\n  chin.frustumCulled=false;\n  rg.add(chin);\n\n  [[-1],[1]].forEach(([side])=>{\n    const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);\n    ua.rotation.z = side * 1.05;\n    ua.rotation.x = -0.45;\n    ua.position.set(side*0.27, 1.26, 0.08);\n    rg.add(ua);\n\n    const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);\n    fa.rotation.z = side * 0.45;\n    fa.rotation.x = -0.95;\n    fa.position.set(side*0.32, 1.04, 0.28);\n    rg.add(fa);\n\n    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));\n    glove.position.set(side*0.34, 0.90, 0.42);\n    glove.frustumCulled=false;\n    rg.add(glove);\n  });\n\n  [[-1],[1]].forEach(([side])=>{\n    const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);\n    thigh.rotation.x = 1.25;\n    thigh.position.set(side*0.14, 0.95, 0.30);\n    rg.add(thigh);\n\n    const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);\n    shin.rotation.x = -0.80;\n    shin.position.set(side*0.14, 0.66, 0.50);\n    rg.add(shin);\n\n    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));\n    boot.position.set(side*0.14, 0.52, 0.60);\n    boot.frustumCulled=false;\n    rg.add(boot);\n  });\n\n  rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });\n  carGroup.add(rg);\n  carGroup._rider = rg;\n}\n\n\n// Kick off both loads in parallel\nloadBike1();\nloadBike2();\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  PARTICLE SYSTEM \u2014 FIX 2: Reduced MAX_P from 150 \u2192 80\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst MAX_P=80;\nconst pGeo=new THREE.BufferGeometry();\nconst pPos2=new Float32Array(MAX_P*3);\nconst pSz=new Float32Array(MAX_P);\nconst pLf=new Float32Array(MAX_P);\nconst pVx=new Float32Array(MAX_P), pVy=new Float32Array(MAX_P), pVz2=new Float32Array(MAX_P);\nconst pTy=new Uint8Array(MAX_P);\nfor(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pPos2[i*3+1]=9999; pPos2[i*3+2]=9999; pLf[i]=0; pSz[i]=0; }\npGeo.setAttribute('position',new THREE.BufferAttribute(pPos2,3));\npGeo.setAttribute('size',new THREE.BufferAttribute(pSz,1));\nconst pC=document.createElement('canvas'); pC.width=64; pC.height=64;\nconst pCx=pC.getContext('2d');\nconst pG=pCx.createRadialGradient(32,32,0,32,32,32);\npG.addColorStop(0,'rgba(255,255,255,1)'); pG.addColorStop(0.5,'rgba(255,255,255,0.4)'); pG.addColorStop(1,'rgba(255,255,255,0)');\npCx.fillStyle=pG; pCx.fillRect(0,0,64,64);\nconst particleMat=new THREE.PointsMaterial({map:new THREE.CanvasTexture(pC),size:1.4,transparent:true,opacity:0.55,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending});\nconst particles=new THREE.Points(pGeo,particleMat);\nscene.add(particles);\nlet pIdx2=0;\nfunction spawnP(x,y,z,vx,vy,vz,type){\n  const i=pIdx2%MAX_P; pIdx2++;\n  pPos2[i*3]=x; pPos2[i*3+1]=y; pPos2[i*3+2]=z;\n  pLf[i]=1.0; pSz[i]=type===3?0.3:(type===0?2.5:1.1);\n  pVx[i]=vx+(Math.random()-0.5)*0.5; pVy[i]=vy+Math.random()*0.25; pVz2[i]=vz+(Math.random()-0.5)*0.35;\n  pTy[i]=type;\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  GAME STATE\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nconst START_Z=5;\nconst gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];\nconst gearThr=[0,14,38,70,106,148,198];\nconst MAX_SPD=325;\n\nconst state={phase:'idle',timer:0,raceStart:0,\n  p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},\n  p2:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0}};\nlet p1M=1,p2M=1,cShake=0;\n\nfunction getGear(spd){ for(let g=gearThr.length-1;g>=0;g--) if(spd>=gearThr[g]) return g+1; return 1; }\n\nfunction resetGame(){\n  state.phase='idle'; state.timer=0; state.raceStart=0;\n  state.p1={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};\n  state.p2={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};\n  car1.position.set(-3,0,START_Z); car2.position.set(3,0,START_Z);\n  document.getElementById('winner-banner').style.display='none';\n  document.getElementById('countdown').style.display='none';\n  document.getElementById('launch-hint').style.display='block';\n  p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;\n  cShake=0;\n  for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }\n  document.getElementById('timer-val').textContent = '0.000';\n  // FIX 1: Re-enable cinematic on reset\n  cinematicTimer = 7.0;\n  cinematicDone = false;\n}\n\nfunction startCountdown(){\n  if(state.phase!=='idle') return;\n  // FIX 1: Interrupt cinematic immediately when user starts race\n  cinematicDone = true;\n  document.getElementById('launch-hint').style.display='none';\n  state.phase='countdown';\n  const el=document.getElementById('countdown');\n  el.style.display='block'; el.classList.remove('go');\n  for(let li=0;li<5;li++){\n    const lm=scene.userData['light_'+li];\n    if(lm){ lm.material.emissiveIntensity=0.2; }\n  }\n  let idx=0;\n  const counts=['3','2','1','GO!'];\n  function step(){\n    if(idx<3){\n      el.textContent=counts[idx];\n      const lm=scene.userData['light_'+idx];\n      if(lm){ lm.material.color.setHex(0xFF0000); lm.material.emissive.setHex(0xFF0000); lm.material.emissiveIntensity=3.0; }\n    } else {\n      el.textContent='GO!'; el.classList.add('go');\n      for(let li=0;li<5;li++){\n        const lm2=scene.userData['light_'+li];\n        if(lm2){ lm2.material.color.setHex(0x00FF00); lm2.material.emissive.setHex(0x00FF00); lm2.material.emissiveIntensity=4.0; }\n      }\n    }\n    el.style.animation='none'; el.offsetHeight; el.style.animation='countPulse 0.6s ease-out';\n    idx++;\n    if(idx<4) setTimeout(step,900);\n    else{ setTimeout(()=>{ el.style.display='none'; state.phase='racing'; state.raceStart=performance.now(); cShake=0.22; },700); }\n  }\n  step();\n}\n\nwindow.addEventListener('keydown',e=>{\n  if(e.code==='Space'||e.key===' '){ e.preventDefault(); if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); }\n});\ndocument.getElementById('canvas-container').addEventListener('click',()=>{ if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); });\ndocument.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPropagation(); resetGame(); });\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  CAMERA \u2014 FIX 1: Multi-phase cinematic intro\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\nfunction cycleCam(){\n  camMode = (camMode + 1) % CAM_MODES.length;\n  document.getElementById('camBtn').textContent = CAM_MODES[camMode];\n}\n\nlet camMode = 0; // 0=chase, 1=top, 2=side, 3=low-front\nconst CAM_MODES = ['\ud83c\udfa5 Chase', '\ud83d\udd3c Top', '\u2194\ufe0f Side', '\ud83c\udfc1 Front'];\n\n// FIX 1: Enable cinematic intro \u2014 7 seconds, plays once at load\nlet cinematicTimer = 7.0;\nlet cinematicDone  = false;\n\n// Ease in-out cubic\nfunction easeInOut(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }\n\nfunction updateCamera(dt){\n  const midZ = (state.p1.pos + state.p2.pos) * 0.5;\n  const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;\n  const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;\n\n  // \u2500\u2500 FIX 1: CINEMATIC INTRO (only in idle phase before race) \u2500\u2500\n  if(!cinematicDone && state.phase === 'idle'){\n    cinematicTimer -= dt;\n    const elapsed = 7.0 - Math.max(cinematicTimer, 0);\n    const t = elapsed; // 0 \u2192 7\n\n    // \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u062f\u0627\u064a\u0645\u0627\u064b \u0641\u064a START_Z=5 \u2014 \u0646\u062e\u0644\u064a \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u062a\u0637\u0648\u0651\u0641 \u062d\u0648\u0627\u0644\u064a\u0647\u0645\n    const bikeZ = START_Z; // 5\n    let tX, tY, tZ, lX=0, lY=1.2, lZ=bikeZ;\n\n    if(t < 2.5){\n      // Phase 1: \u0643\u0644\u0648\u0632-\u0623\u0628 \u0645\u0646 \u0627\u0644\u0623\u0645\u0627\u0645 \u2014 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u0642\u062f\u0627\u0645 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u0628\u062a\u0634\u0648\u0641\u0647\u0645 \u0648\u062c\u0647 \u0644\u0648\u062c\u0647\n      const p = easeInOut(t / 2.5);\n      tX = 0;\n      tY = 1.5 + p * 0.5;       // 1.5 \u2192 2\n      tZ = bikeZ + 7 + p * 3;   // 12 \u2192 15 (\u0642\u062f\u0627\u0645 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a)\n      lX = 0; lY = 1.2; lZ = bikeZ;\n    } else if(t < 4.5){\n      // Phase 2: \u062f\u0648\u0631\u0627\u0646 \u062c\u0627\u0646\u0628\u064a \u2014 \u062a\u0637\u0648\u0651\u0641 \u062d\u0648\u0627\u0644\u064a\u0646 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a\n      const p = easeInOut((t - 2.5) / 2.0);\n      const a = p * Math.PI; // 0 \u2192 \u03c0\n      tX = Math.sin(a) * 9;\n      tY = 2.5;\n      tZ = bikeZ + Math.cos(a) * 9; // \u062a\u062f\u0648\u0631 \u062d\u0648\u0627\u0644\u064a\u0646 bikeZ\n      lX = 0; lY = 1.2; lZ = bikeZ;\n    } else {\n      // Phase 3: \u062a\u0627\u0646\u0632\u064a\u0634\u0646 \u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u0627\u0644\u0633\u0628\u0627\u0642 \u0645\u0646 \u0648\u0631\u0627\n      const p = easeInOut((t - 4.5) / 2.5);\n      const fromX = 0;\n      const fromY = 2.5;\n      const fromZ = bikeZ - 9;\n      const toX = sh;\n      const toY = 4.5 + shY;\n      const toZ = bikeZ - 11.0;\n      tX = fromX + (toX - fromX) * p;\n      tY = fromY + (toY - fromY) * p;\n      tZ = fromZ + (toZ - fromZ) * p;\n      lX = 0;\n      lY = 1.2;\n      lZ = bikeZ + p * 25;\n    }\n\n    if(cinematicTimer <= 0){\n      cinematicDone = true;\n    }\n\n    camera.position.x += (tX - camera.position.x) * 0.10;\n    camera.position.y += (tY - camera.position.y) * 0.08;\n    camera.position.z += (tZ - camera.position.z) * 0.10;\n    camera.lookAt(new THREE.Vector3(lX, lY, lZ));\n    skyGroup.position.set(camera.position.x, 0, camera.position.z);\n    sun.position.set(-80, 100, midZ+50);\n    sun.target.position.set(0,0,midZ);\n    sun.target.updateMatrixWorld();\n    return;\n  }\n  // \u2500\u2500 END CINEMATIC \u2500\u2500\n\n  let tX, tY, tZ, lX=0, lY=1.1, lZ;\n\n  // \u0641\u064a \u0645\u0631\u062d\u0644\u0629 \u0627\u0644\u0640 countdown \u2014 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u062a\u0628\u0635 \u0639\u0644\u0649 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u0645\u0634 \u0642\u062f\u0627\u0645\u0647\u0645\n  const isCountdown = (state.phase === 'countdown');\n\n  if(camMode === 0){\n    // Chase cam\n    tX = sh; tY = 4.5 + shY; tZ = midZ - 11.0;\n    // \u0644\u0648 countdown: \u0627\u0628\u0635 \u0639\u0644\u0649 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u0646\u0641\u0633\u0647\u0627\u060c \u0644\u0648 racing: \u0627\u0628\u0635 \u0644\u0644\u0623\u0645\u0627\u0645\n    lZ = isCountdown ? midZ + 2 : midZ + 25;\n    lY = isCountdown ? 1.5 : 1.1;\n  } else if(camMode === 1){\n    // Sports broadcast top-down angle\n    tX = 0; tY = 25; tZ = midZ - 4;\n    lX = 0; lY = 0; lZ = midZ + 2;\n  } else if(camMode === 2){\n    // Side cam \u2014 perpendicular view\n    tX = 18; tY = 3.5; tZ = midZ;\n    lX = 0; lY = 2; lZ = midZ;\n  } else {\n    // Low front cam \u2014 facing the bikes\n    tX = sh * 0.5; tY = 1.4 + shY * 0.5; tZ = midZ + 14;\n    lZ = midZ - 5;\n  }\n\n  const lerpSpd = camMode === 1 ? 0.06 : 0.13;\n  camera.position.x += (tX - camera.position.x) * lerpSpd;\n  camera.position.y += (tY - camera.position.y) * (lerpSpd * 0.8);\n  camera.position.z += (tZ - camera.position.z) * lerpSpd;\n  camera.lookAt(new THREE.Vector3(lX, lY, lZ));\n\n  if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.8);\n  skyGroup.position.set(camera.position.x, 0, camera.position.z);\n  sun.position.set(-80, 100, midZ+50);\n  sun.target.position.set(0,0,midZ);\n  sun.target.updateMatrixWorld();\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  PHYSICS\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction updatePhysics(dt){\n  if(state.phase!=='racing') return;\n  const elapsed=(performance.now()-state.raceStart)/1000;\n  state.timer=elapsed;\n  function updateCar(cs,mult){\n    if(cs.finished) return;\n    cs.gear=getGear(cs.speed);\n    const ga=gears[Math.min(cs.gear,gears.length-1)];\n    const ar=cs.speed/MAX_SPD;\n    const vr=1+(Math.sin(elapsed*3.9+mult*12)*0.022);\n    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*285, MAX_SPD);\n    cs.pos+=cs.speed/3.6*dt;\n  }\n  updateCar(state.p1,p1M); updateCar(state.p2,p2M);\n  car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;\n  const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];\n  ws.forEach((c,ci)=>{\n    const spd = spds[ci];\n    const rotAmt = spd * 0.052 * dt;\n    if(c._wheels && c._wheels.length > 0){\n      c._wheels.forEach(w=>{ w.rotation.x += rotAmt; });\n    }\n    if(c._allWheelMeshes && c._allWheelMeshes.length > 0){\n      c._allWheelMeshes.forEach(w=>{ w.rotation.x += rotAmt; });\n    }\n    // FIX 2: Cache fallback wheel traversal result to avoid every-frame traversal\n    if((!c._wheels || c._wheels.length===0) && (!c._allWheelMeshes || c._allWheelMeshes.length===0)){\n      if(!c._fallbackWheels){\n        c._fallbackWheels = [];\n        c.traverse(function(child){\n          if(!child.isMesh || child._isRiderPart) return;\n          const bb = child.geometry && child.geometry.boundingBox;\n          if(!bb) return;\n          const sx = bb.max.x - bb.min.x;\n          const sy = bb.max.y - bb.min.y;\n          const sz = bb.max.z - bb.min.z;\n          const thin = Math.min(sx,sy,sz) < Math.max(sx,sy,sz)*0.4;\n          if(thin) c._fallbackWheels.push(child);\n        });\n      }\n      c._fallbackWheels.forEach(function(child){ child.rotation.x += rotAmt; });\n    }\n  });\n  car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);\n  car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);\n\n  // \u0644\u0645\u0627 \u0627\u0644\u0633\u0628\u0627\u0642 \u064a\u062e\u0644\u0635 \u0627\u0631\u062c\u0639 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u0639\u0644\u0649 \u0627\u0644\u0623\u0631\u0636\n  if(state.p1.finished) car1.position.y = 0;\n  if(state.p2.finished) car2.position.y = 0;\n\n  [car1, car2].forEach((car, ci)=>{\n    if(car._rider){\n      const spd = spds[ci];\n      const leanX = -0.18 * (spd / MAX_SPD);\n      car._rider.rotation.x = leanX;\n    }\n  });\n  const now=performance.now();\n  if(!state.p1.finished&&state.p1.pos>=FINISH_Z){ state.p1.finished=true; state.p1.finTime=(now-state.raceStart)/1000; }\n  if(!state.p2.finished&&state.p2.pos>=FINISH_Z){ state.p2.finished=true; state.p2.finTime=(now-state.raceStart)/1000; }\n  if(state.p1.finished&&state.p2.finished&&state.phase==='racing'){\n    state.phase='finished';\n    const w=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';\n    showWinner(w,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));\n  } else if((state.p1.finished||state.p2.finished)&&state.phase==='racing'){\n    const leader=state.p1.finished?state.p1:state.p2;\n    const other=state.p1.finished?state.p2:state.p1;\n    if(leader.pos>FINISH_Z+25&&!other.finished){\n      other.finished=true; other.finTime=(now-state.raceStart)/1000+0.06+Math.random()*0.28;\n      state.phase='finished';\n      const wn=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';\n      showWinner(wn,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));\n    }\n  }\n}\n\nfunction showWinner(n,t,m){\n  document.getElementById('winner-name').textContent=n;\n  document.getElementById('winner-time').textContent=`Time: ${t.toFixed(3)}s`;\n  document.getElementById('winner-margin').textContent=m<0.001?'Photo Finish!':`Won by ${m.toFixed(3)}s`;\n  document.getElementById('winner-banner').style.display='block';\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  PARTICLES \u2014 FIX 2: Reduced spawn counts\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction spawnCarParticles(){\n  if(state.phase!=='racing') return;\n  const elapsed=(performance.now()-state.raceStart)/1000;\n  [[car1,state.p1],[car2,state.p2]].forEach(([c,s])=>{\n    if(s.finished) return;\n    const cx=c.position.x, cy=c.position.y, cz=c.position.z;\n    // FIX 2: Reduced launch smoke from 5 \u2192 2 iterations\n    if(elapsed<2.8&&s.speed<90){\n      for(let i=0;i<2;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);\n    }\n    for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);\n    // FIX 2: Added 50% gate on speed-particle spawning at speed > 35\n    if(s.speed>35&&Math.random()<0.5) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);\n    if(s.speed>185&&Math.random()<0.18) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);\n  });\n}\n\nfunction updateParticles(dt){\n  for(let i=0;i<MAX_P;i++){\n    if(pLf[i]<=0) continue;\n    const rate=pTy[i]===0?0.55:(pTy[i]===3?3.2:1.15);\n    pLf[i]-=dt*rate;\n    if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }\n    pPos2[i*3]+=pVx[i]*dt*4; pPos2[i*3+1]+=pVy[i]*dt*4; pPos2[i*3+2]+=pVz2[i]*dt*4;\n    pVy[i]-=dt*0.75;\n    pSz[i]*=0.996;\n  }\n  pGeo.attributes.position.needsUpdate=true;\n  pGeo.attributes.size.needsUpdate=true;\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  HUD\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nfunction updateHUD(){\n  document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);\n  document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);\n  const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);\n  document.getElementById('p1-rpm').style.width=r1+'%';\n  document.getElementById('p2-rpm').style.width=r2+'%';\n  document.getElementById('p1-rpm').style.backgroundPosition=r1>82?'100% 0':'50% 0';\n  document.getElementById('p1-gear').textContent=state.phase==='racing'?state.p1.gear:'N';\n  document.getElementById('p2-gear').textContent=state.phase==='racing'?state.p2.gear:'N';\n  if(state.phase==='racing') document.getElementById('timer-val').textContent=state.timer.toFixed(3);\n  const prog=FINISH_Z-START_Z;\n  document.getElementById('p1-fill').style.width=Math.min((state.p1.pos-START_Z)/prog*100,100)+'%';\n  document.getElementById('p2-fill').style.width=Math.min((state.p2.pos-START_Z)/prog*100,100)+'%';\n  document.getElementById('speed-overlay').style.opacity='0';\n  // FIX 2: Only update lens-flare DOM when racing (skip idle/cinematic)\n  if(state.phase === 'racing'){\n    const lf=document.getElementById('lens-flare');\n    const fa=Math.abs(Math.sin(Date.now()*0.00045));\n    if(fa>0.62){ lf.style.display='block'; lf.style.left=(38+fa*18)+'%'; lf.style.top='16%'; lf.style.opacity=((fa-0.62)*1.4).toFixed(2); }\n    else lf.style.display='none';\n  }\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n//  MAIN LOOP\n// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nlet lastT=0, hudFrame=0;\nfunction animate(time){\n  requestAnimationFrame(animate);\n  const dt=Math.min((time-lastT)/1000,0.05); lastT=time;\n  updatePhysics(dt);\n  spawnCarParticles();\n  updateParticles(dt);\n  updateCamera(dt);\n\n  // \u062a\u062d\u062f\u064a\u062b \u0625\u0636\u0627\u0621\u0629 \u0627\u0644\u062f\u0631\u0627\u062c\u0627\u062a \u2014 \u062a\u062a\u062d\u0631\u0643 \u0645\u0639 \u0627\u0644\u0645\u0648\u062f\u064a\u0644\n  bikeLight1.position.set(car1.position.x, car1.position.y + 3, car1.position.z);\n  bikeLight2.position.set(car2.position.x, car2.position.y + 3, car2.position.z);\n\n  // FIX 2: Reduced HUD update frequency (was % 2, now % 3)\n  if(hudFrame++ % 5 === 0) updateHUD();\n  renderer.render(scene,camera);\n}\nresetGame();\nrequestAnimationFrame(animate);\nsetLoadStatus('Loading track & environment...');\nsetTimeout(checkAllLoaded, 500);\n\n})();\n\n</script>\n</body>\n</html>\n";
-
-  function _getRaceIframe(){ return document.getElementById('raceIframe'); }
-
-  function _showIframe(){
-    const fr = _getRaceIframe();
-    if(!fr) return;
-    fr.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function _hideIframe(){
-    const fr = _getRaceIframe();
-    if(!fr) return;
-    fr.style.display = 'none';
-    fr.src = 'about:blank';
-    document.body.style.overflow = '';
-  }
+  /* ─── Preload images once ── */
+  (function preloadRaceImages(){
+    _bgImg = new Image();
+    _bgImg.src = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/51df461b-503f-4f45-9cf0-1173ca5a9a85.png';
+    _finishImg = new Image();
+    _finishImg.src = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5ea7018c-2054-4a44-bf47-4f285555d3bf.png';
+  })();
 
   /* ════════════════════════════════════════════════════════════
-     CAROUSEL INIT
+     CANVAS ROAD RENDERER
+     Draws a proper perspective road — like a 2D racing game.
   ════════════════════════════════════════════════════════════ */
+  function drawRoad(canvas, scrollY, finishVisible, finishProgress){
+    const ctx = canvas.getContext('2d');
+    const W   = canvas.width;
+    const H   = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+
+    /* ─── Horizon Y (40% from top) ── */
+    const hY = H * 0.40;
+
+    /* ─── Road trapezoid dimensions ── */
+    const rWBot = W;          /* full width at bottom */
+    const rWTop = W * 0.12;   /* narrow strip at horizon */
+
+    /* Helper: get road left/right X at screen Y */
+    function roadEdge(screenY){
+      const t = Math.max(0, Math.min(1, (screenY - hY) / (H - hY)));
+      const half = rWTop/2 + (rWBot/2 - rWTop/2) * t;
+      return { left: W/2 - half, right: W/2 + half, half };
+    }
+
+    /* ─── 1. SKY / BACKGROUND ── */
+    if(_bgImg && _bgImg.complete && _bgImg.naturalWidth > 0){
+      /* Draw nature background image, cropped to top portion */
+      ctx.drawImage(_bgImg, 0, 0, W, hY + 20);
+      /* Darken bottom of bg to blend into road */
+      const blend = ctx.createLinearGradient(0, hY - 40, 0, hY + 20);
+      blend.addColorStop(0, 'transparent');
+      blend.addColorStop(1, 'rgba(0,0,0,0.6)');
+      ctx.fillStyle = blend;
+      ctx.fillRect(0, hY - 40, W, 60);
+    } else {
+      /* Fallback gradient sky */
+      const skyG = ctx.createLinearGradient(0, 0, 0, hY);
+      skyG.addColorStop(0,   '#3a6186');
+      skyG.addColorStop(0.6, '#89a0b8');
+      skyG.addColorStop(1,   '#b5c8d6');
+      ctx.fillStyle = skyG;
+      ctx.fillRect(0, 0, W, hY);
+    }
+
+    /* ─── 2. ROAD SHOULDER (gravel/grass on sides) ── */
+    {
+      const edgeBot = roadEdge(H);
+      const edgeHor = roadEdge(hY);
+      /* Left shoulder */
+      ctx.beginPath();
+      ctx.moveTo(0, hY);
+      ctx.lineTo(edgeHor.left, hY);
+      ctx.lineTo(edgeBot.left, H);
+      ctx.lineTo(0, H);
+      ctx.closePath();
+      const sgL = ctx.createLinearGradient(0, hY, 0, H);
+      sgL.addColorStop(0, '#5a7a3a');
+      sgL.addColorStop(1, '#3d5c28');
+      ctx.fillStyle = sgL;
+      ctx.fill();
+      /* Right shoulder */
+      ctx.beginPath();
+      ctx.moveTo(W, hY);
+      ctx.lineTo(edgeHor.right, hY);
+      ctx.lineTo(edgeBot.right, H);
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      ctx.fillStyle = sgL;
+      ctx.fill();
+    }
+
+    /* ─── 3. ROAD SURFACE ── */
+    {
+      const edgeBot = roadEdge(H);
+      const edgeHor = roadEdge(hY);
+      ctx.beginPath();
+      ctx.moveTo(edgeHor.left,  hY);
+      ctx.lineTo(edgeHor.right, hY);
+      ctx.lineTo(edgeBot.right, H);
+      ctx.lineTo(edgeBot.left,  H);
+      ctx.closePath();
+      const roadG = ctx.createLinearGradient(0, hY, 0, H);
+      roadG.addColorStop(0,   '#6b6b6b');
+      roadG.addColorStop(0.4, '#555555');
+      roadG.addColorStop(1,   '#404040');
+      ctx.fillStyle = roadG;
+      ctx.fill();
+    }
+
+    /* ─── 4. ROAD EDGE LINES (white solid lines) ── */
+    {
+      const edgeBot = roadEdge(H);
+      const edgeHor = roadEdge(hY);
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 3;
+      /* Left edge */
+      ctx.beginPath();
+      ctx.moveTo(edgeHor.left, hY);
+      ctx.lineTo(edgeBot.left, H);
+      ctx.stroke();
+      /* Right edge */
+      ctx.beginPath();
+      ctx.moveTo(edgeHor.right, hY);
+      ctx.lineTo(edgeBot.right, H);
+      ctx.stroke();
+    }
+
+    /* ─── 5. CENTER DASHED LANE DIVIDER ── */
+    /* We project dashes from world space to screen using perspective.
+       World depth increases toward horizon.
+       dashSpacing = world units between dashes.
+       scrollY acts as camera z offset to scroll dashes. */
+    {
+      const NUM_STEPS   = 200; /* resolution of perspective projection */
+      const DASH_PERIOD = 14;  /* how many steps per dash+gap */
+      const DASH_ON     = 6;   /* dash "on" steps */
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.80)';
+
+      let lastX   = W/2;
+      let lastY   = H;
+      let drawing = false;
+
+      for(let i = 0; i < NUM_STEPS; i++){
+        /* t goes from 0 (bottom of road) to 1 (horizon) */
+        const t = i / NUM_STEPS;
+        const screenY = H - t * (H - hY);
+
+        /* perspective-correct line width */
+        const e = roadEdge(screenY);
+        const lw = Math.max(1, (1 - t) * 4 + 1);
+
+        /* scrolled dash pattern */
+        const dashPhase = (i + Math.floor(scrollY * 0.45)) % DASH_PERIOD;
+        const isOn = dashPhase < DASH_ON;
+
+        if(isOn && !drawing){
+          ctx.beginPath();
+          ctx.lineWidth = lw;
+          ctx.moveTo(W/2, screenY);
+          drawing = true;
+        } else if(!isOn && drawing){
+          ctx.lineTo(W/2, screenY);
+          ctx.stroke();
+          drawing = false;
+        }
+      }
+      if(drawing){
+        ctx.lineTo(W/2, hY);
+        ctx.stroke();
+      }
+    }
+
+    /* ─── 6. LANE POSITION MARKERS (white blocks near bottom) ── */
+    {
+      /* Small perspective-accurate marks on left and right thirds */
+      const MARK_PERIOD = 30;
+      const MARK_ON     = 10;
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      for(let i = 0; i < 60; i++){
+        const t = i / 60;
+        const screenY = H - t * (H - hY);
+        const e = roadEdge(screenY);
+        const phase = (i + Math.floor(scrollY * 0.3)) % MARK_PERIOD;
+        if(phase < MARK_ON){
+          const markH = Math.max(1, (1-t)*3);
+          const quarter = (e.right - e.left) / 4;
+          ctx.fillRect(e.left + quarter - 1,   screenY, 2, markH);
+          ctx.fillRect(e.right - quarter - 1,  screenY, 2, markH);
+        }
+      }
+    }
+
+    /* ─── 7. FINISH LINE BANNER ── */
+    if(finishVisible && finishProgress > 0){
+      /* finishProgress 0=at horizon → 1=at camera bottom */
+      const fp      = Math.min(1, finishProgress);
+      const bannerY = hY + fp * (H - hY) * 0.72;
+      const e       = roadEdge(bannerY);
+      const bW      = e.right - e.left;
+      const bH      = Math.max(6, bW * 0.12);
+
+      if(_finishImg && _finishImg.complete && _finishImg.naturalWidth > 0){
+        /* Draw finish image stretched across road width */
+        ctx.drawImage(_finishImg, e.left, bannerY - bH, bW, bH * 1.6);
+      } else {
+        /* Fallback drawn finish banner */
+        const colsF = 12;
+        const cWF   = bW / colsF;
+        for(let c = 0; c < colsF; c++){
+          for(let r = 0; r < 2; r++){
+            ctx.fillStyle = (c + r) % 2 === 0 ? '#fff' : '#111';
+            ctx.fillRect(e.left + c * cWF, bannerY - bH + r * bH/2, cWF, bH/2);
+          }
+        }
+        /* FINISH text */
+        const fSize = Math.max(10, bH * 0.9);
+        ctx.font = `bold ${fSize}px Fredoka, sans-serif`;
+        ctx.fillStyle = '#cc0000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('FINISH', W/2, bannerY - bH/4);
+        ctx.textBaseline = 'alphabetic';
+        /* Poles */
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth   = Math.max(2, (1-fp)*4);
+        ctx.beginPath();ctx.moveTo(e.left,  bannerY - bH * 2);ctx.lineTo(e.left,  H);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(e.right, bannerY - bH * 2);ctx.lineTo(e.right, H);ctx.stroke();
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     CAROUSEL INIT
+  ═══════════════════════════════════════════ */
   window._raceInit = function(){
+    /* Update floating topbar (avatar + name + ton balance) */
     try{
       const av=document.getElementById('raceAvatar');
       const nm=document.getElementById('raceUserName');
@@ -2874,7 +3112,7 @@ async function doUpgradeStat(bikeLevel, stat){
     const sf = document.getElementById('raceStartFixed');
     if(sf) sf.style.display = 'block';
     if(_raceBikes.length === 0){
-      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.7);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>No bikes available.<br>Buy one in the <span style="color:var(--bamboo);cursor:pointer;text-decoration:underline" onclick="goNavBySection('sectionMarket')">Garage</span></div></div>';
+      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.7);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>No bikes available.<br>Buy one in the <span style="color:var(--bamboo);cursor:pointer;text-decoration:underline" onclick="goNavBySection(\'sectionMarket\')">Garage</span></div></div>';
       const dotsEl=document.getElementById('raceDots'); if(dotsEl) dotsEl.innerHTML='';
       const thEl=document.getElementById('raceThumbsTrack'); if(thEl) thEl.innerHTML='';
       const sl=document.getElementById('raceStatsList'); if(sl) sl.innerHTML='';
@@ -2996,10 +3234,13 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceIdx=Math.max(0,Math.min(_raceBikes.length-1,i));
     const track=document.getElementById('raceCarouselTrack');
     if(!track) return;
+    /* Only show the active slide — hide all others */
     document.querySelectorAll('.race-bike-slide').forEach((s,j)=>s.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-dot').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
     document.querySelectorAll('.race-thumb').forEach((d,j)=>d.classList.toggle('active',j===_raceIdx));
+    /* No translateX needed — only active card is displayed */
     track.style.transform='';
+    /* Scroll active thumb into view */
     requestAnimationFrame(()=>{
       const activeTh=document.querySelector('.race-thumb.active');
       if(activeTh) activeTh.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
@@ -3008,19 +3249,41 @@ async function doUpgradeStat(bikeLevel, stat){
     if(b) _renderStats(b);
   }
 
-  /* ════════════════════════════════════════════════════════════
-     START RACE — loads 3D race into iframe blob
-  ════════════════════════════════════════════════════════════ */
+  /* swipe on big carousel card disabled — navigation is via thumbnails only */
+
+  /* ═══════════════════════════════════════════
+     START RACE
+  ═══════════════════════════════════════════ */
   window.startRace = async function(){
     if(_raceActive||_raceStarted) return;
-    if(_raceBikes.length===0){showNotif('❌ No bikes! Buy one in Garage','e');return;}
+    if(_raceBikes.length===0){showNotif('❌ Нет байков! Купите в Гараже','e');return;}
     const ton=S?.user?.tonBalance||0;
-    if(ton<0.5){showNotif('❌ Need 0.5 TON to start','e');return;}
+    if(ton<0.5){showNotif('❌ Нужно 0.5 TON для старта','e');return;}
 
     _raceStarted=true;
     _raceSelectedBike=_raceBikes[_raceIdx];
 
-    /* Determine outcome (for API call) */
+    /* Loading overlay */
+    let loadOv=document.getElementById('raceLoadingOv');
+    if(!loadOv){
+      loadOv=document.createElement('div');
+      loadOv.id='raceLoadingOv';
+      loadOv.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .3s';
+      loadOv.innerHTML=[
+        '<div style="width:64px;height:64px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div>',
+        '<div style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">🏎️ Поиск соперника...</div>',
+        '<div style="font-size:14px;color:rgba(232,245,233,.5);font-weight:600;font-family:Fredoka,cursive">Готовим гонку — 0.5 TON ставка</div>'
+      ].join('');
+      document.body.appendChild(loadOv);
+    }
+    const sf=document.getElementById('raceStartFixed');
+    if(sf)sf.style.display='none';
+    loadOv.style.opacity='1';loadOv.style.pointerEvents='all';
+
+    await new Promise(r=>setTimeout(r,1600));
+    loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
+
+    /* Determine outcome */
     const stats=(typeof getBikeCurrentStats==='function')
       ?getBikeCurrentStats(_raceSelectedBike)
       :{speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
@@ -3028,42 +3291,101 @@ async function doUpgradeStat(bikeLevel, stat){
     const aiMultiplier=0.70+Math.random()*0.60;
     const aiPower=playerPower*aiMultiplier;
     const playerWins=playerPower>=aiPower;
+    const aiName=OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
 
-    /* API call */
-    try{
-      const result=await api('raceResult',{won:playerWins,bikeLevel:_raceSelectedBike?.lv||0});
-      if(result&&result.success&&result.data){
-        if(S.user)S.user.tonBalance=result.data.tonBalance;
-        syncTopbar();
-      }
-    }catch(e){console.warn('raceResult API:',e.message);}
-
-    /* Load 3D race in iframe */
     _raceActive=true;
-    const blob = new Blob([_raceHtmlSrc], {type:'text/html'});
-    const url  = URL.createObjectURL(blob);
-    const fr   = _getRaceIframe();
-    if(fr){
-      fr.src = url;
-      _showIframe();
-    }
+    _racePending={playerWins,aiName,p1Name:(S?._tgName||S?.user?.firstName||'You').slice(0,14),
+      maxPlayerKmh:Math.max(35,Math.round(40+playerPower*0.026)),
+      maxAiKmh:Math.max(35,Math.round(40+aiPower*0.026))};
 
-    /* Hide select phase */
     const selectPhase=document.getElementById('raceSelectPhase');
+    const animPhase=document.getElementById('raceAnimPhase');
+    const resultOv=document.getElementById('rsResultOverlay');
     if(selectPhase)selectPhase.style.display='none';
-    const sf=document.getElementById('raceStartFixed');
-    if(sf)sf.style.display='none';
+    if(animPhase)animPhase.style.display='block';
+    if(resultOv)resultOv.style.display='none';
+
+    /* Load engine iframe (re-load each race for fresh state) */
+    const fr=document.getElementById('raceEngineFrame');
+    if(fr) fr.src='race_engine.html?t='+Date.now();
+
+    /* Server call for reward */
+    (async()=>{
+      try{
+        const result=await api('raceResult',{won:playerWins,bikeLevel:_raceSelectedBike?.lv||0});
+        if(result&&result.success&&result.data){
+          if(S.user)S.user.tonBalance=result.data.tonBalance;
+          syncTopbar();
+        }
+      }catch(e){console.warn('raceResult API:',e.message);}
+    })();
   };
 
-  /* ════════════════════════════════════════════════════════════
+  let _racePending=null;
+
+  /* Listen for race-engine messages */
+  window.addEventListener('message',function(ev){
+    const d=ev.data||{};
+    if(d.type==='race-back'){ window.raceGoBack(); }
+    else if(d.type==='race-finished' && _racePending){
+      const p=_racePending;
+      setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh),400);
+    }
+  });
+
+  /* ═══════════════════════════════════════════
+     RESULT OVERLAY
+  ═══════════════════════════════════════════ */
+  function _showResult(playerWins,p1Name,aiName,p1Kmh,p2Kmh){
+    const ov=document.getElementById('rsResultOverlay');
+    if(!ov)return;
+    const emoji=document.getElementById('rsrEmoji');
+    const title=document.getElementById('rsrTitle');
+    const reward=document.getElementById('rsrReward');
+    const rewTxt=document.getElementById('rsrRewardTxt');
+    const av1=document.getElementById('rsrAv1');
+    const name1=document.getElementById('rsrName1');
+    const spd1=document.getElementById('rsrSpd1');
+    const av2=document.getElementById('rsrAv2');
+    const name2=document.getElementById('rsrName2');
+    const spd2=document.getElementById('rsrSpd2');
+    if(playerWins){
+      if(emoji)emoji.textContent='🏆';
+      if(title){title.textContent='Победа!';title.className='rsr-title win';}
+      if(reward)reward.style.display='flex';
+      if(rewTxt)rewTxt.textContent='+0.9 TON';
+    }else{
+      if(emoji)emoji.textContent='💨';
+      if(title){title.textContent='Проигрыш';title.className='rsr-title lose';}
+      if(reward)reward.style.display='none';
+    }
+    const tgUser=S?.tg?.initDataUnsafe?.user;
+    if(tgUser?.photo_url){
+      if(av1)av1.innerHTML='<img src="'+tgUser.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
+    }else{if(av1)av1.textContent='🏍️';}
+    if(av2)av2.textContent='🤖';
+    if(name1)name1.textContent='@'+p1Name;
+    if(name2)name2.textContent=aiName;
+    if(spd1)spd1.textContent=p1Kmh+' km/h';
+    if(spd2)spd2.textContent=p2Kmh+' km/h';
+    ov.style.display='flex';
+    setTimeout(()=>{try{loadState();}catch(e){}},1200);
+  }
+
+  /* ═══════════════════════════════════════════
      BACK TO SELECTION
-  ════════════════════════════════════════════════════════════ */
+  ═══════════════════════════════════════════ */
   window.raceGoBack=function(){
-    _raceActive=false;_raceStarted=false;
-    _hideIframe();
+    _raceActive=false;_raceStarted=false;_racePending=null;
+    const ov=document.getElementById('rsResultOverlay');
+    if(ov)ov.style.display='none';
+    const fr=document.getElementById('raceEngineFrame');
+    if(fr)fr.src='about:blank';
+    const animPhase=document.getElementById('raceAnimPhase');
     const selectPhase=document.getElementById('raceSelectPhase');
-    const sf=document.getElementById('raceStartFixed');
+    if(animPhase)animPhase.style.display='none';
     if(selectPhase)selectPhase.style.display='block';
+    const sf=document.getElementById('raceStartFixed');
     if(sf)sf.style.display='block';
     _raceInit();
   };

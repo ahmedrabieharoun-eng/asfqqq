@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -575,59 +576,19 @@ road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
 road.receiveShadow=true;
 scene.add(road);
 
-// ── CONCRETE FLOOR (replaces grass) ──────────────────────────
-const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9, metalness: 0.0 });
+const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
+const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.9, metalness:0.0 });
 [-400, 400].forEach(x=>{
-  const g=new THREE.Mesh(new THREE.PlaneGeometry(800, TRACK_LENGTH+100), concreteMat);
-  g.rotation.x=-Math.PI/2;
+  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
 });
 
-// ── SIDE WALLS WITH IMAGE TEXTURE ────────────────────────────
-const WALL_IMAGE_URL = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/825b1ab6-ba54-4b69-bedd-5280060d5aca.png';
-const WALL_HEIGHT = 18;
-const WALL_THICKNESS = 1.2;
-const WALL_X_OFFSET = TRACK_WIDTH / 2 + WALL_THICKNESS / 2 + 0.5;
-const WALL_LENGTH = TRACK_LENGTH + 20;
-
-// Gray solid material for wall body
-const wallGrayMat = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.85, metalness: 0.05 });
-
-// Load image texture for the inner face
-const wallImgTex = new THREE.TextureLoader().load(WALL_IMAGE_URL, function(tex){
-  tex.encoding = THREE.sRGBEncoding;
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.ClampToEdgeWrapping;
-  // repeat so image tiles horizontally along wall, fills vertically once
-  tex.repeat.set(WALL_LENGTH / 35, 1);
-  tex.needsUpdate = true;
-  wallImgMatInner.map = tex;
-  wallImgMatInner.needsUpdate = true;
-});
-
-// Inner face material (image) — DoubleSide so both walls show it
-const wallImgMatInner = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-
-// Build each wall using separate planes: gray box + image plane on inner face
-[-1, 1].forEach(side => {
-  // Gray box wall
-  const wallBox = new THREE.Mesh(
-    new THREE.BoxGeometry(WALL_THICKNESS, WALL_HEIGHT, WALL_LENGTH),
-    wallGrayMat
-  );
-  wallBox.position.set(side * WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH / 2 - 10);
-  scene.add(wallBox);
-
-  // Image plane on the inner side (facing the track)
-  const imgPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(WALL_LENGTH, WALL_HEIGHT),
-    wallImgMatInner.clone()
-  );
-  // Offset slightly inward so it sits on the inner face
-  imgPlane.position.set(side * (WALL_X_OFFSET - WALL_THICKNESS / 2 - 0.01), WALL_HEIGHT / 2, TRACK_LENGTH / 2 - 10);
-  // Rotate so it faces inward (toward track center)
-  imgPlane.rotation.y = side > 0 ? Math.PI : 0;
-  scene.add(imgPlane);
+const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});
+[-1,1].forEach(side => {
+  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
+  dirt.rotation.x = -Math.PI/2;
+  dirt.position.set(side * (TRACK_WIDTH/2 + 2), 0.005, TRACK_LENGTH/2);
+  scene.add(dirt);
 });
 
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });

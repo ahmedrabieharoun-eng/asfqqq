@@ -321,7 +321,7 @@ function loadProgress(key){
   setLoadBar(pct);
   const labels = { sky:'Sky loaded', grass:'Terrain loaded', palm:'Trees loaded',
     bush:'Vegetation loaded', forest:'Forest loaded', mountain:'Mountains loaded',
-    model:'Bikes loaded' };
+    model1:'Left bike loaded', model2:'Right bike loaded' };
   setLoadStatus(labels[key] || 'Loading assets...');
 }
 function checkAllLoaded(){
@@ -807,29 +807,26 @@ function fitBikeToGround(innerModel){
   innerModel.position.y = -box.min.y;
 }
 
-// ── RED PLACEHOLDER BOXES (shown if model fails to load entirely) ──
-function spawnFallbackBoxes(){
-  [car1, car2].forEach(function(car, idx){
-    const color = idx === 0 ? 0xFF2200 : 0xFF6600;
-    const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: false, side: THREE.DoubleSide });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 3.6), mat);
-    body.position.set(0, 1.2, 0); body.frustumCulled = false; car.add(body);
-    const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), mat);
-    front.position.set(0, 1.5, 1.6); front.frustumCulled = false; car.add(front);
-    const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 16);
-    const wMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
-    [-1.6, 1.6].forEach(function(zOff){
-      const wheel = new THREE.Mesh(wGeo, wMat);
-      wheel.rotation.z = Math.PI / 2;
-      wheel.position.set(0, 0.55, zOff);
-      wheel.frustumCulled = false;
-      car.add(wheel);
-    });
+// ── RED PLACEHOLDER BOXES (shown if a model fails to load entirely) ──
+function spawnFallbackBox(car, colorHex){
+  const mat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: false, side: THREE.DoubleSide });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 3.6), mat);
+  body.position.set(0, 1.2, 0); body.frustumCulled = false; car.add(body);
+  const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), mat);
+  front.position.set(0, 1.5, 1.6); front.frustumCulled = false; car.add(front);
+  const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 16);
+  const wMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
+  [-1.6, 1.6].forEach(function(zOff){
+    const wheel = new THREE.Mesh(wGeo, wMat);
+    wheel.rotation.z = Math.PI / 2;
+    wheel.position.set(0, 0.55, zOff);
+    wheel.frustumCulled = false;
+    car.add(wheel);
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  GLB LOADING
+//  GLB LOADING — Two separate loads, one per lane
 // ═══════════════════════════════════════════════════════════════
 const dracoLoader = new THREE.DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -837,75 +834,117 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-const BIKE_URL_PRIMARY  = 'bike with rider.glb';
-const BIKE_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
+// car1 (left lane, x=-3) — uses "bike with rider 2.glb"
+const BIKE1_URL_PRIMARY  = 'bike with rider 2.glb';
+const BIKE1_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
-trackLoad('model');
+// car2 (right lane, x=+3) — uses "bike with rider.glb"
+const BIKE2_URL_PRIMARY  = 'bike with rider.glb';
+const BIKE2_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
-function applyBikeGltf(gltf){
-  const bikeModel = gltf.scene;
+// Track two independent model loads
+trackLoad('model1');
+trackLoad('model2');
 
-  const testBox = new THREE.Box3().setFromObject(bikeModel);
-  const testSize = new THREE.Vector3();
-  testBox.getSize(testSize);
-  console.log('GLB native size — X:', testSize.x.toFixed(2), 'Y:', testSize.y.toFixed(2), 'Z:', testSize.z.toFixed(2));
-  console.log('Longest axis:', testSize.x > testSize.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
-
-  const bike1Model = bikeModel.clone(true);
-  fitBikeToGround(bike1Model);
-  const r1 = setupBikeModel(bike1Model);
-  car1._wheels = r1.namedWheels;
-  car1._allWheelMeshes = r1.allDetected;
-  car1.remove(debugCube1);
-  car1.add(bike1Model);
-
-  const bike2Model = bikeModel.clone(true);
-  fitBikeToGround(bike2Model);
-  const r2 = setupBikeModel(bike2Model);
-  car2._wheels = r2.namedWheels;
-  car2._allWheelMeshes = r2.allDetected;
-  car2.remove(debugCube2);
-  car2.add(bike2Model);
-
-  modelsLoaded = true;
-  loadProgress('model');
-  dracoLoader.dispose();
-  checkAllLoaded();
+// Counter: call checkAllLoaded only after both loads complete (success or fallback)
+let modelsFinishedCount = 0;
+function onModelLoadComplete(){
+  modelsFinishedCount++;
+  if(modelsFinishedCount >= 2){
+    modelsLoaded = true;
+    dracoLoader.dispose();
+    checkAllLoaded();
+  }
 }
 
-function loadBikeWithFallback(){
+// Apply a loaded GLB scene to car1 (left lane)
+function applyBike1Gltf(gltf){
+  const bikeModel = gltf.scene;
+  fitBikeToGround(bikeModel);
+  const r = setupBikeModel(bikeModel);
+  car1._wheels = r.namedWheels;
+  car1._allWheelMeshes = r.allDetected;
+  car1.remove(debugCube1);
+  car1.add(bikeModel);
+  loadProgress('model1');
+  onModelLoadComplete();
+}
+
+// Apply a loaded GLB scene to car2 (right lane)
+function applyBike2Gltf(gltf){
+  const bikeModel = gltf.scene;
+  fitBikeToGround(bikeModel);
+  const r = setupBikeModel(bikeModel);
+  car2._wheels = r.namedWheels;
+  car2._allWheelMeshes = r.allDetected;
+  car2.remove(debugCube2);
+  car2.add(bikeModel);
+  loadProgress('model2');
+  onModelLoadComplete();
+}
+
+// Load left-lane bike (bike with rider 2.glb) → car1
+function loadBike1(){
   gltfLoader.load(
-    BIKE_URL_PRIMARY,
-    function(gltf){
-      applyBikeGltf(gltf);
-    },
+    BIKE1_URL_PRIMARY,
+    function(gltf){ applyBike1Gltf(gltf); },
     function(xhr){
       if(xhr.total > 0){
         const pct = Math.round(xhr.loaded / xhr.total * 100);
-        setLoadStatus('Loading bikes... ' + pct + '%');
+        setLoadStatus('Loading left bike... ' + pct + '%');
       }
     },
     function(err){
-      setLoadStatus('Retrying from fallback...');
+      setLoadStatus('Left bike: retrying fallback...');
       gltfLoader.load(
-        BIKE_URL_FALLBACK,
-        function(gltf){
-          applyBikeGltf(gltf);
-        },
+        BIKE1_URL_FALLBACK,
+        function(gltf){ applyBike1Gltf(gltf); },
         function(xhr2){
           if(xhr2.total > 0){
             const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
-            setLoadStatus('Fallback loading... ' + pct2 + '%');
+            setLoadStatus('Left bike fallback... ' + pct2 + '%');
           }
         },
         function(err2){
-          setLoadStatus('Model unavailable — using placeholder');
+          setLoadStatus('Left bike unavailable — using placeholder');
           car1.remove(debugCube1);
+          spawnFallbackBox(car1, 0xFF2200);
+          loadProgress('model1');
+          onModelLoadComplete();
+        }
+      );
+    }
+  );
+}
+
+// Load right-lane bike (bike with rider.glb) → car2
+function loadBike2(){
+  gltfLoader.load(
+    BIKE2_URL_PRIMARY,
+    function(gltf){ applyBike2Gltf(gltf); },
+    function(xhr){
+      if(xhr.total > 0){
+        const pct = Math.round(xhr.loaded / xhr.total * 100);
+        setLoadStatus('Loading right bike... ' + pct + '%');
+      }
+    },
+    function(err){
+      setLoadStatus('Right bike: retrying fallback...');
+      gltfLoader.load(
+        BIKE2_URL_FALLBACK,
+        function(gltf){ applyBike2Gltf(gltf); },
+        function(xhr2){
+          if(xhr2.total > 0){
+            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
+            setLoadStatus('Right bike fallback... ' + pct2 + '%');
+          }
+        },
+        function(err2){
+          setLoadStatus('Right bike unavailable — using placeholder');
           car2.remove(debugCube2);
-          spawnFallbackBoxes();
-          modelsLoaded = true;
-          loadProgress('model');
-          checkAllLoaded();
+          spawnFallbackBox(car2, 0xFF6600);
+          loadProgress('model2');
+          onModelLoadComplete();
         }
       );
     }
@@ -1018,7 +1057,9 @@ function addProceduralRider(carGroup, helmetColor){
 }
 
 
-loadBikeWithFallback();
+// Kick off both loads in parallel
+loadBike1();
+loadBike2();
 
 // ═══════════════════════════════════════════════════════════════
 //  PARTICLE SYSTEM — FIX 2: Reduced MAX_P from 150 → 80

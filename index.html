@@ -10,57 +10,7 @@
   #canvas-container { position:relative; width:100vw; height:100vh; }
   canvas { display:block; width:100%!important; height:100%!important; }
 
-  /* ── LOADING SCREEN ── */
-  #loading-screen {
-    position:fixed; inset:0; z-index:999;
-    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    transition:opacity 0.9s ease, visibility 0.9s ease;
-  }
-  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
-  #loading-logo {
-    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
-    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
-    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
-  }
-  #loading-logo span { color:#FFB800; }
-  @keyframes logoPulse {
-    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
-    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
-  }
-  #loading-subtitle {
-    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
-    text-transform:uppercase; margin-bottom:60px;
-  }
-  #loading-bar-wrap {
-    width:320px; height:5px; background:rgba(255,255,255,0.08);
-    border-radius:10px; overflow:hidden; margin-bottom:18px;
-    box-shadow:0 0 20px rgba(255,180,0,0.15);
-  }
-  #loading-bar {
-    height:100%; width:0%; border-radius:10px;
-    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
-    transition:width 0.25s ease;
-    box-shadow:0 0 10px rgba(255,180,0,0.6);
-  }
-  #loading-status {
-    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
-    text-transform:uppercase; min-height:16px; text-align:center;
-  }
-  #loading-dots {
-    margin-top:50px; display:flex; gap:10px; align-items:center;
-  }
-  .load-dot {
-    width:8px; height:8px; border-radius:50%;
-    animation:dotBounce 1.2s ease-in-out infinite;
-  }
-  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
-  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
-  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
-  @keyframes dotBounce {
-    0%,100%{transform:translateY(0);opacity:0.3;}
-    50%{transform:translateY(-10px);opacity:1;}
-  }
+
 
   /* FIX #5: Remove vignette tint — set background to none */
   #vignette {
@@ -183,20 +133,7 @@
 </head>
 <body>
 <button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
-<!-- LOADING SCREEN -->
-<div id="loading-screen">
-  <div id="loading-logo">DRAG<span>RACE</span></div>
-  <div id="loading-subtitle">🏆 Tropical Edition</div>
-  <div id="loading-bar-wrap">
-    <div id="loading-bar"></div>
-  </div>
-  <div id="loading-status">Initializing...</div>
-  <div id="loading-dots">
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-  </div>
-</div>
+
 
 <div id="canvas-container">
   <canvas id="c"></canvas>
@@ -304,8 +241,8 @@ window.addEventListener('resize', ()=>{
 let _loadTotal = 0, _loadDone = 0;
 const _loadItems = {};
 
-function setLoadStatus(msg){ document.getElementById('loading-status').textContent = msg; }
-function setLoadBar(pct){ document.getElementById('loading-bar').style.width = Math.min(pct,100)+'%'; }
+function setLoadStatus(msg){}
+function setLoadBar(pct){}
 
 function trackLoad(key){
   if(_loadItems[key]) return;
@@ -325,14 +262,7 @@ function loadProgress(key){
   setLoadStatus(labels[key] || 'Loading assets...');
 }
 function checkAllLoaded(){
-  setLoadBar(100);
-  setLoadStatus('Ready!');
-  setTimeout(function(){
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('hidden');
-    document.getElementById('launch-hint').style.display = 'block';
-    setTimeout(function(){ ls.style.display = 'none'; }, 950);
-  }, 600);
+  document.getElementById('launch-hint').style.display = 'block';
 }
 
 // Patch TL.load to auto-track

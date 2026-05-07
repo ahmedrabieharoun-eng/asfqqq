@@ -3278,10 +3278,9 @@ async function doUpgradeStat(bikeLevel, stat){
     }
     const sf=document.getElementById('raceStartFixed');
     if(sf)sf.style.display='none';
+    const _bnav=document.querySelector('.bnav');
+    if(_bnav)_bnav.style.display='none';
     loadOv.style.opacity='1';loadOv.style.pointerEvents='all';
-
-    await new Promise(r=>setTimeout(r,1600));
-    loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
 
     /* Determine outcome */
     const stats=(typeof getBikeCurrentStats==='function')
@@ -3293,7 +3292,6 @@ async function doUpgradeStat(bikeLevel, stat){
     const playerWins=playerPower>=aiPower;
     const aiName=OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
 
-    _raceActive=true;
     _racePending={playerWins,aiName,p1Name:(S?._tgName||S?.user?.firstName||'You').slice(0,14),
       maxPlayerKmh:Math.max(35,Math.round(40+playerPower*0.026)),
       maxAiKmh:Math.max(35,Math.round(40+aiPower*0.026))};
@@ -3301,13 +3299,27 @@ async function doUpgradeStat(bikeLevel, stat){
     const selectPhase=document.getElementById('raceSelectPhase');
     const animPhase=document.getElementById('raceAnimPhase');
     const resultOv=document.getElementById('rsResultOverlay');
-    if(selectPhase)selectPhase.style.display='none';
-    if(animPhase)animPhase.style.display='block';
     if(resultOv)resultOv.style.display='none';
 
-    /* Load engine iframe (re-load each race for fresh state) */
+    /* Pre-load engine iframe HIDDEN — wait for models ready before showing */
     const fr=document.getElementById('raceEngineFrame');
+    _raceReady=false;
+    const minLoadMs=1600;
+    const startedAt=Date.now();
+    const showRace=()=>{
+      const elapsed=Date.now()-startedAt;
+      const wait=Math.max(0,minLoadMs-elapsed);
+      setTimeout(()=>{
+        loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
+        if(selectPhase)selectPhase.style.display='none';
+        if(animPhase)animPhase.style.display='block';
+        _raceActive=true;
+      },wait);
+    };
+    _raceShowFn=showRace;
     if(fr) fr.src='race_engine.html?t='+Date.now();
+    /* Safety fallback: if ready signal never arrives within 15s, show anyway */
+    setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } },15000);
 
     /* Server call for reward */
     (async()=>{
@@ -3321,12 +3333,17 @@ async function doUpgradeStat(bikeLevel, stat){
     })();
   };
 
+  let _raceReady=false, _raceShowFn=null;
+
   let _racePending=null;
 
   /* Listen for race-engine messages */
   window.addEventListener('message',function(ev){
     const d=ev.data||{};
-    if(d.type==='race-back'){ window.raceGoBack(); }
+    if(d.type==='race-ready'){
+      if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); }
+    }
+    else if(d.type==='race-back'){ window.raceGoBack(); }
     else if(d.type==='race-finished' && _racePending){
       const p=_racePending;
       setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh),400);
@@ -3387,6 +3404,8 @@ async function doUpgradeStat(bikeLevel, stat){
     if(selectPhase)selectPhase.style.display='block';
     const sf=document.getElementById('raceStartFixed');
     if(sf)sf.style.display='block';
+    const _bnav=document.querySelector('.bnav');
+    if(_bnav)_bnav.style.display='';
     _raceInit();
   };
 

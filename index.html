@@ -575,19 +575,48 @@ road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
 road.receiveShadow=true;
 scene.add(road);
 
-const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.9, metalness:0.0 });
+// ── CONCRETE FLOOR (replaces grass) ──────────────────────────
+const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9, metalness: 0.0 });
 [-400, 400].forEach(x=>{
-  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
+  const g=new THREE.Mesh(new THREE.PlaneGeometry(800, TRACK_LENGTH+100), concreteMat);
+  g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
 });
 
-const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});
+// ── SIDE WALLS WITH IMAGE TEXTURE ────────────────────────────
+const WALL_IMAGE_URL = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/825b1ab6-ba54-4b69-bedd-5280060d5aca.png';
+const WALL_HEIGHT = 18;
+const WALL_X_OFFSET = TRACK_WIDTH/2 + 1.2;
+
+const wallImgTex = TL.load(WALL_IMAGE_URL);
+wallImgTex.encoding = THREE.sRGBEncoding;
+wallImgTex.wrapS = THREE.RepeatWrapping;
+wallImgTex.wrapT = THREE.ClampToEdgeWrapping;
+wallImgTex.repeat.set(TRACK_LENGTH / 40, 1);
+
+const wallImgMatLeft = new THREE.MeshBasicMaterial({ map: wallImgTex, side: THREE.FrontSide });
+const wallImgMatRight = new THREE.MeshBasicMaterial({ map: wallImgTex, side: THREE.BackSide });
+
+// Left wall
+const wallLeftGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 20, WALL_HEIGHT);
+const wallLeft = new THREE.Mesh(wallLeftGeo, wallImgMatLeft);
+wallLeft.position.set(-WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
+wallLeft.rotation.y = Math.PI / 2;
+scene.add(wallLeft);
+
+// Right wall
+const wallRightGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 20, WALL_HEIGHT);
+const wallRight = new THREE.Mesh(wallRightGeo, wallImgMatRight);
+wallRight.position.set(WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
+wallRight.rotation.y = Math.PI / 2;
+scene.add(wallRight);
+
+// Gray wall base (back face for thickness feel)
+const wallBaseMat = new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.85, metalness: 0.1 });
 [-1,1].forEach(side => {
-  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
-  dirt.rotation.x = -Math.PI/2;
-  dirt.position.set(side * (TRACK_WIDTH/2 + 2), 0.005, TRACK_LENGTH/2);
-  scene.add(dirt);
+  const wallBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, WALL_HEIGHT, TRACK_LENGTH + 20), wallBaseMat);
+  wallBase.position.set(side * WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
+  scene.add(wallBase);
 });
 
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });

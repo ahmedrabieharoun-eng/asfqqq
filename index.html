@@ -278,9 +278,9 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreferen
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// COLOR FIX: Increased exposure so bike colors match the original model
-renderer.toneMappingExposure = 1.2;
+renderer.toneMapping = THREE.LinearToneMapping;
+// FIX 3: Lower exposure so road doesn't blow out (was 1.0)
+renderer.toneMappingExposure = 0.85;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
 
@@ -481,14 +481,14 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// COLOR FIX: Higher ambient so bike colors show correctly (was 0.55)
-const ambient = new THREE.AmbientLight(0xffffff, 1.2);
+// الإضاءة العامة — زي الأصل
+const ambient = new THREE.AmbientLight(0xffffff, 0.55);
 scene.add(ambient);
 
-const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xffffff, 1.6); // COLOR FIX: was 1.4
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
 sun.position.set(-40, 60, -120);
 sun.castShadow = true;
 // FIX 2: Smaller shadow map for performance (was 1024)
@@ -502,8 +502,8 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// COLOR FIX: Brighter sky fill (was 0.25)
-const skyFill = new THREE.DirectionalLight(0xffffff, 0.5);
+// FIX 3: Lower sky fill intensity (was 0.5)
+const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.25);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
 
@@ -719,6 +719,29 @@ scene.add(car2);
 car1._wheels = [];
 car2._wheels = [];
 let modelsLoaded = false;
+
+// ── إضاءة خاصة بكل دراجة — تضيء الموديل بس مش البيئة ──────
+// PointLight فوق كل دراجة بمسافة قريبة جداً وdistance محدود
+const bikeLight1 = new THREE.PointLight(0xffffff, 2.5, 6);
+bikeLight1.position.set(-3, 3, 5); // فوق car1
+scene.add(bikeLight1);
+
+const bikeLight2 = new THREE.PointLight(0xffffff, 2.5, 6);
+bikeLight2.position.set(3, 3, 5); // فوق car2
+scene.add(bikeLight2);
+
+// SpotLight من الأمام لإظهار ألوان الدراجتين بوضوح
+const bikeSpot1 = new THREE.SpotLight(0xffffff, 1.8, 8, Math.PI/4, 0.5, 1.5);
+bikeSpot1.position.set(-3, 5, 2);
+scene.add(bikeSpot1);
+bikeSpot1.target = car1;
+scene.add(bikeSpot1.target);
+
+const bikeSpot2 = new THREE.SpotLight(0xffffff, 1.8, 8, Math.PI/4, 0.5, 1.5);
+bikeSpot2.position.set(3, 5, 2);
+scene.add(bikeSpot2);
+bikeSpot2.target = car2;
+scene.add(bikeSpot2.target);
 
 // ── DEBUG PLACEHOLDER CUBES (visible while loading) ──────────
 const debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);
@@ -1444,6 +1467,17 @@ function animate(time){
   spawnCarParticles();
   updateParticles(dt);
   updateCamera(dt);
+
+  // تحديث إضاءة الدراجات — تتحرك مع الموديل
+  bikeLight1.position.set(car1.position.x, car1.position.y + 3, car1.position.z);
+  bikeLight2.position.set(car2.position.x, car2.position.y + 3, car2.position.z);
+  bikeSpot1.position.set(car1.position.x, car1.position.y + 5, car1.position.z - 3);
+  bikeSpot1.target.position.set(car1.position.x, car1.position.y + 0.5, car1.position.z);
+  bikeSpot1.target.updateMatrixWorld();
+  bikeSpot2.position.set(car2.position.x, car2.position.y + 5, car2.position.z - 3);
+  bikeSpot2.target.position.set(car2.position.x, car2.position.y + 0.5, car2.position.z);
+  bikeSpot2.target.updateMatrixWorld();
+
   // FIX 2: Reduced HUD update frequency (was % 2, now % 3)
   if(hudFrame++ % 3 === 0) updateHUD();
   renderer.render(scene,camera);

@@ -273,13 +273,13 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance', logarithmicDepthBuffer:false });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance', logarithmicDepthBuffer:false });
 // FIX 2: Lower pixel ratio for performance (was 1.5)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// Natural exposure — not washed out
+renderer.toneMapping = THREE.LinearToneMapping;
+// FIX 3: Lower exposure so road doesn't blow out (was 1.0)
 renderer.toneMappingExposure = 0.85;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.physicallyCorrectLights = false;
@@ -290,8 +290,9 @@ scene.background = new THREE.Color(0x6FB2D9);
 
 // ─── CAMERA ──────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);
-camera.position.set(0, 4.0, -13);
-camera.lookAt(0, 1.5, 0);
+// نبدأ الكاميرا قدام الدراجات مباشرةً (START_Z=5)
+camera.position.set(0, 1.5, 12);
+camera.lookAt(0, 1.2, 5);
 window.addEventListener('resize', ()=>{
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth/window.innerHeight;
@@ -481,18 +482,17 @@ function makeAsphaltNormal(w,h){
 // ═══════════════════════════════════════════════════════════════
 //  LIGHTING
 // ═══════════════════════════════════════════════════════════════
-// LIGHTING FIX: Natural ambient — not too bright, not too dark
-const ambient = new THREE.AmbientLight(0xfff8f0, 0.55);
+// الإضاءة العامة — زي الأصل
+const ambient = new THREE.AmbientLight(0xffffff, 0.55);
 scene.add(ambient);
 
-// Hemisphere: warm sky top, natural ground bounce
-const hemi = new THREE.HemisphereLight(0x8FC8E8, 0x4a7a3a, 0.45);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
 scene.add(hemi);
 
-// Sun: natural daylight intensity, warm-white
-const sun = new THREE.DirectionalLight(0xfff5e0, 1.1);
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
 sun.position.set(-40, 60, -120);
 sun.castShadow = true;
+// FIX 2: Smaller shadow map for performance (was 1024)
 sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
 sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
@@ -503,28 +503,10 @@ sun.shadow.normalBias = 0.02;
 scene.add(sun);
 scene.add(sun.target);
 
-// Sky fill: subtle only
-const skyFill = new THREE.DirectionalLight(0xffffff, 0.2);
+// FIX 3: Lower sky fill intensity (was 0.5)
+const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.25);
 skyFill.position.set(0, 100, 0);
 scene.add(skyFill);
-
-// ── BIKE SPOT LIGHTS: strong focused light on each bike to reveal colors ──
-const bikeLight1 = new THREE.PointLight(0xffffff, 3.5, 12);
-bikeLight1.position.set(-3, 5, 5); // above car1
-scene.add(bikeLight1);
-
-const bikeLight2 = new THREE.PointLight(0xffffff, 3.5, 12);
-bikeLight2.position.set(3, 5, 5); // above car2
-scene.add(bikeLight2);
-
-// Front fill lights for bikes (from front-below to reveal details)
-const bikeFront1 = new THREE.PointLight(0xfff0e0, 1.8, 8);
-bikeFront1.position.set(-3, 2, 2);
-scene.add(bikeFront1);
-
-const bikeFront2 = new THREE.PointLight(0xfff0e0, 1.8, 8);
-bikeFront2.position.set(3, 2, 2);
-scene.add(bikeFront2);
 
 // ═══════════════════════════════════════════════════════════════
 //  SKY
@@ -572,8 +554,7 @@ const TRACK_LENGTH = 1100;
 const TRACK_WIDTH  = 14;
 const FINISH_Z     = 860;
 // FIX 2: Reduced texture resolution for performance (was 2048x2048)
-const asphaltTex   = makeAsphaltTexture(1024, 1024);
-const normalTex    = makeAsphaltNormal(512,512);
+const asphaltTex   = makeAsphaltTexture(512, 512);
 
 const grassTex = TL.load(URL_GRASS);
 grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
@@ -581,21 +562,19 @@ grassTex.repeat.set(40, 140);
 grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 grassTex.encoding = THREE.sRGBEncoding;
 
-const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 8, 80);
+const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 4, 20);
 roadGeo.computeVertexNormals();
-// FIX 3: More matte road material (was roughness:0.82, metalness:0.04)
-const roadMat = new THREE.MeshStandardMaterial({
-  map:asphaltTex, normalMap:normalTex,
-  normalScale:new THREE.Vector2(0.45,0.45),
-  roughness:0.95, metalness:0.0, envMapIntensity:0.35
+const roadMat = new THREE.MeshLambertMaterial({
+  map:asphaltTex
 });
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
-road.receiveShadow=true;
+road.receiveShadow=false;
+road.frustumCulled=true;
 scene.add(road);
 
 const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
-const gMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness:0.9, metalness:0.0 });
+const gMat = new THREE.MeshLambertMaterial({ map: grassTex });
 [-400, 400].forEach(x=>{
   const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
   g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
@@ -609,7 +588,7 @@ const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9}
   scene.add(dirt);
 });
 
-const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });
+const curbMat = new THREE.MeshLambertMaterial({ color:0xE8E0D0 });
 function makeCurb(x, zCenter, length){
   const cg=new THREE.BoxGeometry(0.7,0.12,length);
   const c=new THREE.Mesh(cg,curbMat); c.position.set(x,0.06,zCenter);
@@ -624,7 +603,7 @@ function makeCurb(x, zCenter, length){
 makeCurb(-TRACK_WIDTH/2-0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 makeCurb( TRACK_WIDTH/2+0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
 
-const armcoMat = new THREE.MeshStandardMaterial({ color:0xCCCCCC, metalness:0.7, roughness:0.35 });
+const armcoMat = new THREE.MeshLambertMaterial({ color:0xCCCCCC });
 function makeArmco(x, zCenter, length){
   const ag=new THREE.BoxGeometry(0.2,0.6,length);
   const a=new THREE.Mesh(ag,armcoMat); a.position.set(x,0.5,zCenter); a.castShadow=true; scene.add(a);
@@ -661,8 +640,8 @@ makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
   hb.rotation.z=Math.PI/2; hb.position.set(0,11,z); hb.castShadow=true; scene.add(hb);
   const lightColors=[0xFF0000,0xFF0000,0xFF0000,0xFF0000,0xFF8800];
   for(let i=0;i<5;i++){
-    const lg=new THREE.Mesh(new THREE.SphereGeometry(0.28,16,16),
-      new THREE.MeshPhysicalMaterial({color:lightColors[i],emissive:lightColors[i],emissiveIntensity:0.4,metalness:0.3,roughness:0.2}));
+    const lg=new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8),
+      new THREE.MeshStandardMaterial({color:lightColors[i],emissive:lightColors[i],emissiveIntensity:0.4}));
     lg.position.set(-3+(i*1.5),11.5,z+0.2); scene.add(lg);
     scene.userData['light_'+i]=lg;
   }
@@ -738,6 +717,15 @@ scene.add(car2);
 car1._wheels = [];
 car2._wheels = [];
 let modelsLoaded = false;
+
+// إضاءة خاصة بكل دراجة — PointLight بس (SpotLight مكلف على الـ GPU)
+const bikeLight1 = new THREE.PointLight(0xffffff, 3.5, 7);
+bikeLight1.position.set(-3, 3, 5);
+scene.add(bikeLight1);
+
+const bikeLight2 = new THREE.PointLight(0xffffff, 3.5, 7);
+bikeLight2.position.set(3, 3, 5);
+scene.add(bikeLight2);
 
 // ── DEBUG PLACEHOLDER CUBES (visible while loading) ──────────
 const debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);
@@ -1226,39 +1214,40 @@ function updateCamera(dt){
     const elapsed = 7.0 - Math.max(cinematicTimer, 0);
     const t = elapsed; // 0 → 7
 
-    let tX, tY, tZ, lX=0, lY=1.5, lZ=midZ;
+    // الدراجات دايماً في START_Z=5 — نخلي الكاميرا تطوّف حواليهم
+    const bikeZ = START_Z; // 5
+    let tX, tY, tZ, lX=0, lY=1.2, lZ=bikeZ;
 
     if(t < 2.5){
-      // Phase 1 (0–2.5s): Low front close-up, slowly dollying back
+      // Phase 1: كلوز-أب من الأمام — الكاميرا قدام الدراجات بتشوفهم وجه لوجه
       const p = easeInOut(t / 2.5);
       tX = 0;
-      tY = 1.2;
-      tZ = midZ + 8 + p * 4; // 8 → 12
-      lX = 0; lY = 1.5; lZ = midZ;
+      tY = 1.5 + p * 0.5;       // 1.5 → 2
+      tZ = bikeZ + 7 + p * 3;   // 12 → 15 (قدام الدراجات)
+      lX = 0; lY = 1.2; lZ = bikeZ;
     } else if(t < 4.5){
-      // Phase 2 (2.5–4.5s): Side orbit — camera circles from front-right around to behind
+      // Phase 2: دوران جانبي — تطوّف حوالين الدراجات
       const p = easeInOut((t - 2.5) / 2.0);
-      const a = p * Math.PI; // 0 → π (front → behind)
-      tX = Math.sin(a) * 12;
+      const a = p * Math.PI; // 0 → π
+      tX = Math.sin(a) * 9;
       tY = 2.5;
-      tZ = midZ + Math.cos(a) * 12;
-      lX = 0; lY = 1.5; lZ = midZ;
+      tZ = bikeZ + Math.cos(a) * 9; // تدور حوالين bikeZ
+      lX = 0; lY = 1.2; lZ = bikeZ;
     } else {
-      // Phase 3 (4.5–7.0s): Pull up & back, ease into chase camera position
+      // Phase 3: تانزيشن لكاميرا السباق من ورا
       const p = easeInOut((t - 4.5) / 2.5);
-      // Interpolate from behind-orbit end pos → chase cam target
-      const fromX = 0;   // orbit ends roughly at x=0 (behind)
+      const fromX = 0;
       const fromY = 2.5;
-      const fromZ = midZ - 12;
+      const fromZ = bikeZ - 9;
       const toX = sh;
       const toY = 4.5 + shY;
-      const toZ = midZ - 11.0;
+      const toZ = bikeZ - 11.0;
       tX = fromX + (toX - fromX) * p;
       tY = fromY + (toY - fromY) * p;
       tZ = fromZ + (toZ - fromZ) * p;
       lX = 0;
-      lY = 1.1 + p * 0.4; // ease lY from 1.5 → 1.1 as chase settles... wait flip: 1.5 → 1.1
-      lZ = midZ + p * 25; // ease lZ from midZ → midZ+25
+      lY = 1.2;
+      lZ = bikeZ + p * 25;
     }
 
     if(cinematicTimer <= 0){
@@ -1279,10 +1268,15 @@ function updateCamera(dt){
 
   let tX, tY, tZ, lX=0, lY=1.1, lZ;
 
+  // في مرحلة الـ countdown — الكاميرا تبص على الدراجات مش قدامهم
+  const isCountdown = (state.phase === 'countdown');
+
   if(camMode === 0){
-    // Chase cam — behind & elevated, looking far down the road toward finish
+    // Chase cam
     tX = sh; tY = 4.5 + shY; tZ = midZ - 11.0;
-    lZ = midZ + 25;
+    // لو countdown: ابص على الدراجات نفسها، لو racing: ابص للأمام
+    lZ = isCountdown ? midZ + 2 : midZ + 25;
+    lY = isCountdown ? 1.5 : 1.1;
   } else if(camMode === 1){
     // Sports broadcast top-down angle
     tX = 0; tY = 25; tZ = midZ - 4;
@@ -1359,13 +1353,9 @@ function updatePhysics(dt){
   car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
   car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
-  // Move bike lights with the bikes
-  if(typeof bikeLight1 !== 'undefined'){
-    bikeLight1.position.set(car1.position.x, car1.position.y + 5, car1.position.z);
-    bikeFront1.position.set(car1.position.x, car1.position.y + 2, car1.position.z + 2);
-    bikeLight2.position.set(car2.position.x, car2.position.y + 5, car2.position.z);
-    bikeFront2.position.set(car2.position.x, car2.position.y + 2, car2.position.z + 2);
-  }
+  // لما السباق يخلص ارجع الدراجات على الأرض
+  if(state.p1.finished) car1.position.y = 0;
+  if(state.p2.finished) car2.position.y = 0;
 
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){
@@ -1471,8 +1461,13 @@ function animate(time){
   spawnCarParticles();
   updateParticles(dt);
   updateCamera(dt);
+
+  // تحديث إضاءة الدراجات — تتحرك مع الموديل
+  bikeLight1.position.set(car1.position.x, car1.position.y + 3, car1.position.z);
+  bikeLight2.position.set(car2.position.x, car2.position.y + 3, car2.position.z);
+
   // FIX 2: Reduced HUD update frequency (was % 2, now % 3)
-  if(hudFrame++ % 3 === 0) updateHUD();
+  if(hudFrame++ % 5 === 0) updateHUD();
   renderer.render(scene,camera);
 }
 resetGame();

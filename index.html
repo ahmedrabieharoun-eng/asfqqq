@@ -586,37 +586,48 @@ const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness:
 // ── SIDE WALLS WITH IMAGE TEXTURE ────────────────────────────
 const WALL_IMAGE_URL = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/825b1ab6-ba54-4b69-bedd-5280060d5aca.png';
 const WALL_HEIGHT = 18;
-const WALL_X_OFFSET = TRACK_WIDTH/2 + 1.2;
+const WALL_THICKNESS = 1.2;
+const WALL_X_OFFSET = TRACK_WIDTH / 2 + WALL_THICKNESS / 2 + 0.5;
+const WALL_LENGTH = TRACK_LENGTH + 20;
 
-const wallImgTex = TL.load(WALL_IMAGE_URL);
-wallImgTex.encoding = THREE.sRGBEncoding;
-wallImgTex.wrapS = THREE.RepeatWrapping;
-wallImgTex.wrapT = THREE.ClampToEdgeWrapping;
-wallImgTex.repeat.set(TRACK_LENGTH / 40, 1);
+// Gray solid material for wall body
+const wallGrayMat = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.85, metalness: 0.05 });
 
-const wallImgMatLeft = new THREE.MeshBasicMaterial({ map: wallImgTex, side: THREE.FrontSide });
-const wallImgMatRight = new THREE.MeshBasicMaterial({ map: wallImgTex, side: THREE.BackSide });
+// Load image texture for the inner face
+const wallImgTex = new THREE.TextureLoader().load(WALL_IMAGE_URL, function(tex){
+  tex.encoding = THREE.sRGBEncoding;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  // repeat so image tiles horizontally along wall, fills vertically once
+  tex.repeat.set(WALL_LENGTH / 35, 1);
+  tex.needsUpdate = true;
+  wallImgMatInner.map = tex;
+  wallImgMatInner.needsUpdate = true;
+});
 
-// Left wall
-const wallLeftGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 20, WALL_HEIGHT);
-const wallLeft = new THREE.Mesh(wallLeftGeo, wallImgMatLeft);
-wallLeft.position.set(-WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
-wallLeft.rotation.y = Math.PI / 2;
-scene.add(wallLeft);
+// Inner face material (image) — DoubleSide so both walls show it
+const wallImgMatInner = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
 
-// Right wall
-const wallRightGeo = new THREE.PlaneGeometry(TRACK_LENGTH + 20, WALL_HEIGHT);
-const wallRight = new THREE.Mesh(wallRightGeo, wallImgMatRight);
-wallRight.position.set(WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
-wallRight.rotation.y = Math.PI / 2;
-scene.add(wallRight);
+// Build each wall using separate planes: gray box + image plane on inner face
+[-1, 1].forEach(side => {
+  // Gray box wall
+  const wallBox = new THREE.Mesh(
+    new THREE.BoxGeometry(WALL_THICKNESS, WALL_HEIGHT, WALL_LENGTH),
+    wallGrayMat
+  );
+  wallBox.position.set(side * WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH / 2 - 10);
+  scene.add(wallBox);
 
-// Gray wall base (back face for thickness feel)
-const wallBaseMat = new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.85, metalness: 0.1 });
-[-1,1].forEach(side => {
-  const wallBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, WALL_HEIGHT, TRACK_LENGTH + 20), wallBaseMat);
-  wallBase.position.set(side * WALL_X_OFFSET, WALL_HEIGHT / 2, TRACK_LENGTH/2 - 10);
-  scene.add(wallBase);
+  // Image plane on the inner side (facing the track)
+  const imgPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(WALL_LENGTH, WALL_HEIGHT),
+    wallImgMatInner.clone()
+  );
+  // Offset slightly inward so it sits on the inner face
+  imgPlane.position.set(side * (WALL_X_OFFSET - WALL_THICKNESS / 2 - 0.01), WALL_HEIGHT / 2, TRACK_LENGTH / 2 - 10);
+  // Rotate so it faces inward (toward track center)
+  imgPlane.rotation.y = side > 0 ? Math.PI : 0;
+  scene.add(imgPlane);
 });
 
 const curbMat = new THREE.MeshStandardMaterial({ color:0xE8E0D0, roughness:0.70, metalness:0.05 });

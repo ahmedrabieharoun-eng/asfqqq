@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -857,12 +858,19 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-// car1 (left lane, x=-3) — uses "bike with rider 2.glb"
-const BIKE1_URL_PRIMARY  = 'bike with rider 2.glb';
+// Read bike levels from URL: ?player=N&ai=M  (N,M in 1..7)
+const _raceParams = new URLSearchParams(window.location.search);
+function _clampLv(v){ const n=parseInt(v,10); return (n>=1&&n<=7)?n:1; }
+const PLAYER_LV = _clampLv(_raceParams.get('player')||'1');
+const AI_LV     = _clampLv(_raceParams.get('ai')||'1');
+function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
+
+// car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
+const BIKE1_URL_PRIMARY  = _bikeUrl(PLAYER_LV);
 const BIKE1_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
-// car2 (right lane, x=+3) — uses "bike with rider.glb"
-const BIKE2_URL_PRIMARY  = 'bike with rider.glb';
+// car2 (right lane, x=+3) — AI / opponent bike
+const BIKE2_URL_PRIMARY  = _bikeUrl(AI_LV);
 const BIKE2_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
 
 // Track two independent model loads

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -585,6 +583,188 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-btn-spin{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}}
 #compBanner{display:none!important}
 #compBanner.ended{display:none!important}
+
+/* ═══════════════════════════════════════════
+   RACE ENGINE — Embedded CSS
+═══════════════════════════════════════════ */
+#raceEngineContainer {
+  font-family:'Segoe UI',Arial,sans-serif;
+  overflow:hidden;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+  #raceEngineContainer { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
+  #canvas-container { position:relative; width:100%; height:100%; }
+  canvas { display:block; width:100%!important; height:100%!important; }
+
+  /* ── LOADING SCREEN ── */
+  #loading-screen {
+    position:absolute; inset:0; z-index:999;
+    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  #loading-logo {
+    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
+    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
+    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
+  }
+  #loading-logo span { color:#FFB800; }
+  @keyframes logoPulse {
+    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
+    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
+  }
+  #loading-subtitle {
+    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
+    text-transform:uppercase; margin-bottom:60px;
+  }
+  #loading-bar-wrap {
+    width:320px; height:5px; background:rgba(255,255,255,0.08);
+    border-radius:10px; overflow:hidden; margin-bottom:18px;
+    box-shadow:0 0 20px rgba(255,180,0,0.15);
+  }
+  #loading-bar {
+    height:100%; width:0%; border-radius:10px;
+    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
+    transition:width 0.25s ease;
+    box-shadow:0 0 10px rgba(255,180,0,0.6);
+  }
+  #loading-status {
+    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
+    text-transform:uppercase; min-height:16px; text-align:center;
+  }
+  #loading-dots {
+    margin-top:50px; display:flex; gap:10px; align-items:center;
+  }
+  .load-dot {
+    width:8px; height:8px; border-radius:50%;
+    animation:dotBounce 1.2s ease-in-out infinite;
+  }
+  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
+  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
+  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
+  @keyframes dotBounce {
+    0%,100%{transform:translateY(0);opacity:0.3;}
+    50%{transform:translateY(-10px);opacity:1;}
+  }
+
+  /* FIX #5: Remove vignette tint — set background to none */
+  #vignette {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:5;
+    background:none;
+  }
+  /* FIX #5: speed-overlay opacity multiplier set to 0 via JS; keep element */
+  #speed-overlay {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:6; opacity:0; transition:opacity 0.25s;
+    background:radial-gradient(ellipse at center, transparent 20%, rgba(180,200,255,0.05) 100%);
+  }
+  #lens-flare {
+    position:absolute; pointer-events:none; z-index:8;
+    width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,248,200,0.55) 0%, rgba(255,210,80,0.18) 40%, transparent 70%);
+    display:none; transform:translate(-50%,-50%); filter:blur(8px);
+  }
+
+  /* HUD */
+  #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }
+  #p1-hud {
+    position:absolute; top:16px; left:16px;
+    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
+    border:1px solid rgba(255,180,0,0.5); border-radius:10px;
+    padding:8px 12px; min-width:140px;
+    backdrop-filter:blur(12px);
+    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);
+  }
+  #p2-hud {
+    position:absolute; top:16px; right:16px;
+    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);
+    border:1px solid rgba(0,160,255,0.5); border-radius:10px;
+    padding:8px 12px; min-width:140px; text-align:right;
+    backdrop-filter:blur(12px);
+    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);
+  }
+  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+  #p1-hud .car-name { color:#FFB800; }
+  #p2-hud .car-name { color:#00CFFF; }
+  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
+  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
+  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
+  .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
+  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
+  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
+  .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
+  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
+  #p2-hud .gear-row { flex-direction:row-reverse; }
+  #p2-hud .gear-num { color:#00CFFF; }
+  #timer-hud {
+    position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,0.68); border:1px solid rgba(255,255,255,0.14);
+    border-radius:8px; padding:6px 16px; text-align:center;
+    backdrop-filter:blur(12px); box-shadow:0 4px 22px rgba(0,0,0,0.5);
+  }
+  .timer-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }
+  .timer-value { font-size:20px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+  .prog-wrap { position:absolute; bottom:28px; width:38%; }
+  #p1-prog-wrap { left:5%; }
+  #p2-prog-wrap { right:5%; }
+  .prog-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+  #p2-prog-wrap .prog-label { text-align:right; }
+  .prog-bg { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  #p1-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#FFB800,#FF4400); width:0%; transition:width 0.05s; }
+  #p2-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#0088FF,#AA00FF); width:0%; transition:width 0.05s; }
+  #countdown {
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    font-size:160px; font-weight:900; color:#fff;
+    text-shadow:0 0 40px rgba(255,60,60,0.95),0 0 80px rgba(255,60,60,0.5),5px 5px 0 #000;
+    letter-spacing:4px; pointer-events:none; display:none; text-align:center; white-space:nowrap;
+    animation:countPulse 0.6s ease-out;
+  }
+  #countdown.go { color:#00FF88; text-shadow:0 0 40px rgba(0,255,120,0.95),0 0 80px rgba(0,255,120,0.5),5px 5px 0 #003300; font-size:180px; }
+  @keyframes countPulse {
+    0%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}
+    40%{opacity:1;}
+    100%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  }
+  #winner-banner {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:rgba(0,0,0,0.9); border:2px solid #FFB800; border-radius:20px;
+    padding:40px 70px; text-align:center; display:none; pointer-events:all; z-index:25;
+    backdrop-filter:blur(20px) saturate(1.4);
+    box-shadow:0 0 80px rgba(255,180,0,0.4),0 20px 60px rgba(0,0,0,0.7);
+  }
+  #winner-title { font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:5px; text-transform:uppercase; margin-bottom:10px; }
+  #winner-name { font-size:56px; font-weight:900; color:#FFB800; text-shadow:0 0 30px rgba(255,180,0,0.7); margin-bottom:10px; }
+  #winner-time { font-size:18px; color:rgba(255,255,255,0.7); margin-bottom:5px; }
+  #winner-margin { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:32px; }
+  #race-again-btn {
+    background:linear-gradient(135deg,#FFB800,#FF5500); color:#000; border:none; border-radius:50px;
+    padding:15px 50px; font-size:16px; font-weight:800; cursor:pointer;
+    text-transform:uppercase; letter-spacing:3px; transition:transform 0.12s,box-shadow 0.12s;
+    pointer-events:all; box-shadow:0 4px 20px rgba(255,100,0,0.4);
+  }
+  #race-again-btn:hover { transform:scale(1.06); box-shadow:0 8px 36px rgba(255,140,0,0.6); }
+  #launch-hint {
+    position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
+    font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:3px;
+    text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+  /* Camera mode button */
+  #camBtn{
+    position:fixed; bottom:70px; right:14px; z-index:99999;
+    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);
+    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;
+    padding:10px 18px; border-radius:24px; cursor:pointer;
+    transition:background 0.2s, transform 0.1s;
+    font-family:'Segoe UI',sans-serif; user-select:none;
+    pointer-events:all; touch-action:manipulation;
+  }
+  #camBtn:active{ transform:scale(0.90); }
 </style>
 </head>
 <body>
@@ -2798,7 +2978,80 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ══ RACE ANIMATION PHASE (Full Screen, embedded engine) ══ -->
     <div id="raceAnimPhase">
-      <iframe id="raceEngineFrame" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000" allow="autoplay; fullscreen"></iframe>
+      <div id="raceEngineContainer" style="position:absolute;inset:0;width:100%;height:100%;background:#000;overflow:hidden;display:none">
+<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
+<!-- top back button removed -->
+<!-- LOADING SCREEN -->
+<div id="loading-screen" style="display:none!important">
+  <div id="loading-logo">DRAG<span>RACE</span></div>
+  <div id="loading-subtitle">🏆 Tropical Edition</div>
+  <div id="loading-bar-wrap">
+    <div id="loading-bar"></div>
+  </div>
+  <div id="loading-status">Initializing...</div>
+  <div id="loading-dots">
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+    <div class="load-dot"></div>
+  </div>
+</div>
+
+<div id="canvas-container">
+  <canvas id="c"></canvas>
+  <div id="vignette"></div>
+  <div id="speed-overlay"></div>
+  <div id="lens-flare"></div>
+  <div id="hud">
+    <div id="p1-hud">
+      <div class="car-name">🏍 Player 1</div>
+      <div class="speed-gauge-wrap">
+        <span class="speed-num" id="p1-speed">0</span>
+        <span class="speed-unit">km/h</span>
+      </div>
+      <div class="rpm-label">RPM</div>
+      <div class="rpm-bar-bg"><div class="rpm-fill" id="p1-rpm" style="width:0%"></div></div>
+      <div class="gear-row">
+        <span class="gear-label">GEAR</span>
+        <span class="gear-num" id="p1-gear">N</span>
+      </div>
+    </div>
+    <div id="timer-hud">
+      <div class="timer-label">⏱ Race Time</div>
+      <div class="timer-value" id="timer-val">0.000</div>
+    </div>
+    <div id="p2-hud">
+      <div class="car-name">Player 2 🏍</div>
+      <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
+        <span class="speed-num" id="p2-speed">0</span>
+        <span class="speed-unit">km/h</span>
+      </div>
+      <div class="rpm-label" style="text-align:right">RPM</div>
+      <div class="rpm-bar-bg"><div class="rpm-fill" id="p2-rpm" style="width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);"></div></div>
+      <div class="gear-row" style="flex-direction:row-reverse;">
+        <span class="gear-label">GEAR</span>
+        <span class="gear-num" id="p2-gear">N</span>
+      </div>
+    </div>
+    <div class="prog-wrap" id="p1-prog-wrap">
+      <div class="prog-label">P1 Progress</div>
+      <div class="prog-bg"><div id="p1-fill"></div></div>
+    </div>
+    <div class="prog-wrap" id="p2-prog-wrap">
+      <div class="prog-label" style="text-align:right">P2 Progress</div>
+      <div class="prog-bg"><div id="p2-fill"></div></div>
+    </div>
+    <div id="countdown"></div>
+    <div id="winner-banner">
+      <div id="winner-title">🏆 WINNER</div>
+      <div id="winner-name">Player 1</div>
+      <div id="winner-time">Time: 0.000s</div>
+      <div id="winner-margin">Won by 0.000s</div>
+      <button id="race-again-btn">🔁 Race Again</button>
+    </div>
+    <div id="launch-hint" style="display:none">Press SPACE or tap to launch</div>
+  </div>
+</div>
+</div>
 
       <!-- Result overlay (shown after race finishes) -->
       <div id="rsResultOverlay">
@@ -3303,7 +3556,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(resultOv)resultOv.style.display='none';
 
     /* Pre-load engine iframe HIDDEN — wait for models ready before showing */
-    const fr=document.getElementById('raceEngineFrame');
+    // iframe replaced by embedded engine
     _raceReady=false;
     const minLoadMs=1600;
     const startedAt=Date.now();
@@ -3318,7 +3571,20 @@ async function doUpgradeStat(bikeLevel, stat){
       },wait);
     };
     _raceShowFn=showRace;
-    if(fr) fr.src=window.__RACE_ENGINE_URL__;
+    // Initialize and start embedded engine
+    if(!window._raceEngineInitialized){
+      initRaceEngine3D();
+    }
+    const _engineContainer = document.getElementById('raceEngineContainer');
+    if(_engineContainer) _engineContainer.style.display='block';
+    window._raceEngineReady = function(){
+      if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); }
+    };
+    window._raceEngineFinished = function(data){
+      window.dispatchEvent(new MessageEvent('message', {data: {type:'race-finished', winner:data.winner, time:data.time, margin:data.margin}}));
+    };
+    // Trigger ready after short delay if engine already initialized
+    if(window._raceEngineInitialized) setTimeout(()=>{ if(window._raceEngineReady && !_raceReady) window._raceEngineReady(); }, 800);
     /* Safety fallback: if ready signal never arrives within 15s, show anyway */
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } },15000);
 
@@ -3397,8 +3663,8 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceActive=false;_raceStarted=false;_racePending=null;
     const ov=document.getElementById('rsResultOverlay');
     if(ov)ov.style.display='none';
-    const fr=document.getElementById('raceEngineFrame');
-    if(fr)fr.src='about:blank';
+    // iframe replaced by embedded engine
+    const _ec=document.getElementById('raceEngineContainer'); if(_ec)_ec.style.display='none';
     const animPhase=document.getElementById('raceAnimPhase');
     const selectPhase=document.getElementById('raceSelectPhase');
     if(animPhase)animPhase.style.display='none';
@@ -7260,270 +7526,23 @@ async function loadSeasonAlloc(){
 
 
 </script>
-<script type="text/html" id="raceEngineHTML">
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAG RACE — MOTORCYCLES</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
-  #canvas-container { position:relative; width:100vw; height:100vh; }
-  canvas { display:block; width:100%!important; height:100%!important; }
+<!-- Race Engine 3D Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 
-  /* ── LOADING SCREEN ── */
-  #loading-screen {
-    position:fixed; inset:0; z-index:999;
-    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    transition:opacity 0.9s ease, visibility 0.9s ease;
-  }
-  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
-  #loading-logo {
-    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
-    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
-    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
-  }
-  #loading-logo span { color:#FFB800; }
-  @keyframes logoPulse {
-    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
-    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
-  }
-  #loading-subtitle {
-    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
-    text-transform:uppercase; margin-bottom:60px;
-  }
-  #loading-bar-wrap {
-    width:320px; height:5px; background:rgba(255,255,255,0.08);
-    border-radius:10px; overflow:hidden; margin-bottom:18px;
-    box-shadow:0 0 20px rgba(255,180,0,0.15);
-  }
-  #loading-bar {
-    height:100%; width:0%; border-radius:10px;
-    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
-    transition:width 0.25s ease;
-    box-shadow:0 0 10px rgba(255,180,0,0.6);
-  }
-  #loading-status {
-    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
-    text-transform:uppercase; min-height:16px; text-align:center;
-  }
-  #loading-dots {
-    margin-top:50px; display:flex; gap:10px; align-items:center;
-  }
-  .load-dot {
-    width:8px; height:8px; border-radius:50%;
-    animation:dotBounce 1.2s ease-in-out infinite;
-  }
-  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
-  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
-  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
-  @keyframes dotBounce {
-    0%,100%{transform:translateY(0);opacity:0.3;}
-    50%{transform:translateY(-10px);opacity:1;}
-  }
-
-  /* FIX #5: Remove vignette tint — set background to none */
-  #vignette {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    pointer-events:none; z-index:5;
-    background:none;
-  }
-  /* FIX #5: speed-overlay opacity multiplier set to 0 via JS; keep element */
-  #speed-overlay {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    pointer-events:none; z-index:6; opacity:0; transition:opacity 0.25s;
-    background:radial-gradient(ellipse at center, transparent 20%, rgba(180,200,255,0.05) 100%);
-  }
-  #lens-flare {
-    position:absolute; pointer-events:none; z-index:8;
-    width:260px; height:260px; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,248,200,0.55) 0%, rgba(255,210,80,0.18) 40%, transparent 70%);
-    display:none; transform:translate(-50%,-50%); filter:blur(8px);
-  }
-
-  /* HUD */
-  #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }
-  #p1-hud {
-    position:absolute; top:16px; left:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
-    border:1px solid rgba(255,180,0,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);
-  }
-  #p2-hud {
-    position:absolute; top:16px; right:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);
-    border:1px solid rgba(0,160,255,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px; text-align:right;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);
-  }
-  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-  #p1-hud .car-name { color:#FFB800; }
-  #p2-hud .car-name { color:#00CFFF; }
-  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
-  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
-  .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
-  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
-  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
-  .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
-  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
-  #p2-hud .gear-row { flex-direction:row-reverse; }
-  #p2-hud .gear-num { color:#00CFFF; }
-  #timer-hud {
-    position:absolute; top:16px; left:50%; transform:translateX(-50%);
-    background:rgba(0,0,0,0.68); border:1px solid rgba(255,255,255,0.14);
-    border-radius:8px; padding:6px 16px; text-align:center;
-    backdrop-filter:blur(12px); box-shadow:0 4px 22px rgba(0,0,0,0.5);
-  }
-  .timer-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }
-  .timer-value { font-size:20px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
-  .prog-wrap { position:absolute; bottom:28px; width:38%; }
-  #p1-prog-wrap { left:5%; }
-  #p2-prog-wrap { right:5%; }
-  .prog-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-  #p2-prog-wrap .prog-label { text-align:right; }
-  .prog-bg { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  #p1-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#FFB800,#FF4400); width:0%; transition:width 0.05s; }
-  #p2-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#0088FF,#AA00FF); width:0%; transition:width 0.05s; }
-  #countdown {
-    position:absolute; top:50%; left:50%;
-    transform:translate(-50%,-50%) scale(1);
-    font-size:160px; font-weight:900; color:#fff;
-    text-shadow:0 0 40px rgba(255,60,60,0.95),0 0 80px rgba(255,60,60,0.5),5px 5px 0 #000;
-    letter-spacing:4px; pointer-events:none; display:none; text-align:center; white-space:nowrap;
-    animation:countPulse 0.6s ease-out;
-  }
-  #countdown.go { color:#00FF88; text-shadow:0 0 40px rgba(0,255,120,0.95),0 0 80px rgba(0,255,120,0.5),5px 5px 0 #003300; font-size:180px; }
-  @keyframes countPulse {
-    0%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}
-    40%{opacity:1;}
-    100%{transform:translate(-50%,-50%) scale(1);opacity:1;}
-  }
-  #winner-banner {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.9); border:2px solid #FFB800; border-radius:20px;
-    padding:40px 70px; text-align:center; display:none; pointer-events:all; z-index:25;
-    backdrop-filter:blur(20px) saturate(1.4);
-    box-shadow:0 0 80px rgba(255,180,0,0.4),0 20px 60px rgba(0,0,0,0.7);
-  }
-  #winner-title { font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:5px; text-transform:uppercase; margin-bottom:10px; }
-  #winner-name { font-size:56px; font-weight:900; color:#FFB800; text-shadow:0 0 30px rgba(255,180,0,0.7); margin-bottom:10px; }
-  #winner-time { font-size:18px; color:rgba(255,255,255,0.7); margin-bottom:5px; }
-  #winner-margin { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:32px; }
-  #race-again-btn {
-    background:linear-gradient(135deg,#FFB800,#FF5500); color:#000; border:none; border-radius:50px;
-    padding:15px 50px; font-size:16px; font-weight:800; cursor:pointer;
-    text-transform:uppercase; letter-spacing:3px; transition:transform 0.12s,box-shadow 0.12s;
-    pointer-events:all; box-shadow:0 4px 20px rgba(255,100,0,0.4);
-  }
-  #race-again-btn:hover { transform:scale(1.06); box-shadow:0 8px 36px rgba(255,140,0,0.6); }
-  #launch-hint {
-    position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
-    font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:3px;
-    text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
-
-  /* Camera mode button */
-  #camBtn{
-    position:fixed; bottom:70px; right:14px; z-index:99999;
-    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);
-    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;
-    padding:10px 18px; border-radius:24px; cursor:pointer;
-    transition:background 0.2s, transform 0.1s;
-    font-family:'Segoe UI',sans-serif; user-select:none;
-    pointer-events:all; touch-action:manipulation;
-  }
-  #camBtn:active{ transform:scale(0.90); }
-</style>
-</head>
-<body>
-<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
-<!-- top back button removed -->
-<!-- LOADING SCREEN -->
-<div id="loading-screen" style="display:none!important">
-  <div id="loading-logo">DRAG<span>RACE</span></div>
-  <div id="loading-subtitle">🏆 Tropical Edition</div>
-  <div id="loading-bar-wrap">
-    <div id="loading-bar"></div>
-  </div>
-  <div id="loading-status">Initializing...</div>
-  <div id="loading-dots">
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-  </div>
-</div>
-
-<div id="canvas-container">
-  <canvas id="c"></canvas>
-  <div id="vignette"></div>
-  <div id="speed-overlay"></div>
-  <div id="lens-flare"></div>
-  <div id="hud">
-    <div id="p1-hud">
-      <div class="car-name">🏍 Player 1</div>
-      <div class="speed-gauge-wrap">
-        <span class="speed-num" id="p1-speed">0</span>
-        <span class="speed-unit">km/h</span>
-      </div>
-      <div class="rpm-label">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p1-rpm" style="width:0%"></div></div>
-      <div class="gear-row">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p1-gear">N</span>
-      </div>
-    </div>
-    <div id="timer-hud">
-      <div class="timer-label">⏱ Race Time</div>
-      <div class="timer-value" id="timer-val">0.000</div>
-    </div>
-    <div id="p2-hud">
-      <div class="car-name">Player 2 🏍</div>
-      <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
-        <span class="speed-num" id="p2-speed">0</span>
-        <span class="speed-unit">km/h</span>
-      </div>
-      <div class="rpm-label" style="text-align:right">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p2-rpm" style="width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);"></div></div>
-      <div class="gear-row" style="flex-direction:row-reverse;">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p2-gear">N</span>
-      </div>
-    </div>
-    <div class="prog-wrap" id="p1-prog-wrap">
-      <div class="prog-label">P1 Progress</div>
-      <div class="prog-bg"><div id="p1-fill"></div></div>
-    </div>
-    <div class="prog-wrap" id="p2-prog-wrap">
-      <div class="prog-label" style="text-align:right">P2 Progress</div>
-      <div class="prog-bg"><div id="p2-fill"></div></div>
-    </div>
-    <div id="countdown"></div>
-    <div id="winner-banner">
-      <div id="winner-title">🏆 WINNER</div>
-      <div id="winner-name">Player 1</div>
-      <div id="winner-time">Time: 0.000s</div>
-      <div id="winner-margin">Won by 0.000s</div>
-      <button id="race-again-btn">🔁 Race Again</button>
-    </div>
-    <div id="launch-hint" style="display:none">Press SPACE or tap to launch</div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"><\/script>
 <script>
-(function(){
+/* ═══════════════════════════════════════════
+   RACE ENGINE 3D — Embedded (replaces iframe)
+═══════════════════════════════════════════ */
+window._raceEngineInitialized = false;
+window._raceEngineStartFn = null;
+
+function initRaceEngine3D() {
+  if(window._raceEngineInitialized) return;
+  window._raceEngineInitialized = true;
+  (function(){
 'use strict';
 
 // ─── IMAGE URLs ──────────────────────────────────────────────
@@ -7541,7 +7560,7 @@ const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance', logarithmicDepthBuffer:false });
 // FIX 2: Lower pixel ratio for performance (was 1.5)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
-renderer.setSize(window.innerWidth, window.innerHeight);
+const _rc=document.getElementById('raceEngineContainer'); renderer.setSize(_rc?_rc.offsetWidth:window.innerWidth, _rc?_rc.offsetHeight:window.innerHeight);
 renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.LinearToneMapping;
 // FIX 3: Lower exposure so road doesn't blow out (was 1.0)
@@ -7554,12 +7573,12 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x6FB2D9);
 
 // ─── CAMERA ──────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);
+const _rcC=document.getElementById('raceEngineContainer'); const camera = new THREE.PerspectiveCamera(62, (_rcC?_rcC.offsetWidth:window.innerWidth)/(_rcC?_rcC.offsetHeight:window.innerHeight), 0.1, 3000);
 // نبدأ الكاميرا قدام الدراجات مباشرةً (START_Z=5)
 camera.position.set(0, 1.5, 12);
 camera.lookAt(0, 1.2, 5);
 window.addEventListener('resize', ()=>{
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  const _rc=document.getElementById('raceEngineContainer'); renderer.setSize(_rc?_rc.offsetWidth:window.innerWidth, _rc?_rc.offsetHeight:window.innerHeight);
   camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
 });
@@ -7594,6 +7613,7 @@ function checkAllLoaded(){
   setLoadBar(100);
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('launch-hint').style.display = 'block';
+  if(window._raceEngineReady) window._raceEngineReady();
 }
 
 // Patch TL.load to auto-track
@@ -8654,7 +8674,7 @@ function showWinner(n,t,m){
   document.getElementById('winner-time').textContent=`Time: ${t.toFixed(3)}s`;
   document.getElementById('winner-margin').textContent=m<0.001?'Photo Finish!':`Won by ${m.toFixed(3)}s`;
   document.getElementById('winner-banner').style.display='block';
-  try{ window.parent && window.parent.postMessage({type:'race-finished',winner:n,time:t,margin:m},'*'); }catch(e){}
+  if(window._raceEngineFinished) window._raceEngineFinished({winner:n,time:t,margin:m});
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -8743,20 +8763,7 @@ setLoadStatus('Loading track & environment...');
 setTimeout(checkAllLoaded, 500);
 
 })();
-
-<\/script>
-</body>
-</html>
-
-</script>
-<script>
-(function(){
-  var el=document.getElementById("raceEngineHTML");
-  if(!el){window.__RACE_ENGINE_URL__="about:blank";return;}
-  var html=el.textContent.replace(/<\\/script/g,"</script");
-  var blob=new Blob([html],{type:"text/html"});
-  window.__RACE_ENGINE_URL__=URL.createObjectURL(blob);
-})();
+}
 </script>
 </body>
 </html>

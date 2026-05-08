@@ -14,7 +14,27 @@
    then serves them from device storage on every later visit. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW register failed', err));
+    navigator.serviceWorker.register('sw.js')
+      .then(() => {
+        // Background preload of bike GLB models so they're ready before any race.
+        // Uses requestIdleCallback to avoid blocking the UI; SW caches each one
+        // on first fetch, so future requests are instant + offline-friendly.
+        const schedule = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
+        schedule(async () => {
+          for (let lv = 1; lv <= 7; lv++) {
+            const url = 'Bike Level ' + lv + '.glb';
+            try {
+              const cache = await caches.open('race-assets-v2');
+              const hit = await cache.match(url, { ignoreVary: true });
+              if (hit) { console.log('[preload] cached:', url); continue; }
+              console.log('[preload] downloading:', url);
+              await fetch(url, { cache: 'reload' }); // SW intercepts & stores it
+              console.log('[preload] done:', url);
+            } catch (e) { console.warn('[preload] failed:', url, e); }
+          }
+        });
+      })
+      .catch(err => console.warn('SW register failed', err));
   });
 }
 </script>

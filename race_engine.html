@@ -336,10 +336,17 @@ function loadProgress(key){
     model1:'Left bike loaded', model2:'Right bike loaded' };
   setLoadStatus(labels[key] || 'Loading assets...');
 }
+let _raceLoadComplete=false;
 function checkAllLoaded(){
+  if(_raceLoadComplete) return;
+  _raceLoadComplete=true;
   setLoadBar(100);
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('launch-hint').style.display = 'block';
+  try{ window.parent && window.parent.postMessage({type:'race-ready'},'*'); }catch(e){}
+  setTimeout(()=>{
+    try{ if(state.phase==='idle') startCountdown(); }catch(e){}
+  },650);
 }
 
 // Patch TL.load to auto-track
@@ -900,7 +907,6 @@ function onModelLoadComplete(){
     modelsLoaded = true;
     dracoLoader.dispose();
     checkAllLoaded();
-    try{ window.parent && window.parent.postMessage({type:'race-ready'},'*'); }catch(e){}
   }
 }
 
@@ -1504,7 +1510,7 @@ function animate(time){
 resetGame();
 requestAnimationFrame(animate);
 setLoadStatus('Loading track & environment...');
-setTimeout(checkAllLoaded, 500);
+setTimeout(()=>{ if(!_raceLoadComplete) checkAllLoaded(); }, 8000);
 
 })();
 

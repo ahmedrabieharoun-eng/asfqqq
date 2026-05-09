@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3464,7 +3461,16 @@ async function doUpgradeStat(bikeLevel, stat){
         const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
         const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
       }
+      // status==='waiting' → keep polling
     }).catch(e=>console.warn('racePoll:',e.message));
+  }
+
+  // متابعة الـ poll حتى لو جاء "matched" فوراً من joinQueue
+  async function _racePollUntilMatch(){
+    // فوراً نجرب مرة
+    _racePollOnce();
+    // بعدين كل 2.5 ثانية
+    _racePollTimer = setInterval(_racePollOnce, 2500);
   }
 
   window.startRace = async function(){
@@ -3497,11 +3503,11 @@ async function doUpgradeStat(bikeLevel, stat){
     try{ loadState(); }catch(_){}
 
     if(res.data.status==='matched'){
-      // Instant match — pull full data via poll, then launch
-      _racePollOnce();
+      // Instant match — use polling to get full data reliably
+      _racePollUntilMatch();
     } else {
-      // Waiting → poll every 2s
-      _racePollTimer=setInterval(_racePollOnce, 2000);
+      // Waiting → poll every 2.5s
+      _racePollUntilMatch();
     }
   };
 
@@ -5058,11 +5064,13 @@ const SERVERS = [
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
   'claimTask','verifyTask','createTask','deposit',
-  'buyBike','upgradeStats','race','raceResult','startBikeMining','claimBikeMining'
+  'buyBike','upgradeStats','race','raceResult','startBikeMining','claimBikeMining',
+  // Race PvP actions — must be consistent to same server
+  'raceJoinQueue','raceCancelQueue','raceAck'
 ]);
 
-const API_TIMEOUT_MS  = 8000;
-const DEAD_WINDOW_MS  = 12 * 60 * 60 * 1000; // 12h
+const API_TIMEOUT_MS  = 15000;             // زيادة من 8s لـ 15s (Cloudflare Workers بيأخذ وقت)
+const DEAD_WINDOW_MS  = 2 * 60 * 1000;    // تقليل من 12h لـ 2 دقيقة فقط
 const SESS_KEY        = 'panda_active_srv';
 const DEAD_KEY        = 'panda_dead_srvs';
 
@@ -5115,7 +5123,8 @@ async function _raceServers(action, data, authHdr){
           resolve(res);
         })
         .catch(()=>{
-          _markDead(url);
+          // لا نعلّم السيرفر كـ "dead" عند startup ping فشل
+          // فقط نعدّ الفشل
           fails++;
           if(fails===live.length && !done) reject(new Error('All servers unreachable'));
         });
@@ -5131,7 +5140,13 @@ async function _call(url/*ignored*/, action, data, authHdr){
   if(isWrite){
     // Write ops MUST use sticky server to prevent duplicate execution
     const srv = sticky || SERVERS[0];
-    return _callOne(srv, action, data, authHdr);
+    try{
+      return await _callOne(srv, action, data, authHdr);
+    }catch(e){
+      // للـ write ops: لو فشل، نجرب مرة ثانية بعد ثانية (بدل ما نعلّمه dead)
+      await new Promise(r=>setTimeout(r,1000));
+      return _callOne(srv, action, data, authHdr);
+    }
   }
 
   // Read op: try sticky first, fall back to race
@@ -6509,7 +6524,9 @@ async function init(){
     await window._raceServersNow(authHdr);
     ldProgress(22, '✅ Server connected!');
   }catch(e){
-    ldProgress(22, '⚠️ Using fallback server...');
+    // لو الـ ping فشل، نضع السيرفر الأول كـ sticky عشان ما يتعطلش
+    try{ sessionStorage.setItem(SESS_KEY, SERVERS[0]); }catch(_){}
+    ldProgress(22, '⚡ Connecting to server...');
   }
   await new Promise(r=>setTimeout(r,300));
 

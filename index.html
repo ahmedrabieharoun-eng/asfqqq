@@ -2881,13 +2881,13 @@ async function doUpgradeStat(bikeLevel, stat){
         <div class="rsr-vs">
           <div class="rsr-side">
             <div class="rsr-av" id="rsrAv1">🏍️</div>
-            <div class="rsr-sname" id="rsrName1">Opponent</div>
+            <div class="rsr-sname" id="rsrName1">You</div>
             <div class="rsr-sspd" id="rsrSpd1">— km/h</div>
           </div>
           <div class="rsr-sep">VS</div>
           <div class="rsr-side">
-            <div class="rsr-av" id="rsrAv2">🏍️</div>
-            <div class="rsr-sname" id="rsrName2">You</div>
+            <div class="rsr-av" id="rsrAv2">🤖</div>
+            <div class="rsr-sname" id="rsrName2">Opponent</div>
             <div class="rsr-sspd" id="rsrSpd2">— km/h</div>
           </div>
         </div>
@@ -3323,184 +3323,187 @@ async function doUpgradeStat(bikeLevel, stat){
   /* swipe on big carousel card disabled — navigation is via thumbnails only */
 
   /* ═══════════════════════════════════════════
-     START RACE
+     START RACE — PvP matchmaking, server-authoritative outcome.
+     Flow: joinQueue → poll → matched → load engine → show result.
+     Cancel allowed only while still in queue (refunds 0.5 TON).
   ═══════════════════════════════════════════ */
-  window.startRace = async function(){
-    if(_raceActive||_raceStarted) return;
-    if(_raceBikes.length===0){showNotif('❌ No bikes! Buy one in the Garage','e');return;}
-    const ton=S?.user?.tonBalance||0;
-    if(ton<0.5){showNotif('❌ Need 0.5 TON to race','e');return;}
-
-    _raceStarted=true;
-    _raceSelectedBike=_raceBikes[_raceIdx];
-
-    /* ── Loading overlay: searching for opponent ── */
-    let loadOv=document.getElementById('raceLoadingOv');
-    if(!loadOv){
-      loadOv=document.createElement('div');
-      loadOv.id='raceLoadingOv';
-      loadOv.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .3s';
-      loadOv.innerHTML=`
-        <div style="width:64px;height:64px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div>
-        <div id="raceLoadingTitle" style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">🔍 Finding opponent...</div>
-        <div id="raceLoadingSubtitle" style="font-size:14px;color:rgba(232,245,233,.5);font-weight:600;font-family:Fredoka,cursive;text-align:center">Entry fee: 0.5 TON · Prize: 0.9 TON</div>
-        <div id="raceLoadingTimer" style="font-size:13px;color:rgba(255,255,255,.35);font-family:Fredoka,cursive">Waiting: 0s</div>
-        <button id="raceLoadingCancelBtn" onclick="cancelRaceSearch()" style="margin-top:8px;background:rgba(255,60,60,.18);border:1px solid rgba(255,60,60,.4);color:#ff6060;border-radius:24px;padding:10px 28px;font-size:14px;font-weight:700;font-family:Fredoka,cursive;cursor:pointer">✕ Cancel</button>
-      `;
-      document.body.appendChild(loadOv);
-    } else {
-      document.getElementById('raceLoadingTitle').textContent='🔍 Finding opponent...';
-      document.getElementById('raceLoadingSubtitle').textContent='Entry fee: 0.5 TON · Prize: 0.9 TON';
-    }
-
-    const sf=document.getElementById('raceStartFixed');
-    if(sf)sf.style.display='none';
-    const _bnav=document.querySelector('.bnav');
-    if(_bnav)_bnav.style.display='none';
-    loadOv.style.opacity='1';loadOv.style.pointerEvents='all';
-
-    // Enter the server-side queue (deducts 0.5 TON)
-    let enterResult;
-    try{
-      enterResult = await api('enterQueue',{bikeLevel:_raceSelectedBike.lv});
-    }catch(e){
-      // Restore UI on failure
-      loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
-      if(sf)sf.style.display='block';
-      if(_bnav)_bnav.style.display='';
-      _raceStarted=false;
-      showNotif('❌ '+(e.message||'Failed to enter queue'),'e');
-      return;
-    }
-
-    if(!enterResult||!enterResult.success){
-      loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
-      if(sf)sf.style.display='block';
-      if(_bnav)_bnav.style.display='';
-      _raceStarted=false;
-      showNotif('❌ '+(enterResult?.error||'Queue error'),'e');
-      return;
-    }
-
-    // If immediately matched (opponent was already waiting)
-    if(enterResult.data?.status==='matched'){
-      _handleMatchFound(enterResult.data, loadOv);
-      return;
-    }
-
-    // Poll for match
-    let waitSecs=0;
-    const timerEl=document.getElementById('raceLoadingTimer');
-    _pollInterval=setInterval(async()=>{
-      if(!_raceStarted){ clearInterval(_pollInterval); _pollInterval=null; return; }
-      waitSecs++;
-      if(timerEl) timerEl.textContent=`Waiting: ${waitSecs}s`;
-
-      let poll;
-      try{ poll=await api('pollMatch',{}); }catch(e){ return; }
-
-      if(poll?.data?.status==='matched'){
-        clearInterval(_pollInterval); _pollInterval=null;
-        _handleMatchFound(poll.data, loadOv);
-      } else if(poll?.data?.status==='timeout'){
-        clearInterval(_pollInterval); _pollInterval=null;
-        // Refunded — show message
-        loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
-        if(sf)sf.style.display='block';
-        if(_bnav)_bnav.style.display='';
-        _raceStarted=false;
-        if(poll.data.refunded){
-          if(S.user) S.user.tonBalance=(S.user.tonBalance||0)+0.5;
-          syncTopbar();
-        }
-        showNotif('⏱ No opponent found. Fee refunded.','i');
-        try{loadState();}catch(e){}
-      }
-    }, 2000);
-  };
-
-  let _pollInterval=null;
-
-  window.cancelRaceSearch=async function(){
-    if(_pollInterval){ clearInterval(_pollInterval); _pollInterval=null; }
-    _raceStarted=false;
-    try{ const r=await api('cancelQueue',{}); if(r?.data?.refunded){ if(S.user) S.user.tonBalance=(S.user.tonBalance||0)+0.5; syncTopbar(); } }catch(e){}
-    const loadOv=document.getElementById('raceLoadingOv');
-    if(loadOv){loadOv.style.opacity='0';loadOv.style.pointerEvents='none';}
-    const sf=document.getElementById('raceStartFixed');
-    if(sf)sf.style.display='block';
-    const _bnav=document.querySelector('.bnav');
-    if(_bnav)_bnav.style.display='';
-    showNotif('Race search cancelled. Fee refunded.','i');
-  };
-
-  function _handleMatchFound(matchData, loadOv){
-    // matchData: {myLv,myPower,myMaxKmh, oppLv,oppPower,oppMaxKmh, oppName,oppPhoto, won,prize,newTonBalance}
-    _racePending={
-      playerWins: matchData.won,
-      p1Name: (S?._tgName||S?.user?.firstName||'You').slice(0,14),
-      aiName: matchData.oppName,
-      maxPlayerKmh: matchData.myMaxKmh,
-      maxAiKmh: matchData.oppMaxKmh,
-      oppPhoto: matchData.oppPhoto||'',
-      prize: matchData.prize||0,
-      newTonBalance: matchData.newTonBalance,
-    };
-
-    // Update balance immediately (server already settled)
-    if(matchData.newTonBalance!=null && S.user){
-      S.user.tonBalance=matchData.newTonBalance;
-      syncTopbar();
-    }
-
-    // Show "opponent found" briefly before launching race
-    const titleEl=document.getElementById('raceLoadingTitle');
-    const subEl=document.getElementById('raceLoadingSubtitle');
-    const cancelBtn=document.getElementById('raceLoadingCancelBtn');
-    if(cancelBtn) cancelBtn.style.display='none';
-    if(titleEl) titleEl.textContent=`⚡ Opponent found: ${matchData.oppName}`;
-    if(subEl){
-      const oppKmh=matchData.oppMaxKmh||0;
-      const myKmh=matchData.myMaxKmh||0;
-      subEl.textContent=`You: ${myKmh} km/h  ·  Opponent: ${oppKmh} km/h`;
-    }
-
-    // Pre-load engine iframe
-    const fr=document.getElementById('raceEngineFrame');
-    _raceReady=false;
-    const startedAt=Date.now();
-    const showRace=()=>{
-      const elapsed=Date.now()-startedAt;
-      const wait=Math.max(0,1600-elapsed);
-      setTimeout(()=>{
-        if(loadOv){loadOv.style.opacity='0';loadOv.style.pointerEvents='none';}
-        const selectPhase=document.getElementById('raceSelectPhase');
-        const animPhase=document.getElementById('raceAnimPhase');
-        if(selectPhase)selectPhase.style.display='none';
-        if(animPhase)animPhase.style.display='block';
-        _raceActive=true;
-      },wait);
-    };
-    _raceShowFn=showRace;
-
-    if(fr){
-      // Player (you) on RIGHT lane (car2), opponent on LEFT (car1)
-      // Pass maxKmh for both so race_engine drives them deterministically
-      const params=new URLSearchParams({
-        t: Date.now(),
-        player: matchData.myLv||1,
-        ai: matchData.oppLv||1,
-        maxP1Kmh: matchData.oppMaxKmh||100,   // left lane = opponent
-        maxP2Kmh: matchData.myMaxKmh||100,     // right lane = you
-        playerWins: matchData.won?'1':'0',
-      });
-      fr.src='race_engine.html?'+params.toString();
-    }
-    setTimeout(()=>{ if(!_raceReady&&_raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } },15000);
-  }
-
   let _raceReady=false, _raceShowFn=null;
   let _racePending=null;
+  let _racePollTimer=null;
+  let _raceQueueing=false;
+
+  function _raceStopPolling(){
+    if(_racePollTimer){ clearInterval(_racePollTimer); _racePollTimer=null; }
+  }
+
+  function _ensureLoadingOverlay(){
+    let loadOv=document.getElementById('raceLoadingOv');
+    if(loadOv) return loadOv;
+    loadOv=document.createElement('div');
+    loadOv.id='raceLoadingOv';
+    loadOv.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;opacity:0;pointer-events:none;transition:opacity .3s;padding:24px;text-align:center';
+    loadOv.innerHTML=[
+      '<div id="rqSpinner" style="width:64px;height:64px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div>',
+      '<div id="rqTitle" style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">🏎️ Поиск соперника...</div>',
+      '<div id="rqSub" style="font-size:13px;color:rgba(232,245,233,.55);font-weight:600;font-family:Fredoka,cursive;max-width:280px;line-height:1.4">Ставка 0.5 TON · Победитель получает 0.9 TON</div>',
+      '<div id="rqOpp" style="display:none;margin-top:6px;background:rgba(124,179,66,.12);border:1px solid rgba(124,179,66,.35);border-radius:14px;padding:10px 16px;color:#fff;font-family:Fredoka,cursive;display:none;align-items:center;gap:10px"><div id="rqOppAv" style="width:40px;height:40px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:18px">🏍️</div><div style="text-align:left"><div id="rqOppName" style="font-size:14px;font-weight:800">Opponent</div><div id="rqOppLv" style="font-size:11px;opacity:.7">Level 1</div></div></div>',
+      '<button id="rqCancelBtn" style="margin-top:18px;background:rgba(220,80,80,.18);border:1px solid rgba(220,80,80,.5);color:#ff8a8a;font-family:Fredoka,cursive;font-weight:800;font-size:14px;padding:10px 22px;border-radius:12px;cursor:pointer">✖ Отменить и вернуть 0.5 TON</button>'
+    ].join('');
+    document.body.appendChild(loadOv);
+    document.getElementById('rqCancelBtn').addEventListener('click', _raceCancel);
+    return loadOv;
+  }
+
+  function _raceShowSearching(){
+    const ov=_ensureLoadingOverlay();
+    ov.style.opacity='1'; ov.style.pointerEvents='all';
+    const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='none';
+    const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='none';
+  }
+
+  function _raceHideSearching(){
+    const ov=document.getElementById('raceLoadingOv');
+    if(ov){ ov.style.opacity='0'; ov.style.pointerEvents='none'; }
+  }
+
+  async function _raceCancel(){
+    _raceStopPolling();
+    try{
+      const res=await api('raceCancelQueue',{});
+      if(res&&res.success){
+        if(res.data&&typeof res.data.tonBalance==='number' && S?.user){
+          S.user.tonBalance=res.data.tonBalance; syncTopbar();
+        }
+        showNotif('↩️ Поиск отменён, 0.5 TON возвращены','i');
+      }
+    }catch(e){ console.warn('cancel:',e.message); }
+    _raceQueueing=false; _raceStarted=false;
+    _raceHideSearching();
+    const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+    const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+    try{ loadState(); }catch(_){}
+  }
+
+  function _raceShowOpponent(opp){
+    const cancelBtn=document.getElementById('rqCancelBtn');
+    if(cancelBtn) cancelBtn.style.display='none';
+    const sub=document.getElementById('rqSub');
+    if(sub) sub.textContent='Соперник найден! Готовим трассу...';
+    const title=document.getElementById('rqTitle');
+    if(title) title.textContent='⚡ Match found';
+    const oppBox=document.getElementById('rqOpp');
+    const av=document.getElementById('rqOppAv');
+    const nm=document.getElementById('rqOppName');
+    const lv=document.getElementById('rqOppLv');
+    if(av){
+      if(opp.photoUrl){ av.innerHTML='<img src="'+opp.photoUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">'; }
+      else av.textContent='🏍️';
+    }
+    if(nm) nm.textContent='@'+(opp.username||opp.name||'rider').slice(0,18);
+    if(lv) lv.textContent='Level '+opp.lv;
+    if(oppBox){ oppBox.style.display='flex'; }
+  }
+
+  async function _raceLaunchMatch(matchData){
+    _raceStopPolling();
+    _raceQueueing=false;
+    const youAreP1=!!matchData.youAreP1;
+    const winnerSide = matchData.youWon ? (youAreP1?'p1':'p2') : (youAreP1?'p2':'p1');
+    const myLv=matchData.you.lv, oppLv=matchData.opp.lv;
+    _racePending={
+      playerWins: !!matchData.youWon,
+      p1Name: matchData.you.name||'You',
+      aiName: matchData.opp.name||'Opponent',
+      oppPhoto: matchData.opp.photoUrl||'',
+      maxPlayerKmh: matchData.you.maxKmh||120,
+      maxAiKmh: matchData.opp.maxKmh||120,
+      tonBalance: matchData.tonBalance,
+      prize: matchData.prize||0.9
+    };
+    if(typeof matchData.tonBalance==='number' && S?.user){
+      S.user.tonBalance=matchData.tonBalance; syncTopbar();
+    }
+    _raceShowOpponent(matchData.opp);
+    const selectPhase=document.getElementById('raceSelectPhase');
+    const animPhase=document.getElementById('raceAnimPhase');
+    const resultOv=document.getElementById('rsResultOverlay');
+    if(resultOv) resultOv.style.display='none';
+    const fr=document.getElementById('raceEngineFrame');
+    _raceReady=false;
+    const minLoadMs=1400; const startedAt=Date.now();
+    const showRace=()=>{
+      const wait=Math.max(0, minLoadMs-(Date.now()-startedAt));
+      setTimeout(()=>{
+        _raceHideSearching();
+        if(selectPhase) selectPhase.style.display='none';
+        if(animPhase) animPhase.style.display='block';
+        _raceActive=true;
+      }, wait);
+    };
+    _raceShowFn=showRace;
+    if(fr){
+      // youAreP1 → engine: car1 (left) is YOU. Else car2 (right) is YOU.
+      // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
+      const leftLv  = youAreP1 ? myLv  : oppLv;
+      const rightLv = youAreP1 ? oppLv : myLv;
+      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+    }
+    setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
+  }
+
+  function _racePollOnce(){
+    api('racePoll',{}).then(res=>{
+      if(!res||!res.success||!res.data) return;
+      if(res.data.status==='matched'){
+        _raceStopPolling();
+        _raceLaunchMatch(res.data);
+      } else if(res.data.status==='idle'){
+        // Server forgot us (TTL or external cancel). Reset UI.
+        _raceStopPolling(); _raceQueueing=false; _raceStarted=false;
+        _raceHideSearching();
+        const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+        const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+      }
+    }).catch(e=>console.warn('racePoll:',e.message));
+  }
+
+  window.startRace = async function(){
+    if(_raceActive||_raceStarted||_raceQueueing) return;
+    if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
+    const ton=S?.user?.tonBalance||0;
+    if(ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+
+    _raceStarted=true; _raceQueueing=true;
+    _raceSelectedBike=_raceBikes[_raceIdx];
+    _raceShowSearching();
+
+    let res;
+    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike?.lv||1}); }
+    catch(e){
+      _raceQueueing=false; _raceStarted=false;
+      _raceHideSearching();
+      const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+      const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+      showNotif('❌ '+(e.message||'Ошибка сети'),'e'); return;
+    }
+    if(!res||!res.success){
+      _raceQueueing=false; _raceStarted=false;
+      _raceHideSearching();
+      const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+      const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+      showNotif('❌ '+(res?.error||'Не удалось войти в очередь'),'e'); return;
+    }
+    // Refresh balance display (entry fee deducted)
+    try{ loadState(); }catch(_){}
+
+    if(res.data.status==='matched'){
+      // Instant match — pull full data via poll, then launch
+      _racePollOnce();
+    } else {
+      // Waiting → poll every 2s
+      _racePollTimer=setInterval(_racePollOnce, 2000);
+    }
+  };
 
   /* Listen for race-engine messages */
   window.addEventListener('message',function(ev){
@@ -3511,14 +3514,14 @@ async function doUpgradeStat(bikeLevel, stat){
     else if(d.type==='race-back'){ window.raceGoBack(); }
     else if(d.type==='race-finished' && _racePending){
       const p=_racePending;
-      setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh,p.oppPhoto,p.prize),400);
+      setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh,p.oppPhoto),400);
     }
   });
 
   /* ═══════════════════════════════════════════
      RESULT OVERLAY
   ═══════════════════════════════════════════ */
-  function _showResult(playerWins,p1Name,oppName,p1Kmh,p2Kmh,oppPhoto,prize){
+  function _showResult(playerWins,p1Name,aiName,p1Kmh,p2Kmh,oppPhoto){
     const ov=document.getElementById('rsResultOverlay');
     if(!ov)return;
     const emoji=document.getElementById('rsrEmoji');
@@ -3533,28 +3536,29 @@ async function doUpgradeStat(bikeLevel, stat){
     const spd2=document.getElementById('rsrSpd2');
     if(playerWins){
       if(emoji)emoji.textContent='🏆';
-      if(title){title.textContent='Victory!';title.className='rsr-title win';}
+      if(title){title.textContent='Победа!';title.className='rsr-title win';}
       if(reward)reward.style.display='flex';
-      if(rewTxt)rewTxt.textContent='+'+(prize||0.9)+' TON';
+      if(rewTxt)rewTxt.textContent='+0.9 TON';
     }else{
       if(emoji)emoji.textContent='💨';
-      if(title){title.textContent='Defeated';title.className='rsr-title lose';}
+      if(title){title.textContent='Проигрыш';title.className='rsr-title lose';}
       if(reward)reward.style.display='none';
     }
-    // My avatar (right lane — player2)
     const tgUser=S?.tg?.initDataUnsafe?.user;
     if(tgUser?.photo_url){
-      if(av2)av2.innerHTML='<img src="'+tgUser.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
-    }else{if(av2)av2.textContent='🏍️';}
-    // Opponent avatar (left lane — player1)
-    if(oppPhoto){
-      if(av1)av1.innerHTML='<img src="'+oppPhoto+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
+      if(av1)av1.innerHTML='<img src="'+tgUser.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
     }else{if(av1)av1.textContent='🏍️';}
-    if(name2)name2.textContent='@'+p1Name;
-    if(name1)name1.textContent=oppName;
-    if(spd2)spd2.textContent=p1Kmh+' km/h';
-    if(spd1)spd1.textContent=p2Kmh+' km/h';
+    if(av2){
+      if(oppPhoto){ av2.innerHTML='<img src="'+oppPhoto+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">'; }
+      else av2.textContent='🏍️';
+    }
+    if(name1)name1.textContent='@'+p1Name;
+    if(name2)name2.textContent='@'+aiName;
+    if(spd1)spd1.textContent=p1Kmh+' km/h';
+    if(spd2)spd2.textContent=p2Kmh+' km/h';
     ov.style.display='flex';
+    // Acknowledge match server-side so the record can be cleaned up
+    api('raceAck',{}).catch(()=>{});
     setTimeout(()=>{try{loadState();}catch(e){}},1200);
   }
 
@@ -3562,7 +3566,8 @@ async function doUpgradeStat(bikeLevel, stat){
      BACK TO SELECTION
   ═══════════════════════════════════════════ */
   window.raceGoBack=function(){
-    _raceActive=false;_raceStarted=false;_racePending=null;
+    _raceStopPolling();
+    _raceActive=false;_raceStarted=false;_raceQueueing=false;_racePending=null;
     const ov=document.getElementById('rsResultOverlay');
     if(ov)ov.style.display='none';
     const fr=document.getElementById('raceEngineFrame');

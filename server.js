@@ -37,6 +37,13 @@ const G = {
     mt20 : { n:20, ton:1 },
     mt50 : { n:50, ton:3 },
   },
+  // Upgrade increments per stat — must match frontend UPGRADE_INC
+  UPGRADE_INCREMENTS: {
+    speed   : 5,
+    nitro   : 5,
+    accel   : 5,
+    maneuver: 3,
+  },
 };
 
 // Bike base stats
@@ -117,7 +124,7 @@ function rateOk(ip){const now=Date.now();const d=_rl.get(ip)||{c:0,r:now+60000};
 
 // Per-user per-action cooldown
 const _userActionTs=new Map();
-const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,claimMissionTask:2500,submitPartnerPost:5000};
+const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,claimMissionTask:2500,submitPartnerPost:5000,saveSeasonAlloc:10000};
 function userActionOk(uid,action){const cd=ACTION_COOLDOWNS[action];if(!cd)return true;const key=`${uid}:${action}`;const now=Date.now();const last=_userActionTs.get(key)||0;if(now-last<cd)return false;_userActionTs.set(key,now);return true;}
 
 // Logging
@@ -660,7 +667,9 @@ async function hRaceResult(env,uid,data,_meta={}){
     const newRaces=(user.totalRacesPlayed||0)+1;
     await dbUpdate(env,`users/${uid}`,{tonBalance:parseFloat(newBal.toFixed(4)),totalRacesPlayed:newRaces});
     log(env,uid,'race_result',{won,cost,prize,tonBalance_before:bal,tonBalance_after:newBal},_meta);
-    return{success:true,data:{tonBalance:parseFloat(newBal.toFixed(4)),won,prize,totalRacesPlayed:newRaces}};
+    // Frontend reads: result.success and result.data.tonBalance
+    // api() unwraps j.data, so we wrap the payload one level deeper
+    return{success:true,data:{success:true,data:{tonBalance:parseFloat(newBal.toFixed(4)),won,prize,totalRacesPlayed:newRaces}}};
   }catch(e){console.error('raceResult:',e);return{success:false,error:e.message};}
 }
 
@@ -728,6 +737,15 @@ async function hAdmin(env,action,data){
   }
 }
 
+// ── Save Season Allocation ────────────────────────────────────────
+async function hSaveSeasonAlloc(env,uid,data,_meta={}){
+  try{
+    const{coinsAlloc,refsAlloc,total}=data;
+    await dbSet(env,`users/${uid}/seasonAlloc`,{coinsAlloc:coinsAlloc||0,refsAlloc:refsAlloc||0,total:total||0,savedAt:Date.now()});
+    return{success:true,data:{saved:true}};
+  }catch(e){console.error('saveSeasonAlloc:',e);return{success:false,error:e.message};}
+}
+
 // ── Main handler ──────────────────────────────────────────────────
 export default {
   async fetch(request,env){
@@ -786,6 +804,7 @@ export default {
       case 'raceResult'       :return jRes(await hRaceResult      (env,uid,data,_meta));
       case 'claimMissionTask' :return jRes(await hClaimMissionTask(env,uid,data,_meta));
       case 'submitPartnerPost':return jRes(await hSubmitPartnerPost(env,uid,data,_meta));
+      case 'saveSeasonAlloc'  :return jRes(await hSaveSeasonAlloc  (env,uid,data,_meta));
       default:return fail('Unknown action',400);
     }
   }

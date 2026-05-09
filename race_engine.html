@@ -216,7 +216,7 @@ if ('serviceWorker' in navigator) {
   <div id="lens-flare"></div>
   <div id="hud">
     <div id="p1-hud">
-      <div class="car-name">🏍 Opponent</div>
+      <div class="car-name">🏍 Player 1</div>
       <div class="speed-gauge-wrap">
         <span class="speed-num" id="p1-speed">0</span>
         <span class="speed-unit">km/h</span>
@@ -233,7 +233,7 @@ if ('serviceWorker' in navigator) {
       <div class="timer-value" id="timer-val">0.000</div>
     </div>
     <div id="p2-hud">
-      <div class="car-name">You 🏍</div>
+      <div class="car-name">Player 2 🏍</div>
       <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
         <span class="speed-num" id="p2-speed">0</span>
         <span class="speed-unit">km/h</span>
@@ -866,28 +866,18 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const gltfLoader = new THREE.GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-// Read bike levels from URL: ?player=N&ai=M  (N,M in 1..7)
-// PvP params: maxP1Kmh, maxP2Kmh (server-computed), playerWins
+// Read bike levels + predetermined winner from URL.
+//   ?player=N&ai=M&winner=p1|p2  (N,M in 1..7; winner controls final outcome)
+// PLAYER bike (right lane in this engine) is car2 → maps to "p2" in parent.
+// OPPONENT bike (left lane) is car1 → maps to "p1".
 const _raceParams = new URLSearchParams(window.location.search);
 function _clampLv(v){ const n=parseInt(v,10); return (n>=1&&n<=7)?n:1; }
 const PLAYER_LV = _clampLv(_raceParams.get('player')||'1');
 const AI_LV     = _clampLv(_raceParams.get('ai')||'1');
-
-// PvP: left lane = opponent, right lane = player (you)
-// maxP1Kmh = opponent max speed (left), maxP2Kmh = player max speed (right)
-const _RAW_MAX_P1 = parseInt(_raceParams.get('maxP1Kmh')||'0',10)||0;
-const _RAW_MAX_P2 = parseInt(_raceParams.get('maxP2Kmh')||'0',10)||0;
-// playerWins=1 means right lane (player) wins; =0 means left lane (opponent) wins
-const _PLAYER_WINS = _raceParams.get('playerWins')==='1';
-
-// If PvP params provided, use them; else fall back to legacy random (AI mode)
-const _PVP_MODE = _RAW_MAX_P1 > 0 && _RAW_MAX_P2 > 0;
-
-// Clamp to sensible range
-function _clampKmh(v){ return Math.max(80, Math.min(500, v)); }
-const PVP_MAX_P1 = _PVP_MODE ? _clampKmh(_RAW_MAX_P1) : 0;
-const PVP_MAX_P2 = _PVP_MODE ? _clampKmh(_RAW_MAX_P2) : 0;
-
+// FORCED_WINNER: 'p1' (left/opponent) or 'p2' (right/you). Server-decided.
+const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
+                    : (_raceParams.get('winner')==='p2') ? 'p2'
+                    : null;
 function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
 
 // car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
@@ -1154,11 +1144,7 @@ function spawnP(x,y,z,vx,vy,vz,type){
 const START_Z=5;
 const gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];
 const gearThr=[0,14,38,70,106,148,198];
-// In PvP mode each bike has its own server-computed max speed
-// car1=left=opponent, car2=right=player
-const MAX_SPD = _PVP_MODE ? Math.max(PVP_MAX_P1, PVP_MAX_P2) : 325;
-const P1_MAX_SPD = _PVP_MODE ? PVP_MAX_P1 : MAX_SPD;
-const P2_MAX_SPD = _PVP_MODE ? PVP_MAX_P2 : MAX_SPD;
+const MAX_SPD=325;
 
 const state={phase:'idle',timer:0,raceStart:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
@@ -1175,14 +1161,11 @@ function resetGame(){
   document.getElementById('winner-banner').style.display='none';
   document.getElementById('countdown').style.display='none';
   document.getElementById('launch-hint').style.display='block';
-  // In PvP mode: multipliers are derived from server max speeds (deterministic)
-  // In legacy mode: random as before
-  if(_PVP_MODE){
-    p1M=0.92+Math.random()*0.08; // small variance for visual feel
-    p2M=0.92+Math.random()*0.08;
-  } else {
-    p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;
-  }
+  // Multipliers biased so the server-decided winner crosses the line first.
+  // No bias if winner not provided (legacy / standalone testing).
+  if(FORCED_WINNER==='p1'){      p1M=1.04+Math.random()*0.06; p2M=0.90+Math.random()*0.05; }
+  else if(FORCED_WINNER==='p2'){ p2M=1.04+Math.random()*0.06; p1M=0.90+Math.random()*0.05; }
+  else {                          p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16; }
   cShake=0;
   for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
   document.getElementById('timer-val').textContent = '0.000';
@@ -1358,33 +1341,16 @@ function updatePhysics(dt){
   if(state.phase!=='racing') return;
   const elapsed=(performance.now()-state.raceStart)/1000;
   state.timer=elapsed;
-
-  // PvP mode: each bike accelerates toward its own server-computed max speed
-  // The winner (from server) will have a slightly higher effective top speed
-  // ensuring the race result matches exactly what the server decided.
-  function updateCar(cs,mult,maxSpd){
+  function updateCar(cs,mult){
     if(cs.finished) return;
     cs.gear=getGear(cs.speed);
     const ga=gears[Math.min(cs.gear,gears.length-1)];
-    const ar=cs.speed/maxSpd;
+    const ar=cs.speed/MAX_SPD;
     const vr=1+(Math.sin(elapsed*3.9+mult*12)*0.022);
-    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*285, maxSpd);
+    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*285, MAX_SPD);
     cs.pos+=cs.speed/3.6*dt;
   }
-
-  if(_PVP_MODE){
-    // In PvP: winner gets their full max speed, loser gets slightly less
-    // to guarantee the correct finish order regardless of visual randomness
-    const p1Winner = !_PLAYER_WINS; // p1=left=opponent wins if player doesn't
-    const p2Winner = _PLAYER_WINS;
-    const P1_EFF = p1Winner ? P1_MAX_SPD : P1_MAX_SPD * 0.985;
-    const P2_EFF = p2Winner ? P2_MAX_SPD : P2_MAX_SPD * 0.985;
-    updateCar(state.p1, p1M, P1_EFF);
-    updateCar(state.p2, p2M, P2_EFF);
-  } else {
-    updateCar(state.p1,p1M,MAX_SPD);
-    updateCar(state.p2,p2M,MAX_SPD);
-  }
+  updateCar(state.p1,p1M); updateCar(state.p2,p2M);
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
@@ -1448,13 +1414,7 @@ function updatePhysics(dt){
 }
 
 function showWinner(n,t,m){
-  // In PvP mode: map internal Player1/Player2 to Opponent/You labels
-  let displayName = n;
-  if(_PVP_MODE){
-    if(n==='Player 1') displayName='Opponent';
-    else if(n==='Player 2') displayName='You';
-  }
-  document.getElementById('winner-name').textContent=displayName;
+  document.getElementById('winner-name').textContent=n;
   document.getElementById('winner-time').textContent=`Time: ${t.toFixed(3)}s`;
   document.getElementById('winner-margin').textContent=m<0.001?'Photo Finish!':`Won by ${m.toFixed(3)}s`;
   document.getElementById('winner-banner').style.display='block';
@@ -1501,7 +1461,7 @@ function updateParticles(dt){
 function updateHUD(){
   document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);
   document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);
-  const r1=Math.min(state.p1.speed/P1_MAX_SPD*100,100), r2=Math.min(state.p2.speed/P2_MAX_SPD*100,100);
+  const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);
   document.getElementById('p1-rpm').style.width=r1+'%';
   document.getElementById('p2-rpm').style.width=r2+'%';
   document.getElementById('p1-rpm').style.backgroundPosition=r1>82?'100% 0':'50% 0';

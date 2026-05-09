@@ -2852,6 +2852,7 @@ async function doUpgradeStat(bikeLevel, stat){
         Entry Fee: <span class="v">0.5</span>
         <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png">
       </div>
+      <button id="raceCleanupBtn" onclick="window.raceCleanupStuck()" style="display:none;margin-top:8px;background:rgba(255,160,0,.15);border:1px solid rgba(255,160,0,.5);color:#ffcc80;font-family:Fredoka,cursive;font-weight:700;font-size:12px;padding:6px 16px;border-radius:10px;cursor:pointer;width:100%">🔄 Clear stuck race &amp; try again</button>
     </div>
 
     <!-- ── DEV NOTICE (compat, not shown in normal flow) ── -->
@@ -3465,11 +3466,8 @@ async function doUpgradeStat(bikeLevel, stat){
     }).catch(e=>console.warn('racePoll:',e.message));
   }
 
-  // متابعة الـ poll حتى لو جاء "matched" فوراً من joinQueue
   async function _racePollUntilMatch(){
-    // فوراً نجرب مرة
     _racePollOnce();
-    // بعدين كل 2.5 ثانية
     _racePollTimer = setInterval(_racePollOnce, 2500);
   }
 
@@ -3486,12 +3484,39 @@ async function doUpgradeStat(bikeLevel, stat){
     let res;
     try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike?.lv||1}); }
     catch(e){
-      _raceQueueing=false; _raceStarted=false;
-      _raceHideSearching();
-      const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
-      const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
-      showNotif('❌ '+(e.message||'Ошибка сети'),'e'); return;
+      // ────────────────────────────────────────────────
+      // قد يكون السيرفر أكمل الـ match لكن timeout حصل
+      // نجرب racePoll لمدة 10 ثواني قبل ما نستسلم
+      // ────────────────────────────────────────────────
+      console.warn('raceJoinQueue failed, trying poll fallback:', e.message);
+      let pollFound=false;
+      for(let i=0;i<4;i++){
+        await new Promise(r=>setTimeout(r,1500));
+        try{
+          const pollRes=await api('racePoll',{});
+          if(pollRes&&pollRes.status==='matched'){
+            pollFound=true;
+            _raceLaunchMatch(pollRes);
+            break;
+          } else if(pollRes&&pollRes.status==='waiting'){
+            // We're in queue — start normal polling
+            pollFound=true;
+            _racePollUntilMatch();
+            break;
+          }
+        }catch(_){}
+      }
+      if(!pollFound){
+        _raceQueueing=false; _raceStarted=false;
+        _raceHideSearching();
+        const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+        const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+        showNotif('❌ '+(e.message||'Ошибка сети'),'e');
+      }
+      return;
     }
+
+    // ── السيرفر رد بنجاح ──────────────────────────────
     if(!res||!res.success){
       _raceQueueing=false; _raceStarted=false;
       _raceHideSearching();
@@ -3499,14 +3524,17 @@ async function doUpgradeStat(bikeLevel, stat){
       const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
       showNotif('❌ '+(res?.error||'Не удалось войти в очередь'),'e'); return;
     }
-    // Refresh balance display (entry fee deducted)
+
     try{ loadState(); }catch(_){}
 
-    if(res.data.status==='matched'){
-      // Instant match — use polling to get full data reliably
+    if(res.data&&res.data.status==='matched'&&res.data.youWon!==undefined){
+      // السيرفر بعت بيانات الـ match كاملة مباشرة — اطلع فوراً
+      _raceLaunchMatch(res.data);
+    } else if(res.data&&res.data.status==='matched'){
+      // عنده matchId بس مش كل البيانات — poll مرة واحدة
       _racePollUntilMatch();
     } else {
-      // Waiting → poll every 2.5s
+      // Waiting → poll كل 2.5 ثانية
       _racePollUntilMatch();
     }
   };
@@ -3587,6 +3615,55 @@ async function doUpgradeStat(bikeLevel, stat){
     const _bnav=document.querySelector('.bnav');
     if(_bnav)_bnav.style.display='';
     _raceInit();
+  };
+
+  // ── Cleanup stuck race ────────────────────────────────────────
+  window.raceCleanupStuck = async function(){
+    const btn=document.getElementById('raceCleanupBtn');
+    if(btn){ btn.textContent='⏳ Clearing...'; btn.disabled=true; }
+    try{
+      const res=await api('raceCleanup',{});
+      if(res&&res.hadActiveMatch){
+        // Had a recent match — display it!
+        showNotif('⚡ Found your match! Loading...','s');
+        _raceStarted=true; _raceQueueing=true;
+        _raceSelectedBike=_raceBikes[_raceIdx];
+        _raceShowSearching();
+        _raceLaunchMatch(res);
+        return;
+      }
+      if(res&&res.refunded){
+        showNotif(`✅ Cleared! ${res.tonBalance?.toFixed?.(2)||''} TON refunded`,'s');
+        if(S?.user&&res.tonBalance) S.user.tonBalance=res.tonBalance;
+        syncTopbar();
+      } else {
+        showNotif('✅ Race state cleared. Ready to start!','s');
+      }
+      try{ loadState(); }catch(_){}
+    }catch(e){
+      showNotif('❌ '+(e.message||'Error'),'e');
+    }
+    if(btn){ btn.textContent='🔄 Clear stuck race & try again'; btn.disabled=false; }
+  };
+
+  // ── Auto-check for stuck match on page open ───────────────────
+  let _raceCheckedOnOpen=false;
+  window._raceCheckOnOpen = async function(){
+    if(_raceCheckedOnOpen||_raceActive||_raceStarted||_raceQueueing) return;
+    _raceCheckedOnOpen=true;
+    try{
+      const res=await api('racePoll',{});
+      const btn=document.getElementById('raceCleanupBtn');
+      if(res&&res.status==='matched'){
+        // Has an unfinished match — offer to continue
+        if(btn) btn.style.display='block';
+        showNotif('⚠️ You have an unfinished race! Tap "Clear stuck race" to resolve.','i');
+      } else if(res&&res.status==='waiting'){
+        if(btn) btn.style.display='block';
+      } else {
+        if(btn) btn.style.display='none';
+      }
+    }catch(_){}
   };
 
   window._raceRefreshIfActive=function(){
@@ -5066,7 +5143,7 @@ const WRITE_ACTIONS = new Set([
   'claimTask','verifyTask','createTask','deposit',
   'buyBike','upgradeStats','race','raceResult','startBikeMining','claimBikeMining',
   // Race PvP actions — must be consistent to same server
-  'raceJoinQueue','raceCancelQueue','raceAck'
+  'raceJoinQueue','raceCancelQueue','raceAck','raceCleanup'
 ]);
 
 const API_TIMEOUT_MS  = 15000;             // زيادة من 8s لـ 15s (Cloudflare Workers بيأخذ وقت)
@@ -5574,6 +5651,8 @@ function goNav(el){
   if(el.dataset.s==='sectionTasks'&&typeof window._raceInit==='function'){
     if(S&&S._dataLoaded) requestAnimationFrame(()=>requestAnimationFrame(window._raceInit));
     else setTimeout(window._raceInit,60);
+    // Check for stuck/pending race state
+    setTimeout(()=>{ if(typeof window._raceCheckOnOpen==='function') window._raceCheckOnOpen(); }, 800);
   }
 }
 

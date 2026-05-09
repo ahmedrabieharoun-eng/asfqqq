@@ -21,17 +21,57 @@ if ('serviceWorker' in navigator) {
         // on first fetch, so future requests are instant + offline-friendly.
         const schedule = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
         schedule(async () => {
-          for (let lv = 1; lv <= 7; lv++) {
-            const url = 'Bike Level ' + lv + '.glb';
+          const cache = await caches.open('race-assets-v2');
+          const queue = async (url) => {
             try {
-              const cache = await caches.open('race-assets-v2');
               const hit = await cache.match(url, { ignoreVary: true });
-              if (hit) { console.log('[preload] cached:', url); continue; }
-              console.log('[preload] downloading:', url);
-              await fetch(url, { cache: 'reload' }); // SW intercepts & stores it
-              console.log('[preload] done:', url);
-            } catch (e) { console.warn('[preload] failed:', url, e); }
+              if (hit) return;
+              await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
+                .catch(() => fetch(url, { cache: 'reload' }));
+            } catch (e) { /* ignore */ }
+          };
+          // 1) Bike GLB models
+          for (let lv = 1; lv <= 7; lv++) {
+            await queue('Bike Level ' + lv + '.glb');
           }
+          // 2) All website images — scan DOM + CSS for image URLs and preload them
+          const collectImageUrls = () => {
+            const urls = new Set();
+            // <img src>
+            document.querySelectorAll('img[src]').forEach(el => {
+              const s = el.getAttribute('src'); if (s) urls.add(s);
+            });
+            // CSS rules: background-image url(...)
+            const urlRe = /url\(\s*['"]?([^'")]+\.(?:png|jpe?g|webp|gif|svg|avif))(?:\?[^'")]*)?['"]?\s*\)/gi;
+            // Inline HTML scan (covers JS string literals + style attrs)
+            try {
+              const html = document.documentElement.outerHTML;
+              let m; while ((m = urlRe.exec(html))) urls.add(m[1]);
+            } catch (e) {}
+            // Stylesheet rules
+            for (const sheet of Array.from(document.styleSheets)) {
+              let rules; try { rules = sheet.cssRules; } catch (e) { continue; }
+              if (!rules) continue;
+              for (const rule of Array.from(rules)) {
+                const t = rule.cssText || '';
+                let m; urlRe.lastIndex = 0;
+                while ((m = urlRe.exec(t))) urls.add(m[1]);
+              }
+            }
+            return Array.from(urls).filter(u => /^https?:\/\//i.test(u));
+          };
+          const imgs = collectImageUrls();
+          console.log('[preload] images found:', imgs.length);
+          // Throttle: 4 in parallel
+          let i = 0;
+          const workers = Array.from({ length: 4 }, async () => {
+            while (i < imgs.length) {
+              const u = imgs[i++];
+              await queue(u);
+            }
+          });
+          await Promise.all(workers);
+          console.log('[preload] all images cached');
         });
       })
       .catch(err => console.warn('SW register failed', err));

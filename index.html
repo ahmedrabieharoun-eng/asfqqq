@@ -1,11 +1,13 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Panda Bamboo Factory 🎋</title>
+<title>RASEEN</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -19,7 +21,7 @@ if ('serviceWorker' in navigator) {
         // Background preload of bike GLB models so they're ready before any race.
         // Uses requestIdleCallback to avoid blocking the UI; SW caches each one
         // on first fetch, so future requests are instant + offline-friendly.
-        const schedule = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
+        const schedule = (cb) => setTimeout(cb, 8000);
         schedule(async () => {
           const cache = await caches.open('race-assets-v2');
           const queue = async (url) => {
@@ -429,26 +431,51 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ld-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;text-shadow:0 1px 6px rgba(0,0,0,.9);}
 
 /* Gold progress bar */
-.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:80%;max-width:320px;}
+.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:84%;max-width:340px;}
 .ld-bar-track{
-  width:100%;height:5px;border-radius:3px;
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(200,160,40,.2);
+  position:relative;width:100%;height:14px;border-radius:10px;
+  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(20,20,20,.35));
+  border:1px solid rgba(255,80,0,.45);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.7),0 0 14px rgba(255,90,0,.18);
   overflow:hidden;
 }
+.ld-bar-track::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.06) 6px 8px);
+}
 .ld-bar-fill{
-  height:100%;width:0%;border-radius:3px;
-  background:linear-gradient(90deg,#7a5c00,#d4a800,#f5d060,#d4a800,#7a5c00);
-  background-size:300% 100%;
-  animation:ld-bar-shine 1.6s linear infinite;
-  transition:width .4s ease;
-  box-shadow:0 0 8px rgba(210,160,20,.7);
+  position:relative;height:100%;width:0%;border-radius:9px;
+  background:linear-gradient(90deg,#ff3d00 0%,#ff7a00 35%,#ffc400 65%,#ffec3d 100%);
+  background-size:200% 100%;
+  animation:ld-bar-shine 1.4s linear infinite;
+  transition:width .35s cubic-bezier(.4,.8,.3,1);
+  box-shadow:0 0 14px rgba(255,140,0,.85),0 0 28px rgba(255,90,0,.4);
+}
+.ld-bar-fill::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);
+  border-radius:9px 9px 0 0;
+}
+.ld-bar-fill::after{
+  content:'';position:absolute;top:0;right:-2px;bottom:0;width:14px;
+  background:radial-gradient(ellipse at center,rgba(255,240,150,.95),transparent 70%);
+  filter:blur(2px);
 }
 @keyframes ld-bar-shine{
   0%{background-position:200% 0}
   100%{background-position:-200% 0}
 }
-.ld-pct{font-size:11px;font-weight:800;color:rgba(220,180,50,1);letter-spacing:1.5px;text-shadow:0 1px 6px rgba(0,0,0,.9);}
+.ld-pct{
+  font-size:14px;font-weight:900;color:#ffd84d;
+  letter-spacing:2px;font-family:'Fredoka',sans-serif;
+  text-shadow:0 0 12px rgba(255,140,0,.85),0 1px 6px rgba(0,0,0,.95);
+}
+.ld-sub{
+  font-size:12px!important;color:#ffe9b8!important;
+  font-weight:700!important;letter-spacing:1.5px!important;
+  text-transform:uppercase;font-family:'Fredoka',sans-serif!important;
+  text-shadow:0 0 10px rgba(255,140,0,.5),0 1px 6px rgba(0,0,0,.95)!important;
+}
 
 /* hide old segments */
 .ld-segments{display:none!important;}
@@ -654,6 +681,17 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-btn-spin{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}}
 #compBanner{display:none!important}
 #compBanner.ended{display:none!important}
+</style>
+
+<style id="raseenGlobalFont">
+/* Unified font across all devices — Fredoka bold */
+html, body, button, input, textarea, select, option {
+  font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 700 !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 </style>
 </head>
 <body>
@@ -1989,7 +2027,7 @@ async function doUpgradeStat(bikeLevel, stat){
     url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat;
 }
 .gr-hero{
-  position:relative;width:100%;height:240px;overflow:hidden;
+  position:relative;width:100%;height:160px;overflow:hidden;
   flex-shrink:0;
 }
 .gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
@@ -2031,9 +2069,9 @@ async function doUpgradeStat(bikeLevel, stat){
   pointer-events:none;
 }
 .gr-hero-title-row{display:flex;align-items:center;gap:10px;}
-.gr-hero-wrench{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(124,179,66,.8));}
-.gr-hero-title{font-size:36px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
-.gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:4px;text-align:center;}
+.gr-hero-wrench{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(124,179,66,.8));}
+.gr-hero-title{font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
+.gr-hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:3px;text-align:center;}
 
 /* ══ GARAGE BODY ══ */
 .gr-body{padding:0 12px 32px;background:transparent;}
@@ -2905,7 +2943,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   BALI RALLY — Race Engine v3.0
+   RASEEN — Race Engine v3.0
    Canvas-based road rendering for correct perspective
 ══════════════════════════════════════════════════════════════ */
 (function(){
@@ -4198,14 +4236,14 @@ async function doUpgradeStat(bikeLevel, stat){
         <div style="font-size:16px;font-weight:800;color:#FFD700;margin-bottom:8px;display:flex;align-items:center;gap:6px">🤝 <span data-i18n="partnershipTitle">Channel Partnership</span></div>
         <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.8" data-i18n="partnershipInfo">
           Promote our game to earn TON rewards!<br>
-          Post about Bali Rally on your Telegram channel and submit the link for review.
+          Post about Raseen on your Telegram channel and submit the link for review.
         </div>
         <div style="margin-top:10px;background:rgba(0,0,0,.28);border-radius:10px;padding:10px 12px">
           <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:6px" data-i18n="partnerRequirements">📋 Requirements:</div>
           <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.9">
             • <span data-i18n="req1">Channel must have 1,000+ real subscribers</span><br>
             • <span data-i18n="req2">Subscribers must be genuine (not bots)</span><br>
-            • <span data-i18n="req3">Post must be about Bali Rally / our game</span>
+            • <span data-i18n="req3">Post must be about Raseen / our game</span>
           </div>
         </div>
         <div style="margin-top:10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:9px 12px;text-align:center">
@@ -4560,7 +4598,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
       listEl.innerHTML = refs.slice(0,30).map(r=>`
         <div class="ref2-list-item">
-          <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🐼'">` :'🐼'}</div>
+          <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🏍️'">` :'🏍️'}</div>
           <div class="ref2-li-info">
             <div class="ref2-li-name">${esc(r.name||'Friend')}</div>
             <div class="ref2-li-date">${esc(r.date||'Joined recently')}</div>
@@ -4854,8 +4892,6 @@ function syncFinanceHeader(){
 </style>
 
 <!-- HELP BUTTON -->
-<button id="helpBtn" onclick="openModal('helpModal')" style="position:fixed;bottom:84px;right:14px;z-index:190;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));border:2px solid rgba(124,179,66,.55);color:var(--bamboo);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(124,179,66,.35),0 4px 16px rgba(0,0,0,.5);transition:transform .18s;">?</button>
-
 <!-- NAV -->
 <nav class="bnav">
   <!-- Home -->
@@ -4899,17 +4935,17 @@ function syncFinanceHeader(){
 <div class="modal" id="helpModal">
   <div class="modal-box" style="max-height:88vh;overflow-y:auto;padding:0;border-radius:22px 22px 0 0">
     <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0a1f0a,#061206);border-bottom:1px solid rgba(124,179,66,.18);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:22px 22px 0 0">
-      <div style="font-size:17px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:8px" data-i18n="helpTitle">🐼 Panda Bamboo Guide</div>
+      <div style="font-size:17px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:8px" data-i18n="helpTitle">🏍️ Game Guide</div>
       <button class="mclose" onclick="closeModal('helpModal')"><i class="fas fa-times"></i></button>
     </div>
     <!-- Channel / Support links -->
     <div style="padding:14px 14px 0">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:4px">
-        <a href="https://t.me/PandaBambooPayouts" target="_blank" style="text-decoration:none;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <a href="https://t.me/RaseenRacingbot" target="_blank" style="text-decoration:none;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
           <span style="font-size:20px">💸</span>
           <span style="font-size:10px;font-weight:800;color:#00D4FF;line-height:1.2" data-i18n="helpPayCh">Payouts<br>Channel</span>
         </a>
-        <a href="https://t.me/PandaMiningNews" target="_blank" style="text-decoration:none;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <a href="https://t.me/RaseenRacingbot" target="_blank" style="text-decoration:none;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
           <span style="font-size:20px">📢</span>
           <span style="font-size:10px;font-weight:800;color:var(--bamboo);line-height:1.2" data-i18n="helpNewsCh">Bot<br>News</span>
         </a>
@@ -4928,7 +4964,7 @@ function syncFinanceHeader(){
       <!-- Main idea -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--bamboo);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpIdeaTitle">💡 Main Concept</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🏁<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
       </div>
       <!-- Pages explanation -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
@@ -4989,7 +5025,7 @@ function syncFinanceHeader(){
       <!-- Withdrawal conditions -->
       <div style="background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,0,0,.4));border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWdTitle">📤 Withdrawal Conditions</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
       </div>
     </div>
     <div style="height:12px"></div>
@@ -5034,7 +5070,7 @@ function syncFinanceHeader(){
     <!-- Bot admin hint -->
     <div id="atBotHint" style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.22);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600">
       ⚠️ <span data-i18n="taskBotHint">Add our bot as admin in your channel first:</span><br>
-      <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px">@PandaBambooBot</span>
+      <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px">@RaseenRacingbot</span>
     </div>
     <!-- Link -->
     <label class="flabel" data-i18n="taskLinkLabel">Telegram Link</label>
@@ -5069,8 +5105,8 @@ const CFG = {
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
   MIN_WD_TON   : 0.1,
   REF_BONUS    : 20,
-  BOT_USERNAME : 'PandaBamboBot',
-  BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
+  BOT_USERNAME : 'RaseenBot',
+  BOT_APP_LINK : 'https://t.me/RaseenBot/app',
 };
 
 /* ════ MULTI-SERVER RACE SYSTEM ════════════════════════════════════
@@ -5200,10 +5236,10 @@ const BAM_URL='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f
 // Fix 4: rebalanced items — clear ROI progression, higher tier always better per coin
 const ITEMS = [
   {id:'bamboo_stick',   name:'Bamboo Stick',       icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a995343f-ab46-4c91-9cf2-1140c0bdd6f5.png',  price:7500,    power:50    },
-  {id:'panda_paw',      name:'Panda Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
+  {id:'panda_paw',      name:'Raseen Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
   {id:'leaf_fan',       name:'Leaf Fan Cooler',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1657ae3-3927-41e9-a32d-70ab89ddfe3b.png',  price:125000,  power:1200  },
   {id:'bamboo_energy',  name:'Bamboo Energy Pod',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/73a7e781-107c-4598-9c1a-e9db2c65dbf5.png',  price:625000,  power:7500  },
-  {id:'panda_den',      name:'Panda Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
+  {id:'panda_den',      name:'Raseen Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
   {id:'bamboo_forest',  name:'Bamboo Forest Rig',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/273f8ce0-bfa2-4618-895a-00481620d1d9.png',  price:6500000, power:110000},
 ];
 // 27 tank levels — capacity only, no speedBonus
@@ -5211,7 +5247,7 @@ const TANK_LVS = {
   1 :{cap:5000,      upgCost:1000,       label:'Starter Tank'},
   2 :{cap:10000,     upgCost:3000,       label:'Leaf Tank'},
   3 :{cap:20000,     upgCost:8000,       label:'Bamboo Tank'},
-  4 :{cap:40000,     upgCost:20000,      label:'Panda Tank'},
+  4 :{cap:40000,     upgCost:20000,      label:'Raseen Tank'},
   5 :{cap:80000,     upgCost:50000,      label:'Mega Tank'},
   6 :{cap:150000,    upgCost:120000,     label:'Empire Tank'},
   7 :{cap:250000,    upgCost:250000,     label:'Forest Tank'},
@@ -5261,8 +5297,8 @@ const REF_ACTIVE_TASKS=[
   {id:'ra500',n:500, bam:5000000, coins:20000},
 ];
 const SOC_TASKS=[
-  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/PandaBambooPayouts', bam:1000},
-  {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/PandaMiningNews', bam:500},
+  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacingbot', bam:1000},
+  {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/RaseenRacingbot', bam:500},
   {id:'tg_ch', name:'Join Telegram Channel', icon:'📢', link:'https://t.me/YOUR_CHANNEL', bam:1000},
   {id:'tg_grp',name:'Join Telegram Group',   icon:'👥', link:'https://t.me/YOUR_GROUP',   bam:500 },
   {id:'tg_bot',name:'Start our Bot',          icon:'🤖', link:`https://t.me/${CFG.BOT_USERNAME}`, bam:300},
@@ -5305,8 +5341,8 @@ async function getDeviceFingerprint(){
       ctx.textBaseline='top';
       ctx.font='14px Arial';
       ctx.fillStyle='#f60';ctx.fillRect(125,1,62,20);
-      ctx.fillStyle='#069';ctx.fillText('🐼PandaBamboo',2,15);
-      ctx.fillStyle='rgba(102,204,0,0.7)';ctx.fillText('🐼PandaBamboo',4,17);
+      ctx.fillStyle='#069';ctx.fillText('🏍️Raseen',2,15);
+      ctx.fillStyle='rgba(102,204,0,0.7)';ctx.fillText('🏍️Raseen',4,17);
       parts.push(c.toDataURL());
     }catch(_){}
     // 2. WebGL GPU fingerprint
@@ -5825,7 +5861,7 @@ function showAdminConfirmModal(link, target, cost){
       <div style="font-size:17px;font-weight:800;color:#ffa726;margin-bottom:10px">${T.taskConfirmTitle||'Important Confirmation'}</div>
       <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,165,0,.3),transparent);margin-bottom:14px"></div>
       <div style="background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.25);border-radius:14px;padding:14px;margin-bottom:14px;font-size:13px;font-weight:700;color:#ffcc80;line-height:1.7;text-align:${isRtl?'right':'left'}">
-        ${T.taskConfirmBody||'🤖 You must add <b style="color:#fff">@PandaBamboBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>'}
+        ${T.taskConfirmBody||'🤖 You must add <b style="color:#fff">@RaseenBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>'}
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:16px">${T.taskConfirmChannel||'Channel:'} <b style="color:var(--bamboo)">${esc(link)}</b><br>${T.taskConfirmCost||'Cost:'} <b style="color:var(--coin)">${fmt(cost)} Coins</b></div>
       <div style="display:flex;gap:10px">
@@ -6502,7 +6538,7 @@ async function init(){
 
   // Record start time — minimum 6 seconds total
   const startTime = Date.now();
-  const MIN_LOADING_MS = 3000;
+  const MIN_LOADING_MS = 800;
 
   // Step 1: Telegram setup
   ldProgress(0, lt('ldLoading'));
@@ -6530,7 +6566,7 @@ async function init(){
       // Legacy uavatar
       if(u.photo_url){
         const av=document.getElementById('uavatar');
-        if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🐼</div>'">`;
+        if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🏍️</div>'">`;
       }
     }
     S.startParam=(
@@ -6653,7 +6689,7 @@ const TRANSLATIONS = {
     partnershipTitle:'شراكة القناة',
     req1:'1,000+ مشترك حقيقي',
     req2:'مشتركون حقيقيون (ليسوا بوتات)',
-    req3:'منشور عن Bali Rally',
+    req3:'منشور عن Raseen',
     postLinkLabel:'رابط المنشور',
     submitPost:'📤 إرسال للمراجعة',
     postHistory:'سجل المنشورات',
@@ -6692,12 +6728,12 @@ const TRANSLATIONS = {
     swapFrom:'من',swapTo:'إلى',balance:'الرصيد:',maxBtn:'أقصى',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
     exchangeHist:'📋 سجل التحويل',noConversions:'لا تحويلات بعد',
-    helpTitle:'🐼 دليل Panda Bamboo',
+    helpTitle:'🏍️ دليل RASEEN',
     helpPayCh:'قناة\nالمدفوعات',helpNewsCh:'أخبار\nالبوت',helpSupport:'الدعم\nالفني',
     helpWelcomeTitle:'🎁 مكافأة الترحيب المجانية',
     helpWelcomeBody:'عند التسجيل لأول مرة تحصل تلقائياً على:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — عملة السحب الأساسية<br><span style="color:#fff;font-weight:800">• 100 Bamboo/يوم</span> — طاقة تعدين مجانية تبدأ فوراً',
     helpIdeaTitle:'💡 الفكرة الرئيسية',
-    helpIdeaBody:'البوت مصنع بامبو افتراضي 🎋<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
+    helpIdeaBody:'البوت مصنع بامبو افتراضي 🏁<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
     helpPagesTitle:'🗂 شرح الصفحات',
     helpPageHome:'🏠 الرئيسية',helpPageHomeDesc:'تشوف الباندا وتانك التجميع ومعدل التعدين اليومي. اضغط Claim Bamboo لجمع ما تراكم.',
     helpPageMarket:'🛒 السوق',helpPageMarketDesc:'اشتري آلات تعدين بـ Bamboo. كل آلة تزيد إنتاجك اليومي.',
@@ -6710,7 +6746,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'20% من مشتريات الصديق',
     helpAddTask:'➕ إضافة مهمة (100 عضو)',
     helpWdTitle:'📤 شروط السحب',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
     upgTitle:'⬆️ ترقية التانك',miningInfoTitle:'⚡ معلومات التعدين',
     addTaskTitle:'➕ إضافة مهمة مجتمعية',
     taskCostFormula:'التكلفة = <strong style="color:var(--coin)">عدد المستخدمين × 60 Coins</strong>',
@@ -6721,21 +6757,21 @@ const TRANSLATIONS = {
     taskTargetLabel:'عدد المستخدمين المستهدف (الحد الأدنى 100)',
     taskTotalCost:'التكلفة الإجمالية:',taskCreateBtn:'✅ إنشاء المهمة',
     wdMinHint:'⚠️ الحد الأدنى: 200 Coins',
-    multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🐼',
+    multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🏍️',
     depositRequired:'⛔ السحب متاح فقط للمودعين\n\n💎 قم بإيداع TON واحد على الأقل لتفعيل السحب\n\n🔄 جارٍ تحويلك لصفحة الإيداع...',
     depositRequiredBtn:'💎 إيداع الآن',
     ldLoading:'جارٍ التحميل...',
     ldConnecting:'الاتصال بتيليجرام...',
     ldAssets:'تحميل الملفات...',
     ldAssetsOk:'تم تحميل الملفات!',
-    ldFinding:'🏁 البحث عن أسرع سيرفر...',
-    ldRacing:'⚡ السباق بين السيرفرات...',
+    ldFinding:'🏎️ تجهيز الحلبة...',
+    ldRacing:'⚡ تشغيل المحرك...',
     ldRetrying:'إعادة المحاولة...',
     ldBusy:'⏳ السيرفرات مشغولة، إعادة المحاولة...',
     ldConnected:'✅ متصل',
     ldBuilding:'بناء الواجهة...',
     ldWallet:'إعداد المحفظة...',
-    ldReady:'جاهز! 🐼',
+    ldReady:'جاهز! 🏍️',
     ldErrorMsg:'⚠️ الخدمة مؤقتاً غير متاحة\nجميع السيرفرات مشغولة\nأعد تشغيل البوت بعد لحظات',
     ldRetryBtn:'🔄 إعادة المحاولة',
     tabRegularRef:'👥 إحالات',
@@ -6748,12 +6784,12 @@ const TRANSLATIONS = {
     friendsDeposited:'أصدقاء أجروا إيداع TON',
     claimBtn2:'استلام',
     taskConfirmTitle:'تأكيد مهم قبل الإنشاء',
-    taskConfirmBody:'🤖 يجب رفع البوت <b style="color:#fff">@PandaBamboBot</b> كمشرف في قناتك <b>قبل</b> إنشاء المهمة.<br><br>⛔ في حال عدم رفع البوت كمشرف، <b style="color:#ff8a80">سيتم حذف المهمة ولن يتم إرجاع الرصيد إليك.</b>',
+    taskConfirmBody:'🤖 يجب رفع البوت <b style="color:#fff">@RaseenBot</b> كمشرف في قناتك <b>قبل</b> إنشاء المهمة.<br><br>⛔ في حال عدم رفع البوت كمشرف، <b style="color:#ff8a80">سيتم حذف المهمة ولن يتم إرجاع الرصيد إليك.</b>',
     taskConfirmChannel:'القناة:',
     taskConfirmCost:'التكلفة:',
     taskConfirmBtn:'✅ فهمت، أنشئ المهمة',
     cancelBtn:'إلغاء',
-    multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🐼',
+    multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🏍️',
     compTabActive:'💎 الإحالات النشطة',
     compTabMining:'⚡ سرعة التعدين',
     compActiveDesc:'أفضل 20 مستخدم لديهم أكثر إحالات نشطة (أجروا إيداع)',
@@ -6782,11 +6818,11 @@ const TRANSLATIONS = {
     raceMissions:'Race Missions',
     mineMissions:'Mining Missions',
     partnershipTitle:'Channel Partnership',
-    partnershipInfo:'Promote our game to earn TON rewards! Post about Bali Rally on your Telegram channel and submit the link for review.',
+    partnershipInfo:'Promote our game to earn TON rewards! Post about Raseen on your Telegram channel and submit the link for review.',
     partnerRequirements:'Requirements:',
     req1:'Channel must have 1,000+ real subscribers',
     req2:'Subscribers must be genuine (not bots)',
-    req3:'Post must be about Bali Rally / our game',
+    req3:'Post must be about Raseen / our game',
     rewardRange:'Reward Range',
     basedOnQuality:'Based on post quality & reach',
     postLinkLabel:'Post Link',
@@ -6828,12 +6864,12 @@ const TRANSLATIONS = {
     swapFrom:'FROM',swapTo:'TO',balance:'Balance:',maxBtn:'MAX',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
     exchangeHist:'📋 Exchange History',noConversions:'No conversions yet',
-    helpTitle:'🐼 Panda Bamboo Guide',
+    helpTitle:'🏍️ Game Guide',
     helpPayCh:'Payouts<br>Channel',helpNewsCh:'Bot<br>News',helpSupport:'Technical<br>Support',
     helpWelcomeTitle:'🎁 Free Welcome Bonus',
     helpWelcomeBody:'When you register for the first time you automatically receive:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — main withdrawal currency<br><span style="color:#fff;font-weight:800">• 100 Bamboo/day</span> — free mining power starts immediately',
     helpIdeaTitle:'💡 Main Concept',
-    helpIdeaBody:'The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
+    helpIdeaBody:'The bot is a virtual Bamboo Factory 🏁<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
     helpPagesTitle:'🗂 Pages Guide',
     helpPageHome:'🏠 Home',helpPageHomeDesc:'View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.',
     helpPageMarket:'🛒 Market',helpPageMarketDesc:'Buy mining machines with Bamboo. Each machine increases your daily output.',
@@ -6846,7 +6882,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"20% of friend's purchases",
     helpAddTask:'➕ Add Task (100 members)',
     helpWdTitle:'📤 Withdrawal Conditions',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
     upgTitle:'⬆️ Upgrade Tank',miningInfoTitle:'⚡ Mining Info',
     addTaskTitle:'➕ Add Community Task',
     taskCostFormula:'Cost = <strong style="color:var(--coin)">Target Users × 60 Coins</strong>',
@@ -6857,7 +6893,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Target Users (min 100)',
     taskTotalCost:'Total Cost:',taskCreateBtn:'✅ Create Task',
     wdMinHint:'⚠️ Minimum: 200 Coins',
-    multiAccount:'⚠️ You are using multiple accounts — play fair 🐼',
+    multiAccount:'⚠️ You are using multiple accounts — play fair 🏍️',
     depositRequired:'⛔ Withdrawal is only available for depositors\n\n💎 Make at least one TON deposit to unlock withdrawals\n\n🔄 Redirecting you to the deposit page...',
     depositRequiredBtn:'💎 Deposit Now',
     ldLoading:'Loading...',
@@ -6871,7 +6907,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Connected',
     ldBuilding:'Building interface...',
     ldWallet:'Setting up wallet...',
-    ldReady:'Ready! 🐼',
+    ldReady:'Ready! 🏍️',
     ldErrorMsg:'⚠️ Service temporarily unavailable\nAll servers are busy\nPlease restart the app in a moment',
     ldRetryBtn:'🔄 Retry',
     tabRegularRef:'👥 Referrals',
@@ -6884,12 +6920,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Friends who deposited TON',
     claimBtn2:'Claim',
     taskConfirmTitle:'Important Confirmation',
-    taskConfirmBody:'🤖 You must add <b style="color:#fff">@PandaBamboBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>',
+    taskConfirmBody:'🤖 You must add <b style="color:#fff">@RaseenBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>',
     taskConfirmChannel:'Channel:',
     taskConfirmCost:'Cost:',
     taskConfirmBtn:'✅ Understood, Create Task',
     cancelBtn:'Cancel',
-    multiAccount:'⚠️ This device is linked to another account — one device per account 🐼',
+    multiAccount:'⚠️ This device is linked to another account — one device per account 🏍️',
     compTabActive:'💎 Active Refs',
     compTabMining:'⚡ Mining Speed',
     compActiveDesc:'Top 20 users with most active referrals (who deposited)',
@@ -6916,7 +6952,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Партнёрство',
     req1:'1000+ реальных подписчиков',
     req2:'Реальные подписчики (не боты)',
-    req3:'Пост о Bali Rally',
+    req3:'Пост о Raseen',
     postLinkLabel:'Ссылка на пост',
     submitPost:'📤 Отправить',
     postHistory:'История постов',
@@ -6955,12 +6991,12 @@ const TRANSLATIONS = {
     swapFrom:'ИЗ',swapTo:'В',balance:'Баланс:',maxBtn:'МАКС',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
     exchangeHist:'📋 История обменов',noConversions:'Обменов пока нет',
-    helpTitle:'🐼 Руководство Panda Bamboo',
+    helpTitle:'🏍️ Руководство RASEEN',
     helpPayCh:'Канал<br>выплат',helpNewsCh:'Новости<br>бота',helpSupport:'Тех.<br>поддержка',
     helpWelcomeTitle:'🎁 Бесплатный приветственный бонус',
     helpWelcomeBody:'При первой регистрации вы автоматически получаете:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — основная валюта вывода<br><span style="color:#fff;font-weight:800">• 100 Bamboo/день</span> — бесплатный майнинг сразу',
     helpIdeaTitle:'💡 Основная концепция',
-    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🎋<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
+    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🏁<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
     helpPagesTitle:'🗂 Руководство по страницам',
     helpPageHome:'🏠 Главная',helpPageHomeDesc:'Смотрите панду, резервуар и скорость майнинга. Нажмите Claim Bamboo для сбора.',
     helpPageMarket:'🛒 Рынок',helpPageMarketDesc:'Покупайте машины за Bamboo. Каждая машина увеличивает суточный доход.',
@@ -6973,7 +7009,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'20% с покупок друга',
     helpAddTask:'➕ Добавить задание (100 участников)',
     helpWdTitle:'📤 Условия вывода',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
     upgTitle:'⬆️ Улучшить танк',miningInfoTitle:'⚡ Инфо о майнинге',
     addTaskTitle:'➕ Добавить задание',
     taskCostFormula:'Стоимость = <strong style="color:var(--coin)">Кол-во участников × 60 Coins</strong>',
@@ -6984,7 +7020,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Целевых участников (мин. 100)',
     taskTotalCost:'Итого:',taskCreateBtn:'✅ Создать задание',
     wdMinHint:'⚠️ Минимум: 200 Coins',
-    multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🐼',
+    multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🏍️',
     depositRequired:'⛔ Вывод доступен только для пополнивших счёт\n\n💎 Пополните счёт хотя бы на 1 TON, чтобы разблокировать вывод\n\n🔄 Перенаправление на страницу пополнения...',
     depositRequiredBtn:'💎 Пополнить сейчас',
     ldLoading:'Загрузка...',
@@ -6998,7 +7034,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Подключено',
     ldBuilding:'Сборка интерфейса...',
     ldWallet:'Настройка кошелька...',
-    ldReady:'Готово! 🐼',
+    ldReady:'Готово! 🏍️',
     ldErrorMsg:'⚠️ Сервис временно недоступен\nВсе серверы заняты\nПожалуйста, перезапустите приложение',
     ldRetryBtn:'🔄 Повторить',
     tabRegularRef:'👥 Рефералы',
@@ -7011,12 +7047,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Друзья, пополнившие счёт TON',
     claimBtn2:'Получить',
     taskConfirmTitle:'Важное подтверждение',
-    taskConfirmBody:'🤖 Вы должны добавить <b style="color:#fff">@PandaBamboBot</b> как администратора в ваш канал <b>перед</b> созданием задания.<br><br>⛔ Если бот не является администратором, <b style="color:#ff8a80">задание будет удалено и баланс НЕ будет возвращён.</b>',
+    taskConfirmBody:'🤖 Вы должны добавить <b style="color:#fff">@RaseenBot</b> как администратора в ваш канал <b>перед</b> созданием задания.<br><br>⛔ Если бот не является администратором, <b style="color:#ff8a80">задание будет удалено и баланс НЕ будет возвращён.</b>',
     taskConfirmChannel:'Канал:',
     taskConfirmCost:'Стоимость:',
     taskConfirmBtn:'✅ Понял, создать задание',
     cancelBtn:'Отмена',
-    multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🐼',
+    multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🏍️',
     compTabActive:'💎 Активные рефералы',
     compTabMining:'⚡ Скорость майнинга',
     compActiveDesc:'Топ-20 пользователей с наибольшим числом активных рефералов',
@@ -7043,7 +7079,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Asociación',
     req1:'1,000+ suscriptores reales',
     req2:'Suscriptores reales (no bots)',
-    req3:'Post sobre Bali Rally',
+    req3:'Post sobre Raseen',
     postLinkLabel:'Enlace del post',
     submitPost:'📤 Enviar',
     postHistory:'Historial',
@@ -7082,12 +7118,12 @@ const TRANSLATIONS = {
     swapFrom:'DE',swapTo:'A',balance:'Saldo:',maxBtn:'MÁX',
     swapRate:'📊 300 Bamboo = 10 Monedas',exchangeNow:'⚡ Cambiar ahora',
     exchangeHist:'📋 Historial de cambios',noConversions:'Sin conversiones aún',
-    helpTitle:'🐼 Guía de Panda Bamboo',
+    helpTitle:'🏍️ Guía de RASEEN',
     helpPayCh:'Canal de<br>pagos',helpNewsCh:'Noticias<br>del bot',helpSupport:'Soporte<br>técnico',
     helpWelcomeTitle:'🎁 Bono de bienvenida gratis',
     helpWelcomeBody:'Al registrarte por primera vez recibes automáticamente:<br><span style="color:#fff;font-weight:800">• 200 Monedas</span> — moneda principal de retiro<br><span style="color:#fff;font-weight:800">• 100 Bamboo/día</span> — minería gratuita empieza de inmediato',
     helpIdeaTitle:'💡 Concepto principal',
-    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🎋<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
+    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🏁<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
     helpPagesTitle:'🗂 Guía de páginas',
     helpPageHome:'🏠 Inicio',helpPageHomeDesc:'Ve el panda, el tanque y la tasa de minería. Pulsa Claim Bamboo para recoger lo acumulado.',
     helpPageMarket:'🛒 Mercado',helpPageMarketDesc:'Compra máquinas de minería con Bamboo. Cada máquina aumenta tu producción diaria.',
@@ -7100,7 +7136,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Comisión de referido',helpRefCommissionVal:'20% de las compras del amigo',
     helpAddTask:'➕ Añadir tarea (100 miembros)',
     helpWdTitle:'📤 Condiciones de retiro',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
     upgTitle:'⬆️ Mejorar tanque',miningInfoTitle:'⚡ Info de minería',
     addTaskTitle:'➕ Añadir tarea comunitaria',
     taskCostFormula:'Costo = <strong style="color:var(--coin)">Usuarios objetivo × 60 Monedas</strong>',
@@ -7111,7 +7147,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Usuarios objetivo (mín. 100)',
     taskTotalCost:'Costo total:',taskCreateBtn:'✅ Crear tarea',
     wdMinHint:'⚠️ Mínimo: 200 Monedas',
-    multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🐼',
+    multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🏍️',
     depositRequired:'⛔ El retiro solo está disponible para quienes han depositado\n\n💎 Realiza al menos un depósito de TON para desbloquear los retiros\n\n🔄 Redirigiendo a la página de depósito...',
     depositRequiredBtn:'💎 Depositar ahora',
     ldLoading:'Cargando...',
@@ -7125,7 +7161,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Conectado',
     ldBuilding:'Construyendo interfaz...',
     ldWallet:'Configurando billetera...',
-    ldReady:'¡Listo! 🐼',
+    ldReady:'¡Listo! 🏍️',
     ldErrorMsg:'⚠️ Servicio temporalmente no disponible\nTodos los servidores están ocupados\nPor favor reinicia la app en un momento',
     ldRetryBtn:'🔄 Reintentar',
     tabRegularRef:'👥 Referidos',
@@ -7138,12 +7174,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Amigos que depositaron TON',
     claimBtn2:'Reclamar',
     taskConfirmTitle:'Confirmación importante',
-    taskConfirmBody:'🤖 Debes agregar <b style="color:#fff">@PandaBamboBot</b> como administrador en tu canal <b>antes</b> de crear la tarea.<br><br>⛔ Si el bot no es administrador, <b style="color:#ff8a80">la tarea será eliminada y tu saldo NO será reembolsado.</b>',
+    taskConfirmBody:'🤖 Debes agregar <b style="color:#fff">@RaseenBot</b> como administrador en tu canal <b>antes</b> de crear la tarea.<br><br>⛔ Si el bot no es administrador, <b style="color:#ff8a80">la tarea será eliminada y tu saldo NO será reembolsado.</b>',
     taskConfirmChannel:'Canal:',
     taskConfirmCost:'Costo:',
     taskConfirmBtn:'✅ Entendido, crear tarea',
     cancelBtn:'Cancelar',
-    multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🐼',
+    multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🏍️',
     compTabActive:'💎 Referidos activos',
     compTabMining:'⚡ Velocidad de minería',
     compActiveDesc:'Top 20 usuarios con más referidos activos (que depositaron)',
@@ -7170,7 +7206,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Partenariat',
     req1:'1 000+ vrais abonnés',
     req2:'Abonnés réels (pas de bots)',
-    req3:'Post sur Bali Rally',
+    req3:'Post sur Raseen',
     postLinkLabel:'Lien du post',
     submitPost:'📤 Soumettre',
     postHistory:'Historique posts',
@@ -7209,12 +7245,12 @@ const TRANSLATIONS = {
     swapFrom:'DE',swapTo:'VERS',balance:'Solde:',maxBtn:'MAX',
     swapRate:'📊 300 Bamboo = 10 Pièces',exchangeNow:'⚡ Échanger maintenant',
     exchangeHist:'📋 Historique des échanges',noConversions:'Aucune conversion encore',
-    helpTitle:'🐼 Guide Panda Bamboo',
+    helpTitle:'🏍️ Guide RASEEN',
     helpPayCh:'Canal de<br>paiements',helpNewsCh:'Actualités<br>du bot',helpSupport:'Support<br>technique',
     helpWelcomeTitle:'🎁 Bonus de bienvenue gratuit',
     helpWelcomeBody:'À votre première inscription vous recevez automatiquement:<br><span style="color:#fff;font-weight:800">• 200 Pièces</span> — monnaie de retrait principale<br><span style="color:#fff;font-weight:800">• 100 Bamboo/jour</span> — minage gratuit démarre immédiatement',
     helpIdeaTitle:'💡 Concept principal',
-    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🎋<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
+    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🏁<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
     helpPagesTitle:'🗂 Guide des pages',
     helpPageHome:'🏠 Accueil',helpPageHomeDesc:'Voyez le panda, le réservoir et le taux de minage. Appuyez sur Claim Bamboo pour collecter.',
     helpPageMarket:'🛒 Marché',helpPageMarketDesc:'Achetez des machines de minage avec du Bamboo. Chaque machine augmente votre production quotidienne.',
@@ -7227,7 +7263,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"20% des achats de l'ami",
     helpAddTask:'➕ Ajouter tâche (100 membres)',
     helpWdTitle:'📤 Conditions de retrait',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
     upgTitle:'⬆️ Améliorer le réservoir',miningInfoTitle:'⚡ Info de minage',
     addTaskTitle:'➕ Ajouter une tâche communautaire',
     taskCostFormula:'Coût = <strong style="color:var(--coin)">Utilisateurs cibles × 60 Pièces</strong>',
@@ -7238,7 +7274,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Utilisateurs cibles (min. 100)',
     taskTotalCost:'Coût total:',taskCreateBtn:'✅ Créer la tâche',
     wdMinHint:'⚠️ Minimum: 200 Pièces',
-    multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🐼',
+    multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🏍️',
     depositRequired:'⛔ Le retrait est réservé aux utilisateurs ayant effectué un dépôt\n\n💎 Effectuez au moins un dépôt TON pour débloquer les retraits\n\n🔄 Redirection vers la page de dépôt...',
     depositRequiredBtn:'💎 Déposer maintenant',
     ldLoading:'Chargement...',
@@ -7252,7 +7288,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Connecté',
     ldBuilding:"Construction de l'interface...",
     ldWallet:'Configuration du portefeuille...',
-    ldReady:'Prêt! 🐼',
+    ldReady:'Prêt! 🏍️',
     ldErrorMsg:'⚠️ Service temporairement indisponible\nTous les serveurs sont occupés\nVeuillez redémarrer l\'application',
     ldRetryBtn:'🔄 Réessayer',
     tabRegularRef:'👥 Parrainages',
@@ -7265,12 +7301,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Amis ayant déposé du TON',
     claimBtn2:'Réclamer',
     taskConfirmTitle:'Confirmation importante',
-    taskConfirmBody:'🤖 Vous devez ajouter <b style="color:#fff">@PandaBamboBot</b> comme administrateur dans votre chaîne <b>avant</b> de créer la tâche.<br><br>⛔ Si le bot n\'est pas administrateur, <b style="color:#ff8a80">la tâche sera supprimée et votre solde NE sera PAS remboursé.</b>',
+    taskConfirmBody:'🤖 Vous devez ajouter <b style="color:#fff">@RaseenBot</b> comme administrateur dans votre chaîne <b>avant</b> de créer la tâche.<br><br>⛔ Si le bot n\'est pas administrateur, <b style="color:#ff8a80">la tâche sera supprimée et votre solde NE sera PAS remboursé.</b>',
     taskConfirmChannel:'Chaîne:',
     taskConfirmCost:'Coût:',
     taskConfirmBtn:'✅ Compris, créer la tâche',
     cancelBtn:'Annuler',
-    multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🐼',
+    multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🏍️',
     compTabActive:'💎 Réf. actifs',
     compTabMining:'⚡ Vitesse de minage',
     compActiveDesc:'Top 20 utilisateurs avec le plus de parrainages actifs (ayant déposé)',
@@ -7344,6 +7380,8 @@ function closeLangMenuOutside(e){
 function setLang(lang,flag,code){
   try{
     localStorage.setItem('pandaLang',lang);
+    localStorage.setItem('pandaLangFlag',flag);
+    localStorage.setItem('pandaLangCode',code);
     applyLang(lang,flag,code);
   }catch(err){ console.error('setLang error',err); }
   const m=document.getElementById('langMenu'); if(m) m.style.display='none';
@@ -7361,6 +7399,9 @@ function applyLang(lang,flag,code){
   document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang));
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
   document.documentElement.lang=lang;
+  // Sync ALL lang indicators (covers profile, header, mining, garage)
+  document.querySelectorAll('[data-lang-flag]').forEach(el=>{el.textContent=flag;});
+  document.querySelectorAll('[data-lang-code]').forEach(el=>{el.textContent=code;});
 
   // ── Loading screen text (if still visible) ──
   const ldStat=document.getElementById('ldStatus');

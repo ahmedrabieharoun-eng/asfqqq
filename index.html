@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,69 +8,27 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-/* Register asset cache service worker — downloads images/models once,
-   then serves them from device storage on every later visit. */
+/* Register service worker — caches 3D bike models only on device.
+   Images, audio, and fonts are always fetched fresh from the network. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
       .then(() => {
-        // Background preload of bike GLB models so they're ready before any race.
-        // Uses requestIdleCallback to avoid blocking the UI; SW caches each one
-        // on first fetch, so future requests are instant + offline-friendly.
-        const schedule = (cb) => setTimeout(cb, 8000);
-        schedule(async () => {
+        // Background preload of bike GLB models so they're cached on device
+        // before the user enters a race. Runs after 8s to avoid blocking UI.
+        setTimeout(async () => {
           const cache = await caches.open('race-assets-v2');
-          const queue = async (url) => {
+          for (let lv = 1; lv <= 7; lv++) {
+            const url = 'Bike Level ' + lv + '.glb';
             try {
               const hit = await cache.match(url, { ignoreVary: true });
-              if (hit) return;
+              if (hit) continue;
               await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
                 .catch(() => fetch(url, { cache: 'reload' }));
             } catch (e) { /* ignore */ }
-          };
-          // 1) Bike GLB models
-          for (let lv = 1; lv <= 7; lv++) {
-            await queue('Bike Level ' + lv + '.glb');
           }
-          // 2) All website images — scan DOM + CSS for image URLs and preload them
-          const collectImageUrls = () => {
-            const urls = new Set();
-            // <img src>
-            document.querySelectorAll('img[src]').forEach(el => {
-              const s = el.getAttribute('src'); if (s) urls.add(s);
-            });
-            // CSS rules: background-image url(...)
-            const urlRe = /url\(\s*['"]?([^'")]+\.(?:png|jpe?g|webp|gif|svg|avif))(?:\?[^'")]*)?['"]?\s*\)/gi;
-            // Inline HTML scan (covers JS string literals + style attrs)
-            try {
-              const html = document.documentElement.outerHTML;
-              let m; while ((m = urlRe.exec(html))) urls.add(m[1]);
-            } catch (e) {}
-            // Stylesheet rules
-            for (const sheet of Array.from(document.styleSheets)) {
-              let rules; try { rules = sheet.cssRules; } catch (e) { continue; }
-              if (!rules) continue;
-              for (const rule of Array.from(rules)) {
-                const t = rule.cssText || '';
-                let m; urlRe.lastIndex = 0;
-                while ((m = urlRe.exec(t))) urls.add(m[1]);
-              }
-            }
-            return Array.from(urls).filter(u => /^https?:\/\//i.test(u));
-          };
-          const imgs = collectImageUrls();
-          console.log('[preload] images found:', imgs.length);
-          // Throttle: 4 in parallel
-          let i = 0;
-          const workers = Array.from({ length: 4 }, async () => {
-            while (i < imgs.length) {
-              const u = imgs[i++];
-              await queue(u);
-            }
-          });
-          await Promise.all(workers);
-          console.log('[preload] all images cached');
-        });
+          console.log('[preload] bike models cached');
+        }, 8000);
       })
       .catch(err => console.warn('SW register failed', err));
   });

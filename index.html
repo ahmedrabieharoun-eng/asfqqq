@@ -1048,15 +1048,7 @@ const BIKES = [
 const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
 
 // Colored card backgrounds for each bike level
-const BIKE_CARD_IMGS = [
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png', // green
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b46cbb24-5c10-4d60-965b-5425d14d8057.png', // pink/magenta
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0475e654-4c10-420b-981a-8fa44f48dcd6.png', // purple
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ecfd607-921f-49d7-bb9e-73e8072dc4a7.png', // red
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/79068472-1e06-49cf-a4e0-1b9ddb37825c.png', // orange
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6246f464-1218-4a3d-a10c-356bdd33c3fe.png', // dark blue
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0a0c0b62-9eb8-421e-b501-17246678f1df.png', // sky blue
-];
+const BIKE_CARD_IMGS = []; // backgrounds removed — solid black used instead
 const BIKE_NAME_COLORS = [
   '#39FF14','#FF007A','#8A2BE2','#FF1A1A','#FF7A00',
   '#0066FF','#00E5FF'
@@ -1082,11 +1074,11 @@ function renderBikes(){
         <div class="bk-card-imgbox">
           <img src="${b.img}" onerror="this.style.opacity='.2'">
         </div>
-        <div class="bk-card-info" style="background-image:url('${cardImg}');background-size:cover;background-position:center;background-repeat:no-repeat;">
+        <div class="bk-card-info" style="background:#000;">
           <div class="bk-card-info-content">
             <div class="bk-card-nameline">
-              <div class="bk-card-name" style="color:${nameColor};text-shadow:0 0 12px ${nameColor}88;">${b.name}</div>
-              <div class="bk-card-arrow" style="color:${nameColor};border-color:${nameColor};" onclick="openBikeDetail(${b.lv})">›</div>
+              <div class="bk-card-name" style="color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.8);">${b.name}</div>
+              <div class="bk-card-arrow" style="color:#fff;border-color:rgba(255,255,255,.5);" onclick="openBikeDetail(${b.lv})">›</div>
             </div>
             <div class="bk-stats-grid">
               <div class="bk-stat-cell">
@@ -1141,29 +1133,29 @@ function openBikeDetail(lv){
 
   document.getElementById('bikeDetailSheet').innerHTML = `
     <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
-    <div class="bk-detail-body" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
+    <div class="bk-detail-body" style="background:#000;">
       <div class="bk-detail-class">Класс: Уровень ${b.lv}</div>
 
-      <div class="bk-detail-section-title" style="color:${nameColor};">Характеристики:</div>
+      <div class="bk-detail-section-title" style="color:#fff;">Характеристики:</div>
 
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Скорость</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.speed}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Разгон</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.accel}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Маневры</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.maneuver}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Нитро</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.nitro}</div>
       </div>
 
@@ -1380,9 +1372,9 @@ function renderGarage(){
     detailEl.innerHTML = `
       <div class="gr-sel-wrap">
         <div class="gr-sel-img-side">
-          <div class="gr-sel-bg" style="background-image:url('${bCardBg}')"></div>
+          <div class="gr-sel-bg"></div>
           <img class="gr-sel-bike-img" src="${b.img}" onerror="this.style.opacity='.3'">
-          <div class="gr-sel-bike-name" style="color:${bColor}">${b.name}</div>
+          <div class="gr-sel-bike-name" style="color:#fff">${b.name}</div>
         </div>
         <button class="gr-sel-upgrade-btn" onclick="openUpgModal(${b.lv})">
           Upgrade Your Bike
@@ -1412,7 +1404,7 @@ function renderGarage(){
         btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>Upgrade</button>`;
       }
       return `
-        <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
+        <div class="gr-upg-item-new">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
@@ -1472,7 +1464,7 @@ function openUpgModal(lv){
         btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}');setTimeout(()=>openUpgModal(${b.lv}),700)" ${canAfford?'':'disabled'}>Upgrade</button>`;
       }
       return `
-        <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
+        <div class="gr-upg-item-new">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
@@ -1982,9 +1974,9 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .gr-hero{
   position:relative;width:100%;height:160px;overflow:hidden;
-  flex-shrink:0;
+  flex-shrink:0;background:transparent;
 }
-.gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.gr-hero-img{display:none;}
 .gr-hero-overlay{
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
@@ -2183,7 +2175,7 @@ async function doUpgradeStat(bikeLevel, stat){
   text-shadow:0 2px 12px rgba(0,0,0,.95);
 }
 .gr-upg-modal-body{
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png') center/cover no-repeat;
+  background:#050d05;
   padding:18px 16px 110px;
   overflow-y:auto;
   flex:1;
@@ -2250,7 +2242,7 @@ async function doUpgradeStat(bikeLevel, stat){
 <div class="sec" id="sectionMarket">
   <!-- HERO (same pattern as home) -->
   <div class="gr-hero">
-    <img class="gr-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png" alt="garage">
+
     <div class="gr-hero-overlay"></div>
     <!-- topbar -->
     <div class="gr-hero-topbar">
@@ -2550,9 +2542,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* ── Stats card (under thumbnails) ── */
 .race-stats-card{
   margin:14px 12px 0;
-  background:
-    linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.62)),
-    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png') center/cover no-repeat;
+  background:rgba(6,20,6,.82);
   border:1px solid rgba(124,179,66,.25);
   border-radius:18px;
   padding:14px 14px;
@@ -6529,31 +6519,27 @@ async function init(){
       ''
     ).toString().replace(/\D/g,'');
   }
-  await ldAnimateTo(10, lt('ldConnecting'), 700);
-  await new Promise(r=>setTimeout(r,400));
+  await ldAnimateTo(10, lt('ldConnecting'), 300);
 
-  // Step 1.5: Race servers — find fastest live server
-  await ldAnimateTo(18, '🏎️ Finding fastest server...', 500);
+  // Step 1.5: Race servers — find fastest live server (max 1.5s wait)
+  ldProgress(18, '🏎️ Finding fastest server...');
   try{
     const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
-    await window._raceServersNow(authHdr);
+    await Promise.race([
+      window._raceServersNow(authHdr),
+      new Promise(r=>setTimeout(r,1500)),
+    ]);
     ldProgress(22, '✅ Server connected!');
   }catch(e){
     ldProgress(22, '⚠️ Using fallback server...');
   }
-  await new Promise(r=>setTimeout(r,300));
 
-  // Step 2: Preload images
-  await ldAnimateTo(20, lt('ldAssets'), 600);
-  await Promise.all([
-    preloadImages().catch(()=>{}),
-    new Promise(r=>setTimeout(r,800)), // min 0.8s on this step
-  ]);
-  await ldAnimateTo(40, lt('ldAssetsOk'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  // Step 2: Kick off image preload in background — don't block loading
+  preloadImages().catch(()=>{});
+  await ldAnimateTo(35, lt('ldAssets'), 250);
 
   // Step 3: Load user data
-  await ldAnimateTo(50, lt('ldConnecting'), 600);
+  await ldAnimateTo(45, lt('ldConnecting'), 250);
   let loaded = false;
   let attempts = 0;
   const MAX_ATTEMPTS = 3;
@@ -6568,7 +6554,7 @@ async function init(){
       console.warn(`Attempt ${attempts} failed:`,e.message);
       if(attempts < MAX_ATTEMPTS){
         ldProgress(50 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
-        await new Promise(r=>setTimeout(r,2000*attempts));
+        await new Promise(r=>setTimeout(r,800*attempts));
       }
     }
   }
@@ -6576,51 +6562,41 @@ async function init(){
     ldError(lt('ldErrorMsg'), lt('ldRetryBtn'));
     return;
   }
-  await ldAnimateTo(70, lt('ldConnected'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  await ldAnimateTo(70, lt('ldConnected'), 250);
 
-  // Step 3.5: Preload owned bike images with priority
-  await ldAnimateTo(72, '🏍️ Loading your bikes...', 400);
+  // Step 3.5: Kick off bike image preload in background (non-blocking)
   try{
     const ownedLvs = S.user?.ownedBikes || [];
     if(ownedLvs.length > 0){
       const bikeImgs = ownedLvs.map(lv=>{ const b=BIKES.find(x=>x.lv===lv); return b?b.img:null; }).filter(Boolean);
-      await Promise.all(bikeImgs.map(u=>new Promise(res=>{
-        const img=new Image(); img.onload=img.onerror=res; img.src=u;
-      })));
+      bikeImgs.forEach(u=>{ const img=new Image(); img.src=u; });
     }
   }catch(e){ console.warn('bike preload:',e.message); }
 
   // Step 4: Render UI
-  await ldAnimateTo(80, lt('ldBuilding'), 400);
+  await ldAnimateTo(82, lt('ldBuilding'), 200);
   try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
-  // Pre-build race carousel so bikes appear instantly when user opens race section
   try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
-  // Also sync Farm page topbar so user data appears immediately on first open
   try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
-  await new Promise(r=>setTimeout(r,300));
 
-  // Step 5: Init TON + timers
-  await ldAnimateTo(90, lt('ldWallet'), 400);
-  setTimeout(()=>initTON(), 600);
-  // Pre-compute device fingerprint in background
+  // Step 5: Init TON + timers (non-blocking)
+  setTimeout(()=>initTON(), 0);
   getOrComputeFp().catch(()=>{});
   setInterval(()=>{ loadState(); }, 30000);
-  await new Promise(r=>setTimeout(r,400));
 
-  await ldAnimateTo(100, lt('ldReady'), 500);
+  await ldAnimateTo(100, lt('ldReady'), 250);
 
-  // Ensure minimum loading time (5-10s feel)
+  // Ensure minimum loading time
   const elapsed = Date.now() - startTime;
   if(elapsed < MIN_LOADING_MS){
     await new Promise(r=>setTimeout(r, MIN_LOADING_MS - elapsed));
   }
 
-  setTimeout(()=>ldHide(), 700);
+  setTimeout(()=>ldHide(), 350);
   // Apply saved language after UI ready
   const savedLang = localStorage.getItem('pandaLang');
   if(savedLang){

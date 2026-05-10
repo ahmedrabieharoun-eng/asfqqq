@@ -1,31 +1,14 @@
 /* Asset cache service worker
- * Caches images, audio, 3D models (.glb/.gltf), fonts, etc.
- * Strategy: cache-first, with background revalidation for HTML/JS.
- * The first time the user opens the game, assets download from the network
- * and are stored in CacheStorage (persistent on device). Every subsequent
- * load (even offline) is served from cache, so nothing re-downloads.
+ * Strategy: cache-first for 3D bike models only (.glb/.gltf/.bin).
+ * All other assets (images, audio, fonts) are always fetched from the network.
  */
-const CACHE_NAME = 'race-assets-v1';
+const CACHE_NAME = 'race-assets-v2';
 
-const ASSET_HOSTS = [
-  'i.supaimg.com',
-  'files.catbox.moe',
-  'cdn.pixabay.com',
-  'cdn.jsdelivr.net',
-  'unpkg.com',
-  'cdnjs.cloudflare.com',
-  'fonts.googleapis.com',
-  'fonts.gstatic.com',
-  'raw.githubusercontent.com',
-];
+const MODEL_EXT = /\.(glb|gltf|bin)(\?|$)/i;
 
-const ASSET_EXT = /\.(glb|gltf|bin|png|jpe?g|webp|gif|svg|mp3|wav|ogg|m4a|woff2?|ttf|otf)(\?|$)/i;
-
-function isAsset(url) {
+function is3DModel(url) {
   try {
-    const u = new URL(url);
-    if (ASSET_HOSTS.includes(u.hostname)) return true;
-    if (ASSET_EXT.test(u.pathname)) return true;
+    return MODEL_EXT.test(new URL(url).pathname);
   } catch (_) {}
   return false;
 }
@@ -42,14 +25,13 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
-  if (!isAsset(req.url)) return;
+  if (!is3DModel(req.url)) return;   // ← only intercept 3D models
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(req, { ignoreVary: true });
     if (cached) return cached;
     try {
-      // Use no-cors for cross-origin so opaque responses still cache.
       const fetchReq = new Request(req.url, {
         mode: req.mode === 'navigate' ? 'cors' : 'no-cors',
         credentials: 'omit',

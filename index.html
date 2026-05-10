@@ -1,14 +1,13 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Panda Bamboo Factory 🎋</title>
+<title>RASEEN</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
@@ -338,7 +337,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   top:0;left:0;
   width:100vw;height:100vh;
   z-index:9999;
-  background-image:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a61169bb-aaa0-4ad9-be8c-9a403326d384.png');
+  background-image:url('loading page.png');
   background-size:100% 100%;
   background-position:center center;
   background-repeat:no-repeat;
@@ -360,26 +359,51 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ld-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;text-shadow:0 1px 6px rgba(0,0,0,.9);}
 
 /* Gold progress bar */
-.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:80%;max-width:320px;}
+.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:84%;max-width:340px;}
 .ld-bar-track{
-  width:100%;height:5px;border-radius:3px;
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(200,160,40,.2);
+  position:relative;width:100%;height:14px;border-radius:10px;
+  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(20,20,20,.35));
+  border:1px solid rgba(255,80,0,.45);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.7),0 0 14px rgba(255,90,0,.18);
   overflow:hidden;
 }
+.ld-bar-track::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.06) 6px 8px);
+}
 .ld-bar-fill{
-  height:100%;width:0%;border-radius:3px;
-  background:linear-gradient(90deg,#7a5c00,#d4a800,#f5d060,#d4a800,#7a5c00);
-  background-size:300% 100%;
-  animation:ld-bar-shine 1.6s linear infinite;
-  transition:width .4s ease;
-  box-shadow:0 0 8px rgba(210,160,20,.7);
+  position:relative;height:100%;width:0%;border-radius:9px;
+  background:linear-gradient(90deg,#ff3d00 0%,#ff7a00 35%,#ffc400 65%,#ffec3d 100%);
+  background-size:200% 100%;
+  animation:ld-bar-shine 1.4s linear infinite;
+  transition:width .35s cubic-bezier(.4,.8,.3,1);
+  box-shadow:0 0 14px rgba(255,140,0,.85),0 0 28px rgba(255,90,0,.4);
+}
+.ld-bar-fill::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);
+  border-radius:9px 9px 0 0;
+}
+.ld-bar-fill::after{
+  content:'';position:absolute;top:0;right:-2px;bottom:0;width:14px;
+  background:radial-gradient(ellipse at center,rgba(255,240,150,.95),transparent 70%);
+  filter:blur(2px);
 }
 @keyframes ld-bar-shine{
   0%{background-position:200% 0}
   100%{background-position:-200% 0}
 }
-.ld-pct{font-size:11px;font-weight:800;color:rgba(220,180,50,1);letter-spacing:1.5px;text-shadow:0 1px 6px rgba(0,0,0,.9);}
+.ld-pct{
+  font-size:14px;font-weight:900;color:#ffd84d;
+  letter-spacing:2px;font-family:'Fredoka',sans-serif;
+  text-shadow:0 0 12px rgba(255,140,0,.85),0 1px 6px rgba(0,0,0,.95);
+}
+.ld-sub{
+  font-size:12px!important;color:#ffe9b8!important;
+  font-weight:700!important;letter-spacing:1.5px!important;
+  text-transform:uppercase;font-family:'Fredoka',sans-serif!important;
+  text-shadow:0 0 10px rgba(255,140,0,.5),0 1px 6px rgba(0,0,0,.95)!important;
+}
 
 /* hide old segments */
 .ld-segments{display:none!important;}
@@ -585,6 +609,17 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes comp-btn-spin{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.06) rotate(4deg)}}
 #compBanner{display:none!important}
 #compBanner.ended{display:none!important}
+</style>
+
+<style id="raseenGlobalFont">
+/* Unified font across all devices — Fredoka bold */
+html, body, button, input, textarea, select, option {
+  font-family: 'Fredoka', 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 700 !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 </style>
 </head>
 <body>
@@ -987,15 +1022,7 @@ const BIKES = [
 const TON_IMG = 'https://cryptologos.cc/logos/toncoin-ton-logo.png';
 
 // Colored card backgrounds for each bike level
-const BIKE_CARD_IMGS = [
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png', // green
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b46cbb24-5c10-4d60-965b-5425d14d8057.png', // pink/magenta
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0475e654-4c10-420b-981a-8fa44f48dcd6.png', // purple
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9ecfd607-921f-49d7-bb9e-73e8072dc4a7.png', // red
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/79068472-1e06-49cf-a4e0-1b9ddb37825c.png', // orange
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/6246f464-1218-4a3d-a10c-356bdd33c3fe.png', // dark blue
-  'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0a0c0b62-9eb8-421e-b501-17246678f1df.png', // sky blue
-];
+const BIKE_CARD_IMGS = []; // backgrounds removed — solid black used instead
 const BIKE_NAME_COLORS = [
   '#39FF14','#FF007A','#8A2BE2','#FF1A1A','#FF7A00',
   '#0066FF','#00E5FF'
@@ -1021,11 +1048,11 @@ function renderBikes(){
         <div class="bk-card-imgbox">
           <img src="${b.img}" onerror="this.style.opacity='.2'">
         </div>
-        <div class="bk-card-info" style="background-image:url('${cardImg}');background-size:cover;background-position:center;background-repeat:no-repeat;">
+        <div class="bk-card-info" style="background:#000;">
           <div class="bk-card-info-content">
             <div class="bk-card-nameline">
-              <div class="bk-card-name" style="color:${nameColor};text-shadow:0 0 12px ${nameColor}88;">${b.name}</div>
-              <div class="bk-card-arrow" style="color:${nameColor};border-color:${nameColor};" onclick="openBikeDetail(${b.lv})">›</div>
+              <div class="bk-card-name" style="color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.8);">${b.name}</div>
+              <div class="bk-card-arrow" style="color:#fff;border-color:rgba(255,255,255,.5);" onclick="openBikeDetail(${b.lv})">›</div>
             </div>
             <div class="bk-stats-grid">
               <div class="bk-stat-cell">
@@ -1080,29 +1107,29 @@ function openBikeDetail(lv){
 
   document.getElementById('bikeDetailSheet').innerHTML = `
     <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
-    <div class="bk-detail-body" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
+    <div class="bk-detail-body" style="background:#000;">
       <div class="bk-detail-class">Класс: Уровень ${b.lv}</div>
 
-      <div class="bk-detail-section-title" style="color:${nameColor};">Характеристики:</div>
+      <div class="bk-detail-section-title" style="color:#fff;">Характеристики:</div>
 
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Скорость</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.speed}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Разгон</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.accel}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Маневры</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.maneuver}</div>
       </div>
       <div class="bk-detail-stat">
         <div class="bk-detail-stat-name">Нитро</div>
-        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
+        <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));"></div></div>
         <div class="bk-detail-stat-val">${b.nitro}</div>
       </div>
 
@@ -1319,9 +1346,9 @@ function renderGarage(){
     detailEl.innerHTML = `
       <div class="gr-sel-wrap">
         <div class="gr-sel-img-side">
-          <div class="gr-sel-bg" style="background-image:url('${bCardBg}')"></div>
+          <div class="gr-sel-bg"></div>
           <img class="gr-sel-bike-img" src="${b.img}" onerror="this.style.opacity='.3'">
-          <div class="gr-sel-bike-name" style="color:${bColor}">${b.name}</div>
+          <div class="gr-sel-bike-name" style="color:#fff">${b.name}</div>
         </div>
         <button class="gr-sel-upgrade-btn" onclick="openUpgModal(${b.lv})">
           Upgrade Your Bike
@@ -1351,7 +1378,7 @@ function renderGarage(){
         btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>Upgrade</button>`;
       }
       return `
-        <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
+        <div class="gr-upg-item-new">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
@@ -1411,7 +1438,7 @@ function openUpgModal(lv){
         btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}');setTimeout(()=>openUpgModal(${b.lv}),700)" ${canAfford?'':'disabled'}>Upgrade</button>`;
       }
       return `
-        <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
+        <div class="gr-upg-item-new">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
@@ -1920,10 +1947,10 @@ async function doUpgradeStat(bikeLevel, stat){
     url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f7668d99-3cde-40f6-b96d-65482b121020.png') center/cover no-repeat;
 }
 .gr-hero{
-  position:relative;width:100%;height:240px;overflow:hidden;
-  flex-shrink:0;
+  position:relative;width:100%;height:160px;overflow:hidden;
+  flex-shrink:0;background:transparent;
 }
-.gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.gr-hero-img{display:none;}
 .gr-hero-overlay{
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
@@ -1962,9 +1989,9 @@ async function doUpgradeStat(bikeLevel, stat){
   pointer-events:none;
 }
 .gr-hero-title-row{display:flex;align-items:center;gap:10px;}
-.gr-hero-wrench{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(124,179,66,.8));}
-.gr-hero-title{font-size:36px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
-.gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:4px;text-align:center;}
+.gr-hero-wrench{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(124,179,66,.8));}
+.gr-hero-title{font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
+.gr-hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:3px;text-align:center;}
 
 /* ══ GARAGE BODY ══ */
 .gr-body{padding:0 12px 32px;background:transparent;}
@@ -2122,7 +2149,7 @@ async function doUpgradeStat(bikeLevel, stat){
   text-shadow:0 2px 12px rgba(0,0,0,.95);
 }
 .gr-upg-modal-body{
-  background:url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png') center/cover no-repeat;
+  background:#050d05;
   padding:18px 16px 110px;
   overflow-y:auto;
   flex:1;
@@ -2189,7 +2216,7 @@ async function doUpgradeStat(bikeLevel, stat){
 <div class="sec" id="sectionMarket">
   <!-- HERO (same pattern as home) -->
   <div class="gr-hero">
-    <img class="gr-hero-img" src="https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/337dc33d-f6d1-4812-b5c0-2b4473267469.png" alt="garage">
+
     <div class="gr-hero-overlay"></div>
     <!-- topbar -->
     <div class="gr-hero-topbar">
@@ -2489,9 +2516,7 @@ async function doUpgradeStat(bikeLevel, stat){
 /* ── Stats card (under thumbnails) ── */
 .race-stats-card{
   margin:14px 12px 0;
-  background:
-    linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.62)),
-    url('https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5716da26-83d2-4109-838f-5e5869107b6b.png') center/cover no-repeat;
+  background:rgba(6,20,6,.82);
   border:1px solid rgba(124,179,66,.25);
   border-radius:18px;
   padding:14px 14px;
@@ -2836,7 +2861,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   BALI RALLY — Race Engine v3.0
+   RASEEN — Race Engine v3.0
    Canvas-based road rendering for correct perspective
 ══════════════════════════════════════════════════════════════ */
 (function(){
@@ -3253,90 +3278,218 @@ async function doUpgradeStat(bikeLevel, stat){
   /* swipe on big carousel card disabled — navigation is via thumbnails only */
 
   /* ═══════════════════════════════════════════
-     START RACE
+     START RACE — PvP matchmaking, server-authoritative outcome.
+     Flow: joinQueue → poll → matched → load engine → show result.
+     Cancel allowed only while still in queue (refunds 0.5 TON).
   ═══════════════════════════════════════════ */
-  window.startRace = async function(){
-    if(_raceActive||_raceStarted) return;
-    if(_raceBikes.length===0){showNotif('❌ Нет байков! Купите в Гараже','e');return;}
-    const ton=S?.user?.tonBalance||0;
-    if(ton<0.5){showNotif('❌ Нужно 0.5 TON для старта','e');return;}
+  let _raceReady=false, _raceShowFn=null;
+  let _racePending=null;
+  let _racePollTimer=null;
+  let _raceQueueing=false;
 
-    _raceStarted=true;
-    _raceSelectedBike=_raceBikes[_raceIdx];
+  function _raceStopPolling(){
+    if(_racePollTimer){ clearInterval(_racePollTimer); _racePollTimer=null; }
+  }
 
-    /* Loading overlay */
+  function _ensureLoadingOverlay(){
     let loadOv=document.getElementById('raceLoadingOv');
-    if(!loadOv){
-      loadOv=document.createElement('div');
-      loadOv.id='raceLoadingOv';
-      loadOv.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .3s';
-      loadOv.innerHTML=[
-        '<div style="width:64px;height:64px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div>',
-        '<div style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">🏎️ Поиск соперника...</div>',
-        '<div style="font-size:14px;color:rgba(232,245,233,.5);font-weight:600;font-family:Fredoka,cursive">Готовим гонку — 0.5 TON ставка</div>'
-      ].join('');
-      document.body.appendChild(loadOv);
+    if(loadOv) return loadOv;
+    loadOv=document.createElement('div');
+    loadOv.id='raceLoadingOv';
+    loadOv.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(4,10,4,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;opacity:0;pointer-events:none;transition:opacity .3s;padding:24px;text-align:center';
+    loadOv.innerHTML=[
+      '<div id="rqSpinner" style="width:64px;height:64px;border:4px solid rgba(124,179,66,.2);border-top:4px solid var(--bamboo);border-radius:50%;animation:spin .8s linear infinite"></div>',
+      '<div id="rqTitle" style="font-size:22px;font-weight:800;color:#fff;font-family:Fredoka,cursive">🏎️ Поиск соперника...</div>',
+      '<div id="rqSub" style="font-size:13px;color:rgba(232,245,233,.55);font-weight:600;font-family:Fredoka,cursive;max-width:280px;line-height:1.4">Ставка 0.5 TON · Победитель получает 0.9 TON</div>',
+      '<div id="rqOpp" style="display:none;margin-top:6px;background:rgba(124,179,66,.12);border:1px solid rgba(124,179,66,.35);border-radius:14px;padding:10px 16px;color:#fff;font-family:Fredoka,cursive;display:none;align-items:center;gap:10px"><div id="rqOppAv" style="width:40px;height:40px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:18px">🏍️</div><div style="text-align:left"><div id="rqOppName" style="font-size:14px;font-weight:800">Opponent</div><div id="rqOppLv" style="font-size:11px;opacity:.7">Level 1</div></div></div>',
+      '<button id="rqCancelBtn" style="margin-top:18px;background:rgba(220,80,80,.18);border:1px solid rgba(220,80,80,.5);color:#ff8a8a;font-family:Fredoka,cursive;font-weight:800;font-size:14px;padding:10px 22px;border-radius:12px;cursor:pointer">✖ Отменить и вернуть 0.5 TON</button>'
+    ].join('');
+    document.body.appendChild(loadOv);
+    document.getElementById('rqCancelBtn').addEventListener('click', _raceCancel);
+    return loadOv;
+  }
+
+  function _raceShowSearching(){
+    const ov=_ensureLoadingOverlay();
+    ov.style.opacity='1'; ov.style.pointerEvents='all';
+    const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='none';
+    const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='none';
+  }
+
+  function _raceHideSearching(){
+    const ov=document.getElementById('raceLoadingOv');
+    if(ov){ ov.style.opacity='0'; ov.style.pointerEvents='none'; }
+  }
+
+  function _raceRestoreSelectUI(){
+    _raceQueueing=false; _raceStarted=false;
+    _raceHideSearching();
+    const sf=document.getElementById('raceStartFixed'); if(sf) sf.style.display='block';
+    const _bnav=document.querySelector('.bnav'); if(_bnav) _bnav.style.display='';
+  }
+
+  function _raceDelay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  async function _racePollUntilResolved(maxMs=30000){
+    const end=Date.now()+maxMs;
+    while(Date.now()<end && _raceQueueing){
+      try{
+        const res=await api('racePoll',{});
+        if(res&&res.status==='matched'){
+          _raceStopPolling();
+          _raceLaunchMatch(res);
+          return true;
+        }
+        if(res&&res.status==='waiting'){
+          _raceStopPolling();
+          _racePollTimer=setInterval(_racePollOnce, 2000);
+          return true;
+        }
+      }catch(e){ console.warn('racePoll recover:',e.message); }
+      await _raceDelay(1500);
     }
-    const sf=document.getElementById('raceStartFixed');
-    if(sf)sf.style.display='none';
-    const _bnav=document.querySelector('.bnav');
-    if(_bnav)_bnav.style.display='none';
-    loadOv.style.opacity='1';loadOv.style.pointerEvents='all';
+    return false;
+  }
 
-    /* Determine outcome */
-    const stats=(typeof getBikeCurrentStats==='function')
-      ?getBikeCurrentStats(_raceSelectedBike)
-      :{speed:_raceSelectedBike.speed,nitro:_raceSelectedBike.nitro,accel:_raceSelectedBike.accel,maneuver:_raceSelectedBike.maneuver};
-    const playerPower=(stats.speed||0)*1.0+(stats.accel||0)*0.5+(stats.nitro||0)*0.3+(stats.maneuver||0)*0.1;
-    const aiMultiplier=0.70+Math.random()*0.60;
-    const aiPower=playerPower*aiMultiplier;
-    const playerWins=playerPower>=aiPower;
-    const aiName=OPP_NAMES[Math.floor(Math.random()*OPP_NAMES.length)];
+  async function _raceCancel(){
+    _raceStopPolling();
+    try{
+      const res=await api('raceCancelQueue',{});
+      if(res){
+        if(typeof res.tonBalance==='number' && S?.user){
+          S.user.tonBalance=res.tonBalance; syncTopbar();
+        }
+        if(res.refunded!==false) showNotif('↩️ Поиск отменён, 0.5 TON возвращены','i');
+      }
+    }catch(e){ console.warn('cancel:',e.message); }
+    _raceRestoreSelectUI();
+    try{ loadState(); }catch(_){}
+  }
 
-    _racePending={playerWins,aiName,p1Name:(S?._tgName||S?.user?.firstName||'You').slice(0,14),
-      maxPlayerKmh:Math.max(35,Math.round(40+playerPower*0.026)),
-      maxAiKmh:Math.max(35,Math.round(40+aiPower*0.026))};
+  function _raceShowOpponent(opp){
+    const cancelBtn=document.getElementById('rqCancelBtn');
+    if(cancelBtn) cancelBtn.style.display='none';
+    const sub=document.getElementById('rqSub');
+    if(sub) sub.textContent='Соперник найден! Готовим трассу...';
+    const title=document.getElementById('rqTitle');
+    if(title) title.textContent='⚡ Match found';
+    const oppBox=document.getElementById('rqOpp');
+    const av=document.getElementById('rqOppAv');
+    const nm=document.getElementById('rqOppName');
+    const lv=document.getElementById('rqOppLv');
+    if(av){
+      if(opp.photoUrl){ av.innerHTML='<img src="'+opp.photoUrl+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">'; }
+      else av.textContent='🏍️';
+    }
+    if(nm) nm.textContent='@'+(opp.username||opp.name||'rider').slice(0,18);
+    if(lv) lv.textContent='Level '+opp.lv;
+    if(oppBox){ oppBox.style.display='flex'; }
+  }
 
+  async function _raceLaunchMatch(matchData){
+    _raceStopPolling();
+    _raceQueueing=false;
+    const youAreP1=!!matchData.youAreP1;
+    const winnerSide = matchData.youWon ? (youAreP1?'p1':'p2') : (youAreP1?'p2':'p1');
+    const myLv=matchData.you.lv, oppLv=matchData.opp.lv;
+    _racePending={
+      playerWins: !!matchData.youWon,
+      p1Name: matchData.you.name||'You',
+      aiName: matchData.opp.name||'Opponent',
+      oppPhoto: matchData.opp.photoUrl||'',
+      maxPlayerKmh: matchData.you.maxKmh||120,
+      maxAiKmh: matchData.opp.maxKmh||120,
+      tonBalance: matchData.tonBalance,
+      prize: matchData.prize||0.9
+    };
+    if(typeof matchData.tonBalance==='number' && S?.user){
+      S.user.tonBalance=matchData.tonBalance; syncTopbar();
+    }
+    _raceShowOpponent(matchData.opp);
     const selectPhase=document.getElementById('raceSelectPhase');
     const animPhase=document.getElementById('raceAnimPhase');
     const resultOv=document.getElementById('rsResultOverlay');
-    if(resultOv)resultOv.style.display='none';
-
-    /* Pre-load engine iframe HIDDEN — wait for models ready before showing */
+    if(resultOv) resultOv.style.display='none';
     const fr=document.getElementById('raceEngineFrame');
     _raceReady=false;
-    const minLoadMs=1600;
-    const startedAt=Date.now();
+    const minLoadMs=1400; const startedAt=Date.now();
     const showRace=()=>{
-      const elapsed=Date.now()-startedAt;
-      const wait=Math.max(0,minLoadMs-elapsed);
+      const wait=Math.max(0, minLoadMs-(Date.now()-startedAt));
       setTimeout(()=>{
-        loadOv.style.opacity='0';loadOv.style.pointerEvents='none';
-        if(selectPhase)selectPhase.style.display='none';
-        if(animPhase)animPhase.style.display='block';
+        _raceHideSearching();
+        if(selectPhase) selectPhase.style.display='none';
+        if(animPhase) animPhase.style.display='block';
         _raceActive=true;
-      },wait);
+      }, wait);
     };
     _raceShowFn=showRace;
-    if(fr) fr.src=window.__RACE_ENGINE_URL__;
-    /* Safety fallback: if ready signal never arrives within 15s, show anyway */
-    setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } },15000);
+    if(fr){
+      // youAreP1 → engine: car1 (left) is YOU. Else car2 (right) is YOU.
+      // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
+      const leftLv  = youAreP1 ? myLv  : oppLv;
+      const rightLv = youAreP1 ? oppLv : myLv;
+      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+    }
+    setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
+  }
 
-    /* Server call for reward */
-    (async()=>{
-      try{
-        const result=await api('raceResult',{won:playerWins,bikeLevel:_raceSelectedBike?.lv||0});
-        if(result&&result.success&&result.data){
-          if(S.user)S.user.tonBalance=result.data.tonBalance;
-          syncTopbar();
-        }
-      }catch(e){console.warn('raceResult API:',e.message);}
-    })();
+  function _racePollOnce(){
+    api('racePoll',{}).then(res=>{
+      if(!res||!res.status) return;
+      if(res.status==='matched'){
+        _raceStopPolling();
+        _raceLaunchMatch(res);
+      } else if(res.status==='idle'){
+        // Server forgot us (TTL or external cancel). Reset UI.
+        _raceStopPolling();
+        _raceRestoreSelectUI();
+        if(res.refunded) showNotif('↩️ Поиск истёк, 0.5 TON возвращены','i');
+        try{ loadState(); }catch(_){}
+      }
+    }).catch(e=>console.warn('racePoll:',e.message));
+  }
+
+  window.startRace = async function(){
+    if(_raceActive||_raceStarted||_raceQueueing) return;
+    if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
+    const ton=S?.user?.tonBalance||0;
+    if(ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+
+    _raceStarted=true; _raceQueueing=true;
+    _raceSelectedBike=_raceBikes[_raceIdx];
+    _raceShowSearching();
+
+    let res;
+    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike?.lv||1}); }
+    catch(e){
+      // The server may have completed the match after the network timed out.
+      // Keep the loading screen open and verify by polling before showing an error.
+      const recovered=await _racePollUntilResolved(30000);
+      if(recovered) return;
+      _raceRestoreSelectUI();
+      showNotif('❌ '+(e.message||'Ошибка сети'),'e'); return;
+    }
+    if(!res||!res.status){
+      const recovered=await _racePollUntilResolved(12000);
+      if(recovered) return;
+      _raceRestoreSelectUI();
+      showNotif('❌ Не удалось войти в очередь','e'); return;
+    }
+    // Refresh balance display (entry fee deducted)
+    try{ loadState(); }catch(_){}
+
+    if(res.status==='matched'){
+      // Instant or previously unacknowledged match — pull full data via poll, then launch
+      _racePollOnce();
+    } else if(res.status==='waiting'){
+      // Waiting → poll every 2s and keep the loading screen open
+      _raceStopPolling();
+      _racePollTimer=setInterval(_racePollOnce, 2000);
+    } else {
+      _raceRestoreSelectUI();
+      showNotif('❌ Не удалось войти в очередь','e');
+    }
   };
-
-  let _raceReady=false, _raceShowFn=null;
-
-  let _racePending=null;
 
   /* Listen for race-engine messages */
   window.addEventListener('message',function(ev){
@@ -3347,14 +3500,14 @@ async function doUpgradeStat(bikeLevel, stat){
     else if(d.type==='race-back'){ window.raceGoBack(); }
     else if(d.type==='race-finished' && _racePending){
       const p=_racePending;
-      setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh),400);
+      setTimeout(()=>_showResult(p.playerWins,p.p1Name,p.aiName,p.maxPlayerKmh,p.maxAiKmh,p.oppPhoto),400);
     }
   });
 
   /* ═══════════════════════════════════════════
      RESULT OVERLAY
   ═══════════════════════════════════════════ */
-  function _showResult(playerWins,p1Name,aiName,p1Kmh,p2Kmh){
+  function _showResult(playerWins,p1Name,aiName,p1Kmh,p2Kmh,oppPhoto){
     const ov=document.getElementById('rsResultOverlay');
     if(!ov)return;
     const emoji=document.getElementById('rsrEmoji');
@@ -3381,12 +3534,17 @@ async function doUpgradeStat(bikeLevel, stat){
     if(tgUser?.photo_url){
       if(av1)av1.innerHTML='<img src="'+tgUser.photo_url+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">';
     }else{if(av1)av1.textContent='🏍️';}
-    if(av2)av2.textContent='🤖';
+    if(av2){
+      if(oppPhoto){ av2.innerHTML='<img src="'+oppPhoto+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'🏍️\'">'; }
+      else av2.textContent='🏍️';
+    }
     if(name1)name1.textContent='@'+p1Name;
-    if(name2)name2.textContent=aiName;
+    if(name2)name2.textContent='@'+aiName;
     if(spd1)spd1.textContent=p1Kmh+' km/h';
     if(spd2)spd2.textContent=p2Kmh+' km/h';
     ov.style.display='flex';
+    // Acknowledge match server-side so the record can be cleaned up
+    api('raceAck',{}).catch(()=>{});
     setTimeout(()=>{try{loadState();}catch(e){}},1200);
   }
 
@@ -3394,7 +3552,8 @@ async function doUpgradeStat(bikeLevel, stat){
      BACK TO SELECTION
   ═══════════════════════════════════════════ */
   window.raceGoBack=function(){
-    _raceActive=false;_raceStarted=false;_racePending=null;
+    _raceStopPolling();
+    _raceActive=false;_raceStarted=false;_raceQueueing=false;_racePending=null;
     const ov=document.getElementById('rsResultOverlay');
     if(ov)ov.style.display='none';
     const fr=document.getElementById('raceEngineFrame');
@@ -3995,14 +4154,14 @@ async function doUpgradeStat(bikeLevel, stat){
         <div style="font-size:16px;font-weight:800;color:#FFD700;margin-bottom:8px;display:flex;align-items:center;gap:6px">🤝 <span data-i18n="partnershipTitle">Channel Partnership</span></div>
         <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.8" data-i18n="partnershipInfo">
           Promote our game to earn TON rewards!<br>
-          Post about Bali Rally on your Telegram channel and submit the link for review.
+          Post about Raseen on your Telegram channel and submit the link for review.
         </div>
         <div style="margin-top:10px;background:rgba(0,0,0,.28);border-radius:10px;padding:10px 12px">
           <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:6px" data-i18n="partnerRequirements">📋 Requirements:</div>
           <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.9">
             • <span data-i18n="req1">Channel must have 1,000+ real subscribers</span><br>
             • <span data-i18n="req2">Subscribers must be genuine (not bots)</span><br>
-            • <span data-i18n="req3">Post must be about Bali Rally / our game</span>
+            • <span data-i18n="req3">Post must be about Raseen / our game</span>
           </div>
         </div>
         <div style="margin-top:10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:9px 12px;text-align:center">
@@ -4357,7 +4516,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
       listEl.innerHTML = refs.slice(0,30).map(r=>`
         <div class="ref2-list-item">
-          <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🐼'">` :'🐼'}</div>
+          <div class="ref2-av">${r.photo?`<img src="${esc(r.photo)}" onerror="this.parentElement.innerHTML='🏍️'">` :'🏍️'}</div>
           <div class="ref2-li-info">
             <div class="ref2-li-name">${esc(r.name||'Friend')}</div>
             <div class="ref2-li-date">${esc(r.date||'Joined recently')}</div>
@@ -4651,8 +4810,6 @@ function syncFinanceHeader(){
 </style>
 
 <!-- HELP BUTTON -->
-<button id="helpBtn" onclick="openModal('helpModal')" style="position:fixed;bottom:84px;right:14px;z-index:190;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));border:2px solid rgba(124,179,66,.55);color:var(--bamboo);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 0 14px rgba(124,179,66,.35),0 4px 16px rgba(0,0,0,.5);transition:transform .18s;">?</button>
-
 <!-- NAV -->
 <nav class="bnav">
   <!-- Home -->
@@ -4696,17 +4853,17 @@ function syncFinanceHeader(){
 <div class="modal" id="helpModal">
   <div class="modal-box" style="max-height:88vh;overflow-y:auto;padding:0;border-radius:22px 22px 0 0">
     <div style="position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0a1f0a,#061206);border-bottom:1px solid rgba(124,179,66,.18);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:22px 22px 0 0">
-      <div style="font-size:17px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:8px" data-i18n="helpTitle">🐼 Panda Bamboo Guide</div>
+      <div style="font-size:17px;font-weight:800;color:var(--bamboo);display:flex;align-items:center;gap:8px" data-i18n="helpTitle">🏍️ Game Guide</div>
       <button class="mclose" onclick="closeModal('helpModal')"><i class="fas fa-times"></i></button>
     </div>
     <!-- Channel / Support links -->
     <div style="padding:14px 14px 0">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:4px">
-        <a href="https://t.me/PandaBambooPayouts" target="_blank" style="text-decoration:none;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <a href="https://t.me/RaseenRacingbot" target="_blank" style="text-decoration:none;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
           <span style="font-size:20px">💸</span>
           <span style="font-size:10px;font-weight:800;color:#00D4FF;line-height:1.2" data-i18n="helpPayCh">Payouts<br>Channel</span>
         </a>
-        <a href="https://t.me/PandaMiningNews" target="_blank" style="text-decoration:none;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <a href="https://t.me/RaseenRacingbot" target="_blank" style="text-decoration:none;background:rgba(124,179,66,.1);border:1px solid rgba(124,179,66,.3);border-radius:12px;padding:9px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px">
           <span style="font-size:20px">📢</span>
           <span style="font-size:10px;font-weight:800;color:var(--bamboo);line-height:1.2" data-i18n="helpNewsCh">Bot<br>News</span>
         </a>
@@ -4725,7 +4882,7 @@ function syncFinanceHeader(){
       <!-- Main idea -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--bamboo);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpIdeaTitle">💡 Main Concept</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpIdeaBody">The bot is a virtual Bamboo Factory 🏁<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎</div>
       </div>
       <!-- Pages explanation -->
       <div style="background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:16px;padding:13px">
@@ -4786,7 +4943,7 @@ function syncFinanceHeader(){
       <!-- Withdrawal conditions -->
       <div style="background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,0,0,.4));border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWdTitle">📤 Withdrawal Conditions</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
       </div>
     </div>
     <div style="height:12px"></div>
@@ -4831,7 +4988,7 @@ function syncFinanceHeader(){
     <!-- Bot admin hint -->
     <div id="atBotHint" style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.22);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#FFD740;font-weight:600">
       ⚠️ <span data-i18n="taskBotHint">Add our bot as admin in your channel first:</span><br>
-      <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px">@PandaBambooBot</span>
+      <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:.5px">@RaseenRacingbot</span>
     </div>
     <!-- Link -->
     <label class="flabel" data-i18n="taskLinkLabel">Telegram Link</label>
@@ -4866,8 +5023,8 @@ const CFG = {
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
   MIN_WD_TON   : 0.1,
   REF_BONUS    : 20,
-  BOT_USERNAME : 'PandaBamboBot',
-  BOT_APP_LINK : 'https://t.me/PandaBamboBot/app',
+  BOT_USERNAME : 'RaseenBot',
+  BOT_APP_LINK : 'https://t.me/RaseenBot/app',
 };
 
 /* ════ MULTI-SERVER RACE SYSTEM ════════════════════════════════════
@@ -4885,10 +5042,20 @@ const SERVERS = [
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
   'claimTask','verifyTask','createTask','deposit',
-  'buyBike','upgradeStats','race','raceResult','startBikeMining','claimBikeMining'
+  'buyBike','upgradeStats','race','raceResult','raceJoinQueue','raceCancelQueue','raceAck','startBikeMining','claimBikeMining'
 ]);
 
 const API_TIMEOUT_MS  = 8000;
+const API_ACTION_TIMEOUT_MS = {
+  raceJoinQueue: 30000,
+  racePoll: 12000,
+  raceCancelQueue: 15000,
+  raceAck: 12000,
+  buyBike: 20000,
+  upgradeStats: 20000,
+  withdraw: 20000
+};
+function _timeoutForAction(action){ return API_ACTION_TIMEOUT_MS[action] || API_TIMEOUT_MS; }
 const DEAD_WINDOW_MS  = 12 * 60 * 60 * 1000; // 12h
 const SESS_KEY        = 'panda_active_srv';
 const DEAD_KEY        = 'panda_dead_srvs';
@@ -4915,7 +5082,7 @@ async function _callOne(url, action, data, authHdr){
   const heads = {'Content-Type':'application/json'};
   if(authHdr) heads.Authorization = authHdr;
   const ctrl = new AbortController();
-  const tOut = setTimeout(()=>ctrl.abort(), API_TIMEOUT_MS);
+  const tOut = setTimeout(()=>ctrl.abort(), _timeoutForAction(action));
   try{
     const r = await fetch(`${url}/api`,{method:'POST',headers:heads,body:JSON.stringify({action,data}),signal:ctrl.signal});
     clearTimeout(tOut);
@@ -4987,10 +5154,10 @@ const BAM_URL='https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/d7e19f
 // Fix 4: rebalanced items — clear ROI progression, higher tier always better per coin
 const ITEMS = [
   {id:'bamboo_stick',   name:'Bamboo Stick',       icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a995343f-ab46-4c91-9cf2-1140c0bdd6f5.png',  price:7500,    power:50    },
-  {id:'panda_paw',      name:'Panda Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
+  {id:'panda_paw',      name:'Raseen Paw Drill',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/f8d2d332-fa72-447e-94e9-62f4e5cf75c9.png',  price:25000,   power:200   },
   {id:'leaf_fan',       name:'Leaf Fan Cooler',    icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/c1657ae3-3927-41e9-a32d-70ab89ddfe3b.png',  price:125000,  power:1200  },
   {id:'bamboo_energy',  name:'Bamboo Energy Pod',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/73a7e781-107c-4598-9c1a-e9db2c65dbf5.png',  price:625000,  power:7500  },
-  {id:'panda_den',      name:'Panda Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
+  {id:'panda_den',      name:'Raseen Den Hub',      icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/a4cd4f37-ce88-4115-92af-3170bb1654b7.png',  price:3130000, power:45000 },
   {id:'bamboo_forest',  name:'Bamboo Forest Rig',  icon:'img', iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/273f8ce0-bfa2-4618-895a-00481620d1d9.png',  price:6500000, power:110000},
 ];
 // 27 tank levels — capacity only, no speedBonus
@@ -4998,7 +5165,7 @@ const TANK_LVS = {
   1 :{cap:5000,      upgCost:1000,       label:'Starter Tank'},
   2 :{cap:10000,     upgCost:3000,       label:'Leaf Tank'},
   3 :{cap:20000,     upgCost:8000,       label:'Bamboo Tank'},
-  4 :{cap:40000,     upgCost:20000,      label:'Panda Tank'},
+  4 :{cap:40000,     upgCost:20000,      label:'Raseen Tank'},
   5 :{cap:80000,     upgCost:50000,      label:'Mega Tank'},
   6 :{cap:150000,    upgCost:120000,     label:'Empire Tank'},
   7 :{cap:250000,    upgCost:250000,     label:'Forest Tank'},
@@ -5048,8 +5215,8 @@ const REF_ACTIVE_TASKS=[
   {id:'ra500',n:500, bam:5000000, coins:20000},
 ];
 const SOC_TASKS=[
-  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/PandaBambooPayouts', bam:1000},
-  {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/PandaMiningNews', bam:500},
+  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacingbot', bam:1000},
+  {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/RaseenRacingbot', bam:500},
   {id:'tg_ch', name:'Join Telegram Channel', icon:'📢', link:'https://t.me/YOUR_CHANNEL', bam:1000},
   {id:'tg_grp',name:'Join Telegram Group',   icon:'👥', link:'https://t.me/YOUR_GROUP',   bam:500 },
   {id:'tg_bot',name:'Start our Bot',          icon:'🤖', link:`https://t.me/${CFG.BOT_USERNAME}`, bam:300},
@@ -5092,8 +5259,8 @@ async function getDeviceFingerprint(){
       ctx.textBaseline='top';
       ctx.font='14px Arial';
       ctx.fillStyle='#f60';ctx.fillRect(125,1,62,20);
-      ctx.fillStyle='#069';ctx.fillText('🐼PandaBamboo',2,15);
-      ctx.fillStyle='rgba(102,204,0,0.7)';ctx.fillText('🐼PandaBamboo',4,17);
+      ctx.fillStyle='#069';ctx.fillText('🏍️Raseen',2,15);
+      ctx.fillStyle='rgba(102,204,0,0.7)';ctx.fillText('🏍️Raseen',4,17);
       parts.push(c.toDataURL());
     }catch(_){}
     // 2. WebGL GPU fingerprint
@@ -5612,7 +5779,7 @@ function showAdminConfirmModal(link, target, cost){
       <div style="font-size:17px;font-weight:800;color:#ffa726;margin-bottom:10px">${T.taskConfirmTitle||'Important Confirmation'}</div>
       <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,165,0,.3),transparent);margin-bottom:14px"></div>
       <div style="background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.25);border-radius:14px;padding:14px;margin-bottom:14px;font-size:13px;font-weight:700;color:#ffcc80;line-height:1.7;text-align:${isRtl?'right':'left'}">
-        ${T.taskConfirmBody||'🤖 You must add <b style="color:#fff">@PandaBamboBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>'}
+        ${T.taskConfirmBody||'🤖 You must add <b style="color:#fff">@RaseenBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>'}
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:16px">${T.taskConfirmChannel||'Channel:'} <b style="color:var(--bamboo)">${esc(link)}</b><br>${T.taskConfirmCost||'Cost:'} <b style="color:var(--coin)">${fmt(cost)} Coins</b></div>
       <div style="display:flex;gap:10px">
@@ -6289,7 +6456,7 @@ async function init(){
 
   // Record start time — minimum 6 seconds total
   const startTime = Date.now();
-  const MIN_LOADING_MS = 3000;
+  const MIN_LOADING_MS = 800;
 
   // Step 1: Telegram setup
   ldProgress(0, lt('ldLoading'));
@@ -6317,7 +6484,7 @@ async function init(){
       // Legacy uavatar
       if(u.photo_url){
         const av=document.getElementById('uavatar');
-        if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🐼</div>'">`;
+        if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🏍️</div>'">`;
       }
     }
     S.startParam=(
@@ -6326,31 +6493,27 @@ async function init(){
       ''
     ).toString().replace(/\D/g,'');
   }
-  await ldAnimateTo(10, lt('ldConnecting'), 700);
-  await new Promise(r=>setTimeout(r,400));
+  await ldAnimateTo(10, lt('ldConnecting'), 300);
 
-  // Step 1.5: Race servers — find fastest live server
-  await ldAnimateTo(18, '🏎️ Finding fastest server...', 500);
+  // Step 1.5: Race servers — find fastest live server (max 1.5s wait)
+  ldProgress(18, '🏎️ Finding fastest server...');
   try{
     const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
-    await window._raceServersNow(authHdr);
+    await Promise.race([
+      window._raceServersNow(authHdr),
+      new Promise(r=>setTimeout(r,1500)),
+    ]);
     ldProgress(22, '✅ Server connected!');
   }catch(e){
     ldProgress(22, '⚠️ Using fallback server...');
   }
-  await new Promise(r=>setTimeout(r,300));
 
-  // Step 2: Preload images
-  await ldAnimateTo(20, lt('ldAssets'), 600);
-  await Promise.all([
-    preloadImages().catch(()=>{}),
-    new Promise(r=>setTimeout(r,800)), // min 0.8s on this step
-  ]);
-  await ldAnimateTo(40, lt('ldAssetsOk'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  // Step 2: Kick off image preload in background — don't block loading
+  preloadImages().catch(()=>{});
+  await ldAnimateTo(35, lt('ldAssets'), 250);
 
   // Step 3: Load user data
-  await ldAnimateTo(50, lt('ldConnecting'), 600);
+  await ldAnimateTo(45, lt('ldConnecting'), 250);
   let loaded = false;
   let attempts = 0;
   const MAX_ATTEMPTS = 3;
@@ -6365,7 +6528,7 @@ async function init(){
       console.warn(`Attempt ${attempts} failed:`,e.message);
       if(attempts < MAX_ATTEMPTS){
         ldProgress(50 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
-        await new Promise(r=>setTimeout(r,2000*attempts));
+        await new Promise(r=>setTimeout(r,800*attempts));
       }
     }
   }
@@ -6373,51 +6536,41 @@ async function init(){
     ldError(lt('ldErrorMsg'), lt('ldRetryBtn'));
     return;
   }
-  await ldAnimateTo(70, lt('ldConnected'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  await ldAnimateTo(70, lt('ldConnected'), 250);
 
-  // Step 3.5: Preload owned bike images with priority
-  await ldAnimateTo(72, '🏍️ Loading your bikes...', 400);
+  // Step 3.5: Kick off bike image preload in background (non-blocking)
   try{
     const ownedLvs = S.user?.ownedBikes || [];
     if(ownedLvs.length > 0){
       const bikeImgs = ownedLvs.map(lv=>{ const b=BIKES.find(x=>x.lv===lv); return b?b.img:null; }).filter(Boolean);
-      await Promise.all(bikeImgs.map(u=>new Promise(res=>{
-        const img=new Image(); img.onload=img.onerror=res; img.src=u;
-      })));
+      bikeImgs.forEach(u=>{ const img=new Image(); img.src=u; });
     }
   }catch(e){ console.warn('bike preload:',e.message); }
 
   // Step 4: Render UI
-  await ldAnimateTo(80, lt('ldBuilding'), 400);
+  await ldAnimateTo(82, lt('ldBuilding'), 200);
   try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
-  // Pre-build race carousel so bikes appear instantly when user opens race section
   try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
-  // Also sync Farm page topbar so user data appears immediately on first open
   try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
-  await new Promise(r=>setTimeout(r,300));
 
-  // Step 5: Init TON + timers
-  await ldAnimateTo(90, lt('ldWallet'), 400);
-  setTimeout(()=>initTON(), 600);
-  // Pre-compute device fingerprint in background
+  // Step 5: Init TON + timers (non-blocking)
+  setTimeout(()=>initTON(), 0);
   getOrComputeFp().catch(()=>{});
   setInterval(()=>{ loadState(); }, 30000);
-  await new Promise(r=>setTimeout(r,400));
 
-  await ldAnimateTo(100, lt('ldReady'), 500);
+  await ldAnimateTo(100, lt('ldReady'), 250);
 
-  // Ensure minimum loading time (5-10s feel)
+  // Ensure minimum loading time
   const elapsed = Date.now() - startTime;
   if(elapsed < MIN_LOADING_MS){
     await new Promise(r=>setTimeout(r, MIN_LOADING_MS - elapsed));
   }
 
-  setTimeout(()=>ldHide(), 700);
+  setTimeout(()=>ldHide(), 350);
   // Apply saved language after UI ready
   const savedLang = localStorage.getItem('pandaLang');
   if(savedLang){
@@ -6440,7 +6593,7 @@ const TRANSLATIONS = {
     partnershipTitle:'شراكة القناة',
     req1:'1,000+ مشترك حقيقي',
     req2:'مشتركون حقيقيون (ليسوا بوتات)',
-    req3:'منشور عن Bali Rally',
+    req3:'منشور عن Raseen',
     postLinkLabel:'رابط المنشور',
     submitPost:'📤 إرسال للمراجعة',
     postHistory:'سجل المنشورات',
@@ -6479,12 +6632,12 @@ const TRANSLATIONS = {
     swapFrom:'من',swapTo:'إلى',balance:'الرصيد:',maxBtn:'أقصى',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ تحويل الآن',
     exchangeHist:'📋 سجل التحويل',noConversions:'لا تحويلات بعد',
-    helpTitle:'🐼 دليل Panda Bamboo',
+    helpTitle:'🏍️ دليل RASEEN',
     helpPayCh:'قناة\nالمدفوعات',helpNewsCh:'أخبار\nالبوت',helpSupport:'الدعم\nالفني',
     helpWelcomeTitle:'🎁 مكافأة الترحيب المجانية',
     helpWelcomeBody:'عند التسجيل لأول مرة تحصل تلقائياً على:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — عملة السحب الأساسية<br><span style="color:#fff;font-weight:800">• 100 Bamboo/يوم</span> — طاقة تعدين مجانية تبدأ فوراً',
     helpIdeaTitle:'💡 الفكرة الرئيسية',
-    helpIdeaBody:'البوت مصنع بامبو افتراضي 🎋<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
+    helpIdeaBody:'البوت مصنع بامبو افتراضي 🏁<br>⬅ تشتري آلات من السوق بـ <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ الآلات تنتج Bamboo تلقائياً في التانك<br>⬅ تحوّل Bamboo إلى <span style="color:var(--coin);font-weight:800">Coins</span> من صفحة Finance<br>⬅ تسحب Coins إلى محفظة TON 💎',
     helpPagesTitle:'🗂 شرح الصفحات',
     helpPageHome:'🏠 الرئيسية',helpPageHomeDesc:'تشوف الباندا وتانك التجميع ومعدل التعدين اليومي. اضغط Claim Bamboo لجمع ما تراكم.',
     helpPageMarket:'🛒 السوق',helpPageMarketDesc:'اشتري آلات تعدين بـ Bamboo. كل آلة تزيد إنتاجك اليومي.',
@@ -6497,7 +6650,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'20% من مشتريات الصديق',
     helpAddTask:'➕ إضافة مهمة (100 عضو)',
     helpWdTitle:'📤 شروط السحب',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
     upgTitle:'⬆️ ترقية التانك',miningInfoTitle:'⚡ معلومات التعدين',
     addTaskTitle:'➕ إضافة مهمة مجتمعية',
     taskCostFormula:'التكلفة = <strong style="color:var(--coin)">عدد المستخدمين × 60 Coins</strong>',
@@ -6508,21 +6661,21 @@ const TRANSLATIONS = {
     taskTargetLabel:'عدد المستخدمين المستهدف (الحد الأدنى 100)',
     taskTotalCost:'التكلفة الإجمالية:',taskCreateBtn:'✅ إنشاء المهمة',
     wdMinHint:'⚠️ الحد الأدنى: 200 Coins',
-    multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🐼',
+    multiAccount:'⚠️ أنت تستخدم أكثر من حساب — العب بنزاهة 🏍️',
     depositRequired:'⛔ السحب متاح فقط للمودعين\n\n💎 قم بإيداع TON واحد على الأقل لتفعيل السحب\n\n🔄 جارٍ تحويلك لصفحة الإيداع...',
     depositRequiredBtn:'💎 إيداع الآن',
     ldLoading:'جارٍ التحميل...',
     ldConnecting:'الاتصال بتيليجرام...',
     ldAssets:'تحميل الملفات...',
     ldAssetsOk:'تم تحميل الملفات!',
-    ldFinding:'🏁 البحث عن أسرع سيرفر...',
-    ldRacing:'⚡ السباق بين السيرفرات...',
+    ldFinding:'🏎️ تجهيز الحلبة...',
+    ldRacing:'⚡ تشغيل المحرك...',
     ldRetrying:'إعادة المحاولة...',
     ldBusy:'⏳ السيرفرات مشغولة، إعادة المحاولة...',
     ldConnected:'✅ متصل',
     ldBuilding:'بناء الواجهة...',
     ldWallet:'إعداد المحفظة...',
-    ldReady:'جاهز! 🐼',
+    ldReady:'جاهز! 🏍️',
     ldErrorMsg:'⚠️ الخدمة مؤقتاً غير متاحة\nجميع السيرفرات مشغولة\nأعد تشغيل البوت بعد لحظات',
     ldRetryBtn:'🔄 إعادة المحاولة',
     tabRegularRef:'👥 إحالات',
@@ -6535,12 +6688,12 @@ const TRANSLATIONS = {
     friendsDeposited:'أصدقاء أجروا إيداع TON',
     claimBtn2:'استلام',
     taskConfirmTitle:'تأكيد مهم قبل الإنشاء',
-    taskConfirmBody:'🤖 يجب رفع البوت <b style="color:#fff">@PandaBamboBot</b> كمشرف في قناتك <b>قبل</b> إنشاء المهمة.<br><br>⛔ في حال عدم رفع البوت كمشرف، <b style="color:#ff8a80">سيتم حذف المهمة ولن يتم إرجاع الرصيد إليك.</b>',
+    taskConfirmBody:'🤖 يجب رفع البوت <b style="color:#fff">@RaseenBot</b> كمشرف في قناتك <b>قبل</b> إنشاء المهمة.<br><br>⛔ في حال عدم رفع البوت كمشرف، <b style="color:#ff8a80">سيتم حذف المهمة ولن يتم إرجاع الرصيد إليك.</b>',
     taskConfirmChannel:'القناة:',
     taskConfirmCost:'التكلفة:',
     taskConfirmBtn:'✅ فهمت، أنشئ المهمة',
     cancelBtn:'إلغاء',
-    multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🐼',
+    multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🏍️',
     compTabActive:'💎 الإحالات النشطة',
     compTabMining:'⚡ سرعة التعدين',
     compActiveDesc:'أفضل 20 مستخدم لديهم أكثر إحالات نشطة (أجروا إيداع)',
@@ -6569,11 +6722,11 @@ const TRANSLATIONS = {
     raceMissions:'Race Missions',
     mineMissions:'Mining Missions',
     partnershipTitle:'Channel Partnership',
-    partnershipInfo:'Promote our game to earn TON rewards! Post about Bali Rally on your Telegram channel and submit the link for review.',
+    partnershipInfo:'Promote our game to earn TON rewards! Post about Raseen on your Telegram channel and submit the link for review.',
     partnerRequirements:'Requirements:',
     req1:'Channel must have 1,000+ real subscribers',
     req2:'Subscribers must be genuine (not bots)',
-    req3:'Post must be about Bali Rally / our game',
+    req3:'Post must be about Raseen / our game',
     rewardRange:'Reward Range',
     basedOnQuality:'Based on post quality & reach',
     postLinkLabel:'Post Link',
@@ -6615,12 +6768,12 @@ const TRANSLATIONS = {
     swapFrom:'FROM',swapTo:'TO',balance:'Balance:',maxBtn:'MAX',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ Exchange Now',
     exchangeHist:'📋 Exchange History',noConversions:'No conversions yet',
-    helpTitle:'🐼 Panda Bamboo Guide',
+    helpTitle:'🏍️ Game Guide',
     helpPayCh:'Payouts<br>Channel',helpNewsCh:'Bot<br>News',helpSupport:'Technical<br>Support',
     helpWelcomeTitle:'🎁 Free Welcome Bonus',
     helpWelcomeBody:'When you register for the first time you automatically receive:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — main withdrawal currency<br><span style="color:#fff;font-weight:800">• 100 Bamboo/day</span> — free mining power starts immediately',
     helpIdeaTitle:'💡 Main Concept',
-    helpIdeaBody:'The bot is a virtual Bamboo Factory 🎋<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
+    helpIdeaBody:'The bot is a virtual Bamboo Factory 🏁<br>⬅ Buy machines from the Market with <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Machines auto-produce Bamboo collected in the Tank<br>⬅ Convert Bamboo to <span style="color:var(--coin);font-weight:800">Coins</span> on the Finance page<br>⬅ Withdraw Coins to your TON wallet 💎',
     helpPagesTitle:'🗂 Pages Guide',
     helpPageHome:'🏠 Home',helpPageHomeDesc:'View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.',
     helpPageMarket:'🛒 Market',helpPageMarketDesc:'Buy mining machines with Bamboo. Each machine increases your daily output.',
@@ -6633,7 +6786,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"20% of friend's purchases",
     helpAddTask:'➕ Add Task (100 members)',
     helpWdTitle:'📤 Withdrawal Conditions',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
     upgTitle:'⬆️ Upgrade Tank',miningInfoTitle:'⚡ Mining Info',
     addTaskTitle:'➕ Add Community Task',
     taskCostFormula:'Cost = <strong style="color:var(--coin)">Target Users × 60 Coins</strong>',
@@ -6644,7 +6797,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Target Users (min 100)',
     taskTotalCost:'Total Cost:',taskCreateBtn:'✅ Create Task',
     wdMinHint:'⚠️ Minimum: 200 Coins',
-    multiAccount:'⚠️ You are using multiple accounts — play fair 🐼',
+    multiAccount:'⚠️ You are using multiple accounts — play fair 🏍️',
     depositRequired:'⛔ Withdrawal is only available for depositors\n\n💎 Make at least one TON deposit to unlock withdrawals\n\n🔄 Redirecting you to the deposit page...',
     depositRequiredBtn:'💎 Deposit Now',
     ldLoading:'Loading...',
@@ -6658,7 +6811,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Connected',
     ldBuilding:'Building interface...',
     ldWallet:'Setting up wallet...',
-    ldReady:'Ready! 🐼',
+    ldReady:'Ready! 🏍️',
     ldErrorMsg:'⚠️ Service temporarily unavailable\nAll servers are busy\nPlease restart the app in a moment',
     ldRetryBtn:'🔄 Retry',
     tabRegularRef:'👥 Referrals',
@@ -6671,12 +6824,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Friends who deposited TON',
     claimBtn2:'Claim',
     taskConfirmTitle:'Important Confirmation',
-    taskConfirmBody:'🤖 You must add <b style="color:#fff">@PandaBamboBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>',
+    taskConfirmBody:'🤖 You must add <b style="color:#fff">@RaseenBot</b> as admin in your channel <b>before</b> creating the task.<br><br>⛔ If the bot is not admin, <b style="color:#ff8a80">the task will be deleted and your balance will NOT be refunded.</b>',
     taskConfirmChannel:'Channel:',
     taskConfirmCost:'Cost:',
     taskConfirmBtn:'✅ Understood, Create Task',
     cancelBtn:'Cancel',
-    multiAccount:'⚠️ This device is linked to another account — one device per account 🐼',
+    multiAccount:'⚠️ This device is linked to another account — one device per account 🏍️',
     compTabActive:'💎 Active Refs',
     compTabMining:'⚡ Mining Speed',
     compActiveDesc:'Top 20 users with most active referrals (who deposited)',
@@ -6703,7 +6856,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Партнёрство',
     req1:'1000+ реальных подписчиков',
     req2:'Реальные подписчики (не боты)',
-    req3:'Пост о Bali Rally',
+    req3:'Пост о Raseen',
     postLinkLabel:'Ссылка на пост',
     submitPost:'📤 Отправить',
     postHistory:'История постов',
@@ -6742,12 +6895,12 @@ const TRANSLATIONS = {
     swapFrom:'ИЗ',swapTo:'В',balance:'Баланс:',maxBtn:'МАКС',
     swapRate:'📊 300 Bamboo = 10 Coins',exchangeNow:'⚡ Обменять',
     exchangeHist:'📋 История обменов',noConversions:'Обменов пока нет',
-    helpTitle:'🐼 Руководство Panda Bamboo',
+    helpTitle:'🏍️ Руководство RASEEN',
     helpPayCh:'Канал<br>выплат',helpNewsCh:'Новости<br>бота',helpSupport:'Тех.<br>поддержка',
     helpWelcomeTitle:'🎁 Бесплатный приветственный бонус',
     helpWelcomeBody:'При первой регистрации вы автоматически получаете:<br><span style="color:#fff;font-weight:800">• 200 Coins</span> — основная валюта вывода<br><span style="color:#fff;font-weight:800">• 100 Bamboo/день</span> — бесплатный майнинг сразу',
     helpIdeaTitle:'💡 Основная концепция',
-    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🎋<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
+    helpIdeaBody:'Бот — виртуальная Фабрика Бамбука 🏁<br>⬅ Покупайте машины на Рынке за <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Машины автоматически производят Bamboo в Танке<br>⬅ Конвертируйте Bamboo в <span style="color:var(--coin);font-weight:800">Coins</span> в Finance<br>⬅ Выводите Coins на TON-кошелёк 💎',
     helpPagesTitle:'🗂 Руководство по страницам',
     helpPageHome:'🏠 Главная',helpPageHomeDesc:'Смотрите панду, резервуар и скорость майнинга. Нажмите Claim Bamboo для сбора.',
     helpPageMarket:'🛒 Рынок',helpPageMarketDesc:'Покупайте машины за Bamboo. Каждая машина увеличивает суточный доход.',
@@ -6760,7 +6913,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'20% с покупок друга',
     helpAddTask:'➕ Добавить задание (100 участников)',
     helpWdTitle:'📤 Условия вывода',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
     upgTitle:'⬆️ Улучшить танк',miningInfoTitle:'⚡ Инфо о майнинге',
     addTaskTitle:'➕ Добавить задание',
     taskCostFormula:'Стоимость = <strong style="color:var(--coin)">Кол-во участников × 60 Coins</strong>',
@@ -6771,7 +6924,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Целевых участников (мин. 100)',
     taskTotalCost:'Итого:',taskCreateBtn:'✅ Создать задание',
     wdMinHint:'⚠️ Минимум: 200 Coins',
-    multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🐼',
+    multiAccount:'⚠️ Вы используете несколько аккаунтов — играйте честно 🏍️',
     depositRequired:'⛔ Вывод доступен только для пополнивших счёт\n\n💎 Пополните счёт хотя бы на 1 TON, чтобы разблокировать вывод\n\n🔄 Перенаправление на страницу пополнения...',
     depositRequiredBtn:'💎 Пополнить сейчас',
     ldLoading:'Загрузка...',
@@ -6785,7 +6938,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Подключено',
     ldBuilding:'Сборка интерфейса...',
     ldWallet:'Настройка кошелька...',
-    ldReady:'Готово! 🐼',
+    ldReady:'Готово! 🏍️',
     ldErrorMsg:'⚠️ Сервис временно недоступен\nВсе серверы заняты\nПожалуйста, перезапустите приложение',
     ldRetryBtn:'🔄 Повторить',
     tabRegularRef:'👥 Рефералы',
@@ -6798,12 +6951,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Друзья, пополнившие счёт TON',
     claimBtn2:'Получить',
     taskConfirmTitle:'Важное подтверждение',
-    taskConfirmBody:'🤖 Вы должны добавить <b style="color:#fff">@PandaBamboBot</b> как администратора в ваш канал <b>перед</b> созданием задания.<br><br>⛔ Если бот не является администратором, <b style="color:#ff8a80">задание будет удалено и баланс НЕ будет возвращён.</b>',
+    taskConfirmBody:'🤖 Вы должны добавить <b style="color:#fff">@RaseenBot</b> как администратора в ваш канал <b>перед</b> созданием задания.<br><br>⛔ Если бот не является администратором, <b style="color:#ff8a80">задание будет удалено и баланс НЕ будет возвращён.</b>',
     taskConfirmChannel:'Канал:',
     taskConfirmCost:'Стоимость:',
     taskConfirmBtn:'✅ Понял, создать задание',
     cancelBtn:'Отмена',
-    multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🐼',
+    multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🏍️',
     compTabActive:'💎 Активные рефералы',
     compTabMining:'⚡ Скорость майнинга',
     compActiveDesc:'Топ-20 пользователей с наибольшим числом активных рефералов',
@@ -6830,7 +6983,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Asociación',
     req1:'1,000+ suscriptores reales',
     req2:'Suscriptores reales (no bots)',
-    req3:'Post sobre Bali Rally',
+    req3:'Post sobre Raseen',
     postLinkLabel:'Enlace del post',
     submitPost:'📤 Enviar',
     postHistory:'Historial',
@@ -6869,12 +7022,12 @@ const TRANSLATIONS = {
     swapFrom:'DE',swapTo:'A',balance:'Saldo:',maxBtn:'MÁX',
     swapRate:'📊 300 Bamboo = 10 Monedas',exchangeNow:'⚡ Cambiar ahora',
     exchangeHist:'📋 Historial de cambios',noConversions:'Sin conversiones aún',
-    helpTitle:'🐼 Guía de Panda Bamboo',
+    helpTitle:'🏍️ Guía de RASEEN',
     helpPayCh:'Canal de<br>pagos',helpNewsCh:'Noticias<br>del bot',helpSupport:'Soporte<br>técnico',
     helpWelcomeTitle:'🎁 Bono de bienvenida gratis',
     helpWelcomeBody:'Al registrarte por primera vez recibes automáticamente:<br><span style="color:#fff;font-weight:800">• 200 Monedas</span> — moneda principal de retiro<br><span style="color:#fff;font-weight:800">• 100 Bamboo/día</span> — minería gratuita empieza de inmediato',
     helpIdeaTitle:'💡 Concepto principal',
-    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🎋<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
+    helpIdeaBody:'El bot es una Fábrica de Bamboo virtual 🏁<br>⬅ Compra máquinas en el Mercado con <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Las máquinas producen Bamboo automáticamente<br>⬅ Convierte Bamboo a <span style="color:var(--coin);font-weight:800">Monedas</span> en Finance<br>⬅ Retira Monedas a tu cartera TON 💎',
     helpPagesTitle:'🗂 Guía de páginas',
     helpPageHome:'🏠 Inicio',helpPageHomeDesc:'Ve el panda, el tanque y la tasa de minería. Pulsa Claim Bamboo para recoger lo acumulado.',
     helpPageMarket:'🛒 Mercado',helpPageMarketDesc:'Compra máquinas de minería con Bamboo. Cada máquina aumenta tu producción diaria.',
@@ -6887,7 +7040,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Comisión de referido',helpRefCommissionVal:'20% de las compras del amigo',
     helpAddTask:'➕ Añadir tarea (100 miembros)',
     helpWdTitle:'📤 Condiciones de retiro',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
     upgTitle:'⬆️ Mejorar tanque',miningInfoTitle:'⚡ Info de minería',
     addTaskTitle:'➕ Añadir tarea comunitaria',
     taskCostFormula:'Costo = <strong style="color:var(--coin)">Usuarios objetivo × 60 Monedas</strong>',
@@ -6898,7 +7051,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Usuarios objetivo (mín. 100)',
     taskTotalCost:'Costo total:',taskCreateBtn:'✅ Crear tarea',
     wdMinHint:'⚠️ Mínimo: 200 Monedas',
-    multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🐼',
+    multiAccount:'⚠️ Estás usando múltiples cuentas — juega limpio 🏍️',
     depositRequired:'⛔ El retiro solo está disponible para quienes han depositado\n\n💎 Realiza al menos un depósito de TON para desbloquear los retiros\n\n🔄 Redirigiendo a la página de depósito...',
     depositRequiredBtn:'💎 Depositar ahora',
     ldLoading:'Cargando...',
@@ -6912,7 +7065,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Conectado',
     ldBuilding:'Construyendo interfaz...',
     ldWallet:'Configurando billetera...',
-    ldReady:'¡Listo! 🐼',
+    ldReady:'¡Listo! 🏍️',
     ldErrorMsg:'⚠️ Servicio temporalmente no disponible\nTodos los servidores están ocupados\nPor favor reinicia la app en un momento',
     ldRetryBtn:'🔄 Reintentar',
     tabRegularRef:'👥 Referidos',
@@ -6925,12 +7078,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Amigos que depositaron TON',
     claimBtn2:'Reclamar',
     taskConfirmTitle:'Confirmación importante',
-    taskConfirmBody:'🤖 Debes agregar <b style="color:#fff">@PandaBamboBot</b> como administrador en tu canal <b>antes</b> de crear la tarea.<br><br>⛔ Si el bot no es administrador, <b style="color:#ff8a80">la tarea será eliminada y tu saldo NO será reembolsado.</b>',
+    taskConfirmBody:'🤖 Debes agregar <b style="color:#fff">@RaseenBot</b> como administrador en tu canal <b>antes</b> de crear la tarea.<br><br>⛔ Si el bot no es administrador, <b style="color:#ff8a80">la tarea será eliminada y tu saldo NO será reembolsado.</b>',
     taskConfirmChannel:'Canal:',
     taskConfirmCost:'Costo:',
     taskConfirmBtn:'✅ Entendido, crear tarea',
     cancelBtn:'Cancelar',
-    multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🐼',
+    multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🏍️',
     compTabActive:'💎 Referidos activos',
     compTabMining:'⚡ Velocidad de minería',
     compActiveDesc:'Top 20 usuarios con más referidos activos (que depositaron)',
@@ -6957,7 +7110,7 @@ const TRANSLATIONS = {
     partnershipTitle:'Partenariat',
     req1:'1 000+ vrais abonnés',
     req2:'Abonnés réels (pas de bots)',
-    req3:'Post sur Bali Rally',
+    req3:'Post sur Raseen',
     postLinkLabel:'Lien du post',
     submitPost:'📤 Soumettre',
     postHistory:'Historique posts',
@@ -6996,12 +7149,12 @@ const TRANSLATIONS = {
     swapFrom:'DE',swapTo:'VERS',balance:'Solde:',maxBtn:'MAX',
     swapRate:'📊 300 Bamboo = 10 Pièces',exchangeNow:'⚡ Échanger maintenant',
     exchangeHist:'📋 Historique des échanges',noConversions:'Aucune conversion encore',
-    helpTitle:'🐼 Guide Panda Bamboo',
+    helpTitle:'🏍️ Guide RASEEN',
     helpPayCh:'Canal de<br>paiements',helpNewsCh:'Actualités<br>du bot',helpSupport:'Support<br>technique',
     helpWelcomeTitle:'🎁 Bonus de bienvenue gratuit',
     helpWelcomeBody:'À votre première inscription vous recevez automatiquement:<br><span style="color:#fff;font-weight:800">• 200 Pièces</span> — monnaie de retrait principale<br><span style="color:#fff;font-weight:800">• 100 Bamboo/jour</span> — minage gratuit démarre immédiatement',
     helpIdeaTitle:'💡 Concept principal',
-    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🎋<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
+    helpIdeaBody:'Le bot est une Usine de Bamboo virtuelle 🏁<br>⬅ Achetez des machines sur le Marché avec du <span style="color:var(--bamboo);font-weight:800">Bamboo</span><br>⬅ Les machines produisent automatiquement du Bamboo<br>⬅ Convertissez le Bamboo en <span style="color:var(--coin);font-weight:800">Pièces</span> dans Finance<br>⬅ Retirez les Pièces sur votre portefeuille TON 💎',
     helpPagesTitle:'🗂 Guide des pages',
     helpPageHome:'🏠 Accueil',helpPageHomeDesc:'Voyez le panda, le réservoir et le taux de minage. Appuyez sur Claim Bamboo pour collecter.',
     helpPageMarket:'🛒 Marché',helpPageMarketDesc:'Achetez des machines de minage avec du Bamboo. Chaque machine augmente votre production quotidienne.',
@@ -7014,7 +7167,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"20% des achats de l'ami",
     helpAddTask:'➕ Ajouter tâche (100 membres)',
     helpWdTitle:'📤 Conditions de retrait',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/PandaBambooPayouts" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/RaseenRacingbot" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
     upgTitle:'⬆️ Améliorer le réservoir',miningInfoTitle:'⚡ Info de minage',
     addTaskTitle:'➕ Ajouter une tâche communautaire',
     taskCostFormula:'Coût = <strong style="color:var(--coin)">Utilisateurs cibles × 60 Pièces</strong>',
@@ -7025,7 +7178,7 @@ const TRANSLATIONS = {
     taskTargetLabel:'Utilisateurs cibles (min. 100)',
     taskTotalCost:'Coût total:',taskCreateBtn:'✅ Créer la tâche',
     wdMinHint:'⚠️ Minimum: 200 Pièces',
-    multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🐼',
+    multiAccount:'⚠️ Vous utilisez plusieurs comptes — jouez honnêtement 🏍️',
     depositRequired:'⛔ Le retrait est réservé aux utilisateurs ayant effectué un dépôt\n\n💎 Effectuez au moins un dépôt TON pour débloquer les retraits\n\n🔄 Redirection vers la page de dépôt...',
     depositRequiredBtn:'💎 Déposer maintenant',
     ldLoading:'Chargement...',
@@ -7039,7 +7192,7 @@ const TRANSLATIONS = {
     ldConnected:'✅ Connecté',
     ldBuilding:"Construction de l'interface...",
     ldWallet:'Configuration du portefeuille...',
-    ldReady:'Prêt! 🐼',
+    ldReady:'Prêt! 🏍️',
     ldErrorMsg:'⚠️ Service temporairement indisponible\nTous les serveurs sont occupés\nVeuillez redémarrer l\'application',
     ldRetryBtn:'🔄 Réessayer',
     tabRegularRef:'👥 Parrainages',
@@ -7052,12 +7205,12 @@ const TRANSLATIONS = {
     friendsDeposited:'Amis ayant déposé du TON',
     claimBtn2:'Réclamer',
     taskConfirmTitle:'Confirmation importante',
-    taskConfirmBody:'🤖 Vous devez ajouter <b style="color:#fff">@PandaBamboBot</b> comme administrateur dans votre chaîne <b>avant</b> de créer la tâche.<br><br>⛔ Si le bot n\'est pas administrateur, <b style="color:#ff8a80">la tâche sera supprimée et votre solde NE sera PAS remboursé.</b>',
+    taskConfirmBody:'🤖 Vous devez ajouter <b style="color:#fff">@RaseenBot</b> comme administrateur dans votre chaîne <b>avant</b> de créer la tâche.<br><br>⛔ Si le bot n\'est pas administrateur, <b style="color:#ff8a80">la tâche sera supprimée et votre solde NE sera PAS remboursé.</b>',
     taskConfirmChannel:'Chaîne:',
     taskConfirmCost:'Coût:',
     taskConfirmBtn:'✅ Compris, créer la tâche',
     cancelBtn:'Annuler',
-    multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🐼',
+    multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🏍️',
     compTabActive:'💎 Réf. actifs',
     compTabMining:'⚡ Vitesse de minage',
     compActiveDesc:'Top 20 utilisateurs avec le plus de parrainages actifs (ayant déposé)',
@@ -7131,6 +7284,8 @@ function closeLangMenuOutside(e){
 function setLang(lang,flag,code){
   try{
     localStorage.setItem('pandaLang',lang);
+    localStorage.setItem('pandaLangFlag',flag);
+    localStorage.setItem('pandaLangCode',code);
     applyLang(lang,flag,code);
   }catch(err){ console.error('setLang error',err); }
   const m=document.getElementById('langMenu'); if(m) m.style.display='none';
@@ -7148,6 +7303,9 @@ function applyLang(lang,flag,code){
   document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang));
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
   document.documentElement.lang=lang;
+  // Sync ALL lang indicators (covers profile, header, mining, garage)
+  document.querySelectorAll('[data-lang-flag]').forEach(el=>{el.textContent=flag;});
+  document.querySelectorAll('[data-lang-code]').forEach(el=>{el.textContent=code;});
 
   // ── Loading screen text (if still visible) ──
   const ldStat=document.getElementById('ldStatus');
@@ -7259,1504 +7417,6 @@ async function loadSeasonAlloc(){
 }
 
 
-</script>
-<script type="text/html" id="raceEngineHTML">
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAG RACE — MOTORCYCLES</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
-  #canvas-container { position:relative; width:100vw; height:100vh; }
-  canvas { display:block; width:100%!important; height:100%!important; }
-
-  /* ── LOADING SCREEN ── */
-  #loading-screen {
-    position:fixed; inset:0; z-index:999;
-    background:radial-gradient(ellipse at center, #0a0a14 0%, #000 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    transition:opacity 0.9s ease, visibility 0.9s ease;
-  }
-  #loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
-  #loading-logo {
-    font-size:52px; font-weight:900; letter-spacing:8px; text-transform:uppercase;
-    color:#fff; text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);
-    margin-bottom:10px; animation:logoPulse 2s ease-in-out infinite;
-  }
-  #loading-logo span { color:#FFB800; }
-  @keyframes logoPulse {
-    0%,100%{text-shadow:0 0 40px rgba(255,180,0,0.8),0 0 80px rgba(255,100,0,0.4);}
-    50%{text-shadow:0 0 60px rgba(255,180,0,1),0 0 120px rgba(255,100,0,0.7);}
-  }
-  #loading-subtitle {
-    font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:5px;
-    text-transform:uppercase; margin-bottom:60px;
-  }
-  #loading-bar-wrap {
-    width:320px; height:5px; background:rgba(255,255,255,0.08);
-    border-radius:10px; overflow:hidden; margin-bottom:18px;
-    box-shadow:0 0 20px rgba(255,180,0,0.15);
-  }
-  #loading-bar {
-    height:100%; width:0%; border-radius:10px;
-    background:linear-gradient(90deg,#FF5500,#FFB800,#FFE000);
-    transition:width 0.25s ease;
-    box-shadow:0 0 10px rgba(255,180,0,0.6);
-  }
-  #loading-status {
-    font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:3px;
-    text-transform:uppercase; min-height:16px; text-align:center;
-  }
-  #loading-dots {
-    margin-top:50px; display:flex; gap:10px; align-items:center;
-  }
-  .load-dot {
-    width:8px; height:8px; border-radius:50%;
-    animation:dotBounce 1.2s ease-in-out infinite;
-  }
-  .load-dot:nth-child(1){ background:#FFB800; animation-delay:0s; }
-  .load-dot:nth-child(2){ background:#FF8800; animation-delay:0.2s; }
-  .load-dot:nth-child(3){ background:#FF5500; animation-delay:0.4s; }
-  @keyframes dotBounce {
-    0%,100%{transform:translateY(0);opacity:0.3;}
-    50%{transform:translateY(-10px);opacity:1;}
-  }
-
-  /* FIX #5: Remove vignette tint — set background to none */
-  #vignette {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    pointer-events:none; z-index:5;
-    background:none;
-  }
-  /* FIX #5: speed-overlay opacity multiplier set to 0 via JS; keep element */
-  #speed-overlay {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    pointer-events:none; z-index:6; opacity:0; transition:opacity 0.25s;
-    background:radial-gradient(ellipse at center, transparent 20%, rgba(180,200,255,0.05) 100%);
-  }
-  #lens-flare {
-    position:absolute; pointer-events:none; z-index:8;
-    width:260px; height:260px; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,248,200,0.55) 0%, rgba(255,210,80,0.18) 40%, transparent 70%);
-    display:none; transform:translate(-50%,-50%); filter:blur(8px);
-  }
-
-  /* HUD */
-  #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }
-  #p1-hud {
-    position:absolute; top:16px; left:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
-    border:1px solid rgba(255,180,0,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);
-  }
-  #p2-hud {
-    position:absolute; top:16px; right:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);
-    border:1px solid rgba(0,160,255,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px; text-align:right;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);
-  }
-  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-  #p1-hud .car-name { color:#FFB800; }
-  #p2-hud .car-name { color:#00CFFF; }
-  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
-  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
-  .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
-  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
-  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
-  .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
-  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
-  #p2-hud .gear-row { flex-direction:row-reverse; }
-  #p2-hud .gear-num { color:#00CFFF; }
-  #timer-hud {
-    position:absolute; top:16px; left:50%; transform:translateX(-50%);
-    background:rgba(0,0,0,0.68); border:1px solid rgba(255,255,255,0.14);
-    border-radius:8px; padding:6px 16px; text-align:center;
-    backdrop-filter:blur(12px); box-shadow:0 4px 22px rgba(0,0,0,0.5);
-  }
-  .timer-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }
-  .timer-value { font-size:20px; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
-  .prog-wrap { position:absolute; bottom:28px; width:38%; }
-  #p1-prog-wrap { left:5%; }
-  #p2-prog-wrap { right:5%; }
-  .prog-label { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-  #p2-prog-wrap .prog-label { text-align:right; }
-  .prog-bg { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-  #p1-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#FFB800,#FF4400); width:0%; transition:width 0.05s; }
-  #p2-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#0088FF,#AA00FF); width:0%; transition:width 0.05s; }
-  #countdown {
-    position:absolute; top:50%; left:50%;
-    transform:translate(-50%,-50%) scale(1);
-    font-size:160px; font-weight:900; color:#fff;
-    text-shadow:0 0 40px rgba(255,60,60,0.95),0 0 80px rgba(255,60,60,0.5),5px 5px 0 #000;
-    letter-spacing:4px; pointer-events:none; display:none; text-align:center; white-space:nowrap;
-    animation:countPulse 0.6s ease-out;
-  }
-  #countdown.go { color:#00FF88; text-shadow:0 0 40px rgba(0,255,120,0.95),0 0 80px rgba(0,255,120,0.5),5px 5px 0 #003300; font-size:180px; }
-  @keyframes countPulse {
-    0%{transform:translate(-50%,-50%) scale(1.6);opacity:0;}
-    40%{opacity:1;}
-    100%{transform:translate(-50%,-50%) scale(1);opacity:1;}
-  }
-  #winner-banner {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.9); border:2px solid #FFB800; border-radius:20px;
-    padding:40px 70px; text-align:center; display:none; pointer-events:all; z-index:25;
-    backdrop-filter:blur(20px) saturate(1.4);
-    box-shadow:0 0 80px rgba(255,180,0,0.4),0 20px 60px rgba(0,0,0,0.7);
-  }
-  #winner-title { font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:5px; text-transform:uppercase; margin-bottom:10px; }
-  #winner-name { font-size:56px; font-weight:900; color:#FFB800; text-shadow:0 0 30px rgba(255,180,0,0.7); margin-bottom:10px; }
-  #winner-time { font-size:18px; color:rgba(255,255,255,0.7); margin-bottom:5px; }
-  #winner-margin { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:32px; }
-  #race-again-btn {
-    background:linear-gradient(135deg,#FFB800,#FF5500); color:#000; border:none; border-radius:50px;
-    padding:15px 50px; font-size:16px; font-weight:800; cursor:pointer;
-    text-transform:uppercase; letter-spacing:3px; transition:transform 0.12s,box-shadow 0.12s;
-    pointer-events:all; box-shadow:0 4px 20px rgba(255,100,0,0.4);
-  }
-  #race-again-btn:hover { transform:scale(1.06); box-shadow:0 8px 36px rgba(255,140,0,0.6); }
-  #launch-hint {
-    position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
-    font-size:12px; color:rgba(255,255,255,0.55); letter-spacing:3px;
-    text-transform:uppercase; pointer-events:none; animation:blink 1.2s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
-
-  /* Camera mode button */
-  #camBtn{
-    position:fixed; bottom:70px; right:14px; z-index:99999;
-    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);
-    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;
-    padding:10px 18px; border-radius:24px; cursor:pointer;
-    transition:background 0.2s, transform 0.1s;
-    font-family:'Segoe UI',sans-serif; user-select:none;
-    pointer-events:all; touch-action:manipulation;
-  }
-  #camBtn:active{ transform:scale(0.90); }
-</style>
-</head>
-<body>
-<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
-<!-- top back button removed -->
-<!-- LOADING SCREEN -->
-<div id="loading-screen" style="display:none!important">
-  <div id="loading-logo">DRAG<span>RACE</span></div>
-  <div id="loading-subtitle">🏆 Tropical Edition</div>
-  <div id="loading-bar-wrap">
-    <div id="loading-bar"></div>
-  </div>
-  <div id="loading-status">Initializing...</div>
-  <div id="loading-dots">
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-    <div class="load-dot"></div>
-  </div>
-</div>
-
-<div id="canvas-container">
-  <canvas id="c"></canvas>
-  <div id="vignette"></div>
-  <div id="speed-overlay"></div>
-  <div id="lens-flare"></div>
-  <div id="hud">
-    <div id="p1-hud">
-      <div class="car-name">🏍 Player 1</div>
-      <div class="speed-gauge-wrap">
-        <span class="speed-num" id="p1-speed">0</span>
-        <span class="speed-unit">km/h</span>
-      </div>
-      <div class="rpm-label">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p1-rpm" style="width:0%"></div></div>
-      <div class="gear-row">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p1-gear">N</span>
-      </div>
-    </div>
-    <div id="timer-hud">
-      <div class="timer-label">⏱ Race Time</div>
-      <div class="timer-value" id="timer-val">0.000</div>
-    </div>
-    <div id="p2-hud">
-      <div class="car-name">Player 2 🏍</div>
-      <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
-        <span class="speed-num" id="p2-speed">0</span>
-        <span class="speed-unit">km/h</span>
-      </div>
-      <div class="rpm-label" style="text-align:right">RPM</div>
-      <div class="rpm-bar-bg"><div class="rpm-fill" id="p2-rpm" style="width:0%;background:linear-gradient(90deg,#00CFFF,#0044FF,#AA00FF);"></div></div>
-      <div class="gear-row" style="flex-direction:row-reverse;">
-        <span class="gear-label">GEAR</span>
-        <span class="gear-num" id="p2-gear">N</span>
-      </div>
-    </div>
-    <div class="prog-wrap" id="p1-prog-wrap">
-      <div class="prog-label">P1 Progress</div>
-      <div class="prog-bg"><div id="p1-fill"></div></div>
-    </div>
-    <div class="prog-wrap" id="p2-prog-wrap">
-      <div class="prog-label" style="text-align:right">P2 Progress</div>
-      <div class="prog-bg"><div id="p2-fill"></div></div>
-    </div>
-    <div id="countdown"></div>
-    <div id="winner-banner">
-      <div id="winner-title">🏆 WINNER</div>
-      <div id="winner-name">Player 1</div>
-      <div id="winner-time">Time: 0.000s</div>
-      <div id="winner-margin">Won by 0.000s</div>
-      <button id="race-again-btn">🔁 Race Again</button>
-    </div>
-    <div id="launch-hint" style="display:none">Press SPACE or tap to launch</div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"><\/script>
-<script>
-(function(){
-'use strict';
-
-// ─── IMAGE URLs ──────────────────────────────────────────────
-const URL_SKY      = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/0283923f-92e7-4fa1-9174-3b65fb3787eb.jpg';
-const URL_MOUNTAIN = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/dbae7089-ceee-43a4-95ff-6821267cfe5b.jpg';
-const URL_GRASS    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/2b70430a-30b5-46e2-9fc7-ce262e388893.jpg';
-const URL_PALM     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/3928c54e-b10d-4d5e-8672-fc0062585db0.png';
-const URL_BUSH     = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/b260a10e-10db-43ca-854c-48b74fb24ef8.png';
-const URL_BUSH2    = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/25cfa60d-c358-4d87-b386-d9379515fc09.png';
-const URL_FOREST   = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/5a90fb8e-890f-422f-811d-e00c619311eb.png';
-const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/8d9d07e8-6107-4cfd-ba07-1202d0e2481b.png';
-
-// ─── RENDERER ────────────────────────────────────────────────
-const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance', logarithmicDepthBuffer:false });
-// FIX 2: Lower pixel ratio for performance (was 1.5)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = false;
-renderer.toneMapping = THREE.LinearToneMapping;
-// FIX 3: Lower exposure so road doesn't blow out (was 1.0)
-renderer.toneMappingExposure = 0.85;
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.physicallyCorrectLights = false;
-
-// ─── SCENE ───────────────────────────────────────────────────
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x6FB2D9);
-
-// ─── CAMERA ──────────────────────────────────────────────────
-const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 3000);
-// نبدأ الكاميرا قدام الدراجات مباشرةً (START_Z=5)
-camera.position.set(0, 1.5, 12);
-camera.lookAt(0, 1.2, 5);
-window.addEventListener('resize', ()=>{
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-});
-
-// ═══════════════════════════════════════════════════════════════
-//  LOADING MANAGER
-// ═══════════════════════════════════════════════════════════════
-let _loadTotal = 0, _loadDone = 0;
-const _loadItems = {};
-
-function setLoadStatus(msg){ document.getElementById('loading-status').textContent = msg; }
-function setLoadBar(pct){ document.getElementById('loading-bar').style.width = Math.min(pct,100)+'%'; }
-
-function trackLoad(key){
-  if(_loadItems[key]) return;
-  _loadItems[key] = false;
-  _loadTotal++;
-  setLoadBar((_loadDone/_loadTotal)*90);
-}
-function loadProgress(key){
-  if(_loadItems[key]) return;
-  _loadItems[key] = true;
-  _loadDone++;
-  const pct = (_loadDone / _loadTotal) * 90;
-  setLoadBar(pct);
-  const labels = { sky:'Sky loaded', grass:'Terrain loaded', palm:'Trees loaded',
-    bush:'Vegetation loaded', forest:'Forest loaded', mountain:'Mountains loaded',
-    model1:'Left bike loaded', model2:'Right bike loaded' };
-  setLoadStatus(labels[key] || 'Loading assets...');
-}
-function checkAllLoaded(){
-  setLoadBar(100);
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('launch-hint').style.display = 'block';
-}
-
-// Patch TL.load to auto-track
-const TL = new THREE.TextureLoader();
-const _tlLoad = TL.load.bind(TL);
-TL.load = function(url, onLoad, onProgress, onError){
-  trackLoad(url);
-  return _tlLoad(url, (tex)=>{ loadProgress(url); if(onLoad) onLoad(tex); }, onProgress, onError);
-};
-
-// ═══════════════════════════════════════════════════════════════
-//  PROCEDURAL TEXTURE HELPERS
-// ═══════════════════════════════════════════════════════════════
-function fbmNoise(ctx, w, h, scale, octaves, baseAlpha){
-  for(let o=0;o<octaves;o++){
-    const f=scale*Math.pow(2,o), a=baseAlpha/Math.pow(2,o);
-    for(let x=0;x<w;x+=Math.max(1,Math.floor(w/f))){
-      for(let y=0;y<h;y+=Math.max(1,Math.floor(h/f))){
-        const v=Math.floor(Math.random()*80-40);
-        const sz=Math.max(1,Math.floor(w/f));
-        ctx.fillStyle=`rgba(${128+v},${128+v},${128+v},${a})`;
-        ctx.fillRect(x,y,sz,sz);
-      }
-    }
-  }
-}
-
-function makeAsphaltTexture(w,h){
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
-  const ctx=c.getContext('2d');
-  // FIX 3: Realistic dark warm-grey asphalt base (was #141414)
-  ctx.fillStyle='#2a2a2c'; ctx.fillRect(0,0,w,h);
-  fbmNoise(ctx,w,h,5,4,0.38);
-  for(let i=0;i<12;i++){
-    const x=Math.random()*w, y=Math.random()*h;
-    const rx=30+Math.random()*80, ry=20+Math.random()*60;
-    const g2=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));
-    const warmR=Math.floor(35+Math.random()*20), warmG=Math.floor(30+Math.random()*15);
-    g2.addColorStop(0,`rgba(${warmR},${warmG},18,0.12)`);
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2; ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2);
-    ctx.fill();
-  }
-  for(let i=0;i<10;i++){
-    const x=Math.random()*w, y=Math.random()*h;
-    const rx=25+Math.random()*70, ry=18+Math.random()*50;
-    const g2=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));
-    g2.addColorStop(0,'rgba(30,38,48,0.14)');
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2;
-    ctx.beginPath(); ctx.ellipse(x,y,rx,ry,Math.random()*Math.PI,0,Math.PI*2); ctx.fill();
-  }
-  for(let i=0;i<14;i++){
-    const x=Math.random()*w, y=Math.random()*h;
-    const r=8+Math.random()*25;
-    const g2=ctx.createRadialGradient(x,y,0,x,y,r);
-    g2.addColorStop(0,'rgba(5,5,8,0.30)');
-    g2.addColorStop(0.5,'rgba(10,8,15,0.15)');
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
-  }
-  for(let i=0;i<8;i++){
-    const x=Math.random()*w, y=Math.random()*h;
-    const r=12+Math.random()*30;
-    const g2=ctx.createRadialGradient(x,y,0,x,y,r);
-    g2.addColorStop(0,'rgba(60,65,70,0.08)');
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
-  }
-  for(let i=0;i<1300;i++){
-    const x=Math.random()*w, y=Math.random()*h, r=0.5+Math.random()*2.5;
-    const v=Math.floor(48+Math.random()*50);
-    ctx.beginPath(); ctx.ellipse(x,y,r,r*0.65,Math.random()*Math.PI,0,Math.PI*2);
-    ctx.fillStyle=`rgb(${v},${v},${v})`; ctx.fill();
-  }
-  for(let i=0;i<8;i++){
-    const xm=w*0.28+Math.random()*(w*0.44);
-    const ym=Math.random()*h;
-    const len=40+Math.random()*120;
-    ctx.strokeStyle=`rgba(6,6,6,${0.18+Math.random()*0.18})`; ctx.lineWidth=3+Math.random()*7;
-    ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(xm+(Math.random()-0.5)*3,ym);
-    ctx.lineTo(xm+(Math.random()-0.5)*5,ym+len); ctx.stroke();
-  }
-  for(let i=0;i<24;i++){
-    const xm=40+Math.random()*(w-80);
-    const ym=Math.random()*h;
-    const len=30+Math.random()*100;
-    const ang=(Math.random()-0.5)*0.6;
-    ctx.strokeStyle=`rgba(6,6,6,${0.18+Math.random()*0.20})`; ctx.lineWidth=0.8+Math.random()*1.8;
-    ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(xm,ym);
-    let cx2=xm, cy2=ym;
-    const steps=3+Math.floor(Math.random()*4);
-    for(let s=0;s<steps;s++){
-      cx2+=(Math.random()-0.5)*14+Math.sin(ang)*12;
-      cy2+=len/steps*(0.7+Math.random()*0.6);
-      ctx.lineTo(cx2,cy2);
-    }
-    ctx.stroke();
-    if(Math.random()<0.5){
-      const bx=xm+(Math.random()-0.5)*20, by=ym+len*0.3;
-      ctx.beginPath(); ctx.moveTo(bx,by);
-      ctx.lineTo(bx+(Math.random()-0.5)*22,by+20+Math.random()*30);
-      ctx.strokeStyle=`rgba(6,6,6,${0.10+Math.random()*0.12})`; ctx.lineWidth=0.6+Math.random()*1.0;
-      ctx.stroke();
-    }
-  }
-  for(let i=0;i<18;i++){
-    const x=20+Math.random()*(w-40), y=Math.random()*h;
-    const r=1.5+Math.random()*5;
-    const g2=ctx.createRadialGradient(x,y,0,x,y,r);
-    g2.addColorStop(0,'rgba(4,4,4,0.55)');
-    g2.addColorStop(0.6,'rgba(10,10,10,0.25)');
-    g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2; ctx.fillRect(x-r,y-r,r*2,r*2);
-  }
-  ctx.strokeStyle='rgba(255,255,255,0.70)'; ctx.lineWidth=9+Math.random()*2;
-  ctx.setLineDash([88,72]);
-  ctx.beginPath(); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.stroke();
-  ctx.setLineDash([]);
-  [18, w-18].forEach(x=>{
-    ctx.strokeStyle='rgba(255,255,255,0.70)';
-    ctx.lineWidth=6+Math.random()*2;
-    ctx.beginPath(); ctx.moveTo(x+(Math.random()-0.5)*1.5,0); ctx.lineTo(x+(Math.random()-0.5)*1.5,h); ctx.stroke();
-  });
-  const tex=new THREE.CanvasTexture(c);
-  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.repeat.set(1, 25);
-  tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
-  return tex;
-}
-
-function makeAsphaltNormal(w,h){
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
-  const ctx=c.getContext('2d');
-  ctx.fillStyle='rgb(128,128,255)'; ctx.fillRect(0,0,w,h);
-  for(let x=0;x<w;x+=3){
-    for(let y=0;y<h;y+=3){
-      const nx=Math.floor(128+(Math.random()-0.5)*40);
-      const ny=Math.floor(128+(Math.random()-0.5)*40);
-      ctx.fillStyle=`rgb(${nx},${ny},255)`; ctx.fillRect(x,y,3,3);
-    }
-  }
-  const tex=new THREE.CanvasTexture(c);
-  tex.wrapS=tex.wrapT=THREE.RepeatWrapping;
-  tex.repeat.set(6,90);
-  return tex;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  LIGHTING
-// ═══════════════════════════════════════════════════════════════
-// الإضاءة العامة — زي الأصل
-const ambient = new THREE.AmbientLight(0xffffff, 0.55);
-scene.add(ambient);
-
-const hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
-scene.add(hemi);
-
-const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-sun.position.set(-40, 60, -120);
-sun.castShadow = true;
-// FIX 2: Smaller shadow map for performance (was 1024)
-sun.shadow.mapSize.width = sun.shadow.mapSize.height = 512;
-sun.shadow.camera.near = 1; sun.shadow.camera.far = 600;
-sun.shadow.camera.left = -150; sun.shadow.camera.right = 150;
-sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
-sun.shadow.radius = 3;
-sun.shadow.bias = -0.0002;
-sun.shadow.normalBias = 0.02;
-scene.add(sun);
-scene.add(sun.target);
-
-// FIX 3: Lower sky fill intensity (was 0.5)
-const skyFill = new THREE.DirectionalLight(0xAADDFF, 0.25);
-skyFill.position.set(0, 100, 0);
-scene.add(skyFill);
-
-// ═══════════════════════════════════════════════════════════════
-//  SKY
-// ═══════════════════════════════════════════════════════════════
-const skyGroup = new THREE.Group();
-scene.add(skyGroup);
-
-(function buildSky(){
-  const skyTex = TL.load(URL_SIDE_BG);
-  skyTex.encoding = THREE.sRGBEncoding;
-  skyTex.wrapS = THREE.RepeatWrapping;
-
-  const matFront = new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.FrontSide, depthWrite:false, fog:false });
-  matFront.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',''); };
-  const skyFront = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matFront);
-  skyFront.position.set(0, 60, -580);
-  skyGroup.add(skyFront);
-
-  const skyTexL = TL.load(URL_SIDE_BG);
-  skyTexL.encoding = THREE.sRGBEncoding; skyTexL.wrapS = THREE.RepeatWrapping; skyTexL.repeat.set(1,1);
-  const matSide = new THREE.MeshBasicMaterial({ map: skyTexL, side: THREE.FrontSide, depthWrite:false, fog:false });
-
-  const skyLeft = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide);
-  skyLeft.position.set(-580, 60, 0); skyLeft.rotation.y = Math.PI/2;
-  skyGroup.add(skyLeft);
-
-  const skyRight = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
-  skyRight.position.set(580, 60, 0); skyRight.rotation.y = -Math.PI/2;
-  skyGroup.add(skyRight);
-
-  const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(1200,500), matSide.clone());
-  skyBack.position.set(0, 60, 580); skyBack.rotation.y = Math.PI;
-  skyGroup.add(skyBack);
-
-  const skyTop = new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),
-    new THREE.MeshBasicMaterial({color:0x6FB2D9, side:THREE.FrontSide, depthWrite:false, fog:false}));
-  skyTop.position.set(0,250,0); skyTop.rotation.x = Math.PI/2;
-  skyGroup.add(skyTop);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  TRACK
-// ═══════════════════════════════════════════════════════════════
-const TRACK_LENGTH = 1100;
-const TRACK_WIDTH  = 14;
-const FINISH_Z     = 860;
-// FIX 2: Reduced texture resolution for performance (was 2048x2048)
-const asphaltTex   = makeAsphaltTexture(512, 512);
-
-const grassTex = TL.load(URL_GRASS);
-grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
-grassTex.repeat.set(40, 140);
-grassTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-grassTex.encoding = THREE.sRGBEncoding;
-
-const roadGeo = new THREE.PlaneGeometry(TRACK_WIDTH, TRACK_LENGTH, 4, 20);
-roadGeo.computeVertexNormals();
-const roadMat = new THREE.MeshLambertMaterial({
-  map:asphaltTex
-});
-const road = new THREE.Mesh(roadGeo, roadMat);
-road.rotation.x=-Math.PI/2; road.position.set(0,0,TRACK_LENGTH/2-10);
-road.receiveShadow=false;
-road.frustumCulled=true;
-scene.add(road);
-
-const gGeo = new THREE.PlaneGeometry(800, TRACK_LENGTH+100);
-const gMat = new THREE.MeshLambertMaterial({ map: grassTex });
-[-400, 400].forEach(x=>{
-  const g=new THREE.Mesh(gGeo,gMat); g.rotation.x=-Math.PI/2;
-  g.position.set(x,-0.01,TRACK_LENGTH/2-10); scene.add(g);
-});
-
-const dirtMat = new THREE.MeshStandardMaterial({color: 0x8B6B3A, roughness: 0.9});
-[-1,1].forEach(side => {
-  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(3, TRACK_LENGTH+100), dirtMat);
-  dirt.rotation.x = -Math.PI/2;
-  dirt.position.set(side * (TRACK_WIDTH/2 + 2), 0.005, TRACK_LENGTH/2);
-  scene.add(dirt);
-});
-
-const curbMat = new THREE.MeshLambertMaterial({ color:0xE8E0D0 });
-function makeCurb(x, zCenter, length){
-  const cg=new THREE.BoxGeometry(0.7,0.12,length);
-  const c=new THREE.Mesh(cg,curbMat); c.position.set(x,0.06,zCenter);
-  c.receiveShadow=c.castShadow=true; scene.add(c);
-  const stripeW=3;
-  for(let z=-length/2;z<length/2;z+=stripeW*2){
-    const sg=new THREE.BoxGeometry(0.72,0.13,stripeW);
-    const sc=new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ color:0xCC2200, roughness:0.65 }));
-    sc.position.set(x,0.065,zCenter+z+stripeW/2); scene.add(sc);
-  }
-}
-makeCurb(-TRACK_WIDTH/2-0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
-makeCurb( TRACK_WIDTH/2+0.35, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
-
-const armcoMat = new THREE.MeshLambertMaterial({ color:0xCCCCCC });
-function makeArmco(x, zCenter, length){
-  const ag=new THREE.BoxGeometry(0.2,0.6,length);
-  const a=new THREE.Mesh(ag,armcoMat); a.position.set(x,0.5,zCenter); a.castShadow=true; scene.add(a);
-  const postCount = Math.floor(length/3)+1;
-  const postGeo=new THREE.CylinderGeometry(0.05,0.06,1.1,8);
-  const postMat=new THREE.MeshStandardMaterial({color:0xAAAAAA,metalness:0.6,roughness:0.4});
-  const postInst=new THREE.InstancedMesh(postGeo,postMat,postCount);
-  postInst.castShadow=true;
-  const dummy=new THREE.Object3D();
-  let idx=0;
-  for(let z=-length/2;z<length/2;z+=3){
-    dummy.position.set(x,0.55,zCenter+z);
-    dummy.updateMatrix();
-    postInst.setMatrixAt(idx++,dummy.matrix);
-  }
-  postInst.instanceMatrix.needsUpdate=true;
-  scene.add(postInst);
-}
-makeArmco(-TRACK_WIDTH/2-1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
-makeArmco( TRACK_WIDTH/2+1.0, TRACK_LENGTH/2-10, TRACK_LENGTH+20);
-
-// ═══════════════════════════════════════════════════════════════
-//  START LINE GANTRY (F1 Style)
-// ═══════════════════════════════════════════════════════════════
-(function buildStartGantry(){
-  const z=8;
-  const gantryMat=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.85,roughness:0.2});
-  const poleMat=new THREE.MeshStandardMaterial({color:0x333333,metalness:0.8,roughness:0.25});
-  [-TRACK_WIDTH/2-1, TRACK_WIDTH/2+1].forEach(x=>{
-    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.25,11,14),poleMat);
-    p.position.set(x,5.5,z); p.castShadow=true; scene.add(p);
-  });
-  const hb=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,TRACK_WIDTH+4,14),gantryMat);
-  hb.rotation.z=Math.PI/2; hb.position.set(0,11,z); hb.castShadow=true; scene.add(hb);
-  const lightColors=[0xFF0000,0xFF0000,0xFF0000,0xFF0000,0xFF8800];
-  for(let i=0;i<5;i++){
-    const lg=new THREE.Mesh(new THREE.SphereGeometry(0.28,8,8),
-      new THREE.MeshStandardMaterial({color:lightColors[i],emissive:lightColors[i],emissiveIntensity:0.4}));
-    lg.position.set(-3+(i*1.5),11.5,z+0.2); scene.add(lg);
-    scene.userData['light_'+i]=lg;
-  }
-  const slC=document.createElement('canvas'); slC.width=512; slC.height=128;
-  const slCtx=slC.getContext('2d');
-  const ts=32;
-  for(let bx=0;bx<512;bx+=ts) for(let by=0;by<128;by+=ts){
-    slCtx.fillStyle=((bx/ts+by/ts)%2===0)?'#fff':'#000';
-    slCtx.fillRect(bx,by,ts,ts);
-  }
-  const slTex=new THREE.CanvasTexture(slC);
-  const sl=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,3),
-    new THREE.MeshStandardMaterial({map:slTex,roughness:0.6,metalness:0.05}));
-  sl.rotation.x=-Math.PI/2; sl.position.set(0,0.012,z); scene.add(sl);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  FINISH GATE
-// ═══════════════════════════════════════════════════════════════
-(function buildFinish(){
-  const finZ=FINISH_Z;
-  const poleMat=new THREE.MeshStandardMaterial({color:0xBBBBBB,metalness:0.88,roughness:0.18});
-  [-TRACK_WIDTH/2-0.6, TRACK_WIDTH/2+0.6].forEach(x=>{
-    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.26,14,14),poleMat);
-    p.position.set(x,7,finZ); p.castShadow=true; scene.add(p);
-    const bp=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.25,10),poleMat);
-    bp.position.set(x,0.12,finZ); scene.add(bp);
-  });
-  const crossGeo=new THREE.CylinderGeometry(0.15,0.15,TRACK_WIDTH+2.5,12);
-  crossGeo.applyMatrix4(new THREE.Matrix4().makeRotationZ(Math.PI/2));
-  const cross=new THREE.Mesh(crossGeo,poleMat); cross.position.set(0,14,finZ); cross.castShadow=true; scene.add(cross);
-  [[-1,1],[1,1]].forEach(([sx])=>{
-    const dg=new THREE.CylinderGeometry(0.08,0.08,8,8);
-    dg.applyMatrix4(new THREE.Matrix4().makeRotationZ(sx*0.5));
-    const d=new THREE.Mesh(dg,poleMat); d.position.set(sx*(TRACK_WIDTH/2-1),10,finZ); scene.add(d);
-  });
-  const banC=document.createElement('canvas'); banC.width=1024; banC.height=200;
-  const bCtx=banC.getContext('2d');
-  const ts2=40;
-  for(let bx=0;bx<1024;bx+=ts2) for(let by=0;by<200;by+=ts2){
-    bCtx.fillStyle=((bx/ts2+by/ts2)%2===0)?'#000':'#fff';
-    bCtx.fillRect(bx,by,ts2,ts2);
-  }
-  bCtx.font='bold 120px Arial'; bCtx.textAlign='center'; bCtx.textBaseline='middle';
-  bCtx.fillStyle='rgba(255,200,0,1)'; bCtx.fillText('FINISH',512,100);
-  const banGeo=new THREE.PlaneGeometry(TRACK_WIDTH+2,3,20,4);
-  const banPos=banGeo.attributes.position;
-  for(let i=0;i<banPos.count;i++){
-    const x=banPos.getX(i);
-    banPos.setZ(i, Math.sin(x*0.3+0.5)*0.12);
-  }
-  banGeo.computeVertexNormals();
-  const banMat=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(banC),side:THREE.DoubleSide,roughness:0.7});
-  const banner=new THREE.Mesh(banGeo,banMat); banner.position.set(0,12.5,finZ); scene.add(banner);
-  const lMat=new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.55,metalness:0.08});
-  const line=new THREE.Mesh(new THREE.PlaneGeometry(TRACK_WIDTH,2.5),lMat);
-  line.rotation.x=-Math.PI/2; line.position.set(0,0.012,finZ); scene.add(line);
-})();
-
-// ═══════════════════════════════════════════════════════════════
-//  BIKE GROUPS
-// ═══════════════════════════════════════════════════════════════
-const car1 = new THREE.Group();
-car1.position.set(-3, 0, 5);
-car1.rotation.y = 0;
-scene.add(car1);
-
-const car2 = new THREE.Group();
-car2.position.set(3, 0, 5);
-car2.rotation.y = 0;
-scene.add(car2);
-
-car1._wheels = [];
-car2._wheels = [];
-let modelsLoaded = false;
-
-// إضاءة خاصة بكل دراجة — PointLight بس (SpotLight مكلف على الـ GPU)
-const bikeLight1 = new THREE.PointLight(0xffffff, 3.5, 7);
-bikeLight1.position.set(-3, 3, 5);
-scene.add(bikeLight1);
-
-const bikeLight2 = new THREE.PointLight(0xffffff, 3.5, 7);
-bikeLight2.position.set(3, 3, 5);
-scene.add(bikeLight2);
-
-// ── DEBUG PLACEHOLDER CUBES (visible while loading) ──────────
-const debugGeo = new THREE.BoxGeometry(1.2, 1.5, 3.0);
-const debugMat1 = new THREE.MeshBasicMaterial({ color: 0xFFDD00, side: THREE.DoubleSide });
-const debugMat2 = new THREE.MeshBasicMaterial({ color: 0x00AAFF, side: THREE.DoubleSide });
-const debugCube1 = new THREE.Mesh(debugGeo, debugMat1);
-const debugCube2 = new THREE.Mesh(debugGeo, debugMat2);
-debugCube1.position.set(0, 0.75, 0);
-debugCube2.position.set(0, 0.75, 0);
-debugCube1.frustumCulled = false;
-debugCube2.frustumCulled = false;
-car1.add(debugCube1);
-car2.add(debugCube2);
-
-// ═══════════════════════════════════════════════════════════════
-//  MODEL SETUP HELPERS
-// ═══════════════════════════════════════════════════════════════
-function setupBikeModel(model){
-  const wheels = [];
-  const allMeshes = [];
-
-  model.traverse(function(child){
-    if(child.isMesh){
-      child.castShadow = true;
-      child.receiveShadow = false;
-      child.frustumCulled = false;
-      child.geometry.computeBoundingSphere();
-      child.geometry.computeBoundingBox();
-      allMeshes.push(child);
-
-      // COLOR FIX: Ensure textures have correct encoding and materials show original colors
-      if(child.material){
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(function(mat){
-          if(mat.map) mat.map.encoding = THREE.sRGBEncoding;
-          if(mat.emissiveMap) mat.emissiveMap.encoding = THREE.sRGBEncoding;
-          // Prevent metalness from darkening the model
-          if(mat.metalness !== undefined && mat.metalness > 0.5) mat.metalness = 0.3;
-          // Ensure roughness doesn't make model look muddy
-          if(mat.roughness !== undefined && mat.roughness > 0.9) mat.roughness = 0.7;
-          mat.needsUpdate = true;
-        });
-      }
-    }
-  });
-
-  const wheelPattern = /wheel|tire|tyre|rim|roue|rueda/i;
-  allMeshes.forEach(function(mesh){
-    if(wheelPattern.test(mesh.name)) wheels.push(mesh);
-  });
-
-  const geometricWheels = [];
-  if(wheels.length === 0){
-    allMeshes.forEach(function(mesh){
-      const bb = new THREE.Box3().setFromObject(mesh);
-      const sz = new THREE.Vector3(); bb.getSize(sz);
-      const minDim = Math.min(sz.x, sz.y, sz.z);
-      const maxDim = Math.max(sz.x, sz.y, sz.z);
-      if(minDim < maxDim * 0.35 && maxDim > 0.2 && maxDim < 2.5){
-        geometricWheels.push(mesh);
-      }
-    });
-  }
-
-  const detectedWheels = wheels.length > 0 ? wheels : geometricWheels;
-  return { namedWheels: wheels, geometricWheels: geometricWheels, allDetected: detectedWheels };
-}
-
-function fitBikeToGround(innerModel){
-  innerModel.updateMatrixWorld(true);
-  let box = new THREE.Box3().setFromObject(innerModel);
-  let size = new THREE.Vector3();
-  box.getSize(size);
-
-  console.log('GLB native size — X:', size.x.toFixed(2), 'Y:', size.y.toFixed(2), 'Z:', size.z.toFixed(2));
-  console.log('Longest axis:', size.x > size.z ? 'X (bike is sideways in GLB)' : 'Z (bike faces Z in GLB)');
-
-  if(size.x > size.z * 1.2){
-    innerModel.rotation.y = -Math.PI / 2;
-  } else {
-    innerModel.rotation.y = 0;
-  }
-  innerModel.updateMatrixWorld(true);
-  box = new THREE.Box3().setFromObject(innerModel);
-  box.getSize(size);
-
-  const TARGET_LENGTH = 4.5;
-  const currentDepth = Math.max(size.z, size.x, 0.001);
-  const scaleFactor = TARGET_LENGTH / currentDepth;
-  innerModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-  innerModel.updateMatrixWorld(true);
-  box = new THREE.Box3().setFromObject(innerModel);
-  box.getSize(size);
-  const center = new THREE.Vector3();
-  box.getCenter(center);
-
-  innerModel.position.x = -center.x;
-  innerModel.position.z = -center.z;
-  innerModel.position.y = -box.min.y;
-}
-
-// ── RED PLACEHOLDER BOXES (shown if a model fails to load entirely) ──
-function spawnFallbackBox(car, colorHex){
-  const mat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: false, side: THREE.DoubleSide });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 3.6), mat);
-  body.position.set(0, 1.2, 0); body.frustumCulled = false; car.add(body);
-  const front = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), mat);
-  front.position.set(0, 1.5, 1.6); front.frustumCulled = false; car.add(front);
-  const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.25, 16);
-  const wMat = new THREE.MeshBasicMaterial({ color: 0x333333, side: THREE.DoubleSide });
-  [-1.6, 1.6].forEach(function(zOff){
-    const wheel = new THREE.Mesh(wGeo, wMat);
-    wheel.rotation.z = Math.PI / 2;
-    wheel.position.set(0, 0.55, zOff);
-    wheel.frustumCulled = false;
-    car.add(wheel);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  GLB LOADING — Two separate loads, one per lane
-// ═══════════════════════════════════════════════════════════════
-const dracoLoader = new THREE.DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-
-const gltfLoader = new THREE.GLTFLoader();
-gltfLoader.setDRACOLoader(dracoLoader);
-
-// car1 (left lane, x=-3) — uses "bike with rider 2.glb"
-const BIKE1_URL_PRIMARY  = 'bike with rider 2.glb';
-const BIKE1_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
-
-// car2 (right lane, x=+3) — uses "bike with rider.glb"
-const BIKE2_URL_PRIMARY  = 'bike with rider.glb';
-const BIKE2_URL_FALLBACK = 'https://files.catbox.moe/bmgbx2.glb';
-
-// Track two independent model loads
-trackLoad('model1');
-trackLoad('model2');
-
-// Counter: call checkAllLoaded only after both loads complete (success or fallback)
-let modelsFinishedCount = 0;
-function onModelLoadComplete(){
-  modelsFinishedCount++;
-  if(modelsFinishedCount >= 2){
-    modelsLoaded = true;
-    dracoLoader.dispose();
-    checkAllLoaded();
-    try{ window.parent && window.parent.postMessage({type:'race-ready'},'*'); }catch(e){}
-  }
-}
-
-// Apply a loaded GLB scene to car1 (left lane)
-function applyBike1Gltf(gltf){
-  const bikeModel = gltf.scene;
-  fitBikeToGround(bikeModel);
-  const r = setupBikeModel(bikeModel);
-  car1._wheels = r.namedWheels;
-  car1._allWheelMeshes = r.allDetected;
-  car1.remove(debugCube1);
-  car1.add(bikeModel);
-  loadProgress('model1');
-  onModelLoadComplete();
-}
-
-// Apply a loaded GLB scene to car2 (right lane)
-function applyBike2Gltf(gltf){
-  const bikeModel = gltf.scene;
-  fitBikeToGround(bikeModel);
-  const r = setupBikeModel(bikeModel);
-  car2._wheels = r.namedWheels;
-  car2._allWheelMeshes = r.allDetected;
-  car2.remove(debugCube2);
-  car2.add(bikeModel);
-  loadProgress('model2');
-  onModelLoadComplete();
-}
-
-// Load left-lane bike (bike with rider 2.glb) → car1
-function loadBike1(){
-  gltfLoader.load(
-    BIKE1_URL_PRIMARY,
-    function(gltf){ applyBike1Gltf(gltf); },
-    function(xhr){
-      if(xhr.total > 0){
-        const pct = Math.round(xhr.loaded / xhr.total * 100);
-        setLoadStatus('Loading left bike... ' + pct + '%');
-      }
-    },
-    function(err){
-      setLoadStatus('Left bike: retrying fallback...');
-      gltfLoader.load(
-        BIKE1_URL_FALLBACK,
-        function(gltf){ applyBike1Gltf(gltf); },
-        function(xhr2){
-          if(xhr2.total > 0){
-            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
-            setLoadStatus('Left bike fallback... ' + pct2 + '%');
-          }
-        },
-        function(err2){
-          setLoadStatus('Left bike unavailable — using placeholder');
-          car1.remove(debugCube1);
-          spawnFallbackBox(car1, 0xFF2200);
-          loadProgress('model1');
-          onModelLoadComplete();
-        }
-      );
-    }
-  );
-}
-
-// Load right-lane bike (bike with rider.glb) → car2
-function loadBike2(){
-  gltfLoader.load(
-    BIKE2_URL_PRIMARY,
-    function(gltf){ applyBike2Gltf(gltf); },
-    function(xhr){
-      if(xhr.total > 0){
-        const pct = Math.round(xhr.loaded / xhr.total * 100);
-        setLoadStatus('Loading right bike... ' + pct + '%');
-      }
-    },
-    function(err){
-      setLoadStatus('Right bike: retrying fallback...');
-      gltfLoader.load(
-        BIKE2_URL_FALLBACK,
-        function(gltf){ applyBike2Gltf(gltf); },
-        function(xhr2){
-          if(xhr2.total > 0){
-            const pct2 = Math.round(xhr2.loaded / xhr2.total * 100);
-            setLoadStatus('Right bike fallback... ' + pct2 + '%');
-          }
-        },
-        function(err2){
-          setLoadStatus('Right bike unavailable — using placeholder');
-          car2.remove(debugCube2);
-          spawnFallbackBox(car2, 0xFF6600);
-          loadProgress('model2');
-          onModelLoadComplete();
-        }
-      );
-    }
-  );
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-//  PROCEDURAL RIDER — r128 compatible (no CapsuleGeometry)
-// ═══════════════════════════════════════════════════════════════
-function makeCapsule(rt, rb, h, col, rough=0.7, metal=0.0){
-  const g = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
-  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,10), mat);
-  g.add(cyl);
-  const top = new THREE.Mesh(new THREE.SphereGeometry(rt,10,8,0,Math.PI*2,0,Math.PI/2), mat);
-  top.position.y = h/2; g.add(top);
-  const bot = new THREE.Mesh(new THREE.SphereGeometry(rb,10,8,0,Math.PI*2,Math.PI/2,Math.PI/2), mat);
-  bot.position.y = -h/2; g.add(bot);
-  g.traverse(c=>{ if(c.isMesh) c.frustumCulled=false; });
-  return g;
-}
-
-function addProceduralRider(carGroup, helmetColor){
-  const suitCol  = 0x1a1a2e;
-  const bootCol  = 0x0d0d0d;
-  const gloveCol = 0x111111;
-  const skinCol  = 0x8B5E3C;
-
-  function smat(col, rough=0.75, metal=0.0){
-    return new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
-  }
-
-  const rg = new THREE.Group();
-
-  const torso = makeCapsule(0.20, 0.22, 0.44, suitCol, 0.8);
-  torso.rotation.x = -0.65;
-  torso.position.set(0, 1.20, 0.10);
-  rg.add(torso);
-
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.09,0.02), smat(helmetColor,0.4));
-  stripe.position.set(0, 1.22, -0.13);
-  rg.add(stripe);
-
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.09,0.11,10), smat(skinCol,0.8));
-  neck.position.set(0, 1.50, 0.00);
-  rg.add(neck);
-
-  const helmetMat = new THREE.MeshStandardMaterial({color:helmetColor, roughness:0.25, metalness:0.15});
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.20, 20, 16), helmetMat);
-  helmet.scale.set(1.0, 1.08, 1.12);
-  helmet.position.set(0, 1.66, -0.04);
-  rg.add(helmet);
-
-  const visorMat = new THREE.MeshStandardMaterial({
-    color:0x0a0a1a, roughness:0.02, metalness:0.9,
-    transparent:true, opacity:0.80, side:THREE.FrontSide
-  });
-  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.148,16,12,0.25,2.6,0.55,0.95), visorMat);
-  visor.position.set(0, 1.62, 0.09);
-  visor.scale.set(1, 0.82, 0.88);
-  visor.frustumCulled = false;
-  rg.add(visor);
-
-  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,10,0,Math.PI*2,0.85,0.7), helmetMat);
-  chin.position.set(0, 1.56, 0.10);
-  chin.scale.set(1,0.75,1.1);
-  chin.frustumCulled=false;
-  rg.add(chin);
-
-  [[-1],[1]].forEach(([side])=>{
-    const ua = makeCapsule(0.065,0.075, 0.26, suitCol, 0.8);
-    ua.rotation.z = side * 1.05;
-    ua.rotation.x = -0.45;
-    ua.position.set(side*0.27, 1.26, 0.08);
-    rg.add(ua);
-
-    const fa = makeCapsule(0.052,0.062, 0.22, suitCol, 0.8);
-    fa.rotation.z = side * 0.45;
-    fa.rotation.x = -0.95;
-    fa.position.set(side*0.32, 1.04, 0.28);
-    rg.add(fa);
-
-    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062,10,8), smat(gloveCol,0.6));
-    glove.position.set(side*0.34, 0.90, 0.42);
-    glove.frustumCulled=false;
-    rg.add(glove);
-  });
-
-  [[-1],[1]].forEach(([side])=>{
-    const thigh = makeCapsule(0.095,0.105, 0.30, suitCol, 0.8);
-    thigh.rotation.x = 1.25;
-    thigh.position.set(side*0.14, 0.95, 0.30);
-    rg.add(thigh);
-
-    const shin = makeCapsule(0.070,0.082, 0.26, suitCol, 0.8);
-    shin.rotation.x = -0.80;
-    shin.position.set(side*0.14, 0.66, 0.50);
-    rg.add(shin);
-
-    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.115,0.095,0.21), smat(bootCol,0.9));
-    boot.position.set(side*0.14, 0.52, 0.60);
-    boot.frustumCulled=false;
-    rg.add(boot);
-  });
-
-  rg.traverse(c=>{ if(c.isMesh){ c.frustumCulled=false; c._isRiderPart=true; } });
-  carGroup.add(rg);
-  carGroup._rider = rg;
-}
-
-
-// Kick off both loads in parallel
-loadBike1();
-loadBike2();
-
-// ═══════════════════════════════════════════════════════════════
-//  PARTICLE SYSTEM — FIX 2: Reduced MAX_P from 150 → 80
-// ═══════════════════════════════════════════════════════════════
-const MAX_P=80;
-const pGeo=new THREE.BufferGeometry();
-const pPos2=new Float32Array(MAX_P*3);
-const pSz=new Float32Array(MAX_P);
-const pLf=new Float32Array(MAX_P);
-const pVx=new Float32Array(MAX_P), pVy=new Float32Array(MAX_P), pVz2=new Float32Array(MAX_P);
-const pTy=new Uint8Array(MAX_P);
-for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pPos2[i*3+1]=9999; pPos2[i*3+2]=9999; pLf[i]=0; pSz[i]=0; }
-pGeo.setAttribute('position',new THREE.BufferAttribute(pPos2,3));
-pGeo.setAttribute('size',new THREE.BufferAttribute(pSz,1));
-const pC=document.createElement('canvas'); pC.width=64; pC.height=64;
-const pCx=pC.getContext('2d');
-const pG=pCx.createRadialGradient(32,32,0,32,32,32);
-pG.addColorStop(0,'rgba(255,255,255,1)'); pG.addColorStop(0.5,'rgba(255,255,255,0.4)'); pG.addColorStop(1,'rgba(255,255,255,0)');
-pCx.fillStyle=pG; pCx.fillRect(0,0,64,64);
-const particleMat=new THREE.PointsMaterial({map:new THREE.CanvasTexture(pC),size:1.4,transparent:true,opacity:0.55,sizeAttenuation:true,depthWrite:false,blending:THREE.AdditiveBlending});
-const particles=new THREE.Points(pGeo,particleMat);
-scene.add(particles);
-let pIdx2=0;
-function spawnP(x,y,z,vx,vy,vz,type){
-  const i=pIdx2%MAX_P; pIdx2++;
-  pPos2[i*3]=x; pPos2[i*3+1]=y; pPos2[i*3+2]=z;
-  pLf[i]=1.0; pSz[i]=type===3?0.3:(type===0?2.5:1.1);
-  pVx[i]=vx+(Math.random()-0.5)*0.5; pVy[i]=vy+Math.random()*0.25; pVz2[i]=vz+(Math.random()-0.5)*0.35;
-  pTy[i]=type;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════════════════════
-const START_Z=5;
-const gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];
-const gearThr=[0,14,38,70,106,148,198];
-const MAX_SPD=325;
-
-const state={phase:'idle',timer:0,raceStart:0,
-  p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
-  p2:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0}};
-let p1M=1,p2M=1,cShake=0;
-
-function getGear(spd){ for(let g=gearThr.length-1;g>=0;g--) if(spd>=gearThr[g]) return g+1; return 1; }
-
-function resetGame(){
-  state.phase='idle'; state.timer=0; state.raceStart=0;
-  state.p1={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
-  state.p2={pos:START_Z,speed:0,gear:1,finished:false,finTime:0};
-  car1.position.set(-3,0,START_Z); car2.position.set(3,0,START_Z);
-  document.getElementById('winner-banner').style.display='none';
-  document.getElementById('countdown').style.display='none';
-  document.getElementById('launch-hint').style.display='block';
-  p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16;
-  cShake=0;
-  for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
-  document.getElementById('timer-val').textContent = '0.000';
-  // FIX 1: Re-enable cinematic on reset
-  cinematicTimer = 7.0;
-  cinematicDone = false;
-}
-
-function startCountdown(){
-  if(state.phase!=='idle') return;
-  // FIX 1: Interrupt cinematic immediately when user starts race
-  cinematicDone = true;
-  document.getElementById('launch-hint').style.display='none';
-  state.phase='countdown';
-  const el=document.getElementById('countdown');
-  el.style.display='block'; el.classList.remove('go');
-  for(let li=0;li<5;li++){
-    const lm=scene.userData['light_'+li];
-    if(lm){ lm.material.emissiveIntensity=0.2; }
-  }
-  let idx=0;
-  const counts=['3','2','1','GO!'];
-  function step(){
-    if(idx<3){
-      el.textContent=counts[idx];
-      const lm=scene.userData['light_'+idx];
-      if(lm){ lm.material.color.setHex(0xFF0000); lm.material.emissive.setHex(0xFF0000); lm.material.emissiveIntensity=3.0; }
-    } else {
-      el.textContent='GO!'; el.classList.add('go');
-      for(let li=0;li<5;li++){
-        const lm2=scene.userData['light_'+li];
-        if(lm2){ lm2.material.color.setHex(0x00FF00); lm2.material.emissive.setHex(0x00FF00); lm2.material.emissiveIntensity=4.0; }
-      }
-    }
-    el.style.animation='none'; el.offsetHeight; el.style.animation='countPulse 0.6s ease-out';
-    idx++;
-    if(idx<4) setTimeout(step,900);
-    else{ setTimeout(()=>{ el.style.display='none'; state.phase='racing'; state.raceStart=performance.now(); cShake=0.22; },700); }
-  }
-  step();
-}
-
-window.addEventListener('keydown',e=>{
-  if(e.code==='Space'||e.key===' '){ e.preventDefault(); if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); }
-});
-document.getElementById('canvas-container').addEventListener('click',()=>{ if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); });
-document.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPropagation(); resetGame(); });
-
-// ═══════════════════════════════════════════════════════════════
-//  CAMERA — FIX 1: Multi-phase cinematic intro
-// ═══════════════════════════════════════════════════════════════
-
-function cycleCam(){
-  camMode = (camMode + 1) % CAM_MODES.length;
-  document.getElementById('camBtn').textContent = CAM_MODES[camMode];
-}
-
-let camMode = 0; // 0=chase, 1=top, 2=side, 3=low-front
-const CAM_MODES = ['🎥 Chase', '🔼 Top', '↔️ Side', '🏁 Front'];
-
-// FIX 1: Enable cinematic intro — 7 seconds, plays once at load
-let cinematicTimer = 7.0;
-let cinematicDone  = false;
-
-// Ease in-out cubic
-function easeInOut(t){ return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
-
-function updateCamera(dt){
-  const midZ = (state.p1.pos + state.p2.pos) * 0.5;
-  const sh  = cShake * Math.sin(Date.now()*0.13) * 0.09;
-  const shY = cShake * Math.abs(Math.sin(Date.now()*0.08)) * 0.04;
-
-  // ── FIX 1: CINEMATIC INTRO (only in idle phase before race) ──
-  if(!cinematicDone && state.phase === 'idle'){
-    cinematicTimer -= dt;
-    const elapsed = 7.0 - Math.max(cinematicTimer, 0);
-    const t = elapsed; // 0 → 7
-
-    // الدراجات دايماً في START_Z=5 — نخلي الكاميرا تطوّف حواليهم
-    const bikeZ = START_Z; // 5
-    let tX, tY, tZ, lX=0, lY=1.2, lZ=bikeZ;
-
-    if(t < 2.5){
-      // Phase 1: كلوز-أب من الأمام — الكاميرا قدام الدراجات بتشوفهم وجه لوجه
-      const p = easeInOut(t / 2.5);
-      tX = 0;
-      tY = 1.5 + p * 0.5;       // 1.5 → 2
-      tZ = bikeZ + 7 + p * 3;   // 12 → 15 (قدام الدراجات)
-      lX = 0; lY = 1.2; lZ = bikeZ;
-    } else if(t < 4.5){
-      // Phase 2: دوران جانبي — تطوّف حوالين الدراجات
-      const p = easeInOut((t - 2.5) / 2.0);
-      const a = p * Math.PI; // 0 → π
-      tX = Math.sin(a) * 9;
-      tY = 2.5;
-      tZ = bikeZ + Math.cos(a) * 9; // تدور حوالين bikeZ
-      lX = 0; lY = 1.2; lZ = bikeZ;
-    } else {
-      // Phase 3: تانزيشن لكاميرا السباق من ورا
-      const p = easeInOut((t - 4.5) / 2.5);
-      const fromX = 0;
-      const fromY = 2.5;
-      const fromZ = bikeZ - 9;
-      const toX = sh;
-      const toY = 4.5 + shY;
-      const toZ = bikeZ - 11.0;
-      tX = fromX + (toX - fromX) * p;
-      tY = fromY + (toY - fromY) * p;
-      tZ = fromZ + (toZ - fromZ) * p;
-      lX = 0;
-      lY = 1.2;
-      lZ = bikeZ + p * 25;
-    }
-
-    if(cinematicTimer <= 0){
-      cinematicDone = true;
-    }
-
-    camera.position.x += (tX - camera.position.x) * 0.10;
-    camera.position.y += (tY - camera.position.y) * 0.08;
-    camera.position.z += (tZ - camera.position.z) * 0.10;
-    camera.lookAt(new THREE.Vector3(lX, lY, lZ));
-    skyGroup.position.set(camera.position.x, 0, camera.position.z);
-    sun.position.set(-80, 100, midZ+50);
-    sun.target.position.set(0,0,midZ);
-    sun.target.updateMatrixWorld();
-    return;
-  }
-  // ── END CINEMATIC ──
-
-  let tX, tY, tZ, lX=0, lY=1.1, lZ;
-
-  // في مرحلة الـ countdown — الكاميرا تبص على الدراجات مش قدامهم
-  const isCountdown = (state.phase === 'countdown');
-
-  if(camMode === 0){
-    // Chase cam
-    tX = sh; tY = 4.5 + shY; tZ = midZ - 11.0;
-    // لو countdown: ابص على الدراجات نفسها، لو racing: ابص للأمام
-    lZ = isCountdown ? midZ + 2 : midZ + 25;
-    lY = isCountdown ? 1.5 : 1.1;
-  } else if(camMode === 1){
-    // Sports broadcast top-down angle
-    tX = 0; tY = 25; tZ = midZ - 4;
-    lX = 0; lY = 0; lZ = midZ + 2;
-  } else if(camMode === 2){
-    // Side cam — perpendicular view
-    tX = 18; tY = 3.5; tZ = midZ;
-    lX = 0; lY = 2; lZ = midZ;
-  } else {
-    // Low front cam — facing the bikes
-    tX = sh * 0.5; tY = 1.4 + shY * 0.5; tZ = midZ + 14;
-    lZ = midZ - 5;
-  }
-
-  const lerpSpd = camMode === 1 ? 0.06 : 0.13;
-  camera.position.x += (tX - camera.position.x) * lerpSpd;
-  camera.position.y += (tY - camera.position.y) * (lerpSpd * 0.8);
-  camera.position.z += (tZ - camera.position.z) * lerpSpd;
-  camera.lookAt(new THREE.Vector3(lX, lY, lZ));
-
-  if(cShake > 0) cShake = Math.max(0, cShake - dt * 0.8);
-  skyGroup.position.set(camera.position.x, 0, camera.position.z);
-  sun.position.set(-80, 100, midZ+50);
-  sun.target.position.set(0,0,midZ);
-  sun.target.updateMatrixWorld();
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  PHYSICS
-// ═══════════════════════════════════════════════════════════════
-function updatePhysics(dt){
-  if(state.phase!=='racing') return;
-  const elapsed=(performance.now()-state.raceStart)/1000;
-  state.timer=elapsed;
-  function updateCar(cs,mult){
-    if(cs.finished) return;
-    cs.gear=getGear(cs.speed);
-    const ga=gears[Math.min(cs.gear,gears.length-1)];
-    const ar=cs.speed/MAX_SPD;
-    const vr=1+(Math.sin(elapsed*3.9+mult*12)*0.022);
-    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*285, MAX_SPD);
-    cs.pos+=cs.speed/3.6*dt;
-  }
-  updateCar(state.p1,p1M); updateCar(state.p2,p2M);
-  car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
-  const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
-  ws.forEach((c,ci)=>{
-    const spd = spds[ci];
-    const rotAmt = spd * 0.052 * dt;
-    if(c._wheels && c._wheels.length > 0){
-      c._wheels.forEach(w=>{ w.rotation.x += rotAmt; });
-    }
-    if(c._allWheelMeshes && c._allWheelMeshes.length > 0){
-      c._allWheelMeshes.forEach(w=>{ w.rotation.x += rotAmt; });
-    }
-    // FIX 2: Cache fallback wheel traversal result to avoid every-frame traversal
-    if((!c._wheels || c._wheels.length===0) && (!c._allWheelMeshes || c._allWheelMeshes.length===0)){
-      if(!c._fallbackWheels){
-        c._fallbackWheels = [];
-        c.traverse(function(child){
-          if(!child.isMesh || child._isRiderPart) return;
-          const bb = child.geometry && child.geometry.boundingBox;
-          if(!bb) return;
-          const sx = bb.max.x - bb.min.x;
-          const sy = bb.max.y - bb.min.y;
-          const sz = bb.max.z - bb.min.z;
-          const thin = Math.min(sx,sy,sz) < Math.max(sx,sy,sz)*0.4;
-          if(thin) c._fallbackWheels.push(child);
-        });
-      }
-      c._fallbackWheels.forEach(function(child){ child.rotation.x += rotAmt; });
-    }
-  });
-  car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
-  car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
-
-  // لما السباق يخلص ارجع الدراجات على الأرض
-  if(state.p1.finished) car1.position.y = 0;
-  if(state.p2.finished) car2.position.y = 0;
-
-  [car1, car2].forEach((car, ci)=>{
-    if(car._rider){
-      const spd = spds[ci];
-      const leanX = -0.18 * (spd / MAX_SPD);
-      car._rider.rotation.x = leanX;
-    }
-  });
-  const now=performance.now();
-  if(!state.p1.finished&&state.p1.pos>=FINISH_Z){ state.p1.finished=true; state.p1.finTime=(now-state.raceStart)/1000; }
-  if(!state.p2.finished&&state.p2.pos>=FINISH_Z){ state.p2.finished=true; state.p2.finTime=(now-state.raceStart)/1000; }
-  if(state.p1.finished&&state.p2.finished&&state.phase==='racing'){
-    state.phase='finished';
-    const w=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';
-    showWinner(w,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));
-  } else if((state.p1.finished||state.p2.finished)&&state.phase==='racing'){
-    const leader=state.p1.finished?state.p1:state.p2;
-    const other=state.p1.finished?state.p2:state.p1;
-    if(leader.pos>FINISH_Z+25&&!other.finished){
-      other.finished=true; other.finTime=(now-state.raceStart)/1000+0.06+Math.random()*0.28;
-      state.phase='finished';
-      const wn=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';
-      showWinner(wn,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));
-    }
-  }
-}
-
-function showWinner(n,t,m){
-  document.getElementById('winner-name').textContent=n;
-  document.getElementById('winner-time').textContent=`Time: ${t.toFixed(3)}s`;
-  document.getElementById('winner-margin').textContent=m<0.001?'Photo Finish!':`Won by ${m.toFixed(3)}s`;
-  document.getElementById('winner-banner').style.display='block';
-  try{ window.parent && window.parent.postMessage({type:'race-finished',winner:n,time:t,margin:m},'*'); }catch(e){}
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  PARTICLES — FIX 2: Reduced spawn counts
-// ═══════════════════════════════════════════════════════════════
-function spawnCarParticles(){
-  if(state.phase!=='racing') return;
-  const elapsed=(performance.now()-state.raceStart)/1000;
-  [[car1,state.p1],[car2,state.p2]].forEach(([c,s])=>{
-    if(s.finished) return;
-    const cx=c.position.x, cy=c.position.y, cz=c.position.z;
-    // FIX 2: Reduced launch smoke from 5 → 2 iterations
-    if(elapsed<2.8&&s.speed<90){
-      for(let i=0;i<2;i++) spawnP(cx+(Math.random()-0.5)*1.9,cy+0.14,cz-1.5+(Math.random()-0.5)*0.6,(Math.random()-0.5)*0.4,0.32+Math.random()*0.45,-(0.5+Math.random()*2.2),0);
-    }
-    for(let e=0;e<2;e++) spawnP(cx+(e===0?-0.42:0.42),cy+0.12,cz-2.3,(Math.random()-0.5)*0.2,0.07+Math.random()*0.12,-(0.3+Math.random()*1.1),2);
-    // FIX 2: Added 50% gate on speed-particle spawning at speed > 35
-    if(s.speed>35&&Math.random()<0.5) spawnP(cx+(Math.random()-0.5)*2,cy+0.07,cz-1.9+(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.3,0.04+Math.random()*0.18,-(0.2+Math.random()*0.9),1);
-    if(s.speed>185&&Math.random()<0.18) spawnP(cx+(Math.random()-0.5)*1.6,cy+0.05,cz-1.6,(Math.random()-0.5)*3,0.5+Math.random()*1.6,-(Math.random()*2),3);
-  });
-}
-
-function updateParticles(dt){
-  for(let i=0;i<MAX_P;i++){
-    if(pLf[i]<=0) continue;
-    const rate=pTy[i]===0?0.55:(pTy[i]===3?3.2:1.15);
-    pLf[i]-=dt*rate;
-    if(pLf[i]<=0){ pPos2[i*3]=9999; pSz[i]=0; continue; }
-    pPos2[i*3]+=pVx[i]*dt*4; pPos2[i*3+1]+=pVy[i]*dt*4; pPos2[i*3+2]+=pVz2[i]*dt*4;
-    pVy[i]-=dt*0.75;
-    pSz[i]*=0.996;
-  }
-  pGeo.attributes.position.needsUpdate=true;
-  pGeo.attributes.size.needsUpdate=true;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  HUD
-// ═══════════════════════════════════════════════════════════════
-function updateHUD(){
-  document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);
-  document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);
-  const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);
-  document.getElementById('p1-rpm').style.width=r1+'%';
-  document.getElementById('p2-rpm').style.width=r2+'%';
-  document.getElementById('p1-rpm').style.backgroundPosition=r1>82?'100% 0':'50% 0';
-  document.getElementById('p1-gear').textContent=state.phase==='racing'?state.p1.gear:'N';
-  document.getElementById('p2-gear').textContent=state.phase==='racing'?state.p2.gear:'N';
-  if(state.phase==='racing') document.getElementById('timer-val').textContent=state.timer.toFixed(3);
-  const prog=FINISH_Z-START_Z;
-  document.getElementById('p1-fill').style.width=Math.min((state.p1.pos-START_Z)/prog*100,100)+'%';
-  document.getElementById('p2-fill').style.width=Math.min((state.p2.pos-START_Z)/prog*100,100)+'%';
-  document.getElementById('speed-overlay').style.opacity='0';
-  // FIX 2: Only update lens-flare DOM when racing (skip idle/cinematic)
-  if(state.phase === 'racing'){
-    const lf=document.getElementById('lens-flare');
-    const fa=Math.abs(Math.sin(Date.now()*0.00045));
-    if(fa>0.62){ lf.style.display='block'; lf.style.left=(38+fa*18)+'%'; lf.style.top='16%'; lf.style.opacity=((fa-0.62)*1.4).toFixed(2); }
-    else lf.style.display='none';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  MAIN LOOP
-// ═══════════════════════════════════════════════════════════════
-let lastT=0, hudFrame=0;
-function animate(time){
-  requestAnimationFrame(animate);
-  const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
-  updatePhysics(dt);
-  spawnCarParticles();
-  updateParticles(dt);
-  updateCamera(dt);
-
-  // تحديث إضاءة الدراجات — تتحرك مع الموديل
-  bikeLight1.position.set(car1.position.x, car1.position.y + 3, car1.position.z);
-  bikeLight2.position.set(car2.position.x, car2.position.y + 3, car2.position.z);
-
-  // FIX 2: Reduced HUD update frequency (was % 2, now % 3)
-  if(hudFrame++ % 5 === 0) updateHUD();
-  renderer.render(scene,camera);
-}
-resetGame();
-requestAnimationFrame(animate);
-setLoadStatus('Loading track & environment...');
-setTimeout(checkAllLoaded, 500);
-
-})();
-
-<\/script>
-</body>
-</html>
-
-</script>
-<script>
-(function(){
-  var el=document.getElementById("raceEngineHTML");
-  if(!el){window.__RACE_ENGINE_URL__="about:blank";return;}
-  var html=el.textContent.replace(/<\\/script/g,"</script");
-  var blob=new Blob([html],{type:"text/html"});
-  window.__RACE_ENGINE_URL__=URL.createObjectURL(blob);
-})();
 </script>
 </body>
 </html>

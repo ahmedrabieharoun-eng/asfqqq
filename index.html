@@ -7,33 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-/* Register service worker — caches 3D bike models only on device.
-   Images, audio, and fonts are always fetched fresh from the network. */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => {
-        // Background preload of bike GLB models so they're cached on device
-        // before the user enters a race. Runs after 8s to avoid blocking UI.
-        setTimeout(async () => {
-          const cache = await caches.open('race-assets-v2');
-          for (let lv = 1; lv <= 7; lv++) {
-            const url = 'Bike Level ' + lv + '.glb';
-            try {
-              const hit = await cache.match(url, { ignoreVary: true });
-              if (hit) continue;
-              await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
-                .catch(() => fetch(url, { cache: 'reload' }));
-            } catch (e) { /* ignore */ }
-          }
-          console.log('[preload] bike models cached');
-        }, 8000);
-      })
-      .catch(err => console.warn('SW register failed', err));
-  });
-}
-</script>
+
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
 <style>
@@ -647,40 +621,6 @@ html, body, button, input, textarea, select, option {
 }
 h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 </style>
-<script>
-/* Global image retry with cache-busting.
-   Any img that fails retries up to 3x with increasing delay + cache-bust. */
-(function(){
-  var MAX=3, BASE=1200;
-  function retry(img){
-    if(img._r===undefined) img._r=0;
-    if(img._r>=MAX) return;
-    img._r++;
-    var delay=BASE*img._r;
-    setTimeout(function(){
-      var base=(img._o||img.src).split('?')[0];
-      img._o=base;
-      img.src=base+'?r='+img._r+'&t='+Date.now();
-    },delay);
-  }
-  function attach(img){
-    if(img._b) return; img._b=true;
-    img.addEventListener('error',function(){retry(img);});
-  }
-  document.addEventListener('DOMContentLoaded',function(){
-    document.querySelectorAll('img').forEach(attach);
-  });
-  new MutationObserver(function(muts){
-    muts.forEach(function(m){
-      m.addedNodes.forEach(function(n){
-        if(n.nodeType!==1) return;
-        if(n.tagName==='IMG') attach(n);
-        if(n.querySelectorAll) n.querySelectorAll('img').forEach(attach);
-      });
-    });
-  }).observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>
 </head>
 <body>
 <!-- BACKGROUND MUSIC: simple instrumental cycling loop, controlled by toggleSound -->

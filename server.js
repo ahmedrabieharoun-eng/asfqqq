@@ -124,7 +124,7 @@ function rateOk(ip){const now=Date.now();const d=_rl.get(ip)||{c:0,r:now+60000};
 
 // Per-user per-action cooldown
 const _userActionTs=new Map();
-const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,claimMissionTask:2500,submitPartnerPost:5000,saveSeasonAlloc:10000};
+const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,raceJoinQueue:1500,racePoll:400,raceCancelQueue:1500,raceAck:800,claimMissionTask:2500,submitPartnerPost:5000,saveSeasonAlloc:10000};
 function userActionOk(uid,action){const cd=ACTION_COOLDOWNS[action];if(!cd)return true;const key=`${uid}:${action}`;const now=Date.now();const last=_userActionTs.get(key)||0;if(now-last<cd)return false;_userActionTs.set(key,now);return true;}
 
 // Logging
@@ -648,29 +648,219 @@ async function hCreateTask(env,uid,data,_meta={}){
   }catch(e){console.error('createTask:',e);return{success:false,error:e.message};}
 }
 
-// ── Race Result ───────────────────────────────────────────────────
-async function hRaceResult(env,uid,data,_meta={}){
+// ── Race (PvP) ─────────────────────────────────────────────────────
+// Server-authoritative matchmaking. Frontend has zero trust on outcome.
+const RACE_COST=0.5, RACE_PRIZE=0.9, RACE_MATCH_TTL=5*60*1000;
+
+function _bikePower(user, lv){
+  const base=BIKE_BASE_STATS[lv]; if(!base) return {total:0,maxKmh:0};
+  const upg=(user.bikeUpgrades||{})[String(lv)]||(user.bikeUpgrades||{})[lv]||{};
+  const s=base.speed   +(upg.speed   ||0)*G.UPGRADE_INCREMENTS.speed;
+  const n=base.nitro   +(upg.nitro   ||0)*G.UPGRADE_INCREMENTS.nitro;
+  const a=base.accel   +(upg.accel   ||0)*G.UPGRADE_INCREMENTS.accel;
+  const m=base.maneuver+(upg.maneuver||0)*G.UPGRADE_INCREMENTS.maneuver;
+  const total=s+n+a+m;
+  return {total, maxKmh:Math.min(500, Math.max(35, Math.round(total/2)))};
+}
+
+// Deprecated: legacy single-player handler. Now a no-op so old clients
+// can't credit themselves any prize. PvP outcome is decided in raceJoinQueue.
+async function hRaceResult(env,uid,_data,_meta={}){
   try{
-    const won=!!data.won;
-    const cost=0.5;
-    const prize=won?0.9:0;
+    const r=await dbGet(env,`users/${uid}`);
+    return{success:true,data:{success:true,data:{tonBalance:r.data?.tonBalance||0,deprecated:true}}};
+  }catch(e){return{success:false,error:e.message};}
+}
+
+// Join (or create) the matchmaking queue. Always charges 0.5 TON up-front.
+async function hRaceJoinQueue(env,uid,data,_meta={}){
+  try{
     const lv=parseInt(data.bikeLevel)||0;
-    const r=await dbGet(env,`users/${uid}`);const user=r.data;
-    if(!user)return{success:false,error:'User not found'};
-    if(lv){
-      const rec=(user.bikeMining||{})[String(lv)]||(user.bikeMining||{})[lv];
-      if(rec&&rec.status==='active'&&(rec.endsAt||0)>Date.now())return{success:false,error:'This bike is mining now'};
+    if(!lv||!BIKE_BASE_STATS[lv]) return{success:false,error:'Invalid bike level'};
+    const ru=await dbGet(env,`users/${uid}`); let user=ru.data;
+    if(!user) return{success:false,error:'User not found'};
+    const owned=(user.ownedBikes||[]).map(Number);
+    if(!owned.includes(lv)) return{success:false,error:'You do not own this bike'};
+    const rec=(user.bikeMining||{})[String(lv)]||(user.bikeMining||{})[lv];
+    if(rec&&rec.status==='active'&&(rec.endsAt||0)>Date.now()) return{success:false,error:'This bike is mining now'};
+    // Already in a match? Return it only if the match record still exists; clear stale pointers.
+    const am=await dbGet(env,`userActiveMatch/${uid}`);
+    if(am.data){
+      const mr=await dbGet(env,`raceMatches/${am.data}`);
+      if(mr.data) return{success:true,data:{status:'matched',matchId:am.data}};
+      await dbDelete(env,`userActiveMatch/${uid}`);
     }
-    const bal=user.tonBalance||0;
-    if(bal<cost)return{success:false,error:'Insufficient TON balance'};
-    const newBal=Math.max(0,bal-cost)+(won?prize:0);
-    const newRaces=(user.totalRacesPlayed||0)+1;
-    await dbUpdate(env,`users/${uid}`,{tonBalance:parseFloat(newBal.toFixed(4)),totalRacesPlayed:newRaces});
-    log(env,uid,'race_result',{won,cost,prize,tonBalance_before:bal,tonBalance_after:newBal},_meta);
-    // Frontend reads: result.success and result.data.tonBalance
-    // api() unwraps j.data, so we wrap the payload one level deeper
-    return{success:true,data:{success:true,data:{tonBalance:parseFloat(newBal.toFixed(4)),won,prize,totalRacesPlayed:newRaces}}};
-  }catch(e){console.error('raceResult:',e);return{success:false,error:e.message};}
+    // Already queued? Keep fresh queue entries, but clear stale ones so old data doesn't block new races.
+    const exQ=await dbGet(env,`raceQueue/${uid}`);
+    if(exQ.data){
+      if(Date.now()-(exQ.data.joinedAt||0)>RACE_MATCH_TTL){
+        const refundBal=parseFloat(((user.tonBalance||0)+RACE_COST).toFixed(4));
+        await Promise.all([
+          dbDelete(env,`raceQueue/${uid}`),
+          dbUpdate(env,`users/${uid}`,{tonBalance:refundBal})
+        ]);
+        user={...user,tonBalance:refundBal};
+      }else{
+        return{success:true,data:{status:'waiting'}};
+      }
+    }
+    if((user.tonBalance||0)<RACE_COST) return{success:false,error:'Insufficient TON balance (need 0.5)'};
+    // Charge entry fee
+    const balAfter=parseFloat(((user.tonBalance||0)-RACE_COST).toFixed(4));
+    await dbUpdate(env,`users/${uid}`,{tonBalance:balAfter});
+    const power=_bikePower(user,lv);
+    const me={uid,lv,power:power.total,maxKmh:power.maxKmh,
+      name:(user.firstName||'Player').slice(0,32),
+      username:(user.username||'').slice(0,32),
+      photoUrl:(user.photoUrl||'').slice(0,512),
+      joinedAt:Date.now()};
+    // Scan queue for an opponent (skip stale > TTL)
+    const qall=await dbGet(env,'raceQueue'); const queue=qall.data||{};
+    let opp=null;
+    for(const k of Object.keys(queue)){
+      if(k===uid) continue;
+      const q=queue[k]; if(!q||!q.uid||q.uid===uid) continue;
+      if(Date.now()-(q.joinedAt||0)>RACE_MATCH_TTL){ await dbDelete(env,`raceQueue/${k}`); continue; }
+      opp=q; break;
+    }
+    if(opp){
+      // Claim opponent via lock + confirm pattern (prevents double-match races)
+      const lockKey=`raceLocks/${opp.uid}`; const lockTs=Date.now();
+      await dbSet(env,lockKey,{byUid:uid,ts:lockTs});
+      await new Promise(r=>setTimeout(r,150));
+      const cf=await dbGet(env,lockKey);
+      if(!cf.data||cf.data.byUid!==uid||cf.data.ts!==lockTs){
+        await dbSet(env,`raceQueue/${uid}`,me);
+        return{success:true,data:{status:'waiting'}};
+      }
+      const oppQ=await dbGet(env,`raceQueue/${opp.uid}`);
+      if(!oppQ.data){
+        await dbDelete(env,lockKey);
+        await dbSet(env,`raceQueue/${uid}`,me);
+        return{success:true,data:{status:'waiting'}};
+      }
+      // Decide winner: higher power; ties -> random
+      const winnerUid = me.power>opp.power ? uid
+                      : opp.power>me.power ? opp.uid
+                      : (Math.random()<0.5?uid:opp.uid);
+      const matchId=`m_${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
+      // p1 = waiting player (left lane), p2 = joining player (right lane)
+      const match={
+        matchId, createdAt:Date.now(),
+        winnerUid, prize:RACE_PRIZE, cost:RACE_COST,
+        p1:{uid:opp.uid,lv:opp.lv,name:opp.name,username:opp.username||'',photoUrl:opp.photoUrl||'',maxKmh:opp.maxKmh,power:opp.power},
+        p2:{uid:me.uid, lv:me.lv, name:me.name, username:me.username||'',  photoUrl:me.photoUrl||'',  maxKmh:me.maxKmh, power:me.power},
+        ack:{}
+      };
+      await dbSet(env,`raceMatches/${matchId}`,match);
+      await Promise.all([
+        dbSet(env,`userActiveMatch/${opp.uid}`,matchId),
+        dbSet(env,`userActiveMatch/${uid}`,matchId),
+        dbDelete(env,`raceQueue/${opp.uid}`),
+        dbDelete(env,lockKey)
+      ]);
+      // Pre-credit winner immediately
+      const loserUid=winnerUid===uid?opp.uid:uid;
+      const [wRef,lRef]=await Promise.all([
+        dbGet(env,`users/${winnerUid}`),
+        dbGet(env,`users/${loserUid}`)
+      ]);
+      const updates=[];
+      if(wRef.data){
+        const newBal=parseFloat(((wRef.data.tonBalance||0)+RACE_PRIZE).toFixed(4));
+        updates.push(dbUpdate(env,`users/${winnerUid}`,{tonBalance:newBal,totalRacesPlayed:(wRef.data.totalRacesPlayed||0)+1}));
+      }
+      if(lRef.data){
+        updates.push(dbUpdate(env,`users/${loserUid}`,{totalRacesPlayed:(lRef.data.totalRacesPlayed||0)+1}));
+      }
+      await Promise.all(updates);
+      log(env,uid,    'race_result',{won:winnerUid===uid,    cost:RACE_COST,prize:winnerUid===uid?    RACE_PRIZE:0,matchId,opponent:opp.uid},_meta);
+      log(env,opp.uid,'race_result',{won:winnerUid===opp.uid,cost:RACE_COST,prize:winnerUid===opp.uid?RACE_PRIZE:0,matchId,opponent:uid},_meta);
+      return{success:true,data:{status:'matched',matchId}};
+    }
+    // No opponent yet → enter queue
+    await dbSet(env,`raceQueue/${uid}`,me);
+    return{success:true,data:{status:'waiting'}};
+  }catch(e){console.error('raceJoinQueue:',e);return{success:false,error:e.message};}
+}
+
+// Poll queue / match state. Returns idle | waiting | matched.
+async function hRacePoll(env,uid,_data,_meta={}){
+  try{
+    const am=await dbGet(env,`userActiveMatch/${uid}`);
+    if(am.data){
+      const mr=await dbGet(env,`raceMatches/${am.data}`);
+      if(mr.data){
+        const m=mr.data;
+        const youAreP1 = m.p1.uid===uid;
+        const you = youAreP1 ? m.p1 : m.p2;
+        const opp = youAreP1 ? m.p2 : m.p1;
+        const ur=await dbGet(env,`users/${uid}`);
+        return{success:true,data:{
+          status:'matched', matchId:m.matchId,
+          youWon: m.winnerUid===uid,
+          youAreP1, prize:m.prize,
+          you:{uid:you.uid,lv:you.lv,name:you.name,username:you.username,photoUrl:you.photoUrl,maxKmh:you.maxKmh},
+          opp:{uid:opp.uid,lv:opp.lv,name:opp.name,username:opp.username,photoUrl:opp.photoUrl,maxKmh:opp.maxKmh},
+          tonBalance: ur.data?.tonBalance||0
+        }};
+      }
+      // stale pointer
+      await dbDelete(env,`userActiveMatch/${uid}`);
+    }
+    const q=await dbGet(env,`raceQueue/${uid}`);
+    if(q.data){
+      if(Date.now()-(q.data.joinedAt||0)>RACE_MATCH_TTL){
+        await dbDelete(env,`raceQueue/${uid}`);
+        const u=await dbGet(env,`users/${uid}`);
+        if(u.data){
+          const newBal=parseFloat(((u.data.tonBalance||0)+RACE_COST).toFixed(4));
+          await dbUpdate(env,`users/${uid}`,{tonBalance:newBal});
+          return{success:true,data:{status:'idle',refunded:true,tonBalance:newBal}};
+        }
+        return{success:true,data:{status:'idle',refunded:true}};
+      }
+      return{success:true,data:{status:'waiting'}};
+    }
+    return{success:true,data:{status:'idle'}};
+  }catch(e){console.error('racePoll:',e);return{success:false,error:e.message};}
+}
+
+// Cancel queue (only allowed while still waiting). Refunds the 0.5 TON.
+async function hRaceCancelQueue(env,uid,_data,_meta={}){
+  try{
+    const am=await dbGet(env,`userActiveMatch/${uid}`);
+    if(am.data) return{success:false,error:'Match already started, cannot cancel'};
+    const q=await dbGet(env,`raceQueue/${uid}`);
+    if(!q.data) return{success:true,data:{refunded:false}};
+    await dbDelete(env,`raceQueue/${uid}`);
+    const u=await dbGet(env,`users/${uid}`);
+    if(u.data){
+      const newBal=parseFloat(((u.data.tonBalance||0)+RACE_COST).toFixed(4));
+      await dbUpdate(env,`users/${uid}`,{tonBalance:newBal});
+      return{success:true,data:{refunded:true,tonBalance:newBal}};
+    }
+    return{success:true,data:{refunded:true}};
+  }catch(e){console.error('raceCancelQueue:',e);return{success:false,error:e.message};}
+}
+
+// Acknowledge match seen — clears the active-match pointer for this user
+// and removes the record once both players have ack'd.
+async function hRaceAck(env,uid,_data,_meta={}){
+  try{
+    const am=await dbGet(env,`userActiveMatch/${uid}`);
+    if(!am.data) return{success:true,data:{cleared:true}};
+    const matchId=am.data;
+    await dbDelete(env,`userActiveMatch/${uid}`);
+    const mr=await dbGet(env,`raceMatches/${matchId}`);
+    if(mr.data){
+      const m=mr.data; const ack=m.ack||{}; ack[uid]=true;
+      const otherUid = m.p1.uid===uid ? m.p2.uid : m.p1.uid;
+      if(ack[otherUid]) await dbDelete(env,`raceMatches/${matchId}`);
+      else await dbUpdate(env,`raceMatches/${matchId}`,{ack});
+    }
+    return{success:true,data:{cleared:true}};
+  }catch(e){console.error('raceAck:',e);return{success:false,error:e.message};}
 }
 
 
@@ -802,6 +992,10 @@ export default {
       case 'startBikeMining'  :return jRes(await hStartBikeMining (env,uid,data,_meta));
       case 'claimBikeMining'  :return jRes(await hClaimBikeMining (env,uid,data,_meta));
       case 'raceResult'       :return jRes(await hRaceResult      (env,uid,data,_meta));
+      case 'raceJoinQueue'    :return jRes(await hRaceJoinQueue   (env,uid,data,_meta));
+      case 'racePoll'         :return jRes(await hRacePoll         (env,uid,data,_meta));
+      case 'raceCancelQueue'  :return jRes(await hRaceCancelQueue  (env,uid,data,_meta));
+      case 'raceAck'          :return jRes(await hRaceAck          (env,uid,data,_meta));
       case 'claimMissionTask' :return jRes(await hClaimMissionTask(env,uid,data,_meta));
       case 'submitPartnerPost':return jRes(await hSubmitPartnerPost(env,uid,data,_meta));
       case 'saveSeasonAlloc'  :return jRes(await hSaveSeasonAlloc  (env,uid,data,_meta));

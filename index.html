@@ -100,37 +100,9 @@ body{
     linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
     url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat fixed,
     #000;
-  color:var(--text);min-height:100vh;min-height:100dvh;padding-bottom:108px;overflow-x:hidden;font-size:clamp(12px,1.8vw,16px);
+  color:var(--text);min-height:100vh;min-height:100dvh;padding-bottom:108px;overflow-x:hidden;font-size:clamp(12px,2.5vw,16px);
 }
-/* ══ RESPONSIVE SCALING ══ */
-@media (min-width:600px){
-  body{font-size:clamp(14px,2vw,18px);}
-  .bk-card,.bk-card-imgbox img,.bk-card-info{border-radius:clamp(12px,2vw,24px);}
-  .topbar-main{padding:clamp(9px,1.5vh,18px) clamp(12px,2vw,28px);}
-  .bnav{padding:clamp(8px,1.2vh,16px) clamp(8px,2vw,24px);}
-}
-@media (min-width:900px){
-  .sec{max-width:680px;margin:0 auto;}
-  .bnav{max-width:680px;left:50%;transform:translateX(-50%);}
-  .topbar-main{max-width:680px;margin:0 auto;}
-  .hub-hero{max-width:680px;margin:0 auto;}
-}
-/* Scale images and cards fluidly */
-.bk-card-imgbox{height:clamp(140px,25vw,280px);}
-.bk-card-imgbox img{width:100%;height:100%;object-fit:cover;}
-.hub-hero{min-height:clamp(200px,45vw,420px);}
-.hub-hero-img{width:100%;height:100%;object-fit:cover;}
-.gr-hero{min-height:clamp(160px,35vw,320px);}
-.gr-hero-img{width:100%;height:100%;object-fit:cover;}
-.race-bike-slide img,.race-thumb-img{width:clamp(80px,18vw,180px);}
-.mine-map{min-height:clamp(200px,50vw,500px);}
-.ni-icon{font-size:clamp(18px,4vw,28px);}
-.ni-lbl{font-size:clamp(9px,1.8vw,13px);}
-.tb-chip-num,.tb-chip{font-size:clamp(11px,2vw,15px);}
-.bk-card-name{font-size:clamp(13px,2.2vw,18px);}
-.bk-stat-value{font-size:clamp(14px,2.5vw,20px);}
-.hub-tb-ton-val{font-size:clamp(12px,2vw,16px);}
-.sec{overflow-y:auto;overflow-x:hidden;height:calc(100dvh - 78px);}
+@media(min-width:600px){body{font-size:clamp(14px,2vw,17px);}}
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
 @keyframes soft-shine{0%,100%{opacity:1}50%{opacity:.6}}
 .sec{display:none;padding:10px 12px;animation:fi .26s ease}
@@ -717,6 +689,13 @@ html, body, button, input, textarea, select, option {
   text-rendering: optimizeLegibility;
 }
 h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
+/* Button lockout style — prevents 429 spam */
+.btn-global-locked{
+  opacity:.42 !important;
+  filter:grayscale(55%) !important;
+  pointer-events:none !important;
+  cursor:not-allowed !important;
+}
 </style>
 </head>
 <body>
@@ -2058,7 +2037,7 @@ async function doUpgradeStat(bikeLevel, stat){
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
 }
-/* topbar inside hero — same style as home hub-topbar */
+/* topbar inside hero — matches home hub-topbar exactly */
 .gr-hero-topbar{
   position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
@@ -2069,8 +2048,7 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:8px;min-width:0;}
 .gr-hero-tb-avatar{
   width:48px;height:48px;border-radius:50%;
-  border:none;
-  overflow:hidden;flex-shrink:0;
+  border:none;overflow:hidden;flex-shrink:0;
   background:var(--glass);
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
@@ -2083,16 +2061,14 @@ async function doUpgradeStat(bikeLevel, stat){
   display:flex;align-items:center;gap:5px;
   background:rgba(0,0,0,.55);border:1px solid rgba(124,179,66,.3);
   border-radius:18px;padding:5px 10px;font-size:13px;font-weight:800;
-  backdrop-filter:blur(8px);flex-shrink:0;white-space:nowrap;overflow:hidden;
-  color:var(--bamboo);
+  backdrop-filter:blur(8px);flex-shrink:0;color:var(--bamboo);
 }
 .gr-hero-tb-ton img{width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0;}
 .gr-hero-tb-ton-val{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;}
-/* text at bottom-left of hero (same as home page) */
+/* title block — bottom-left like home page */
 .gr-hero-center{
   position:absolute;bottom:14px;left:14px;right:14px;
-  display:flex;flex-direction:column;align-items:flex-start;z-index:10;
-  pointer-events:none;
+  display:flex;flex-direction:column;align-items:flex-start;z-index:10;pointer-events:none;
 }
 .gr-hero-title-row{display:flex;align-items:center;gap:0;}
 .gr-hero-wrench{display:none;}
@@ -2519,10 +2495,10 @@ async function doUpgradeStat(bikeLevel, stat){
 .race-carousel-track{
   display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
-  will-change:transform;padding:4px 16px;width:100%;justify-content:center;
+  will-change:transform;padding:4px 16px;width:100%;
 }
 .race-bike-slide{
-  flex:0 0 calc(100% - 32px);
+  flex:0 0 calc(100% - 32px);margin:0 auto;
   background:rgba(8,18,8,.88);
   border:1.5px solid rgba(255,255,255,.06);
   border-radius:22px;overflow:hidden;
@@ -2530,14 +2506,11 @@ async function doUpgradeStat(bikeLevel, stat){
   position:relative;
   transition:border-color .3s,box-shadow .3s,transform .3s,opacity .3s;
   transform:scale(0.94);opacity:0;pointer-events:none;
-  display:none;margin:0 auto;
+  display:none;
 }
 .race-bike-slide.active{
   border-color:rgba(124,179,66,.85);
-  box-shadow:
-    0 0 0 2px rgba(124,179,66,.55),
-    0 0 24px rgba(124,179,66,.35),
-    0 12px 40px rgba(0,0,0,.7);
+  box-shadow:0 0 0 2px rgba(124,179,66,.55),0 0 24px rgba(124,179,66,.35),0 12px 40px rgba(0,0,0,.7);
   transform:scale(1);opacity:1;pointer-events:auto;
   display:block;
 }
@@ -2547,36 +2520,27 @@ async function doUpgradeStat(bikeLevel, stat){
   display:flex;align-items:center;justify-content:center;
 }
 .race-bike-img-wrap img{
-  width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease;
+  width:auto;height:100%;max-width:100%;object-fit:contain;display:block;transition:transform .3s ease;
+  margin:0 auto;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
-/* bike brand/name on top-left of the big card */
-.race-bike-brand{
-  position:absolute;top:14px;left:16px;z-index:3;
-  color:var(--bamboo);font-size:14px;font-weight:800;
-  text-shadow:0 2px 8px rgba(0,0,0,.95);line-height:1.1;
-}
-.race-bike-model{
-  position:absolute;top:32px;left:16px;z-index:3;
-  color:#fff;font-size:24px;font-weight:800;
-  text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;
-}
-/* carousel side arrows — modern style */
+.race-bike-brand{position:absolute;top:14px;left:16px;z-index:3;color:var(--bamboo);font-size:14px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.95);line-height:1.1;}
+.race-bike-model{position:absolute;top:32px;left:16px;z-index:3;color:#fff;font-size:24px;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;}
+/* modern arrow buttons */
 .race-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
-  width:40px;height:56px;border-radius:12px;
-  background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));
-  border:1px solid rgba(124,179,66,.35);
-  color:var(--bamboo);font-size:24px;font-weight:900;cursor:pointer;z-index:5;
+  width:38px;height:60px;border-radius:14px;
+  background:linear-gradient(160deg,rgba(124,179,66,.25),rgba(0,0,0,.7));
+  border:1px solid rgba(124,179,66,.4);
+  color:var(--bamboo);font-size:26px;font-weight:900;cursor:pointer;z-index:5;
   display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(8px);
-  box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 12px rgba(124,179,66,.18);
-  transition:all .18s;
+  backdrop-filter:blur(10px);
+  box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 14px rgba(124,179,66,.2);
+  transition:all .2s;
 }
-.race-arrow.left{left:4px;}
-.race-arrow.right{right:4px;}
+.race-arrow.left{left:3px;}
+.race-arrow.right{right:3px;}
 .race-arrow:active{transform:translateY(-50%) scale(.9);background:rgba(124,179,66,.4);}
-.race-arrow:hover{background:linear-gradient(135deg,rgba(124,179,66,.35),rgba(0,0,0,.7));box-shadow:0 4px 20px rgba(124,179,66,.35);}
 
 .race-dots{display:flex;gap:6px;margin:10px 0 0;justify-content:center;width:100%;}
 .race-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .2s;cursor:pointer;}
@@ -5437,15 +5401,6 @@ async function getOrComputeFp(){
   return _fp;
 }
 
-/* ════ BUTTON LOCKOUT — prevents 429 errors ════ */
-.btn-locked{
-  opacity:.45 !important;
-  filter:grayscale(60%) !important;
-  pointer-events:none !important;
-  cursor:not-allowed !important;
-  transition:all .15s !important;
-}
-
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
 const DEBOUNCE_MS  = 3000;
@@ -5460,37 +5415,6 @@ function debounce(key){
   _debounceMap.set(key, now);
   return true;
 }
-
-/* ════ GLOBAL BUTTON LOCKOUT (prevent 429) ════
-   After any button click → lock ALL buttons for 2s with gray style.
-   Buttons become clickable again after the lockout expires.
-══════════════════════════════════════════════ */
-(function(){
-  let _lockTimer = null;
-  const LOCK_MS = 2000;
-
-  function lockAllButtons(){
-    document.querySelectorAll('button').forEach(b=>{
-      if(!b.disabled) b.classList.add('btn-locked');
-    });
-  }
-  function unlockAllButtons(){
-    document.querySelectorAll('.btn-locked').forEach(b=>{
-      b.classList.remove('btn-locked');
-    });
-  }
-
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('button');
-    if(!btn || btn.disabled || btn.classList.contains('btn-locked')) return;
-    // Lock all buttons
-    lockAllButtons();
-    if(_lockTimer) clearTimeout(_lockTimer);
-    _lockTimer = setTimeout(()=>{
-      unlockAllButtons();
-    }, LOCK_MS);
-  }, true);
-})();
 
 /* ════ API — Single Server ═════════════════════════════════════════ */
 let _apiInFlight = 0;
@@ -5511,18 +5435,14 @@ async function api(action, data={}){
   } finally { _apiInFlight--; }
 }
 
-/* ════ BACKGROUND STATE REFRESH ════
-   Like loadState but does NOT rebuild carousels, garage, or race page.
-   Only updates balances, coins, tasks — prevents race/buy interruptions.
-══════════════════════════════════ */
+/* ════ BACKGROUND STATE REFRESH (every 3 min) ════
+   Updates balances/data only - does NOT rebuild carousels or reset selections
+══════════════════════════════════════════════ */
 async function loadStateBackground(){
+  if(!S._dataLoaded) return; // don't run until initial load done
   try{
-    const d = await api('getState', {
-      start_param : S.startParam || '',
-      _initData   : S.tg?.initData || '',
-    });
+    const d = await api('getState',{start_param:S.startParam||'',_initData:S.tg?.initData||''});
     const prevRefCount = S.refs ? S.refs.length : 0;
-    // Update data only — never touch _garageSelectedLv or _raceIdx
     S.user      = d.user    || S.user;
     S.user.ownedBikes   = d.user?.ownedBikes   || S.user.ownedBikes   || [];
     S.user.bikeUpgrades = d.user?.bikeUpgrades || S.user.bikeUpgrades || {};
@@ -5532,28 +5452,23 @@ async function loadStateBackground(){
     S.balLog    = d.balanceLog  || [];
     S.doneTasks = d.completedTasks || [];
     S.completedMissions = d.completedMissions || [];
-    S.tasks     = d.tasks || { partner:[], community:[] };
+    S.tasks     = d.tasks || {partner:[],community:[]};
     S.partnerPosts = d.partnerPosts || [];
-    S._dataLoaded = true;
-    if(S._initialized && S.refs.length > prevRefCount){
-      const newest = S.refs[0];
-      const name = newest ? esc(newest.name||'') : '';
-      const lang = localStorage.getItem('pandaLang')||'en';
-      const t = TRANSLATIONS[lang]||TRANSLATIONS['en'];
-      const msg = (t.newRefNotif||TRANSLATIONS['en'].newRefNotif).replace('{name}', name||'👤');
+    if(S.refs.length > prevRefCount){
+      const newest=S.refs[0];
+      const name=newest?esc(newest.name||''):'';
+      const lang=localStorage.getItem('pandaLang')||'en';
+      const t=TRANSLATIONS[lang]||TRANSLATIONS['en'];
+      const msg=(t.newRefNotif||TRANSLATIONS['en'].newRefNotif).replace('{name}',name||'👤');
       showNotif(msg,'s');
     }
-    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId, d.pendingDeposit.txHash);
-    // Only update topbar balances — no full UI rebuild
+    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId,d.pendingDeposit.txHash);
+    // Only sync balances in topbar — no full page re-render
     syncTopbar();
-    try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
-    try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
-    // Refresh mining page timer display only
-    try{ renderMiningPage(); }catch(e){}
-  }catch(e){
-    console.warn('loadStateBackground:', e.message);
-  }
-  S._initialized = true;
+    try{if(typeof syncMineTopbar==='function') syncMineTopbar();}catch(e){}
+    try{if(typeof syncProfileTopbar==='function') syncProfileTopbar();}catch(e){}
+    try{renderMiningPage();}catch(e){}
+  }catch(e){ console.warn('loadStateBackground:',e.message); }
 }
 
 async function loadState(){
@@ -6771,7 +6686,7 @@ async function init(){
   setTimeout(()=>initTON(), 600);
   // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
-  setInterval(()=>{ loadStateBackground(); }, 180000); // every 3 minutes
+  setInterval(()=>{ loadStateBackground(); }, 180000); // poll every 3 minutes
   await new Promise(r=>setTimeout(r,400));
 
   await ldAnimateTo(100, lt('ldReady'), 500);
@@ -7628,7 +7543,17 @@ async function loadSeasonAlloc(){
   api('saveSeasonAlloc',{coinsAlloc, refsAlloc, total: totalCoins}).catch(()=>{});
 }
 
-
+/* ════ BUTTON LOCKOUT — prevents HTTP 429 ════ */
+(function(){
+  var _lt=null;
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('button');
+    if(!btn||btn.disabled||btn.classList.contains('btn-global-locked')) return;
+    document.querySelectorAll('button:not([disabled])').forEach(function(b){b.classList.add('btn-global-locked');});
+    clearTimeout(_lt);
+    _lt=setTimeout(function(){document.querySelectorAll('.btn-global-locked').forEach(function(b){b.classList.remove('btn-global-locked');});},2000);
+  },true);
+})();
 </script>
 </body>
 </html>

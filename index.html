@@ -100,8 +100,37 @@ body{
     linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
     url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat fixed,
     #000;
-  color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;font-size:14px;
+  color:var(--text);min-height:100vh;min-height:100dvh;padding-bottom:108px;overflow-x:hidden;font-size:clamp(12px,1.8vw,16px);
 }
+/* ══ RESPONSIVE SCALING ══ */
+@media (min-width:600px){
+  body{font-size:clamp(14px,2vw,18px);}
+  .bk-card,.bk-card-imgbox img,.bk-card-info{border-radius:clamp(12px,2vw,24px);}
+  .topbar-main{padding:clamp(9px,1.5vh,18px) clamp(12px,2vw,28px);}
+  .bnav{padding:clamp(8px,1.2vh,16px) clamp(8px,2vw,24px);}
+}
+@media (min-width:900px){
+  .sec{max-width:680px;margin:0 auto;}
+  .bnav{max-width:680px;left:50%;transform:translateX(-50%);}
+  .topbar-main{max-width:680px;margin:0 auto;}
+  .hub-hero{max-width:680px;margin:0 auto;}
+}
+/* Scale images and cards fluidly */
+.bk-card-imgbox{height:clamp(140px,25vw,280px);}
+.bk-card-imgbox img{width:100%;height:100%;object-fit:cover;}
+.hub-hero{min-height:clamp(200px,45vw,420px);}
+.hub-hero-img{width:100%;height:100%;object-fit:cover;}
+.gr-hero{min-height:clamp(160px,35vw,320px);}
+.gr-hero-img{width:100%;height:100%;object-fit:cover;}
+.race-bike-slide img,.race-thumb-img{width:clamp(80px,18vw,180px);}
+.mine-map{min-height:clamp(200px,50vw,500px);}
+.ni-icon{font-size:clamp(18px,4vw,28px);}
+.ni-lbl{font-size:clamp(9px,1.8vw,13px);}
+.tb-chip-num,.tb-chip{font-size:clamp(11px,2vw,15px);}
+.bk-card-name{font-size:clamp(13px,2.2vw,18px);}
+.bk-stat-value{font-size:clamp(14px,2.5vw,20px);}
+.hub-tb-ton-val{font-size:clamp(12px,2vw,16px);}
+.sec{overflow-y:auto;overflow-x:hidden;height:calc(100dvh - 78px);}
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
 @keyframes soft-shine{0%,100%{opacity:1}50%{opacity:.6}}
 .sec{display:none;padding:10px 12px;animation:fi .26s ease}
@@ -662,7 +691,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes minus-throb{0%,100%{text-shadow:0 0 6px rgba(255,202,40,.5)}50%{text-shadow:0 0 18px rgba(255,202,40,1)}}
 #notif{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(6,22,6,.97);border:1px solid var(--border);border-radius:22px;padding:10px 18px;font-size:13px;font-weight:700;z-index:1000;transition:transform .28s ease;box-shadow:0 4px 20px rgba(0,0,0,.55);max-width:84vw;text-align:center;backdrop-filter:blur(12px);}
 #notif.show{transform:translateX(-50%) translateY(0)}
-#notif.s{border-color:var(--bamboo-glow);color:var(--bamboo)}
+#notif.s{border-color:rgba(66,165,245,.5);color:#90CAF9}
 #notif.e{border-color:rgba(239,83,80,.5);color:#ff8a80}
 #notif.i{border-color:rgba(66,165,245,.4);color:#90CAF9}
 #notif.w{border-color:rgba(255,193,7,.4);color:#FFD740}
@@ -1737,8 +1766,6 @@ async function doUpgradeStat(bikeLevel, stat){
     <div class="mine-handle"></div>
     <div class="mine-sheet-head">
       <div class="mine-garage-title">Гараж</div>
-      <div class="mine-earned">Добыча: <span id="mineReadyTon">0.000</span> TON</div>
-      <button class="mine-to-balance" onclick="claimBikeMiningRewards()">НА БАЛАНС</button>
     </div>
     <div class="mine-grid" id="miningBikeGrid"><div class="mine-empty">Loading bikes...</div></div>
   </div>
@@ -2031,43 +2058,46 @@ async function doUpgradeStat(bikeLevel, stat){
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
 }
-/* topbar inside hero — scrolls WITH page */
+/* topbar inside hero — same style as home hub-topbar */
 .gr-hero-topbar{
   position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
-  padding:12px 14px 8px;z-index:10;gap:10px;
+  padding:9px 12px 7px;z-index:10;gap:8px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(124,179,66,.12);
 }
-.gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:10px;}
+.gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:8px;min-width:0;}
 .gr-hero-tb-avatar{
-  width:46px;height:46px;border-radius:50%;
+  width:48px;height:48px;border-radius:50%;
   border:none;
   overflow:hidden;flex-shrink:0;
-  background:transparent;
+  background:var(--glass);
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
 .gr-hero-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 .gr-hero-tb-name{
-  flex:1;font-size:15px;font-weight:800;color:#fff;
+  flex:1;font-size:13px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
 .gr-hero-tb-ton{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);
-  border-radius:20px;padding:6px 12px;flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+  background:rgba(0,0,0,.55);border:1px solid rgba(124,179,66,.3);
+  border-radius:18px;padding:5px 10px;font-size:13px;font-weight:800;
+  backdrop-filter:blur(8px);flex-shrink:0;white-space:nowrap;overflow:hidden;
+  color:var(--bamboo);
 }
-.gr-hero-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
-.gr-hero-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
-/* center text on hero */
+.gr-hero-tb-ton img{width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0;}
+.gr-hero-tb-ton-val{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;}
+/* text at bottom-left of hero (same as home page) */
 .gr-hero-center{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;z-index:10;
+  position:absolute;bottom:14px;left:14px;right:14px;
+  display:flex;flex-direction:column;align-items:flex-start;z-index:10;
   pointer-events:none;
 }
-.gr-hero-title-row{display:flex;align-items:center;gap:10px;}
-.gr-hero-wrench{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(124,179,66,.8));}
-.gr-hero-title{font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
-.gr-hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:3px;text-align:center;}
+.gr-hero-title-row{display:flex;align-items:center;gap:0;}
+.gr-hero-wrench{display:none;}
+.gr-hero-title{font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.3px;margin-bottom:5px;}
+.gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);}
 
 /* ══ GARAGE BODY ══ */
 .gr-body{padding:0 12px 32px;background:transparent;}
@@ -2485,11 +2515,11 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 
 /* ── Big bike carousel card ── */
-.race-carousel-outer{position:relative;width:100%;overflow:hidden;padding:4px 0 6px;}
+.race-carousel-outer{position:relative;width:100%;overflow:hidden;padding:4px 0 6px;display:flex;align-items:center;justify-content:center;}
 .race-carousel-track{
   display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
-  will-change:transform;padding:4px 16px;
+  will-change:transform;padding:4px 16px;width:100%;justify-content:center;
 }
 .race-bike-slide{
   flex:0 0 calc(100% - 32px);
@@ -2500,7 +2530,7 @@ async function doUpgradeStat(bikeLevel, stat){
   position:relative;
   transition:border-color .3s,box-shadow .3s,transform .3s,opacity .3s;
   transform:scale(0.94);opacity:0;pointer-events:none;
-  display:none;
+  display:none;margin:0 auto;
 }
 .race-bike-slide.active{
   border-color:rgba(124,179,66,.85);
@@ -2514,9 +2544,10 @@ async function doUpgradeStat(bikeLevel, stat){
 .race-bike-img-wrap{
   width:100%;height:230px;position:relative;overflow:hidden;
   background:rgba(6,14,6,.9);
+  display:flex;align-items:center;justify-content:center;
 }
 .race-bike-img-wrap img{
-  width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;
+  width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
 /* bike brand/name on top-left of the big card */
@@ -2530,18 +2561,22 @@ async function doUpgradeStat(bikeLevel, stat){
   color:#fff;font-size:24px;font-weight:800;
   text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;
 }
-/* carousel side arrows */
+/* carousel side arrows — modern style */
 .race-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
-  width:34px;height:34px;border-radius:50%;
-  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);
-  color:#fff;font-size:18px;font-weight:800;cursor:pointer;z-index:5;
+  width:40px;height:56px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(124,179,66,.22),rgba(0,0,0,.6));
+  border:1px solid rgba(124,179,66,.35);
+  color:var(--bamboo);font-size:24px;font-weight:900;cursor:pointer;z-index:5;
   display:flex;align-items:center;justify-content:center;
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 12px rgba(124,179,66,.18);
+  transition:all .18s;
 }
-.race-arrow.left{left:24px;}
-.race-arrow.right{right:24px;}
-.race-arrow:active{transform:translateY(-50%) scale(.92);}
+.race-arrow.left{left:4px;}
+.race-arrow.right{right:4px;}
+.race-arrow:active{transform:translateY(-50%) scale(.9);background:rgba(124,179,66,.4);}
+.race-arrow:hover{background:linear-gradient(135deg,rgba(124,179,66,.35),rgba(0,0,0,.7));box-shadow:0 4px 20px rgba(124,179,66,.35);}
 
 .race-dots{display:flex;gap:6px;margin:10px 0 0;justify-content:center;width:100%;}
 .race-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .2s;cursor:pointer;}
@@ -4160,7 +4195,7 @@ async function doUpgradeStat(bikeLevel, stat){
         <div style="padding-right:0">
           <label class="flabel">Wallet Address</label>
           <div class="dep-manual-input">
-            <input type="text" class="finput" id="manualWalletAddr" readonly value="UQB...Ton_Wallet_Address_Here">
+            <input type="text" class="finput" id="manualWalletAddr" readonly value="UQDrVUxBI9tGFmJq0FtR4GpR13BD2_m7X83Vho7EDxDW1EYu">
             <button class="dep-copy-btn" onclick="copyText('manualWalletAddr')"><i class="fas fa-copy"></i> Copy</button>
           </div>
           <label class="flabel">Comment (Your User ID)</label>
@@ -5102,7 +5137,7 @@ const CFG = {
   MIN_WD_TON   : 0.1,
   REF_BONUS    : 20,
   BOT_USERNAME : 'RaseenBot',
-  BOT_APP_LINK : 'https://t.me/RaseenBot/app',
+  BOT_APP_LINK : 'http://t.me/RaseenRacingbot/app',
 };
 
 /* ════ MULTI-SERVER RACE SYSTEM ════════════════════════════════════
@@ -5402,6 +5437,15 @@ async function getOrComputeFp(){
   return _fp;
 }
 
+/* ════ BUTTON LOCKOUT — prevents 429 errors ════ */
+.btn-locked{
+  opacity:.45 !important;
+  filter:grayscale(60%) !important;
+  pointer-events:none !important;
+  cursor:not-allowed !important;
+  transition:all .15s !important;
+}
+
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
 const DEBOUNCE_MS  = 3000;
@@ -5416,6 +5460,37 @@ function debounce(key){
   _debounceMap.set(key, now);
   return true;
 }
+
+/* ════ GLOBAL BUTTON LOCKOUT (prevent 429) ════
+   After any button click → lock ALL buttons for 2s with gray style.
+   Buttons become clickable again after the lockout expires.
+══════════════════════════════════════════════ */
+(function(){
+  let _lockTimer = null;
+  const LOCK_MS = 2000;
+
+  function lockAllButtons(){
+    document.querySelectorAll('button').forEach(b=>{
+      if(!b.disabled) b.classList.add('btn-locked');
+    });
+  }
+  function unlockAllButtons(){
+    document.querySelectorAll('.btn-locked').forEach(b=>{
+      b.classList.remove('btn-locked');
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('button');
+    if(!btn || btn.disabled || btn.classList.contains('btn-locked')) return;
+    // Lock all buttons
+    lockAllButtons();
+    if(_lockTimer) clearTimeout(_lockTimer);
+    _lockTimer = setTimeout(()=>{
+      unlockAllButtons();
+    }, LOCK_MS);
+  }, true);
+})();
 
 /* ════ API — Single Server ═════════════════════════════════════════ */
 let _apiInFlight = 0;
@@ -5434,6 +5509,51 @@ async function api(action, data={}){
     }
     return j.data;
   } finally { _apiInFlight--; }
+}
+
+/* ════ BACKGROUND STATE REFRESH ════
+   Like loadState but does NOT rebuild carousels, garage, or race page.
+   Only updates balances, coins, tasks — prevents race/buy interruptions.
+══════════════════════════════════ */
+async function loadStateBackground(){
+  try{
+    const d = await api('getState', {
+      start_param : S.startParam || '',
+      _initData   : S.tg?.initData || '',
+    });
+    const prevRefCount = S.refs ? S.refs.length : 0;
+    // Update data only — never touch _garageSelectedLv or _raceIdx
+    S.user      = d.user    || S.user;
+    S.user.ownedBikes   = d.user?.ownedBikes   || S.user.ownedBikes   || [];
+    S.user.bikeUpgrades = d.user?.bikeUpgrades || S.user.bikeUpgrades || {};
+    S.user.bikeMining   = d.user?.bikeMining   || S.user.bikeMining   || {};
+    S.refs      = d.referrals || [];
+    S.wdHist    = d.wdHistory   || [];
+    S.balLog    = d.balanceLog  || [];
+    S.doneTasks = d.completedTasks || [];
+    S.completedMissions = d.completedMissions || [];
+    S.tasks     = d.tasks || { partner:[], community:[] };
+    S.partnerPosts = d.partnerPosts || [];
+    S._dataLoaded = true;
+    if(S._initialized && S.refs.length > prevRefCount){
+      const newest = S.refs[0];
+      const name = newest ? esc(newest.name||'') : '';
+      const lang = localStorage.getItem('pandaLang')||'en';
+      const t = TRANSLATIONS[lang]||TRANSLATIONS['en'];
+      const msg = (t.newRefNotif||TRANSLATIONS['en'].newRefNotif).replace('{name}', name||'👤');
+      showNotif(msg,'s');
+    }
+    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId, d.pendingDeposit.txHash);
+    // Only update topbar balances — no full UI rebuild
+    syncTopbar();
+    try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
+    try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
+    // Refresh mining page timer display only
+    try{ renderMiningPage(); }catch(e){}
+  }catch(e){
+    console.warn('loadStateBackground:', e.message);
+  }
+  S._initialized = true;
 }
 
 async function loadState(){
@@ -6250,7 +6370,7 @@ function copyText(id){
   const el=document.getElementById(id);
   if(!el) return;
   try{
-    navigator.clipboard.writeText(el.value||el.textContent||'').then(()=>showNotif('✅ Copied!','s')).catch(()=>{});
+    navigator.clipboard.writeText(el.value||el.textContent||'').then(()=>showNotif('✅ Copied!','i')).catch(()=>{});
   }catch(e){}
 }
 
@@ -6286,8 +6406,8 @@ function updateRefUI(){
 function copyRefLink(){
   const v=document.getElementById('refLinkInp').value;
   navigator.clipboard.writeText(v)
-    .then(()=>showNotif('✅ Link copied!','s'))
-    .catch(()=>{document.getElementById('refLinkInp').select();document.execCommand('copy');showNotif('✅ Link copied!','s');});
+    .then(()=>showNotif('✅ Link copied!','i'))
+    .catch(()=>{document.getElementById('refLinkInp').select();document.execCommand('copy');showNotif('✅ Link copied!','i');});
 }
 
 /* ════ DEPOSIT PREVIEW ════ */
@@ -6651,7 +6771,7 @@ async function init(){
   setTimeout(()=>initTON(), 600);
   // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
-  setInterval(()=>{ loadState(); }, 30000);
+  setInterval(()=>{ loadStateBackground(); }, 180000); // every 3 minutes
   await new Promise(r=>setTimeout(r,400));
 
   await ldAnimateTo(100, lt('ldReady'), 500);

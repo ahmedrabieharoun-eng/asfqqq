@@ -1,5 +1,5 @@
 // ================================================================
-//  BALI RALLY — Cloudflare Worker v5.0
+//  RASEEN — Cloudflare Worker v5.0
 //  Firebase Realtime Database
 //  Environment Variables:
 //    FIREBASE_DATABASE_URL  e.g. https://YOUR-DB.firebaseio.com
@@ -68,8 +68,8 @@ const BIKE_MINING_MS = 24*60*60*1000;
 
 // Default partner tasks
 const DEFAULT_PARTNER_TASKS = [
-  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/PandaBambooPayouts', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
-  { id:'partner_news',    name:'Join News Channel',    type:'channel', link:'https://t.me/PandaMiningNews',   bambooReward:100, targetUsers:null, status:'active', isDefault:true },
+  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacingbot', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
+  { id:'partner_news',    name:'Join News Channel',    type:'channel', link:'https://t.me/RaseenRacingbot',   bambooReward:100, targetUsers:null, status:'active', isDefault:true },
 ];
 
 async function seedPartnerTasks(env){
@@ -265,7 +265,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
       return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasWithdrawn};
     }));
     const wr=await dbGet(env,`users/${uid}/wdHistory`);
-    const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,30):[];
+    const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,10):[];
     const tpr=await dbGet(env,'tasks/partner');
     const tcr=await dbGet(env,'tasks/community');
     const tasks={
@@ -273,7 +273,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
       community:tcr.data?Object.values(tcr.data).filter(t=>t.status==='active'):[],
     };
     const lr=await dbGet(env,`users/${uid}/log`);
-    const balanceLog=lr.data?Object.values(lr.data).sort((a,b)=>b.ts-a.ts).slice(0,50):[];
+    const balanceLog=lr.data?Object.values(lr.data).sort((a,b)=>b.ts-a.ts).slice(0,20).map(e=>({ts:e.ts,type:e.type,amount:e.amount,balance:e.balance})):[];
     // Partner posts
     const ppr=await dbGet(env,`users/${uid}/partnerPosts`);
     const partnerPosts=ppr.data?Object.values(ppr.data).sort((a,b)=>b.ts-a.ts):[];
@@ -687,8 +687,12 @@ async function hRaceJoinQueue(env,uid,data,_meta={}){
     const am=await dbGet(env,`userActiveMatch/${uid}`);
     if(am.data){
       const mr=await dbGet(env,`raceMatches/${am.data}`);
-      if(mr.data) return{success:true,data:{status:'matched',matchId:am.data}};
+      // Stale match detection: if older than 60s, force-clean it
+      if(mr.data && (Date.now()-(mr.data.createdAt||0))<60000){
+        return{success:true,data:{status:'matched',matchId:am.data}};
+      }
       await dbDelete(env,`userActiveMatch/${uid}`);
+      if(mr.data) await dbDelete(env,`raceMatches/${am.data}`).catch(()=>{});
     }
     // Already queued? Keep fresh queue entries, but clear stale ones so old data doesn't block new races.
     const exQ=await dbGet(env,`raceQueue/${uid}`);
@@ -790,6 +794,12 @@ async function hRacePoll(env,uid,_data,_meta={}){
     const am=await dbGet(env,`userActiveMatch/${uid}`);
     if(am.data){
       const mr=await dbGet(env,`raceMatches/${am.data}`);
+      // Stale match: force-clean & return idle
+      if(mr.data && (Date.now()-(mr.data.createdAt||0))>60000){
+        await dbDelete(env,`userActiveMatch/${uid}`).catch(()=>{});
+        await dbDelete(env,`raceMatches/${am.data}`).catch(()=>{});
+        return{success:true,data:{status:'idle'}};
+      }
       if(mr.data){
         const m=mr.data;
         const youAreP1 = m.p1.uid===uid;
@@ -854,10 +864,11 @@ async function hRaceAck(env,uid,_data,_meta={}){
     await dbDelete(env,`userActiveMatch/${uid}`);
     const mr=await dbGet(env,`raceMatches/${matchId}`);
     if(mr.data){
-      const m=mr.data; const ack=m.ack||{}; ack[uid]=true;
+      const m=mr.data;
       const otherUid = m.p1.uid===uid ? m.p2.uid : m.p1.uid;
-      if(ack[otherUid]) await dbDelete(env,`raceMatches/${matchId}`);
-      else await dbUpdate(env,`raceMatches/${matchId}`,{ack});
+      // Always delete match + the other player's pointer to prevent stuck matches
+      await dbDelete(env,`userActiveMatch/${otherUid}`).catch(()=>{});
+      await dbDelete(env,`raceMatches/${matchId}`).catch(()=>{});
     }
     return{success:true,data:{cleared:true}};
   }catch(e){console.error('raceAck:',e);return{success:false,error:e.message};}
@@ -942,7 +953,7 @@ export default {
     if(request.method==='OPTIONS')return new Response(null,{headers:CORS});
     const url=new URL(request.url);const path=url.pathname;
     if(path==='/health')return ok({status:'ok',ts:Date.now(),env:env.ENVIRONMENT||'production'});
-    if(path==='/tonconnect-manifest.json')return jRes({url:'https://pandabambo.vercel.app',name:'BaliRallyBot',iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png',description:'Bali Rally Garage'});
+    if(path==='/tonconnect-manifest.json')return jRes({url:'https://t.me/RaseenRacingbot',name:'RaseenRacing',iconUrl:'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d/9b1e5a6e-3d27-4f28-9d79-4ff5ec1cd0d3.png',description:'Raseen Racing Garage'});
     if(path!=='/api'||request.method!=='POST')return fail('Not found',404);
 
     const ip=request.headers.get('CF-Connecting-IP')||'unknown';

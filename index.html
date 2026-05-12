@@ -110,7 +110,7 @@ body{
 .bk-stat-value{font-size:clamp(20px,3vw,36px)!important;}
 .bk-card-imgbox{width:clamp(120px,18vw,200px)!important;}
 .race-bike-img-wrap{height:clamp(200px,28vw,340px)!important;}
-.gr-hero{height:260px!important;}
+.gr-hero{height:200px!important;}
 .gr-sel-img-side{height:clamp(180px,22vw,280px)!important;}
 .sec-title{font-size:clamp(15px,2vw,22px)!important;}
 .bk-page-title{font-size:clamp(18px,2.5vw,28px)!important;}
@@ -2040,7 +2040,7 @@ async function doUpgradeStat(bikeLevel, stat){
     url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat;
 }
 .gr-hero{
-  position:relative;width:100%;height:260px;overflow:hidden;
+  position:relative;width:100%;height:200px;overflow:hidden;
   flex-shrink:0;
 }
 .gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
@@ -2069,6 +2069,7 @@ async function doUpgradeStat(bikeLevel, stat){
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
+/* TON card — identical to home: رصيد + زر + في كارت واحد */
 .gr-hero-tb-ton{
   display:flex;align-items:center;gap:6px;
   background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);
@@ -2083,7 +2084,7 @@ async function doUpgradeStat(bikeLevel, stat){
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;box-shadow:0 0 8px rgba(76,175,80,.55);flex-shrink:0;
 }
-/* title+subtitle at BOTTOM-LEFT of hero — same position as home */
+/* title+subtitle at BOTTOM-LEFT — bigger text */
 .gr-hero-center{
   position:absolute;left:14px;bottom:16px;
   display:flex;flex-direction:column;align-items:flex-start;z-index:10;
@@ -2091,8 +2092,8 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .gr-hero-title-row{display:flex;align-items:center;gap:0;}
 .gr-hero-wrench{display:none;}
-.gr-hero-title{font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
-.gr-hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:3px;text-align:left;}
+.gr-hero-title{font-size:32px;font-weight:900;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
+.gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.88);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:2px;text-align:left;}
 
 /* ══ GARAGE BODY ══ */
 .gr-body{padding:0 12px 32px;background:transparent;}
@@ -2327,8 +2328,8 @@ async function doUpgradeStat(bikeLevel, stat){
         <div class="gr-hero-tb-ton">
           <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
           <span class="gr-hero-tb-ton-val" id="garageTonBal">0</span>
+          <button class="gr-hero-tb-plus" onclick="goNavBySection('sectionFinance')" aria-label="Deposit">+</button>
         </div>
-        <button class="gr-hero-tb-plus" onclick="goNavBySection('sectionFinance')" aria-label="Deposit">+</button>
       </div>
     </div>
     <!-- bottom-left: Garage title + subtitle -->
@@ -2336,7 +2337,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="gr-hero-title-row">
         <div class="gr-hero-title">Garage</div>
       </div>
-      <div class="gr-hero-sub">Upgrade your bikes for racing</div>
+      <div class="gr-hero-sub">Upgrade your bike for racing</div>
     </div>
   </div>
 

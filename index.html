@@ -100,9 +100,27 @@ body{
     linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
     url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat fixed,
     #000;
-  color:var(--text);min-height:100vh;min-height:100dvh;padding-bottom:108px;overflow-x:hidden;font-size:clamp(12px,2.5vw,16px);
+  color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;
+  font-size:clamp(13px,1.5vw,16px);
 }
-@media(min-width:600px){body{font-size:clamp(14px,2vw,17px);}}
+/* ── Fluid scaling helpers ── */
+.hub-hero{height:clamp(220px,35vw,420px)!important;}
+.bk-card-top{height:clamp(160px,22vw,240px)!important;}
+.bk-card-name{font-size:clamp(16px,2vw,26px)!important;}
+.bk-stat-value{font-size:clamp(20px,3vw,36px)!important;}
+.bk-card-imgbox{width:clamp(120px,18vw,200px)!important;}
+.race-bike-img-wrap{height:clamp(200px,28vw,340px)!important;}
+.gr-hero{height:clamp(140px,18vw,220px)!important;}
+.gr-sel-img-side{height:clamp(180px,22vw,280px)!important;}
+.sec-title{font-size:clamp(15px,2vw,22px)!important;}
+.bk-page-title{font-size:clamp(18px,2.5vw,28px)!important;}
+@media(min-width:600px){
+  .bk-page{padding:0 clamp(4px,3vw,48px) 24px!important;}
+  .gr-body{padding:0 clamp(12px,3vw,48px) 32px!important;}
+  #sectionHome .hub-hero-img{object-position:center 30%;}
+  .race-wrap{max-width:700px;margin:0 auto;}
+  #sectionMarket,.gr-body{max-width:900px;margin:0 auto;}
+}
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
 @keyframes soft-shine{0%,100%{opacity:1}50%{opacity:.6}}
 .sec{display:none;padding:10px 12px;animation:fi .26s ease}
@@ -663,7 +681,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 @keyframes minus-throb{0%,100%{text-shadow:0 0 6px rgba(255,202,40,.5)}50%{text-shadow:0 0 18px rgba(255,202,40,1)}}
 #notif{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(6,22,6,.97);border:1px solid var(--border);border-radius:22px;padding:10px 18px;font-size:13px;font-weight:700;z-index:1000;transition:transform .28s ease;box-shadow:0 4px 20px rgba(0,0,0,.55);max-width:84vw;text-align:center;backdrop-filter:blur(12px);}
 #notif.show{transform:translateX(-50%) translateY(0)}
-#notif.s{border-color:rgba(66,165,245,.5);color:#90CAF9}
+#notif.s{border-color:rgba(66,165,245,.5);color:#64B5F6}
 #notif.e{border-color:rgba(239,83,80,.5);color:#ff8a80}
 #notif.i{border-color:rgba(66,165,245,.4);color:#90CAF9}
 #notif.w{border-color:rgba(255,193,7,.4);color:#FFD740}
@@ -689,13 +707,6 @@ html, body, button, input, textarea, select, option {
   text-rendering: optimizeLegibility;
 }
 h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
-/* Button lockout style — prevents 429 spam */
-.btn-global-locked{
-  opacity:.42 !important;
-  filter:grayscale(55%) !important;
-  pointer-events:none !important;
-  cursor:not-allowed !important;
-}
 </style>
 </head>
 <body>
@@ -2029,51 +2040,59 @@ async function doUpgradeStat(bikeLevel, stat){
     url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat;
 }
 .gr-hero{
-  position:relative;width:100%;height:160px;overflow:hidden;
+  position:relative;width:100%;height:260px;overflow:hidden;
   flex-shrink:0;
 }
 .gr-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
 .gr-hero-overlay{
   position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.75) 80%,rgba(0,0,0,.95) 100%);
+  background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.1) 45%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.88) 100%);
 }
-/* topbar inside hero — matches home hub-topbar exactly */
+/* topbar inside hero — same as home */
 .gr-hero-topbar{
   position:absolute;top:0;left:0;right:0;
   display:flex;align-items:center;
-  padding:9px 12px 7px;z-index:10;gap:8px;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(124,179,66,.12);
+  padding:12px 14px 8px;z-index:10;gap:10px;
+  background:transparent;
 }
-.gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:8px;min-width:0;}
+.gr-hero-tb-card{flex:1;display:flex;align-items:center;gap:10px;}
 .gr-hero-tb-avatar{
-  width:48px;height:48px;border-radius:50%;
-  border:none;overflow:hidden;flex-shrink:0;
-  background:var(--glass);
+  width:46px;height:46px;border-radius:50%;
+  border:none;
+  overflow:hidden;flex-shrink:0;
+  background:transparent;
   display:flex;align-items:center;justify-content:center;font-size:18px;
 }
 .gr-hero-tb-avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 .gr-hero-tb-name{
-  flex:1;font-size:13px;font-weight:800;color:#fff;
+  flex:1;font-size:15px;font-weight:800;color:#fff;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);
 }
 .gr-hero-tb-ton{
-  display:flex;align-items:center;gap:5px;
-  background:rgba(0,0,0,.55);border:1px solid rgba(124,179,66,.3);
-  border-radius:18px;padding:5px 10px;font-size:13px;font-weight:800;
-  backdrop-filter:blur(8px);flex-shrink:0;color:var(--bamboo);
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:6px 12px;flex-shrink:0;
 }
-.gr-hero-tb-ton img{width:18px;height:18px;object-fit:contain;border-radius:50%;flex-shrink:0;}
-.gr-hero-tb-ton-val{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;}
-/* title block — bottom-left like home page */
+.gr-hero-tb-ton img{width:20px;height:20px;object-fit:contain;border-radius:50%}
+.gr-hero-tb-ton-val{font-size:14px;font-weight:800;color:#fff}
+.gr-hero-tb-plus{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,#43A047,#66BB6A);
+  border:none;color:#fff;font-size:18px;font-weight:900;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 0 8px rgba(76,175,80,.55);flex-shrink:0;
+}
+/* title+subtitle at BOTTOM-LEFT of hero — same position as home */
 .gr-hero-center{
-  position:absolute;bottom:14px;left:14px;right:14px;
-  display:flex;flex-direction:column;align-items:flex-start;z-index:10;pointer-events:none;
+  position:absolute;left:14px;bottom:16px;
+  display:flex;flex-direction:column;align-items:flex-start;z-index:10;
+  pointer-events:none;
 }
 .gr-hero-title-row{display:flex;align-items:center;gap:0;}
 .gr-hero-wrench{display:none;}
-.gr-hero-title{font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.3px;margin-bottom:5px;}
-.gr-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);}
+.gr-hero-title{font-size:26px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);letter-spacing:-.5px;}
+.gr-hero-sub{font-size:11px;font-weight:700;color:rgba(255,255,255,.82);text-shadow:0 1px 6px rgba(0,0,0,.8);margin-top:3px;text-align:left;}
 
 /* ══ GARAGE BODY ══ */
 .gr-body{padding:0 12px 32px;background:transparent;}
@@ -2309,12 +2328,12 @@ async function doUpgradeStat(bikeLevel, stat){
           <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
           <span class="gr-hero-tb-ton-val" id="garageTonBal">0</span>
         </div>
+        <button class="gr-hero-tb-plus" onclick="goNavBySection('sectionFinance')" aria-label="Deposit">+</button>
       </div>
     </div>
-    <!-- center: Garage title + subtitle -->
+    <!-- bottom-left: Garage title + subtitle -->
     <div class="gr-hero-center">
       <div class="gr-hero-title-row">
-        <img class="gr-hero-wrench" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463289/9e729fba-39b5-4b46-be3d-c9e9a784bda0_fa0sx8.png" alt="">
         <div class="gr-hero-title">Garage</div>
       </div>
       <div class="gr-hero-sub">Upgrade your bikes for racing</div>
@@ -2491,14 +2510,15 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 
 /* ── Big bike carousel card ── */
-.race-carousel-outer{position:relative;width:100%;overflow:hidden;padding:4px 0 6px;display:flex;align-items:center;justify-content:center;}
+.race-carousel-outer{position:relative;width:100%;overflow:hidden;padding:4px 0 6px;}
 .race-carousel-track{
   display:flex;gap:12px;align-items:center;
   transition:transform .35s cubic-bezier(.4,0,.2,1);
-  will-change:transform;padding:4px 16px;width:100%;
+  will-change:transform;padding:4px 0;
+  justify-content:center;
 }
 .race-bike-slide{
-  flex:0 0 calc(100% - 32px);margin:0 auto;
+  flex:0 0 calc(100% - 32px);
   background:rgba(8,18,8,.88);
   border:1.5px solid rgba(255,255,255,.06);
   border-radius:22px;overflow:hidden;
@@ -2510,37 +2530,48 @@ async function doUpgradeStat(bikeLevel, stat){
 }
 .race-bike-slide.active{
   border-color:rgba(124,179,66,.85);
-  box-shadow:0 0 0 2px rgba(124,179,66,.55),0 0 24px rgba(124,179,66,.35),0 12px 40px rgba(0,0,0,.7);
+  box-shadow:
+    0 0 0 2px rgba(124,179,66,.55),
+    0 0 24px rgba(124,179,66,.35),
+    0 12px 40px rgba(0,0,0,.7);
   transform:scale(1);opacity:1;pointer-events:auto;
   display:block;
 }
 .race-bike-img-wrap{
   width:100%;height:230px;position:relative;overflow:hidden;
   background:rgba(6,14,6,.9);
-  display:flex;align-items:center;justify-content:center;
 }
 .race-bike-img-wrap img{
-  width:auto;height:100%;max-width:100%;object-fit:contain;display:block;transition:transform .3s ease;
-  margin:0 auto;
+  width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;
 }
 .race-bike-slide.active .race-bike-img-wrap img{transform:scale(1.04);}
-.race-bike-brand{position:absolute;top:14px;left:16px;z-index:3;color:var(--bamboo);font-size:14px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.95);line-height:1.1;}
-.race-bike-model{position:absolute;top:32px;left:16px;z-index:3;color:#fff;font-size:24px;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;}
-/* modern arrow buttons */
+/* bike brand/name on top-left of the big card */
+.race-bike-brand{
+  position:absolute;top:14px;left:16px;z-index:3;
+  color:var(--bamboo);font-size:14px;font-weight:800;
+  text-shadow:0 2px 8px rgba(0,0,0,.95);line-height:1.1;
+}
+.race-bike-model{
+  position:absolute;top:32px;left:16px;z-index:3;
+  color:#fff;font-size:24px;font-weight:800;
+  text-shadow:0 2px 10px rgba(0,0,0,.95);line-height:1.1;letter-spacing:-.3px;
+}
+/* carousel side arrows — modern professional design */
 .race-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
-  width:38px;height:60px;border-radius:14px;
-  background:linear-gradient(160deg,rgba(124,179,66,.25),rgba(0,0,0,.7));
-  border:1px solid rgba(124,179,66,.4);
-  color:var(--bamboo);font-size:26px;font-weight:900;cursor:pointer;z-index:5;
+  width:40px;height:56px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(0,0,0,.72),rgba(20,30,20,.85));
+  border:1px solid rgba(124,179,66,.45);
+  color:var(--bamboo);font-size:22px;font-weight:900;cursor:pointer;z-index:5;
   display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(10px);
-  box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 14px rgba(124,179,66,.2);
-  transition:all .2s;
+  box-shadow:0 4px 18px rgba(0,0,0,.55),0 0 12px rgba(124,179,66,.18);
+  transition:background .18s,box-shadow .18s,transform .15s;
 }
-.race-arrow.left{left:3px;}
-.race-arrow.right{right:3px;}
-.race-arrow:active{transform:translateY(-50%) scale(.9);background:rgba(124,179,66,.4);}
+.race-arrow:hover{background:linear-gradient(135deg,rgba(30,55,30,.9),rgba(50,80,30,.9));box-shadow:0 4px 20px rgba(0,0,0,.6),0 0 18px rgba(124,179,66,.38);}
+.race-arrow.left{left:10px;}
+.race-arrow.right{right:10px;}
+.race-arrow:active{transform:translateY(-50%) scale(.9);}
 
 .race-dots{display:flex;gap:6px;margin:10px 0 0;justify-content:center;width:100%;}
 .race-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .2s;cursor:pointer;}
@@ -5403,6 +5434,38 @@ async function getOrComputeFp(){
 
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
+/* ── Global button cooldown: disable ALL buttons for 2s after any API action ── */
+let _globalBtnCooldown = false;
+function _startBtnCooldown(){
+  if(_globalBtnCooldown) return;
+  _globalBtnCooldown = true;
+  document.querySelectorAll('button:not([data-no-cooldown])').forEach(b=>{
+    if(!b.disabled){
+      b.dataset._wasCooled = '1';
+      b.disabled = true;
+      b.style.opacity = '0.45';
+      b.style.filter = 'grayscale(0.5)';
+    }
+  });
+  setTimeout(()=>{
+    _globalBtnCooldown = false;
+    document.querySelectorAll('button[data-_was-cooled]').forEach(b=>{
+      b.disabled = false;
+      b.style.opacity = '';
+      b.style.filter = '';
+      delete b.dataset._wasCooled;
+    });
+    // Re-enable buttons that had data attribute
+    document.querySelectorAll('button').forEach(b=>{
+      if(b.dataset._wasCooled){
+        b.disabled = false;
+        b.style.opacity = '';
+        b.style.filter = '';
+        delete b.dataset._wasCooled;
+      }
+    });
+  }, 2000);
+}
 const DEBOUNCE_MS  = 3000;
 function debounce(key){
   const now = Date.now();
@@ -5422,6 +5485,8 @@ let _apiInFlight = 0;
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
+  // Trigger 2-second button cooldown on write actions to prevent 429
+  if(WRITE_ACTIONS.has(action)) _startBtnCooldown();
   const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
   try{
     const j = await _call(null, action, data, authHdr);
@@ -5433,42 +5498,6 @@ async function api(action, data={}){
     }
     return j.data;
   } finally { _apiInFlight--; }
-}
-
-/* ════ BACKGROUND STATE REFRESH (every 3 min) ════
-   Updates balances/data only - does NOT rebuild carousels or reset selections
-══════════════════════════════════════════════ */
-async function loadStateBackground(){
-  if(!S._dataLoaded) return; // don't run until initial load done
-  try{
-    const d = await api('getState',{start_param:S.startParam||'',_initData:S.tg?.initData||''});
-    const prevRefCount = S.refs ? S.refs.length : 0;
-    S.user      = d.user    || S.user;
-    S.user.ownedBikes   = d.user?.ownedBikes   || S.user.ownedBikes   || [];
-    S.user.bikeUpgrades = d.user?.bikeUpgrades || S.user.bikeUpgrades || {};
-    S.user.bikeMining   = d.user?.bikeMining   || S.user.bikeMining   || {};
-    S.refs      = d.referrals || [];
-    S.wdHist    = d.wdHistory   || [];
-    S.balLog    = d.balanceLog  || [];
-    S.doneTasks = d.completedTasks || [];
-    S.completedMissions = d.completedMissions || [];
-    S.tasks     = d.tasks || {partner:[],community:[]};
-    S.partnerPosts = d.partnerPosts || [];
-    if(S.refs.length > prevRefCount){
-      const newest=S.refs[0];
-      const name=newest?esc(newest.name||''):'';
-      const lang=localStorage.getItem('pandaLang')||'en';
-      const t=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-      const msg=(t.newRefNotif||TRANSLATIONS['en'].newRefNotif).replace('{name}',name||'👤');
-      showNotif(msg,'s');
-    }
-    if(d.pendingDeposit) startDepVerify(d.pendingDeposit.depId,d.pendingDeposit.txHash);
-    // Only sync balances in topbar — no full page re-render
-    syncTopbar();
-    try{if(typeof syncMineTopbar==='function') syncMineTopbar();}catch(e){}
-    try{if(typeof syncProfileTopbar==='function') syncProfileTopbar();}catch(e){}
-    try{renderMiningPage();}catch(e){}
-  }catch(e){ console.warn('loadStateBackground:',e.message); }
 }
 
 async function loadState(){
@@ -5513,14 +5542,18 @@ async function loadState(){
   // Only update UI if we have confirmed server data at least once
   if(S._dataLoaded){
     updateUI();
-    renderGarage();
-    renderBikes();
+    // Only re-render garage/bikes if user is NOT currently on race/select phase
+    const raceSec = document.getElementById('sectionTasks');
+    const raceActive = raceSec && raceSec.classList.contains('active');
+    // Don't re-render garage+bikes if race page is active (user may be selecting a bike)
+    if(!raceActive){
+      renderGarage();
+      renderBikes();
+    }
     renderMiningPage();
-    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
-    // Also rebuild carousel immediately with no timeout for faster response
-    if(typeof window._raceInit==='function'){
-      const sec=document.getElementById('sectionTasks');
-      if(sec&&sec.classList.contains('active')) window._raceInit();
+    // Only re-init race carousel if race section is active AND user is not mid-selection
+    if(raceActive && typeof window._raceRefreshIfActive==='function'){
+      window._raceRefreshIfActive();
     }
   }
   S._initialized = true;
@@ -6285,8 +6318,8 @@ function copyText(id){
   const el=document.getElementById(id);
   if(!el) return;
   try{
-    navigator.clipboard.writeText(el.value||el.textContent||'').then(()=>showNotif('✅ Copied!','i')).catch(()=>{});
-  }catch(e){}
+    navigator.clipboard.writeText(el.value||el.textContent||'').then(()=>showNotif('✅ Copied!','s')).catch(()=>showNotif('❌ Copy failed','e'));
+  }catch(e){showNotif('❌ Copy failed','e');}
 }
 
 function goToFinanceDeposit(){
@@ -6321,8 +6354,8 @@ function updateRefUI(){
 function copyRefLink(){
   const v=document.getElementById('refLinkInp').value;
   navigator.clipboard.writeText(v)
-    .then(()=>showNotif('✅ Link copied!','i'))
-    .catch(()=>{document.getElementById('refLinkInp').select();document.execCommand('copy');showNotif('✅ Link copied!','i');});
+    .then(()=>showNotif('✅ Link copied!','s'))
+    .catch(()=>{document.getElementById('refLinkInp').select();document.execCommand('copy');showNotif('✅ Link copied!','s');});
 }
 
 /* ════ DEPOSIT PREVIEW ════ */
@@ -6686,7 +6719,7 @@ async function init(){
   setTimeout(()=>initTON(), 600);
   // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
-  setInterval(()=>{ loadStateBackground(); }, 180000); // poll every 3 minutes
+  setInterval(()=>{ loadState(); }, 180000);
   await new Promise(r=>setTimeout(r,400));
 
   await ldAnimateTo(100, lt('ldReady'), 500);
@@ -7543,17 +7576,7 @@ async function loadSeasonAlloc(){
   api('saveSeasonAlloc',{coinsAlloc, refsAlloc, total: totalCoins}).catch(()=>{});
 }
 
-/* ════ BUTTON LOCKOUT — prevents HTTP 429 ════ */
-(function(){
-  var _lt=null;
-  document.addEventListener('click',function(e){
-    var btn=e.target.closest('button');
-    if(!btn||btn.disabled||btn.classList.contains('btn-global-locked')) return;
-    document.querySelectorAll('button:not([disabled])').forEach(function(b){b.classList.add('btn-global-locked');});
-    clearTimeout(_lt);
-    _lt=setTimeout(function(){document.querySelectorAll('.btn-global-locked').forEach(function(b){b.classList.remove('btn-global-locked');});},2000);
-  },true);
-})();
+
 </script>
 </body>
 </html>

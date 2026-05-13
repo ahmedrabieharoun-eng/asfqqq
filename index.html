@@ -435,7 +435,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 }
 #loadingScreen::before{
   content:'';position:absolute;inset:-30px;
-  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778676654/6d41eaaa-ac88-4291-a6ef-ff8310051d10_rjfdr6.jpg');
+  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778709685/photo_2026-05-14_01-01-02_eob9r8.jpg');
   background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
@@ -469,54 +469,35 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
 .ld-title{display:none!important;}
 .ld-sub{font-size:11px;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:.5px;text-shadow:0 1px 6px rgba(0,0,0,.9);}
 
-/* Gold progress bar */
-.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:84%;max-width:340px;}
-.ld-bar-track{
-  position:relative;width:100%;height:14px;border-radius:10px;
-  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(20,20,20,.35));
-  border:1px solid rgba(255,80,0,.45);
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.7),0 0 14px rgba(255,90,0,.18);
-  overflow:hidden;
+/* Blue segmented progress bar (image-style) */
+.ld-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:92%;max-width:430px;}
+.ld-bar-row{display:flex;align-items:center;gap:12px;width:100%;justify-content:center;}
+.ld-segs-new{display:flex;gap:4px;flex:1;align-items:center;justify-content:center;}
+.ld-segs-new .seg{
+  flex:1;height:18px;border-radius:3px;
+  background:rgba(255,255,255,.14);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+  transition:background .25s ease,box-shadow .25s ease;
 }
-.ld-bar-track::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.06) 6px 8px);
-}
-.ld-bar-fill{
-  position:relative;height:100%;width:0%;border-radius:9px;
-  background:linear-gradient(90deg,#ff3d00 0%,#ff7a00 35%,#ffc400 65%,#ffec3d 100%);
-  background-size:200% 100%;
-  animation:ld-bar-shine 1.4s linear infinite;
-  transition:width .35s cubic-bezier(.4,.8,.3,1);
-  box-shadow:0 0 14px rgba(255,140,0,.85),0 0 28px rgba(255,90,0,.4);
-}
-.ld-bar-fill::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:50%;
-  background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);
-  border-radius:9px 9px 0 0;
-}
-.ld-bar-fill::after{
-  content:'';position:absolute;top:0;right:-2px;bottom:0;width:14px;
-  background:radial-gradient(ellipse at center,rgba(255,240,150,.95),transparent 70%);
-  filter:blur(2px);
-}
-@keyframes ld-bar-shine{
-  0%{background-position:200% 0}
-  100%{background-position:-200% 0}
+.ld-segs-new .seg.active{
+  background:linear-gradient(180deg,#3aa0ff,#1565ff);
+  box-shadow:0 0 8px rgba(58,160,255,.85),0 0 14px rgba(21,101,255,.55),inset 0 1px 0 rgba(255,255,255,.35);
 }
 .ld-pct{
-  font-size:14px;font-weight:900;color:#ffd84d;
-  letter-spacing:2px;font-family:'Fredoka',sans-serif;
-  text-shadow:0 0 12px rgba(255,140,0,.85),0 1px 6px rgba(0,0,0,.95);
+  font-size:16px;font-weight:800;color:#fff;
+  font-family:'Fredoka',sans-serif;min-width:46px;text-align:right;
+  text-shadow:0 0 8px rgba(58,160,255,.7),0 1px 4px rgba(0,0,0,.9);
 }
 .ld-sub{
-  font-size:12px!important;color:#ffe9b8!important;
-  font-weight:700!important;letter-spacing:1.5px!important;
-  text-transform:uppercase;font-family:'Fredoka',sans-serif!important;
-  text-shadow:0 0 10px rgba(255,140,0,.5),0 1px 6px rgba(0,0,0,.95)!important;
+  font-size:18px!important;color:#fff!important;
+  font-weight:800!important;letter-spacing:1px!important;
+  font-family:'Fredoka',sans-serif!important;
+  text-shadow:0 2px 10px rgba(0,0,0,.9)!important;
+  text-transform:none!important;
 }
 
-/* hide old segments */
+/* hide old bar */
+.ld-bar-track,.ld-bar-fill{display:none!important;}
 .ld-segments{display:none!important;}
 .ld-seg{display:none!important;}
 /* ════ CHAMPION CARD ════ */
@@ -744,13 +725,15 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
   <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778679700/bd57c63b-71a1-4114-8207-3763fbab038f-removebg-preview_hgqgis.png" onerror="this.style.display='none'" alt="RASEEN">
   </div>
   <!-- Bottom bar section -->
-  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;position:relative;z-index:1;">
-  <div class="ld-sub" id="ldStatus">Loading...</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;position:relative;z-index:1;">
+  <div class="ld-sub" id="ldStatus">Loading</div>
   <div class="ld-bar-wrap">
-    <div class="ld-bar-track">
-      <div class="ld-bar-fill" id="ldBarFill"></div>
+    <div class="ld-bar-row">
+      <div class="ld-segs-new" id="ldSegsNew"></div>
+      <div class="ld-pct" id="ldPct">0%</div>
     </div>
-    <div class="ld-pct" id="ldPct">0%</div>
+    <!-- legacy hidden bar -->
+    <div class="ld-bar-track"><div class="ld-bar-fill" id="ldBarFill"></div></div>
   </div>
   </div><!-- end bottom bar section -->
   <!-- hidden legacy elements for JS compatibility -->
@@ -6615,20 +6598,29 @@ function pandaClick(){
 
 /* ════ LOADING SCREEN ════ */
 function ldProgress(pct, msg){
-  // Drive new gold bar
+  pct = Math.max(0, Math.min(100, pct));
+  // Drive legacy bar (hidden)
   const fill = document.getElementById('ldBarFill');
   if(fill) fill.style.width = Math.round(pct) + '%';
-  // Legacy segments (hidden but kept for compatibility)
+  // New blue segmented bar (build once)
+  const SEG_COUNT = 20;
+  const host = document.getElementById('ldSegsNew');
+  if(host && host.childElementCount !== SEG_COUNT){
+    host.innerHTML = '';
+    for(let i=0;i<SEG_COUNT;i++){ const d=document.createElement('div'); d.className='seg'; host.appendChild(d); }
+  }
+  if(host){
+    const filled = Math.round((pct/100)*SEG_COUNT);
+    host.querySelectorAll('.seg').forEach((s,i)=>s.classList.toggle('active', i<filled));
+  }
+  // Legacy segments compatibility
   const segs = document.querySelectorAll('#ldSegs .ld-seg');
-  const filled = Math.round((pct / 100) * segs.length);
-  segs.forEach((s, i) => {
-    if(i < filled) s.classList.add('active');
-    else s.classList.remove('active');
-  });
+  const filledLegacy = Math.round((pct / 100) * segs.length);
+  segs.forEach((s, i) => { if(i < filledLegacy) s.classList.add('active'); else s.classList.remove('active'); });
   const pctEl = document.getElementById('ldPct');
-  if(pctEl) pctEl.textContent = Math.round(pct) + '%';
+  if(pctEl){ pctEl.textContent = Math.round(pct) + '%'; pctEl.style.color=''; }
   const stat = document.getElementById('ldStatus');
-  if(stat){ stat.textContent = msg; stat.style.color = ''; }
+  if(stat){ stat.textContent = 'Loading'; stat.style.color = ''; }
 }
 function ldHide(){
   const s = document.getElementById('loadingScreen');

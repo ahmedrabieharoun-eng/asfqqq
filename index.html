@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -425,17 +426,26 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   top:0;left:0;
   width:100vw;height:100vh;
   z-index:9999;
-  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778678554/bbbc225e-dc4c-4e68-84f8-9436efb77d5d_zbvziv.jpg');
-  background-size:cover;
-  background-position:center center;
-  background-repeat:no-repeat;
+  background:#000;
+  overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding-top:0;padding-bottom:52px;gap:0;
   transition:opacity .7s ease;
 }
 #loadingScreen::before{
+  content:'';position:absolute;inset:-30px;
+  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778678554/bbbc225e-dc4c-4e68-84f8-9436efb77d5d_zbvziv.jpg');
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+  filter:blur(16px) brightness(.7);
+  transform:scale(1.1);
+  z-index:0;
+}
+#loadingScreen::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,transparent 40%,rgba(0,0,0,.65) 100%);
+  background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.15) 40%,rgba(0,0,0,.7) 100%);
+  z-index:0;
 }
 #loadingScreen>*{position:relative;z-index:1;}
 #loadingScreen.hidden{opacity:0;pointer-events:none;}
@@ -449,7 +459,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   width:100%;
 }
 #ldLogoMain img{
-  width:220px;height:auto;object-fit:contain;
+  width:340px;max-width:88vw;height:auto;object-fit:contain;
   filter:drop-shadow(0 6px 24px rgba(0,0,0,.75));
 }
 /* hide old elements */
@@ -730,7 +740,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 <div id="loadingScreen">
   <!-- Logo center -->
   <div id="ldLogoMain">
-    <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778677586/a6918860-6a16-4e60-a154-10110a9cc33d_laewxj.jpg" onerror="this.style.display='none'" alt="RASEEN">
+  <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778679700/bd57c63b-71a1-4114-8207-3763fbab038f-removebg-preview_hgqgis.png" onerror="this.style.display='none'" alt="RASEEN">
   </div>
   <!-- Bottom bar section -->
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;position:relative;z-index:1;">
@@ -3486,7 +3496,7 @@ async function doUpgradeStat(bikeLevel, stat){
       '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.6) 100%);pointer-events:none;"></div>',
       /* Logo in center */
       '<div style="position:relative;z-index:2;flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:0 24px;">',
-        '<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778677157/0623f42f-a6d9-45f4-805f-b230f44dca1e_h8kv4t.jpg" id="rqLogo" style="width:220px;height:auto;object-fit:contain;filter:drop-shadow(0 6px 24px rgba(0,0,0,.8));border-radius:14px;" onerror="this.style.display=\'none\'">',
+        '<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778679700/bd57c63b-71a1-4114-8207-3763fbab038f-removebg-preview_hgqgis.png" id="rqLogo" style="width:340px;max-width:88vw;height:auto;object-fit:contain;filter:drop-shadow(0 6px 24px rgba(0,0,0,.8));" onerror="this.style.display=\'none\'">',
       '</div>',
       /* Bottom bar section */
       '<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;padding:0 24px 0;">',

@@ -1755,19 +1755,19 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- Headline describing the page -->
     <div class="mine-headline">
-      <div class="mine-headline-title">⛏️ Mining</div>
-      <div class="mine-headline-sub">Rent out your motorcycle for 24 hours and earn TON automatically. Tap “Garage” below to start mining with your bikes.</div>
+      <div class="mine-headline-title" data-i18n="miningTitle">⛏️ Mining</div>
+      <div class="mine-headline-sub" data-i18n="miningSub">Rent out your motorcycle for 24 hours and earn TON automatically. Tap “Garage” below to start mining with your bikes.</div>
     </div>
 
-    <button class="mine-garage-fab" onclick="openMineSheet()">Гараж 🚗</button>
+    <button class="mine-garage-fab" onclick="openMineSheet()" data-i18n="miningOpenGarage">Гараж 🚗</button>
   </div>
   <div class="mine-sheet-overlay" id="mineSheetOverlay" onclick="closeMineSheet()"></div>
   <div class="mine-bottom-sheet" id="mineBottomSheet">
     <div class="mine-handle"></div>
     <div class="mine-sheet-head">
-      <div class="mine-garage-title">Гараж</div>
+      <div class="mine-garage-title" data-i18n="miningGarageSheetTitle">Гараж</div>
     </div>
-    <div class="mine-grid" id="miningBikeGrid"><div class="mine-empty">Loading bikes...</div></div>
+    <div class="mine-grid" id="miningBikeGrid"><div class="mine-empty" data-i18n="miningLoadingBikes">Loading bikes...</div></div>
   </div>
   <script>
   function openMineSheet(){
@@ -2346,9 +2346,9 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- bottom-left: Garage title + subtitle -->
     <div class="gr-hero-center">
       <div class="gr-hero-title-row">
-        <div class="gr-hero-title">Garage</div>
+        <div class="gr-hero-title" data-i18n="garageTitle">Garage</div>
       </div>
-      <div class="gr-hero-sub">Upgrade your bike for racing</div>
+      <div class="gr-hero-sub" data-i18n="garageSub">Upgrade your bike for racing</div>
     </div>
   </div>
 
@@ -2933,10 +2933,10 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="race-title-block">
         <div class="race-title-row">
           <span class="race-title-chev">»</span>
-          <span class="race-title-main">SELECT BIKE</span>
+          <span class="race-title-main" data-i18n="raceSelectBike">SELECT BIKE</span>
           <span class="race-title-chev">«</span>
         </div>
-        <div class="race-title-sub">Choose your bike and dominate the track</div>
+        <div class="race-title-sub" data-i18n="raceSelectBikeSub">Choose your bike and dominate the track</div>
       </div>
 
       <!-- Big bike carousel -->
@@ -4242,7 +4242,7 @@ async function doUpgradeStat(bikeLevel, stat){
           <div class="dep-amt-icon">
             <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
           </div>
-          <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" step="0.1" min="1" oninput="updDepPreview()">
+          <input type="number" id="depositAmountInput" class="finput" placeholder="Enter amount" data-i18n-ph="enterAmountPh" step="0.1" min="1" oninput="updDepPreview()">
           <div class="dep-amt-suffix">TON</div>
         </div>
         <div class="dep-preset-row">
@@ -4264,23 +4264,21 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="dep-card dep-manual-card" style="margin-bottom:0">
         <div class="dep-card-hdr">
           <div class="dep-step">3</div>
-          <div class="dep-card-title">Manual Deposit</div>
+          <div class="dep-card-title" data-i18n="manualDepositTitle">Manual Deposit</div>
         </div>
         <div style="padding-right:0">
-          <label class="flabel">Wallet Address</label>
+          <label class="flabel" data-i18n="walletAddressLbl">Wallet Address</label>
           <div class="dep-manual-input">
             <input type="text" class="finput" id="manualWalletAddr" readonly value="UQDrVUxBI9tGFmJq0FtR4GpR13BD2_m7X83Vho7EDxDW1EYu">
-            <button class="dep-copy-btn" onclick="copyText('manualWalletAddr')"><i class="fas fa-copy"></i> Copy</button>
+            <button class="dep-copy-btn" onclick="copyText('manualWalletAddr')"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
           </div>
-          <label class="flabel">Comment (Your User ID)</label>
+          <label class="flabel" data-i18n="commentUserIdLbl">Comment (Your User ID)</label>
           <div class="dep-manual-input">
             <input type="text" class="finput" id="manualCommentId" readonly>
-            <button class="dep-copy-btn" onclick="copyText('manualCommentId')"><i class="fas fa-copy"></i> Copy</button>
+            <button class="dep-copy-btn" onclick="copyText('manualCommentId')"><i class="fas fa-copy"></i> <span data-i18n="copyBtn">Copy</span></button>
           </div>
         </div>
-        <div class="dep-manual-foot">
-          <i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.
-        </div>
+        <div class="dep-manual-foot" data-i18n="sendOnlyTonNote"><i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.</div>
       </div>
 
     </div>
@@ -4294,12 +4292,12 @@ async function doUpgradeStat(bikeLevel, stat){
 
       <!-- Wallet Address Section -->
       <div class="wd-new-wallet-card">
-        <label class="flabel">TON Wallet Address</label>
+        <label class="flabel" data-i18n="tonWalletAddr">TON Wallet Address</label>
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
-          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 1 TON" step="0.1" min="1">
-          <button class="wd-new-max-btn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||''">Max</button>
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="1">
+          <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||''">Max</button>
         </div>
         <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
           <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0">
@@ -6333,17 +6331,15 @@ function renderWdHist(){
 function switchFinTab(el,t){ /* legacy - redirect to openProfilePage */ openProfilePage(t); }
 
 function openProfilePage(page){
-  const titles = {
-    deposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
-    withdraw:'Withdraw',
-    missions:'Missions',
-    partnership:'Partnership',
-    referrals:'Referrals'
+  const titleKeys = {
+    deposit:'pspTitleDeposit', withdraw:'pspTitleWithdraw',
+    missions:'pspTitleMissions', partnership:'pspTitlePartnership',
+    referrals:'pspTitleReferrals'
   };
-  const balLabels = {
-    deposit:'Balance', withdraw:'Available Balance',
-    missions:'Available Balance', referrals:'Available Balance',
-    partnership:'Total Earned'
+  const balLabelKeys = {
+    deposit:'pspBalLblBalance', withdraw:'pspBalLblAvailable',
+    missions:'pspBalLblAvailable', referrals:'pspBalLblAvailable',
+    partnership:'pspBalLblEarned'
   };
   const overlay = document.getElementById('profileSubPage');
   const content = document.getElementById('profileSubPageContent');
@@ -6352,7 +6348,8 @@ function openProfilePage(page){
   const src = document.getElementById('page-'+page+'-content');
   if(!src) return;
   content.innerHTML = src.innerHTML;
-  title.innerHTML = titles[page]||page;
+  title.innerHTML = tr(titleKeys[page]||'') || page;
+  title.setAttribute('data-i18n', titleKeys[page]||'');
   overlay.setAttribute('data-page', page);
   // Sync topbar user info + balance
   try{
@@ -6366,7 +6363,10 @@ function openProfilePage(page){
       nm.textContent = (srcNm && srcNm.textContent) ? srcNm.textContent : 'Player';
     }
     const lbl = document.getElementById('pspBalLbl');
-    if(lbl) lbl.textContent = balLabels[page]||'Balance';
+    if(lbl){
+      lbl.textContent = tr(balLabelKeys[page]||'pspBalLblBalance');
+      lbl.setAttribute('data-i18n', balLabelKeys[page]||'pspBalLblBalance');
+    }
     const bv = document.getElementById('pspBalVal');
     const srcBv = document.getElementById('finTonBal');
     if(bv){
@@ -6388,6 +6388,8 @@ function openProfilePage(page){
   else if(page==='withdraw'||page==='deposit'){syncFinanceHeader();renderWdHistNew();}
   const cidEl=document.getElementById('manualCommentId');
   if(cidEl) cidEl.value=S.userId||'???';
+  // Re-apply translations to the freshly-injected content so all data-i18n nodes are localized
+  try{ if(typeof applyLang==='function'){ const lang=localStorage.getItem('pandaLang')||'en'; const flag=localStorage.getItem('pandaLangFlag')||'🇬🇧'; const code=localStorage.getItem('pandaLangCode')||'EN'; applyLang(lang,flag,code); } }catch(e){}
 }
 
 function closeProfilePage(){
@@ -7586,6 +7588,150 @@ const TRANSLATIONS = {
   });
 })();
 
+/* ── Extended translations v2: Garage hero, Race header, Mining/Farm page, Manual deposit, Withdraw, Profile sub-pages ── */
+(function(){
+  const ext2 = {
+    ar:{
+      garageTitle:'الجراج',
+      garageSub:'طوّر دراجتك للسباق',
+      raceSelectBike:'اختر الدراجة',
+      raceSelectBikeSub:'اختر دراجتك وسيطر على الحلبة',
+      miningTitle:'⛏️ التعدين',
+      miningSub:'أجّر دراجتك لمدة 24 ساعة واربح TON تلقائياً. اضغط "الجراج" بالأسفل لبدء التعدين بدراجاتك.',
+      miningOpenGarage:'الجراج 🚗',
+      miningGarageSheetTitle:'الجراج',
+      miningLoadingBikes:'جارٍ تحميل الدراجات...',
+      manualDepositTitle:'إيداع يدوي',
+      walletAddressLbl:'عنوان المحفظة',
+      commentUserIdLbl:'التعليق (معرّف المستخدم)',
+      sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> أرسل <b>TON</b> فقط إلى هذا العنوان.',
+      enterAmountPh:'أدخل المبلغ',
+      tonWalletAddr:'عنوان محفظة TON',
+      minOneTonPh:'الحد الأدنى: 1 TON',
+      maxBtn:'الأقصى',
+      pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> إيداع',
+      pspTitleWithdraw:'سحب',
+      pspTitleMissions:'المهام',
+      pspTitlePartnership:'شراكة',
+      pspTitleReferrals:'الإحالات',
+      pspBalLblBalance:'الرصيد',
+      pspBalLblAvailable:'الرصيد المتاح',
+      pspBalLblEarned:'إجمالي الأرباح'
+    },
+    en:{
+      garageTitle:'Garage',
+      garageSub:'Upgrade your bike for racing',
+      raceSelectBike:'SELECT BIKE',
+      raceSelectBikeSub:'Choose your bike and dominate the track',
+      miningTitle:'⛏️ Mining',
+      miningSub:'Rent out your motorcycle for 24 hours and earn TON automatically. Tap "Garage" below to start mining with your bikes.',
+      miningOpenGarage:'Garage 🚗',
+      miningGarageSheetTitle:'Garage',
+      miningLoadingBikes:'Loading bikes...',
+      manualDepositTitle:'Manual Deposit',
+      walletAddressLbl:'Wallet Address',
+      commentUserIdLbl:'Comment (Your User ID)',
+      sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
+      enterAmountPh:'Enter amount',
+      tonWalletAddr:'TON Wallet Address',
+      minOneTonPh:'Min: 1 TON',
+      maxBtn:'Max',
+      pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
+      pspTitleWithdraw:'Withdraw',
+      pspTitleMissions:'Missions',
+      pspTitlePartnership:'Partnership',
+      pspTitleReferrals:'Referrals',
+      pspBalLblBalance:'Balance',
+      pspBalLblAvailable:'Available Balance',
+      pspBalLblEarned:'Total Earned'
+    },
+    ru:{
+      garageTitle:'Гараж',
+      garageSub:'Прокачайте мотоцикл для гонок',
+      raceSelectBike:'ВЫБЕРИ МОТОЦИКЛ',
+      raceSelectBikeSub:'Выберите мотоцикл и доминируйте на трассе',
+      miningTitle:'⛏️ Майнинг',
+      miningSub:'Сдавайте мотоцикл в аренду на 24 часа и автоматически зарабатывайте TON. Нажмите «Гараж» ниже, чтобы начать майнить.',
+      miningOpenGarage:'Гараж 🚗',
+      miningGarageSheetTitle:'Гараж',
+      miningLoadingBikes:'Загрузка мотоциклов...',
+      manualDepositTitle:'Ручной депозит',
+      walletAddressLbl:'Адрес кошелька',
+      commentUserIdLbl:'Комментарий (ID пользователя)',
+      sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
+      enterAmountPh:'Введите сумму',
+      tonWalletAddr:'Адрес TON-кошелька',
+      minOneTonPh:'Мин: 1 TON',
+      maxBtn:'Макс',
+      pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Депозит',
+      pspTitleWithdraw:'Вывод',
+      pspTitleMissions:'Задания',
+      pspTitlePartnership:'Партнёрство',
+      pspTitleReferrals:'Рефералы',
+      pspBalLblBalance:'Баланс',
+      pspBalLblAvailable:'Доступный баланс',
+      pspBalLblEarned:'Всего заработано'
+    },
+    es:{
+      garageTitle:'Garaje',
+      garageSub:'Mejora tu moto para las carreras',
+      raceSelectBike:'ELIGE MOTO',
+      raceSelectBikeSub:'Elige tu moto y domina la pista',
+      miningTitle:'⛏️ Minería',
+      miningSub:'Alquila tu moto por 24 horas y gana TON automáticamente. Pulsa "Garaje" abajo para empezar a minar con tus motos.',
+      miningOpenGarage:'Garaje 🚗',
+      miningGarageSheetTitle:'Garaje',
+      miningLoadingBikes:'Cargando motos...',
+      manualDepositTitle:'Depósito manual',
+      walletAddressLbl:'Dirección de cartera',
+      commentUserIdLbl:'Comentario (Tu ID)',
+      sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
+      enterAmountPh:'Ingresa cantidad',
+      tonWalletAddr:'Dirección de cartera TON',
+      minOneTonPh:'Mín: 1 TON',
+      maxBtn:'Máx',
+      pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Depósito',
+      pspTitleWithdraw:'Retirar',
+      pspTitleMissions:'Misiones',
+      pspTitlePartnership:'Asociación',
+      pspTitleReferrals:'Referidos',
+      pspBalLblBalance:'Saldo',
+      pspBalLblAvailable:'Saldo disponible',
+      pspBalLblEarned:'Total ganado'
+    },
+    fr:{
+      garageTitle:'Garage',
+      garageSub:'Améliorez votre moto pour la course',
+      raceSelectBike:'CHOISIR MOTO',
+      raceSelectBikeSub:'Choisissez votre moto et dominez la piste',
+      miningTitle:'⛏️ Minage',
+      miningSub:'Louez votre moto pendant 24 heures et gagnez du TON automatiquement. Appuyez sur "Garage" ci-dessous pour commencer.',
+      miningOpenGarage:'Garage 🚗',
+      miningGarageSheetTitle:'Garage',
+      miningLoadingBikes:'Chargement des motos...',
+      manualDepositTitle:'Dépôt manuel',
+      walletAddressLbl:'Adresse du portefeuille',
+      commentUserIdLbl:'Commentaire (Votre ID)',
+      sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
+      enterAmountPh:'Entrez le montant',
+      tonWalletAddr:'Adresse du portefeuille TON',
+      minOneTonPh:'Min: 1 TON',
+      maxBtn:'Max',
+      pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Dépôt',
+      pspTitleWithdraw:'Retrait',
+      pspTitleMissions:'Missions',
+      pspTitlePartnership:'Partenariat',
+      pspTitleReferrals:'Parrainages',
+      pspBalLblBalance:'Solde',
+      pspBalLblAvailable:'Solde disponible',
+      pspBalLblEarned:'Total gagné'
+    }
+  };
+  Object.keys(ext2).forEach(k=>{
+    TRANSLATIONS[k] = Object.assign(TRANSLATIONS[k]||{}, ext2[k]);
+  });
+})();
+
 /* tr(key) — translate by current language with English fallback */
 function tr(key){
   const lang = (localStorage.getItem('pandaLang')||'en');
@@ -7683,6 +7829,12 @@ function setLang(lang,flag,code){
       const biOv = document.getElementById('bikeInfoModalOverlay');
       if(biOv && biOv.classList.contains('open') && typeof openBikeInfoModal==='function'){
         openBikeInfoModal();
+      }
+      // Refresh open profile sub-page (deposit/withdraw/missions/referrals/partnership)
+      const psp = document.getElementById('profileSubPage');
+      if(psp && psp.style.display!=='none'){
+        const curPage = psp.getAttribute('data-page');
+        if(curPage && typeof openProfilePage==='function') openProfilePage(curPage);
       }
     }catch(e){}
   }catch(err){ console.error('setLang error',err); }

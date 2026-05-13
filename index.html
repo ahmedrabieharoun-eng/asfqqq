@@ -96,16 +96,15 @@ if ('serviceWorker' in navigator) {
 }
 body{
   font-family:'Fredoka',cursive;font-weight:800;
-  -webkit-font-smoothing:antialiased;
   background:
     linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.62) 40%,rgba(0,0,0,.85) 100%),
-    url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat fixed,
+    url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463498/f7668d99-3cde-40f6-b96d-65482b121020_bien1o.png') center/cover no-repeat,
     #000;
+  background-attachment:scroll;
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;
   font-size:clamp(13px,1.5vw,16px);
+  -webkit-font-smoothing:antialiased;
 }
-img{display:block;-webkit-backface-visibility:hidden;backface-visibility:hidden;will-change:auto;}
-.hub-hero-img,.bk-card-top img,.bk-detail-img{content-visibility:auto;contain-intrinsic-size:auto 260px;}
 /* ── Fluid scaling helpers ── */
 .hub-hero{height:clamp(220px,35vw,420px)!important;}
 .bk-card-top{height:clamp(160px,22vw,240px)!important;}
@@ -712,7 +711,8 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 </style>
 </head>
 <body>
-<!-- Background music removed -->
+<!-- BACKGROUND MUSIC: simple instrumental cycling loop, controlled by toggleSound -->
+<!-- audio removed -->
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
@@ -907,6 +907,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 .bk-card-imgbox img{
   width:100%;height:100%;object-fit:cover;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
+  transform:translateZ(0);will-change:transform;backface-visibility:hidden;
 }
 
 /* Right: name + stats — uses card bg image */
@@ -972,7 +973,6 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
   display:none;position:fixed;inset:0;z-index:600;
   background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
   align-items:flex-end;justify-content:center;
-  will-change:opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
 .bk-detail-overlay.open{display:flex}
 .bk-detail-sheet{
@@ -982,7 +982,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
   overflow:hidden;
   animation:su .3s ease;
   max-height:92vh;overflow-y:auto;
-;will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+}
 .bk-detail-img{
   width:100%;height:200px;object-fit:cover;display:block;
 }
@@ -1135,8 +1135,8 @@ function renderBikes(){
     div.className = 'bk-card' + (isOwned ? ' owned' : '');
     div.style.animationDelay = (i*0.06)+'s';
     const btnHtml = isOwned
-      ? `<button class="bk-card-btn owned-btn" disabled>${lt('bikeOwnedBtn')}</button>`
-      : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">${lt('bikeBuyBtn').replace('{price}',b.price)}</button>`;
+      ? `<button class="bk-card-btn owned-btn" disabled>✅ В вашем гараже</button>`
+      : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">Купить за ${b.price} TON</button>`;
     div.innerHTML = `
       <div class="bk-card-top">
         <div class="bk-card-imgbox">
@@ -1196,56 +1196,56 @@ function openBikeDetail(lv){
   const tonIcon = `<img class="bk-detail-ton-icon" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">`;
 
   const buyBtnHtml = isOwned
-    ? `<button class="bk-detail-owned-btn">${lt('bikeOwnedBtn')}</button>`
-    : `<button class="bk-detail-buy-btn" onclick="buyBike(${b.lv});closeBikeDetailForce()">${lt('bikeBuyBtn').replace('{price}',b.price)}</button>`;
+    ? `<button class="bk-detail-owned-btn">✅ В вашем гараже</button>`
+    : `<button class="bk-detail-buy-btn" onclick="buyBike(${b.lv});closeBikeDetailForce()">Купить за ${b.price} TON</button>`;
 
   document.getElementById('bikeDetailSheet').innerHTML = `
-    <img class="bk-detail-img" src="${b.img}" loading="eager" decoding="async" onerror="this.style.opacity='.3'">
+    <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
     <div class="bk-detail-body" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
-      <div class="bk-detail-class">${lt('bikeLevel')} ${b.lv}</div>
+      <div class="bk-detail-class">Класс: Уровень ${b.lv}</div>
 
-      <div class="bk-detail-section-title" style="color:${nameColor};">${lt('bikeStats')}</div>
+      <div class="bk-detail-section-title" style="color:${nameColor};">Характеристики:</div>
 
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeSpeed')}</div>
+        <div class="bk-detail-stat-name">Скорость</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.speed}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeAccel')}</div>
+        <div class="bk-detail-stat-name">Разгон</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.accel}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeManeuver')}</div>
+        <div class="bk-detail-stat-name">Маневры</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.maneuver}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeNitro')}</div>
+        <div class="bk-detail-stat-name">Нитро</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.nitro}</div>
       </div>
 
-      <div class="bk-detail-earn-title">${lt('bikeEarns')}</div>
+      <div class="bk-detail-earn-title">Техника приносит:</div>
 
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${daily} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('bikeDailyTon')}</div>
+        <div class="bk-detail-earn-period">в день</div>
       </div>
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${monthly} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('bikeMonthlyTon')}</div>
+        <div class="bk-detail-earn-period">в месяц</div>
       </div>
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${halfyr} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('bikeHalfYear')}</div>
+        <div class="bk-detail-earn-period">за полгода</div>
       </div>
 
       <div class="bk-detail-actions">
@@ -1295,7 +1295,7 @@ async function buyBike(lv){
     syncTopbar();
     renderBikes();
     renderGarage();
-    showNotif(`✅ 🏍️ ${bike.name} ${lt('bikeBought')}`,'s');
+    showNotif(`✅ 🏍️ ${bike.name} куплен!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Purchase failed'}`,'e');
   }finally{
@@ -1637,7 +1637,7 @@ async function doUpgradeStat(bikeLevel, stat){
     syncTopbar();
     _garageSelectedLv = bikeLevel;
     renderGarage();
-    showNotif(`✅ ${STAT_LABELS[stat]} ${lt('bikeUpgraded')} +${UPGRADE_INC[stat]}`,'s');
+    showNotif(`✅ ${STAT_LABELS[stat]} улучшена! +${UPGRADE_INC[stat]}`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Failed'}`,'e');
   }finally{
@@ -1708,7 +1708,7 @@ async function doUpgradeStat(bikeLevel, stat){
     /* Dark bottom sheet */
     .mine-sheet-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
     .mine-sheet-overlay.open{display:block}
-    .mine-bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#0f1410;border-top:1px solid rgba(124,179,66,.28);border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.55);padding:16px 18px 110px;min-height:340px;max-height:82vh;overflow-y:auto;color:#fff;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .mine-bottom-sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#0f1410;border-top:1px solid rgba(124,179,66,.28);border-radius:22px 22px 0 0;box-shadow:0 -12px 35px rgba(0,0,0,.55);padding:16px 18px 110px;min-height:340px;max-height:82vh;overflow-y:auto;color:#fff;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
     .mine-bottom-sheet.open{transform:translateY(0)}
     .mine-handle{width:140px;height:5px;background:rgba(255,255,255,.22);border-radius:10px;margin:0 auto 20px}
     .mine-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
@@ -1748,7 +1748,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="mine-headline-sub">Rent out your motorcycle for 24 hours and earn TON automatically. Tap “Garage” below to start mining with your bikes.</div>
     </div>
 
-    <button class="mine-garage-fab" onclick="openMineSheet()" id="mineGarageFabBtn">Гараж 🚗</button>
+    <button class="mine-garage-fab" onclick="openMineSheet()">Гараж 🚗</button>
   </div>
   <div class="mine-sheet-overlay" id="mineSheetOverlay" onclick="closeMineSheet()"></div>
   <div class="mine-bottom-sheet" id="mineBottomSheet">
@@ -2157,6 +2157,7 @@ async function doUpgradeStat(bikeLevel, stat){
 .gr-sel-bike-img{
   position:relative;z-index:2;
   width:100%;height:100%;object-fit:cover;display:block;
+  transform:translateZ(0);will-change:transform;backface-visibility:hidden;
 }
 .gr-sel-bike-name{
   position:absolute;bottom:14px;left:14px;right:14px;
@@ -3478,7 +3479,7 @@ async function doUpgradeStat(bikeLevel, stat){
     const cancelBtn=document.getElementById('rqCancelBtn');
     if(cancelBtn) cancelBtn.style.display='none';
     const sub=document.getElementById('rqSub');
-    if(sub) sub.textContent=lt('raceFound');
+    if(sub) sub.textContent='Соперник найден! Готовим трассу...';
     const title=document.getElementById('rqTitle');
     if(title) title.textContent='⚡ Match found';
     const oppBox=document.getElementById('rqOpp');
@@ -3575,13 +3576,13 @@ async function doUpgradeStat(bikeLevel, stat){
       const recovered=await _racePollUntilResolved(30000);
       if(recovered) return;
       _raceRestoreSelectUI();
-      showNotif('❌ '+(e.message||lt('raceNetErr')),'e'); return;
+      showNotif('❌ '+(e.message||'Ошибка сети'),'e'); return;
     }
     if(!res||!res.status){
       const recovered=await _racePollUntilResolved(12000);
       if(recovered) return;
       _raceRestoreSelectUI();
-      showNotif('❌ '+lt('raceQueueErr'),'e'); return;
+      showNotif('❌ Не удалось войти в очередь','e'); return;
     }
     // Refresh balance display (entry fee deducted)
     try{ loadState(); }catch(_){}
@@ -3595,7 +3596,7 @@ async function doUpgradeStat(bikeLevel, stat){
       _racePollTimer=setInterval(_racePollOnce, 2000);
     } else {
       _raceRestoreSelectUI();
-      showNotif('❌ '+lt('raceQueueErr'),'e');
+      showNotif('❌ Не удалось войти в очередь','e');
     }
   };
 
@@ -3630,12 +3631,12 @@ async function doUpgradeStat(bikeLevel, stat){
     const spd2=document.getElementById('rsrSpd2');
     if(playerWins){
       if(emoji)emoji.textContent='🏆';
-      if(title){title.textContent=lt('raceWin');title.className='rsr-title win';}
+      if(title){title.textContent='Победа!';title.className='rsr-title win';}
       if(reward)reward.style.display='flex';
       if(rewTxt)rewTxt.textContent='+0.9 TON';
     }else{
       if(emoji)emoji.textContent='💨';
-      if(title){title.textContent=lt('raceLose');title.className='rsr-title lose';}
+      if(title){title.textContent='Проигрыш';title.className='rsr-title lose';}
       if(reward)reward.style.display='none';
     }
     const tgUser=S?.tg?.initDataUnsafe?.user;
@@ -3729,7 +3730,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <img class="pf-hero-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/28c8e6bc-d206-4d74-8a19-4dbfb8fa4897_mxwtsa.png" alt="profile hero">
     <div class="pf-hero-overlay"></div>
 
-    <!-- top-right Lang + Sound -->
+    <!-- top-right Lang -->
     <div class="pf-actions">
       <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span> <span style="font-size:10px;opacity:.7">▼</span></button>
     </div>
@@ -4903,11 +4904,13 @@ function syncFinanceHeader(){
   if(handleEl){
     handleEl.textContent = user.username?`@${user.username}`:'';
   }
-  // Lang flags on finance page
+  // Lang flags on profile page — read from localStorage (reliable source of truth)
+  const savedFlag = localStorage.getItem('pandaLangFlag')||'🇬🇧';
+  const savedCode = localStorage.getItem('pandaLangCode')||'EN';
   const langFl = document.getElementById('langFlagFin');
   const langLbl = document.getElementById('langLblFin');
-  if(langFl) langFl.textContent = document.getElementById('langFlag')?.textContent||'🇬🇧';
-  if(langLbl) langLbl.textContent = document.getElementById('langLbl')?.textContent||'EN';
+  if(langFl) langFl.textContent = savedFlag;
+  if(langLbl) langLbl.textContent = savedCode;
 }
 </script>
 <style>
@@ -5591,7 +5594,7 @@ function renderMiningPage(){
   if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(2))+' TON';
   const ownedList=BIKES.filter(b=>owned.includes(b.lv));
   if(!ownedList.length){
-    grid.innerHTML='<div class="mine-empty">'+lt('noGarageBikes')+'<br><span style="font-size:12px;color:#8a927f">اشتري دراجة أولاً من الجراج</span></div>';
+    grid.innerHTML='<div class="mine-empty">У вас пока нет سيارات في الجراج<br><span style="font-size:12px;color:#8a927f">اشتري دراجة أولاً من الجراج</span></div>';
     return;
   }
   const now=Date.now();
@@ -5607,7 +5610,7 @@ function renderMiningPage(){
     return '<div class="mine-car-card">'+
       '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
       '<div class="mine-card-body">'+
-        '<div class="mine-in-garage">'+lt('inGarage').replace('{n}',1)+'</div>'+
+        '<div class="mine-in-garage">В гараже: 1</div>'+
         '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(3)+' TON / 24h</div>'+btn+
       '</div></div>';
   }).join('');
@@ -5781,7 +5784,7 @@ function renderTasks(){
 
   // ── Update stats card ──
   const totalRefs = S.refs.length;
-  // Active = referrals with hasWithdrawn:true (made first withdrawal — matches server logic)
+  // Active = referrals who have made a withdrawal (consistent with server definition)
   const activeCount = S.refs.filter(r=>r.hasWithdrawn).length;
   S._activeRefCount = activeCount;
   const totalEl=document.getElementById('refTotalCount');
@@ -6741,7 +6744,7 @@ async function init(){
 /* ════ LANGUAGE SYSTEM ════ */
 const TRANSLATIONS = {
   ar:{
-    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',bikeOwnedBtn:'✅ في مرآبك',bikeBuyBtn:'شراء مقابل {price} TON',bikeLevel:'المستوى',bikeSpeed:'السرعة',bikeAccel:'التسارع',bikeManeuver:'المناورة',bikeNitro:'النيترو',bikeDailyTon:'يومياً',bikeMonthlyTon:'شهرياً',bikeStats:'المواصفات:',bikeEarns:'تكسب:',bikeHalfYear:'نصف سنة',bikeBought:'تم الشراء!',bikeUpgraded:'تمت الترقية!',garageBtn:'الجراج 🚗',noGarageBikes:'لا توجد دراجات في الجراج',toBalance:'للرصيد',goRide:'انطلق',inGarage:'في الجراج: {n}',raceComingSoon:'السباق قريباً!',raceDev:'قيد التطوير',raceModeNow:'وضع السباق الآن',raceDevNote:'قيد التطوير.',raceContinue:'متابعة',raceSearching:'البحث عن منافس...',raceBet:'رهان 0.5 TON',raceWinner:'الفائز يحصل على 0.9 TON',raceCancelBtn:'إلغاء وإعادة 0.5 TON',raceCancelled:'تم الإلغاء، 0.5 TON مُعاد',raceFound:'تم إيجاد منافس! جاري التجهيز...',raceExpired:'انتهت المهلة، 0.5 TON مُعاد',raceNoBikes:'لا دراجات! اشترِ من الجراج',raceNeedBal:'تحتاج 0.5 TON للبدء',raceNetErr:'خطأ في الشبكة',raceQueueErr:'تعذّر الدخول للقائمة',raceWin:'فوز! 🏆',raceLose:'خسارة',withdrawDepRequired:'السحب متاح للمودعين فقط',withdrawDepNote:'أودع TON واحداً على الأقل لتفعيل السحب',withdrawRedirect:'إعادة التوجيه لصفحة الإيداع خلال 4 ثواني...'
+    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',
     tabMissions:'المهام',
     tabPartnership:'الشراكة',
     tabReferrals:'الإحالات',
@@ -6868,7 +6871,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
   },
   en:{
-    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',bikeOwnedBtn:'✅ In your garage',bikeBuyBtn:'Buy for {price} TON',bikeLevel:'Level',bikeSpeed:'Speed',bikeAccel:'Accel',bikeManeuver:'Maneuver',bikeNitro:'Nitro',bikeDailyTon:'Daily',bikeMonthlyTon:'Monthly',bikeStats:'Stats:',bikeEarns:'Earns:',bikeHalfYear:'6 months',bikeBought:'Purchased!',bikeUpgraded:'Upgraded!',garageBtn:'Garage 🚗',noGarageBikes:'No bikes in garage yet',toBalance:'To Balance',goRide:'Go!',inGarage:'In Garage: {n}',raceComingSoon:'Race Coming Soon!',raceDev:'In Development',raceModeNow:'Race mode is now',raceDevNote:'under development.',raceContinue:'Continue',raceSearching:'Searching for opponent...',raceBet:'Bet 0.5 TON',raceWinner:'Winner gets 0.9 TON',raceCancelBtn:'Cancel & return 0.5 TON',raceCancelled:'Cancelled, 0.5 TON refunded',raceFound:'Opponent found! Preparing track...',raceExpired:'Search expired, 0.5 TON refunded',raceNoBikes:'No bikes! Buy in Garage',raceNeedBal:'Need 0.5 TON to start',raceNetErr:'Network error',raceQueueErr:'Could not join queue',raceWin:'Victory! 🏆',raceLose:'Defeat',withdrawDepRequired:'Withdrawal available for depositors only',withdrawDepNote:'Deposit at least 1 TON to unlock withdrawals',withdrawRedirect:'Redirecting to deposit page in 4 seconds...'
+    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
     labelCoins:'Coins',labelBamboo:'Bamboo',
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
@@ -7004,7 +7007,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
   },
   ru:{
-    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',bikeOwnedBtn:'✅ В вашем гараже',bikeBuyBtn:'Купить за {price} TON',bikeLevel:'Уровень',bikeSpeed:'Скорость',bikeAccel:'Разгон',bikeManeuver:'Маневры',bikeNitro:'Нитро',bikeDailyTon:'в день',bikeMonthlyTon:'в месяц',bikeStats:'Характеристики:',bikeEarns:'Техника приносит:',bikeHalfYear:'${lt('bikeHalfYear')}',bikeBought:'куплен!',bikeUpgraded:'улучшена!',garageBtn:'Гараж 🚗',noGarageBikes:'No bikes in garage yet',toBalance:'To Balance',goRide:'Go!',inGarage:'В гараже: {n}',raceComingSoon:'Гонка скоро!',raceDev:'В разработке',raceModeNow:'Режим гонки сейчас',raceDevNote:'в процессе разработки.',raceContinue:'Продолжить',raceSearching:'Searching for opponent...',raceBet:'Bet 0.5 TON',raceWinner:'Winner gets 0.9 TON',raceCancelBtn:'Cancel & return 0.5 TON',raceCancelled:'Cancelled, 0.5 TON refunded',raceFound:'Opponent found! Preparing track...',raceExpired:'Search expired, 0.5 TON refunded',raceNoBikes:'No bikes! Buy in Garage',raceNeedBal:'Нужно 0.5 TON для старта',raceNetErr:'Ошибка сети',raceQueueErr:'Не удалось войти в очередь',raceWin:'Победа!',raceLose:'Проигрыш',withdrawDepRequired:'Withdrawal available for depositors only',withdrawDepNote:'Deposit at least 1 TON to unlock withdrawals',withdrawRedirect:'Redirecting to deposit page in 4 seconds...'
+    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
     tabMissions:'Задания',
     tabPartnership:'Партнёрство',
     tabReferrals:'Рефералы',
@@ -7131,7 +7134,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
   },
   es:{
-    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',bikeOwnedBtn:'✅ En tu garaje',bikeBuyBtn:'Comprar por {price} TON',bikeLevel:'Nivel',bikeSpeed:'Velocidad',bikeAccel:'Aceleración',bikeManeuver:'Maniobra',bikeNitro:'Nitro',bikeDailyTon:'Diario',bikeMonthlyTon:'Mensual',bikeStats:'Estadísticas:',bikeEarns:'Gana:',bikeHalfYear:'6 meses',bikeBought:'¡Comprada!',bikeUpgraded:'¡Mejorada!',garageBtn:'Garaje 🚗',noGarageBikes:'Sin motos en el garaje',toBalance:'Al Saldo',goRide:'¡Ir!',inGarage:'En garaje: {n}',raceComingSoon:'¡Carrera pronto!',raceDev:'En desarrollo',raceModeNow:'El modo carrera está',raceDevNote:'en desarrollo.',raceContinue:'Continuar',raceSearching:'Buscando oponente...',raceBet:'Apuesta 0.5 TON',raceWinner:'Ganador recibe 0.9 TON',raceCancelBtn:'Cancelar y devolver 0.5 TON',raceCancelled:'Cancelado, 0.5 TON devuelto',raceFound:'¡Oponente encontrado! Preparando...',raceExpired:'Búsqueda expirada, 0.5 TON devuelto',raceNoBikes:'¡Sin motos! Compra en Garaje',raceNeedBal:'Necesitas 0.5 TON',raceNetErr:'Error de red',raceQueueErr:'No se pudo unir a la cola',raceWin:'¡Victoria! 🏆',raceLose:'Derrota',withdrawDepRequired:'Retiro solo para depositantes',withdrawDepNote:'Deposita al menos 1 TON',withdrawRedirect:'Redirigiendo en 4 segundos...'
+    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
     tabMissions:'Misiones',
     tabPartnership:'Asociación',
     tabReferrals:'Referidos',
@@ -7258,7 +7261,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
   },
   fr:{
-    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',bikeOwnedBtn:'✅ Dans votre garage',bikeBuyBtn:'Acheter pour {price} TON',bikeLevel:'Niveau',bikeSpeed:'Vitesse',bikeAccel:'Accél.',bikeManeuver:'Manœuvre',bikeNitro:'Nitro',bikeDailyTon:'par jour',bikeMonthlyTon:'par mois',bikeStats:'Statistiques:',bikeEarns:'Rapporte:',bikeHalfYear:'6 mois',bikeBought:'Acheté!',bikeUpgraded:'Amélioré!',garageBtn:'Garage 🚗',noGarageBikes:'Pas de motos dans le garage',toBalance:'Au Solde',goRide:'Partir!',inGarage:'Dans garage: {n}',raceComingSoon:'Course bientôt!',raceDev:'En développement',raceModeNow:'Le mode course est',raceDevNote:'en développement.',raceContinue:'Continuer',raceSearching:'Recherche d'adversaire...',raceBet:'Mise 0.5 TON',raceWinner:'Le vainqueur gagne 0.9 TON',raceCancelBtn:'Annuler et rendre 0.5 TON',raceCancelled:'Annulé, 0.5 TON remboursé',raceFound:'Adversaire trouvé! Préparation...',raceExpired:'Recherche expirée, 0.5 TON remboursé',raceNoBikes:'Pas de motos! Acheter en Garage',raceNeedBal:'Besoin 0.5 TON',raceNetErr:'Erreur réseau',raceQueueErr:'Impossible de rejoindre la file',raceWin:'Victoire! 🏆',raceLose:'Défaite',withdrawDepRequired:'Retrait pour déposants seulement',withdrawDepNote:'Déposez au moins 1 TON',withdrawRedirect:'Redirection dans 4 secondes...'
+    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
     tabMissions:'Missions',
     tabPartnership:'Partenariat',
     tabReferrals:'Parrainages',
@@ -7388,8 +7391,42 @@ const TRANSLATIONS = {
 
 
 /* ════ SOUND TOGGLE + BACKGROUND MUSIC ════ */
-// Music removed
-const m=document.getElementById('langMenu');
+let _soundEnabled = localStorage.getItem('soundEnabled') !== '0';
+function _bgMusicEl(){ return document.getElementById('bgMusic'); }
+function _playBgMusic(){
+  const a = _bgMusicEl(); if(!a) return;
+  try{ a.volume = 0.35; a.play().catch(()=>{}); }catch(e){}
+}
+function _pauseBgMusic(){
+  const a = _bgMusicEl(); if(!a) return;
+  try{ a.pause(); }catch(e){}
+}
+function toggleSound(){
+  _soundEnabled = !_soundEnabled;
+  localStorage.setItem('soundEnabled', _soundEnabled ? '1' : '0');
+  const btn = document.getElementById('soundBtn');
+  if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
+  if(_soundEnabled) _playBgMusic(); else _pauseBgMusic();
+  if(typeof showNotif==='function') showNotif(_soundEnabled ? '🔊 Music ON' : '🔇 Music OFF', 'w');
+}
+// Init sound button + try autoplay; fallback: start on first user gesture
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('soundBtn');
+  if(btn) btn.textContent = _soundEnabled ? '🔊' : '🔇';
+  if(_soundEnabled){
+    _playBgMusic();
+    const startOnGesture = ()=>{
+      if(_soundEnabled) _playBgMusic();
+      document.removeEventListener('click', startOnGesture);
+      document.removeEventListener('touchstart', startOnGesture);
+    };
+    document.addEventListener('click', startOnGesture, {once:false});
+    document.addEventListener('touchstart', startOnGesture, {once:false});
+  }
+});
+
+function toggleLangMenu(){
+  const m=document.getElementById('langMenu');
   if(!m) return;
   const willOpen = m.style.display==='none' || m.style.display==='';
   m.style.display = willOpen ? 'block' : 'none';
@@ -7412,6 +7449,12 @@ function setLang(lang,flag,code){
     localStorage.setItem('pandaLangFlag',flag);
     localStorage.setItem('pandaLangCode',code);
     applyLang(lang,flag,code);
+    // Re-render dynamic pages so translated strings appear in JS-generated HTML
+    if(typeof renderTasks==='function') try{renderTasks();}catch(e){}
+    if(typeof renderMissions==='function') try{renderMissions();}catch(e){}
+    if(typeof renderRefMissions==='function') try{renderRefMissions();}catch(e){}
+    if(typeof renderBikes==='function') try{renderBikes();}catch(e){}
+    if(typeof renderGarage==='function') try{renderGarage();}catch(e){}
   }catch(err){ console.error('setLang error',err); }
   const m=document.getElementById('langMenu'); if(m) m.style.display='none';
   if(typeof syncFinanceHeader==="function") try{syncFinanceHeader();}catch(e){}
@@ -7422,9 +7465,6 @@ function applyLang(lang,flag,code){
   // Top header lang button (may be absent on some pages)
   const lf=document.getElementById('langFlag'); if(lf) lf.textContent=flag;
   const lc=document.getElementById('langCode'); if(lc) lc.textContent=code;
-  // Sync ALL lang button instances across the page
-  document.querySelectorAll('[id^="langFlag"]').forEach(el=>{ el.textContent=flag; });
-  document.querySelectorAll('[id^="langLbl"], [id^="langCode"]').forEach(el=>{ el.textContent=code; });
   // Profile page lang button
   const lfF=document.getElementById('langFlagFin'); if(lfF) lfF.textContent=flag;
   const lcF=document.getElementById('langLblFin'); if(lcF) lcF.textContent=code;
@@ -7488,9 +7528,6 @@ function applyLang(lang,flag,code){
 
   // ── Copy buttons ──
   document.querySelectorAll('.btn-copy').forEach(el=>el.innerHTML=`<i class="fas fa-copy"></i> ${t.copyBtn}`);
-  // ── Mine garage fab ──
-  const mineGarageFab=document.getElementById('mineGarageFabBtn');
-  if(mineGarageFab) mineGarageFab.textContent=t.garageBtn||'Garage 🚗';
 
   // ── Float add task ──
   const floatBtn=document.getElementById('floatAddTask');
@@ -7504,10 +7541,6 @@ function applyLang(lang,flag,code){
     wadEl.innerHTML=`${t.notConnected}<span class="conn-dot"></span><span class="conn-lbl">Connected</span>`;
     wadEl.dataset.defaultShown='1';
   }
-  // ── Re-render dynamic sections that build HTML from JS (bike cards, missions, referrals) ──
-  try{ if(typeof renderBikes==='function') renderBikes(); }catch(e){}
-  try{ if(typeof renderMissions==='function') renderMissions(); }catch(e){}
-  try{ if(typeof updateRef2Stats==='function') updateRef2Stats(); }catch(e){}
 }
 
 /* ════ NEW SEASON ALLOCATION ════ */
@@ -7551,20 +7584,6 @@ async function loadSeasonAlloc(){
   api('saveSeasonAlloc',{coinsAlloc, refsAlloc, total: totalCoins}).catch(()=>{});
 }
 
-
-// ── Apply saved language on page load ──
-(function(){
-  try{
-    const sl=localStorage.getItem('pandaLang')||'en';
-    const sf=localStorage.getItem('pandaLangFlag')||'🇬🇧';
-    const sc=localStorage.getItem('pandaLangCode')||'EN';
-    if(sl!=='en') applyLang(sl,sf,sc);
-    // Always sync langBtnFin even for EN
-    const lf=document.getElementById('langFlagFin'); if(lf) lf.textContent=sf;
-    const lc=document.getElementById('langLblFin');  if(lc) lc.textContent=sc;
-    document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('active',el.dataset.lang===sl));
-  }catch(e){}
-})();
 
 </script>
 </body>

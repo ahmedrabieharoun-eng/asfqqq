@@ -1090,10 +1090,10 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
     </div>
   </div>
   <div style="position:absolute;bottom:14px;left:14px;right:14px;z-index:10;">
-    <div data-i18n="homeMotorcycles" style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
+    <div data-i18n="hubMotorcycles" style="font-size:32px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.9);margin-bottom:5px;letter-spacing:-.3px;">Motorcycles</div>
     <div style="display:flex;align-items:center;gap:10px;width:100%;">
-      <div data-i18n="homeTagline" style="flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
-      <div data-i18n="sortByPrice" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(6px);white-space:nowrap;">🏆 By price ↓</div>
+      <div data-i18n="hubTagline" style="flex:1;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.8);">Collect • Upgrade • Dominate</div>
+      <div data-i18n="hubByPrice" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#fff;display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(6px);white-space:nowrap;">🏆 By price ↓</div>
     </div>
   </div>
 </div>
@@ -1146,9 +1146,8 @@ function renderBikes(){
     div.className = 'bk-card' + (isOwned ? ' owned' : '');
     div.style.animationDelay = (i*0.06)+'s';
     const btnHtml = isOwned
-      ? `<button class="bk-card-btn owned-btn" disabled>${lt('bikeInGarage')}</button>`
-      : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">${lt('bikeBuyFor').replace('{n}',b.price)}</button>`;
-    const bikeName = `${lt('bikeLevel')} ${b.lv}`;
+      ? `<button class="bk-card-btn owned-btn" disabled>${tr('inGarage')}</button>`
+      : `<button class="bk-card-btn buy-btn" onclick="buyBike(${b.lv})">${tr('buyForTon').replace('{p}', b.price)}</button>`;
     div.innerHTML = `
       <div class="bk-card-top">
         <div class="bk-card-imgbox">
@@ -1157,24 +1156,24 @@ function renderBikes(){
         <div class="bk-card-info" style="background-image:url('${cardImg}');background-size:cover;background-position:center;background-repeat:no-repeat;">
           <div class="bk-card-info-content">
             <div class="bk-card-nameline">
-              <div class="bk-card-name" style="color:${nameColor};text-shadow:0 0 12px ${nameColor}88;">${bikeName}</div>
+              <div class="bk-card-name" style="color:${nameColor};text-shadow:0 0 12px ${nameColor}88;">${trBikeName(b)}</div>
               <div class="bk-card-arrow" style="color:${nameColor};border-color:${nameColor};" onclick="openBikeDetail(${b.lv})">›</div>
             </div>
             <div class="bk-stats-grid">
               <div class="bk-stat-cell">
-                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${lt('bikeSpeed')}</div>
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${tr('statSpeed')}</div>
                 <div class="bk-stat-value">${b.speed}</div>
               </div>
               <div class="bk-stat-cell">
-                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${lt('bikeNitro')}</div>
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${tr('statNitro')}</div>
                 <div class="bk-stat-value">${b.nitro}</div>
               </div>
               <div class="bk-stat-cell">
-                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${lt('bikeAccel')}</div>
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${tr('statAccel')}</div>
                 <div class="bk-stat-value">${b.accel}</div>
               </div>
               <div class="bk-stat-cell">
-                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${lt('bikeManeuver')}</div>
+                <div class="bk-stat-label" style="color:rgba(255,255,255,.7);">${tr('statManeuver')}</div>
                 <div class="bk-stat-value">${b.maneuver}</div>
               </div>
             </div>
@@ -1208,57 +1207,56 @@ function openBikeDetail(lv){
   const tonIcon = `<img class="bk-detail-ton-icon" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">`;
 
   const buyBtnHtml = isOwned
-    ? `<button class="bk-detail-owned-btn">${lt('bikeInGarage')}</button>`
-    : `<button class="bk-detail-buy-btn" onclick="buyBike(${b.lv});closeBikeDetailForce()">${lt('bikeBuyFor').replace('{n}',b.price)}</button>`;
-  const bikeName = `${lt('bikeLevel')} ${b.lv}`;
+    ? `<button class="bk-detail-owned-btn">${tr('inGarage')}</button>`
+    : `<button class="bk-detail-buy-btn" onclick="buyBike(${b.lv});closeBikeDetailForce()">${tr('buyForTon').replace('{p}', b.price)}</button>`;
 
   document.getElementById('bikeDetailSheet').innerHTML = `
     <img class="bk-detail-img" src="${b.img}" onerror="this.style.opacity='.3'">
     <div class="bk-detail-body" style="background-image:url('${cardImg}');background-size:cover;background-position:center;">
-      <div class="bk-detail-class">${lt('bikeClassLevel')} ${b.lv}</div>
+      <div class="bk-detail-class">${tr('detailClass')} ${b.lv}</div>
 
-      <div class="bk-detail-section-title" style="color:${nameColor};">${lt('bikeSpecs')}</div>
+      <div class="bk-detail-section-title" style="color:${nameColor};">${tr('detailSpecs')}</div>
 
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeSpeed')}</div>
+        <div class="bk-detail-stat-name">${tr('statSpeedLong')}</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.speed/maxSpeed*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.speed}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeAccel')}</div>
+        <div class="bk-detail-stat-name">${tr('statAccelLong')}</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.accel/maxAccel*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.accel}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeManeuver')}</div>
+        <div class="bk-detail-stat-name">${tr('statManeuverLong')}</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.maneuver/maxManeuver*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.maneuver}</div>
       </div>
       <div class="bk-detail-stat">
-        <div class="bk-detail-stat-name">${lt('bikeNitro')}</div>
+        <div class="bk-detail-stat-name">${tr('statNitroLong')}</div>
         <div class="bk-detail-bar-wrap"><div class="bk-detail-bar-fill" style="width:${Math.round(b.nitro/maxNitro*100)}%;background:linear-gradient(90deg,${nameColor},${nameColor}88);"></div></div>
         <div class="bk-detail-stat-val">${b.nitro}</div>
       </div>
 
-      <div class="bk-detail-earn-title">${lt('bikeEarns')}</div>
+      <div class="bk-detail-earn-title">${tr('detailEarns')}</div>
 
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${daily} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('perDay')}</div>
+        <div class="bk-detail-earn-period">${tr('perDay')}</div>
       </div>
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${monthly} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('perMonth')}</div>
+        <div class="bk-detail-earn-period">${tr('perMonth')}</div>
       </div>
       <div class="bk-detail-earn-row">
         ${tonIcon}
         <div class="bk-detail-earn-val">${halfyr} TON</div>
         <div class="bk-detail-earn-arrow">→</div>
-        <div class="bk-detail-earn-period">${lt('perHalfYear')}</div>
+        <div class="bk-detail-earn-period">${tr('perHalfYear')}</div>
       </div>
 
       <div class="bk-detail-actions">
@@ -1428,9 +1426,9 @@ function renderGarage(){
         : 'none';
       thumb.style.opacity = isActive ? '1' : '0.55';
       thumb.innerHTML = `
-        <div class="gr-bike-thumb-no" style="color:${isActive?ACTIVE_COLOR:'rgba(255,255,255,.55)'}">${lt('upgradeBikeNo')} ${noNum}</div>
+        <div class="gr-bike-thumb-no" style="color:${isActive?ACTIVE_COLOR:'rgba(255,255,255,.55)'}">No ${noNum}</div>
         <img class="gr-bike-thumb-img" src="${b.img}" onerror="this.style.opacity='.3'" style="${isActive?'':'filter:grayscale(.45) brightness(.75);'}">
-        <div class="gr-bike-thumb-label">${lt('bikeLevel')} ${b.lv}</div>
+        <div class="gr-bike-thumb-label">${tr('bikeLevelLabel')} ${b.lv}</div>
       `;
       thumb.onclick = () => { _garageSelectedLv = b.lv; renderGarage(); };
       trackEl.appendChild(thumb);
@@ -1455,10 +1453,10 @@ function renderGarage(){
         <div class="gr-sel-img-side">
           <div class="gr-sel-bg" style="background-image:url('${bCardBg}')"></div>
           <img class="gr-sel-bike-img" src="${b.img}" onerror="this.style.opacity='.3'">
-          <div class="gr-sel-bike-name" style="color:${bColor}">${lt('bikeLevel')} ${b.lv}</div>
+          <div class="gr-sel-bike-name" style="color:${bColor}">${trBikeName(b)}</div>
         </div>
         <button class="gr-sel-upgrade-btn" onclick="openUpgModal(${b.lv})">
-          ${lt('upgradeYourBike')}
+          ${tr('upgradeYourBike')}
         </button>
       </div>
     `;
@@ -1480,16 +1478,16 @@ function renderGarage(){
       const dots = Array.from({length:dotCount},(_,i)=>`<div class="gr-upg-dot${i<upg?' filled':''}"></div>`).join('');
       let btnHtml = '';
       if(isMax){
-        btnHtml = `<button class="gr-upg-btn-new maxed" disabled>${lt('upgradeMax')}</button>`;
+        btnHtml = `<button class="gr-upg-btn-new maxed" disabled>${tr('upMaxBtn')}</button>`;
       } else {
-        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>${lt('upgradeBtn')}</button>`;
+        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}')" ${canAfford?'':'disabled'}>${tr('upgradeBtn')}</button>`;
       }
       return `
         <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
-            <div class="gr-upg-level-new">${lt('upgradeLevel')} ${upg} / ${maxUpg}</div>
+            <div class="gr-upg-level-new">${tr('levelOf')} ${upg} / ${maxUpg}</div>
             <div class="gr-upg-dots">${dots}</div>
           </div>
           <div class="gr-upg-price-new">
@@ -1502,11 +1500,11 @@ function renderGarage(){
     }
 
     upgEl.innerHTML = `
-      <div class="gr-upg-section-title">${lt('upgradesTitle')}</div>
-      ${upgRowNew('speed',lt('bikeSpeed'))}
-      ${upgRowNew('accel',lt('bikeAccel'))}
-      ${upgRowNew('maneuver',lt('bikeHandling'))}
-      ${upgRowNew('nitro',lt('bikeNitro'))}
+      <div class="gr-upg-section-title">${tr('upgradesTitle')}</div>
+      ${upgRowNew('speed',tr('statSpeedLong'))}
+      ${upgRowNew('accel',tr('statAccelLong'))}
+      ${upgRowNew('maneuver',tr('statManeuverLong'))}
+      ${upgRowNew('nitro',tr('statNitroLong'))}
     `;
   }
 }
@@ -1523,7 +1521,7 @@ function openUpgModal(lv){
   const imgEl = document.getElementById('grUpgModalBikeImg');
   const nameEl = document.getElementById('grUpgModalBikeName');
   if(imgEl) imgEl.src = b.img;
-  if(nameEl) nameEl.textContent = `${lt('bikeLevel')} ${b.lv}`;
+  if(nameEl) nameEl.textContent = trBikeName(b);
   const bodyEl = document.getElementById('grUpgModalBody');
   if(bodyEl){
     const bCardBg = BIKE_CARD_IMGS[0];
@@ -1540,16 +1538,16 @@ function openUpgModal(lv){
       const dots = Array.from({length:dotCount},(_,i)=>`<div class="gr-upg-dot${i<upg?' filled':''}"></div>`).join('');
       let btnHtml = '';
       if(isMax){
-        btnHtml = `<button class="gr-upg-btn-new maxed" disabled>${lt('upgradeMax')}</button>`;
+        btnHtml = `<button class="gr-upg-btn-new maxed" disabled>${tr('upMaxBtn')}</button>`;
       } else {
-        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}');setTimeout(()=>openUpgModal(${b.lv}),700)" ${canAfford?'':'disabled'}>${lt('upgradeBtn')}</button>`;
+        btnHtml = `<button class="gr-upg-btn-new" onclick="doUpgradeStat(${b.lv},'${stat}');setTimeout(()=>openUpgModal(${b.lv}),700)" ${canAfford?'':'disabled'}>${tr('upgradeBtn')}</button>`;
       }
       return `
         <div class="gr-upg-item-new" style="background-image:url('${bCardBg}')">
           <div class="gr-upg-icon-new">${STAT_ICONS[stat]}</div>
           <div class="gr-upg-info-new">
             <div class="gr-upg-name-new">${label} ${cs[stat]}</div>
-            <div class="gr-upg-level-new">${lt('upgradeLevel')} ${upg} / ${maxUpg}</div>
+            <div class="gr-upg-level-new">${tr('levelOf')} ${upg} / ${maxUpg}</div>
             <div class="gr-upg-dots">${dots}</div>
           </div>
           <div class="gr-upg-price-new">
@@ -1561,11 +1559,11 @@ function openUpgModal(lv){
       `;
     }
     bodyEl.innerHTML = `
-      <div class="gr-upg-section-title">${lt('upgradesTitle')}</div>
-      ${upgRowModal('speed',lt('bikeSpeed'))}
-      ${upgRowModal('accel',lt('bikeAccel'))}
-      ${upgRowModal('maneuver',lt('bikeHandling'))}
-      ${upgRowModal('nitro',lt('bikeNitro'))}
+      <div class="gr-upg-section-title">${tr('upgradesTitle')}</div>
+      ${upgRowModal('speed',tr('statSpeedLong'))}
+      ${upgRowModal('accel',tr('statAccelLong'))}
+      ${upgRowModal('maneuver',tr('statManeuverLong'))}
+      ${upgRowModal('nitro',tr('statNitroLong'))}
     `;
   }
   document.getElementById('grUpgModalOverlay').classList.add('open');
@@ -1588,7 +1586,7 @@ function openBikeInfoModal(){
   const nameEl  = document.getElementById('bikeInfoModalName');
   const bodyEl  = document.getElementById('bikeInfoModalBody');
   if(imgEl)  imgEl.src = b.img;
-  if(nameEl) nameEl.textContent = `${lt('bikeLevel')} ${b.lv}`;
+  if(nameEl) nameEl.textContent = trBikeName(b);
 
   if(bodyEl){
     const stats = (typeof getBikeCurrentStats === 'function')
@@ -1617,12 +1615,12 @@ function openBikeInfoModal(){
     }
 
     bodyEl.innerHTML = `
-      <div class="bi-level-badge">${lt('upgradeLevel').toUpperCase()} ${b.lv}</div>
-      <div class="bi-stats-section-title">${lt('bikeStatsTitle')}</div>
-      ${statRow('speed',lt('bikeSpeed'))}
-      ${statRow('accel',lt('bikeAccel'))}
-      ${statRow('maneuver',lt('bikeHandling'))}
-      ${statRow('nitro',lt('bikeNitro'))}
+      <div class="bi-level-badge">${tr('levelBadge')} ${b.lv}</div>
+      <div class="bi-stats-section-title">${tr('bikeStats')}</div>
+      ${statRow('speed',tr('statSpeedLong'))}
+      ${statRow('accel',tr('statAccelLong'))}
+      ${statRow('maneuver',tr('statManeuverLong'))}
+      ${statRow('nitro',tr('statNitroLong'))}
     `;
   }
 
@@ -2348,9 +2346,9 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- bottom-left: Garage title + subtitle -->
     <div class="gr-hero-center">
       <div class="gr-hero-title-row">
-        <div class="gr-hero-title" data-i18n="garageTitle">Garage</div>
+        <div class="gr-hero-title">Garage</div>
       </div>
-      <div class="gr-hero-sub" data-i18n="garageSub">Upgrade your bike for racing</div>
+      <div class="gr-hero-sub">Upgrade your bike for racing</div>
     </div>
   </div>
 
@@ -2371,8 +2369,8 @@ async function doUpgradeStat(bikeLevel, stat){
     <div id="garageEmptyState" style="display:none">
       <div class="gr-empty-new">
         <div class="gr-empty-new-icon">🏍️</div>
-        <div data-i18n="garageEmpty">You have no bikes yet</div>
-        <div data-i18n="garageEmptySub" style="font-size:12px;margin-top:6px;color:rgba(255,255,255,.3)">Buy a bike to start upgrading</div>
+        <div data-i18n="noBikesYetTitle">You have no bikes yet</div>
+        <div data-i18n="noBikesYetSub" style="font-size:12px;margin-top:6px;color:rgba(255,255,255,.3)">Buy a bike to start upgrading</div>
       </div>
     </div>
   </div>
@@ -2975,9 +2973,9 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ── START FIXED BOTTOM ── -->
     <div class="race-start-fixed" id="raceStartFixed">
-      <button class="race-start-btn" onclick="startRace()"><span data-i18n="raceStartBtn">Start Race</span> <span class="chev">»</span></button>
+      <button class="race-start-btn" onclick="startRace()"><span data-i18n="startRaceBtn">Start Race</span> <span class="chev">»</span></button>
       <div class="race-stake-lbl">
-        <span data-i18n="raceEntryFee">Entry Fee:</span> <span class="v">0.5</span>
+        <span data-i18n="entryFeeLbl">Entry Fee:</span> <span class="v">0.5</span>
         <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
       </div>
     </div>
@@ -3317,7 +3315,7 @@ async function doUpgradeStat(bikeLevel, stat){
     const sf = document.getElementById('raceStartFixed');
     if(sf) sf.style.display = 'block';
     if(_raceBikes.length === 0){
-      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.7);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>No bikes available.<br>Buy one in the <span style="color:var(--bamboo);cursor:pointer;text-decoration:underline" onclick="goNavBySection(\'sectionMarket\')">Garage</span></div></div>';
+      track.innerHTML = '<div style="min-width:100%;text-align:center;padding:40px 20px;color:rgba(255,255,255,.7);font-size:14px;font-weight:700"><div style="font-size:48px;margin-bottom:12px">🏍️</div><div>'+tr('noBikesAvail')+'<br><span style="color:var(--bamboo);cursor:pointer;text-decoration:underline" onclick="goNavBySection(\'sectionMarket\')">'+tr('buyOneInGarage')+'</span></div></div>';
       const dotsEl=document.getElementById('raceDots'); if(dotsEl) dotsEl.innerHTML='';
       const thEl=document.getElementById('raceThumbsTrack'); if(thEl) thEl.innerHTML='';
       const sl=document.getElementById('raceStatsList'); if(sl) sl.innerHTML='';
@@ -6959,15 +6957,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'الكوينز الحالية',snsRowCoinsDesc:'ترحيل: 20%',
     snsRowRefsTitle:'الإحالات',snsRowRefsDesc:'مكافأة الإحالات النشطة',
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
-    homeMotorcycles:'الدراجات النارية',homeTagline:'اجمع • طوّر • سيطر',sortByPrice:'🏆 حسب السعر ↓',
-    bikeLevel:'دراجة مستوى',bikeBuyFor:'شراء بـ {n} TON',bikeInGarage:'✅ في جراجك',bikeAlreadyOwned:'✅ تم شراؤها',
-    bikeSpeed:'السرعة',bikeNitro:'النيترو',bikeAccel:'التسارع',bikeManeuver:'المناورة',bikeHandling:'التحكم',
-    bikeClassLevel:'الفئة: المستوى',bikeSpecs:'المواصفات:',bikeEarns:'الدراجة تربح:',
-    perDay:'في اليوم',perMonth:'في الشهر',perHalfYear:'في نصف سنة',
-    garageTitle:'الجراج',garageSub:'طوّر دراجتك للسباق',garageEmpty:'ليس لديك دراجات بعد',garageEmptySub:'اشترِ دراجة لتبدأ التطوير',
-    upgradeYourBike:'طوّر دراجتك',upgradesTitle:'التطويرات',upgradeBtn:'تطوير',upgradeMax:'✅ الأقصى',upgradeLevel:'المستوى',upgradeBikeNo:'رقم',
-    bikeInfoBtn:'معلومات الدراجة',bikeStatsTitle:'إحصائيات الدراجة',
-    raceStartBtn:'ابدأ السباق',raceEntryFee:'رسوم الدخول:',raceComingSoon:'السباق قريباً!',
   },
   en:{
     navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
@@ -7104,15 +7093,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Current Coins',snsRowCoinsDesc:'Carry Over: 20%',
     snsRowRefsTitle:'Referrals',snsRowRefsDesc:'Active Referrals Bonus',
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
-    homeMotorcycles:'Motorcycles',homeTagline:'Collect • Upgrade • Dominate',sortByPrice:'🏆 By price ↓',
-    bikeLevel:'Bike Level',bikeBuyFor:'Buy for {n} TON',bikeInGarage:'✅ In your garage',bikeAlreadyOwned:'✅ Already owned',
-    bikeSpeed:'Speed',bikeNitro:'Nitro',bikeAccel:'Acceleration',bikeManeuver:'Maneuvers',bikeHandling:'Handling',
-    bikeClassLevel:'Class: Level',bikeSpecs:'Specs:',bikeEarns:'Bike earns:',
-    perDay:'per day',perMonth:'per month',perHalfYear:'per half year',
-    garageTitle:'Garage',garageSub:'Upgrade your bike for racing',garageEmpty:'You have no bikes yet',garageEmptySub:'Buy a bike to start upgrading',
-    upgradeYourBike:'Upgrade Your Bike',upgradesTitle:'Upgrades',upgradeBtn:'Upgrade',upgradeMax:'✅ MAX',upgradeLevel:'Level',upgradeBikeNo:'No',
-    bikeInfoBtn:'Bike Info',bikeStatsTitle:'Bike Stats',
-    raceStartBtn:'Start Race',raceEntryFee:'Entry Fee:',raceComingSoon:'Race coming soon!',
   },
   ru:{
     navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
@@ -7240,15 +7220,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Текущие монеты',snsRowCoinsDesc:'Перенос: 20%',
     snsRowRefsTitle:'Рефералы',snsRowRefsDesc:'Бонус за активных рефералов',
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
-    homeMotorcycles:'Мотоциклы',homeTagline:'Собирай • Улучшай • Доминируй',sortByPrice:'🏆 По цене ↓',
-    bikeLevel:'Мотоцикл уровень',bikeBuyFor:'Купить за {n} TON',bikeInGarage:'✅ В вашем гараже',bikeAlreadyOwned:'✅ Уже куплено',
-    bikeSpeed:'Скорость',bikeNitro:'Нитро',bikeAccel:'Разгон',bikeManeuver:'Маневры',bikeHandling:'Управление',
-    bikeClassLevel:'Класс: Уровень',bikeSpecs:'Характеристики:',bikeEarns:'Мотоцикл приносит:',
-    perDay:'в день',perMonth:'в месяц',perHalfYear:'за полгода',
-    garageTitle:'Гараж',garageSub:'Улучшайте мотоцикл для гонок',garageEmpty:'У вас пока нет мотоциклов',garageEmptySub:'Купите мотоцикл, чтобы начать улучшения',
-    upgradeYourBike:'Улучшить мотоцикл',upgradesTitle:'Улучшения',upgradeBtn:'Улучшить',upgradeMax:'✅ МАКС',upgradeLevel:'Уровень',upgradeBikeNo:'№',
-    bikeInfoBtn:'О мотоцикле',bikeStatsTitle:'Характеристики',
-    raceStartBtn:'Начать гонку',raceEntryFee:'Взнос:',raceComingSoon:'Гонка скоро!',
   },
   es:{
     navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
@@ -7376,15 +7347,6 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Monedas actuales',snsRowCoinsDesc:'Transferencia: 20%',
     snsRowRefsTitle:'Referidos',snsRowRefsDesc:'Bono referidos activos',
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
-    homeMotorcycles:'Motocicletas',homeTagline:'Colecciona • Mejora • Domina',sortByPrice:'🏆 Por precio ↓',
-    bikeLevel:'Moto Nivel',bikeBuyFor:'Comprar por {n} TON',bikeInGarage:'✅ En tu garaje',bikeAlreadyOwned:'✅ Ya adquirida',
-    bikeSpeed:'Velocidad',bikeNitro:'Nitro',bikeAccel:'Aceleración',bikeManeuver:'Maniobras',bikeHandling:'Manejo',
-    bikeClassLevel:'Clase: Nivel',bikeSpecs:'Características:',bikeEarns:'La moto gana:',
-    perDay:'por día',perMonth:'por mes',perHalfYear:'por medio año',
-    garageTitle:'Garaje',garageSub:'Mejora tu moto para correr',garageEmpty:'Aún no tienes motos',garageEmptySub:'Compra una moto para comenzar',
-    upgradeYourBike:'Mejorar Tu Moto',upgradesTitle:'Mejoras',upgradeBtn:'Mejorar',upgradeMax:'✅ MÁX',upgradeLevel:'Nivel',upgradeBikeNo:'Nº',
-    bikeInfoBtn:'Info Moto',bikeStatsTitle:'Estadísticas',
-    raceStartBtn:'Iniciar Carrera',raceEntryFee:'Cuota:',raceComingSoon:'¡Carrera pronto!',
   },
   fr:{
     navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
@@ -7512,17 +7474,131 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Pièces actuelles',snsRowCoinsDesc:'Report: 20%',
     snsRowRefsTitle:'Parrainages',snsRowRefsDesc:'Bonus parrainages actifs',
     snsTotalLbl:'🎯 Allocation totale saison',snsSeasonBadge:'Saison 2',
-    homeMotorcycles:'Motos',homeTagline:'Collecte • Améliore • Domine',sortByPrice:'🏆 Par prix ↓',
-    bikeLevel:'Moto Niveau',bikeBuyFor:'Acheter pour {n} TON',bikeInGarage:'✅ Dans votre garage',bikeAlreadyOwned:'✅ Déjà possédée',
-    bikeSpeed:'Vitesse',bikeNitro:'Nitro',bikeAccel:'Accélération',bikeManeuver:'Manœuvres',bikeHandling:'Maniabilité',
-    bikeClassLevel:'Classe : Niveau',bikeSpecs:'Caractéristiques :',bikeEarns:'La moto gagne :',
-    perDay:'par jour',perMonth:'par mois',perHalfYear:'par semestre',
-    garageTitle:'Garage',garageSub:'Améliorez votre moto pour la course',garageEmpty:'Aucune moto pour le moment',garageEmptySub:'Achetez une moto pour commencer',
-    upgradeYourBike:'Améliorer Votre Moto',upgradesTitle:'Améliorations',upgradeBtn:'Améliorer',upgradeMax:'✅ MAX',upgradeLevel:'Niveau',upgradeBikeNo:'N°',
-    bikeInfoBtn:'Info Moto',bikeStatsTitle:'Statistiques Moto',
-    raceStartBtn:'Démarrer Course',raceEntryFee:'Frais d\'entrée :',raceComingSoon:'Course bientôt !',
   }
 };
+
+/* ── Extended translations: full coverage for home/garage/race ── */
+(function(){
+  const ext = {
+    ar:{
+      hubMotorcycles:'الدراجات النارية',
+      hubTagline:'اجمع • طوّر • سيطر',
+      hubByPrice:'🏆 حسب السعر ↓',
+      bikeNamePrefix:'دراجة المستوى',
+      statSpeed:'السرعة', statNitro:'النيترو', statAccel:'التسارع', statManeuver:'المناورة',
+      statSpeedLong:'السرعة', statAccelLong:'التسارع', statManeuverLong:'المناورة', statNitroLong:'النيترو',
+      inGarage:'✅ في جراجك', buyForTon:'شراء بـ {p} TON',
+      detailClass:'الفئة: المستوى', detailSpecs:'المواصفات:',
+      detailEarns:'هذه الدراجة تربح:',
+      perDay:'يومياً', perMonth:'شهرياً', perHalfYear:'كل 6 أشهر',
+      bikeLevelLabel:'Bike Level',
+      upgradeYourBike:'طوّر دراجتك', upgradesTitle:'التطويرات',
+      upgradeBtn:'تطوير', upMaxBtn:'✅ MAX',
+      levelOf:'مستوى',
+      bikeStats:'إحصائيات الدراجة', levelBadge:'المستوى',
+      bikeInfoBtn:'معلومات الدراجة', startRaceBtn:'بدء السباق', entryFeeLbl:'رسم الدخول:',
+      noBikesYetTitle:'ليس لديك دراجات بعد', noBikesYetSub:'اشترِ دراجة لتبدأ التطوير',
+      noBikesAvail:'لا توجد دراجات متاحة.', buyOneInGarage:'اشترِ واحدة من الجراج'
+    },
+    en:{
+      hubMotorcycles:'Motorcycles',
+      hubTagline:'Collect • Upgrade • Dominate',
+      hubByPrice:'🏆 By price ↓',
+      bikeNamePrefix:'Bike Level',
+      statSpeed:'Speed', statNitro:'Nitro', statAccel:'Accel', statManeuver:'Handling',
+      statSpeedLong:'Speed', statAccelLong:'Acceleration', statManeuverLong:'Handling', statNitroLong:'Nitro',
+      inGarage:'✅ In your garage', buyForTon:'Buy for {p} TON',
+      detailClass:'Class: Level', detailSpecs:'Specs:',
+      detailEarns:'This bike earns:',
+      perDay:'per day', perMonth:'per month', perHalfYear:'per 6 months',
+      bikeLevelLabel:'Bike Level',
+      upgradeYourBike:'Upgrade Your Bike', upgradesTitle:'Upgrades',
+      upgradeBtn:'Upgrade', upMaxBtn:'✅ MAX',
+      levelOf:'Level',
+      bikeStats:'Bike Stats', levelBadge:'LEVEL',
+      bikeInfoBtn:'Bike Info', startRaceBtn:'Start Race', entryFeeLbl:'Entry Fee:',
+      noBikesYetTitle:'You have no bikes yet', noBikesYetSub:'Buy a bike to start upgrading',
+      noBikesAvail:'No bikes available.', buyOneInGarage:'Buy one in the Garage'
+    },
+    ru:{
+      hubMotorcycles:'Мотоциклы',
+      hubTagline:'Собирай • Прокачивай • Доминируй',
+      hubByPrice:'🏆 По цене ↓',
+      bikeNamePrefix:'Мотоцикл уровня',
+      statSpeed:'Скорость', statNitro:'Нитро', statAccel:'Разгон', statManeuver:'Маневры',
+      statSpeedLong:'Скорость', statAccelLong:'Разгон', statManeuverLong:'Маневры', statNitroLong:'Нитро',
+      inGarage:'✅ В вашем гараже', buyForTon:'Купить за {p} TON',
+      detailClass:'Класс: Уровень', detailSpecs:'Характеристики:',
+      detailEarns:'Техника приносит:',
+      perDay:'в день', perMonth:'в месяц', perHalfYear:'за полгода',
+      bikeLevelLabel:'Мотоцикл',
+      upgradeYourBike:'Прокачай мотоцикл', upgradesTitle:'Улучшения',
+      upgradeBtn:'Улучшить', upMaxBtn:'✅ MAX',
+      levelOf:'Уровень',
+      bikeStats:'Характеристики', levelBadge:'УРОВЕНЬ',
+      bikeInfoBtn:'О мотоцикле', startRaceBtn:'Старт гонки', entryFeeLbl:'Взнос:',
+      noBikesYetTitle:'У вас пока нет мотоциклов', noBikesYetSub:'Купите мотоцикл, чтобы прокачивать',
+      noBikesAvail:'Нет доступных мотоциклов.', buyOneInGarage:'Купите в Гараже'
+    },
+    es:{
+      hubMotorcycles:'Motocicletas',
+      hubTagline:'Colecciona • Mejora • Domina',
+      hubByPrice:'🏆 Por precio ↓',
+      bikeNamePrefix:'Moto Nivel',
+      statSpeed:'Velocidad', statNitro:'Nitro', statAccel:'Aceler.', statManeuver:'Manejo',
+      statSpeedLong:'Velocidad', statAccelLong:'Aceleración', statManeuverLong:'Manejo', statNitroLong:'Nitro',
+      inGarage:'✅ En tu garaje', buyForTon:'Comprar por {p} TON',
+      detailClass:'Clase: Nivel', detailSpecs:'Especificaciones:',
+      detailEarns:'Esta moto gana:',
+      perDay:'por día', perMonth:'por mes', perHalfYear:'por 6 meses',
+      bikeLevelLabel:'Moto Nivel',
+      upgradeYourBike:'Mejora tu moto', upgradesTitle:'Mejoras',
+      upgradeBtn:'Mejorar', upMaxBtn:'✅ MAX',
+      levelOf:'Nivel',
+      bikeStats:'Estadísticas', levelBadge:'NIVEL',
+      bikeInfoBtn:'Info Moto', startRaceBtn:'Iniciar Carrera', entryFeeLbl:'Cuota:',
+      noBikesYetTitle:'Aún no tienes motos', noBikesYetSub:'Compra una moto para mejorar',
+      noBikesAvail:'No hay motos disponibles.', buyOneInGarage:'Compra una en el Garaje'
+    },
+    fr:{
+      hubMotorcycles:'Motos',
+      hubTagline:'Collecte • Améliore • Domine',
+      hubByPrice:'🏆 Par prix ↓',
+      bikeNamePrefix:'Moto Niveau',
+      statSpeed:'Vitesse', statNitro:'Nitro', statAccel:'Accél.', statManeuver:'Maniabilité',
+      statSpeedLong:'Vitesse', statAccelLong:'Accélération', statManeuverLong:'Maniabilité', statNitroLong:'Nitro',
+      inGarage:'✅ Dans votre garage', buyForTon:'Acheter pour {p} TON',
+      detailClass:'Classe: Niveau', detailSpecs:'Caractéristiques:',
+      detailEarns:'Cette moto rapporte:',
+      perDay:'par jour', perMonth:'par mois', perHalfYear:'par 6 mois',
+      bikeLevelLabel:'Moto Niveau',
+      upgradeYourBike:'Améliorez votre moto', upgradesTitle:'Améliorations',
+      upgradeBtn:'Améliorer', upMaxBtn:'✅ MAX',
+      levelOf:'Niveau',
+      bikeStats:'Statistiques', levelBadge:'NIVEAU',
+      bikeInfoBtn:'Info Moto', startRaceBtn:'Démarrer la Course', entryFeeLbl:'Frais:',
+      noBikesYetTitle:'Vous n\'avez pas encore de motos', noBikesYetSub:'Achetez une moto pour améliorer',
+      noBikesAvail:'Aucune moto disponible.', buyOneInGarage:'Achetez-en une au Garage'
+    }
+  };
+  Object.keys(ext).forEach(k=>{
+    TRANSLATIONS[k] = Object.assign(TRANSLATIONS[k]||{}, ext[k]);
+  });
+})();
+
+/* tr(key) — translate by current language with English fallback */
+function tr(key){
+  const lang = (localStorage.getItem('pandaLang')||'en');
+  const T = TRANSLATIONS[lang] || TRANSLATIONS.en || {};
+  if(T[key]!==undefined) return T[key];
+  if(TRANSLATIONS.en && TRANSLATIONS.en[key]!==undefined) return TRANSLATIONS.en[key];
+  return key;
+}
+/* Translate a bike's display name to current language */
+function trBikeName(b){
+  if(!b) return '';
+  return tr('bikeNamePrefix') + ' ' + b.lv;
+}
 
 
 /* ════ SOUND TOGGLE + BACKGROUND MUSIC ════ */
@@ -7590,9 +7666,25 @@ function setLang(lang,flag,code){
     if(typeof renderRefMissions==='function') try{renderRefMissions();}catch(e){}
     if(typeof renderBikes==='function') try{renderBikes();}catch(e){}
     if(typeof renderGarage==='function') try{renderGarage();}catch(e){}
-    // Refresh open modals
-    try{ const upg=document.getElementById('grUpgModalOverlay'); if(upg && upg.classList.contains('open') && _garageSelectedLv) openUpgModal(_garageSelectedLv); }catch(e){}
-    try{ const bi=document.getElementById('bikeInfoModalOverlay'); if(bi && bi.classList.contains('open')) openBikeInfoModal(); }catch(e){}
+    // Re-init race carousel + thumbs so labels translate
+    if(typeof window._raceInit==='function') try{window._raceInit();}catch(e){}
+    // Refresh any open modals so their inner text re-translates immediately
+    try{
+      const bd = document.getElementById('bikeDetailOverlay');
+      if(bd && bd.classList.contains('open')){
+        // Re-open with current selected bike level (sheet has buy btn with data-lv? fallback: skip)
+        const m = bd.querySelector('.bk-detail-buy-btn,.bk-detail-owned-btn');
+        // Find any visible bike — use selected garage one as best-guess
+      }
+      const upgOv = document.getElementById('grUpgModalOverlay');
+      if(upgOv && upgOv.classList.contains('open') && typeof openUpgModal==='function' && _garageSelectedLv){
+        openUpgModal(_garageSelectedLv);
+      }
+      const biOv = document.getElementById('bikeInfoModalOverlay');
+      if(biOv && biOv.classList.contains('open') && typeof openBikeInfoModal==='function'){
+        openBikeInfoModal();
+      }
+    }catch(e){}
   }catch(err){ console.error('setLang error',err); }
   const m=document.getElementById('langMenu'); if(m) m.style.display='none';
   if(typeof syncFinanceHeader==="function") try{syncFinanceHeader();}catch(e){}

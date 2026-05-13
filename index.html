@@ -440,7 +440,7 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
-  filter:blur(3px) brightness(.82);
+  filter:blur(1px) brightness(.85);
   transform:scale(1.1);
   z-index:0;
 }
@@ -461,9 +461,10 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   width:100%;
 }
 #ldLogoMain img{
-  width:100vw;max-width:100vw;min-width:100vw;height:auto;object-fit:contain;display:block;
+  width:100vw;max-width:100vw;min-width:100vw;height:auto;object-fit:cover;display:block;margin:0;padding:0;
   filter:drop-shadow(0 6px 24px rgba(0,0,0,.75));
 }
+#ldLogoMain{padding:0!important;margin:0!important;width:100vw!important;max-width:100vw!important;}
 /* hide old elements */
 .ld-logo{display:none!important;}
 .ld-bike{display:none!important;}

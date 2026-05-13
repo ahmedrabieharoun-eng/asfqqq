@@ -425,22 +425,34 @@ button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive
   top:0;left:0;
   width:100vw;height:100vh;
   z-index:9999;
-  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778677389/612c8cb5-708a-4227-9f37-25502bb1583a_l4ko9o.jpg');
-  background-size:100% 100%;
+  background-image:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778678554/bbbc225e-dc4c-4e68-84f8-9436efb77d5d_zbvziv.jpg');
+  background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  padding-bottom:48px;gap:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding-top:0;padding-bottom:52px;gap:0;
   transition:opacity .7s ease;
 }
 #loadingScreen::before{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.72) 100%);
+  background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,transparent 40%,rgba(0,0,0,.65) 100%);
 }
 #loadingScreen>*{position:relative;z-index:1;}
 #loadingScreen.hidden{opacity:0;pointer-events:none;}
 
-/* hide everything except bar */
+/* logo center wrapper */
+#ldLogoMain{
+  display:flex!important;
+  flex:1;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+}
+#ldLogoMain img{
+  width:220px;height:auto;object-fit:contain;
+  filter:drop-shadow(0 6px 24px rgba(0,0,0,.75));
+}
+/* hide old elements */
 .ld-logo{display:none!important;}
 .ld-bike{display:none!important;}
 .ld-title{display:none!important;}
@@ -716,6 +728,12 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 
 <!-- LOADING SCREEN -->
 <div id="loadingScreen">
+  <!-- Logo center -->
+  <div id="ldLogoMain">
+    <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778677586/a6918860-6a16-4e60-a154-10110a9cc33d_laewxj.jpg" onerror="this.style.display='none'" alt="RASEEN">
+  </div>
+  <!-- Bottom bar section -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;position:relative;z-index:1;">
   <div class="ld-sub" id="ldStatus">Loading...</div>
   <div class="ld-bar-wrap">
     <div class="ld-bar-track">
@@ -723,6 +741,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
     </div>
     <div class="ld-pct" id="ldPct">0%</div>
   </div>
+  </div><!-- end bottom bar section -->
   <!-- hidden legacy elements for JS compatibility -->
   <div class="ld-segments" id="ldSegs" style="display:none">
     <div class="ld-seg"></div><div class="ld-seg"></div><div class="ld-seg"></div>
@@ -3462,14 +3481,17 @@ async function doUpgradeStat(bikeLevel, stat){
     if(loadOv) return loadOv;
     loadOv=document.createElement('div');
     loadOv.id='raceLoadingOv';
-    loadOv.style.cssText='position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding-top:60px;text-align:center;background:url(\'https://res.cloudinary.com/dktppfipy/image/upload/v1778675637/27df1ed1-e909-4a5f-a23a-23a3b4d7f42b_hliyq6.jpg\') center/cover no-repeat';
+    loadOv.style.cssText='position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:space-between;opacity:0;pointer-events:none;transition:opacity .3s;padding-top:0;padding-bottom:60px;text-align:center;background:url(\'https://res.cloudinary.com/dktppfipy/image/upload/v1778675637/27df1ed1-e909-4a5f-a23a-23a3b4d7f42b_hliyq6.jpg\') center/cover no-repeat';
     loadOv.innerHTML=[
-      '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.55) 100%);pointer-events:none;"></div>',
-      '<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;padding:0 24px;">',
-        '<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778677586/a6918860-6a16-4e60-a154-10110a9cc33d_laewxj.jpg" id="rqLogo" style="width:200px;height:auto;object-fit:contain;filter:drop-shadow(0 4px 18px rgba(0,0,0,.7));border-radius:12px;" onerror="this.style.display=\'none\'">',
-        '<div id="rqOpp" style="display:none;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:10px 16px;color:#fff;font-family:Fredoka,cursive;align-items:center;gap:10px"><div id="rqOppAv" style="width:40px;height:40px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:18px">🏍️</div><div style="text-align:left"><div id="rqOppName" style="font-size:14px;font-weight:800">Opponent</div><div id="rqOppLv" style="font-size:11px;opacity:.7">Level 1</div></div></div>',
-        '<div id="rqTitle" style="font-size:20px;font-weight:800;color:#fff;font-family:Fredoka,cursive;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.8);">Поиск соперника...</div>',
-        '<div style="width:85%;max-width:320px;height:10px;border-radius:8px;background:rgba(255,255,255,.18);overflow:hidden;border:1px solid rgba(255,255,255,.12);"><div id="rqProgressBar" style="height:100%;width:0%;border-radius:8px;background:linear-gradient(90deg,#1565c0,#42a5f5,#90caf9);background-size:200% 100%;animation:rq-bar-shine 1.4s linear infinite,rq-bar-grow 8s ease-in-out infinite alternate;box-shadow:0 0 10px rgba(66,165,245,.7);"></div></div>',
+      '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.6) 100%);pointer-events:none;"></div>',
+      /* Logo in center */
+      '<div style="position:relative;z-index:2;flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:0 24px;">',
+        '<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778677157/0623f42f-a6d9-45f4-805f-b230f44dca1e_h8kv4t.jpg" id="rqLogo" style="width:220px;height:auto;object-fit:contain;filter:drop-shadow(0 6px 24px rgba(0,0,0,.8));border-radius:14px;" onerror="this.style.display=\'none\'">',
+      '</div>',
+      /* Bottom bar section */
+      '<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;padding:0 24px 0;">',
+        '<div id="rqTitle" style="font-size:18px;font-weight:800;color:#fff;font-family:Fredoka,cursive;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.8);">Поиск соперника...</div>',
+        '<div style="width:85%;max-width:320px;height:12px;border-radius:8px;background:rgba(255,255,255,.18);overflow:hidden;border:1px solid rgba(255,255,255,.12);"><div id="rqProgressBar" style="height:100%;width:0%;border-radius:8px;background:linear-gradient(90deg,#ff3d00,#ff7a00,#ffc400);background-size:200% 100%;animation:rq-bar-shine 1.4s linear infinite,rq-bar-grow 8s ease-in-out infinite alternate;box-shadow:0 0 12px rgba(255,140,0,.7);"></div></div>',
         '<style>@keyframes rq-bar-shine{0%{background-position:200% 0}100%{background-position:-200% 0}}@keyframes rq-bar-grow{0%{width:8%}100%{width:92%}}</style>',
         '<div id="rqSub" style="font-size:12px;color:rgba(255,255,255,.65);font-weight:600;font-family:Fredoka,cursive;max-width:280px;line-height:1.4">@RaseenRacing_bot</div>',
       '</div>'

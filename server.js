@@ -262,21 +262,12 @@ async function hGetState(env,uid,tg,data={},_meta={}){
         hasWithdrawn=ud.data===true;
         if(hasWithdrawn)await dbUpdate(env,`users/${uid}/referrals/${r.userId}`,{hasWithdrawn:true}).catch(()=>{});
       }
-      return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasWithdrawn};
+      return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasWithdrawn,hasDeposited:hasWithdrawn};
     }));
     const wr=await dbGet(env,`users/${uid}/wdHistory`);
     const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,10):[];
-    const tpr=await dbGet(env,'tasks/partner');
-    const tcr=await dbGet(env,'tasks/community');
-    const tasks={
-      partner  :tpr.data?Object.values(tpr.data).filter(t=>t.status==='active'):[],
-      community:tcr.data?Object.values(tcr.data).filter(t=>t.status==='active'):[],
-    };
     const lr=await dbGet(env,`users/${uid}/log`);
     const balanceLog=lr.data?Object.values(lr.data).sort((a,b)=>b.ts-a.ts).slice(0,20).map(e=>({ts:e.ts,type:e.type,amount:e.amount,balance:e.balance})):[];
-    // Partner posts
-    const ppr=await dbGet(env,`users/${uid}/partnerPosts`);
-    const partnerPosts=ppr.data?Object.values(ppr.data).sort((a,b)=>b.ts-a.ts):[];
     return{success:true,data:{
       user:{
         tonBalance:user.tonBalance||0,
@@ -293,14 +284,14 @@ async function hGetState(env,uid,tg,data={},_meta={}){
         lastName:user.lastName||'',
         username:user.username||'',
         photoUrl:user.photoUrl||'',
+        referralCode:user.referralCode||uid,
+        referredBy:user.referredBy||null,
       },
       referrals,
       completedTasks:user.completedTasks||[],
       completedMissions:user.completedMissions||[],
       wdHistory,
       balanceLog,
-      tasks,
-      partnerPosts,
     }};
   }catch(e){console.error('getState',e);return{success:false,error:e.message,errorCode:'GET_STATE_ERROR'};}
 }
@@ -322,6 +313,9 @@ async function hBuyBike(env,uid,data,_meta={}){
     const newTotal=(user.totalBikesBought||0)+1;
     await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,ownedBikes:newOwned,totalBikesBought:newTotal});
     log(env,uid,'buy_bike',{bikeLevel:lv,price:priceTon,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
+    const _bkNames={1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
+    const _bkDaily=BIKE_DAILY_TON[lv]||0;
+    sendTgNotification(env,uid,`🏍️ <b>Bike Purchased!</b>\n\n🎉 <b>${_bkNames[lv]||'Level '+lv} (Lv${lv})</b>\n\n📊 Speed:${bike.speed} Nitro:${bike.nitro} Accel:${bike.accel} Handling:${bike.maneuver}\n\n💰 Daily: ${_bkDaily} TON | Monthly: ~${(_bkDaily*30).toFixed(2)} TON\n\n🔋 Send to mining to start earning!`).catch(()=>{});
     if(user.referredBy&&user.referredBy!==uid){
       const comm=Math.round(priceTon*G.REF_BONUS_PCT/100*1e8)/1e8;
       const rr=await dbGet(env,`users/${user.referredBy}`);
@@ -522,6 +516,8 @@ async function hClaimTask(env,uid,data,_meta={}){
       const newTon=(user.tonBalance||0)+tonReward;
       await dbUpdate(env,`users/${uid}`,{completedTasks:[...(user.completedTasks||[]),tid],tonBalance:parseFloat(newTon.toFixed(8))});
       log(env,uid,'claim_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
+      const _rtn={rt10:'10 Active Refs',rt50:'50 Active Refs',rt100:'100 Active Refs',rt200:'200 Active Refs',rt500:'500 Active Refs',rt1000:'1000 Active Refs'};
+      sendTgNotification(env,uid,`🎯 <b>Referral Task Done!</b>\n\n✅ ${_rtn[tid]||tid}\n💎 +${tonReward} TON added!`).catch(()=>{});
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -565,6 +561,8 @@ async function hClaimMissionTask(env,uid,data,_meta={}){
         tonBalance:parseFloat(newTon.toFixed(8))
       });
       log(env,uid,'claim_mission_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
+      const _mn={bt5:'Buy 5 Bikes',bt10:'Buy 10 Bikes',rc10:'10 Races',rc20:'20 Races',rc50:'50 Races',mt20:'20 Mining Runs',mt50:'50 Mining Runs'};
+      sendTgNotification(env,uid,`🎯 <b>Mission Completed!</b>\n\n✅ ${_mn[tid]||tid}\n💎 +${tonReward} TON added!`).catch(()=>{});
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -780,6 +778,13 @@ async function hRaceJoinQueue(env,uid,data,_meta={}){
       await Promise.all(updates);
       log(env,uid,    'race_result',{won:winnerUid===uid,    cost:RACE_COST,prize:winnerUid===uid?    RACE_PRIZE:0,matchId,opponent:opp.uid},_meta);
       log(env,opp.uid,'race_result',{won:winnerUid===opp.uid,cost:RACE_COST,prize:winnerUid===opp.uid?RACE_PRIZE:0,matchId,opponent:uid},_meta);
+      if(winnerUid===uid){
+        sendTgNotification(env,uid,`🏆 <b>Race Won!</b>\n\n🏍️ You beat <b>${opp.name||'Opponent'}</b>\n💎 +${RACE_PRIZE} TON added!`).catch(()=>{});
+        sendTgNotification(env,opp.uid,`❌ <b>Race Lost</b>\n\n🏍️ Beaten by <b>${me.name||'Opponent'}</b>\n💪 Race again to win!`).catch(()=>{});
+      }else{
+        sendTgNotification(env,opp.uid,`🏆 <b>Race Won!</b>\n\n🏍️ You beat <b>${me.name||'Opponent'}</b>\n💎 +${RACE_PRIZE} TON added!`).catch(()=>{});
+        sendTgNotification(env,uid,`❌ <b>Race Lost</b>\n\n🏍️ Beaten by <b>${opp.name||'Opponent'}</b>\n💪 Race again to win!`).catch(()=>{});
+      }
       return{success:true,data:{status:'matched',matchId}};
     }
     // No opponent yet → enter queue

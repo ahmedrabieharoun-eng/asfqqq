@@ -1,3 +1,7 @@
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3728,16 +3732,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(spd1)spd1.textContent=p1Kmh+' km/h';
     if(spd2)spd2.textContent=p2Kmh+' km/h';
     ov.style.display='flex';
-    // ── In-app win/loss notification (shown after result overlay appears) ──
-    const _notifPrize = ((_racePending&&_racePending.prize)||0.9);
-    const _notifOpp = '@'+(aiName||'Opponent');
-    if(playerWins){
-      setTimeout(()=>{ showNotif('🏆 سبقت '+_notifOpp+'! +'+_notifPrize+' TON ربحتها 🎉','s'); }, 600);
-    } else {
-      setTimeout(()=>{ showNotif('❌ خسرت أمام '+_notifOpp+' — حظاً أوفر المرة الجاية 💪','e'); }, 600);
-    }
     // Acknowledge match server-side so the record can be cleaned up
-    // Server already sends Telegram notification via sendTgNotification in hRaceJoinQueue
     api('raceAck',{}).catch(()=>{});
     setTimeout(()=>{try{loadState();}catch(e){}},1200);
   }
@@ -4498,7 +4493,7 @@ async function doUpgradeStat(bikeLevel, stat){
     <!-- Commission card -->
     <div class="ref2-commission-card">
       <div class="ref2-pct-row">
-        <span class="ref2-pct">20%</span>
+        <span class="ref2-pct">10%</span>
         <span class="ref2-pct-txt" data-i18n="refCommission">Commission when friends buy from Market!</span>
       </div>
       <div class="ref2-link-row">
@@ -5095,7 +5090,7 @@ function syncFinanceHeader(){
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
             <span style="font-size:20px;flex-shrink:0">👥</span>
-            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageFriends">Friends</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageFriendsDesc">Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">20%</span> commission on every purchase your friend makes from the Market.</div></div>
+            <div><div style="font-size:12px;font-weight:800;color:#fff" data-i18n="helpPageFriends">Friends</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px" data-i18n="helpPageFriendsDesc">Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">10%</span> commission on every purchase your friend makes from the Market.</div></div>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start">
             <span style="font-size:20px;flex-shrink:0">💰</span>
@@ -5125,7 +5120,7 @@ function syncFinanceHeader(){
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpRefCommission">👥 Referral Commission</span>
-            <span style="font-size:12px;font-weight:800;color:var(--bamboo)" data-i18n="helpRefCommissionVal">20% of friend's purchases</span>
+            <span style="font-size:12px;font-weight:800;color:var(--bamboo)" data-i18n="helpRefCommissionVal">10% of friend's purchases</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpAddTask">➕ Add Task (100 members)</span>
@@ -5215,7 +5210,7 @@ const CFG = {
   API_URL      : 'https://silent-block-bedf.ahmedrabieharoun.workers.dev', // ✏️ ضع رابط Workers هنا
   DEPOSIT_WALLET:'UQA1c65zeiKZg4lpf4mwZeaSsNRyZhQ181M13brLTm2i_s5k',
   MIN_WD_TON   : 0.1,
-  REF_BONUS    : 20,
+  REF_BONUS    : 10,
   BOT_USERNAME : 'RaseenRacing_bot',
   BOT_APP_LINK : 'https://t.me/RaseenRacing_bot/app',
 };
@@ -5519,31 +5514,35 @@ async function getOrComputeFp(){
 
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
-/* ── Global button cooldown: disable ALL buttons for 3s after any API action ── */
+/* ── Global button cooldown: disable ALL buttons for 2s after any API action ── */
 let _globalBtnCooldown = false;
-let _globalBtnCooldownTimer = null;
 function _startBtnCooldown(){
   if(_globalBtnCooldown) return;
   _globalBtnCooldown = true;
-  // Mark and disable every non-exempt, non-already-disabled button
   document.querySelectorAll('button:not([data-no-cooldown])').forEach(b=>{
     if(!b.disabled){
-      b.setAttribute('data-was-cooled','1');
+      b.dataset._wasCooled = '1';
       b.disabled = true;
       b.style.opacity = '0.45';
-      b.style.filter = 'grayscale(0.6)';
+      b.style.filter = 'grayscale(0.5)';
     }
   });
-  if(_globalBtnCooldownTimer) clearTimeout(_globalBtnCooldownTimer);
-  _globalBtnCooldownTimer = setTimeout(()=>{
+  setTimeout(()=>{
     _globalBtnCooldown = false;
-    _globalBtnCooldownTimer = null;
-    // Re-enable only the buttons we disabled (attribute-based, reliable)
-    document.querySelectorAll('button[data-was-cooled]').forEach(b=>{
+    document.querySelectorAll('button[data-_was-cooled]').forEach(b=>{
       b.disabled = false;
       b.style.opacity = '';
       b.style.filter = '';
-      b.removeAttribute('data-was-cooled');
+      delete b.dataset._wasCooled;
+    });
+    // Re-enable buttons that had data attribute
+    document.querySelectorAll('button').forEach(b=>{
+      if(b.dataset._wasCooled){
+        b.disabled = false;
+        b.style.opacity = '';
+        b.style.filter = '';
+        delete b.dataset._wasCooled;
+      }
     });
   }, 3000);
 }
@@ -5566,8 +5565,9 @@ let _apiInFlight = 0;
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
-  // Trigger 2-second button cooldown on write actions to prevent 429
-  if(WRITE_ACTIONS.has(action)) _startBtnCooldown();
+  // Trigger 3-second button cooldown on EVERY API call to prevent 429 spam
+  // (covers double-click on same button AND fast clicks across different buttons)
+  if(action !== 'racePoll' && action !== 'getState') _startBtnCooldown();
   const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
   try{
     const j = await _call(null, action, data, authHdr);
@@ -6865,7 +6865,7 @@ const TRANSLATIONS = {
     tabReferralTxt:'إحالة',tabSocialTxt:'اجتماعي',
     tabPartner:'⭐ شريك',tabCommunity:'🌍 مجتمع',floatAdd:'➕ إضافة مهمة',
     friendsTitle:'الأصدقاء والإحالات',refProgTitle:'برنامج الإحالة',
-    refCommission:'عمولة 20% عند شراء أصدقائك من السوق!',
+    refCommission:'عمولة 10% عند شراء أصدقائك من السوق!',
     refLinkPh:'رابط الإحالة الخاص بك...',copyBtn:'نسخ',
     refNote:'📤 شارك هذا الرابط مع أصدقائك',
     recentRefs:'أحدث الإحالات',noReferrals:'لا إحالات بعد',
@@ -6896,12 +6896,12 @@ const TRANSLATIONS = {
     helpPageHome:'🏠 الرئيسية',helpPageHomeDesc:'تشوف الباندا وتانك التجميع ومعدل التعدين اليومي. اضغط Claim Bamboo لجمع ما تراكم.',
     helpPageMarket:'🛒 السوق',helpPageMarketDesc:'اشتري آلات تعدين بـ Bamboo. كل آلة تزيد إنتاجك اليومي.',
     helpPageTasks:'✅ المهام',helpPageTasksDesc:'أكمل مهام للحصول على Bamboo إضافي. مهام الإحالة تكافئك بـ Bamboo + Coins.',
-    helpPageFriends:'👥 الأصدقاء',helpPageFriendsDesc:'شارك رابط الإحالة الخاص بك. تكسب <span style="color:var(--bamboo);font-weight:800">20%</span> عمولة من كل مشتريات صديقك.',
+    helpPageFriends:'👥 الأصدقاء',helpPageFriendsDesc:'شارك رابط الإحالة الخاص بك. تكسب <span style="color:var(--bamboo);font-weight:800">10%</span> عمولة من كل مشتريات صديقك.',
     helpPageFinance:'💰 المالية',helpPageFinanceDesc:'تحويل Bamboo → Coins، إيداع TON، وسحب Coins إلى محفظتك.',
     helpPricesTitle:'💲 الأسعار والتحويلات',
     helpDepositTON:'💎 إيداع TON',helpConvertBamboo:'⚡ تحويل Bamboo',
     helpWithdrawRate:'💸 سعر السحب',helpMinWithdraw:'📦 أقل مبلغ سحب',
-    helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'20% من مشتريات الصديق',
+    helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'10% من مشتريات الصديق',
     helpAddTask:'➕ إضافة مهمة (100 عضو)',
     helpWdTitle:'📤 شروط السحب',
     helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
@@ -6955,7 +6955,7 @@ const TRANSLATIONS = {
     compMyScore:'نقاطك',
     compMyRank:'مرتبتك',
     loading:'جارٍ التحميل...',
-    newRefNotif:'🎉 دعوت {name}! ستحصل على 20% من مشترياتهم',
+    newRefNotif:'🎉 دعوت {name}! ستحصل على 10% من مشترياتهم',
     s2BadgeTxt:'قريباً',s2BannerTitle:'تحضير الموسم 2',s2BannerSub:'🎯 تحقق من مخصصاتك ←',s2TapTxt:'اضغط',
     snsHeroTitle:'تحضير الموسم 2',snsHeroSub:'تقدمك ينتقل للأمام',
     snsRowCoinsTitle:'الكوينز الحالية',snsRowCoinsDesc:'ترحيل: 20%',
@@ -7032,12 +7032,12 @@ const TRANSLATIONS = {
     helpPageHome:'🏠 Home',helpPageHomeDesc:'View the panda, collection tank and daily mining rate. Press Claim Bamboo to collect what has accumulated.',
     helpPageMarket:'🛒 Market',helpPageMarketDesc:'Buy mining machines with Bamboo. Each machine increases your daily output.',
     helpPageTasks:'✅ Tasks',helpPageTasksDesc:'Complete tasks for extra Bamboo. Referral tasks reward you with Bamboo + Coins.',
-    helpPageFriends:'👥 Friends',helpPageFriendsDesc:'Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">20%</span> commission on every purchase your friend makes.',
+    helpPageFriends:'👥 Friends',helpPageFriendsDesc:'Share your referral link. Earn <span style="color:var(--bamboo);font-weight:800">10%</span> commission on every purchase your friend makes.',
     helpPageFinance:'💰 Finance',helpPageFinanceDesc:'Convert Bamboo → Coins, deposit TON, and withdraw Coins to your wallet.',
     helpPricesTitle:'💲 Rates & Conversions',
     helpDepositTON:'💎 Deposit TON',helpConvertBamboo:'⚡ Convert Bamboo',
     helpWithdrawRate:'💸 Withdrawal Rate',helpMinWithdraw:'📦 Minimum Withdrawal',
-    helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"20% of friend's purchases",
+    helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"10% of friend's purchases",
     helpAddTask:'➕ Add Task (100 members)',
     helpWdTitle:'📤 Withdrawal Conditions',
     helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
@@ -7091,7 +7091,7 @@ const TRANSLATIONS = {
     compMyScore:'Your Score',
     compMyRank:'Your Rank',
     loading:'Loading...',
-    newRefNotif:'🎉 You invited {name}! You will earn 20% of their purchases',
+    newRefNotif:'🎉 You invited {name}! You will earn 10% of their purchases',
     s2BadgeTxt:'Coming Soon',s2BannerTitle:'Season 2 Preparation',s2BannerSub:'🎯 Check your allocation →',s2TapTxt:'Tap',
     snsHeroTitle:'Season 2 Preparation',snsHeroSub:'Your progress carries forward',
     snsRowCoinsTitle:'Current Coins',snsRowCoinsDesc:'Carry Over: 20%',
@@ -7128,7 +7128,7 @@ const TRANSLATIONS = {
     tabReferralTxt:'Реферал',tabSocialTxt:'Соцсети',
     tabPartner:'⭐ Партнёр',tabCommunity:'🌍 Сообщество',floatAdd:'➕ Добавить задание',
     friendsTitle:'Друзья и рефералы',refProgTitle:'Реферальная программа',
-    refCommission:'Комиссия 20% с каждой покупки друга!',
+    refCommission:'Комиссия 10% с каждой покупки друга!',
     refLinkPh:'Ваша реферальная ссылка...',copyBtn:'Копировать',
     refNote:'📤 Поделитесь ссылкой с друзьями',
     recentRefs:'Последние рефералы',noReferrals:'Рефералов пока нет',
@@ -7159,12 +7159,12 @@ const TRANSLATIONS = {
     helpPageHome:'🏠 Главная',helpPageHomeDesc:'Смотрите панду, резервуар и скорость майнинга. Нажмите Claim Bamboo для сбора.',
     helpPageMarket:'🛒 Рынок',helpPageMarketDesc:'Покупайте машины за Bamboo. Каждая машина увеличивает суточный доход.',
     helpPageTasks:'✅ Задания',helpPageTasksDesc:'Выполняйте задания за Bamboo. Реферальные задания дают Bamboo + Coins.',
-    helpPageFriends:'👥 Друзья',helpPageFriendsDesc:'Делитесь реферальной ссылкой. Зарабатывайте <span style="color:var(--bamboo);font-weight:800">20%</span> с каждой покупки друга.',
+    helpPageFriends:'👥 Друзья',helpPageFriendsDesc:'Делитесь реферальной ссылкой. Зарабатывайте <span style="color:var(--bamboo);font-weight:800">10%</span> с каждой покупки друга.',
     helpPageFinance:'💰 Финансы',helpPageFinanceDesc:'Конвертируйте Bamboo → Coins, пополняйте TON, выводите Coins на кошелёк.',
     helpPricesTitle:'💲 Курсы и конвертация',
     helpDepositTON:'💎 Депозит TON',helpConvertBamboo:'⚡ Обмен Bamboo',
     helpWithdrawRate:'💸 Курс вывода',helpMinWithdraw:'📦 Мин. вывод',
-    helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'20% с покупок друга',
+    helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'10% с покупок друга',
     helpAddTask:'➕ Добавить задание (100 участников)',
     helpWdTitle:'📤 Условия вывода',
     helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
@@ -7218,7 +7218,7 @@ const TRANSLATIONS = {
     compMyScore:'Ваши очки',
     compMyRank:'Ваш ранг',
     loading:'Загрузка...',
-    newRefNotif:'🎉 Вы пригласили {name}! Вы получите 20% с их покупок',
+    newRefNotif:'🎉 Вы пригласили {name}! Вы получите 10% с их покупок',
     s2BadgeTxt:'Скоро',s2BannerTitle:'Подготовка к Сезону 2',s2BannerSub:'🎯 Проверить распределение →',s2TapTxt:'Нажми',
     snsHeroTitle:'Подготовка к Сезону 2',snsHeroSub:'Ваш прогресс переносится',
     snsRowCoinsTitle:'Текущие монеты',snsRowCoinsDesc:'Перенос: 20%',
@@ -7255,7 +7255,7 @@ const TRANSLATIONS = {
     tabReferralTxt:'Referido',tabSocialTxt:'Social',
     tabPartner:'⭐ Socio',tabCommunity:'🌍 Comunidad',floatAdd:'➕ Añadir tarea',
     friendsTitle:'Amigos y referidos',refProgTitle:'Programa de referidos',
-    refCommission:'¡Comisión del 20% cuando tus amigos compren en el Mercado!',
+    refCommission:'¡Comisión del 10% cuando tus amigos compren en el Mercado!',
     refLinkPh:'Tu enlace de referido...',copyBtn:'Copiar',
     refNote:'📤 Comparte este enlace con amigos',
     recentRefs:'Referidos recientes',noReferrals:'Sin referidos aún',
@@ -7286,12 +7286,12 @@ const TRANSLATIONS = {
     helpPageHome:'🏠 Inicio',helpPageHomeDesc:'Ve el panda, el tanque y la tasa de minería. Pulsa Claim Bamboo para recoger lo acumulado.',
     helpPageMarket:'🛒 Mercado',helpPageMarketDesc:'Compra máquinas de minería con Bamboo. Cada máquina aumenta tu producción diaria.',
     helpPageTasks:'✅ Tareas',helpPageTasksDesc:'Completa tareas para obtener Bamboo extra. Las tareas de referido recompensan con Bamboo + Monedas.',
-    helpPageFriends:'👥 Amigos',helpPageFriendsDesc:'Comparte tu enlace de referido. Gana <span style="color:var(--bamboo);font-weight:800">20%</span> de comisión por cada compra de tu amigo.',
+    helpPageFriends:'👥 Amigos',helpPageFriendsDesc:'Comparte tu enlace de referido. Gana <span style="color:var(--bamboo);font-weight:800">10%</span> de comisión por cada compra de tu amigo.',
     helpPageFinance:'💰 Finanzas',helpPageFinanceDesc:'Convierte Bamboo → Monedas, deposita TON y retira Monedas a tu cartera.',
     helpPricesTitle:'💲 Tarifas y conversiones',
     helpDepositTON:'💎 Depositar TON',helpConvertBamboo:'⚡ Convertir Bamboo',
     helpWithdrawRate:'💸 Tasa de retiro',helpMinWithdraw:'📦 Retiro mínimo',
-    helpRefCommission:'👥 Comisión de referido',helpRefCommissionVal:'20% de las compras del amigo',
+    helpRefCommission:'👥 Comisión de referido',helpRefCommissionVal:'10% de las compras del amigo',
     helpAddTask:'➕ Añadir tarea (100 miembros)',
     helpWdTitle:'📤 Condiciones de retiro',
     helpWdBody:'<span style="color:var(--coin);font-weight:800">Condiciones generales de retiro:</span><br>• Mínimo: <span style="color:#fff;font-weight:800">2,000 Monedas (0.1 TON)</span><br>• Completa todas las <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Se requiere cartera TON válida<br>• Procesado automáticamente en <span style="color:var(--neon-green);font-weight:800">1 a 3 minutos</span><br>• Sigue el <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">canal de pagos</a>',
@@ -7345,7 +7345,7 @@ const TRANSLATIONS = {
     compMyScore:'Tu puntaje',
     compMyRank:'Tu rango',
     loading:'Cargando...',
-    newRefNotif:'🎉 Invitaste a {name}! Ganarás 20% de sus compras',
+    newRefNotif:'🎉 Invitaste a {name}! Ganarás 10% de sus compras',
     s2BadgeTxt:'Próximamente',s2BannerTitle:'Preparación Temporada 2',s2BannerSub:'🎯 Ver tu asignación →',s2TapTxt:'Toca',
     snsHeroTitle:'Preparación Temporada 2',snsHeroSub:'Tu progreso continúa',
     snsRowCoinsTitle:'Monedas actuales',snsRowCoinsDesc:'Transferencia: 20%',
@@ -7382,7 +7382,7 @@ const TRANSLATIONS = {
     tabReferralTxt:'Parrainage',tabSocialTxt:'Réseaux',
     tabPartner:'⭐ Partenaire',tabCommunity:'🌍 Communauté',floatAdd:'➕ Ajouter tâche',
     friendsTitle:'Amis & Parrainages',refProgTitle:'Programme de parrainage',
-    refCommission:'Commission 20% quand vos amis achètent sur le Marché!',
+    refCommission:'Commission 10% quand vos amis achètent sur le Marché!',
     refLinkPh:'Votre lien de parrainage...',copyBtn:'Copier',
     refNote:'📤 Partagez ce lien avec vos amis',
     recentRefs:'Parrainages récents',noReferrals:'Aucun parrainage encore',
@@ -7413,12 +7413,12 @@ const TRANSLATIONS = {
     helpPageHome:'🏠 Accueil',helpPageHomeDesc:'Voyez le panda, le réservoir et le taux de minage. Appuyez sur Claim Bamboo pour collecter.',
     helpPageMarket:'🛒 Marché',helpPageMarketDesc:'Achetez des machines de minage avec du Bamboo. Chaque machine augmente votre production quotidienne.',
     helpPageTasks:'✅ Tâches',helpPageTasksDesc:'Accomplissez des tâches pour obtenir du Bamboo supplémentaire. Les tâches de parrainage récompensent avec Bamboo + Pièces.',
-    helpPageFriends:'👥 Amis',helpPageFriendsDesc:'Partagez votre lien de parrainage. Gagnez <span style="color:var(--bamboo);font-weight:800">20%</span> de commission sur chaque achat de votre ami.',
+    helpPageFriends:'👥 Amis',helpPageFriendsDesc:'Partagez votre lien de parrainage. Gagnez <span style="color:var(--bamboo);font-weight:800">10%</span> de commission sur chaque achat de votre ami.',
     helpPageFinance:'💰 Finance',helpPageFinanceDesc:'Convertissez Bamboo → Pièces, déposez du TON, retirez des Pièces vers votre portefeuille.',
     helpPricesTitle:'💲 Taux et conversions',
     helpDepositTON:'💎 Dépôt TON',helpConvertBamboo:'⚡ Convertir Bamboo',
     helpWithdrawRate:'💸 Taux de retrait',helpMinWithdraw:'📦 Retrait minimum',
-    helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"20% des achats de l'ami",
+    helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"10% des achats de l'ami",
     helpAddTask:'➕ Ajouter tâche (100 membres)',
     helpWdTitle:'📤 Conditions de retrait',
     helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
@@ -7472,7 +7472,7 @@ const TRANSLATIONS = {
     compMyScore:'Votre score',
     compMyRank:'Votre rang',
     loading:'Chargement...',
-    newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 20% de ses achats',
+    newRefNotif:'🎉 Vous avez invité {name}! Vous gagnerez 10% de ses achats',
     s2BadgeTxt:'Bientôt',s2BannerTitle:'Préparation Saison 2',s2BannerSub:'🎯 Voir votre allocation →',s2TapTxt:'Appuyer',
     snsHeroTitle:'Préparation Saison 2',snsHeroSub:'Votre progression continue',
     snsRowCoinsTitle:'Pièces actuelles',snsRowCoinsDesc:'Report: 20%',

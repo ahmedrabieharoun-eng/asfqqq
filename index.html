@@ -4325,6 +4325,9 @@ async function doUpgradeStat(bikeLevel, stat){
       <!-- Mining Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">⛏️ <span data-i18n="mineMissions">Mining Missions</span></div>
       <div id="mineMissionsList"></div>
+      <!-- Partner Tasks -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🤝 <span data-i18n="partnerTasksTitle">Partner</span></div>
+      <div id="missionPartnerList"></div>
     </div>
   </div>
 
@@ -4817,6 +4820,38 @@ function renderMissions(){
   if(rl) rl.innerHTML = MISSION_DEFS.RACE.map(m=>missionCard(m,totalRaces,'RACE')).join('');
   const ml = document.getElementById('mineMissionsList');
   if(ml) ml.innerHTML = MISSION_DEFS.MINE.map(m=>missionCard(m,totalMine,'MINE')).join('');
+
+  // ── Partner Tasks (join channels) ──
+  const pl = document.getElementById('missionPartnerList');
+  if(pl){
+    const partnerTasks = S.tasks?.partner || [];
+    if(!partnerTasks.length){
+      pl.innerHTML = '<div class="hist-empty" style="padding:14px 0;color:rgba(255,255,255,.3);font-size:12px;font-weight:600;text-align:center">Loading...</div>';
+    } else {
+      pl.innerHTML = partnerTasks.map(t => {
+        const tid = t.id;
+        const done = (S.doneTasks||[]).includes(tid);
+        const inFlight = _taskInFlight.has(tid);
+        const img = t.imageUrl ? `<img src="${esc(t.imageUrl)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentElement.innerHTML='📢'">` : '<div style="font-size:32px;display:flex;align-items:center;justify-content:center;height:100%">📢</div>';
+        const name = esc(t.name || 'Join Channel');
+        const link = esc(t.link || '');
+        const btnHtml = done
+          ? '<div style="background:rgba(0,242,122,.14);border:1px solid rgba(0,242,122,.3);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:800;color:#00F27A">✅ Done</div>'
+          : inFlight
+            ? '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5)">⏳</div>'
+            : `<button onclick="doDbTask('${tid}','${link}','channel','partner')" style="background:linear-gradient(135deg,#7CB342,#4CAF50);border:none;border-radius:10px;padding:8px 13px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 0 12px rgba(124,179,66,.5);white-space:nowrap">Join →</button>`;
+        return `<div style="border:1.5px solid rgba(124,179,66,.25);border-radius:16px;display:flex;align-items:center;gap:0;margin-bottom:10px;overflow:hidden;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);">
+          <div style="width:100px;height:100px;flex-shrink:0;overflow:hidden;border-radius:14px;margin:8px;box-shadow:0 4px 16px rgba(0,0,0,.6)">${img}</div>
+          <div style="flex:1;padding:10px 8px 10px 0;min-width:0">
+            <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px">${name}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--bamboo);display:flex;align-items:center;gap:4px">${BAM_IMG} ${fmt(t.bambooReward||100)} Bamboo</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:600;margin-top:3px">📢 Required to withdraw</div>
+          </div>
+          <div style="flex-shrink:0;padding:10px 10px 10px 4px">${btnHtml}</div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 function renderRefMissions(){
@@ -5938,6 +5973,7 @@ async function doDbTask(tid,link,type,cat){
       const r=await api('verifyTask',{taskId:tid,taskType:type,taskCategory:cat});
       S.doneTasks.push(tid);
       updateUI(); renderTasks();
+      if(typeof renderMissions==='function') try{renderMissions();}catch(_){}
       showNotif(`✅ Task completed!`,'s');
     }catch(e){
       showNotif(`❌ ${e.message||'Verification failed'}`,'e');
@@ -6849,6 +6885,7 @@ const TRANSLATIONS = {
     bikeMissions:'مهام الدراجات',
     raceMissions:'مهام السباق',
     mineMissions:'مهام التعدين',
+    partnerTasksTitle:'شريك',
     partnershipTitle:'شراكة القناة',
     req1:'1,000+ مشترك حقيقي',
     req2:'مشتركون حقيقيون (ليسوا بوتات)',
@@ -6980,6 +7017,7 @@ const TRANSLATIONS = {
     bikeMissions:'Bike Missions',
     raceMissions:'Race Missions',
     mineMissions:'Mining Missions',
+    partnerTasksTitle:'Partner',
     partnershipTitle:'Channel Partnership',
     partnershipInfo:'Promote our game to earn TON rewards! Post about Raseen on your Telegram channel and submit the link for review.',
     partnerRequirements:'Requirements:',
@@ -7112,6 +7150,7 @@ const TRANSLATIONS = {
     bikeMissions:'Задания с байками',
     raceMissions:'Гоночные задания',
     mineMissions:'Задания по майнингу',
+    partnerTasksTitle:'Партнёр',
     partnershipTitle:'Партнёрство',
     req1:'1000+ реальных подписчиков',
     req2:'Реальные подписчики (не боты)',
@@ -7239,6 +7278,7 @@ const TRANSLATIONS = {
     bikeMissions:'Misiones de motos',
     raceMissions:'Misiones de carrera',
     mineMissions:'Misiones de minería',
+    partnerTasksTitle:'Socio',
     partnershipTitle:'Asociación',
     req1:'1,000+ suscriptores reales',
     req2:'Suscriptores reales (no bots)',
@@ -7366,6 +7406,7 @@ const TRANSLATIONS = {
     bikeMissions:'Missions motos',
     raceMissions:'Missions course',
     mineMissions:'Missions minage',
+    partnerTasksTitle:'Partenaire',
     partnershipTitle:'Partenariat',
     req1:'1 000+ vrais abonnés',
     req2:'Abonnés réels (pas de bots)',

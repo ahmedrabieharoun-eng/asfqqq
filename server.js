@@ -11,7 +11,7 @@
 const G = {
   MIN_WITHDRAW_TON: 0.1,
   MIN_DEPOSIT_TON: 1,
-  REF_BONUS_PCT: 20,
+  REF_BONUS_PCT: 10,
   // Referral TON tasks (active referrals only - who have withdrawn)
   REF_TON_TASKS: {
     rt10  : { n:10,   ton:0.1  },
@@ -87,12 +87,17 @@ async function seedPartnerTasks(env){
 
 async function sendTgNotification(env,userId,message){
   try{
-    if(!env.BOT_TOKEN) return;
-    await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`,{
+    if(!env.BOT_TOKEN){console.warn('sendTgNotification: BOT_TOKEN not set');return;}
+    if(!userId){console.warn('sendTgNotification: userId is empty');return;}
+    const res=await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:userId,text:message,parse_mode:'HTML'}),
+      body:JSON.stringify({chat_id:String(userId),text:message,parse_mode:'HTML'}),
     });
+    const json=await res.json().catch(()=>({}));
+    if(!res.ok||!json.ok){
+      console.error('sendTgNotification FAILED userId:',userId,'status:',res.status,'tg_error:',json.description||'unknown');
+    }
   }catch(e){console.error('sendTgNotification:',e.message);}
 }
 
@@ -186,7 +191,7 @@ async function registerReferral(env,uid,user,referrerId){
         const confirm=await dbGet(env,notifKey);
         if(confirm.data&&confirm.data.ts===myTs){
           const refName=(user.firstName||'Someone').slice(0,32);
-          sendTgNotification(env,referrerId,`🎉 <b>${refName}</b> joined using your referral link!\n\n🏍️ You will earn 20% commission on their purchases.`).catch(()=>{});
+          sendTgNotification(env,referrerId,`🎉 <b>${refName}</b> joined using your referral link!\n\n🏍️ You will earn 10% commission on their purchases.`).catch(()=>{});
         }
       }
     }
@@ -317,11 +322,22 @@ async function hBuyBike(env,uid,data,_meta={}){
     const _bkDaily=BIKE_DAILY_TON[lv]||0;
     sendTgNotification(env,uid,`🏍️ <b>Bike Purchased!</b>\n\n🎉 <b>${_bkNames[lv]||'Level '+lv} (Lv${lv})</b>\n\n📊 Speed:${bike.speed} Nitro:${bike.nitro} Accel:${bike.accel} Handling:${bike.maneuver}\n\n💰 Daily: ${_bkDaily} TON | Monthly: ~${(_bkDaily*30).toFixed(2)} TON\n\n🔋 Send to mining to start earning!`).catch(()=>{});
     if(user.referredBy&&user.referredBy!==uid){
-      const comm=Math.round(priceTon*G.REF_BONUS_PCT/100*1e8)/1e8;
-      const rr=await dbGet(env,`users/${user.referredBy}`);
-      if(rr.data){
-        await dbUpdate(env,`users/${user.referredBy}`,{tonBalance:(rr.data.tonBalance||0)+comm});
-        sendTgNotification(env,user.referredBy,`💰 Commission! ${user.firstName||'Friend'} bought a bike. +${comm} TON (20%)`).catch(()=>{});
+      // Fix: use toFixed(8) to avoid Math.round zeroing small commissions
+      const comm=parseFloat((priceTon*G.REF_BONUS_PCT/100).toFixed(8));
+      if(comm>0){
+        const rr=await dbGet(env,`users/${user.referredBy}`);
+        if(rr.data){
+          const newRefBal=parseFloat(((rr.data.tonBalance||0)+comm).toFixed(8));
+          await dbUpdate(env,`users/${user.referredBy}`,{tonBalance:newRefBal});
+          // Update earned field in referrer's referrals list
+          const refEntry=await dbGet(env,`users/${user.referredBy}/referrals/${uid}`);
+          const prevEarned=(refEntry.data&&refEntry.data.earned)||0;
+          await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{earned:parseFloat((prevEarned+comm).toFixed(8))});
+          log(env,user.referredBy,'referral_commission',{from:uid,bikeLevel:lv,bikePriceTon:priceTon,comm,tonBalance_before:rr.data.tonBalance||0,tonBalance_after:newRefBal},_meta);
+          await sendTgNotification(env,user.referredBy,`💰 <b>Referral Commission!</b>\n\n🏍️ <b>${user.firstName||'Friend'}</b> bought a Level ${lv} bike\n💤 +${comm} TON (10%) added to your balance!\n💰 New balance: ${newRefBal.toFixed(4)} TON`);
+        }else{
+          console.error('hBuyBike: referredBy user not found:',user.referredBy);
+        }
       }
     }
     return{success:true,data:{tonBalance:newTon,ownedBikes:newOwned,totalBikesBought:newTotal}};
@@ -685,8 +701,8 @@ async function hRaceJoinQueue(env,uid,data,_meta={}){
     const am=await dbGet(env,`userActiveMatch/${uid}`);
     if(am.data){
       const mr=await dbGet(env,`raceMatches/${am.data}`);
-      // Stale match detection: if older than 60s, force-clean it
-      if(mr.data && (Date.now()-(mr.data.createdAt||0))<60000){
+      // Stale match detection: if older than 5 min, force-clean it
+      if(mr.data && (Date.now()-(mr.data.createdAt||0))<300000){
         return{success:true,data:{status:'matched',matchId:am.data}};
       }
       await dbDelete(env,`userActiveMatch/${uid}`);
@@ -716,7 +732,7 @@ async function hRaceJoinQueue(env,uid,data,_meta={}){
       username:(user.username||'').slice(0,32),
       photoUrl:(user.photoUrl||'').slice(0,512),
       joinedAt:Date.now()};
-    // Scan queue for an opponent (skip stale > TTL)
+    // Scan queue for an opponent (skip stale > TTL, enforce ±2 bike-level cap)
     const qall=await dbGet(env,'raceQueue'); const queue=qall.data||{};
     let opp=null;
     for(const k of Object.keys(queue)){
@@ -778,13 +794,17 @@ async function hRaceJoinQueue(env,uid,data,_meta={}){
       await Promise.all(updates);
       log(env,uid,    'race_result',{won:winnerUid===uid,    cost:RACE_COST,prize:winnerUid===uid?    RACE_PRIZE:0,matchId,opponent:opp.uid},_meta);
       log(env,opp.uid,'race_result',{won:winnerUid===opp.uid,cost:RACE_COST,prize:winnerUid===opp.uid?RACE_PRIZE:0,matchId,opponent:uid},_meta);
-      if(winnerUid===uid){
-        sendTgNotification(env,uid,`🏆 <b>Race Won!</b>\n\n🏍️ You beat <b>${opp.name||'Opponent'}</b>\n💎 +${RACE_PRIZE} TON added!`).catch(()=>{});
-        sendTgNotification(env,opp.uid,`❌ <b>Race Lost</b>\n\n🏍️ Beaten by <b>${me.name||'Opponent'}</b>\n💪 Race again to win!`).catch(()=>{});
-      }else{
-        sendTgNotification(env,opp.uid,`🏆 <b>Race Won!</b>\n\n🏍️ You beat <b>${me.name||'Opponent'}</b>\n💎 +${RACE_PRIZE} TON added!`).catch(()=>{});
-        sendTgNotification(env,uid,`❌ <b>Race Lost</b>\n\n🏍️ Beaten by <b>${opp.name||'Opponent'}</b>\n💪 Race again to win!`).catch(()=>{});
-      }
+      // Store notification intent in the match record — sent after race finishes via raceAck
+      // This prevents the bot message from arriving before the race animation even starts
+      await dbUpdate(env,`raceMatches/${matchId}`,{
+        notifPending:{
+          winnerUid,
+          winnerName: winnerUid===uid ? (me.name||'You') : (opp.name||'Opponent'),
+          loserName:  winnerUid===uid ? (opp.name||'Opponent') : (me.name||'You'),
+          winnerPhone: winnerUid===uid ? uid : opp.uid,
+          loserPhone:  winnerUid===uid ? opp.uid : uid,
+        }
+      });
       return{success:true,data:{status:'matched',matchId}};
     }
     // No opponent yet → enter queue
@@ -799,8 +819,9 @@ async function hRacePoll(env,uid,_data,_meta={}){
     const am=await dbGet(env,`userActiveMatch/${uid}`);
     if(am.data){
       const mr=await dbGet(env,`raceMatches/${am.data}`);
-      // Stale match: force-clean & return idle
-      if(mr.data && (Date.now()-(mr.data.createdAt||0))>60000){
+      // Stale match: older than 5 minutes with no ack → force-clean & return idle
+      // Use 5 min (not 60s) so the opponent has enough time to poll and get matched data
+      if(mr.data && (Date.now()-(mr.data.createdAt||0))>300000){
         await dbDelete(env,`userActiveMatch/${uid}`).catch(()=>{});
         await dbDelete(env,`raceMatches/${am.data}`).catch(()=>{});
         return{success:true,data:{status:'idle'}};
@@ -820,12 +841,13 @@ async function hRacePoll(env,uid,_data,_meta={}){
           tonBalance: ur.data?.tonBalance||0
         }};
       }
-      // stale pointer
+      // Stale pointer (match record already deleted) — clear and return idle
       await dbDelete(env,`userActiveMatch/${uid}`);
     }
     const q=await dbGet(env,`raceQueue/${uid}`);
     if(q.data){
-      if(Date.now()-(q.data.joinedAt||0)>RACE_MATCH_TTL){
+      const waitedMs=Date.now()-(q.data.joinedAt||0);
+      if(waitedMs>RACE_MATCH_TTL){
         await dbDelete(env,`raceQueue/${uid}`);
         const u=await dbGet(env,`users/${uid}`);
         if(u.data){
@@ -859,8 +881,9 @@ async function hRaceCancelQueue(env,uid,_data,_meta={}){
   }catch(e){console.error('raceCancelQueue:',e);return{success:false,error:e.message};}
 }
 
-// Acknowledge match seen — clears the active-match pointer for this user
-// and removes the record once both players have ack'd.
+// Acknowledge match seen — clears the active-match pointer for this user.
+// First player to ack sends the Telegram notifications (race is now truly finished).
+// Both players must ack before the match record is deleted.
 async function hRaceAck(env,uid,_data,_meta={}){
   try{
     const am=await dbGet(env,`userActiveMatch/${uid}`);
@@ -871,9 +894,35 @@ async function hRaceAck(env,uid,_data,_meta={}){
     if(mr.data){
       const m=mr.data;
       const otherUid = m.p1.uid===uid ? m.p2.uid : m.p1.uid;
-      // Always delete match + the other player's pointer to prevent stuck matches
+      // Send Telegram notifications on FIRST ack (race animation has now finished)
+      const notif=m.notifPending;
+      if(notif&&!m.notifSent){
+        // Mark sent first to prevent double-send if both players ack simultaneously
+        await dbUpdate(env,`raceMatches/${matchId}`,{notifSent:true}).catch(()=>{});
+        const winnerUid=notif.winnerUid;
+        const loserUid =winnerUid===m.p1.uid ? m.p2.uid : m.p1.uid;
+        const winnerName=notif.winnerName||'Winner';
+        const loserName =notif.loserName||'Opponent';
+        await Promise.all([
+          sendTgNotification(env,winnerUid,`🏆 <b>Race Won!</b>
+
+🏍️ You beat <b>${loserName}</b>
+💤 +${RACE_PRIZE} TON added to your balance!`),
+          sendTgNotification(env,loserUid, `❌ <b>Hard Luck!</b>
+
+🏍️ <b>${winnerName}</b> beat you this time.
+💔 You lost ${RACE_COST} TON entry fee.
+💪 Race again to win ${RACE_PRIZE} TON!`),
+        ]);
+      }
+      // Check if other player already acked — if so, delete the match record
+      const otherActive=await dbGet(env,`userActiveMatch/${otherUid}`);
+      if(!otherActive.data){
+        // Other player already cleared their pointer — safe to delete match
+        await dbDelete(env,`raceMatches/${matchId}`).catch(()=>{});
+      }
+      // Also clear other pointer to prevent them being stuck if they never ack
       await dbDelete(env,`userActiveMatch/${otherUid}`).catch(()=>{});
-      await dbDelete(env,`raceMatches/${matchId}`).catch(()=>{});
     }
     return{success:true,data:{cleared:true}};
   }catch(e){console.error('raceAck:',e);return{success:false,error:e.message};}
@@ -954,7 +1003,7 @@ async function hSaveSeasonAlloc(env,uid,data,_meta={}){
 
 // ── Main handler ──────────────────────────────────────────────────
 export default {
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     if(request.method==='OPTIONS')return new Response(null,{headers:CORS});
     const url=new URL(request.url);const path=url.pathname;
     if(path==='/health')return ok({status:'ok',ts:Date.now(),env:env.ENVIRONMENT||'production'});

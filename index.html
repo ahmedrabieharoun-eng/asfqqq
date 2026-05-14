@@ -3479,10 +3479,10 @@ async function doUpgradeStat(bikeLevel, stat){
       '</div>',
       /* Bottom bar section */
       '<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;padding:0 24px 0;">',
-        '<div id="rqTitle" style="font-size:18px;font-weight:800;color:#fff;font-family:Fredoka,cursive;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.8);">Поиск соперника...</div>',
+        '<div id="rqTitle" style="font-size:18px;font-weight:800;color:#fff;font-family:Fredoka,cursive;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.8);">' + tr('rqSearching') + '</div>',
         '<div style="width:85%;max-width:320px;height:12px;border-radius:8px;background:rgba(255,255,255,.18);overflow:hidden;border:1px solid rgba(255,255,255,.12);"><div id="rqProgressBar" style="height:100%;width:0%;border-radius:8px;background:linear-gradient(90deg,#ff3d00,#ff7a00,#ffc400);background-size:200% 100%;animation:rq-bar-shine 1.4s linear infinite,rq-bar-grow 8s ease-in-out infinite alternate;box-shadow:0 0 12px rgba(255,140,0,.7);"></div></div>',
         '<style>@keyframes rq-bar-shine{0%{background-position:200% 0}100%{background-position:-200% 0}}@keyframes rq-bar-grow{0%{width:8%}100%{width:92%}}</style>',
-        '<div id="rqSub" style="font-size:12px;color:rgba(255,255,255,.65);font-weight:600;font-family:Fredoka,cursive;max-width:280px;line-height:1.4">@RaseenRacing_bot</div>',
+        '<div id="rqSub" style="font-size:12px;color:rgba(255,255,255,.65);font-weight:600;font-family:Fredoka,cursive;max-width:280px;line-height:1.4">' + tr('rqSearchingSub') + '</div>',
       '</div>'
     ].join('');
     document.body.appendChild(loadOv);
@@ -7494,7 +7494,8 @@ const TRANSLATIONS = {
       bikeStats:'إحصائيات الدراجة', levelBadge:'المستوى',
       bikeInfoBtn:'معلومات الدراجة', startRaceBtn:'بدء السباق', entryFeeLbl:'رسم الدخول:',
       noBikesYetTitle:'ليس لديك دراجات بعد', noBikesYetSub:'اشترِ دراجة لتبدأ التطوير',
-      noBikesAvail:'لا توجد دراجات متاحة.', buyOneInGarage:'اشترِ واحدة من الجراج'
+      noBikesAvail:'لا توجد دراجات متاحة.', buyOneInGarage:'اشترِ واحدة من الجراج',
+      rqSearching:'🔍 البحث عن منافس...', rqSearchingSub:'@RaseenRacing_bot'
     },
     en:{
       hubMotorcycles:'Motorcycles',
@@ -7514,7 +7515,8 @@ const TRANSLATIONS = {
       bikeStats:'Bike Stats', levelBadge:'LEVEL',
       bikeInfoBtn:'Bike Info', startRaceBtn:'Start Race', entryFeeLbl:'Entry Fee:',
       noBikesYetTitle:'You have no bikes yet', noBikesYetSub:'Buy a bike to start upgrading',
-      noBikesAvail:'No bikes available.', buyOneInGarage:'Buy one in the Garage'
+      noBikesAvail:'No bikes available.', buyOneInGarage:'Buy one in the Garage',
+      rqSearching:'🔍 Searching for opponent...', rqSearchingSub:'@RaseenRacing_bot'
     },
     ru:{
       hubMotorcycles:'Мотоциклы',
@@ -7534,7 +7536,8 @@ const TRANSLATIONS = {
       bikeStats:'Характеристики', levelBadge:'УРОВЕНЬ',
       bikeInfoBtn:'О мотоцикле', startRaceBtn:'Старт гонки', entryFeeLbl:'Взнос:',
       noBikesYetTitle:'У вас пока нет мотоциклов', noBikesYetSub:'Купите мотоцикл, чтобы прокачивать',
-      noBikesAvail:'Нет доступных мотоциклов.', buyOneInGarage:'Купите в Гараже'
+      noBikesAvail:'Нет доступных мотоциклов.', buyOneInGarage:'Купите в Гараже',
+      rqSearching:'🔍 Поиск соперника...', rqSearchingSub:'@RaseenRacing_bot'
     },
     es:{
       hubMotorcycles:'Motocicletas',
@@ -7554,7 +7557,8 @@ const TRANSLATIONS = {
       bikeStats:'Estadísticas', levelBadge:'NIVEL',
       bikeInfoBtn:'Info Moto', startRaceBtn:'Iniciar Carrera', entryFeeLbl:'Cuota:',
       noBikesYetTitle:'Aún no tienes motos', noBikesYetSub:'Compra una moto para mejorar',
-      noBikesAvail:'No hay motos disponibles.', buyOneInGarage:'Compra una en el Garaje'
+      noBikesAvail:'No hay motos disponibles.', buyOneInGarage:'Compra una en el Garaje',
+      rqSearching:'🔍 Buscando rival...', rqSearchingSub:'@RaseenRacing_bot'
     },
     fr:{
       hubMotorcycles:'Motos',
@@ -7574,7 +7578,8 @@ const TRANSLATIONS = {
       bikeStats:'Statistiques', levelBadge:'NIVEAU',
       bikeInfoBtn:'Info Moto', startRaceBtn:'Démarrer la Course', entryFeeLbl:'Frais:',
       noBikesYetTitle:'Vous n\'avez pas encore de motos', noBikesYetSub:'Achetez une moto pour améliorer',
-      noBikesAvail:'Aucune moto disponible.', buyOneInGarage:'Achetez-en une au Garage'
+      noBikesAvail:'Aucune moto disponible.', buyOneInGarage:'Achetez-en une au Garage',
+      rqSearching:'🔍 Recherche d\'adversaire...', rqSearchingSub:'@RaseenRacing_bot'
     }
   };
   Object.keys(ext).forEach(k=>{
@@ -7856,6 +7861,12 @@ function applyLang(lang,flag,code){
   if(ldStat && !ldStat.style.color) ldStat.textContent=t.ldLoading||'Loading...';
   const ldRetryBtn=document.getElementById('ldRetryBtn');
   if(ldRetryBtn) ldRetryBtn.textContent=t.ldRetryBtn||'🔄 Retry';
+
+  // ── Race search overlay text (update live if overlay is open) ──
+  const rqTitle=document.getElementById('rqTitle');
+  if(rqTitle) rqTitle.textContent=t.rqSearching||'🔍 Searching for opponent...';
+  const rqSub=document.getElementById('rqSub');
+  if(rqSub) rqSub.textContent=t.rqSearchingSub||'@RaseenRacing_bot';
 
   // ── Universal data-i18n engine ──
   document.querySelectorAll('[data-i18n]').forEach(el=>{

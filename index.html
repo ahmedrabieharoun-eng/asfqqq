@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3731,7 +3728,16 @@ async function doUpgradeStat(bikeLevel, stat){
     if(spd1)spd1.textContent=p1Kmh+' km/h';
     if(spd2)spd2.textContent=p2Kmh+' km/h';
     ov.style.display='flex';
+    // ── In-app win/loss notification (shown after result overlay appears) ──
+    const _notifPrize = ((_racePending&&_racePending.prize)||0.9);
+    const _notifOpp = '@'+(aiName||'Opponent');
+    if(playerWins){
+      setTimeout(()=>{ showNotif('🏆 سبقت '+_notifOpp+'! +'+_notifPrize+' TON ربحتها 🎉','s'); }, 600);
+    } else {
+      setTimeout(()=>{ showNotif('❌ خسرت أمام '+_notifOpp+' — حظاً أوفر المرة الجاية 💪','e'); }, 600);
+    }
     // Acknowledge match server-side so the record can be cleaned up
+    // Server already sends Telegram notification via sendTgNotification in hRaceJoinQueue
     api('raceAck',{}).catch(()=>{});
     setTimeout(()=>{try{loadState();}catch(e){}},1200);
   }
@@ -5513,37 +5519,33 @@ async function getOrComputeFp(){
 
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
-/* ── Global button cooldown: disable ALL buttons for 2s after any API action ── */
+/* ── Global button cooldown: disable ALL buttons for 3s after any API action ── */
 let _globalBtnCooldown = false;
+let _globalBtnCooldownTimer = null;
 function _startBtnCooldown(){
   if(_globalBtnCooldown) return;
   _globalBtnCooldown = true;
+  // Mark and disable every non-exempt, non-already-disabled button
   document.querySelectorAll('button:not([data-no-cooldown])').forEach(b=>{
     if(!b.disabled){
-      b.dataset._wasCooled = '1';
+      b.setAttribute('data-was-cooled','1');
       b.disabled = true;
       b.style.opacity = '0.45';
-      b.style.filter = 'grayscale(0.5)';
+      b.style.filter = 'grayscale(0.6)';
     }
   });
-  setTimeout(()=>{
+  if(_globalBtnCooldownTimer) clearTimeout(_globalBtnCooldownTimer);
+  _globalBtnCooldownTimer = setTimeout(()=>{
     _globalBtnCooldown = false;
-    document.querySelectorAll('button[data-_was-cooled]').forEach(b=>{
+    _globalBtnCooldownTimer = null;
+    // Re-enable only the buttons we disabled (attribute-based, reliable)
+    document.querySelectorAll('button[data-was-cooled]').forEach(b=>{
       b.disabled = false;
       b.style.opacity = '';
       b.style.filter = '';
-      delete b.dataset._wasCooled;
+      b.removeAttribute('data-was-cooled');
     });
-    // Re-enable buttons that had data attribute
-    document.querySelectorAll('button').forEach(b=>{
-      if(b.dataset._wasCooled){
-        b.disabled = false;
-        b.style.opacity = '';
-        b.style.filter = '';
-        delete b.dataset._wasCooled;
-      }
-    });
-  }, 2000);
+  }, 3000);
 }
 const DEBOUNCE_MS  = 3000;
 function debounce(key){

@@ -1337,7 +1337,7 @@ function syncTopbar(){
 // Hook into page load
 document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ renderBikes(); syncTopbar(); }, 800);
-  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); if(typeof syncProfileTopbar==='function') syncProfileTopbar(); }, 3000);
+  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); if(typeof syncProfileTopbar==='function') syncProfileTopbar(); }, 10000);
 });
 
 /* ════ GARAGE SYSTEM ════════════════════════════════════════════
@@ -5735,7 +5735,7 @@ function renderMiningPage(){
       : ready
         ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">'+tr('miningClaim')+'</button>'
         : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">'+tr('miningStart')+'</button>';
-    return '<div class="mine-car-card">'+
+    return '<div class="mine-car-card" data-lv="'+b.lv+'">'+
       '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
       '<div class="mine-card-body">'+
         '<div class="mine-in-garage">'+tr('miningInGarage')+': 1</div>'+
@@ -5772,7 +5772,26 @@ async function claimBikeMiningRewards(){
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
   finally{_miningInFlight=false;}
 }
-setInterval(()=>{renderMiningPage();},1000);
+// Only update mining timers (not full re-render) every second
+setInterval(()=>{
+  const mineSection = document.getElementById('sectionFriends');
+  if(!mineSection||!mineSection.classList.contains('active')) return;
+  // Just update countdown buttons, no full re-render
+  const now = Date.now();
+  const mining = S.user?.bikeMining||{};
+  document.querySelectorAll('.mine-action-btn.wait').forEach(btn=>{
+    const card = btn.closest('.mine-car-card');
+    if(!card) return;
+    const lv = card.dataset.lv;
+    const rec = mining[String(lv)]||mining[lv];
+    if(rec&&rec.status==='active'&&(rec.endsAt||0)>now){
+      btn.textContent = formatMiningTime((rec.endsAt||0)-now);
+    } else if(rec&&rec.status==='active'&&(rec.endsAt||0)<=now){
+      // Mining done - do a full re-render once
+      renderMiningPage();
+    }
+  });
+},1000);
 
 /* ════ UPDATE UI ════ */
 function updateUI(){

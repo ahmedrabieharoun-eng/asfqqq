@@ -5813,12 +5813,15 @@ function buildTaskCard(t,cat){
   const name=esc(t.name||('@'+(t.link?.split('t.me/')[1]?.split('/')[0]||'Task')));
   const bam=t.bambooReward||500;
   const link=esc(t.link||'');
+  const imgHtml=t.imageUrl
+    ?`<img src="${esc(t.imageUrl)}" style="width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">`
+    :`<div class="ticon" style="font-size:28px">${icon}</div>`;
   return`<div class="task-item">
-    <div class="ticon" style="font-size:28px">${icon}</div>
+    ${imgHtml}
     <div class="tinfo">
       <div class="tname">${name}</div>
       <div class="trew">${BAM_IMG} ${fmt(bam)} Bamboo</div>
-      ${t.completions!==undefined?`<div class="tstat">${t.completions||0}/${t.targetUsers||0} completed</div>`:''}
+      ${t.completions!==undefined&&t.targetUsers?`<div class="tstat">${t.completions||0}/${t.targetUsers||0} completed</div>`:''}
     </div>
     ${done?`<button class="tbtn done">✅ Done</button>`
       :inFlight?`<button class="tbtn done" style="opacity:.6">⏳</button>`

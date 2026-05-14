@@ -5226,7 +5226,7 @@ const SERVERS = [
 const WRITE_ACTIONS = new Set([
   'withdraw','exchange','buy','upgradeTank','collect',
   'claimTask','verifyTask','createTask','deposit',
-  'buyBike','upgradeStats','race','raceResult','raceJoinQueue','raceCancelQueue','raceAck','startBikeMining','claimBikeMining'
+  'buyBike','upgradeStats','race','raceResult','raceJoinQueue','raceCancelQueue','raceAck','startBikeMining','claimBikeMining','saveLanguage'
 ]);
 
 const API_TIMEOUT_MS  = 8000;
@@ -5536,7 +5536,7 @@ function _startBtnCooldown(){
       b.style.opacity = '';
       b.style.filter = '';
     });
-  }, 6000);
+  }, 3000);
 }
 const DEBOUNCE_MS  = 3000;
 function debounce(key){
@@ -6698,6 +6698,16 @@ async function init(){
     const u=S.tg.initDataUnsafe?.user;
     if(u){
       S.userId=String(u.id);
+      // Auto-detect Telegram user language if no saved preference
+      if(!localStorage.getItem('pandaLang') && u.language_code){
+        const tgLang=u.language_code.toLowerCase().slice(0,2);
+        const supported={ar:['🇸🇦','AR'],en:['🇬🇧','EN'],ru:['🇷🇺','RU'],es:['🇪🇸','ES'],fr:['🇫🇷','FR']};
+        if(supported[tgLang]){
+          localStorage.setItem('pandaLang',tgLang);
+          localStorage.setItem('pandaLangFlag',supported[tgLang][0]);
+          localStorage.setItem('pandaLangCode',supported[tgLang][1]);
+        }
+      }
       // Set avatar in new topbar
       const hubAv=document.getElementById('hubAvatar');
       if(hubAv && u.photo_url){
@@ -7805,6 +7815,8 @@ function setLang(lang,flag,code){
     localStorage.setItem('pandaLangFlag',flag);
     localStorage.setItem('pandaLangCode',code);
     applyLang(lang,flag,code);
+    // Save language to server so bot notifications arrive in the right language
+    if(typeof api==='function') api('saveLanguage',{lang}).catch(()=>{});
     // Re-render dynamic pages so translated strings appear in JS-generated HTML
     if(typeof renderTasks==='function') try{renderTasks();}catch(e){}
     if(typeof renderMissions==='function') try{renderMissions();}catch(e){}

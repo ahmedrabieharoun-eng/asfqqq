@@ -5544,7 +5544,7 @@ function _startBtnCooldown(){
         delete b.dataset._wasCooled;
       }
     });
-  }, 3000);
+  }, 6000);
 }
 const DEBOUNCE_MS  = 3000;
 function debounce(key){
@@ -5565,7 +5565,7 @@ let _apiInFlight = 0;
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
-  // Trigger 3-second button cooldown on EVERY API call to prevent 429 spam
+  // Trigger 6-second button cooldown on EVERY API call to prevent 429 spam
   // (covers double-click on same button AND fast clicks across different buttons)
   if(action !== 'racePoll' && action !== 'getState') _startBtnCooldown();
   const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;

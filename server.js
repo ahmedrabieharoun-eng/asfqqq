@@ -68,8 +68,8 @@ const BIKE_MINING_MS = 24*60*60*1000;
 
 // Default partner tasks
 const DEFAULT_PARTNER_TASKS = [
-  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacingbot', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
-  { id:'partner_news',    name:'Join News Channel',    type:'channel', link:'https://t.me/RaseenRacingbot',   bambooReward:100, targetUsers:null, status:'active', isDefault:true },
+  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacingpayouts', imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747937/payments_c5ifxk.jpg', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
+  { id:'partner_news',    name:'Join News Channel',    type:'channel', link:'https://t.me/RaseenRacing',        imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747938/news_ek96ui.jpg',     bambooReward:100, targetUsers:null, status:'active', isDefault:true },
 ];
 
 async function seedPartnerTasks(env){
@@ -77,12 +77,113 @@ async function seedPartnerTasks(env){
     const tpr=await dbGet(env,'tasks/partner');
     const existing=tpr.data||{};
     for(const task of DEFAULT_PARTNER_TASKS){
+      const now=Date.now();
       if(!existing[task.id]){
-        const now=Date.now();
         await dbSet(env,`tasks/partner/${task.id}`,{...task,completions:0,completedBy:[],createdAt:now,updatedAt:now});
+      } else {
+        // Always force-update link and imageUrl for default tasks (fix stale data)
+        await dbUpdate(env,`tasks/partner/${task.id}`,{link:task.link,imageUrl:task.imageUrl,name:task.name,updatedAt:now});
       }
     }
   }catch(e){console.error('seedPartnerTasks:',e.message);}
+}
+
+// ── Multilingual Notification Messages ──────────────────────────
+const MSG={
+  ref_joined:{
+    ar:(name)=>`🎉 <b>${name}</b> انضم باستخدام رابط إحالتك!\n\n🏍️ ستكسب عمولة 10% من مشترياته.`,
+    en:(name)=>`🎉 <b>${name}</b> joined using your referral link!\n\n🏍️ You will earn 10% commission on their purchases.`,
+    ru:(name)=>`🎉 <b>${name}</b> присоединился по вашей реферальной ссылке!\n\n🏍️ Вы будете получать 10% комиссию с их покупок.`,
+    es:(name)=>`🎉 <b>${name}</b> se unió usando tu enlace de referido!\n\n🏍️ Ganarás 10% de comisión en sus compras.`,
+    fr:(name)=>`🎉 <b>${name}</b> a rejoint via votre lien de parrainage!\n\n🏍️ Vous gagnerez 10% de commission sur ses achats.`,
+  },
+  bike_bought:{
+    ar:(bkName,lv,speed,nitro,accel,maneuver,daily,monthly)=>`🏍️ <b>تم شراء الدراجة!</b>\n\n🎉 <b>${bkName} (المستوى ${lv})</b>\n\n📊 السرعة:${speed} النيترو:${nitro} التسارع:${accel} المناورة:${maneuver}\n\n💰 يومياً: ${daily} TON | شهرياً: ~${monthly} TON\n\n🔋 أرسلها للتعدين لتبدأ الكسب!`,
+    en:(bkName,lv,speed,nitro,accel,maneuver,daily,monthly)=>`🏍️ <b>Bike Purchased!</b>\n\n🎉 <b>${bkName} (Lv${lv})</b>\n\n📊 Speed:${speed} Nitro:${nitro} Accel:${accel} Handling:${maneuver}\n\n💰 Daily: ${daily} TON | Monthly: ~${monthly} TON\n\n🔋 Send to mining to start earning!`,
+    ru:(bkName,lv,speed,nitro,accel,maneuver,daily,monthly)=>`🏍️ <b>Мотоцикл куплен!</b>\n\n🎉 <b>${bkName} (Ур.${lv})</b>\n\n📊 Скорость:${speed} Нитро:${nitro} Ускор:${accel} Управл:${maneuver}\n\n💰 В день: ${daily} TON | В месяц: ~${monthly} TON\n\n🔋 Отправьте в майнинг для заработка!`,
+    es:(bkName,lv,speed,nitro,accel,maneuver,daily,monthly)=>`🏍️ <b>¡Moto Comprada!</b>\n\n🎉 <b>${bkName} (Nv${lv})</b>\n\n📊 Vel:${speed} Nitro:${nitro} Acel:${accel} Manejo:${maneuver}\n\n💰 Diario: ${daily} TON | Mensual: ~${monthly} TON\n\n🔋 ¡Envíala a minería para empezar a ganar!`,
+    fr:(bkName,lv,speed,nitro,accel,maneuver,daily,monthly)=>`🏍️ <b>Moto Achetée!</b>\n\n🎉 <b>${bkName} (Nv${lv})</b>\n\n📊 Vitesse:${speed} Nitro:${nitro} Accél:${accel} Maniab:${maneuver}\n\n💰 Quotidien: ${daily} TON | Mensuel: ~${monthly} TON\n\n🔋 Envoyez en minage pour commencer à gagner!`,
+  },
+  ref_commission:{
+    ar:(firstName,lv,comm,newBal)=>`💰 <b>عمولة إحالة!</b>\n\n🏍️ <b>${firstName}</b> اشترى دراجة المستوى ${lv}\n💤 +${comm} TON (10%) أضيف لرصيدك!\n💰 الرصيد الجديد: ${newBal} TON`,
+    en:(firstName,lv,comm,newBal)=>`💰 <b>Referral Commission!</b>\n\n🏍️ <b>${firstName}</b> bought a Level ${lv} bike\n💤 +${comm} TON (10%) added to your balance!\n💰 New balance: ${newBal} TON`,
+    ru:(firstName,lv,comm,newBal)=>`💰 <b>Реферальная комиссия!</b>\n\n🏍️ <b>${firstName}</b> купил мотоцикл уровня ${lv}\n💤 +${comm} TON (10%) добавлено к вашему балансу!\n💰 Новый баланс: ${newBal} TON`,
+    es:(firstName,lv,comm,newBal)=>`💰 <b>¡Comisión de Referido!</b>\n\n🏍️ <b>${firstName}</b> compró una moto de nivel ${lv}\n💤 +${comm} TON (10%) añadido a tu saldo!\n💰 Nuevo saldo: ${newBal} TON`,
+    fr:(firstName,lv,comm,newBal)=>`💰 <b>Commission de Parrainage!</b>\n\n🏍️ <b>${firstName}</b> a acheté une moto niveau ${lv}\n💤 +${comm} TON (10%) ajouté à votre solde!\n💰 Nouveau solde: ${newBal} TON`,
+  },
+  mining_done:{
+    ar:(ton)=>`🏍️ اكتمل تعدين الدراجة!\n\n💎 +${ton} TON تمت إضافته لرصيدك.`,
+    en:(ton)=>`🏍️ Bike mining completed!\n\n💎 +${ton} TON has been added to your balance.`,
+    ru:(ton)=>`🏍️ Майнинг мотоцикла завершён!\n\n💎 +${ton} TON добавлено к вашему балансу.`,
+    es:(ton)=>`🏍️ ¡Minería de moto completada!\n\n💎 +${ton} TON añadido a tu saldo.`,
+    fr:(ton)=>`🏍️ Minage de moto terminé!\n\n💎 +${ton} TON ajouté à votre solde.`,
+  },
+  task_done:{
+    ar:(label,ton)=>`🎯 <b>مهمة الإحالة مكتملة!</b>\n\n✅ ${label}\n💎 +${ton} TON أضيف!`,
+    en:(label,ton)=>`🎯 <b>Referral Task Done!</b>\n\n✅ ${label}\n💎 +${ton} TON added!`,
+    ru:(label,ton)=>`🎯 <b>Реферальное задание выполнено!</b>\n\n✅ ${label}\n💎 +${ton} TON добавлено!`,
+    es:(label,ton)=>`🎯 <b>¡Tarea de Referido Completada!</b>\n\n✅ ${label}\n💎 +${ton} TON añadido!`,
+    fr:(label,ton)=>`🎯 <b>Tâche de Parrainage Terminée!</b>\n\n✅ ${label}\n💎 +${ton} TON ajouté!`,
+  },
+  mission_done:{
+    ar:(label,ton)=>`🎯 <b>المهمة مكتملة!</b>\n\n✅ ${label}\n💎 +${ton} TON أضيف!`,
+    en:(label,ton)=>`🎯 <b>Mission Completed!</b>\n\n✅ ${label}\n💎 +${ton} TON added!`,
+    ru:(label,ton)=>`🎯 <b>Миссия выполнена!</b>\n\n✅ ${label}\n💎 +${ton} TON добавлено!`,
+    es:(label,ton)=>`🎯 <b>¡Misión Completada!</b>\n\n✅ ${label}\n💎 +${ton} TON añadido!`,
+    fr:(label,ton)=>`🎯 <b>Mission Accomplie!</b>\n\n✅ ${label}\n💎 +${ton} TON ajouté!`,
+  },
+  race_won:{
+    ar:(loserName,prize)=>`🏆 <b>فزت بالسباق!</b>\n\n🏍️ هزمت <b>${loserName}</b>\n💤 +${prize} TON أضيف لرصيدك!`,
+    en:(loserName,prize)=>`🏆 <b>Race Won!</b>\n\n🏍️ You beat <b>${loserName}</b>\n💤 +${prize} TON added to your balance!`,
+    ru:(loserName,prize)=>`🏆 <b>Гонка выиграна!</b>\n\n🏍️ Вы победили <b>${loserName}</b>\n💤 +${prize} TON добавлено к вашему балансу!`,
+    es:(loserName,prize)=>`🏆 <b>¡Carrera Ganada!</b>\n\n🏍️ Venciste a <b>${loserName}</b>\n💤 +${prize} TON añadido a tu saldo!`,
+    fr:(loserName,prize)=>`🏆 <b>Course Gagnée!</b>\n\n🏍️ Vous avez battu <b>${loserName}</b>\n💤 +${prize} TON ajouté à votre solde!`,
+  },
+  race_lost:{
+    ar:(winnerName,cost,prize)=>`❌ <b>حظاً أوفر!</b>\n\n🏍️ <b>${winnerName}</b> فاز هذه المرة.\n💔 خسرت ${cost} TON رسوم الدخول.\n💪 تسابق مجدداً للفوز بـ ${prize} TON!`,
+    en:(winnerName,cost,prize)=>`❌ <b>Hard Luck!</b>\n\n🏍️ <b>${winnerName}</b> beat you this time.\n💔 You lost ${cost} TON entry fee.\n💪 Race again to win ${prize} TON!`,
+    ru:(winnerName,cost,prize)=>`❌ <b>Не повезло!</b>\n\n🏍️ <b>${winnerName}</b> победил на этот раз.\n💔 Вы потеряли ${cost} TON входной взнос.\n💪 Гоняйтесь снова, чтобы выиграть ${prize} TON!`,
+    es:(winnerName,cost,prize)=>`❌ <b>¡Mala Suerte!</b>\n\n🏍️ <b>${winnerName}</b> te ganó esta vez.\n💔 Perdiste ${cost} TON de cuota de entrada.\n💪 ¡Vuelve a correr para ganar ${prize} TON!`,
+    fr:(winnerName,cost,prize)=>`❌ <b>Pas de Chance!</b>\n\n🏍️ <b>${winnerName}</b> vous a battu cette fois.\n💔 Vous avez perdu ${cost} TON de frais d'entrée.\n💪 Recourez pour gagner ${prize} TON!`,
+  },
+  wd_approved:{
+    ar:(amt)=>`✅ تمت الموافقة على سحب ${amt} TON الخاص بك!`,
+    en:(amt)=>`✅ Your withdrawal of ${amt} TON has been approved!`,
+    ru:(amt)=>`✅ Ваш вывод ${amt} TON одобрен!`,
+    es:(amt)=>`✅ ¡Tu retiro de ${amt} TON ha sido aprobado!`,
+    fr:(amt)=>`✅ Votre retrait de ${amt} TON a été approuvé!`,
+  },
+  wd_rejected:{
+    ar:(amt)=>`❌ تم رفض السحب. تمت استعادة ${amt} TON.`,
+    en:(amt)=>`❌ Withdrawal rejected. ${amt} TON refunded.`,
+    ru:(amt)=>`❌ Вывод отклонён. ${amt} TON возвращено.`,
+    es:(amt)=>`❌ Retiro rechazado. ${amt} TON reembolsado.`,
+    fr:(amt)=>`❌ Retrait rejeté. ${amt} TON remboursé.`,
+  },
+  post_approved:{
+    ar:(reward)=>`✅ تمت الموافقة على منشورك! حصلت على مكافأة ${reward} TON.`,
+    en:(reward)=>`✅ Your post has been approved! You received ${reward} TON reward.`,
+    ru:(reward)=>`✅ Ваш пост одобрен! Вы получили ${reward} TON в награду.`,
+    es:(reward)=>`✅ ¡Tu publicación ha sido aprobada! Recibiste ${reward} TON de recompensa.`,
+    fr:(reward)=>`✅ Votre publication a été approuvée! Vous avez reçu ${reward} TON de récompense.`,
+  },
+  post_rejected:{
+    ar:()=>`❌ تم رفض منشورك.`,
+    en:()=>`❌ Your post was rejected.`,
+    ru:()=>`❌ Ваш пост отклонён.`,
+    es:()=>`❌ Tu publicación fue rechazada.`,
+    fr:()=>`❌ Votre publication a été rejetée.`,
+  },
+};
+// Get user language (saved in DB) or fallback to 'en'
+async function getUserLang(env,uid){
+  try{const r=await dbGet(env,`users/${uid}/language`);return(r.data&&['ar','en','ru','es','fr'].includes(r.data))?r.data:'en';}catch(_){return'en';}
+}
+// Get localised message or fallback to English
+function m(key,lang,...args){
+  const variants=MSG[key];if(!variants)return'';
+  const fn=variants[lang]||variants['en'];
+  return fn?fn(...args):'';
 }
 
 async function sendTgNotification(env,userId,message){
@@ -129,7 +230,7 @@ function rateOk(ip){const now=Date.now();const d=_rl.get(ip)||{c:0,r:now+60000};
 
 // Per-user per-action cooldown
 const _userActionTs=new Map();
-const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,raceJoinQueue:1500,racePoll:400,raceCancelQueue:1500,raceAck:800,claimMissionTask:2500,submitPartnerPost:5000,saveSeasonAlloc:10000};
+const ACTION_COOLDOWNS={withdraw:5000,claimTask:2500,verifyTask:2500,createTask:5000,buyBike:2500,upgradeStats:2500,deposit:2500,startBikeMining:2500,claimBikeMining:2500,raceResult:4000,raceJoinQueue:1500,racePoll:400,raceCancelQueue:1500,raceAck:800,claimMissionTask:2500,submitPartnerPost:5000,saveSeasonAlloc:10000,saveLanguage:2000};
 function userActionOk(uid,action){const cd=ACTION_COOLDOWNS[action];if(!cd)return true;const key=`${uid}:${action}`;const now=Date.now();const last=_userActionTs.get(key)||0;if(now-last<cd)return false;_userActionTs.set(key,now);return true;}
 
 // Logging
@@ -191,7 +292,8 @@ async function registerReferral(env,uid,user,referrerId){
         const confirm=await dbGet(env,notifKey);
         if(confirm.data&&confirm.data.ts===myTs){
           const refName=(user.firstName||'Someone').slice(0,32);
-          sendTgNotification(env,referrerId,`🎉 <b>${refName}</b> joined using your referral link!\n\n🏍️ You will earn 10% commission on their purchases.`).catch(()=>{});
+          const refLang=await getUserLang(env,referrerId);
+          sendTgNotification(env,referrerId,m('ref_joined',refLang,refName)).catch(()=>{});
         }
       }
     }
@@ -273,6 +375,13 @@ async function hGetState(env,uid,tg,data={},_meta={}){
     const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,10):[];
     const lr=await dbGet(env,`users/${uid}/log`);
     const balanceLog=lr.data?Object.values(lr.data).sort((a,b)=>b.ts-a.ts).slice(0,20).map(e=>({ts:e.ts,type:e.type,amount:e.amount,balance:e.balance})):[];
+    // Fetch partner + community tasks to return to frontend
+    const [tPartnerR,tCommunityR]=await Promise.all([
+      dbGet(env,'tasks/partner'),
+      dbGet(env,'tasks/community'),
+    ]);
+    const partnerTasksList=tPartnerR.data?Object.values(tPartnerR.data).filter(t=>t.status==='active'):[];
+    const communityTasksList=tCommunityR.data?Object.values(tCommunityR.data).filter(t=>t.status==='active'):[];
     return{success:true,data:{
       user:{
         tonBalance:user.tonBalance||0,
@@ -297,6 +406,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
       completedMissions:user.completedMissions||[],
       wdHistory,
       balanceLog,
+      tasks:{partner:partnerTasksList,community:communityTasksList},
     }};
   }catch(e){console.error('getState',e);return{success:false,error:e.message,errorCode:'GET_STATE_ERROR'};}
 }
@@ -320,7 +430,7 @@ async function hBuyBike(env,uid,data,_meta={}){
     log(env,uid,'buy_bike',{bikeLevel:lv,price:priceTon,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
     const _bkNames={1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
     const _bkDaily=BIKE_DAILY_TON[lv]||0;
-    sendTgNotification(env,uid,`🏍️ <b>Bike Purchased!</b>\n\n🎉 <b>${_bkNames[lv]||'Level '+lv} (Lv${lv})</b>\n\n📊 Speed:${bike.speed} Nitro:${bike.nitro} Accel:${bike.accel} Handling:${bike.maneuver}\n\n💰 Daily: ${_bkDaily} TON | Monthly: ~${(_bkDaily*30).toFixed(2)} TON\n\n🔋 Send to mining to start earning!`).catch(()=>{});
+    (async()=>{const _ul=await getUserLang(env,uid);sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(2))).catch(()=>{});})();
     if(user.referredBy&&user.referredBy!==uid){
       // Fix: use toFixed(8) to avoid Math.round zeroing small commissions
       const comm=parseFloat((priceTon*G.REF_BONUS_PCT/100).toFixed(8));
@@ -331,10 +441,17 @@ async function hBuyBike(env,uid,data,_meta={}){
           await dbUpdate(env,`users/${user.referredBy}`,{tonBalance:newRefBal});
           // Update earned field in referrer's referrals list
           const refEntry=await dbGet(env,`users/${user.referredBy}/referrals/${uid}`);
-          const prevEarned=(refEntry.data&&refEntry.data.earned)||0;
-          await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{earned:parseFloat((prevEarned+comm).toFixed(8))});
+          const prevEarned=parseFloat((refEntry.data&&refEntry.data.earned)||0);
+          const newEarned=parseFloat((prevEarned+comm).toFixed(8));
+          // Use dbSet (PUT) to ensure the earned field is always written even if entry is stale
+          if(refEntry.data){
+            await dbSet(env,`users/${user.referredBy}/referrals/${uid}`,{...refEntry.data,earned:newEarned});
+          } else {
+            // Create referral entry if missing (edge case: old users without entry)
+            await dbSet(env,`users/${user.referredBy}/referrals/${uid}`,{userId:uid,firstName:user.firstName||'',lastName:user.lastName||'',username:user.username||'',photoUrl:user.photoUrl||'',joinedAt:Date.now(),earned:newEarned,hasWithdrawn:user.hasWithdrawn||false});
+          }
           log(env,user.referredBy,'referral_commission',{from:uid,bikeLevel:lv,bikePriceTon:priceTon,comm,tonBalance_before:rr.data.tonBalance||0,tonBalance_after:newRefBal},_meta);
-          await sendTgNotification(env,user.referredBy,`💰 <b>Referral Commission!</b>\n\n🏍️ <b>${user.firstName||'Friend'}</b> bought a Level ${lv} bike\n💤 +${comm} TON (10%) added to your balance!\n💰 New balance: ${newRefBal.toFixed(4)} TON`);
+          const _rl=await getUserLang(env,user.referredBy);await sendTgNotification(env,user.referredBy,m('ref_commission',_rl,user.firstName||'Friend',lv,comm,newRefBal.toFixed(4)));
         }else{
           console.error('hBuyBike: referredBy user not found:',user.referredBy);
         }
@@ -392,7 +509,7 @@ async function settleBikeMining(env,uid,user,_meta={}){
   const newTon=parseFloat(((user.tonBalance||0)+tonAdded).toFixed(8));
   await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeMining:mining});
   log(env,uid,'bike_mining_claim',{ton_reward:tonAdded,completed,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
-  sendTgNotification(env,uid,`🏍️ Bike mining completed!\n\n💎 +${tonAdded.toFixed(3)} TON has been added to your balance.`).catch(()=>{});
+  (async()=>{const _ml=await getUserLang(env,uid);sendTgNotification(env,uid,m('mining_done',_ml,tonAdded.toFixed(3))).catch(()=>{});})();
   return{user:{...user,tonBalance:newTon,bikeMining:mining},bikeMining:mining,tonAdded,completed};
 }
 
@@ -533,7 +650,7 @@ async function hClaimTask(env,uid,data,_meta={}){
       await dbUpdate(env,`users/${uid}`,{completedTasks:[...(user.completedTasks||[]),tid],tonBalance:parseFloat(newTon.toFixed(8))});
       log(env,uid,'claim_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
       const _rtn={rt10:'10 Active Refs',rt50:'50 Active Refs',rt100:'100 Active Refs',rt200:'200 Active Refs',rt500:'500 Active Refs',rt1000:'1000 Active Refs'};
-      sendTgNotification(env,uid,`🎯 <b>Referral Task Done!</b>\n\n✅ ${_rtn[tid]||tid}\n💎 +${tonReward} TON added!`).catch(()=>{});
+      (async()=>{const _tl=await getUserLang(env,uid);sendTgNotification(env,uid,m('task_done',_tl,_rtn[tid]||tid,tonReward)).catch(()=>{});})();
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -578,7 +695,7 @@ async function hClaimMissionTask(env,uid,data,_meta={}){
       });
       log(env,uid,'claim_mission_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
       const _mn={bt5:'Buy 5 Bikes',bt10:'Buy 10 Bikes',rc10:'10 Races',rc20:'20 Races',rc50:'50 Races',mt20:'20 Mining Runs',mt50:'50 Mining Runs'};
-      sendTgNotification(env,uid,`🎯 <b>Mission Completed!</b>\n\n✅ ${_mn[tid]||tid}\n💎 +${tonReward} TON added!`).catch(()=>{});
+      (async()=>{const _msl=await getUserLang(env,uid);sendTgNotification(env,uid,m('mission_done',_msl,_mn[tid]||tid,tonReward)).catch(()=>{});})();
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -903,16 +1020,10 @@ async function hRaceAck(env,uid,_data,_meta={}){
         const loserUid =winnerUid===m.p1.uid ? m.p2.uid : m.p1.uid;
         const winnerName=notif.winnerName||'Winner';
         const loserName =notif.loserName||'Opponent';
+        const [_wl,_ll]=await Promise.all([getUserLang(env,winnerUid),getUserLang(env,loserUid)]);
         await Promise.all([
-          sendTgNotification(env,winnerUid,`🏆 <b>Race Won!</b>
-
-🏍️ You beat <b>${loserName}</b>
-💤 +${RACE_PRIZE} TON added to your balance!`),
-          sendTgNotification(env,loserUid, `❌ <b>Hard Luck!</b>
-
-🏍️ <b>${winnerName}</b> beat you this time.
-💔 You lost ${RACE_COST} TON entry fee.
-💪 Race again to win ${RACE_PRIZE} TON!`),
+          sendTgNotification(env,winnerUid,m('race_won',_wl,loserName,RACE_PRIZE)),
+          sendTgNotification(env,loserUid,m('race_lost',_ll,winnerName,RACE_COST,RACE_PRIZE)),
         ]);
       }
       // Check if other player already acked — if so, delete the match record
@@ -955,7 +1066,7 @@ async function hAdmin(env,action,data){
       const r=await dbGet(env,`withdrawQueue/${data.wdId}`);if(!r.data)return{success:false,error:'Not found'};
       await dbUpdate(env,`withdrawQueue/${data.wdId}`,{status:'approved'});
       await dbUpdate(env,`users/${r.data.userId}/wdHistory/${data.wdId}`,{status:'approved'});
-      sendTgNotification(env,r.data.userId,`✅ Your withdrawal of ${r.data.amt} TON has been approved!`).catch(()=>{});
+      (async()=>{const _wdl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('wd_approved',_wdl,r.data.amt)).catch(()=>{});})();
       return{success:true};
     }
     case 'adminRejectWithdraw':{
@@ -964,7 +1075,7 @@ async function hAdmin(env,action,data){
       await dbUpdate(env,`users/${r.data.userId}/wdHistory/${data.wdId}`,{status:'rejected'});
       const u=await dbGet(env,`users/${r.data.userId}`);
       if(u.data)await dbUpdate(env,`users/${r.data.userId}`,{tonBalance:(u.data.tonBalance||0)+r.data.amt});
-      sendTgNotification(env,r.data.userId,`❌ Withdrawal rejected. ${r.data.amt} TON refunded.`).catch(()=>{});
+      (async()=>{const _rjl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('wd_rejected',_rjl,r.data.amt)).catch(()=>{});})();
       return{success:true};
     }
     case 'adminGetQueue':{const q=await dbGet(env,'withdrawQueue');return{success:true,data:q.data||{}};}
@@ -976,7 +1087,7 @@ async function hAdmin(env,action,data){
       if(reward>0){
         const u=await dbGet(env,`users/${r.data.userId}`);
         if(u.data)await dbUpdate(env,`users/${r.data.userId}`,{tonBalance:(u.data.tonBalance||0)+reward});
-        sendTgNotification(env,r.data.userId,`✅ Your post has been approved! You received ${reward} TON reward.`).catch(()=>{});
+        (async()=>{const _pl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('post_approved',_pl,reward)).catch(()=>{});})();
         log(env,r.data.userId,'partner_post_reward',{postId:data.postId,reward,by:'admin'});
       }
       return{success:true};
@@ -985,7 +1096,7 @@ async function hAdmin(env,action,data){
       const r=await dbGet(env,`partnerPostQueue/${data.postId}`);if(!r.data)return{success:false,error:'Not found'};
       await dbUpdate(env,`partnerPostQueue/${data.postId}`,{status:'rejected'});
       await dbUpdate(env,`users/${r.data.userId}/partnerPosts/${data.postId}`,{status:'rejected'});
-      sendTgNotification(env,r.data.userId,`❌ Your post was rejected.`).catch(()=>{});
+      (async()=>{const _prl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('post_rejected',_prl)).catch(()=>{});})();
       return{success:true};
     }
     default:return{success:false,error:'Unknown admin action'};
@@ -1046,6 +1157,7 @@ export default {
     if(!userActionOk(uid,action)){return fail('Too fast. Please wait a moment.',429);}
 
     switch(action){
+      case 'saveLanguage'       :return jRes(await (async()=>{const lang=(data.lang||'en');if(['ar','en','ru','es','fr'].includes(lang)){await dbSet(env,`users/${uid}/language`,lang);}return{success:true};})());
       case 'getState'         :return jRes(await hGetState        (env,uid,v.user,{...data,_startParam:v.startParam||''},_meta));
       case 'withdraw'         :return jRes(await hWithdraw        (env,uid,data,_meta));
       case 'deposit'          :return jRes(await hDeposit         (env,uid,data,_meta));

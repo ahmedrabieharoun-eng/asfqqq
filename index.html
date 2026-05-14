@@ -5548,6 +5548,28 @@ const _debounceMap = new Map();
 /* ── Global button cooldown: disable ALL buttons for 6s after any API action ── */
 let _globalBtnCooldown = false;
 let _globalCooldownTimer = null;
+
+// MutationObserver: disable any new buttons added while cooldown is active
+const _cooldownObserver = new MutationObserver((mutations)=>{
+  if(!_globalBtnCooldown) return;
+  mutations.forEach(m=>{
+    m.addedNodes.forEach(node=>{
+      if(node.nodeType!==1) return;
+      // Check the node itself and any button descendants
+      const btns = node.tagName==='BUTTON' ? [node] : [...(node.querySelectorAll ? node.querySelectorAll('button') : [])];
+      btns.forEach(b=>{
+        if(!b.disabled && !b.hasAttribute('data-cooled')){
+          b.setAttribute('data-cooled','1');
+          b.disabled=true;
+          b.style.opacity='0.4';
+          b.style.filter='grayscale(1)';
+        }
+      });
+    });
+  });
+});
+_cooldownObserver.observe(document.body||document.documentElement, {childList:true, subtree:true});
+
 function _startBtnCooldown(){
   if(_globalBtnCooldown) return;
   _globalBtnCooldown = true;
@@ -5700,7 +5722,7 @@ function renderMiningPage(){
   if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(2))+' TON';
   const ownedList=BIKES.filter(b=>owned.includes(b.lv));
   if(!ownedList.length){
-    grid.innerHTML='<div class="mine-empty">У вас пока нет سيارات في الجراج<br><span style="font-size:12px;color:#8a927f">اشتري دراجة أولاً من الجراج</span></div>';
+    grid.innerHTML='<div class="mine-empty">'+tr('noBikesYetTitle')+'<br><span style="font-size:12px;color:#8a927f">'+tr('noBikesYetSub')+'</span></div>';
     return;
   }
   const now=Date.now();
@@ -5711,12 +5733,12 @@ function renderMiningPage(){
     const btn=active
       ? '<button class="mine-action-btn wait" disabled>'+formatMiningTime((rec.endsAt||0)-now)+'</button>'
       : ready
-        ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">НА БАЛАНС</button>'
-        : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">В путь</button>';
+        ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">'+tr('miningClaim')+'</button>'
+        : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">'+tr('miningStart')+'</button>';
     return '<div class="mine-car-card">'+
       '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
       '<div class="mine-card-body">'+
-        '<div class="mine-in-garage">В гараже: 1</div>'+
+        '<div class="mine-in-garage">'+tr('miningInGarage')+': 1</div>'+
         '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(3)+' TON / 24h</div>'+btn+
       '</div></div>';
   }).join('');
@@ -5795,6 +5817,11 @@ function updateTankUI(){
 function showFab(){const f=document.getElementById('floatAddTask');if(f)f.style.display='flex';}
 
 function goNav(el){
+  // Always close any open profile subpage first so bottom nav works correctly
+  const subPage = document.getElementById('profileSubPage');
+  if(subPage && subPage.style.display !== 'none') {
+    subPage.style.display = 'none';
+  }
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
@@ -6725,9 +6752,9 @@ async function init(){
   // Helper: get current lang translation
   function lt(key){ const lang=localStorage.getItem('pandaLang')||'en'; return (TRANSLATIONS[lang]||TRANSLATIONS['en'])[key]||TRANSLATIONS['en'][key]||key; }
 
-  // Record start time — minimum 6 seconds total
+  // Record start time — minimum loading time
   const startTime = Date.now();
-  const MIN_LOADING_MS = 800;
+  const MIN_LOADING_MS = 200;
 
   // Step 1: Telegram setup
   ldProgress(0, lt('ldLoading'));
@@ -6774,31 +6801,22 @@ async function init(){
       ''
     ).toString().replace(/\D/g,'');
   }
-  await ldAnimateTo(10, lt('ldConnecting'), 700);
-  await new Promise(r=>setTimeout(r,400));
+  await ldAnimateTo(10, lt('ldConnecting'), 300);
 
-  // Step 1.5: Race servers — find fastest live server
-  await ldAnimateTo(18, '🏎️ Finding fastest server...', 500);
-  try{
-    const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
-    await window._raceServersNow(authHdr);
-    ldProgress(22, '✅ Server connected!');
-  }catch(e){
-    ldProgress(22, '⚠️ Using fallback server...');
-  }
-  await new Promise(r=>setTimeout(r,300));
+  // Step 1.5: Race servers — find fastest live server (non-blocking)
+  const authHdrForServer = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
+  const serverPromise = window._raceServersNow(authHdrForServer).catch(()=>{});
 
-  // Step 2: Preload images
-  await ldAnimateTo(20, lt('ldAssets'), 600);
+  // Step 2: Preload images (parallel with server detection)
+  await ldAnimateTo(20, lt('ldAssets'), 300);
   await Promise.all([
     preloadImages().catch(()=>{}),
-    new Promise(r=>setTimeout(r,800)), // min 0.8s on this step
+    serverPromise,
   ]);
-  await ldAnimateTo(40, lt('ldAssetsOk'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  await ldAnimateTo(40, lt('ldAssetsOk'), 200);
 
   // Step 3: Load user data
-  await ldAnimateTo(50, lt('ldConnecting'), 600);
+  await ldAnimateTo(50, lt('ldConnecting'), 300);
   let loaded = false;
   let attempts = 0;
   const MAX_ATTEMPTS = 3;
@@ -6813,7 +6831,7 @@ async function init(){
       console.warn(`Attempt ${attempts} failed:`,e.message);
       if(attempts < MAX_ATTEMPTS){
         ldProgress(50 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
-        await new Promise(r=>setTimeout(r,2000*attempts));
+        await new Promise(r=>setTimeout(r,1500*attempts));
       }
     }
   }
@@ -6821,11 +6839,10 @@ async function init(){
     ldError(lt('ldErrorMsg'), lt('ldRetryBtn'));
     return;
   }
-  await ldAnimateTo(70, lt('ldConnected'), 500);
-  await new Promise(r=>setTimeout(r,300));
+  await ldAnimateTo(70, lt('ldConnected'), 300);
 
   // Step 3.5: Preload owned bike images with priority
-  await ldAnimateTo(72, '🏍️ Loading your bikes...', 400);
+  await ldAnimateTo(72, '🏍️ Loading your bikes...', 200);
   try{
     const ownedLvs = S.user?.ownedBikes || [];
     if(ownedLvs.length > 0){
@@ -6837,7 +6854,7 @@ async function init(){
   }catch(e){ console.warn('bike preload:',e.message); }
 
   // Step 4: Render UI
-  await ldAnimateTo(80, lt('ldBuilding'), 400);
+  await ldAnimateTo(85, lt('ldBuilding'), 200);
   try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
@@ -6847,17 +6864,15 @@ async function init(){
   // Also sync Farm page topbar so user data appears immediately on first open
   try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
-  await new Promise(r=>setTimeout(r,300));
 
   // Step 5: Init TON + timers
-  await ldAnimateTo(90, lt('ldWallet'), 400);
-  setTimeout(()=>initTON(), 600);
+  await ldAnimateTo(95, lt('ldWallet'), 150);
+  setTimeout(()=>initTON(), 300);
   // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
   setInterval(()=>{ loadState(); }, 180000);
-  await new Promise(r=>setTimeout(r,400));
 
-  await ldAnimateTo(100, lt('ldReady'), 500);
+  await ldAnimateTo(100, lt('ldReady'), 150);
 
   // Ensure minimum loading time (5-10s feel)
   const elapsed = Date.now() - startTime;
@@ -6894,7 +6909,7 @@ const TRANSLATIONS = {
     submitPost:'📤 إرسال للمراجعة',
     postHistory:'سجل المنشورات',
     noPostsYet:'لا توجد منشورات',
-    activeRefNote:'الإحالات النشطة فقط تُحسب. تصبح نشطة عند أول سحب.',
+    activeRefNote:'الإحالات النشطة فقط تُحسب. تصبح الإحالة نشطة عند أول إيداع أو سحب.',
     availableBalance:'TON المتاح',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'فوري • بدون تحويل',
@@ -7031,7 +7046,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Submit Post for Review',
     postHistory:'Post History',
     noPostsYet:'No posts submitted yet',
-    activeRefNote:'Only active referrals are counted. A referral becomes active when they make their first withdrawal.',
+    activeRefNote:'Only active referrals are counted. A referral becomes active when they make their first deposit or withdrawal.',
     friendsList:'Friends',
     refMissions:'Ref Missions',
     availableBalance:'TON Available',
@@ -7159,7 +7174,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Отправить',
     postHistory:'История постов',
     noPostsYet:'Нет постов',
-    activeRefNote:'Считаются только активные рефералы (сделавшие вывод).',
+    activeRefNote:'Считаются только активные рефералы (сделавшие депозит или вывод).',
     availableBalance:'TON Доступно',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Мгновенно • Без конвертации',
@@ -7287,7 +7302,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Enviar',
     postHistory:'Historial',
     noPostsYet:'Sin posts',
-    activeRefNote:'Solo referidos activos cuentan (que hayan retirado).',
+    activeRefNote:'Solo referidos activos cuentan (que hayan depositado o retirado).',
     availableBalance:'TON Disponible',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantáneo • Sin conversión',
@@ -7415,7 +7430,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Soumettre',
     postHistory:'Historique posts',
     noPostsYet:'Aucun post',
-    activeRefNote:'Seuls les filleuls actifs comptent (ayant retiré).',
+    activeRefNote:'Seuls les filleuls actifs comptent (ayant déposé ou retiré).',
     availableBalance:'TON Disponible',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantané • Sans conversion',
@@ -7654,6 +7669,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'الجراج 🚗',
       miningGarageSheetTitle:'الجراج',
       miningLoadingBikes:'جارٍ تحميل الدراجات...',
+      miningClaim:'استلام للرصيد',
+      miningStart:'بدء التعدين',
+      miningInGarage:'في الجراج',
       manualDepositTitle:'إيداع يدوي',
       walletAddressLbl:'عنوان المحفظة',
       commentUserIdLbl:'التعليق (معرّف المستخدم)',
@@ -7681,8 +7699,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garage 🚗',
       miningGarageSheetTitle:'Garage',
       miningLoadingBikes:'Loading bikes...',
-      manualDepositTitle:'Manual Deposit',
-      walletAddressLbl:'Wallet Address',
+      miningClaim:'Claim to Balance',
+      miningStart:'Start Mining',
+      miningInGarage:'In Garage',
       commentUserIdLbl:'Comment (Your User ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
       enterAmountPh:'Enter amount',
@@ -7708,8 +7727,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Гараж 🚗',
       miningGarageSheetTitle:'Гараж',
       miningLoadingBikes:'Загрузка мотоциклов...',
-      manualDepositTitle:'Ручной депозит',
-      walletAddressLbl:'Адрес кошелька',
+      miningClaim:'На баланс',
+      miningStart:'В путь',
+      miningInGarage:'В гараже',
       commentUserIdLbl:'Комментарий (ID пользователя)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
       enterAmountPh:'Введите сумму',
@@ -7735,8 +7755,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garaje 🚗',
       miningGarageSheetTitle:'Garaje',
       miningLoadingBikes:'Cargando motos...',
-      manualDepositTitle:'Depósito manual',
-      walletAddressLbl:'Dirección de cartera',
+      miningClaim:'Reclamar al saldo',
+      miningStart:'Iniciar minería',
+      miningInGarage:'En Garaje',
       commentUserIdLbl:'Comentario (Tu ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
       enterAmountPh:'Ingresa cantidad',
@@ -7762,8 +7783,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garage 🚗',
       miningGarageSheetTitle:'Garage',
       miningLoadingBikes:'Chargement des motos...',
-      manualDepositTitle:'Dépôt manuel',
-      walletAddressLbl:'Adresse du portefeuille',
+      miningClaim:'Réclamer au solde',
+      miningStart:'Lancer le minage',
+      miningInGarage:'Dans le garage',
       commentUserIdLbl:'Commentaire (Votre ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
       enterAmountPh:'Entrez le montant',

@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3891,25 +3892,28 @@ async function doUpgradeStat(bikeLevel, stat){
         </div>
       </div>
     </div>
-    <!-- Row 3: Market + Ride Mode + Bike Skins -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-      <div onclick="openProfilePage('market')" style="cursor:pointer;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+    <!-- Row 3: Market + Ride Mode -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <!-- Market Card -->
+      <div onclick="openProfilePage('market')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778810384/photo_5_2026-05-15_04-55-39_jktkt3.jpg" style="width:100%;height:100%;object-fit:cover;display:block">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.7) 100%);display:flex;align-items:flex-end;padding:8px">
-          <span style="font-size:12px;font-weight:800;color:#fff">🛒 <span data-i18n="cardMarket">Market</span></span>
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">🛒 <span data-i18n="cardMarket">Market</span></span>
         </div>
       </div>
-      <div onclick="openProfilePage('ridemode')" style="cursor:pointer;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+      <!-- Ride Mode Card -->
+      <div onclick="openProfilePage('ridemode')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
         <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778810325/photo_7_2026-05-15_04-55-39_sixqri.jpg" style="width:100%;height:100%;object-fit:cover;display:block">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.7) 100%);display:flex;align-items:flex-end;padding:8px">
-          <span style="font-size:12px;font-weight:800;color:#fff">🏍 <span data-i18n="cardRideMode">Ride Mode</span></span>
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:10px">
+          <span style="font-size:14px;font-weight:800;color:#fff">🏁 <span data-i18n="cardRideMode">Ride Mode</span></span>
         </div>
       </div>
-      <div onclick="openProfilePage('bikeskins')" style="cursor:pointer;border-radius:16px;overflow:hidden;position:relative;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
-        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778810325/photo_7_2026-05-15_04-55-39_sixqri.jpg" style="width:100%;height:100%;object-fit:cover;display:block">
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.7) 100%);display:flex;align-items:flex-end;padding:8px">
-          <span style="font-size:12px;font-weight:800;color:#fff">🎨 <span data-i18n="cardBikeSkins">Bike Skins</span></span>
-        </div>
+    </div>
+    <!-- Row 4: Bike Skins (full width) -->
+    <div onclick="openProfilePage('bikeskins')" style="cursor:pointer;border-radius:18px;overflow:hidden;position:relative;height:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1)">
+      <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778810361/photo_6_2026-05-15_04-55-39_arinig.jpg" style="width:100%;height:100%;object-fit:cover;display:block">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.65) 100%);display:flex;align-items:flex-end;padding:12px">
+        <span style="font-size:16px;font-weight:800;color:#fff">🎨 <span data-i18n="cardBikeSkins">Bike Skins</span></span>
       </div>
     </div>
   </div>
@@ -3943,10 +3947,24 @@ async function doUpgradeStat(bikeLevel, stat){
   #profileSubPage[data-page="missions"] .psp-ballbl{font-size:10px}
   #profileSubPage[data-page="missions"] .psp-balval{font-size:17px}
   #profileSubPage[data-page="missions"] .psp-baltkn{font-size:10px}
+  #profileSubPage[data-page="market"]{--psp-accent:#00E5A8;--psp-accent-glow:rgba(0,229,168,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810384/photo_5_2026-05-15_04-55-39_jktkt3.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810384/photo_5_2026-05-15_04-55-39_jktkt3.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.86)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810384/photo_5_2026-05-15_04-55-39_jktkt3.jpg') center/cover fixed !important;}
+  #profileSubPage[data-page="market"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(0,20,15,1) 100%)}
+  #profileSubPage[data-page="ridemode"]{--psp-accent:#FF6B3D;--psp-accent-glow:rgba(255,107,61,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810325/photo_7_2026-05-15_04-55-39_sixqri.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810325/photo_7_2026-05-15_04-55-39_sixqri.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.86)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810325/photo_7_2026-05-15_04-55-39_sixqri.jpg') center/cover fixed !important;}
+  #profileSubPage[data-page="ridemode"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(30,10,0,1) 100%)}
+  #profileSubPage[data-page="bikeskins"]{--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810361/photo_6_2026-05-15_04-55-39_arinig.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810361/photo_6_2026-05-15_04-55-39_arinig.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.86)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810361/photo_6_2026-05-15_04-55-39_arinig.jpg') center/cover fixed !important;}
+  #profileSubPage[data-page="bikeskins"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(20,5,40,1) 100%)}
+  /* Coming-soon shared styling */
+  .cs-wrap{margin:0 12px;display:flex;flex-direction:column;gap:12px}
+  .cs-hero{background-image:linear-gradient(135deg,rgba(0,0,0,.62),rgba(0,0,0,.78)),var(--psp-cardbg);background-size:cover;background-position:center;border:1.5px solid var(--psp-accent);border-radius:18px;padding:18px 16px;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.55), 0 0 22px var(--psp-accent-glow)}
+  .cs-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.4px;color:#000;background:var(--psp-accent);padding:5px 12px;border-radius:999px;box-shadow:0 0 14px var(--psp-accent-glow);margin-bottom:10px}
+  .cs-title{font-size:22px;font-weight:900;color:var(--psp-accent);text-shadow:0 0 18px var(--psp-accent-glow);margin-bottom:8px}
+  .cs-sub{font-size:13px;line-height:1.7;color:rgba(255,255,255,.85);font-weight:600}
+  .cs-card{background-image:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.82)),var(--psp-cardbg);background-size:cover;background-position:center;border:1.5px solid var(--psp-accent);border-radius:16px;padding:14px 14px 12px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+  .cs-card-title{font-size:14px;font-weight:800;color:var(--psp-accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;text-shadow:0 0 10px var(--psp-accent-glow)}
+  .cs-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .cs-list li{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.88);font-weight:600;padding-inline-start:22px;position:relative}
+  .cs-list li::before{content:"";position:absolute;inset-inline-start:6px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--psp-accent);box-shadow:0 0 8px var(--psp-accent-glow)}
   #profileSubPage[data-page="partnership"]{--psp-accent:#FFB84D;--psp-accent-glow:rgba(255,184,77,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463515/e772f5bf-aba4-4af2-a929-c907811b0840_ycotlh.png'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463423/b29d7276-28a2-485b-90b8-a8f096606f6c_sylpyi.png'); background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.80)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463423/b29d7276-28a2-485b-90b8-a8f096606f6c_sylpyi.png') center/cover fixed !important;}
-  #profileSubPage[data-page="market"]{--psp-accent:#00E5A8;--psp-accent-glow:rgba(0,229,168,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg') center/cover fixed !important;}
-  #profileSubPage[data-page="ridemode"]{--psp-accent:#FF6B35;--psp-accent-glow:rgba(255,107,53,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810300/photo_8_2026-05-15_04-55-39_yeyhud.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810300/photo_8_2026-05-15_04-55-39_yeyhud.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810300/photo_8_2026-05-15_04-55-39_yeyhud.jpg') center/cover fixed !important;}
-  #profileSubPage[data-page="bikeskins"]{--psp-accent:#C77DFF;--psp-accent-glow:rgba(199,125,255,.55); --psp-hero:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg'); --psp-cardbg:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg'); background:linear-gradient(rgba(0,0,0,.78),rgba(0,0,0,.84)), url('https://res.cloudinary.com/dktppfipy/image/upload/v1778810239/photo_9_2026-05-15_04-55-39_jabhc2.jpg') center/cover fixed !important;}
   .psp-hero{position:relative;height:230px;overflow:hidden;background-image:var(--psp-hero);background-size:cover;background-position:center;}
   .psp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,var(--g1) 100%);pointer-events:none}
   #profileSubPage[data-page="referrals"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(30,5,50,1) 100%)}
@@ -4396,113 +4414,100 @@ async function doUpgradeStat(bikeLevel, stat){
     </div>
   </div>
 
-  <!-- ═══ REFERRALS PAGE CONTENT (shown inside overlay) ═══ -->
-  <!-- ═══ COMING-SOON PAGES (Market / Ride Mode / Bike Skins) ═══ -->
-  <style>
-    .cs-wrap{padding:18px 14px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:60vh}
-    .cs-card{width:100%;max-width:480px;background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1.5px solid var(--psp-accent);border-radius:20px;padding:22px 18px;box-shadow:0 10px 40px rgba(0,0,0,.65), 0 0 26px var(--psp-accent-glow)}
-    .cs-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--psp-accent);background:rgba(0,0,0,.45);border:1px solid var(--psp-accent);border-radius:999px;padding:5px 12px;margin-bottom:12px;text-transform:uppercase}
-    .cs-title{font-size:30px;font-weight:900;color:#fff;text-shadow:0 0 22px var(--psp-accent-glow);margin:6px 0 10px;letter-spacing:.5px}
-    .cs-sub{font-size:13px;color:rgba(255,255,255,.85);font-weight:600;line-height:1.7;margin-bottom:18px}
-    .cs-section{text-align:start;margin-top:14px}
-    .cs-section h4{font-size:13px;font-weight:800;color:var(--psp-accent);margin:0 0 8px;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
-    .cs-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px}
-    .cs-list li{position:relative;padding:8px 10px 8px 28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;font-size:12.5px;color:#fff;font-weight:600;line-height:1.5}
-    .cs-list li::before{content:"✦";position:absolute;left:10px;top:8px;color:var(--psp-accent);font-size:12px}
-    [dir="rtl"] .cs-list li{padding:8px 28px 8px 10px}
-    [dir="rtl"] .cs-list li::before{left:auto;right:10px}
-  </style>
-
+  <!-- ═══ MARKET PAGE CONTENT ═══ -->
   <div id="page-market-content" style="display:none">
     <div class="cs-wrap">
+      <div class="cs-hero">
+        <div class="cs-badge">COMING SOON 🚀</div>
+        <div class="cs-title">🛒 Market</div>
+        <div class="cs-sub">استعد لتجربة سوق الدراجات الجديد بالكامل! قريبًا هتقدر تشتري، تبيع، وتطور دراجتك بحرية كاملة داخل الـ Market.</div>
+      </div>
       <div class="cs-card">
-        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
-        <div class="cs-title" data-i18n="csMarketTitle">Market</div>
-        <div class="cs-sub" data-i18n="csMarketSub">Get ready for the all-new bike marketplace! Soon you'll be able to buy, sell and upgrade your bike freely inside the Market.</div>
-        <div class="cs-section">
-          <h4>✨ <span data-i18n="csFeatures">Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csMarketF1">Buy and sell bikes between players.</li>
-            <li data-i18n="csMarketF2">Upgrade your bike and improve its stats.</li>
-            <li data-i18n="csMarketF3">Change colors and add unique skins.</li>
-            <li data-i18n="csMarketF4">Trade bikes in the market at different prices.</li>
-            <li data-i18n="csMarketF5">Buy bikes from other users.</li>
-          </ul>
-        </div>
-        <div class="cs-section">
-          <h4>🔮 <span data-i18n="csFuture">Future Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csMarketG1">Limited Edition rare bikes drops.</li>
-            <li data-i18n="csMarketG2">Earn from rare bikes.</li>
-            <li data-i18n="csMarketG3">Special races and rewards.</li>
-            <li data-i18n="csMarketG4">In-game mining and earning system.</li>
-            <li data-i18n="csMarketG5">A complete digital economy for bikes and upgrades.</li>
-          </ul>
-        </div>
+        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <ul class="cs-list">
+          <li>شراء وبيع الدراجات بين اللاعبين.</li>
+          <li>تطوير الدراجة وترقية إمكانياتها.</li>
+          <li>تغيير الألوان وإضافة سكنات مميزة.</li>
+          <li>تداول الدراجات داخل السوق بأسعار مختلفة.</li>
+          <li>شراء دراجات من مستخدمين آخرين.</li>
+        </ul>
+      </div>
+      <div class="cs-card">
+        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <ul class="cs-list">
+          <li>إطلاق دراجات Limited Edition نادرة.</li>
+          <li>إمكانية الربح من الدراجات النادرة.</li>
+          <li>سباقات ومكافآت خاصة.</li>
+          <li>نظام تعدين وأرباح داخل اللعبة.</li>
+          <li>اقتصاد رقمي متكامل للدراجات والتطويرات.</li>
+        </ul>
       </div>
     </div>
   </div>
 
+  <!-- ═══ RIDE MODE PAGE CONTENT ═══ -->
   <div id="page-ridemode-content" style="display:none">
     <div class="cs-wrap">
+      <div class="cs-hero">
+        <div class="cs-badge">COMING SOON 🚀</div>
+        <div class="cs-title">🏁 Ride Mode</div>
+        <div class="cs-sub">حوّل دراجتك إلى مصدر دخل حقيقي داخل اللعبة! نفّذ الطلبات والمشاوير واربح مكافآت كلما كانت دراجتك أقوى وأفضل.</div>
+      </div>
       <div class="cs-card">
-        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
-        <div class="cs-title" data-i18n="csRideTitle">Ride Mode</div>
-        <div class="cs-sub" data-i18n="csRideSub">Turn your bike into a real source of income inside the game! Complete orders and deliveries — the better your bike, the bigger the rewards.</div>
-        <div class="cs-section">
-          <h4>✨ <span data-i18n="csFeatures">Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csRideF1">Complete varied orders and deliveries.</li>
-            <li data-i18n="csRideF2">Earn rewards and profits.</li>
-            <li data-i18n="csRideF3">Order system based on bike level.</li>
-            <li data-i18n="csRideF4">Better bikes unlock more opportunities.</li>
-          </ul>
-        </div>
-        <div class="cs-section">
-          <h4>🔮 <span data-i18n="csFuture">Future Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csRideG1">Daily missions and special challenges.</li>
-            <li data-i18n="csRideG2">Higher earnings for rare and upgraded bikes.</li>
-            <li data-i18n="csRideG3">Driver Ranking system.</li>
-            <li data-i18n="csRideG4">VIP zones and orders.</li>
-            <li data-i18n="csRideG5">Seasonal rewards and special events.</li>
-          </ul>
-        </div>
+        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <ul class="cs-list">
+          <li>تنفيذ طلبات ومشاوير متنوعة.</li>
+          <li>الحصول على أرباح ومكافآت.</li>
+          <li>نظام طلبات يعتمد على مستوى الدراجة.</li>
+          <li>كلما كانت دراجتك أفضل تحصل على فرص أكثر.</li>
+        </ul>
+      </div>
+      <div class="cs-card">
+        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <ul class="cs-list">
+          <li>مهام يومية وتحديات خاصة.</li>
+          <li>أرباح أعلى للدراجات النادرة والمطورة.</li>
+          <li>نظام Ranking للسائقين.</li>
+          <li>مناطق وطلبات VIP.</li>
+          <li>مكافآت موسمية وأحداث خاصة.</li>
+        </ul>
       </div>
     </div>
   </div>
 
+  <!-- ═══ BIKE SKINS PAGE CONTENT ═══ -->
   <div id="page-bikeskins-content" style="display:none">
     <div class="cs-wrap">
+      <div class="cs-hero">
+        <div class="cs-badge">COMING SOON 🚀</div>
+        <div class="cs-title">🎨 Bike Skins</div>
+        <div class="cs-sub">اصنع دراجتك الخاصة بالكامل وخصصها بطريقتك!</div>
+      </div>
       <div class="cs-card">
-        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
-        <div class="cs-title" data-i18n="csSkinsTitle">Bike Skins</div>
-        <div class="cs-sub" data-i18n="csSkinsSub">Build your own bike from scratch and customize it your way!</div>
-        <div class="cs-section">
-          <h4>✨ <span data-i18n="csFeatures">Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csSkinsF1">Change your bike's full color.</li>
-            <li data-i18n="csSkinsF2">Tune the engine and improve performance.</li>
-            <li data-i18n="csSkinsF3">Control wheel size and shape.</li>
-            <li data-i18n="csSkinsF4">Modify the handlebars and frame.</li>
-            <li data-i18n="csSkinsF5">Adjust the bike's height.</li>
-            <li data-i18n="csSkinsF6">Full customization of every detail.</li>
-          </ul>
-        </div>
-        <div class="cs-section">
-          <h4>🔮 <span data-i18n="csFuture">Future Features</span></h4>
-          <ul class="cs-list">
-            <li data-i18n="csSkinsG1">Rare skins and effects.</li>
-            <li data-i18n="csSkinsG2">Exclusive upgrade parts.</li>
-            <li data-i18n="csSkinsG3">Neon effects and special lighting.</li>
-            <li data-i18n="csSkinsG4">Custom engine sounds.</li>
-            <li data-i18n="csSkinsG5">Sell your designs in the Market.</li>
-          </ul>
-        </div>
+        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <ul class="cs-list">
+          <li>تغيير ألوان الدراجة بالكامل.</li>
+          <li>تعديل المحرك وتحسين الأداء.</li>
+          <li>التحكم في حجم وشكل العجلات.</li>
+          <li>تعديل الدركسيون والهيكل.</li>
+          <li>التحكم في ارتفاع الدراجة.</li>
+          <li>تخصيص كامل لكل تفاصيل الدراجة.</li>
+        </ul>
+      </div>
+      <div class="cs-card">
+        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <ul class="cs-list">
+          <li>سكنات وتأثيرات نادرة.</li>
+          <li>قطع تطوير حصرية.</li>
+          <li>تأثيرات نيون وإضاءات خاصة.</li>
+          <li>أصوات محركات مخصصة.</li>
+          <li>إمكانية بيع التصاميم داخل الـ Market.</li>
+        </ul>
       </div>
     </div>
   </div>
 
+  <!-- ═══ REFERRALS PAGE CONTENT (shown inside overlay) ═══ -->
   <div id="page-referrals-content" style="display:none">
     <style>
       /* ── REFERRALS PAGE REDESIGN ── */
@@ -6561,7 +6566,8 @@ function openProfilePage(page){
   const src = document.getElementById('page-'+page+'-content');
   if(!src) return;
   content.innerHTML = src.innerHTML;
-  title.innerHTML = tr(titleKeys[page]||'') || page;
+  const _csNames = {market:'🛒 Market', ridemode:'🏁 Ride Mode', bikeskins:'🎨 Bike Skins'};
+  title.innerHTML = tr(titleKeys[page]||'') || _csNames[page] || page;
   title.setAttribute('data-i18n', titleKeys[page]||'');
   overlay.setAttribute('data-page', page);
   // Sync topbar user info + balance
@@ -7045,7 +7051,7 @@ async function init(){
 /* ════ LANGUAGE SYSTEM ════ */
 const TRANSLATIONS = {
   ar:{
-    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',cardMarket:'السوق',cardRideMode:'وضع التوصيل',cardBikeSkins:'سكنات',
+    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',
     tabMissions:'المهام',
     tabPartnership:'الشراكة',
     tabReferrals:'الإحالات',
@@ -7173,7 +7179,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
   },
   en:{
-    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',cardMarket:'Market',cardRideMode:'Ride Mode',cardBikeSkins:'Bike Skins',
+    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
     labelCoins:'Coins',labelBamboo:'Bamboo',
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
@@ -7310,7 +7316,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
   },
   ru:{
-    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',cardMarket:'Маркет',cardRideMode:'Райд',cardBikeSkins:'Скины',
+    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
     tabMissions:'Задания',
     tabPartnership:'Партнёрство',
     tabReferrals:'Рефералы',
@@ -7438,7 +7444,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
   },
   es:{
-    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',cardMarket:'Mercado',cardRideMode:'Modo Ride',cardBikeSkins:'Skins',
+    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
     tabMissions:'Misiones',
     tabPartnership:'Asociación',
     tabReferrals:'Referidos',
@@ -7566,7 +7572,7 @@ const TRANSLATIONS = {
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
   },
   fr:{
-    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',cardMarket:'Marché',cardRideMode:'Mode Ride',cardBikeSkins:'Skins',
+    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
     tabMissions:'Missions',
     tabPartnership:'Partenariat',
     tabReferrals:'Parrainages',
@@ -7840,49 +7846,7 @@ const TRANSLATIONS = {
       pspTitleReferrals:'الإحالات',
       pspBalLblBalance:'الرصيد',
       pspBalLblAvailable:'الرصيد المتاح',
-      pspBalLblEarned:'إجمالي الأرباح',
-      pspTitleMarket:'<i class="fas fa-store" style="font-size:18px"></i> السوق',
-      pspTitleRideMode:'<i class="fas fa-motorcycle" style="font-size:18px"></i> وضع التوصيل',
-      pspTitleBikeSkins:'<i class="fas fa-paint-brush" style="font-size:18px"></i> سكنات الدراجات',
-      csComingSoon:'قريبًا 🚀',
-      csFeatures:'مميزات الصفحة',
-      csFuture:'مميزات مستقبلية',
-      csMarketTitle:'السوق',
-      csMarketSub:'استعد لتجربة سوق الدراجات الجديد بالكامل! قريبًا هتقدر تشتري وتبيع وتطور دراجتك بحرية كاملة داخل الـ Market.',
-      csMarketF1:'شراء وبيع الدراجات بين اللاعبين.',
-      csMarketF2:'تطوير الدراجة وترقية إمكانياتها.',
-      csMarketF3:'تغيير الألوان وإضافة سكنات مميزة.',
-      csMarketF4:'تداول الدراجات داخل السوق بأسعار مختلفة.',
-      csMarketF5:'شراء دراجات من مستخدمين آخرين.',
-      csMarketG1:'إطلاق دراجات Limited Edition نادرة.',
-      csMarketG2:'إمكانية الربح من الدراجات النادرة.',
-      csMarketG3:'سباقات ومكافآت خاصة.',
-      csMarketG4:'نظام تعدين وأرباح داخل اللعبة.',
-      csMarketG5:'اقتصاد رقمي متكامل للدراجات والتطويرات.',
-      csRideTitle:'وضع التوصيل',
-      csRideSub:'حوّل دراجتك إلى مصدر دخل حقيقي داخل اللعبة! نفّذ الطلبات والمشاوير واربح مكافآت كلما كانت دراجتك أقوى وأفضل.',
-      csRideF1:'تنفيذ طلبات ومشاوير متنوعة.',
-      csRideF2:'الحصول على أرباح ومكافآت.',
-      csRideF3:'نظام طلبات يعتمد على مستوى الدراجة.',
-      csRideF4:'كلما كانت دراجتك أفضل تحصل على فرص أكثر.',
-      csRideG1:'مهام يومية وتحديات خاصة.',
-      csRideG2:'أرباح أعلى للدراجات النادرة والمطورة.',
-      csRideG3:'نظام Ranking للسائقين.',
-      csRideG4:'مناطق وطلبات VIP.',
-      csRideG5:'مكافآت موسمية وأحداث خاصة.',
-      csSkinsTitle:'تخصيص الدراجة',
-      csSkinsSub:'اصنع دراجتك الخاصة بالكامل وخصصها بطريقتك!',
-      csSkinsF1:'تغيير ألوان الدراجة بالكامل.',
-      csSkinsF2:'تعديل المحرك وتحسين الأداء.',
-      csSkinsF3:'التحكم في حجم وشكل العجلات.',
-      csSkinsF4:'تعديل الدركسيون والهيكل.',
-      csSkinsF5:'التحكم في ارتفاع الدراجة.',
-      csSkinsF6:'تخصيص كامل لكل تفاصيل الدراجة.',
-      csSkinsG1:'سكنات وتأثيرات نادرة.',
-      csSkinsG2:'قطع تطوير حصرية.',
-      csSkinsG3:'تأثيرات نيون وإضاءات خاصة.',
-      csSkinsG4:'أصوات محركات مخصصة.',
-      csSkinsG5:'إمكانية بيع التصاميم داخل الـ Market.'
+      pspBalLblEarned:'إجمالي الأرباح'
     },
     en:{
       garageTitle:'Garage',
@@ -7910,49 +7874,7 @@ const TRANSLATIONS = {
       pspTitleReferrals:'Referrals',
       pspBalLblBalance:'Balance',
       pspBalLblAvailable:'Available Balance',
-      pspBalLblEarned:'Total Earned',
-      pspTitleMarket:'<i class="fas fa-store" style="font-size:18px"></i> Market',
-      pspTitleRideMode:'<i class="fas fa-motorcycle" style="font-size:18px"></i> Ride Mode',
-      pspTitleBikeSkins:'<i class="fas fa-paint-brush" style="font-size:18px"></i> Bike Skins',
-      csComingSoon:'COMING SOON 🚀',
-      csFeatures:'Page Features',
-      csFuture:'Future Features',
-      csMarketTitle:'Market',
-      csMarketSub:"Get ready for the all-new bike marketplace! Soon you'll be able to buy, sell and upgrade your bike freely inside the Market.",
-      csMarketF1:'Buy and sell bikes between players.',
-      csMarketF2:'Upgrade your bike and improve its capabilities.',
-      csMarketF3:'Change colors and add unique skins.',
-      csMarketF4:'Trade bikes inside the market at different prices.',
-      csMarketF5:'Buy bikes from other users.',
-      csMarketG1:'Limited Edition rare bike drops.',
-      csMarketG2:'Earn from rare bikes.',
-      csMarketG3:'Special races and rewards.',
-      csMarketG4:'In-game mining and earning system.',
-      csMarketG5:'A complete digital economy for bikes and upgrades.',
-      csRideTitle:'Ride Mode',
-      csRideSub:'Turn your bike into a real source of income inside the game! Complete orders and deliveries — the better your bike, the bigger the rewards.',
-      csRideF1:'Complete varied orders and deliveries.',
-      csRideF2:'Earn rewards and profits.',
-      csRideF3:'Order system based on your bike level.',
-      csRideF4:'A better bike unlocks more opportunities.',
-      csRideG1:'Daily missions and special challenges.',
-      csRideG2:'Higher earnings for rare and upgraded bikes.',
-      csRideG3:'Driver Ranking system.',
-      csRideG4:'VIP zones and orders.',
-      csRideG5:'Seasonal rewards and special events.',
-      csSkinsTitle:'Bike Skins',
-      csSkinsSub:'Build your own bike from scratch and customize it your way!',
-      csSkinsF1:"Change your bike's full color.",
-      csSkinsF2:'Tune the engine and improve performance.',
-      csSkinsF3:'Control wheel size and shape.',
-      csSkinsF4:'Modify the handlebars and frame.',
-      csSkinsF5:"Adjust the bike's height.",
-      csSkinsF6:'Full customization of every detail.',
-      csSkinsG1:'Rare skins and effects.',
-      csSkinsG2:'Exclusive upgrade parts.',
-      csSkinsG3:'Neon effects and special lighting.',
-      csSkinsG4:'Custom engine sounds.',
-      csSkinsG5:'Sell your designs in the Market.'
+      pspBalLblEarned:'Total Earned'
     },
     ru:{
       garageTitle:'Гараж',
@@ -7980,49 +7902,7 @@ const TRANSLATIONS = {
       pspTitleReferrals:'Рефералы',
       pspBalLblBalance:'Баланс',
       pspBalLblAvailable:'Доступный баланс',
-      pspBalLblEarned:'Всего заработано',
-      pspTitleMarket:'<i class="fas fa-store" style="font-size:18px"></i> Маркет',
-      pspTitleRideMode:'<i class="fas fa-motorcycle" style="font-size:18px"></i> Режим Райд',
-      pspTitleBikeSkins:'<i class="fas fa-paint-brush" style="font-size:18px"></i> Скины мотоциклов',
-      csComingSoon:'СКОРО 🚀',
-      csFeatures:'Особенности страницы',
-      csFuture:'Будущие возможности',
-      csMarketTitle:'Маркет',
-      csMarketSub:'Готовьтесь к совершенно новому маркету мотоциклов! Скоро вы сможете покупать, продавать и улучшать свой байк прямо в Маркете.',
-      csMarketF1:'Покупка и продажа байков между игроками.',
-      csMarketF2:'Улучшение байка и его характеристик.',
-      csMarketF3:'Смена цветов и добавление уникальных скинов.',
-      csMarketF4:'Торговля байками по разным ценам.',
-      csMarketF5:'Покупка байков у других пользователей.',
-      csMarketG1:'Редкие байки Limited Edition.',
-      csMarketG2:'Заработок на редких байках.',
-      csMarketG3:'Особые гонки и награды.',
-      csMarketG4:'Игровой майнинг и заработок.',
-      csMarketG5:'Полноценная цифровая экономика байков и апгрейдов.',
-      csRideTitle:'Режим Райд',
-      csRideSub:'Превратите свой байк в реальный источник дохода в игре! Выполняйте заказы и поездки — чем лучше байк, тем выше награды.',
-      csRideF1:'Выполнение разных заказов и поездок.',
-      csRideF2:'Получение наград и прибыли.',
-      csRideF3:'Система заказов в зависимости от уровня байка.',
-      csRideF4:'Лучший байк — больше возможностей.',
-      csRideG1:'Ежедневные задания и особые испытания.',
-      csRideG2:'Повышенный доход для редких и прокачанных байков.',
-      csRideG3:'Система рейтинга водителей.',
-      csRideG4:'VIP-зоны и заказы.',
-      csRideG5:'Сезонные награды и особые события.',
-      csSkinsTitle:'Скины мотоциклов',
-      csSkinsSub:'Создайте свой собственный байк с нуля и кастомизируйте его на свой вкус!',
-      csSkinsF1:'Полная смена цвета байка.',
-      csSkinsF2:'Настройка двигателя и улучшение производительности.',
-      csSkinsF3:'Управление размером и формой колёс.',
-      csSkinsF4:'Изменение руля и рамы.',
-      csSkinsF5:'Регулировка высоты байка.',
-      csSkinsF6:'Полная кастомизация каждой детали.',
-      csSkinsG1:'Редкие скины и эффекты.',
-      csSkinsG2:'Эксклюзивные детали для апгрейда.',
-      csSkinsG3:'Неоновые эффекты и подсветка.',
-      csSkinsG4:'Кастомные звуки двигателя.',
-      csSkinsG5:'Продажа дизайнов в Маркете.'
+      pspBalLblEarned:'Всего заработано'
     },
     es:{
       garageTitle:'Garaje',
@@ -8050,49 +7930,7 @@ const TRANSLATIONS = {
       pspTitleReferrals:'Referidos',
       pspBalLblBalance:'Saldo',
       pspBalLblAvailable:'Saldo disponible',
-      pspBalLblEarned:'Total ganado',
-      pspTitleMarket:'<i class="fas fa-store" style="font-size:18px"></i> Mercado',
-      pspTitleRideMode:'<i class="fas fa-motorcycle" style="font-size:18px"></i> Modo Ride',
-      pspTitleBikeSkins:'<i class="fas fa-paint-brush" style="font-size:18px"></i> Skins de Moto',
-      csComingSoon:'PRÓXIMAMENTE 🚀',
-      csFeatures:'Características de la página',
-      csFuture:'Funciones futuras',
-      csMarketTitle:'Mercado',
-      csMarketSub:'¡Prepárate para el nuevo mercado de motos! Pronto podrás comprar, vender y mejorar tu moto libremente dentro del Mercado.',
-      csMarketF1:'Compra y venta de motos entre jugadores.',
-      csMarketF2:'Mejora tu moto y sus capacidades.',
-      csMarketF3:'Cambia colores y añade skins únicas.',
-      csMarketF4:'Comercia motos en el mercado a distintos precios.',
-      csMarketF5:'Compra motos a otros usuarios.',
-      csMarketG1:'Drops de motos raras Limited Edition.',
-      csMarketG2:'Gana con motos raras.',
-      csMarketG3:'Carreras y recompensas especiales.',
-      csMarketG4:'Sistema de minería y ganancias en el juego.',
-      csMarketG5:'Una economía digital completa de motos y mejoras.',
-      csRideTitle:'Modo Ride',
-      csRideSub:'¡Convierte tu moto en una fuente real de ingresos dentro del juego! Completa pedidos y viajes — mejor moto, mejores recompensas.',
-      csRideF1:'Completa pedidos y viajes variados.',
-      csRideF2:'Gana recompensas y beneficios.',
-      csRideF3:'Sistema de pedidos según el nivel de tu moto.',
-      csRideF4:'Una mejor moto desbloquea más oportunidades.',
-      csRideG1:'Misiones diarias y desafíos especiales.',
-      csRideG2:'Mayores ganancias para motos raras y mejoradas.',
-      csRideG3:'Sistema de Ranking de conductores.',
-      csRideG4:'Zonas y pedidos VIP.',
-      csRideG5:'Recompensas estacionales y eventos especiales.',
-      csSkinsTitle:'Skins de Moto',
-      csSkinsSub:'¡Construye tu propia moto desde cero y personalízala a tu manera!',
-      csSkinsF1:'Cambia el color completo de tu moto.',
-      csSkinsF2:'Mejora el motor y el rendimiento.',
-      csSkinsF3:'Controla el tamaño y la forma de las ruedas.',
-      csSkinsF4:'Modifica el manillar y el chasis.',
-      csSkinsF5:'Ajusta la altura de la moto.',
-      csSkinsF6:'Personalización total de cada detalle.',
-      csSkinsG1:'Skins y efectos raros.',
-      csSkinsG2:'Piezas de mejora exclusivas.',
-      csSkinsG3:'Efectos neón y luces especiales.',
-      csSkinsG4:'Sonidos de motor personalizados.',
-      csSkinsG5:'Vende tus diseños en el Mercado.'
+      pspBalLblEarned:'Total ganado'
     },
     fr:{
       garageTitle:'Garage',
@@ -8120,49 +7958,7 @@ const TRANSLATIONS = {
       pspTitleReferrals:'Parrainages',
       pspBalLblBalance:'Solde',
       pspBalLblAvailable:'Solde disponible',
-      pspBalLblEarned:'Total gagné',
-      pspTitleMarket:'<i class="fas fa-store" style="font-size:18px"></i> Marché',
-      pspTitleRideMode:'<i class="fas fa-motorcycle" style="font-size:18px"></i> Mode Ride',
-      pspTitleBikeSkins:'<i class="fas fa-paint-brush" style="font-size:18px"></i> Skins de Moto',
-      csComingSoon:'BIENTÔT 🚀',
-      csFeatures:'Fonctionnalités',
-      csFuture:'Fonctionnalités futures',
-      csMarketTitle:'Marché',
-      csMarketSub:'Préparez-vous pour le tout nouveau marché des motos ! Bientôt, vous pourrez acheter, vendre et améliorer votre moto librement dans le Marché.',
-      csMarketF1:'Achat et vente de motos entre joueurs.',
-      csMarketF2:'Améliorez votre moto et ses capacités.',
-      csMarketF3:'Changez les couleurs et ajoutez des skins uniques.',
-      csMarketF4:'Échangez des motos sur le marché à différents prix.',
-      csMarketF5:'Achetez des motos à d\'autres utilisateurs.',
-      csMarketG1:'Drops de motos rares Limited Edition.',
-      csMarketG2:'Gagnez avec les motos rares.',
-      csMarketG3:'Courses et récompenses spéciales.',
-      csMarketG4:'Système de minage et de gains intégré.',
-      csMarketG5:'Une économie numérique complète pour motos et améliorations.',
-      csRideTitle:'Mode Ride',
-      csRideSub:'Transformez votre moto en véritable source de revenus dans le jeu ! Effectuez des courses et livraisons — meilleure est votre moto, meilleures sont les récompenses.',
-      csRideF1:'Effectuez des commandes et courses variées.',
-      csRideF2:'Gagnez récompenses et bénéfices.',
-      csRideF3:'Système de commandes basé sur le niveau de la moto.',
-      csRideF4:'Une meilleure moto débloque plus d\'opportunités.',
-      csRideG1:'Missions quotidiennes et défis spéciaux.',
-      csRideG2:'Gains plus élevés pour les motos rares et améliorées.',
-      csRideG3:'Système de Ranking des pilotes.',
-      csRideG4:'Zones et commandes VIP.',
-      csRideG5:'Récompenses saisonnières et événements spéciaux.',
-      csSkinsTitle:'Skins de Moto',
-      csSkinsSub:'Construisez votre propre moto et personnalisez-la à votre manière !',
-      csSkinsF1:'Changez la couleur complète de votre moto.',
-      csSkinsF2:'Réglez le moteur et améliorez les performances.',
-      csSkinsF3:'Contrôlez la taille et la forme des roues.',
-      csSkinsF4:'Modifiez le guidon et le cadre.',
-      csSkinsF5:'Ajustez la hauteur de la moto.',
-      csSkinsF6:'Personnalisation totale de chaque détail.',
-      csSkinsG1:'Skins et effets rares.',
-      csSkinsG2:'Pièces d\'amélioration exclusives.',
-      csSkinsG3:'Effets néon et éclairages spéciaux.',
-      csSkinsG4:'Sons de moteur personnalisés.',
-      csSkinsG5:'Vendez vos designs sur le Marché.'
+      pspBalLblEarned:'Total gagné'
     }
   };
   Object.keys(ext2).forEach(k=>{

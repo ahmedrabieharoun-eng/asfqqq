@@ -6268,16 +6268,23 @@ function updWdPrev(){
   document.getElementById('wdTonVal').textContent=(a*0.00001).toFixed(4);
 }
 function goToTasksPartner(){
-  // Navigate to the Finance section first (where profile lives)
+  // Close any open profile sub-page first
+  const overlay = document.getElementById('profileSubPage');
+  if(overlay) overlay.style.display = 'none';
+
+  // Activate Finance section in nav
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  const fn=document.querySelector('.ni[data-s="sectionFinance"]');
+  const fn = document.querySelector('.ni[data-s="sectionFinance"]');
   if(fn) fn.classList.add('active');
-  const fs=document.getElementById('sectionFinance');
+  const fs = document.getElementById('sectionFinance');
   if(fs) fs.classList.add('active');
-  hideFab();
-  // Open the missions sub-page inside profile
-  if(typeof openProfilePage==='function') openProfilePage('missions');
+  if(typeof hideFab==='function') hideFab();
+
+  // Small delay so Finance section renders, then open missions overlay
+  setTimeout(function(){
+    if(typeof openProfilePage==='function') openProfilePage('missions');
+  }, 80);
 }
 
 function updateWdFeePreview(){

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1301,11 +1302,7 @@ async function buyBike(lv){
     S.user.ownedBikes  = res.ownedBikes;
     if(res.totalBikesBought!==undefined) S.user.totalBikesBought = res.totalBikesBought;
     syncTopbar();
-    renderBikes();
-    renderGarage();
-    if(typeof renderMining==='function') renderMining();
-    if(typeof window._raceInit==='function') window._raceInit();
-    if(typeof syncMineTopbar==='function') syncMineTopbar();
+    refreshBikeViews();
     showNotif(`✅ 🏍️ ${bike.name} куплен!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Purchase failed'}`,'e');
@@ -1313,6 +1310,17 @@ async function buyBike(lv){
     _buyBikeInFlight = false;
   }
 }
+
+// Refresh every bike-related view so all pages reflect latest user state
+// (call after buy/upgrade/mining so users don't need to reload).
+function refreshBikeViews(){
+  try{ if(typeof renderBikes==='function') renderBikes(); }catch(e){}
+  try{ if(typeof renderGarage==='function') renderGarage(); }catch(e){}
+  try{ if(typeof renderMiningPage==='function') renderMiningPage(); }catch(e){}
+  try{ if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive(); }catch(e){}
+  try{ if(typeof syncTopbar==='function') syncTopbar(); }catch(e){}
+}
+window.refreshBikeViews = refreshBikeViews;
 
 function syncTopbar(){
   // tbCoins element is inside TON topbar section => show TON balance
@@ -1645,11 +1653,8 @@ async function doUpgradeStat(bikeLevel, stat){
     const res = await api('upgradeStats',{bikeLevel,stat});
     S.user.tonBalance = res.tonBalance;
     S.user.bikeUpgrades = res.bikeUpgrades;
-    syncTopbar();
     _garageSelectedLv = bikeLevel;
-    renderGarage();
-    if(typeof renderMining==='function') renderMining();
-    if(typeof window._raceInit==='function') window._raceInit();
+    refreshBikeViews();
     showNotif(`✅ ${STAT_LABELS[stat]} улучшена! +${UPGRADE_INC[stat]}`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Failed'}`,'e');
@@ -4711,7 +4716,7 @@ async function doUpgradeStat(bikeLevel, stat){
             <div class="ref2-li-name">${esc(r.name||'Friend')}</div>
             <div class="ref2-li-date">${esc(r.date||'Joined recently')}</div>
           </div>
-          <div class="ref2-li-earn">+${fmt(r.earned||0)} ${TON_ICON}</div>
+          <div class="ref2-li-earn">+${(parseFloat(r.earned||0)).toFixed(4).replace(/\.?0+$/,'')||'0'} ${TON_ICON}</div>
         </div>`).join('');
     }
 
@@ -5757,10 +5762,8 @@ async function startBikeMining(lv){
     const res=await api('startBikeMining',{bikeLevel:lv});
     S.user.bikeMining=res.bikeMining||S.user.bikeMining||{};
     if(res.tonBalance!==undefined) S.user.tonBalance=res.tonBalance;
-    syncTopbar();
-    renderMiningPage();
-    if(typeof renderRaceSelector==='function') renderRaceSelector();
-    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+    if(res.totalMiningRuns!==undefined) S.user.totalMiningRuns=res.totalMiningRuns;
+    refreshBikeViews();
     showNotif('✅ Mining started for 24 hours','s');
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
   finally{_miningInFlight=false;}
@@ -5772,9 +5775,7 @@ async function claimBikeMiningRewards(){
     const res=await api('claimBikeMining',{});
     S.user.tonBalance=res.tonBalance;
     S.user.bikeMining=res.bikeMining||{};
-    syncTopbar();
-    renderMiningPage();
-    if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
+    refreshBikeViews();
     const added=parseFloat(res.tonAdded||0);
     showNotif(added>0?'✅ +'+added.toFixed(3)+' TON added to balance':'⏳ No completed mining yet',added>0?'s':'w');
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
@@ -6663,12 +6664,10 @@ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if
 
 /* ════ HELPERS ════ */
 function fmt(n){
-  n=parseFloat(n)||0;
+  n=Math.floor(n||0);
   if(n>=1000000) return(n/1000000).toFixed(1)+'M';
   if(n>=1000)    return(n/1000).toFixed(1)+'K';
-  // Show up to 3 decimal places, removing trailing zeros
-  if(n===0) return '0';
-  return parseFloat(n.toFixed(3)).toString();
+  return n.toString();
 }
 let _nt;
 function showNotif(msg,type='i'){

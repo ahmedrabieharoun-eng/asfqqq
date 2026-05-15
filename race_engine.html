@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -875,9 +876,9 @@ gltfLoader.setDRACOLoader(dracoLoader);
 // PLAYER bike (right lane in this engine) is car2 → maps to "p2" in parent.
 // OPPONENT bike (left lane) is car1 → maps to "p1".
 const _raceParams = new URLSearchParams(window.location.search);
-function _clampLv(v){ const n=parseInt(v,10); return (n>=1&&n<=7)?n:1; }
-const PLAYER_LV = _clampLv(_raceParams.get('player')||'1');
-const AI_LV     = _clampLv(_raceParams.get('ai')||'1');
+function _clampLv(v){ const n=parseInt(v,10); return (n>=0&&n<=7)?n:0; }
+const PLAYER_LV = _clampLv(_raceParams.get('player') ?? '0');
+const AI_LV     = _clampLv(_raceParams.get('ai') ?? '0');
 // FORCED_WINNER: 'p1' (left/opponent) or 'p2' (right/you). Server-decided.
 const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
                     : (_raceParams.get('winner')==='p2') ? 'p2'

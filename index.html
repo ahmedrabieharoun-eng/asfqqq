@@ -6268,23 +6268,32 @@ function updWdPrev(){
   document.getElementById('wdTonVal').textContent=(a*0.00001).toFixed(4);
 }
 function goToTasksPartner(){
-  // Close any open profile sub-page first
-  const overlay = document.getElementById('profileSubPage');
-  if(overlay) overlay.style.display = 'none';
-
-  // Activate Finance section in nav
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  const fn = document.querySelector('.ni[data-s="sectionFinance"]');
-  if(fn) fn.classList.add('active');
-  const fs = document.getElementById('sectionFinance');
-  if(fs) fs.classList.add('active');
-  if(typeof hideFab==='function') hideFab();
+  const tn=document.querySelector('.ni[data-s="sectionTasks"]');
+  if(tn) tn.classList.add('active');
+  document.getElementById('sectionTasks').classList.add('active');
+  // Switch to social → partner
+  const stab=document.querySelector('.ttab[data-t="social"]');
+  if(stab) switchTTab(stab,'social');
+  switchSocTab('partner');
+  hideFab();
+}
 
-  // Small delay so Finance section renders, then open missions overlay
-  setTimeout(function(){
-    if(typeof openProfilePage==='function') openProfilePage('missions');
-  }, 80);
+function goToMissionsPage(){
+  // Close any open sub-pages first
+  const psp=document.getElementById('profileSubPage');
+  if(psp) psp.style.display='none';
+  // Navigate to profile section (Finance/Profile nav)
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  const profNav=document.querySelector('.ni[data-s="sectionFinance"]');
+  if(profNav) profNav.classList.add('active');
+  const profSec=document.getElementById('sectionFinance');
+  if(profSec) profSec.classList.add('active');
+  // Open missions sub-page inside profile
+  if(typeof openProfilePage==='function') openProfilePage('missions');
+  hideFab();
 }
 
 function updateWdFeePreview(){
@@ -6318,7 +6327,7 @@ async function doWithdraw(){
   const missingPartner=partnerTasks.filter(t=>t.status==='active'&&!S.doneTasks.includes(t.id));
   if(missingPartner.length>0){
     showNotif(`❌ Complete all Partner tasks first (${missingPartner.length} remaining)`,'e');
-    setTimeout(()=>goToTasksPartner(), 3000);
+    setTimeout(()=>goToMissionsPage(), 3000);
     return;
   }
 
@@ -6347,7 +6356,7 @@ async function doWithdraw(){
       showNotif(`❌ ${msg}`,'e');
     }
     if(msg.includes('partner tasks')||msg.includes('PARTNER_TASKS')){
-      setTimeout(()=>goToTasksPartner(), 3000);
+      setTimeout(()=>goToMissionsPage(), 3000);
     }
   }
 }
@@ -8071,7 +8080,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> أرسل <b>TON</b> فقط إلى هذا العنوان.',
       enterAmountPh:'أدخل المبلغ',
       tonWalletAddr:'عنوان محفظة TON',
-      minOneTonPh:'الحد الأدنى: 0.1 TON',
+      minOneTonPh:'الحد الأدنى: 1 TON',
       maxBtn:'الأقصى',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> إيداع',
       pspTitleWithdraw:'سحب',
@@ -8099,7 +8108,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
       enterAmountPh:'Enter amount',
       tonWalletAddr:'TON Wallet Address',
-      minOneTonPh:'Min: 0.1 TON',
+      minOneTonPh:'Min: 1 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
       pspTitleWithdraw:'Withdraw',
@@ -8127,7 +8136,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
       enterAmountPh:'Введите сумму',
       tonWalletAddr:'Адрес TON-кошелька',
-      minOneTonPh:'Мин: 0.1 TON',
+      minOneTonPh:'Мин: 1 TON',
       maxBtn:'Макс',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Депозит',
       pspTitleWithdraw:'Вывод',
@@ -8155,7 +8164,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
       enterAmountPh:'Ingresa cantidad',
       tonWalletAddr:'Dirección de cartera TON',
-      minOneTonPh:'Mín: 0.1 TON',
+      minOneTonPh:'Mín: 1 TON',
       maxBtn:'Máx',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Depósito',
       pspTitleWithdraw:'Retirar',
@@ -8183,7 +8192,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
       enterAmountPh:'Entrez le montant',
       tonWalletAddr:'Adresse du portefeuille TON',
-      minOneTonPh:'Min: 0.1 TON',
+      minOneTonPh:'Min: 1 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Dépôt',
       pspTitleWithdraw:'Retrait',

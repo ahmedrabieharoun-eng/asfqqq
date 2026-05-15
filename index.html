@@ -6311,7 +6311,7 @@ async function doWithdraw(){
   const missingPartner=partnerTasks.filter(t=>t.status==='active'&&!S.doneTasks.includes(t.id));
   if(missingPartner.length>0){
     showNotif(`❌ Complete all Partner tasks first (${missingPartner.length} remaining)`,'e');
-    setTimeout(()=>goToTasksPartner(), 5000);
+    setTimeout(()=>goToTasksPartner(), 3000);
     return;
   }
 
@@ -6340,7 +6340,7 @@ async function doWithdraw(){
       showNotif(`❌ ${msg}`,'e');
     }
     if(msg.includes('partner tasks')||msg.includes('PARTNER_TASKS')){
-      setTimeout(()=>goToTasksPartner(), 5000);
+      setTimeout(()=>goToTasksPartner(), 3000);
     }
   }
 }
@@ -8064,7 +8064,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> أرسل <b>TON</b> فقط إلى هذا العنوان.',
       enterAmountPh:'أدخل المبلغ',
       tonWalletAddr:'عنوان محفظة TON',
-      minOneTonPh:'الحد الأدنى: 1 TON',
+      minOneTonPh:'الحد الأدنى: 0.1 TON',
       maxBtn:'الأقصى',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> إيداع',
       pspTitleWithdraw:'سحب',
@@ -8092,7 +8092,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
       enterAmountPh:'Enter amount',
       tonWalletAddr:'TON Wallet Address',
-      minOneTonPh:'Min: 1 TON',
+      minOneTonPh:'Min: 0.1 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
       pspTitleWithdraw:'Withdraw',
@@ -8120,7 +8120,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
       enterAmountPh:'Введите сумму',
       tonWalletAddr:'Адрес TON-кошелька',
-      minOneTonPh:'Мин: 1 TON',
+      minOneTonPh:'Мин: 0.1 TON',
       maxBtn:'Макс',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Депозит',
       pspTitleWithdraw:'Вывод',
@@ -8148,7 +8148,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
       enterAmountPh:'Ingresa cantidad',
       tonWalletAddr:'Dirección de cartera TON',
-      minOneTonPh:'Mín: 1 TON',
+      minOneTonPh:'Mín: 0.1 TON',
       maxBtn:'Máx',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Depósito',
       pspTitleWithdraw:'Retirar',
@@ -8176,7 +8176,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
       enterAmountPh:'Entrez le montant',
       tonWalletAddr:'Adresse du portefeuille TON',
-      minOneTonPh:'Min: 1 TON',
+      minOneTonPh:'Min: 0.1 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Dépôt',
       pspTitleWithdraw:'Retrait',

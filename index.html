@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4338,8 +4336,13 @@ async function doUpgradeStat(bikeLevel, stat){
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
-          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="1">
-          <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||''">Max</button>
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="0.1" oninput="updateWdFeePreview()">
+          <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||'';updateWdFeePreview()">Max</button>
+        </div>
+        <!-- Fee preview box -->
+        <div id="wdFeePreview" style="display:none;margin:8px 0;padding:10px 12px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:10px;font-size:12px;font-weight:600;color:#FFD740;line-height:1.8">
+          <div>💸 رسوم السحب (10%): <span id="wdFeeAmt" style="font-weight:800;color:#ff8a80">-0.00 TON</span></div>
+          <div>✅ المبلغ الصافي بعد الخصم: <span id="wdNetAmt" style="font-weight:800;color:#00F27A">0.00 TON</span></div>
         </div>
         <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
           <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0">
@@ -4361,8 +4364,11 @@ async function doUpgradeStat(bikeLevel, stat){
   <div id="page-missions-content" style="display:none">
     <div style="margin:0 12px">
       <div style="font-size:15px;font-weight:800;color:var(--bamboo);margin-bottom:12px;display:flex;align-items:center;gap:6px">🎯 <span data-i18n="missionsTitle">Missions</span></div>
+      <!-- Partner Tasks (Required - shown first) -->
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🤝 <span data-i18n="partnerTasksTitle">Partner</span></div>
+      <div id="missionPartnerList"></div>
       <!-- Bike Purchase Missions -->
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏍️ <span data-i18n="bikeMissions">Bike Missions</span></div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🏍️ <span data-i18n="bikeMissions">Bike Missions</span></div>
       <div id="bikeMissionsList"></div>
       <!-- Race Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🏁 <span data-i18n="raceMissions">Race Missions</span></div>
@@ -4370,9 +4376,6 @@ async function doUpgradeStat(bikeLevel, stat){
       <!-- Mining Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">⛏️ <span data-i18n="mineMissions">Mining Missions</span></div>
       <div id="mineMissionsList"></div>
-      <!-- Partner Tasks -->
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🤝 <span data-i18n="partnerTasksTitle">Partner</span></div>
-      <div id="missionPartnerList"></div>
     </div>
   </div>
 
@@ -4982,7 +4985,7 @@ function renderMissions(){
           <div style="width:100px;height:100px;flex-shrink:0;overflow:hidden;border-radius:14px;margin:8px;box-shadow:0 4px 16px rgba(0,0,0,.6)">${img}</div>
           <div style="flex:1;padding:10px 8px 10px 0;min-width:0">
             <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:4px">${name}</div>
-            <div style="font-size:11px;font-weight:700;color:var(--bamboo);display:flex;align-items:center;gap:4px">${BAM_IMG} ${fmt(t.bambooReward||100)} Bamboo</div>
+            <div style="font-size:11px;font-weight:700;color:#00D4FF;display:flex;align-items:center;gap:4px"><img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:14px;height:14px;border-radius:50%"> +0.02 TON</div>
             <div style="font-size:10px;color:rgba(255,255,255,.4);font-weight:600;margin-top:3px">📢 Required to withdraw</div>
           </div>
           <div style="flex-shrink:0;padding:10px 10px 10px 4px">${btnHtml}</div>
@@ -6277,6 +6280,23 @@ function goToTasksPartner(){
   hideFab();
 }
 
+function updateWdFeePreview(){
+  const amt=parseFloat(document.getElementById('wdAmtInput')?.value)||0;
+  const preview=document.getElementById('wdFeePreview');
+  const feeEl=document.getElementById('wdFeeAmt');
+  const netEl=document.getElementById('wdNetAmt');
+  if(!preview||!feeEl||!netEl) return;
+  if(amt>=0.1){
+    const fee=+(amt*0.1).toFixed(8);
+    const net=+(amt-fee).toFixed(8);
+    feeEl.textContent=`-${fee.toFixed(4)} TON`;
+    netEl.textContent=`${net.toFixed(4)} TON`;
+    preview.style.display='block';
+  } else {
+    preview.style.display='none';
+  }
+}
+
 async function doWithdraw(){
   if(!debounce('withdraw')) return;
   const addr=(document.getElementById('wdAddrInput')?.value||document.getElementById('wdAddr')?.value||'').trim();
@@ -6295,16 +6315,20 @@ async function doWithdraw(){
     return;
   }
 
+  const feeAmt=+(amt*0.10).toFixed(8);
+  const netAmt=+(amt-feeAmt).toFixed(8);
+
   try{
     // Get device fingerprint (hardware-based, survives VPN/IP change)
     const fp = await getOrComputeFp();
     const res=await api('withdraw',{address:addr,amount:amt});
     u.tonBalance=res.tonBalance;
-    S.wdHist.unshift({amt,address:addr,ts:Date.now(),status:'pending'});
+    S.wdHist.unshift({amt:netAmt,amtRequested:amt,fee:feeAmt,address:addr,ts:Date.now(),status:'pending'});
     if(document.getElementById('wdAddrInput')) document.getElementById('wdAddrInput').value='';
     if(document.getElementById('wdAmtInput')) document.getElementById('wdAmtInput').value='';
+    if(document.getElementById('wdFeePreview')) document.getElementById('wdFeePreview').style.display='none';
     syncTopbar(); syncFinanceHeader(); renderWdHistNew(); updateUI();
-    showNotif(`✅ Withdrawal requested: ${amt} TON`,'s');
+    showNotif(`✅ طلب سحب ${amt} TON — رسوم 10%: ${feeAmt} TON — ستستلم: ${netAmt} TON`,'s');
   }catch(e){
     const msg=e.message||'';
     const errCode=e.errorCode||'';
@@ -6468,6 +6492,8 @@ function renderWdHistNew(){
     const statusText={approved:'Approved',pending:'Pending',cancelled:'Cancelled'}[normStatus]||normStatus;
     const statusCls={approved:'approved',pending:'pending',cancelled:'cancelled'}[normStatus]||'pending';
     const amtTon=h.amt||h.amount||0;
+    const feeInfo=h.fee?`<div style="font-size:9px;color:rgba(255,100,100,.7);font-weight:600">رسوم: -${h.fee} TON</div>`:'';
+    const requestedInfo=h.amtRequested&&h.amtRequested!==h.amt?`<div style="font-size:9px;color:rgba(255,255,255,.35);font-weight:600">طُلب: ${h.amtRequested} TON</div>`:'';
     const ts=h.ts||h.d||null;
     const dateStr=ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})+' \u2022 '+new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'--';
     const fullAddr=h.address||h.addr||'--';
@@ -6482,6 +6508,7 @@ function renderWdHistNew(){
       </div>
       <div class="wd-new-hist-right">
         <div class="wd-new-hist-amt">${amtTon} TON</div>
+        ${requestedInfo}${feeInfo}
         <span class="stat-badge-new ${statusCls}">${statusIcon} ${statusText}</span>
       </div>
     </div>`;

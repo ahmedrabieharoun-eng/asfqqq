@@ -1303,6 +1303,9 @@ async function buyBike(lv){
     syncTopbar();
     renderBikes();
     renderGarage();
+    if(typeof renderMining==='function') renderMining();
+    if(typeof window._raceInit==='function') window._raceInit();
+    if(typeof syncMineTopbar==='function') syncMineTopbar();
     showNotif(`✅ 🏍️ ${bike.name} куплен!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Purchase failed'}`,'e');
@@ -1645,6 +1648,8 @@ async function doUpgradeStat(bikeLevel, stat){
     syncTopbar();
     _garageSelectedLv = bikeLevel;
     renderGarage();
+    if(typeof renderMining==='function') renderMining();
+    if(typeof window._raceInit==='function') window._raceInit();
     showNotif(`✅ ${STAT_LABELS[stat]} улучшена! +${UPGRADE_INC[stat]}`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Failed'}`,'e');
@@ -5751,7 +5756,10 @@ async function startBikeMining(lv){
   try{
     const res=await api('startBikeMining',{bikeLevel:lv});
     S.user.bikeMining=res.bikeMining||S.user.bikeMining||{};
+    if(res.tonBalance!==undefined) S.user.tonBalance=res.tonBalance;
+    syncTopbar();
     renderMiningPage();
+    if(typeof renderRaceSelector==='function') renderRaceSelector();
     if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive();
     showNotif('✅ Mining started for 24 hours','s');
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
@@ -6655,10 +6663,12 @@ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if
 
 /* ════ HELPERS ════ */
 function fmt(n){
-  n=Math.floor(n||0);
+  n=parseFloat(n)||0;
   if(n>=1000000) return(n/1000000).toFixed(1)+'M';
   if(n>=1000)    return(n/1000).toFixed(1)+'K';
-  return n.toString();
+  // Show up to 3 decimal places, removing trailing zeros
+  if(n===0) return '0';
+  return parseFloat(n.toFixed(3)).toString();
 }
 let _nt;
 function showNotif(msg,type='i'){

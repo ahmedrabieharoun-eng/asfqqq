@@ -146,6 +146,13 @@ const MSG={
     es:(winnerName,cost,prize)=>`❌ <b>¡Mala Suerte!</b>\n\n🏍️ <b>${winnerName}</b> te ganó esta vez.\n💔 Perdiste ${cost} TON de cuota de entrada.\n💪 ¡Vuelve a correr para ganar ${prize} TON!`,
     fr:(winnerName,cost,prize)=>`❌ <b>Pas de Chance!</b>\n\n🏍️ <b>${winnerName}</b> vous a battu cette fois.\n💔 Vous avez perdu ${cost} TON de frais d'entrée.\n💪 Recourez pour gagner ${prize} TON!`,
   },
+  bike_upgraded:{
+    ar:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>تم ترقية الدراجة!</b>\n\n🏍️ دراجة المستوى ${lv}\n📊 ${statName}: ${oldVal} ← ${newVal} (+${inc})\n💎 التكلفة: ${price} TON`,
+    en:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Bike Upgraded!</b>\n\n🏍️ Bike Level ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Cost: ${price} TON`,
+    ru:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Мотоцикл улучшен!</b>\n\n🏍️ Уровень ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Стоимость: ${price} TON`,
+    es:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>¡Moto Mejorada!</b>\n\n🏍️ Nivel ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Costo: ${price} TON`,
+    fr:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Moto Améliorée!</b>\n\n🏍️ Niveau ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Coût: ${price} TON`,
+  },
   wd_approved:{
     ar:(amt)=>`✅ تمت الموافقة على سحب ${amt} TON الخاص بك!`,
     en:(amt)=>`✅ Your withdrawal of ${amt} TON has been approved!`,
@@ -190,15 +197,17 @@ async function sendTgNotification(env,userId,message){
   try{
     if(!env.BOT_TOKEN){console.warn('sendTgNotification: BOT_TOKEN not set');return;}
     if(!userId){console.warn('sendTgNotification: userId is empty');return;}
-    const res=await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`,{
+    const p=fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({chat_id:String(userId),text:message,parse_mode:'HTML'}),
-    });
-    const json=await res.json().catch(()=>({}));
-    if(!res.ok||!json.ok){
-      console.error('sendTgNotification FAILED userId:',userId,'status:',res.status,'tg_error:',json.description||'unknown');
-    }
+    }).then(async res=>{
+      const json=await res.json().catch(()=>({}));
+      if(!res.ok||!json.ok){
+        console.error('sendTgNotification FAILED userId:',userId,'status:',res.status,'tg_error:',json.description||'unknown');
+      }
+    }).catch(e=>console.error('sendTgNotification:',e.message));
+    await p;
   }catch(e){console.error('sendTgNotification:',e.message);}
 }
 
@@ -277,7 +286,7 @@ function extractStartParam(initDataStr){
   return '';
 }
 
-async function registerReferral(env,uid,user,referrerId){
+async function registerReferral(env,uid,user,referrerId,ctx){
   try{
     const rr=await dbGet(env,`users/${referrerId}/referrals`);
     const refs=rr.data||{};
@@ -293,7 +302,7 @@ async function registerReferral(env,uid,user,referrerId){
         if(confirm.data&&confirm.data.ts===myTs){
           const refName=(user.firstName||'Someone').slice(0,32);
           const refLang=await getUserLang(env,referrerId);
-          sendTgNotification(env,referrerId,m('ref_joined',refLang,refName)).catch(()=>{});
+          if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{await sendTgNotification(env,referrerId,m('ref_joined',refLang,refName));})().catch(()=>{}));
         }
       }
     }
@@ -327,7 +336,7 @@ function makeUser(uid,tg={},ref=null){
 }
 
 // ── getState ─────────────────────────────────────────────────────
-async function hGetState(env,uid,tg,data={},_meta={}){
+async function hGetState(env,uid,tg,data={},_meta={},ctx=null){
   try{
     const rawRef=(
       data?._startParam||
@@ -341,7 +350,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
 
     if(!user){
       user=makeUser(uid,tg,ref);
-      if(user.referredBy)await registerReferral(env,uid,user,user.referredBy);
+      if(user.referredBy)await registerReferral(env,uid,user,user.referredBy,ctx);
       await dbSet(env,`users/${uid}`,user);
     }else{
       if(tg){
@@ -357,19 +366,27 @@ async function hGetState(env,uid,tg,data={},_meta={}){
         bikeMining:user.bikeMining,
       });
     }
-    const settled=await settleBikeMining(env,uid,user,_meta);
+    const settled=await settleBikeMining(env,uid,user,_meta,ctx);
     user=settled.user;
     const rr=await dbGet(env,`users/${uid}/referrals`);
     const refList=Object.values(rr.data||{});
     // Active referral = one who has made a withdrawal
     const referrals=await Promise.all(refList.map(async r=>{
       let hasWithdrawn=r.hasWithdrawn||false;
+      let hasDeposited=r.hasDeposited||false;
       if(!hasWithdrawn){
         const ud=await dbGet(env,`users/${r.userId}/hasWithdrawn`);
         hasWithdrawn=ud.data===true;
         if(hasWithdrawn)await dbUpdate(env,`users/${uid}/referrals/${r.userId}`,{hasWithdrawn:true}).catch(()=>{});
       }
-      return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasWithdrawn,hasDeposited:hasWithdrawn};
+      if(!hasDeposited){
+        const ud=await dbGet(env,`users/${r.userId}/hasDeposited`);
+        hasDeposited=ud.data===true;
+        if(hasDeposited)await dbUpdate(env,`users/${uid}/referrals/${r.userId}`,{hasDeposited:true}).catch(()=>{});
+      }
+      // Active = deposited OR withdrawn
+      const isActive = hasWithdrawn || hasDeposited;
+      return{userId:r.userId,name:`${r.firstName||''} ${r.lastName||''}`.trim()||'Friend',photo:r.photoUrl||null,date:r.joinedAt?new Date(r.joinedAt).toLocaleDateString():'',earned:r.earned||0,hasWithdrawn:isActive,hasDeposited:isActive};
     }));
     const wr=await dbGet(env,`users/${uid}/wdHistory`);
     const wdHistory=wr.data?Object.values(wr.data).sort((a,b)=>b.ts-a.ts).slice(0,10):[];
@@ -412,7 +429,7 @@ async function hGetState(env,uid,tg,data={},_meta={}){
 }
 
 // ── Buy Bike ─────────────────────────────────────────────────────
-async function hBuyBike(env,uid,data,_meta={}){
+async function hBuyBike(env,uid,data,_meta={},ctx=null){
   try{
     const lv=parseInt(data.lv)||0;
     const bike=BIKE_BASE_STATS[lv];
@@ -430,7 +447,7 @@ async function hBuyBike(env,uid,data,_meta={}){
     log(env,uid,'buy_bike',{bikeLevel:lv,price:priceTon,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
     const _bkNames={1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
     const _bkDaily=BIKE_DAILY_TON[lv]||0;
-    (async()=>{const _ul=await getUserLang(env,uid);sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(2))).catch(()=>{});})();
+    if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ul=await getUserLang(env,uid);await sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(2)));})().catch(()=>{}));
     if(user.referredBy&&user.referredBy!==uid){
       // Fix: use toFixed(8) to avoid Math.round zeroing small commissions
       const comm=parseFloat((priceTon*G.REF_BONUS_PCT/100).toFixed(8));
@@ -451,7 +468,7 @@ async function hBuyBike(env,uid,data,_meta={}){
             await dbSet(env,`users/${user.referredBy}/referrals/${uid}`,{userId:uid,firstName:user.firstName||'',lastName:user.lastName||'',username:user.username||'',photoUrl:user.photoUrl||'',joinedAt:Date.now(),earned:newEarned,hasWithdrawn:user.hasWithdrawn||false});
           }
           log(env,user.referredBy,'referral_commission',{from:uid,bikeLevel:lv,bikePriceTon:priceTon,comm,tonBalance_before:rr.data.tonBalance||0,tonBalance_after:newRefBal},_meta);
-          const _rl=await getUserLang(env,user.referredBy);await sendTgNotification(env,user.referredBy,m('ref_commission',_rl,user.firstName||'Friend',lv,comm,newRefBal.toFixed(4)));
+          if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _rl=await getUserLang(env,user.referredBy);await sendTgNotification(env,user.referredBy,m('ref_commission',_rl,user.firstName||'Friend',lv,comm,newRefBal.toFixed(4)));})().catch(()=>{}));
         }else{
           console.error('hBuyBike: referredBy user not found:',user.referredBy);
         }
@@ -462,7 +479,7 @@ async function hBuyBike(env,uid,data,_meta={}){
 }
 
 // ── Upgrade Bike Stats ──────────────────────────────────────────
-async function hUpgradeStats(env,uid,data,_meta={}){
+async function hUpgradeStats(env,uid,data,_meta={},ctx=null){
   try{
     const{bikeLevel,stat}=data;
     const lv=parseInt(bikeLevel)||0;
@@ -482,16 +499,30 @@ async function hUpgradeStats(env,uid,data,_meta={}){
     const maxUpgrades=Math.floor(maxAdd/inc);
     const curUpgrades=bikeUpgs[stat]||0;
     if(curUpgrades>=maxUpgrades)return{success:false,error:'Already at maximum level'};
+    const oldStatVal=bike[stat]+curUpgrades*inc;
+    const newStatVal=oldStatVal+inc;
     bikeUpgs[stat]=(curUpgrades+1);
     upgs[lv]=bikeUpgs;
     const newTon=(user.tonBalance||0)-upgPrice;
     await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeUpgrades:upgs});
     log(env,uid,'upgrade_stats',{bikeLevel:lv,stat,upgradeCount:bikeUpgs[stat],upgPrice,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
+    if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{
+      const _ul=await getUserLang(env,uid);
+      const STAT_NAMES={
+        ar:{speed:'السرعة',nitro:'النيترو',accel:'التسارع',maneuver:'المناورة'},
+        en:{speed:'Speed',nitro:'Nitro',accel:'Acceleration',maneuver:'Handling'},
+        ru:{speed:'Скорость',nitro:'Нитро',accel:'Ускорение',maneuver:'Управление'},
+        es:{speed:'Velocidad',nitro:'Nitro',accel:'Aceleración',maneuver:'Manejo'},
+        fr:{speed:'Vitesse',nitro:'Nitro',accel:'Accélération',maneuver:'Maniabilité'},
+      };
+      const statName=(STAT_NAMES[_ul]||STAT_NAMES.en)[stat]||stat;
+      await sendTgNotification(env,uid,m('bike_upgraded',_ul,lv,statName,oldStatVal,newStatVal,inc,upgPrice));
+    })().catch(()=>{}));
     return{success:true,data:{tonBalance:newTon,bikeUpgrades:upgs,newUpgradeCount:bikeUpgs[stat]}};
   }catch(e){return{success:false,error:e.message};}
 }
 
-async function settleBikeMining(env,uid,user,_meta={}){
+async function settleBikeMining(env,uid,user,_meta={},ctx=null){
   const mining=user.bikeMining||{};
   const now=Date.now();
   let tonAdded=0;
@@ -509,17 +540,17 @@ async function settleBikeMining(env,uid,user,_meta={}){
   const newTon=parseFloat(((user.tonBalance||0)+tonAdded).toFixed(8));
   await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeMining:mining});
   log(env,uid,'bike_mining_claim',{ton_reward:tonAdded,completed,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
-  (async()=>{const _ml=await getUserLang(env,uid);sendTgNotification(env,uid,m('mining_done',_ml,tonAdded.toFixed(3))).catch(()=>{});})();
+  if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ml=await getUserLang(env,uid);await sendTgNotification(env,uid,m('mining_done',_ml,tonAdded.toFixed(3)));})().catch(()=>{}));
   return{user:{...user,tonBalance:newTon,bikeMining:mining},bikeMining:mining,tonAdded,completed};
 }
 
-async function hStartBikeMining(env,uid,data,_meta={}){
+async function hStartBikeMining(env,uid,data,_meta={},ctx=null){
   try{
     const lv=parseInt(data.bikeLevel)||0;
     if(!BIKE_BASE_STATS[lv])return{success:false,error:'Unknown bike'};
     const r=await dbGet(env,`users/${uid}`);let user=r.data;
     if(!user)return{success:false,error:'User not found'};
-    const settled=await settleBikeMining(env,uid,user,_meta);
+    const settled=await settleBikeMining(env,uid,user,_meta,ctx);
     user=settled.user;
     const owned=(user.ownedBikes||[]).map(Number);
     if(!owned.includes(lv))return{success:false,error:'Bike not owned'};
@@ -537,11 +568,11 @@ async function hStartBikeMining(env,uid,data,_meta={}){
   }catch(e){return{success:false,error:e.message};}
 }
 
-async function hClaimBikeMining(env,uid,_data,_meta={}){
+async function hClaimBikeMining(env,uid,_data,_meta={},ctx=null){
   try{
     const r=await dbGet(env,`users/${uid}`);const user=r.data;
     if(!user)return{success:false,error:'User not found'};
-    const settled=await settleBikeMining(env,uid,user,_meta);
+    const settled=await settleBikeMining(env,uid,user,_meta,ctx);
     return{success:true,data:{bikeMining:settled.bikeMining,tonAdded:settled.tonAdded,completed:settled.completed,tonBalance:settled.user.tonBalance||0}};
   }catch(e){return{success:false,error:e.message};}
 }
@@ -589,9 +620,9 @@ async function hWithdraw(env,uid,data,_meta={}){
       await dbSet(env,`users/${uid}/wdHistory/${wdId}`,rec);
       await dbSet(env,`withdrawQueue/${wdId}`,rec);
       
-      // Mark referral as active (has withdrawn)
+      // Mark referral as active (has deposited or withdrawn)
       if(user.referredBy){
-        await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{hasWithdrawn:true}).catch(()=>{});
+        await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{hasWithdrawn:true,hasDeposited:true}).catch(()=>{});
       }
       
       log(env,uid,'withdraw_request',{wdId,amount_ton:amt,address:addr,tonBalance_before:user.tonBalance||0,tonBalance_after:upd.tonBalance},_meta);
@@ -619,7 +650,7 @@ async function hDeposit(env,uid,data,_meta={}){
 }
 
 // ── Claim Task (social/partner) ───────────────────────────────────
-async function hClaimTask(env,uid,data,_meta={}){
+async function hClaimTask(env,uid,data,_meta={},ctx=null){
   try{
     const tid=data.taskId;
     const lockKey=`taskLocks/${uid}_${tid}`;
@@ -637,7 +668,11 @@ async function hClaimTask(env,uid,data,_meta={}){
         const rr=await dbGet(env,`users/${uid}/referrals`);
         const refIds=rr.data?Object.keys(rr.data):[];
         let activeCount=0;
-        for(const refId of refIds){const hw=await dbGet(env,`users/${refId}/hasWithdrawn`);if(hw.data===true)activeCount++;}
+        for(const refId of refIds){
+          const hw=await dbGet(env,`users/${refId}/hasWithdrawn`);
+          const hd=await dbGet(env,`users/${refId}/hasDeposited`);
+          if(hw.data===true||hd.data===true)activeCount++;
+        }
         if(activeCount<t.n){await dbSet(env,lockKey,{ts:0});return{success:false,error:`Need ${t.n} active referrals (who have withdrawn)`};}
         tonReward=t.ton;
       }else{
@@ -650,7 +685,7 @@ async function hClaimTask(env,uid,data,_meta={}){
       await dbUpdate(env,`users/${uid}`,{completedTasks:[...(user.completedTasks||[]),tid],tonBalance:parseFloat(newTon.toFixed(8))});
       log(env,uid,'claim_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
       const _rtn={rt10:'10 Active Refs',rt50:'50 Active Refs',rt100:'100 Active Refs',rt200:'200 Active Refs',rt500:'500 Active Refs',rt1000:'1000 Active Refs'};
-      (async()=>{const _tl=await getUserLang(env,uid);sendTgNotification(env,uid,m('task_done',_tl,_rtn[tid]||tid,tonReward)).catch(()=>{});})();
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _tl=await getUserLang(env,uid);await sendTgNotification(env,uid,m('task_done',_tl,_rtn[tid]||tid,tonReward));})().catch(()=>{}));
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -658,7 +693,7 @@ async function hClaimTask(env,uid,data,_meta={}){
 }
 
 // ── Claim Mission Task (bikes/races/mining) ───────────────────────
-async function hClaimMissionTask(env,uid,data,_meta={}){
+async function hClaimMissionTask(env,uid,data,_meta={},ctx=null){
   try{
     const tid=data.taskId;
     const lockKey=`missionLocks/${uid}_${tid}`;
@@ -695,7 +730,7 @@ async function hClaimMissionTask(env,uid,data,_meta={}){
       });
       log(env,uid,'claim_mission_task',{taskId:tid,ton_reward:tonReward,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
       const _mn={bt5:'Buy 5 Bikes',bt10:'Buy 10 Bikes',rc10:'10 Races',rc20:'20 Races',rc50:'50 Races',mt20:'20 Mining Runs',mt50:'50 Mining Runs'};
-      (async()=>{const _msl=await getUserLang(env,uid);sendTgNotification(env,uid,m('mission_done',_msl,_mn[tid]||tid,tonReward)).catch(()=>{});})();
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _msl=await getUserLang(env,uid);await sendTgNotification(env,uid,m('mission_done',_msl,_mn[tid]||tid,tonReward));})().catch(()=>{}));
       await dbSet(env,lockKey,{ts:0});
       return{success:true,data:{tonBalance:parseFloat(newTon.toFixed(8)),tonAdded:tonReward}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
@@ -804,7 +839,7 @@ async function hRaceResult(env,uid,_data,_meta={}){
 }
 
 // Join (or create) the matchmaking queue. Always charges 0.5 TON up-front.
-async function hRaceJoinQueue(env,uid,data,_meta={}){
+async function hRaceJoinQueue(env,uid,data,_meta={},ctx=null){
   try{
     const lv=parseInt(data.bikeLevel)||0;
     if(!lv||!BIKE_BASE_STATS[lv]) return{success:false,error:'Invalid bike level'};
@@ -1001,7 +1036,7 @@ async function hRaceCancelQueue(env,uid,_data,_meta={}){
 // Acknowledge match seen — clears the active-match pointer for this user.
 // First player to ack sends the Telegram notifications (race is now truly finished).
 // Both players must ack before the match record is deleted.
-async function hRaceAck(env,uid,_data,_meta={}){
+async function hRaceAck(env,uid,_data,_meta={},ctx=null){
   try{
     const am=await dbGet(env,`userActiveMatch/${uid}`);
     if(!am.data) return{success:true,data:{cleared:true}};
@@ -1009,22 +1044,24 @@ async function hRaceAck(env,uid,_data,_meta={}){
     await dbDelete(env,`userActiveMatch/${uid}`);
     const mr=await dbGet(env,`raceMatches/${matchId}`);
     if(mr.data){
-      const m=mr.data;
-      const otherUid = m.p1.uid===uid ? m.p2.uid : m.p1.uid;
+      const mch=mr.data;
+      const otherUid = mch.p1.uid===uid ? mch.p2.uid : mch.p1.uid;
       // Send Telegram notifications on FIRST ack (race animation has now finished)
-      const notif=m.notifPending;
-      if(notif&&!m.notifSent){
+      const notif=mch.notifPending;
+      if(notif&&!mch.notifSent){
         // Mark sent first to prevent double-send if both players ack simultaneously
         await dbUpdate(env,`raceMatches/${matchId}`,{notifSent:true}).catch(()=>{});
         const winnerUid=notif.winnerUid;
-        const loserUid =winnerUid===m.p1.uid ? m.p2.uid : m.p1.uid;
+        const loserUid =winnerUid===mch.p1.uid ? mch.p2.uid : mch.p1.uid;
         const winnerName=notif.winnerName||'Winner';
         const loserName =notif.loserName||'Opponent';
         const [_wl,_ll]=await Promise.all([getUserLang(env,winnerUid),getUserLang(env,loserUid)]);
-        await Promise.all([
-          sendTgNotification(env,winnerUid,m('race_won',_wl,loserName,RACE_PRIZE)),
-          sendTgNotification(env,loserUid,m('race_lost',_ll,winnerName,RACE_COST,RACE_PRIZE)),
-        ]);
+        if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{
+          await Promise.all([
+            sendTgNotification(env,winnerUid,m('race_won',_wl,loserName,RACE_PRIZE)),
+            sendTgNotification(env,loserUid,m('race_lost',_ll,winnerName,RACE_COST,RACE_PRIZE)),
+          ]);
+        })().catch(()=>{}));
       }
       // Check if other player already acked — if so, delete the match record
       const otherActive=await dbGet(env,`userActiveMatch/${otherUid}`);
@@ -1040,7 +1077,7 @@ async function hRaceAck(env,uid,_data,_meta={}){
 }
 
 
-async function hAdmin(env,action,data){
+async function hAdmin(env,action,data,ctx=null){
   switch(action){
     case 'adminGetUser':{const r=await dbGet(env,`users/${data.userId}`);return{success:true,data:r.data||null};}
     case 'adminSetBalance':{
@@ -1057,7 +1094,10 @@ async function hAdmin(env,action,data){
       const ton=parseFloat(data.amount||dep.data.amount);
       await dbUpdate(env,`users/${data.userId}/deposits/${data.depositId}`,{status:'completed',completedAt:Date.now()});
       const u=await dbGet(env,`users/${data.userId}`);
-      if(u.data)await dbUpdate(env,`users/${data.userId}`,{tonBalance:(u.data.tonBalance||0)+ton,hasDeposited:true});
+      if(u.data){await dbUpdate(env,`users/${data.userId}`,{tonBalance:(u.data.tonBalance||0)+ton,hasDeposited:true});
+        // Mark referral active on deposit
+        if(u.data.referredBy)await dbUpdate(env,`users/${u.data.referredBy}/referrals/${data.userId}`,{hasDeposited:true}).catch(()=>{});
+      }
       await dbDelete(env,`pendingDeposits/${data.depositId}`);
       log(env,data.userId,'admin_confirm_deposit',{depositId:data.depositId,amount_ton:ton,by:'admin'});
       return{success:true,data:{tonAdded:ton}};
@@ -1066,7 +1106,7 @@ async function hAdmin(env,action,data){
       const r=await dbGet(env,`withdrawQueue/${data.wdId}`);if(!r.data)return{success:false,error:'Not found'};
       await dbUpdate(env,`withdrawQueue/${data.wdId}`,{status:'approved'});
       await dbUpdate(env,`users/${r.data.userId}/wdHistory/${data.wdId}`,{status:'approved'});
-      (async()=>{const _wdl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('wd_approved',_wdl,r.data.amt)).catch(()=>{});})();
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _wdl=await getUserLang(env,r.data.userId);await sendTgNotification(env,r.data.userId,m('wd_approved',_wdl,r.data.amt));})().catch(()=>{}));
       return{success:true};
     }
     case 'adminRejectWithdraw':{
@@ -1075,7 +1115,7 @@ async function hAdmin(env,action,data){
       await dbUpdate(env,`users/${r.data.userId}/wdHistory/${data.wdId}`,{status:'rejected'});
       const u=await dbGet(env,`users/${r.data.userId}`);
       if(u.data)await dbUpdate(env,`users/${r.data.userId}`,{tonBalance:(u.data.tonBalance||0)+r.data.amt});
-      (async()=>{const _rjl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('wd_rejected',_rjl,r.data.amt)).catch(()=>{});})();
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _rjl=await getUserLang(env,r.data.userId);await sendTgNotification(env,r.data.userId,m('wd_rejected',_rjl,r.data.amt));})().catch(()=>{}));
       return{success:true};
     }
     case 'adminGetQueue':{const q=await dbGet(env,'withdrawQueue');return{success:true,data:q.data||{}};}
@@ -1087,7 +1127,7 @@ async function hAdmin(env,action,data){
       if(reward>0){
         const u=await dbGet(env,`users/${r.data.userId}`);
         if(u.data)await dbUpdate(env,`users/${r.data.userId}`,{tonBalance:(u.data.tonBalance||0)+reward});
-        (async()=>{const _pl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('post_approved',_pl,reward)).catch(()=>{});})();
+        if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _pl=await getUserLang(env,r.data.userId);await sendTgNotification(env,r.data.userId,m('post_approved',_pl,reward));})().catch(()=>{}));
         log(env,r.data.userId,'partner_post_reward',{postId:data.postId,reward,by:'admin'});
       }
       return{success:true};
@@ -1096,7 +1136,7 @@ async function hAdmin(env,action,data){
       const r=await dbGet(env,`partnerPostQueue/${data.postId}`);if(!r.data)return{success:false,error:'Not found'};
       await dbUpdate(env,`partnerPostQueue/${data.postId}`,{status:'rejected'});
       await dbUpdate(env,`users/${r.data.userId}/partnerPosts/${data.postId}`,{status:'rejected'});
-      (async()=>{const _prl=await getUserLang(env,r.data.userId);sendTgNotification(env,r.data.userId,m('post_rejected',_prl)).catch(()=>{});})();
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _prl=await getUserLang(env,r.data.userId);await sendTgNotification(env,r.data.userId,m('post_rejected',_prl));})().catch(()=>{}));
       return{success:true};
     }
     default:return{success:false,error:'Unknown admin action'};
@@ -1139,7 +1179,7 @@ export default {
       if(!v.valid)return fail('Unauthorized',401);
       const adminIds=(env.ADMIN_IDS||'').split(',').map(s=>s.trim());
       if(!adminIds.includes(String(v.user?.id)))return fail('Forbidden',403);
-      return jRes(await hAdmin(env,action,data));
+      return jRes(await hAdmin(env,action,data,ctx));
     }
 
     if(action==='ping')return jRes({success:true,data:{pong:true,ts:Date.now()}});
@@ -1158,22 +1198,22 @@ export default {
 
     switch(action){
       case 'saveLanguage'       :return jRes(await (async()=>{const lang=(data.lang||'en');if(['ar','en','ru','es','fr'].includes(lang)){await dbSet(env,`users/${uid}/language`,lang);}return{success:true};})());
-      case 'getState'         :return jRes(await hGetState        (env,uid,v.user,{...data,_startParam:v.startParam||''},_meta));
+      case 'getState'         :return jRes(await hGetState        (env,uid,v.user,{...data,_startParam:v.startParam||''},_meta,ctx));
       case 'withdraw'         :return jRes(await hWithdraw        (env,uid,data,_meta));
       case 'deposit'          :return jRes(await hDeposit         (env,uid,data,_meta));
-      case 'claimTask'        :return jRes(await hClaimTask       (env,uid,data,_meta));
+      case 'claimTask'        :return jRes(await hClaimTask       (env,uid,data,_meta,ctx));
       case 'verifyTask'       :return jRes(await hVerifyTask      (env,uid,data,_meta));
       case 'createTask'       :return jRes(await hCreateTask      (env,uid,data,_meta));
-      case 'buyBike'          :return jRes(await hBuyBike         (env,uid,data,_meta));
-      case 'upgradeStats'     :return jRes(await hUpgradeStats    (env,uid,data,_meta));
-      case 'startBikeMining'  :return jRes(await hStartBikeMining (env,uid,data,_meta));
-      case 'claimBikeMining'  :return jRes(await hClaimBikeMining (env,uid,data,_meta));
+      case 'buyBike'          :return jRes(await hBuyBike         (env,uid,data,_meta,ctx));
+      case 'upgradeStats'     :return jRes(await hUpgradeStats    (env,uid,data,_meta,ctx));
+      case 'startBikeMining'  :return jRes(await hStartBikeMining (env,uid,data,_meta,ctx));
+      case 'claimBikeMining'  :return jRes(await hClaimBikeMining (env,uid,data,_meta,ctx));
       case 'raceResult'       :return jRes(await hRaceResult      (env,uid,data,_meta));
-      case 'raceJoinQueue'    :return jRes(await hRaceJoinQueue   (env,uid,data,_meta));
+      case 'raceJoinQueue'    :return jRes(await hRaceJoinQueue   (env,uid,data,_meta,ctx));
       case 'racePoll'         :return jRes(await hRacePoll         (env,uid,data,_meta));
       case 'raceCancelQueue'  :return jRes(await hRaceCancelQueue  (env,uid,data,_meta));
-      case 'raceAck'          :return jRes(await hRaceAck          (env,uid,data,_meta));
-      case 'claimMissionTask' :return jRes(await hClaimMissionTask(env,uid,data,_meta));
+      case 'raceAck'          :return jRes(await hRaceAck          (env,uid,data,_meta,ctx));
+      case 'claimMissionTask' :return jRes(await hClaimMissionTask(env,uid,data,_meta,ctx));
       case 'submitPartnerPost':return jRes(await hSubmitPartnerPost(env,uid,data,_meta));
       case 'saveSeasonAlloc'  :return jRes(await hSaveSeasonAlloc  (env,uid,data,_meta));
       default:return fail('Unknown action',400);

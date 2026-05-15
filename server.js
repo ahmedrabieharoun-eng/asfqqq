@@ -10,6 +10,7 @@
 
 const G = {
   MIN_WITHDRAW_TON: 0.1,
+  WITHDRAW_FEE_PCT: 10, // 10% withdrawal fee
   MIN_DEPOSIT_TON: 1,
   REF_BONUS_PCT: 10,
   // Referral TON tasks (active referrals only - who have withdrawn)
@@ -610,13 +611,16 @@ async function hWithdraw(env,uid,data,_meta={}){
       if(missingPartner.length>0){await dbSet(env,lockKey,{ts:0});return{success:false,error:'Complete all partner tasks first',errorCode:'PARTNER_TASKS_REQUIRED',missing:missingPartner.length};}
       
       const wdId=`wd_${uid}_${now}`;
+      // Apply 10% withdrawal fee
+      const feeAmt=parseFloat((amt*G.WITHDRAW_FEE_PCT/100).toFixed(8));
+      const netAmt=parseFloat((amt-feeAmt).toFixed(8));
       const upd={tonBalance:parseFloat(((user.tonBalance||0)-amt).toFixed(8)),_lastWdTs:now,hasWithdrawn:true,withdrawWallet:addr};
       await dbUpdate(env,`users/${uid}`,upd);
       
       // Register wallet address
       if(!addrRec.data)await dbSet(env,`walletAddresses/${safeAddr}`,{uid,ts:now});
       
-      const rec={wdId,userId:uid,address:addr,amt,status:'pending',ts:now};
+      const rec={wdId,userId:uid,address:addr,amt:netAmt,amtRequested:amt,fee:feeAmt,status:'pending',ts:now};
       await dbSet(env,`users/${uid}/wdHistory/${wdId}`,rec);
       await dbSet(env,`withdrawQueue/${wdId}`,rec);
       
@@ -625,9 +629,9 @@ async function hWithdraw(env,uid,data,_meta={}){
         await dbUpdate(env,`users/${user.referredBy}/referrals/${uid}`,{hasWithdrawn:true,hasDeposited:true}).catch(()=>{});
       }
       
-      log(env,uid,'withdraw_request',{wdId,amount_ton:amt,address:addr,tonBalance_before:user.tonBalance||0,tonBalance_after:upd.tonBalance},_meta);
+      log(env,uid,'withdraw_request',{wdId,amount_requested:amt,fee:feeAmt,amount_net:netAmt,address:addr,tonBalance_before:user.tonBalance||0,tonBalance_after:upd.tonBalance},_meta);
       await dbSet(env,lockKey,{ts:0});
-      return{success:true,data:{wdId,tonBalance:upd.tonBalance,status:'pending'}};
+      return{success:true,data:{wdId,tonBalance:upd.tonBalance,netAmt,feeAmt,status:'pending'}};
     }catch(innerErr){await dbSet(env,lockKey,{ts:0}).catch(()=>{});throw innerErr;}
   }catch(e){return{success:false,error:e.message};}
 }

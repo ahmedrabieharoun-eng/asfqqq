@@ -3955,11 +3955,11 @@ async function doUpgradeStat(bikeLevel, stat){
   #profileSubPage[data-page="bikeskins"] .psp-hero::after{background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.25) 55%,rgba(20,5,40,1) 100%)}
   /* Coming-soon shared styling */
   .cs-wrap{margin:0 12px;display:flex;flex-direction:column;gap:12px}
-  .cs-hero{background-image:linear-gradient(135deg,rgba(0,0,0,.62),rgba(0,0,0,.78)),var(--psp-cardbg);background-size:cover;background-position:center;border:1.5px solid var(--psp-accent);border-radius:18px;padding:18px 16px;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.55), 0 0 22px var(--psp-accent-glow)}
+  .cs-hero{background:#000;border:1.5px solid var(--psp-accent);border-radius:18px;padding:18px 16px;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.55), 0 0 22px var(--psp-accent-glow)}
   .cs-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.4px;color:#000;background:var(--psp-accent);padding:5px 12px;border-radius:999px;box-shadow:0 0 14px var(--psp-accent-glow);margin-bottom:10px}
   .cs-title{font-size:22px;font-weight:900;color:var(--psp-accent);text-shadow:0 0 18px var(--psp-accent-glow);margin-bottom:8px}
   .cs-sub{font-size:13px;line-height:1.7;color:rgba(255,255,255,.85);font-weight:600}
-  .cs-card{background-image:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.82)),var(--psp-cardbg);background-size:cover;background-position:center;border:1.5px solid var(--psp-accent);border-radius:16px;padding:14px 14px 12px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+  .cs-card{background:#000;border:1.5px solid var(--psp-accent);border-radius:16px;padding:14px 14px 12px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
   .cs-card-title{font-size:14px;font-weight:800;color:var(--psp-accent);margin-bottom:10px;display:flex;align-items:center;gap:8px;text-shadow:0 0 10px var(--psp-accent-glow)}
   .cs-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
   .cs-list li{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.88);font-weight:600;padding-inline-start:22px;position:relative}
@@ -4418,28 +4418,28 @@ async function doUpgradeStat(bikeLevel, stat){
   <div id="page-market-content" style="display:none">
     <div class="cs-wrap">
       <div class="cs-hero">
-        <div class="cs-badge">COMING SOON 🚀</div>
-        <div class="cs-title">🛒 Market</div>
-        <div class="cs-sub">استعد لتجربة سوق الدراجات الجديد بالكامل! قريبًا هتقدر تشتري، تبيع، وتطور دراجتك بحرية كاملة داخل الـ Market.</div>
+        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
+        <div class="cs-title">🛒 <span data-i18n="cardMarket">Market</span></div>
+        <div class="cs-sub" data-i18n="mktSub">Get ready for a brand-new bike marketplace! Soon you'll be able to buy, sell and upgrade your bike freely inside the Market.</div>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <div class="cs-card-title">✨ <span data-i18n="csFeatures">Page Features</span></div>
         <ul class="cs-list">
-          <li>شراء وبيع الدراجات بين اللاعبين.</li>
-          <li>تطوير الدراجة وترقية إمكانياتها.</li>
-          <li>تغيير الألوان وإضافة سكنات مميزة.</li>
-          <li>تداول الدراجات داخل السوق بأسعار مختلفة.</li>
-          <li>شراء دراجات من مستخدمين آخرين.</li>
+          <li data-i18n="mktF1">Buy and sell bikes between players.</li>
+          <li data-i18n="mktF2">Upgrade your bike and improve its abilities.</li>
+          <li data-i18n="mktF3">Change colors and add unique skins.</li>
+          <li data-i18n="mktF4">Trade bikes in the market at different prices.</li>
+          <li data-i18n="mktF5">Buy bikes from other users.</li>
         </ul>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <div class="cs-card-title">🚀 <span data-i18n="csFutureFeatures">Future Features</span></div>
         <ul class="cs-list">
-          <li>إطلاق دراجات Limited Edition نادرة.</li>
-          <li>إمكانية الربح من الدراجات النادرة.</li>
-          <li>سباقات ومكافآت خاصة.</li>
-          <li>نظام تعدين وأرباح داخل اللعبة.</li>
-          <li>اقتصاد رقمي متكامل للدراجات والتطويرات.</li>
+          <li data-i18n="mktFu1">Launch of rare Limited Edition bikes.</li>
+          <li data-i18n="mktFu2">Earn from rare bikes.</li>
+          <li data-i18n="mktFu3">Special races and rewards.</li>
+          <li data-i18n="mktFu4">Mining and earnings system inside the game.</li>
+          <li data-i18n="mktFu5">A full digital economy for bikes and upgrades.</li>
         </ul>
       </div>
     </div>
@@ -4449,27 +4449,27 @@ async function doUpgradeStat(bikeLevel, stat){
   <div id="page-ridemode-content" style="display:none">
     <div class="cs-wrap">
       <div class="cs-hero">
-        <div class="cs-badge">COMING SOON 🚀</div>
-        <div class="cs-title">🏁 Ride Mode</div>
-        <div class="cs-sub">حوّل دراجتك إلى مصدر دخل حقيقي داخل اللعبة! نفّذ الطلبات والمشاوير واربح مكافآت كلما كانت دراجتك أقوى وأفضل.</div>
+        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
+        <div class="cs-title">🏁 <span data-i18n="cardRideMode">Ride Mode</span></div>
+        <div class="cs-sub" data-i18n="rmSub">Turn your bike into a real source of income in the game! Take orders and rides and earn rewards as your bike gets stronger and better.</div>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <div class="cs-card-title">✨ <span data-i18n="csFeatures">Page Features</span></div>
         <ul class="cs-list">
-          <li>تنفيذ طلبات ومشاوير متنوعة.</li>
-          <li>الحصول على أرباح ومكافآت.</li>
-          <li>نظام طلبات يعتمد على مستوى الدراجة.</li>
-          <li>كلما كانت دراجتك أفضل تحصل على فرص أكثر.</li>
+          <li data-i18n="rmF1">Take various orders and rides.</li>
+          <li data-i18n="rmF2">Earn profits and rewards.</li>
+          <li data-i18n="rmF3">Order system based on bike level.</li>
+          <li data-i18n="rmF4">The better your bike, the more opportunities you get.</li>
         </ul>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <div class="cs-card-title">🚀 <span data-i18n="csFutureFeatures">Future Features</span></div>
         <ul class="cs-list">
-          <li>مهام يومية وتحديات خاصة.</li>
-          <li>أرباح أعلى للدراجات النادرة والمطورة.</li>
-          <li>نظام Ranking للسائقين.</li>
-          <li>مناطق وطلبات VIP.</li>
-          <li>مكافآت موسمية وأحداث خاصة.</li>
+          <li data-i18n="rmFu1">Daily missions and special challenges.</li>
+          <li data-i18n="rmFu2">Higher earnings for rare and upgraded bikes.</li>
+          <li data-i18n="rmFu3">Ranking system for riders.</li>
+          <li data-i18n="rmFu4">VIP zones and orders.</li>
+          <li data-i18n="rmFu5">Seasonal rewards and special events.</li>
         </ul>
       </div>
     </div>
@@ -4479,29 +4479,29 @@ async function doUpgradeStat(bikeLevel, stat){
   <div id="page-bikeskins-content" style="display:none">
     <div class="cs-wrap">
       <div class="cs-hero">
-        <div class="cs-badge">COMING SOON 🚀</div>
-        <div class="cs-title">🎨 Bike Skins</div>
-        <div class="cs-sub">اصنع دراجتك الخاصة بالكامل وخصصها بطريقتك!</div>
+        <div class="cs-badge" data-i18n="csComingSoon">COMING SOON 🚀</div>
+        <div class="cs-title">🎨 <span data-i18n="cardBikeSkins">Bike Skins</span></div>
+        <div class="cs-sub" data-i18n="bsSub">Build your own bike completely and customize it your way!</div>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">✨ مميزات الصفحة</div>
+        <div class="cs-card-title">✨ <span data-i18n="csFeatures">Page Features</span></div>
         <ul class="cs-list">
-          <li>تغيير ألوان الدراجة بالكامل.</li>
-          <li>تعديل المحرك وتحسين الأداء.</li>
-          <li>التحكم في حجم وشكل العجلات.</li>
-          <li>تعديل الدركسيون والهيكل.</li>
-          <li>التحكم في ارتفاع الدراجة.</li>
-          <li>تخصيص كامل لكل تفاصيل الدراجة.</li>
+          <li data-i18n="bsF1">Change the bike's colors completely.</li>
+          <li data-i18n="bsF2">Modify the engine and improve performance.</li>
+          <li data-i18n="bsF3">Control the size and shape of the wheels.</li>
+          <li data-i18n="bsF4">Customize the handlebars and frame.</li>
+          <li data-i18n="bsF5">Adjust the bike's height.</li>
+          <li data-i18n="bsF6">Full customization for every detail of the bike.</li>
         </ul>
       </div>
       <div class="cs-card">
-        <div class="cs-card-title">🚀 مميزات مستقبلية</div>
+        <div class="cs-card-title">🚀 <span data-i18n="csFutureFeatures">Future Features</span></div>
         <ul class="cs-list">
-          <li>سكنات وتأثيرات نادرة.</li>
-          <li>قطع تطوير حصرية.</li>
-          <li>تأثيرات نيون وإضاءات خاصة.</li>
-          <li>أصوات محركات مخصصة.</li>
-          <li>إمكانية بيع التصاميم داخل الـ Market.</li>
+          <li data-i18n="bsFu1">Rare skins and effects.</li>
+          <li data-i18n="bsFu2">Exclusive upgrade parts.</li>
+          <li data-i18n="bsFu3">Neon effects and special lighting.</li>
+          <li data-i18n="bsFu4">Custom engine sounds.</li>
+          <li data-i18n="bsFu5">Ability to sell designs inside the Market.</li>
         </ul>
       </div>
     </div>
@@ -7177,6 +7177,46 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'الكوينز الحالية',snsRowCoinsDesc:'ترحيل: 20%',
     snsRowRefsTitle:'الإحالات',snsRowRefsDesc:'مكافأة الإحالات النشطة',
     snsTotalLbl:'🎯 إجمالي مخصصات الموسم',snsSeasonBadge:'الموسم 2',
+    /* market/ridemode/bikeskins i18n */
+    pspTitleMarket:'🛒 الماركت',
+    pspTitleRideMode:'🏁 وضع الركوب',
+    pspTitleBikeSkins:'🎨 سكنات الدراجة',
+    csComingSoon:'قريبًا 🚀',
+    csFeatures:'مميزات الصفحة',
+    csFutureFeatures:'مميزات مستقبلية',
+    mktSub:'استعد لتجربة سوق الدراجات الجديد بالكامل! قريبًا هتقدر تشتري، تبيع، وتطور دراجتك بحرية كاملة داخل الماركت.',
+    mktF1:'شراء وبيع الدراجات بين اللاعبين.',
+    mktF2:'تطوير الدراجة وترقية إمكانياتها.',
+    mktF3:'تغيير الألوان وإضافة سكنات مميزة.',
+    mktF4:'تداول الدراجات داخل السوق بأسعار مختلفة.',
+    mktF5:'شراء دراجات من مستخدمين آخرين.',
+    mktFu1:'إطلاق دراجات Limited Edition نادرة.',
+    mktFu2:'إمكانية الربح من الدراجات النادرة.',
+    mktFu3:'سباقات ومكافآت خاصة.',
+    mktFu4:'نظام تعدين وأرباح داخل اللعبة.',
+    mktFu5:'اقتصاد رقمي متكامل للدراجات والتطويرات.',
+    rmSub:'حوّل دراجتك إلى مصدر دخل حقيقي داخل اللعبة! نفّذ الطلبات والمشاوير واربح مكافآت كلما كانت دراجتك أقوى وأفضل.',
+    rmF1:'تنفيذ طلبات ومشاوير متنوعة.',
+    rmF2:'الحصول على أرباح ومكافآت.',
+    rmF3:'نظام طلبات يعتمد على مستوى الدراجة.',
+    rmF4:'كلما كانت دراجتك أفضل تحصل على فرص أكثر.',
+    rmFu1:'مهام يومية وتحديات خاصة.',
+    rmFu2:'أرباح أعلى للدراجات النادرة والمطورة.',
+    rmFu3:'نظام Ranking للسائقين.',
+    rmFu4:'مناطق وطلبات VIP.',
+    rmFu5:'مكافآت موسمية وأحداث خاصة.',
+    bsSub:'اصنع دراجتك الخاصة بالكامل وخصصها بطريقتك!',
+    bsF1:'تغيير ألوان الدراجة بالكامل.',
+    bsF2:'تعديل المحرك وتحسين الأداء.',
+    bsF3:'التحكم في حجم وشكل العجلات.',
+    bsF4:'تعديل الدركسيون والهيكل.',
+    bsF5:'التحكم في ارتفاع الدراجة.',
+    bsF6:'تخصيص كامل لكل تفاصيل الدراجة.',
+    bsFu1:'سكنات وتأثيرات نادرة.',
+    bsFu2:'قطع تطوير حصرية.',
+    bsFu3:'تأثيرات نيون وإضاءات خاصة.',
+    bsFu4:'أصوات محركات مخصصة.',
+    bsFu5:'إمكانية بيع التصاميم داخل الماركت.',
   },
   en:{
     navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
@@ -7314,6 +7354,46 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Current Coins',snsRowCoinsDesc:'Carry Over: 20%',
     snsRowRefsTitle:'Referrals',snsRowRefsDesc:'Active Referrals Bonus',
     snsTotalLbl:'🎯 Total Season Allocation',snsSeasonBadge:'Season 2',
+    /* market/ridemode/bikeskins i18n */
+    pspTitleMarket:'🛒 Market',
+    pspTitleRideMode:'🏁 Ride Mode',
+    pspTitleBikeSkins:'🎨 Bike Skins',
+    csComingSoon:'COMING SOON 🚀',
+    csFeatures:'Page Features',
+    csFutureFeatures:'Future Features',
+    mktSub:'Get ready for a brand-new bike marketplace! Soon you\'ll be able to buy, sell and upgrade your bike freely inside the Market.',
+    mktF1:'Buy and sell bikes between players.',
+    mktF2:'Upgrade your bike and improve its abilities.',
+    mktF3:'Change colors and add unique skins.',
+    mktF4:'Trade bikes in the market at different prices.',
+    mktF5:'Buy bikes from other users.',
+    mktFu1:'Launch of rare Limited Edition bikes.',
+    mktFu2:'Earn from rare bikes.',
+    mktFu3:'Special races and rewards.',
+    mktFu4:'Mining and earnings system inside the game.',
+    mktFu5:'A full digital economy for bikes and upgrades.',
+    rmSub:'Turn your bike into a real source of income in the game! Take orders and rides and earn rewards as your bike gets stronger and better.',
+    rmF1:'Take various orders and rides.',
+    rmF2:'Earn profits and rewards.',
+    rmF3:'Order system based on bike level.',
+    rmF4:'The better your bike, the more opportunities you get.',
+    rmFu1:'Daily missions and special challenges.',
+    rmFu2:'Higher earnings for rare and upgraded bikes.',
+    rmFu3:'Ranking system for riders.',
+    rmFu4:'VIP zones and orders.',
+    rmFu5:'Seasonal rewards and special events.',
+    bsSub:'Build your own bike completely and customize it your way!',
+    bsF1:'Change the bike\'s colors completely.',
+    bsF2:'Modify the engine and improve performance.',
+    bsF3:'Control the size and shape of the wheels.',
+    bsF4:'Customize the handlebars and frame.',
+    bsF5:'Adjust the bike\'s height.',
+    bsF6:'Full customization for every detail of the bike.',
+    bsFu1:'Rare skins and effects.',
+    bsFu2:'Exclusive upgrade parts.',
+    bsFu3:'Neon effects and special lighting.',
+    bsFu4:'Custom engine sounds.',
+    bsFu5:'Ability to sell designs inside the Market.',
   },
   ru:{
     navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
@@ -7442,6 +7522,46 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Текущие монеты',snsRowCoinsDesc:'Перенос: 20%',
     snsRowRefsTitle:'Рефералы',snsRowRefsDesc:'Бонус за активных рефералов',
     snsTotalLbl:'🎯 Итого распределение сезона',snsSeasonBadge:'Сезон 2',
+    /* market/ridemode/bikeskins i18n */
+    pspTitleMarket:'🛒 Маркет',
+    pspTitleRideMode:'🏁 Режим езды',
+    pspTitleBikeSkins:'🎨 Скины байка',
+    csComingSoon:'СКОРО 🚀',
+    csFeatures:'Возможности страницы',
+    csFutureFeatures:'Будущие возможности',
+    mktSub:'Готовьтесь к совершенно новому маркету байков! Скоро вы сможете покупать, продавать и улучшать свой байк свободно внутри Маркета.',
+    mktF1:'Покупка и продажа байков между игроками.',
+    mktF2:'Улучшение байка и его характеристик.',
+    mktF3:'Смена цветов и уникальные скины.',
+    mktF4:'Торговля байками по разным ценам.',
+    mktF5:'Покупка байков у других пользователей.',
+    mktFu1:'Запуск редких байков Limited Edition.',
+    mktFu2:'Заработок на редких байках.',
+    mktFu3:'Особые гонки и награды.',
+    mktFu4:'Система майнинга и заработка в игре.',
+    mktFu5:'Полная цифровая экономика байков и улучшений.',
+    rmSub:'Превратите свой байк в реальный источник дохода в игре! Выполняйте заказы и поездки и зарабатывайте награды.',
+    rmF1:'Выполнение разных заказов и поездок.',
+    rmF2:'Получение прибыли и наград.',
+    rmF3:'Система заказов зависит от уровня байка.',
+    rmF4:'Чем лучше байк, тем больше возможностей.',
+    rmFu1:'Ежедневные миссии и особые задания.',
+    rmFu2:'Больший доход для редких и прокачанных байков.',
+    rmFu3:'Система рейтинга для гонщиков.',
+    rmFu4:'VIP-зоны и заказы.',
+    rmFu5:'Сезонные награды и события.',
+    bsSub:'Создайте свой байк полностью и настройте его по-своему!',
+    bsF1:'Полная смена цветов байка.',
+    bsF2:'Тюнинг двигателя и улучшение производительности.',
+    bsF3:'Контроль размера и формы колёс.',
+    bsF4:'Настройка руля и рамы.',
+    bsF5:'Регулировка высоты байка.',
+    bsF6:'Полная настройка каждой детали.',
+    bsFu1:'Редкие скины и эффекты.',
+    bsFu2:'Эксклюзивные детали для апгрейда.',
+    bsFu3:'Неоновые эффекты и подсветка.',
+    bsFu4:'Кастомные звуки двигателя.',
+    bsFu5:'Возможность продавать дизайны в Маркете.',
   },
   es:{
     navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
@@ -7570,6 +7690,46 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Monedas actuales',snsRowCoinsDesc:'Transferencia: 20%',
     snsRowRefsTitle:'Referidos',snsRowRefsDesc:'Bono referidos activos',
     snsTotalLbl:'🎯 Total asignación de temporada',snsSeasonBadge:'Temporada 2',
+    /* market/ridemode/bikeskins i18n */
+    pspTitleMarket:'🛒 Mercado',
+    pspTitleRideMode:'🏁 Modo Ride',
+    pspTitleBikeSkins:'🎨 Skins de Moto',
+    csComingSoon:'PRÓXIMAMENTE 🚀',
+    csFeatures:'Funciones de la página',
+    csFutureFeatures:'Funciones futuras',
+    mktSub:'¡Prepárate para un mercado de motos totalmente nuevo! Pronto podrás comprar, vender y mejorar tu moto libremente dentro del Mercado.',
+    mktF1:'Compra y venta de motos entre jugadores.',
+    mktF2:'Mejora tu moto y sus capacidades.',
+    mktF3:'Cambia colores y añade skins únicos.',
+    mktF4:'Comercia motos en el mercado a distintos precios.',
+    mktF5:'Compra motos de otros usuarios.',
+    mktFu1:'Lanzamiento de motos Limited Edition raras.',
+    mktFu2:'Gana con motos raras.',
+    mktFu3:'Carreras y recompensas especiales.',
+    mktFu4:'Sistema de minería y ganancias en el juego.',
+    mktFu5:'Una economía digital completa para motos y mejoras.',
+    rmSub:'¡Convierte tu moto en una fuente real de ingresos en el juego! Acepta pedidos y viajes y gana recompensas.',
+    rmF1:'Acepta diversos pedidos y viajes.',
+    rmF2:'Obtén ganancias y recompensas.',
+    rmF3:'Sistema de pedidos según el nivel de la moto.',
+    rmF4:'Cuanto mejor sea tu moto, más oportunidades.',
+    rmFu1:'Misiones diarias y desafíos especiales.',
+    rmFu2:'Mayores ganancias para motos raras y mejoradas.',
+    rmFu3:'Sistema de Ranking para pilotos.',
+    rmFu4:'Zonas y pedidos VIP.',
+    rmFu5:'Recompensas de temporada y eventos especiales.',
+    bsSub:'¡Crea tu propia moto por completo y personalízala a tu manera!',
+    bsF1:'Cambia los colores de la moto por completo.',
+    bsF2:'Modifica el motor y mejora el rendimiento.',
+    bsF3:'Controla el tamaño y la forma de las ruedas.',
+    bsF4:'Personaliza el manillar y el chasis.',
+    bsF5:'Ajusta la altura de la moto.',
+    bsF6:'Personalización total de cada detalle.',
+    bsFu1:'Skins y efectos raros.',
+    bsFu2:'Piezas de mejora exclusivas.',
+    bsFu3:'Efectos neón e iluminación especial.',
+    bsFu4:'Sonidos de motor personalizados.',
+    bsFu5:'Posibilidad de vender diseños en el Mercado.',
   },
   fr:{
     navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
@@ -7698,6 +7858,46 @@ const TRANSLATIONS = {
     snsRowCoinsTitle:'Pièces actuelles',snsRowCoinsDesc:'Report: 20%',
     snsRowRefsTitle:'Parrainages',snsRowRefsDesc:'Bonus parrainages actifs',
     snsTotalLbl:'🎯 Allocation totale saison',snsSeasonBadge:'Saison 2',
+    /* market/ridemode/bikeskins i18n */
+    pspTitleMarket:'🛒 Marché',
+    pspTitleRideMode:'🏁 Mode Ride',
+    pspTitleBikeSkins:'🎨 Skins de Moto',
+    csComingSoon:'BIENTÔT 🚀',
+    csFeatures:'Fonctionnalités',
+    csFutureFeatures:'Fonctionnalités à venir',
+    mktSub:'Préparez-vous pour un tout nouveau marché de motos ! Bientôt, vous pourrez acheter, vendre et améliorer votre moto librement dans le Marché.',
+    mktF1:'Acheter et vendre des motos entre joueurs.',
+    mktF2:'Améliorer votre moto et ses capacités.',
+    mktF3:'Changer les couleurs et ajouter des skins uniques.',
+    mktF4:'Échanger des motos sur le marché à différents prix.',
+    mktF5:'Acheter des motos à d’autres utilisateurs.',
+    mktFu1:'Lancement de motos Limited Edition rares.',
+    mktFu2:'Gagner avec des motos rares.',
+    mktFu3:'Courses et récompenses spéciales.',
+    mktFu4:'Système de minage et de gains en jeu.',
+    mktFu5:'Une économie numérique complète pour les motos et les améliorations.',
+    rmSub:'Transformez votre moto en véritable source de revenus dans le jeu ! Acceptez des commandes et des trajets et gagnez des récompenses.',
+    rmF1:'Effectuer diverses commandes et trajets.',
+    rmF2:'Gagner des profits et des récompenses.',
+    rmF3:'Système de commandes basé sur le niveau de la moto.',
+    rmF4:'Plus votre moto est bonne, plus vous avez d’opportunités.',
+    rmFu1:'Missions quotidiennes et défis spéciaux.',
+    rmFu2:'Gains plus élevés pour les motos rares et améliorées.',
+    rmFu3:'Système de classement pour les pilotes.',
+    rmFu4:'Zones et commandes VIP.',
+    rmFu5:'Récompenses saisonnières et événements spéciaux.',
+    bsSub:'Créez votre propre moto entièrement et personnalisez-la à votre façon !',
+    bsF1:'Changer entièrement les couleurs de la moto.',
+    bsF2:'Modifier le moteur et améliorer les performances.',
+    bsF3:'Contrôler la taille et la forme des roues.',
+    bsF4:'Personnaliser le guidon et le cadre.',
+    bsF5:'Régler la hauteur de la moto.',
+    bsF6:'Personnalisation complète de chaque détail.',
+    bsFu1:'Skins et effets rares.',
+    bsFu2:'Pièces d’amélioration exclusives.',
+    bsFu3:'Effets néon et éclairages spéciaux.',
+    bsFu4:'Sons de moteur personnalisés.',
+    bsFu5:'Possibilité de vendre des designs dans le Marché.',
   }
 };
 

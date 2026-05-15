@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1338,7 +1337,7 @@ function syncTopbar(){
 // Hook into page load
 document.addEventListener('DOMContentLoaded', ()=>{
   setTimeout(()=>{ renderBikes(); syncTopbar(); }, 800);
-  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); if(typeof syncProfileTopbar==='function') syncProfileTopbar(); }, 3000);
+  setInterval(()=>{ syncTopbar(); if(typeof syncMineTopbar==='function') syncMineTopbar(); if(typeof syncProfileTopbar==='function') syncProfileTopbar(); }, 10000);
 });
 
 /* ════ GARAGE SYSTEM ════════════════════════════════════════════
@@ -5546,81 +5545,57 @@ async function getOrComputeFp(){
 
 /* ════ ANTI-CLICKER DEBOUNCE SYSTEM ════ */
 const _debounceMap = new Map();
-/* ── Global button cooldown: disable ALL buttons for 3s after any API action.
-   Also intercepts clickable elements without <button> tag (divs/spans with onclick)
-   and any newly-rendered buttons that appear during the cooldown window. ── */
+/* ── Global button cooldown: disable ALL buttons for 6s after any API action ── */
 let _globalBtnCooldown = false;
 let _globalCooldownTimer = null;
-let _globalCooldownObserver = null;
-let _globalCooldownEndsAt = 0;
-const _COOLDOWN_MS = 3000;
 
-function _disableEl(b){
-  if(b.disabled || b.hasAttribute('data-cooled')) return;
-  b.setAttribute('data-cooled', '1');
-  b.disabled = true;
-  b.style.opacity = '0.4';
-  b.style.filter = 'grayscale(1)';
-  b.style.pointerEvents = 'none';
-}
-function _enableCooledEls(){
-  document.querySelectorAll('[data-cooled="1"]').forEach(b=>{
-    b.removeAttribute('data-cooled');
-    b.disabled = false;
-    b.style.opacity = '';
-    b.style.filter = '';
-    b.style.pointerEvents = '';
-  });
-}
-/* Intercept clicks on clickable non-button elements (div/span with onclick) during cooldown */
-function _coolClickCapture(ev){
+// MutationObserver: disable any new buttons added while cooldown is active
+const _cooldownObserver = new MutationObserver((mutations)=>{
   if(!_globalBtnCooldown) return;
-  const t = ev.target.closest('[onclick]');
-  if(!t) return;
-  if(t.tagName === 'BUTTON') return; /* buttons handled by disabled */
-  /* skip allow-list (close/back/nav UI doesn't need throttling) */
-  const cls = t.className || '';
-  if(typeof cls === 'string' && /(?:^|\s)(?:psp-back|mclose|race-arrow|race-dev-back|ni\b|hub-tb-plus|race-dot|mine-sheet-overlay)/.test(cls)) return;
-  ev.stopPropagation();
-  ev.preventDefault();
-}
-function _startBtnCooldown(){
-  const now = Date.now();
-  /* If already cooling, just extend (but don't reset disabled flags) */
-  _globalCooldownEndsAt = now + _COOLDOWN_MS;
-  if(_globalBtnCooldown){
-    if(_globalCooldownTimer) clearTimeout(_globalCooldownTimer);
-    _globalCooldownTimer = setTimeout(_endCooldown, _COOLDOWN_MS);
-    return;
-  }
-  _globalBtnCooldown = true;
-  document.querySelectorAll('button').forEach(_disableEl);
-  document.addEventListener('click', _coolClickCapture, true);
-  /* Watch for new buttons created during cooldown (re-renders) */
-  if(!_globalCooldownObserver){
-    _globalCooldownObserver = new MutationObserver(muts=>{
-      if(!_globalBtnCooldown) return;
-      for(const mu of muts){
-        for(const n of mu.addedNodes){
-          if(n.nodeType !== 1) continue;
-          if(n.tagName === 'BUTTON') _disableEl(n);
-          if(n.querySelectorAll) n.querySelectorAll('button').forEach(_disableEl);
+  mutations.forEach(m=>{
+    m.addedNodes.forEach(node=>{
+      if(node.nodeType!==1) return;
+      // Check the node itself and any button descendants
+      const btns = node.tagName==='BUTTON' ? [node] : [...(node.querySelectorAll ? node.querySelectorAll('button') : [])];
+      btns.forEach(b=>{
+        if(!b.disabled && !b.hasAttribute('data-cooled')){
+          b.setAttribute('data-cooled','1');
+          b.disabled=true;
+          b.style.opacity='0.4';
+          b.style.filter='grayscale(1)';
         }
-      }
+      });
     });
-  }
-  _globalCooldownObserver.observe(document.body, {childList:true, subtree:true});
+  });
+});
+_cooldownObserver.observe(document.body||document.documentElement, {childList:true, subtree:true});
+
+function _startBtnCooldown(){
+  if(_globalBtnCooldown) return;
+  _globalBtnCooldown = true;
+  // Mark & disable every button that is currently enabled
+  document.querySelectorAll('button').forEach(b=>{
+    if(!b.disabled){
+      b.setAttribute('data-cooled', '1');
+      b.disabled = true;
+      b.style.opacity = '0.4';
+      b.style.filter = 'grayscale(1)';
+    }
+  });
   if(_globalCooldownTimer) clearTimeout(_globalCooldownTimer);
-  _globalCooldownTimer = setTimeout(_endCooldown, _COOLDOWN_MS);
+  _globalCooldownTimer = setTimeout(()=>{
+    _globalBtnCooldown = false;
+    _globalCooldownTimer = null;
+    // Re-enable only the buttons WE disabled (attribute = '1')
+    document.querySelectorAll('button[data-cooled="1"]').forEach(b=>{
+      b.removeAttribute('data-cooled');
+      b.disabled = false;
+      b.style.opacity = '';
+      b.style.filter = '';
+    });
+  }, 2000);
 }
-function _endCooldown(){
-  _globalBtnCooldown = false;
-  _globalCooldownTimer = null;
-  if(_globalCooldownObserver) _globalCooldownObserver.disconnect();
-  document.removeEventListener('click', _coolClickCapture, true);
-  _enableCooledEls();
-}
-const DEBOUNCE_MS  = 3000;
+const DEBOUNCE_MS  = 2000;
 function debounce(key){
   const now = Date.now();
   const last = _debounceMap.get(key) || 0;
@@ -5758,12 +5733,12 @@ function renderMiningPage(){
     const btn=active
       ? '<button class="mine-action-btn wait" disabled>'+formatMiningTime((rec.endsAt||0)-now)+'</button>'
       : ready
-        ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">НА БАЛАНС</button>'
-        : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">В путь</button>';
-    return '<div class="mine-car-card">'+
+        ? '<button class="mine-action-btn" onclick="claimBikeMiningRewards()">'+tr('miningClaim')+'</button>'
+        : '<button class="mine-action-btn" onclick="startBikeMining('+b.lv+')">'+tr('miningStart')+'</button>';
+    return '<div class="mine-car-card" data-lv="'+b.lv+'">'+
       '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
       '<div class="mine-card-body">'+
-        '<div class="mine-in-garage">В гараже: 1</div>'+
+        '<div class="mine-in-garage">'+tr('miningInGarage')+': 1</div>'+
         '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(3)+' TON / 24h</div>'+btn+
       '</div></div>';
   }).join('');
@@ -5797,7 +5772,26 @@ async function claimBikeMiningRewards(){
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
   finally{_miningInFlight=false;}
 }
-setInterval(()=>{renderMiningPage();},1000);
+// Only update mining timers (not full re-render) every second
+setInterval(()=>{
+  const mineSection = document.getElementById('sectionFriends');
+  if(!mineSection||!mineSection.classList.contains('active')) return;
+  // Just update countdown buttons, no full re-render
+  const now = Date.now();
+  const mining = S.user?.bikeMining||{};
+  document.querySelectorAll('.mine-action-btn.wait').forEach(btn=>{
+    const card = btn.closest('.mine-car-card');
+    if(!card) return;
+    const lv = card.dataset.lv;
+    const rec = mining[String(lv)]||mining[lv];
+    if(rec&&rec.status==='active'&&(rec.endsAt||0)>now){
+      btn.textContent = formatMiningTime((rec.endsAt||0)-now);
+    } else if(rec&&rec.status==='active'&&(rec.endsAt||0)<=now){
+      // Mining done - do a full re-render once
+      renderMiningPage();
+    }
+  });
+},1000);
 
 /* ════ UPDATE UI ════ */
 function updateUI(){
@@ -5842,8 +5836,11 @@ function updateTankUI(){
 function showFab(){const f=document.getElementById('floatAddTask');if(f)f.style.display='flex';}
 
 function goNav(el){
-  /* Close any open profile sub-page when switching tabs from bottom nav */
-  try{ if(typeof closeProfilePage === 'function') closeProfilePage(); }catch(_){}
+  // Always close any open profile subpage first so bottom nav works correctly
+  const subPage = document.getElementById('profileSubPage');
+  if(subPage && subPage.style.display !== 'none') {
+    subPage.style.display = 'none';
+  }
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
@@ -6774,9 +6771,9 @@ async function init(){
   // Helper: get current lang translation
   function lt(key){ const lang=localStorage.getItem('pandaLang')||'en'; return (TRANSLATIONS[lang]||TRANSLATIONS['en'])[key]||TRANSLATIONS['en'][key]||key; }
 
-  // Record start time — minimum 1.2 seconds total (was 0.8s + many fake delays)
+  // Record start time — minimum loading time
   const startTime = Date.now();
-  const MIN_LOADING_MS = 1200;
+  const MIN_LOADING_MS = 200;
 
   // Step 1: Telegram setup
   ldProgress(0, lt('ldLoading'));
@@ -6796,10 +6793,12 @@ async function init(){
           localStorage.setItem('pandaLangCode',supported[tgLang][1]);
         }
       }
+      // Set avatar in new topbar
       const hubAv=document.getElementById('hubAvatar');
       if(hubAv && u.photo_url){
         hubAv.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<span>🏍️</span>'">`;
       }
+      // Set username in new topbar — show Telegram first name
       const hubName=document.getElementById('hubUserName');
       if(hubName){
         const firstName=u.first_name||'';
@@ -6807,8 +6806,9 @@ async function init(){
         const username=u.username||'';
         const displayName=(firstName+' '+lastName).trim()||username||'Player';
         hubName.textContent=displayName;
-        S._tgName=displayName;
+        S._tgName=displayName; // save for updateUI
       }
+      // Legacy uavatar
       if(u.photo_url){
         const av=document.getElementById('uavatar');
         if(av) av.innerHTML=`<img src="${esc(u.photo_url)}" onerror="this.parentElement.innerHTML='<div class=ap>🏍️</div>'">`;
@@ -6820,35 +6820,37 @@ async function init(){
       ''
     ).toString().replace(/\D/g,'');
   }
-  ldProgress(10, lt('ldConnecting'));
+  await ldAnimateTo(10, lt('ldConnecting'), 300);
 
-  // Step 1.5 + Step 2 + Step 3 — run in PARALLEL to maximize speed
-  ldProgress(20, '🏎️ ' + lt('ldConnecting'));
-  const authHdr = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
-  const serverP = window._raceServersNow(authHdr).catch(()=>{});
-  const imgP    = preloadImages().catch(()=>{});
+  // Step 1.5: Race servers — find fastest live server (non-blocking)
+  const authHdrForServer = S.tg?.initData ? `Telegram ${S.tg.initData}` : null;
+  const serverPromise = window._raceServersNow(authHdrForServer).catch(()=>{});
 
-  await serverP;
-  ldProgress(35, '✅ Server connected');
-  await imgP;
-  ldProgress(50, lt('ldAssetsOk'));
+  // Step 2: Preload images (parallel with server detection)
+  await ldAnimateTo(20, lt('ldAssets'), 300);
+  await Promise.all([
+    preloadImages().catch(()=>{}),
+    serverPromise,
+  ]);
+  await ldAnimateTo(40, lt('ldAssetsOk'), 200);
 
-  // Step 3: Load user data (with retries)
+  // Step 3: Load user data
+  await ldAnimateTo(50, lt('ldConnecting'), 300);
   let loaded = false;
   let attempts = 0;
   const MAX_ATTEMPTS = 3;
   while(!loaded && attempts < MAX_ATTEMPTS){
     attempts++;
     try{
-      ldProgress(55 + attempts*5, attempts===1 ? lt('ldConnected') : `${lt('ldRetrying')} (${attempts}/${MAX_ATTEMPTS})`);
+      ldProgress(50 + attempts*5, attempts===1 ? lt('ldConnected') : `${lt('ldRetrying')} (${attempts}/${MAX_ATTEMPTS})`);
       await loadState();
       if(S.user && S.userId) loaded=true;
       else throw new Error('No user data');
     }catch(e){
       console.warn(`Attempt ${attempts} failed:`,e.message);
       if(attempts < MAX_ATTEMPTS){
-        ldProgress(55 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
-        await new Promise(r=>setTimeout(r, 800*attempts));
+        ldProgress(50 + attempts*5, `${lt('ldBusy')} (${attempts}/${MAX_ATTEMPTS})`);
+        await new Promise(r=>setTimeout(r,1500*attempts));
       }
     }
   }
@@ -6856,45 +6858,48 @@ async function init(){
     ldError(lt('ldErrorMsg'), lt('ldRetryBtn'));
     return;
   }
-  ldProgress(75, lt('ldConnected'));
+  await ldAnimateTo(70, lt('ldConnected'), 300);
 
-  // Step 3.5: Preload owned bike images in BACKGROUND (non-blocking)
+  // Step 3.5: Preload owned bike images with priority
+  await ldAnimateTo(72, '🏍️ Loading your bikes...', 200);
   try{
     const ownedLvs = S.user?.ownedBikes || [];
     if(ownedLvs.length > 0){
       const bikeImgs = ownedLvs.map(lv=>{ const b=BIKES.find(x=>x.lv===lv); return b?b.img:null; }).filter(Boolean);
-      // Don't await — kick off in background
-      Promise.all(bikeImgs.map(u=>new Promise(res=>{
+      await Promise.all(bikeImgs.map(u=>new Promise(res=>{
         const img=new Image(); img.onload=img.onerror=res; img.src=u;
-      }))).catch(()=>{});
+      })));
     }
   }catch(e){ console.warn('bike preload:',e.message); }
 
   // Step 4: Render UI
-  ldProgress(85, lt('ldBuilding'));
+  await ldAnimateTo(85, lt('ldBuilding'), 200);
   try{ renderGarage(); }catch(e){ console.warn('renderGarage:',e.message); }
   try{ renderTasks(); }catch(e){ console.warn('renderTasks:',e.message); }
   try{ renderBikes(); }catch(e){ console.warn('renderBikes:',e.message); }
+  // Pre-build race carousel so bikes appear instantly when user opens race section
   try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){ console.warn('_raceInit:',e.message); }
   syncTopbar();
+  // Also sync Farm page topbar so user data appears immediately on first open
   try{ if(typeof syncMineTopbar === 'function') syncMineTopbar(); }catch(e){}
   try{ if(typeof syncProfileTopbar === 'function') syncProfileTopbar(); }catch(e){}
 
-  // Step 5: Init TON + timers (deferred)
-  ldProgress(95, lt('ldWallet'));
-  setTimeout(()=>initTON(), 600);
+  // Step 5: Init TON + timers
+  await ldAnimateTo(95, lt('ldWallet'), 150);
+  setTimeout(()=>initTON(), 300);
+  // Pre-compute device fingerprint in background
   getOrComputeFp().catch(()=>{});
   setInterval(()=>{ loadState(); }, 180000);
 
-  ldProgress(100, lt('ldReady'));
+  await ldAnimateTo(100, lt('ldReady'), 150);
 
-  // Ensure minimum loading time so the screen doesn't flash
+  // Ensure minimum loading time (5-10s feel)
   const elapsed = Date.now() - startTime;
   if(elapsed < MIN_LOADING_MS){
     await new Promise(r=>setTimeout(r, MIN_LOADING_MS - elapsed));
   }
 
-  setTimeout(()=>ldHide(), 250);
+  setTimeout(()=>ldHide(), 700);
   // Apply saved language after UI ready
   const savedLang = localStorage.getItem('pandaLang');
   if(savedLang){
@@ -6923,7 +6928,7 @@ const TRANSLATIONS = {
     submitPost:'📤 إرسال للمراجعة',
     postHistory:'سجل المنشورات',
     noPostsYet:'لا توجد منشورات',
-    activeRefNote:'الإحالات النشطة فقط تُحسب. تصبح نشطة عند أول سحب.',
+    activeRefNote:'الإحالات النشطة فقط تُحسب. تصبح الإحالة نشطة عند أول إيداع أو سحب.',
     availableBalance:'TON المتاح',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'فوري • بدون تحويل',
@@ -7060,7 +7065,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Submit Post for Review',
     postHistory:'Post History',
     noPostsYet:'No posts submitted yet',
-    activeRefNote:'Only active referrals are counted. A referral becomes active when they make their first withdrawal.',
+    activeRefNote:'Only active referrals are counted. A referral becomes active when they make their first deposit or withdrawal.',
     friendsList:'Friends',
     refMissions:'Ref Missions',
     availableBalance:'TON Available',
@@ -7188,7 +7193,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Отправить',
     postHistory:'История постов',
     noPostsYet:'Нет постов',
-    activeRefNote:'Считаются только активные рефералы (сделавшие вывод).',
+    activeRefNote:'Считаются только активные рефералы (сделавшие депозит или вывод).',
     availableBalance:'TON Доступно',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Мгновенно • Без конвертации',
@@ -7316,7 +7321,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Enviar',
     postHistory:'Historial',
     noPostsYet:'Sin posts',
-    activeRefNote:'Solo referidos activos cuentan (que hayan retirado).',
+    activeRefNote:'Solo referidos activos cuentan (que hayan depositado o retirado).',
     availableBalance:'TON Disponible',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantáneo • Sin conversión',
@@ -7444,7 +7449,7 @@ const TRANSLATIONS = {
     submitPost:'📤 Soumettre',
     postHistory:'Historique posts',
     noPostsYet:'Aucun post',
-    activeRefNote:'Seuls les filleuls actifs comptent (ayant retiré).',
+    activeRefNote:'Seuls les filleuls actifs comptent (ayant déposé ou retiré).',
     availableBalance:'TON Disponible',
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantané • Sans conversion',
@@ -7683,6 +7688,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'الجراج 🚗',
       miningGarageSheetTitle:'الجراج',
       miningLoadingBikes:'جارٍ تحميل الدراجات...',
+      miningClaim:'استلام للرصيد',
+      miningStart:'بدء التعدين',
+      miningInGarage:'في الجراج',
       manualDepositTitle:'إيداع يدوي',
       walletAddressLbl:'عنوان المحفظة',
       commentUserIdLbl:'التعليق (معرّف المستخدم)',
@@ -7710,8 +7718,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garage 🚗',
       miningGarageSheetTitle:'Garage',
       miningLoadingBikes:'Loading bikes...',
-      manualDepositTitle:'Manual Deposit',
-      walletAddressLbl:'Wallet Address',
+      miningClaim:'Claim to Balance',
+      miningStart:'Start Mining',
+      miningInGarage:'In Garage',
       commentUserIdLbl:'Comment (Your User ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
       enterAmountPh:'Enter amount',
@@ -7737,8 +7746,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Гараж 🚗',
       miningGarageSheetTitle:'Гараж',
       miningLoadingBikes:'Загрузка мотоциклов...',
-      manualDepositTitle:'Ручной депозит',
-      walletAddressLbl:'Адрес кошелька',
+      miningClaim:'На баланс',
+      miningStart:'В путь',
+      miningInGarage:'В гараже',
       commentUserIdLbl:'Комментарий (ID пользователя)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
       enterAmountPh:'Введите сумму',
@@ -7764,8 +7774,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garaje 🚗',
       miningGarageSheetTitle:'Garaje',
       miningLoadingBikes:'Cargando motos...',
-      manualDepositTitle:'Depósito manual',
-      walletAddressLbl:'Dirección de cartera',
+      miningClaim:'Reclamar al saldo',
+      miningStart:'Iniciar minería',
+      miningInGarage:'En Garaje',
       commentUserIdLbl:'Comentario (Tu ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
       enterAmountPh:'Ingresa cantidad',
@@ -7791,8 +7802,9 @@ const TRANSLATIONS = {
       miningOpenGarage:'Garage 🚗',
       miningGarageSheetTitle:'Garage',
       miningLoadingBikes:'Chargement des motos...',
-      manualDepositTitle:'Dépôt manuel',
-      walletAddressLbl:'Adresse du portefeuille',
+      miningClaim:'Réclamer au solde',
+      miningStart:'Lancer le minage',
+      miningInGarage:'Dans le garage',
       commentUserIdLbl:'Commentaire (Votre ID)',
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
       enterAmountPh:'Entrez le montant',

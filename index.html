@@ -1299,12 +1299,11 @@ async function buyBike(lv){
   try{
     showNotif('⏳ Purchasing...','w');
     const res = await api('buyBike', { lv });
-    // Update local state with server response
+    // Update local state immediately, then pull the authoritative state.
     S.user.tonBalance  = res.tonBalance;
     S.user.ownedBikes  = res.ownedBikes;
     if(res.totalBikesBought!==undefined) S.user.totalBikesBought = res.totalBikesBought;
-    syncTopbar();
-    refreshBikeViews();
+    await refreshAppState({ silent: true });
     showNotif(`✅ 🏍️ ${bike.name} куплен!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Purchase failed'}`,'e');
@@ -3652,7 +3651,7 @@ async function doUpgradeStat(bikeLevel, stat){
     _raceShowSearching();
 
     let res;
-    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike?.lv||1}); }
+    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike ? _raceSelectedBike.lv : 0}); }
     catch(e){
       // The server may have completed the match after the network timed out.
       // Keep the loading screen open and verify by polling before showing an error.
@@ -5774,6 +5773,19 @@ async function api(action, data={}){
   } finally { _apiInFlight--; }
 }
 
+async function refreshAppState(opts={}){
+  try{
+    await loadState();
+    refreshBikeViews();
+    return true;
+  }catch(e){
+    if(!opts.silent) console.warn('refreshAppState:', e.message);
+    refreshBikeViews();
+    return false;
+  }
+}
+window.refreshAppState = refreshAppState;
+
 async function loadState(){
   try{
     // Pass raw initData so server can extract start_param from it
@@ -5861,7 +5873,7 @@ function renderMiningPage(){
   const mining=S.user?.bikeMining||{};
   const ready=getBikeMiningReadyAmount();
   const readyEl=document.getElementById('mineReadyTon');
-  if(readyEl) readyEl.textContent=ready.toFixed(3);
+  if(readyEl) readyEl.textContent=ready.toFixed(4);
   const topTon=document.getElementById('mineTopTon');
   if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(2))+' TON';
   const ownedList=BIKES.filter(b=>owned.includes(b.lv));
@@ -5883,7 +5895,7 @@ function renderMiningPage(){
       '<div class="mine-card-img"><img src="'+b.img+'" onerror="this.style.opacity=\'.25\'"><div class="mine-card-name">'+esc(b.name)+'</div></div>'+
       '<div class="mine-card-body">'+
         '<div class="mine-in-garage">'+tr('miningInGarage')+': 1</div>'+
-        '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(3)+' TON / 24h</div>'+btn+
+        '<div class="mine-rate-line">'+Number(b.dailyTon).toFixed(4)+' TON / 24h</div>'+btn+
       '</div></div>';
   }).join('');
 }
@@ -5897,7 +5909,7 @@ async function startBikeMining(lv){
     S.user.bikeMining=res.bikeMining||S.user.bikeMining||{};
     if(res.tonBalance!==undefined) S.user.tonBalance=res.tonBalance;
     if(res.totalMiningRuns!==undefined) S.user.totalMiningRuns=res.totalMiningRuns;
-    refreshBikeViews();
+    await refreshAppState({ silent: true });
     showNotif('✅ Mining started for 24 hours','s');
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
   finally{_miningInFlight=false;}
@@ -5909,9 +5921,9 @@ async function claimBikeMiningRewards(){
     const res=await api('claimBikeMining',{});
     S.user.tonBalance=res.tonBalance;
     S.user.bikeMining=res.bikeMining||{};
-    refreshBikeViews();
+    await refreshAppState({ silent: true });
     const added=parseFloat(res.tonAdded||0);
-    showNotif(added>0?'✅ +'+added.toFixed(3)+' TON added to balance':'⏳ No completed mining yet',added>0?'s':'w');
+    showNotif(added>0?'✅ +'+added.toFixed(4)+' TON added to balance':'⏳ No completed mining yet',added>0?'s':'w');
   }catch(e){showNotif('❌ '+(e.message||'Failed'),'e');}
   finally{_miningInFlight=false;}
 }

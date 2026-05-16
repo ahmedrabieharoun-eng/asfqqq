@@ -3619,8 +3619,30 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      // Bike Level 0.glb exists — send real levels directly like all other levels
-      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+      // Resolve real max speed for each side (with upgrades) so the engine
+      // uses the correct physics for every level including level 0.
+      const leftBike   = BIKES.find(b=>b.lv===leftLv)  || BIKES[0];
+      const rightBike  = BIKES.find(b=>b.lv===rightLv) || BIKES[0];
+      const leftStats  = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(leftBike)  : leftBike;
+      const rightStats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(rightBike) : rightBike;
+      const leftMaxSpd  = Math.max(10, leftStats.speed  || leftBike.speed);
+      const rightMaxSpd = Math.max(10, rightStats.speed || rightBike.speed);
+      // Player names + photos from Telegram
+      const tgUser    = S?.tg?.initDataUnsafe?.user;
+      const myName    = tgUser?.first_name || 'You';
+      const myPhoto   = tgUser?.photo_url  || '';
+      const oppName2  = matchData.opp.name     || 'Opponent';
+      const oppPhoto2 = matchData.opp.photoUrl || '';
+      const p1Name  = youAreP1 ? encodeURIComponent(myName)    : encodeURIComponent(oppName2);
+      const p2Name  = youAreP1 ? encodeURIComponent(oppName2)  : encodeURIComponent(myName);
+      const p1Photo = youAreP1 ? encodeURIComponent(myPhoto)   : encodeURIComponent(oppPhoto2);
+      const p2Photo = youAreP1 ? encodeURIComponent(oppPhoto2) : encodeURIComponent(myPhoto);
+      fr.src='race_engine.html?t='+Date.now()
+        +'&player='+leftLv+'&ai='+rightLv
+        +'&winner='+winnerSide
+        +'&maxSpeed='+leftMaxSpd+'&maxAiSpeed='+rightMaxSpd
+        +'&p1Name='+p1Name+'&p2Name='+p2Name
+        +'&p1Photo='+p1Photo+'&p2Photo='+p2Photo;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }

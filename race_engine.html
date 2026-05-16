@@ -916,7 +916,7 @@ const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
   // Use real names in the winner banner too
   window._RACE_NAMES = { p1: p1Name, p2: p2Name };
 })();
-function _bikeUrl(lv){ return encodeURIComponent('Bike Level '+lv+'.glb'); }
+function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
 
 // car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
 const BIKE1_URL_PRIMARY  = _bikeUrl(PLAYER_LV);
@@ -1179,44 +1179,15 @@ function spawnP(x,y,z,vx,vy,vz,type){
 //  GAME STATE
 // ═══════════════════════════════════════════════════════════════
 const START_Z=5;
-// ── Per-bike dynamic physics ─────────────────────────────────────
-// maxSpeed & maxAiSpeed are passed from index.html for every level.
-// Fallback values mirror the BIKES array in index.html.
-const _BIKE_BASE_SPEED = [10,40,60,90,135,200,300,450];
-function _bikeFallbackSpd(lv){ return _BIKE_BASE_SPEED[Math.min(lv,7)] || 10; }
-
-let P1_MAX_SPD, P2_MAX_SPD;
-try {
-  const _qs = new URLSearchParams(location.search);
-  const _p1Raw = _qs.get('maxSpeed');
-  const _p2Raw = _qs.get('maxAiSpeed');
-  P1_MAX_SPD = (_p1Raw && !isNaN(+_p1Raw)) ? Math.max(10, Math.min(2000,+_p1Raw)) : _bikeFallbackSpd(PLAYER_LV);
-  P2_MAX_SPD = (_p2Raw && !isNaN(+_p2Raw)) ? Math.max(10, Math.min(2000,+_p2Raw)) : _bikeFallbackSpd(AI_LV);
-} catch(_) {
-  P1_MAX_SPD = _bikeFallbackSpd(PLAYER_LV);
-  P2_MAX_SPD = _bikeFallbackSpd(AI_LV);
-}
-// MAX_SPD = the larger of the two (used for shared normalisation: RPM bar, lean angle)
-const MAX_SPD = Math.max(P1_MAX_SPD, P2_MAX_SPD);
-
-// Gear thresholds — scale with each bike's own top speed
-function _makeGearThr(topSpd){
-  return [0, Math.round(topSpd*0.05), Math.round(topSpd*0.14),
-              Math.round(topSpd*0.26), Math.round(topSpd*0.40), Math.round(topSpd*0.57)];
-}
-const P1_GEAR_THR = _makeGearThr(P1_MAX_SPD);
-const P2_GEAR_THR = _makeGearThr(P2_MAX_SPD);
-// Shared acceleration curve shape (same for all levels)
+// Same physics for all levels including level 0 — no special cases
 const gears   = [0,0.082,0.165,0.265,0.385,0.525,0.665];
-// gearThr used by getGear() — use faster bike's thresholds for display gear
-const gearThr = _makeGearThr(MAX_SPD);
-
-// Acceleration constant — scales with top speed: slow bikes feel sluggish, fast bikes feel powerful
-function _accelK(topSpd){ return Math.round(60 + (topSpd / 450) * 225); }
-const P1_ACCEL_K = _accelK(P1_MAX_SPD);
-const P2_ACCEL_K = _accelK(P2_MAX_SPD);
-// ACCEL_K kept for compatibility (average of both)
-const ACCEL_K = Math.round((P1_ACCEL_K + P2_ACCEL_K) / 2);
+const gearThr = [0,14,38,70,106,148,198];
+let MAX_SPD = 325;
+try {
+  const _qsMax = new URLSearchParams(location.search).get('maxSpeed');
+  if (_qsMax && !isNaN(+_qsMax)) MAX_SPD = Math.max(20, Math.min(2000, +_qsMax));
+} catch(_) {}
+const ACCEL_K = 285;
 
 const state={phase:'idle',timer:0,raceStart:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
@@ -1413,18 +1384,16 @@ function updatePhysics(dt){
   if(state.phase!=='racing') return;
   const elapsed=(performance.now()-state.raceStart)/1000;
   state.timer=elapsed;
-  // Each bike uses its own top speed and acceleration constant
-  function updateCar(cs, mult, topSpd, accelK){
+  function updateCar(cs,mult){
     if(cs.finished) return;
     cs.gear=getGear(cs.speed);
     const ga=gears[Math.min(cs.gear,gears.length-1)];
-    const ar=cs.speed/topSpd;
+    const ar=cs.speed/MAX_SPD;
     const vr=1+(Math.sin(elapsed*3.9+mult*12)*0.022);
-    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*accelK, topSpd);
+    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*ACCEL_K, MAX_SPD);
     cs.pos+=cs.speed/3.6*dt;
   }
-  updateCar(state.p1, p1M, P1_MAX_SPD, P1_ACCEL_K);
-  updateCar(state.p2, p2M, P2_MAX_SPD, P2_ACCEL_K);
+  updateCar(state.p1,p1M); updateCar(state.p2,p2M);
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
@@ -1454,19 +1423,17 @@ function updatePhysics(dt){
       c._fallbackWheels.forEach(function(child){ child.rotation.x += rotAmt; });
     }
   });
-  // Use each bike's own top speed for position/lean normalisation
-  car1.position.y=Math.max(0,-state.p1.speed/P1_MAX_SPD*0.04);
-  car2.position.y=Math.max(0,-state.p2.speed/P2_MAX_SPD*0.04);
+  car1.position.y=Math.max(0,-state.p1.speed/MAX_SPD*0.04);
+  car2.position.y=Math.max(0,-state.p2.speed/MAX_SPD*0.04);
 
   // لما السباق يخلص ارجع الدراجات على الأرض
   if(state.p1.finished) car1.position.y = 0;
   if(state.p2.finished) car2.position.y = 0;
 
-  const _perBikeMaxSpd = [P1_MAX_SPD, P2_MAX_SPD];
   [car1, car2].forEach((car, ci)=>{
     if(car._rider){
       const spd = spds[ci];
-      const leanX = -0.18 * (spd / _perBikeMaxSpd[ci]);
+      const leanX = -0.18 * (spd / MAX_SPD);
       car._rider.rotation.x = leanX;
     }
   });
@@ -1537,7 +1504,7 @@ function updateParticles(dt){
 function updateHUD(){
   document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);
   document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);
-  const r1=Math.min(state.p1.speed/P1_MAX_SPD*100,100), r2=Math.min(state.p2.speed/P2_MAX_SPD*100,100);
+  const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);
   document.getElementById('p1-rpm').style.width=r1+'%';
   document.getElementById('p2-rpm').style.width=r2+'%';
   document.getElementById('p1-rpm').style.backgroundPosition=r1>82?'100% 0':'50% 0';

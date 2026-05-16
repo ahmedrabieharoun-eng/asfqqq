@@ -3619,11 +3619,8 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      // Level 0 has no 3D GLB model — fall back to level 1 model for 3D rendering only (does NOT affect race outcome or stats)
-      const safeLeft  = leftLv  > 0 ? leftLv  : 1;
-      const safeRight = rightLv > 0 ? rightLv : 1;
-      // Pass real levels via playerLv/aiLv so engine can show correct name/label
-      fr.src='race_engine.html?t='+Date.now()+'&player='+safeLeft+'&ai='+safeRight+'&winner='+winnerSide+'&playerLv='+leftLv+'&aiLv='+rightLv;
+      // Bike Level 0.glb exists — send real levels directly like all other levels
+      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }

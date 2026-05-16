@@ -28,7 +28,7 @@ if ('serviceWorker' in navigator) {
                 .catch(() => fetch(url, { cache: 'reload' }));
             } catch (e) { /* ignore */ }
           };
-          // 1) Bike GLB models (Level 0 has no 3D model — start from 1)
+          // 1) Bike GLB models (Level 0 has no 3D model — use image only, start GLB from 1)
           for (let lv = 1; lv <= 7; lv++) {
             await queue('Bike Level ' + lv + '.glb');
           }
@@ -3315,8 +3315,7 @@ async function doUpgradeStat(bikeLevel, stat){
     if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
       S.user.ownedBikes.forEach(lv=>{
         const b = BIKES.find(x=>x.lv===lv);
-        // Level 0 is the starter bike — no 3D GLB model exists for it, exclude from race
-        if(b && lv > 0 && !isBikeMiningActive(lv)) _raceBikes.push(b);
+        if(b && !isBikeMiningActive(lv)) _raceBikes.push(b);
       });
     }
     const track = document.getElementById('raceCarouselTrack');

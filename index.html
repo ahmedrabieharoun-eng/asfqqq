@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,6 +75,47 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('SW register failed', err));
   });
 }
+
+/* Fix 7: Ensure ALL bike images (including bike level 0) are cached at startup.
+   This runs early and independently, not relying on the BIKES array being defined yet. */
+(async function ensureAllBikeImgsCached(){
+  const BIKE_IMGS_STARTUP = [
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',       // Lv 0
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png', // Lv 1
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png', // Lv 2
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png', // Lv 3
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png', // Lv 4
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png', // Lv 5
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png', // Lv 6
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png', // Lv 7
+    // Card backgrounds
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778862359/bike_dx3uy7.jpg',       // card 0
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463362/5716da26-83d2-4109-838f-5e5869107b6b_pc0aut.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463429/b46cbb24-5c10-4d60-965b-5425d14d8057_k3unkh.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463356/0475e654-4c10-420b-981a-8fa44f48dcd6_tkcimj.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463293/9ecfd607-921f-49d7-bb9e-73e8072dc4a7_gr97h2.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463412/79068472-1e06-49cf-a4e0-1b9ddb37825c_ibftho.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463366/6246f464-1218-4a3d-a10c-356bdd33c3fe_lc2xee.png',
+    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463286/0a0c0b62-9eb8-421e-b501-17246678f1df_hnrf89.png',
+  ];
+  try {
+    const cache = await caches.open('race-assets-v2');
+    for (const url of BIKE_IMGS_STARTUP) {
+      try {
+        const hit = await cache.match(url, { ignoreVary: true });
+        if (!hit) {
+          fetch(url, { mode: 'cors', credentials: 'omit' })
+            .then(r => { if(r && r.ok) cache.put(url, r.clone()); })
+            .catch(() => {});
+        }
+      } catch(e) {}
+    }
+    console.log('[bike-cache] All bike images verified in cache');
+  } catch(e) {
+    // Fallback: preload via Image() to at least populate browser HTTP cache
+    BIKE_IMGS_STARTUP.forEach(u => { const img = new Image(); img.src = u; });
+  }
+})();
 </script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
@@ -105,7 +145,12 @@ body{
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;
   font-size:clamp(13px,1.5vw,16px);
   -webkit-font-smoothing:antialiased;
+  /* Performance: reduce repaint cost */
+  will-change:auto;
+  contain:layout style;
 }
+/* Performance: lazy decode for all images */
+img{decoding:async;}
 /* ── Fluid scaling helpers ── */
 .hub-hero{height:clamp(220px,35vw,420px)!important;}
 .bk-card-top{height:clamp(160px,22vw,240px)!important;}
@@ -1201,8 +1246,8 @@ function openBikeDetail(lv){
   const maxSpeed    = 1800, maxNitro = 1100, maxAccel = 550, maxManeuver = 250;
 
   const daily  = b.dailyTon;
-  const monthly= +(daily * 30).toFixed(3);
-  const halfyr = +(daily * 180).toFixed(3);
+  const monthly= +(daily * 30).toFixed(4);
+  const halfyr = +(daily * 180).toFixed(4);
 
   const tonIcon = `<img class="bk-detail-ton-icon" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">`;
 
@@ -1287,7 +1332,7 @@ async function buyBike(lv){
   // Check TON balance (bikes are bought with TON)
   const tonBal = parseFloat((S.user && S.user.tonBalance)||0);
   if(tonBal < bike.price){
-    showNotif(`❌ Need ${bike.price} TON (you have ${tonBal.toFixed(2)} TON)`,'e');
+    showNotif(`❌ Need ${bike.price} TON (you have ${tonBal.toFixed(4)} TON)`,'e');
     return;
   }
   // Check if already owned
@@ -1318,8 +1363,11 @@ function refreshBikeViews(){
   try{ if(typeof renderBikes==='function') renderBikes(); }catch(e){}
   try{ if(typeof renderGarage==='function') renderGarage(); }catch(e){}
   try{ if(typeof renderMiningPage==='function') renderMiningPage(); }catch(e){}
+  // Always re-init race section to pick up new/removed bikes
+  try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){}
   try{ if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive(); }catch(e){}
   try{ if(typeof syncTopbar==='function') syncTopbar(); }catch(e){}
+  try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
 }
 window.refreshBikeViews = refreshBikeViews;
 
@@ -1327,12 +1375,12 @@ function syncTopbar(){
   // tbCoins element is inside TON topbar section => show TON balance
   const tonBal = S.user?.tonBalance||0;
   const el = document.getElementById('tbCoins');
-  if(el) el.textContent = tonBal.toFixed(2);
+  if(el) el.textContent = tonBal.toFixed(4);
   // Also update finance header
   if(typeof syncFinanceHeader === 'function') syncFinanceHeader();
   // Garage page TON balance
   const gTon = document.getElementById('garageTonBal');
-  if(gTon) gTon.textContent = tonBal.toFixed(2);
+  if(gTon) gTon.textContent = tonBal.toFixed(4);
   // User name
   const nameEl = document.getElementById('hubUserName');
   if(nameEl){
@@ -1385,7 +1433,7 @@ let _garageSelectedLv = null;
 function renderGarage(){
   // Update user info in garage topbar
   const gTon = document.getElementById('garageTonBal');
-  if(gTon) gTon.textContent = (S.user.tonBalance||0).toFixed(2);
+  if(gTon) gTon.textContent = (S.user.tonBalance||0).toFixed(4);
   const grAvatar = document.getElementById('grHeroAvatar');
   const grName = document.getElementById('grHeroUserName');
   if(grAvatar && S.user){
@@ -1474,7 +1522,7 @@ function renderGarage(){
   // Render upgrades section
   if(upgEl){
     const upgs = cs.upgs;
-    const upgPrice = (b.price/4).toFixed(2);
+    const upgPrice = (b.price/4).toFixed(4);
     const tonBal = S.user.tonBalance||0;
 
     function upgRowNew(stat, label){
@@ -1536,7 +1584,7 @@ function openUpgModal(lv){
     const bCardBg = BIKE_CARD_IMGS[0];
     const cs = getBikeCurrentStats(b);
     const upgs = cs.upgs;
-    const upgPrice = (b.price/4).toFixed(2);
+    const upgPrice = (b.price/4).toFixed(4);
     const tonBal = S.user.tonBalance||0;
     function upgRowModal(stat,label){
       const upg = upgs[stat]||0;
@@ -1831,7 +1879,7 @@ async function doUpgradeStat(bikeLevel, stat){
         let val = srcTb ? (srcTb.textContent||'').trim() : '';
         if(!val || val === '0'){
           const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-          val = (Number(bal)||0).toFixed(2);
+          val = (Number(bal)||0).toFixed(4);
         }
         if(tb.textContent !== val) tb.textContent = val;
       }
@@ -1898,7 +1946,7 @@ async function doUpgradeStat(bikeLevel, stat){
         let val = srcTb ? (srcTb.textContent||'').trim() : '';
         if(!val || val === '0'){
           const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-          val = (Number(bal)||0).toFixed(2);
+          val = (Number(bal)||0).toFixed(4);
         }
         if(tp.textContent !== val) tp.textContent = val;
       }
@@ -1906,10 +1954,10 @@ async function doUpgradeStat(bikeLevel, stat){
         let v = '';
         const tbVal = srcTb ? (srcTb.textContent||'').trim() : '';
         if(tbVal && !isNaN(parseFloat(tbVal.replace(/,/g,'')))){
-          v = parseFloat(tbVal.replace(/,/g,'')).toFixed(2);
+          v = parseFloat(tbVal.replace(/,/g,'')).toFixed(4);
         } else {
           const bal = (u.tonBalance!=null ? u.tonBalance : 0);
-          v = (Number(bal)||0).toFixed(2);
+          v = (Number(bal)||0).toFixed(4);
         }
         if(fb.textContent !== v) fb.textContent = v;
       }
@@ -3307,7 +3355,7 @@ async function doUpgradeStat(bikeLevel, stat){
         const photoUrl = S.user.photoUrl||(S?.tg?.initDataUnsafe?.user?.photo_url)||null;
         if(av && photoUrl) av.innerHTML = `<img src="${photoUrl}" onerror="this.parentNode.innerHTML='<span>🏍️</span>'">`;
         if(nm) nm.textContent = S.user.firstName||S._tgName||'Player';
-        if(tb) tb.textContent = (S.user.tonBalance||0).toFixed(2);
+        if(tb) tb.textContent = (S.user.tonBalance||0).toFixed(4);
       }
     }catch(e){}
 
@@ -4338,7 +4386,7 @@ async function doUpgradeStat(bikeLevel, stat){
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
-          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="0.1" oninput="updateWdFeePreview()">
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.0001 TON" data-i18n-ph="minOneTonPh" step="0.0001" min="0.0001" oninput="updateWdFeePreview()">
           <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||'';updateWdFeePreview()">Max</button>
         </div>
         <!-- Fee preview box -->
@@ -4867,7 +4915,7 @@ async function doUpgradeStat(bikeLevel, stat){
       if(t) t.textContent = total;
       if(a) a.textContent = active;
       if(i) i.textContent = inactive;
-      if(e) e.textContent = totalEarned.toFixed(2);
+      if(e) e.textContent = totalEarned.toFixed(4);
 
       // Also update the old badge used elsewhere
       const cntEl = document.getElementById('totalRefsDisp');
@@ -5139,9 +5187,9 @@ function syncFinanceHeader(){
   const user = S.user||{};
   const tonBal = user.tonBalance||0;
   const el = document.getElementById('finTonBal');
-  if(el) el.textContent = tonBal.toFixed(3);
+  if(el) el.textContent = tonBal.toFixed(4);
   const wdEl = document.getElementById('wdTonBal');
-  if(wdEl) wdEl.textContent = tonBal.toFixed(3);
+  if(wdEl) wdEl.textContent = tonBal.toFixed(4);
   // User photo
   const avEl = document.getElementById('finUserAvatar');
   if(avEl && user.photoUrl){
@@ -5577,7 +5625,7 @@ const REF_ACTIVE_TASKS=[
   {id:'ra500',n:500, bam:5000000, coins:20000},
 ];
 const SOC_TASKS=[
-  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacing_bot', bam:1000},
+  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacing_chat', bam:1000},
   {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/RaseenRacing_bot', bam:500},
   {id:'tg_ch', name:'Join Telegram Channel', icon:'📢', link:'https://t.me/YOUR_CHANNEL', bam:1000},
   {id:'tg_grp',name:'Join Telegram Group',   icon:'👥', link:'https://t.me/YOUR_GROUP',   bam:500 },
@@ -5875,7 +5923,7 @@ function renderMiningPage(){
   const readyEl=document.getElementById('mineReadyTon');
   if(readyEl) readyEl.textContent=ready.toFixed(4);
   const topTon=document.getElementById('mineTopTon');
-  if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(2))+' TON';
+  if(topTon) topTon.textContent=((S.user?.tonBalance||0).toFixed(4))+' TON';
   const ownedList=BIKES.filter(b=>owned.includes(b.lv));
   if(!ownedList.length){
     grid.innerHTML='<div class="mine-empty">'+tr('noBikesYetTitle')+'<br><span style="font-size:12px;color:#8a927f">'+tr('noBikesYetSub')+'</span></div>';
@@ -5954,11 +6002,11 @@ function updateUI(){
   // topbar TON balance
   const tonBal = u.tonBalance||0;
   const tbEl = document.getElementById('tbCoins');
-  if(tbEl) tbEl.textContent = tonBal.toFixed(2);
+  if(tbEl) tbEl.textContent = tonBal.toFixed(4);
   const mineTopTon=document.getElementById('mineTopTon');
-  if(mineTopTon) mineTopTon.textContent=tonBal.toFixed(2)+' TON';
+  if(mineTopTon) mineTopTon.textContent=tonBal.toFixed(4)+' TON';
   const gTon = document.getElementById('garageTonBal');
-  if(gTon) gTon.textContent = tonBal.toFixed(2);
+  if(gTon) gTon.textContent = tonBal.toFixed(4);
   updateRefUI();
   renderWdHist();
   renderWdHistNew();
@@ -6317,7 +6365,7 @@ function updateWdFeePreview(){
   const feeEl=document.getElementById('wdFeeAmt');
   const netEl=document.getElementById('wdNetAmt');
   if(!preview||!feeEl||!netEl) return;
-  if(amt>=0.1){
+  if(amt>=0.0001){
     const fee=+(amt*0.1).toFixed(8);
     const net=+(amt-fee).toFixed(8);
     feeEl.textContent=`-${fee.toFixed(4)} TON`;
@@ -6334,7 +6382,7 @@ async function doWithdraw(){
   const amt=parseFloat(document.getElementById('wdAmtInput')?.value||document.getElementById('wdAmt')?.value)||0;
   const u=S.user;
   if(!addr||addr.length<10){showNotif('Enter valid TON address!','e');return;}
-  if(amt<0.1){showNotif('Min 0.1 TON!','e');return;}
+  if(amt<0.0001){showNotif('Min 0.0001 TON!','e');return;}
   if(amt>(u.tonBalance||0)){showNotif('Not enough TON!','e');return;}
 
   // Fix 9+10: check partner tasks locally first (fast feedback)
@@ -6348,6 +6396,13 @@ async function doWithdraw(){
 
   const feeAmt=+(amt*0.10).toFixed(8);
   const netAmt=+(amt-feeAmt).toFixed(8);
+
+  // Check for pending withdrawal
+  const pendingWd = (S.wdHist||[]).find(h=>(h.status||'pending').toLowerCase()==='pending');
+  if(pendingWd){
+    showNotif('❌ لديك طلب سحب معلق — انتظر الموافقة أولاً','e');
+    return;
+  }
 
   try{
     // Get device fingerprint (hardware-based, survives VPN/IP change)
@@ -6651,7 +6706,7 @@ function openProfilePage(page){
         // Total earned from partnership posts (approved sum) or fallback
         let earned = 0;
         try{ (S.partnerPosts||[]).forEach(p=>{ if(p.status==='approved') earned += (+p.reward||0); }); }catch(e){}
-        bv.textContent = earned ? earned.toFixed(2) : '0.00';
+        bv.textContent = earned ? earned.toFixed(4) : '0.00';
       } else {
         bv.textContent = (srcBv && srcBv.textContent) ? srcBv.textContent : '0.00';
       }
@@ -6725,7 +6780,7 @@ function updDepPreview(){
   const ton=parseFloat(document.getElementById('depositAmountInput')?.value)||0;
   const tonIcon='<img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover">';
   const el=document.getElementById('depTonPreview');
-  if(el) el.innerHTML=`${tonIcon} ${ton>0?ton.toFixed(2):'0'} TON`;
+  if(el) el.innerHTML=`${tonIcon} ${ton>0?ton.toFixed(4):'0'} TON`;
   // enable/disable submit button
   const walletConnected=!!S.wallet;
   const btn=document.getElementById('submitDepositBtn');

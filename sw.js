@@ -13,6 +13,19 @@ function is3DModel(url) {
   return false;
 }
 
+/* Normalize a GLB URL so spaces and %20 always map to the same cache key.
+ * e.g. "Bike Level 0.glb" and "Bike%20Level%200.glb" → identical key.
+ * Always stores/looks up with decoded pathname (spaces, not %20). */
+function normalizeCacheKey(url) {
+  try {
+    const u = new URL(url);
+    u.pathname = decodeURIComponent(u.pathname);
+    return u.toString();
+  } catch (_) {
+    return url;
+  }
+}
+
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
@@ -29,8 +42,12 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(req, { ignoreVary: true });
+
+    // Always look up and store with the normalized (decoded) URL as key
+    const cacheKey = normalizeCacheKey(req.url);
+    const cached = await cache.match(cacheKey, { ignoreVary: true });
     if (cached) return cached;
+
     try {
       const fetchReq = new Request(req.url, {
         mode: req.mode === 'navigate' ? 'cors' : 'no-cors',
@@ -38,10 +55,11 @@ self.addEventListener('fetch', (event) => {
         cache: 'reload',
       });
       const resp = await fetch(fetchReq);
-      try { await cache.put(req, resp.clone()); } catch (_) {}
+      // Store under the normalized key so future requests always hit the cache
+      try { await cache.put(cacheKey, resp.clone()); } catch (_) {}
       return resp;
     } catch (err) {
-      const fallback = await cache.match(req, { ignoreVary: true });
+      const fallback = await cache.match(cacheKey, { ignoreVary: true });
       if (fallback) return fallback;
       throw err;
     }

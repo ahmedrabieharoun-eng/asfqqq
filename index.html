@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,29 +17,20 @@ if ('serviceWorker' in navigator) {
         // Background preload of bike GLB models so they're ready before any race.
         // Uses requestIdleCallback to avoid blocking the UI; SW caches each one
         // on first fetch, so future requests are instant + offline-friendly.
-        // (7) Preload bike assets IMMEDIATELY (not delayed 8s) so bike 0 is ready before user enters race
-        const schedule = (cb) => setTimeout(cb, 500);
+        const schedule = (cb) => setTimeout(cb, 8000);
         schedule(async () => {
           const cache = await caches.open('race-assets-v2');
           const queue = async (url) => {
             try {
               const hit = await cache.match(url, { ignoreVary: true });
-              if (hit) return true;
-              const res = await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
+              if (hit) return;
+              await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
                 .catch(() => fetch(url, { cache: 'reload' }));
-              return res && res.ok;
-            } catch (e) { return false; }
+            } catch (e) { /* ignore */ }
           };
-          // 1) Bike GLB models — explicitly verify bike 0 loads, retry up to 3 times
+          // 1) Bike GLB models
           for (let lv = 0; lv <= 7; lv++) {
-            const url = 'Bike Level ' + lv + '.glb';
-            let ok = false;
-            for (let attempt = 0; attempt < 3 && !ok; attempt++) {
-              ok = await queue(url);
-              if (!ok) await new Promise(r => setTimeout(r, 800));
-            }
-            if (!ok) console.warn('[preload] failed to cache', url);
-            else console.log('[preload] cached', url);
+            await queue('Bike Level ' + lv + '.glb');
           }
           // 2) All website images — scan DOM + CSS for image URLs and preload them
           const collectImageUrls = () => {
@@ -1114,14 +1104,14 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 <script>
 /* ══ BIKE INVESTMENT DATA ══ */
 const BIKES = [
-  {lv:0,  name:'Specialized Allez',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
-  {lv:1,  name:'Honda CB350',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
-  {lv:2,  name:'Honda CBR650R',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
-  {lv:3,  name:'Suzuki GSX-S750',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
-  {lv:4,  name:'Suzuki GSX-R1000',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
-  {lv:5,  name:'Kawasaki Z900',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
-  {lv:6,  name:'KTM RC 8C',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
-  {lv:7,  name:'Kawasaki Ninja H2',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
+  {lv:0,  name:'Bike Level 0',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
+  {lv:1,  name:'Bike Level 1',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
+  {lv:2,  name:'Bike Level 2',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
+  {lv:3,  name:'Bike Level 3',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
+  {lv:4,  name:'Bike Level 4',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
+  {lv:5,  name:'Bike Level 5',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
+  {lv:6,  name:'Bike Level 6',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
+  {lv:7,  name:'Bike Level 7',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
 ];
 
 const TON_IMG = 'https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png';
@@ -1765,7 +1755,7 @@ async function doUpgradeStat(bikeLevel, stat){
       </div>
       <div class="mine-tb-ton">
         <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" alt="TON">
-        <span class="mine-tb-ton-val" id="mineTonBal">0.00</span>
+        <span class="mine-tb-ton-val" id="mineTonBal">0.0000</span>
         <button class="mine-tb-plus" onclick="goNavBySection('sectionFinance')" aria-label="Deposit">+</button>
       </div>
     </div>
@@ -2990,19 +2980,10 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ── START FIXED BOTTOM ── -->
     <div class="race-start-fixed" id="raceStartFixed">
-      <!-- (10) Bike Level 0 info hint — shown only when bike 0 selected -->
-      <div id="raceBike0Hint" style="display:none;font-size:11px;color:#9ccc40;text-align:center;margin-bottom:6px;padding:4px 8px;background:rgba(124,179,66,.1);border-radius:8px;line-height:1.4">
-        💡 Higher-level bikes can bet & win — Bike 0 races are free practice only
-      </div>
       <button class="race-start-btn" onclick="startRace()"><span data-i18n="startRaceBtn">Start Race</span> <span class="chev">»</span></button>
-      <div class="race-stake-lbl" id="raceStakeLbl">
-        <span data-i18n="entryFeeLbl">Entry Fee:</span> <span class="v" id="raceStakeVal">0.5</span>
-        <img id="raceStakeIcon" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
-      </div>
-      <!-- (10) Free-for-bike-0 label, shown only when bike 0 selected -->
-      <div class="race-stake-lbl" id="raceStakeFree" style="display:none">
-        <span style="text-decoration:line-through;opacity:.55">0.5 TON</span>
-        <span style="color:#9ccc40;font-weight:800;margin-left:6px">FREE for Bike Level 0</span>
+      <div class="race-stake-lbl">
+        <span data-i18n="entryFeeLbl">Entry Fee:</span> <span class="v">0.5</span>
+        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
       </div>
     </div>
 
@@ -3476,14 +3457,6 @@ async function doUpgradeStat(bikeLevel, stat){
     });
     const b=_raceBikes[_raceIdx];
     if(b) _renderStats(b);
-    // (10) Toggle bike-0 free-race UI hints
-    const isLv0 = b && b.lv === 0;
-    const hint = document.getElementById('raceBike0Hint');
-    const stake = document.getElementById('raceStakeLbl');
-    const free  = document.getElementById('raceStakeFree');
-    if(hint)  hint.style.display  = isLv0 ? 'block' : 'none';
-    if(stake) stake.style.display = isLv0 ? 'none'  : 'flex';
-    if(free)  free.style.display  = isLv0 ? 'flex'  : 'none';
   }
 
   /* swipe on big carousel card disabled — navigation is via thumbnails only */
@@ -3645,18 +3618,7 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      // (11) Pass dynamic max speed (selected bike's effective top speed) + player names/photos
-      const myBike = _raceBikes.find(b=>b.lv===myLv) || _raceBikes[_raceIdx] || {speed:120};
-      const dynMaxSpd = Math.max(60, Math.min(2000, Math.round((myBike.speed||120) * 1.0)));
-      const myName  = encodeURIComponent((S.user?.firstName || S.tg?.first_name || 'You').slice(0,18));
-      const oppName = encodeURIComponent((matchData.opp?.name || matchData.opp?.firstName || 'Rival').slice(0,18));
-      const myPhoto  = encodeURIComponent(S.user?.photoUrl || S.tg?.photo_url || '');
-      const oppPhoto = encodeURIComponent(matchData.opp?.photoUrl || '');
-      fr.src='race_engine.html?t='+Date.now()
-        +'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide
-        +'&maxSpeed='+dynMaxSpd
-        +'&p1Name='+(youAreP1?myName:oppName)+'&p2Name='+(youAreP1?oppName:myName)
-        +'&p1Photo='+(youAreP1?myPhoto:oppPhoto)+'&p2Photo='+(youAreP1?oppPhoto:myPhoto);
+      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }
@@ -3680,17 +3642,15 @@ async function doUpgradeStat(bikeLevel, stat){
   window.startRace = async function(){
     if(_raceActive||_raceStarted||_raceQueueing) return;
     if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
-    _raceSelectedBike=_raceBikes[_raceIdx];
-    const isFreeBike0 = (_raceSelectedBike && _raceSelectedBike.lv === 0);
     const ton=S?.user?.tonBalance||0;
-    // (10) Bike Level 0 races for FREE — skip 0.5 TON entry-fee check
-    if(!isFreeBike0 && ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+    if(ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
 
     _raceStarted=true; _raceQueueing=true;
+    _raceSelectedBike=_raceBikes[_raceIdx];
     _raceShowSearching();
 
     let res;
-    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike ? _raceSelectedBike.lv : 0, freeBike0: isFreeBike0 ? 1 : 0}); }
+    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike ? _raceSelectedBike.lv : 0}); }
     catch(e){
       // The server may have completed the match after the network timed out.
       // Keep the loading screen open and verify by polling before showing an error.
@@ -3876,7 +3836,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div style="flex:1;min-width:0">
         <div class="pf-ballbl" data-i18n="totalBalance">Total Balance</div>
         <div class="pf-balrow">
-          <span class="pf-balval" id="finTonBal">0.00</span>
+          <span class="pf-balval" id="finTonBal">0.0000</span>
           <span class="pf-baltkn">TON</span>
         </div>
       </div>
@@ -4282,7 +4242,7 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="psp-username" id="pspUserName">Player</div>
       <div class="psp-balcard">
         <div class="psp-ballbl"><span id="pspBalLbl">Balance</span> <i class="fas fa-wallet"></i></div>
-        <div class="psp-balrow"><img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:18px;height:18px;border-radius:50%;object-fit:cover;flex-shrink:0"><span class="psp-balval" id="pspBalVal">0.00</span><span class="psp-baltkn">TON</span></div>
+        <div class="psp-balrow"><img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:18px;height:18px;border-radius:50%;object-fit:cover;flex-shrink:0"><span class="psp-balval" id="pspBalVal">0.0000</span><span class="psp-baltkn">TON</span></div>
       </div>
     </div>
   </div>
@@ -4377,7 +4337,7 @@ async function doUpgradeStat(bikeLevel, stat){
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
-          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="0.1" oninput="updateWdFeePreview()">
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.0001 TON" data-i18n-ph="minOneTonPh" step="0.0001" min="0.0001" oninput="updateWdFeePreview()">
           <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||'';updateWdFeePreview()">Max</button>
         </div>
         <!-- Fee preview box -->
@@ -5329,7 +5289,7 @@ function syncFinanceHeader(){
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpMinWithdraw">📦 Minimum Withdrawal</span>
-            <span style="font-size:12px;font-weight:800;color:#fff">2,000 Coins (0.1 TON)</span>
+            <span style="font-size:12px;font-weight:800;color:#fff">0.0001 TON</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(255,255,255,.04);border-radius:10px">
             <span style="font-size:11px;color:var(--muted);font-weight:600" data-i18n="helpRefCommission">👥 Referral Commission</span>
@@ -5344,7 +5304,7 @@ function syncFinanceHeader(){
       <!-- Withdrawal conditions -->
       <div style="background:linear-gradient(135deg,rgba(255,215,0,.07),rgba(0,0,0,.4));border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:13px">
         <div style="font-size:14px;font-weight:800;color:var(--coin);margin-bottom:8px;display:flex;align-items:center;gap:6px" data-i18n="helpWdTitle">📤 Withdrawal Conditions</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;line-height:1.9" data-i18n="helpWdBody"><span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br><span style="color:#fff">•</span> Minimum withdrawal: <span style="color:#fff;font-weight:800">0.0001 TON</span><br><span style="color:#fff">•</span> Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br><span style="color:#fff">•</span> A valid TON wallet is required to receive the amount<br><span style="color:#fff">•</span> Withdrawal is processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br><span style="color:#fff">•</span> Follow the <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm withdrawal execution</div>
       </div>
     </div>
     <div style="height:12px"></div>
@@ -5793,12 +5753,6 @@ function debounce(key){
 /* ════ API — Single Server ═════════════════════════════════════════ */
 let _apiInFlight = 0;
 
-// (6) Actions that mutate user state — auto-refresh state after success
-const _MUTATING_ACTIONS = new Set([
-  'buyBike','upgradeStats','startBikeMining','claimBikeMining',
-  'withdraw','deposit','claimTask','verifyTask','claimMissionTask',
-  'createTask','submitPartnerPost','saveSeasonAlloc','saveLanguage','raceResult'
-]);
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
@@ -5813,11 +5767,6 @@ async function api(action, data={}){
       err.errorCode = j.errorCode || '';
       err.missing   = j.missing;
       throw err;
-    }
-    // (6) Auto-refresh state after any mutating action so UI is always fresh
-    if(_MUTATING_ACTIONS.has(action)){
-      // fire-and-forget so original caller still gets its data first
-      setTimeout(() => { try { refreshAppState({silent:true}); } catch(_){} }, 200);
     }
     return j.data;
   } finally { _apiInFlight--; }
@@ -6367,7 +6316,7 @@ function updateWdFeePreview(){
   const feeEl=document.getElementById('wdFeeAmt');
   const netEl=document.getElementById('wdNetAmt');
   if(!preview||!feeEl||!netEl) return;
-  if(amt>=0.1){
+  if(amt>=0.0001){
     const fee=+(amt*0.1).toFixed(8);
     const net=+(amt-fee).toFixed(8);
     feeEl.textContent=`-${fee.toFixed(4)} TON`;
@@ -6384,8 +6333,12 @@ async function doWithdraw(){
   const amt=parseFloat(document.getElementById('wdAmtInput')?.value||document.getElementById('wdAmt')?.value)||0;
   const u=S.user;
   if(!addr||addr.length<10){showNotif('Enter valid TON address!','e');return;}
-  if(amt<0.1){showNotif('Min 0.1 TON!','e');return;}
+  if(amt<0.0001){showNotif('Min 0.0001 TON!','e');return;}
   if(amt>(u.tonBalance||0)){showNotif('Not enough TON!','e');return;}
+
+  // Check for existing pending withdrawal
+  const hasPendingWd=(S.wdHist||[]).some(h=>h&&h.status==='pending');
+  if(hasPendingWd){showNotif('❌ You already have a pending withdrawal. Please wait for it to be processed first.','e');return;}
 
   // Fix 9+10: check partner tasks locally first (fast feedback)
   const partnerTasks=S.tasks?.partner||[];
@@ -6701,9 +6654,9 @@ function openProfilePage(page){
         // Total earned from partnership posts (approved sum) or fallback
         let earned = 0;
         try{ (S.partnerPosts||[]).forEach(p=>{ if(p.status==='approved') earned += (+p.reward||0); }); }catch(e){}
-        bv.textContent = earned ? earned.toFixed(4) : '0.00';
+        bv.textContent = earned ? earned.toFixed(4) : '0.0000';
       } else {
-        bv.textContent = (srcBv && srcBv.textContent) ? srcBv.textContent : '0.00';
+        bv.textContent = (srcBv && srcBv.textContent) ? srcBv.textContent : '0.0000';
       }
     }
   }catch(e){}
@@ -7228,7 +7181,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 عمولة الإحالة',helpRefCommissionVal:'10% من مشتريات الصديق',
     helpAddTask:'➕ إضافة مهمة (100 عضو)',
     helpWdTitle:'📤 شروط السحب',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">شروط السحب العامة:</span><br>• الحد الأدنى: <span style="color:#fff;font-weight:800">0.0001 TON</span><br>• يجب إكمال <span style="color:#fff;font-weight:800">مهام الشركاء</span> قبل السحب<br>• تحتاج محفظة TON صالحة<br>• يُعالَج تلقائياً خلال <span style="color:var(--neon-green);font-weight:800">1 إلى 3 دقائق</span><br>• تابع قناة <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">المدفوعات</a> للتأكد',
     upgTitle:'⬆️ ترقية التانك',miningInfoTitle:'⚡ معلومات التعدين',
     addTaskTitle:'➕ إضافة مهمة مجتمعية',
     taskCostFormula:'التكلفة = <strong style="color:var(--coin)">عدد المستخدمين × 60 Coins</strong>',
@@ -7405,7 +7358,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Referral Commission',helpRefCommissionVal:"10% of friend's purchases",
     helpAddTask:'➕ Add Task (100 members)',
     helpWdTitle:'📤 Withdrawal Conditions',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">General Withdrawal Conditions:</span><br>• Minimum withdrawal: <span style="color:#fff;font-weight:800">0.0001 TON</span><br>• Must complete all <span style="color:#fff;font-weight:800">Partner Tasks</span> before withdrawal<br>• A valid TON wallet is required<br>• Processed automatically within <span style="color:var(--neon-green);font-weight:800">1 to 3 minutes</span><br>• Follow the <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">Payouts channel</a> to confirm',
     upgTitle:'⬆️ Upgrade Tank',miningInfoTitle:'⚡ Mining Info',
     addTaskTitle:'➕ Add Community Task',
     taskCostFormula:'Cost = <strong style="color:var(--coin)">Target Users × 60 Coins</strong>',
@@ -7573,7 +7526,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Реферальная комиссия',helpRefCommissionVal:'10% с покупок друга',
     helpAddTask:'➕ Добавить задание (100 участников)',
     helpWdTitle:'📤 Условия вывода',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">2,000 Coins (0.1 TON)</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Общие условия вывода:</span><br>• Минимум: <span style="color:#fff;font-weight:800">0.0001 TON</span><br>• Выполните все <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Нужен действительный TON-кошелёк<br>• Обработка: <span style="color:var(--neon-green);font-weight:800">1–3 минуты</span><br>• Следите за <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">каналом выплат</a>',
     upgTitle:'⬆️ Улучшить танк',miningInfoTitle:'⚡ Инфо о майнинге',
     addTaskTitle:'➕ Добавить задание',
     taskCostFormula:'Стоимость = <strong style="color:var(--coin)">Кол-во участников × 60 Coins</strong>',
@@ -7909,7 +7862,7 @@ const TRANSLATIONS = {
     helpRefCommission:'👥 Commission de parrainage',helpRefCommissionVal:"10% des achats de l'ami",
     helpAddTask:'➕ Ajouter tâche (100 membres)',
     helpWdTitle:'📤 Conditions de retrait',
-    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">2,000 Pièces (0.1 TON)</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
+    helpWdBody:'<span style="color:var(--coin);font-weight:800">Conditions générales de retrait:</span><br>• Minimum: <span style="color:#fff;font-weight:800">0.0001 TON</span><br>• Complétez toutes les <span style="color:#fff;font-weight:800">Partner Tasks</span><br>• Un portefeuille TON valide est requis<br>• Traité automatiquement en <span style="color:var(--neon-green);font-weight:800">1 à 3 minutes</span><br>• Suivez le <a href="https://t.me/RaseenRacing_bot" target="_blank" style="color:#00D4FF;font-weight:800">canal des paiements</a>',
     upgTitle:'⬆️ Améliorer le réservoir',miningInfoTitle:'⚡ Info de minage',
     addTaskTitle:'➕ Ajouter une tâche communautaire',
     taskCostFormula:'Coût = <strong style="color:var(--coin)">Utilisateurs cibles × 60 Pièces</strong>',
@@ -8145,7 +8098,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> أرسل <b>TON</b> فقط إلى هذا العنوان.',
       enterAmountPh:'أدخل المبلغ',
       tonWalletAddr:'عنوان محفظة TON',
-      minOneTonPh:'الحد الأدنى: 1 TON',
+      minOneTonPh:'الحد الأدنى: 0.0001 TON',
       maxBtn:'الأقصى',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> إيداع',
       pspTitleWithdraw:'سحب',
@@ -8173,7 +8126,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Send only <b>TON</b> to this address.',
       enterAmountPh:'Enter amount',
       tonWalletAddr:'TON Wallet Address',
-      minOneTonPh:'Min: 1 TON',
+      minOneTonPh:'Min: 0.0001 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Deposit',
       pspTitleWithdraw:'Withdraw',
@@ -8201,7 +8154,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Отправляйте только <b>TON</b> на этот адрес.',
       enterAmountPh:'Введите сумму',
       tonWalletAddr:'Адрес TON-кошелька',
-      minOneTonPh:'Мин: 1 TON',
+      minOneTonPh:'Мин: 0.0001 TON',
       maxBtn:'Макс',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Депозит',
       pspTitleWithdraw:'Вывод',
@@ -8229,7 +8182,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envía solo <b>TON</b> a esta dirección.',
       enterAmountPh:'Ingresa cantidad',
       tonWalletAddr:'Dirección de cartera TON',
-      minOneTonPh:'Mín: 1 TON',
+      minOneTonPh:'Mín: 0.0001 TON',
       maxBtn:'Máx',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Depósito',
       pspTitleWithdraw:'Retirar',
@@ -8257,7 +8210,7 @@ const TRANSLATIONS = {
       sendOnlyTonNote:'<i class="fas fa-shield-alt"></i> Envoyez uniquement du <b>TON</b> à cette adresse.',
       enterAmountPh:'Entrez le montant',
       tonWalletAddr:'Adresse du portefeuille TON',
-      minOneTonPh:'Min: 1 TON',
+      minOneTonPh:'Min: 0.0001 TON',
       maxBtn:'Max',
       pspTitleDeposit:'<i class="fas fa-wallet" style="font-size:20px"></i> Dépôt',
       pspTitleWithdraw:'Retrait',

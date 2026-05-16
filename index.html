@@ -28,8 +28,8 @@ if ('serviceWorker' in navigator) {
                 .catch(() => fetch(url, { cache: 'reload' }));
             } catch (e) { /* ignore */ }
           };
-          // 1) Bike GLB models
-          for (let lv = 0; lv <= 7; lv++) {
+          // 1) Bike GLB models (Level 0 has no 3D model — start from 1)
+          for (let lv = 1; lv <= 7; lv++) {
             await queue('Bike Level ' + lv + '.glb');
           }
           // 2) All website images — scan DOM + CSS for image URLs and preload them
@@ -3315,7 +3315,8 @@ async function doUpgradeStat(bikeLevel, stat){
     if(S && S.user && S.user.ownedBikes && S.user.ownedBikes.length > 0){
       S.user.ownedBikes.forEach(lv=>{
         const b = BIKES.find(x=>x.lv===lv);
-        if(b && !isBikeMiningActive(lv)) _raceBikes.push(b);
+        // Level 0 is the starter bike — no 3D GLB model exists for it, exclude from race
+        if(b && lv > 0 && !isBikeMiningActive(lv)) _raceBikes.push(b);
       });
     }
     const track = document.getElementById('raceCarouselTrack');
@@ -3619,7 +3620,10 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+      // Level 0 has no 3D GLB model — fall back to level 1 model for rendering only
+      const safeLeft  = leftLv  > 0 ? leftLv  : 1;
+      const safeRight = rightLv > 0 ? rightLv : 1;
+      fr.src='race_engine.html?t='+Date.now()+'&player='+safeLeft+'&ai='+safeRight+'&winner='+winnerSide;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }

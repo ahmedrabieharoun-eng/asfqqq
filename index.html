@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,20 +18,29 @@ if ('serviceWorker' in navigator) {
         // Background preload of bike GLB models so they're ready before any race.
         // Uses requestIdleCallback to avoid blocking the UI; SW caches each one
         // on first fetch, so future requests are instant + offline-friendly.
-        const schedule = (cb) => setTimeout(cb, 8000);
+        // (7) Preload bike assets IMMEDIATELY (not delayed 8s) so bike 0 is ready before user enters race
+        const schedule = (cb) => setTimeout(cb, 500);
         schedule(async () => {
           const cache = await caches.open('race-assets-v2');
           const queue = async (url) => {
             try {
               const hit = await cache.match(url, { ignoreVary: true });
-              if (hit) return;
-              await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
+              if (hit) return true;
+              const res = await fetch(url, { cache: 'reload', mode: 'cors', credentials: 'omit' })
                 .catch(() => fetch(url, { cache: 'reload' }));
-            } catch (e) { /* ignore */ }
+              return res && res.ok;
+            } catch (e) { return false; }
           };
-          // 1) Bike GLB models
+          // 1) Bike GLB models — explicitly verify bike 0 loads, retry up to 3 times
           for (let lv = 0; lv <= 7; lv++) {
-            await queue('Bike Level ' + lv + '.glb');
+            const url = 'Bike Level ' + lv + '.glb';
+            let ok = false;
+            for (let attempt = 0; attempt < 3 && !ok; attempt++) {
+              ok = await queue(url);
+              if (!ok) await new Promise(r => setTimeout(r, 800));
+            }
+            if (!ok) console.warn('[preload] failed to cache', url);
+            else console.log('[preload] cached', url);
           }
           // 2) All website images — scan DOM + CSS for image URLs and preload them
           const collectImageUrls = () => {
@@ -75,47 +85,6 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('SW register failed', err));
   });
 }
-
-/* Fix 7: Ensure ALL bike images (including bike level 0) are cached at startup.
-   This runs early and independently, not relying on the BIKES array being defined yet. */
-(async function ensureAllBikeImgsCached(){
-  const BIKE_IMGS_STARTUP = [
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',       // Lv 0
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png', // Lv 1
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png', // Lv 2
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png', // Lv 3
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png', // Lv 4
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png', // Lv 5
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png', // Lv 6
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png', // Lv 7
-    // Card backgrounds
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778862359/bike_dx3uy7.jpg',       // card 0
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463362/5716da26-83d2-4109-838f-5e5869107b6b_pc0aut.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463429/b46cbb24-5c10-4d60-965b-5425d14d8057_k3unkh.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463356/0475e654-4c10-420b-981a-8fa44f48dcd6_tkcimj.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463293/9ecfd607-921f-49d7-bb9e-73e8072dc4a7_gr97h2.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463412/79068472-1e06-49cf-a4e0-1b9ddb37825c_ibftho.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463366/6246f464-1218-4a3d-a10c-356bdd33c3fe_lc2xee.png',
-    'https://res.cloudinary.com/dktppfipy/image/upload/v1778463286/0a0c0b62-9eb8-421e-b501-17246678f1df_hnrf89.png',
-  ];
-  try {
-    const cache = await caches.open('race-assets-v2');
-    for (const url of BIKE_IMGS_STARTUP) {
-      try {
-        const hit = await cache.match(url, { ignoreVary: true });
-        if (!hit) {
-          fetch(url, { mode: 'cors', credentials: 'omit' })
-            .then(r => { if(r && r.ok) cache.put(url, r.clone()); })
-            .catch(() => {});
-        }
-      } catch(e) {}
-    }
-    console.log('[bike-cache] All bike images verified in cache');
-  } catch(e) {
-    // Fallback: preload via Image() to at least populate browser HTTP cache
-    BIKE_IMGS_STARTUP.forEach(u => { const img = new Image(); img.src = u; });
-  }
-})();
 </script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 <script src="https://unpkg.com/tonweb/dist/tonweb.js"></script>
@@ -145,12 +114,7 @@ body{
   color:var(--text);min-height:100vh;padding-bottom:108px;overflow-x:hidden;
   font-size:clamp(13px,1.5vw,16px);
   -webkit-font-smoothing:antialiased;
-  /* Performance: reduce repaint cost */
-  will-change:auto;
-  contain:layout style;
 }
-/* Performance: lazy decode for all images */
-img{decoding:async;}
 /* ── Fluid scaling helpers ── */
 .hub-hero{height:clamp(220px,35vw,420px)!important;}
 .bk-card-top{height:clamp(160px,22vw,240px)!important;}
@@ -1150,14 +1114,14 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 <script>
 /* ══ BIKE INVESTMENT DATA ══ */
 const BIKES = [
-  {lv:0,  name:'Bike Level 0',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
-  {lv:1,  name:'Bike Level 1',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
-  {lv:2,  name:'Bike Level 2',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
-  {lv:3,  name:'Bike Level 3',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
-  {lv:4,  name:'Bike Level 4',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
-  {lv:5,  name:'Bike Level 5',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
-  {lv:6,  name:'Bike Level 6',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
-  {lv:7,  name:'Bike Level 7',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
+  {lv:0,  name:'Specialized Allez',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
+  {lv:1,  name:'Honda CB350',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
+  {lv:2,  name:'Honda CBR650R',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
+  {lv:3,  name:'Suzuki GSX-S750',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
+  {lv:4,  name:'Suzuki GSX-R1000',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
+  {lv:5,  name:'Kawasaki Z900',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
+  {lv:6,  name:'KTM RC 8C',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
+  {lv:7,  name:'Kawasaki Ninja H2',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
 ];
 
 const TON_IMG = 'https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png';
@@ -1363,11 +1327,8 @@ function refreshBikeViews(){
   try{ if(typeof renderBikes==='function') renderBikes(); }catch(e){}
   try{ if(typeof renderGarage==='function') renderGarage(); }catch(e){}
   try{ if(typeof renderMiningPage==='function') renderMiningPage(); }catch(e){}
-  // Always re-init race section to pick up new/removed bikes
-  try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){}
   try{ if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive(); }catch(e){}
   try{ if(typeof syncTopbar==='function') syncTopbar(); }catch(e){}
-  try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
 }
 window.refreshBikeViews = refreshBikeViews;
 
@@ -3029,10 +2990,19 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- ── START FIXED BOTTOM ── -->
     <div class="race-start-fixed" id="raceStartFixed">
+      <!-- (10) Bike Level 0 info hint — shown only when bike 0 selected -->
+      <div id="raceBike0Hint" style="display:none;font-size:11px;color:#9ccc40;text-align:center;margin-bottom:6px;padding:4px 8px;background:rgba(124,179,66,.1);border-radius:8px;line-height:1.4">
+        💡 Higher-level bikes can bet & win — Bike 0 races are free practice only
+      </div>
       <button class="race-start-btn" onclick="startRace()"><span data-i18n="startRaceBtn">Start Race</span> <span class="chev">»</span></button>
-      <div class="race-stake-lbl">
-        <span data-i18n="entryFeeLbl">Entry Fee:</span> <span class="v">0.5</span>
-        <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
+      <div class="race-stake-lbl" id="raceStakeLbl">
+        <span data-i18n="entryFeeLbl">Entry Fee:</span> <span class="v" id="raceStakeVal">0.5</span>
+        <img id="raceStakeIcon" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png">
+      </div>
+      <!-- (10) Free-for-bike-0 label, shown only when bike 0 selected -->
+      <div class="race-stake-lbl" id="raceStakeFree" style="display:none">
+        <span style="text-decoration:line-through;opacity:.55">0.5 TON</span>
+        <span style="color:#9ccc40;font-weight:800;margin-left:6px">FREE for Bike Level 0</span>
       </div>
     </div>
 
@@ -3506,6 +3476,14 @@ async function doUpgradeStat(bikeLevel, stat){
     });
     const b=_raceBikes[_raceIdx];
     if(b) _renderStats(b);
+    // (10) Toggle bike-0 free-race UI hints
+    const isLv0 = b && b.lv === 0;
+    const hint = document.getElementById('raceBike0Hint');
+    const stake = document.getElementById('raceStakeLbl');
+    const free  = document.getElementById('raceStakeFree');
+    if(hint)  hint.style.display  = isLv0 ? 'block' : 'none';
+    if(stake) stake.style.display = isLv0 ? 'none'  : 'flex';
+    if(free)  free.style.display  = isLv0 ? 'flex'  : 'none';
   }
 
   /* swipe on big carousel card disabled — navigation is via thumbnails only */
@@ -3667,7 +3645,18 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+      // (11) Pass dynamic max speed (selected bike's effective top speed) + player names/photos
+      const myBike = _raceBikes.find(b=>b.lv===myLv) || _raceBikes[_raceIdx] || {speed:120};
+      const dynMaxSpd = Math.max(60, Math.min(2000, Math.round((myBike.speed||120) * 1.0)));
+      const myName  = encodeURIComponent((S.user?.firstName || S.tg?.first_name || 'You').slice(0,18));
+      const oppName = encodeURIComponent((matchData.opp?.name || matchData.opp?.firstName || 'Rival').slice(0,18));
+      const myPhoto  = encodeURIComponent(S.user?.photoUrl || S.tg?.photo_url || '');
+      const oppPhoto = encodeURIComponent(matchData.opp?.photoUrl || '');
+      fr.src='race_engine.html?t='+Date.now()
+        +'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide
+        +'&maxSpeed='+dynMaxSpd
+        +'&p1Name='+(youAreP1?myName:oppName)+'&p2Name='+(youAreP1?oppName:myName)
+        +'&p1Photo='+(youAreP1?myPhoto:oppPhoto)+'&p2Photo='+(youAreP1?oppPhoto:myPhoto);
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }
@@ -3691,15 +3680,17 @@ async function doUpgradeStat(bikeLevel, stat){
   window.startRace = async function(){
     if(_raceActive||_raceStarted||_raceQueueing) return;
     if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
+    _raceSelectedBike=_raceBikes[_raceIdx];
+    const isFreeBike0 = (_raceSelectedBike && _raceSelectedBike.lv === 0);
     const ton=S?.user?.tonBalance||0;
-    if(ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
+    // (10) Bike Level 0 races for FREE — skip 0.5 TON entry-fee check
+    if(!isFreeBike0 && ton<0.5){ showNotif('❌ Нужно 0.5 TON для старта','e'); return; }
 
     _raceStarted=true; _raceQueueing=true;
-    _raceSelectedBike=_raceBikes[_raceIdx];
     _raceShowSearching();
 
     let res;
-    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike ? _raceSelectedBike.lv : 0}); }
+    try{ res=await api('raceJoinQueue',{bikeLevel:_raceSelectedBike ? _raceSelectedBike.lv : 0, freeBike0: isFreeBike0 ? 1 : 0}); }
     catch(e){
       // The server may have completed the match after the network timed out.
       // Keep the loading screen open and verify by polling before showing an error.
@@ -4386,7 +4377,7 @@ async function doUpgradeStat(bikeLevel, stat){
         <input type="text" id="wdAddrInput" class="wd-new-addr-input" placeholder="UQ..." data-i18n-ph="walletPlaceholder">
         <label class="flabel" data-i18n="amountTON">Amount (TON)</label>
         <div class="wd-new-amount-wrap">
-          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.0001 TON" data-i18n-ph="minOneTonPh" step="0.0001" min="0.0001" oninput="updateWdFeePreview()">
+          <input type="number" id="wdAmtInput" class="wd-new-amount-input" placeholder="Min: 0.1 TON" data-i18n-ph="minOneTonPh" step="0.1" min="0.1" oninput="updateWdFeePreview()">
           <button class="wd-new-max-btn" data-i18n="maxBtn" onclick="document.getElementById('wdAmtInput').value=parseFloat(document.getElementById('wdTonBal')?document.getElementById('wdTonBal').textContent||0:0)||'';updateWdFeePreview()">Max</button>
         </div>
         <!-- Fee preview box -->
@@ -5625,7 +5616,7 @@ const REF_ACTIVE_TASKS=[
   {id:'ra500',n:500, bam:5000000, coins:20000},
 ];
 const SOC_TASKS=[
-  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacing_chat', bam:1000},
+  {id:'tg_payouts', name:'💰 Join Payouts Channel', icon:'💰', link:'https://t.me/RaseenRacing_bot', bam:1000},
   {id:'tg_news',    name:'📰 Join Mining News Channel', icon:'📰', link:'https://t.me/RaseenRacing_bot', bam:500},
   {id:'tg_ch', name:'Join Telegram Channel', icon:'📢', link:'https://t.me/YOUR_CHANNEL', bam:1000},
   {id:'tg_grp',name:'Join Telegram Group',   icon:'👥', link:'https://t.me/YOUR_GROUP',   bam:500 },
@@ -5802,6 +5793,12 @@ function debounce(key){
 /* ════ API — Single Server ═════════════════════════════════════════ */
 let _apiInFlight = 0;
 
+// (6) Actions that mutate user state — auto-refresh state after success
+const _MUTATING_ACTIONS = new Set([
+  'buyBike','upgradeStats','startBikeMining','claimBikeMining',
+  'withdraw','deposit','claimTask','verifyTask','claimMissionTask',
+  'createTask','submitPartnerPost','saveSeasonAlloc','saveLanguage','raceResult'
+]);
 async function api(action, data={}){
   if(_apiInFlight > 8) throw new Error('Too many requests');
   _apiInFlight++;
@@ -5816,6 +5813,11 @@ async function api(action, data={}){
       err.errorCode = j.errorCode || '';
       err.missing   = j.missing;
       throw err;
+    }
+    // (6) Auto-refresh state after any mutating action so UI is always fresh
+    if(_MUTATING_ACTIONS.has(action)){
+      // fire-and-forget so original caller still gets its data first
+      setTimeout(() => { try { refreshAppState({silent:true}); } catch(_){} }, 200);
     }
     return j.data;
   } finally { _apiInFlight--; }
@@ -6365,7 +6367,7 @@ function updateWdFeePreview(){
   const feeEl=document.getElementById('wdFeeAmt');
   const netEl=document.getElementById('wdNetAmt');
   if(!preview||!feeEl||!netEl) return;
-  if(amt>=0.0001){
+  if(amt>=0.1){
     const fee=+(amt*0.1).toFixed(8);
     const net=+(amt-fee).toFixed(8);
     feeEl.textContent=`-${fee.toFixed(4)} TON`;
@@ -6382,7 +6384,7 @@ async function doWithdraw(){
   const amt=parseFloat(document.getElementById('wdAmtInput')?.value||document.getElementById('wdAmt')?.value)||0;
   const u=S.user;
   if(!addr||addr.length<10){showNotif('Enter valid TON address!','e');return;}
-  if(amt<0.0001){showNotif('Min 0.0001 TON!','e');return;}
+  if(amt<0.1){showNotif('Min 0.1 TON!','e');return;}
   if(amt>(u.tonBalance||0)){showNotif('Not enough TON!','e');return;}
 
   // Fix 9+10: check partner tasks locally first (fast feedback)
@@ -6396,13 +6398,6 @@ async function doWithdraw(){
 
   const feeAmt=+(amt*0.10).toFixed(8);
   const netAmt=+(amt-feeAmt).toFixed(8);
-
-  // Check for pending withdrawal
-  const pendingWd = (S.wdHist||[]).find(h=>(h.status||'pending').toLowerCase()==='pending');
-  if(pendingWd){
-    showNotif('❌ لديك طلب سحب معلق — انتظر الموافقة أولاً','e');
-    return;
-  }
 
   try{
     // Get device fingerprint (hardware-based, survives VPN/IP change)

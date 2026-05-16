@@ -1,8 +1,13 @@
 /* Asset cache service worker
  * Strategy: cache-first for 3D bike models only (.glb/.gltf/.bin).
  * All other assets (images, audio, fonts) are always fetched from the network.
+ *
+ * FIX: Telegram webview may send GLB requests with spaces encoded as %20 or
+ * as literal spaces depending on how the GLTFLoader resolves relative URLs.
+ * We always normalise to the DECODED form (spaces, not %20) as the cache key,
+ * and also try the encoded form as a fallback lookup so no request ever misses.
  */
-const CACHE_NAME = 'race-assets-v2';
+const CACHE_NAME = 'race-assets-v3';
 
 const MODEL_EXT = /\.(glb|gltf|bin)(\?|$)/i;
 
@@ -14,8 +19,7 @@ function is3DModel(url) {
 }
 
 /* Normalize a GLB URL so spaces and %20 always map to the same cache key.
- * e.g. "Bike Level 0.glb" and "Bike%20Level%200.glb" → identical key.
- * Always stores/looks up with decoded pathname (spaces, not %20). */
+ * Always stores/looks up with DECODED pathname (spaces, not %20). */
 function normalizeCacheKey(url) {
   try {
     const u = new URL(url);
@@ -26,10 +30,23 @@ function normalizeCacheKey(url) {
   }
 }
 
+/* Also return the encoded variant so we can try both on lookup */
+function encodedCacheKey(url) {
+  try {
+    const u = new URL(url);
+    // encode spaces only (encodeURIComponent encodes too much)
+    u.pathname = u.pathname.replace(/ /g, '%20');
+    return u.toString();
+  } catch (_) {
+    return url;
+  }
+}
+
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
+    // Delete ALL old caches (including the old race-assets-v2)
     await Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
     await self.clients.claim();
   })());
@@ -43,23 +60,33 @@ self.addEventListener('fetch', (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
 
-    // Always look up and store with the normalized (decoded) URL as key
-    const cacheKey = normalizeCacheKey(req.url);
-    const cached = await cache.match(cacheKey, { ignoreVary: true });
+    // Primary key: decoded (spaces). Fallback key: encoded (%20).
+    const keyDecoded = normalizeCacheKey(req.url);
+    const keyEncoded = encodedCacheKey(req.url);
+
+    // Try decoded key first, then encoded (covers any previously cached entries)
+    let cached = await cache.match(keyDecoded, { ignoreVary: true });
+    if (!cached && keyEncoded !== keyDecoded) {
+      cached = await cache.match(keyEncoded, { ignoreVary: true });
+    }
     if (cached) return cached;
 
     try {
-      const fetchReq = new Request(req.url, {
-        mode: req.mode === 'navigate' ? 'cors' : 'no-cors',
+      // Fetch using the decoded URL — most reliable across environments
+      const fetchUrl = keyDecoded;
+      const fetchReq = new Request(fetchUrl, {
+        mode: 'cors',
         credentials: 'omit',
         cache: 'reload',
       });
       const resp = await fetch(fetchReq);
-      // Store under the normalized key so future requests always hit the cache
-      try { await cache.put(cacheKey, resp.clone()); } catch (_) {}
+      // Always store under decoded key for consistency
+      try { await cache.put(keyDecoded, resp.clone()); } catch (_) {}
       return resp;
     } catch (err) {
-      const fallback = await cache.match(cacheKey, { ignoreVary: true });
+      // Last resort: return whatever is in cache
+      const fallback = await cache.match(keyDecoded, { ignoreVary: true })
+                    || await cache.match(keyEncoded, { ignoreVary: true });
       if (fallback) return fallback;
       throw err;
     }

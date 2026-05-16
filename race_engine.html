@@ -91,34 +91,44 @@ if ('serviceWorker' in navigator) {
 
   /* HUD */
   #hud { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:15; }
+  /* (11) Compact player cards with avatar + name */
   #p1-hud {
-    position:absolute; top:16px; left:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(20,12,0,0.7) 100%);
+    position:absolute; top:10px; left:10px;
+    background:linear-gradient(135deg,rgba(0,0,0,0.72) 0%,rgba(20,12,0,0.66) 100%);
     border:1px solid rgba(255,180,0,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,200,0,0.14);
+    padding:6px 9px; min-width:118px; max-width:150px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 3px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,200,0,0.12);
   }
   #p2-hud {
-    position:absolute; top:16px; right:16px;
-    background:linear-gradient(135deg,rgba(0,0,0,0.75) 0%,rgba(0,12,32,0.7) 100%);
+    position:absolute; top:10px; right:10px;
+    background:linear-gradient(135deg,rgba(0,0,0,0.72) 0%,rgba(0,12,32,0.66) 100%);
     border:1px solid rgba(0,160,255,0.5); border-radius:10px;
-    padding:8px 12px; min-width:140px; text-align:right;
-    backdrop-filter:blur(12px);
-    box-shadow:0 4px 28px rgba(0,0,0,0.55),inset 0 1px 0 rgba(0,180,255,0.14);
+    padding:6px 9px; min-width:118px; max-width:150px; text-align:right;
+    backdrop-filter:blur(10px);
+    box-shadow:0 3px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(0,180,255,0.12);
   }
-  .car-name { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-  #p1-hud .car-name { color:#FFB800; }
-  #p2-hud .car-name { color:#00CFFF; }
-  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:6px; }
-  .speed-num { font-size:28px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 22px rgba(255,255,255,0.3); }
-  .speed-unit { font-size:9px; color:rgba(255,255,255,0.45); margin-left:4px; align-self:flex-end; margin-bottom:2px; }
+  .player-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  #p2-hud .player-row { flex-direction:row-reverse; }
+  .player-avatar {
+    width:24px; height:24px; border-radius:50%; object-fit:cover; flex-shrink:0;
+    background:rgba(255,255,255,0.08);
+    border:1.5px solid rgba(255,255,255,0.25);
+  }
+  #p1-hud .player-avatar { border-color:rgba(255,180,0,0.7); }
+  #p2-hud .player-avatar { border-color:rgba(0,180,255,0.7); }
+  .car-name { font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:96px; }
+  #p1-hud .car-name { color:#FFD24A; }
+  #p2-hud .car-name { color:#5BDCFF; }
+  .speed-gauge-wrap { display:inline-flex; align-items:center; margin-bottom:4px; }
+  .speed-num { font-size:22px; font-weight:900; color:#fff; line-height:1; font-variant-numeric:tabular-nums; text-shadow:0 0 14px rgba(255,255,255,0.25); }
+  .speed-unit { font-size:8px; color:rgba(255,255,255,0.45); margin-left:3px; align-self:flex-end; margin-bottom:2px; }
   .rpm-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; margin-bottom:2px; }
-  .rpm-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .rpm-bar-bg { width:100%; height:3px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
   .rpm-fill { height:100%; border-radius:3px; transition:width 0.06s linear; background:linear-gradient(90deg,#00FF88,#FFB800,#FF2200); background-size:200% 100%; }
-  .gear-row { display:flex; align-items:baseline; margin-top:4px; gap:8px; }
+  .gear-row { display:flex; align-items:baseline; margin-top:3px; gap:6px; }
   .gear-label { font-size:7px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
-  .gear-num { font-size:18px; font-weight:900; color:#FF8C00; line-height:1; }
+  .gear-num { font-size:14px; font-weight:900; color:#FF8C00; line-height:1; }
   #p2-hud .gear-row { flex-direction:row-reverse; }
   #p2-hud .gear-num { color:#00CFFF; }
   #timer-hud {
@@ -214,7 +224,10 @@ if ('serviceWorker' in navigator) {
   <div id="lens-flare"></div>
   <div id="hud">
     <div id="p1-hud">
-      <div class="car-name">🏍 Player 1</div>
+      <div class="player-row">
+        <img id="p1-avatar" class="player-avatar" alt="" />
+        <div class="car-name" id="p1-name">Player 1</div>
+      </div>
       <div class="speed-gauge-wrap">
         <span class="speed-num" id="p1-speed">0</span>
         <span class="speed-unit">km/h</span>
@@ -231,7 +244,10 @@ if ('serviceWorker' in navigator) {
       <div class="timer-value" id="timer-val">0.000</div>
     </div>
     <div id="p2-hud">
-      <div class="car-name">Player 2 🏍</div>
+      <div class="player-row">
+        <img id="p2-avatar" class="player-avatar" alt="" />
+        <div class="car-name" id="p2-name">Player 2</div>
+      </div>
       <div class="speed-gauge-wrap" style="flex-direction:row-reverse;width:100%;">
         <span class="speed-num" id="p2-speed">0</span>
         <span class="speed-unit">km/h</span>
@@ -283,8 +299,9 @@ const URL_SIDE_BG  = 'https://i.supaimg.com/ec27537b-aa6a-42cf-8ba1-d6850eeea36d
 // ─── RENDERER ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:'high-performance', logarithmicDepthBuffer:false });
-// FIX 2: Lower pixel ratio for performance (was 1.5)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.0));
+// FIX 2 + (8): start at a conservative pixel ratio; adaptive tuning lowers further on slow devices
+const _isLowEnd = (navigator.hardwareConcurrency || 4) <= 4 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, _isLowEnd ? 0.85 : 1.0));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
 renderer.toneMapping = THREE.LinearToneMapping;
@@ -883,6 +900,23 @@ const AI_LV     = _clampLv(_raceParams.get('ai') ?? '0');
 const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
                     : (_raceParams.get('winner')==='p2') ? 'p2'
                     : null;
+
+// (11) Real player names + photos from Telegram via parent URL params
+(function _wirePlayerCards(){
+  const p1Name  = (_raceParams.get('p1Name')  || 'Opponent').slice(0,24);
+  const p2Name  = (_raceParams.get('p2Name')  || 'You').slice(0,24);
+  const p1Photo = _raceParams.get('p1Photo') || '';
+  const p2Photo = _raceParams.get('p2Photo') || '';
+  const FALLBACK = 'data:image/svg+xml;utf8,'+encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23222"/><text x="50%" y="55%" font-size="22" text-anchor="middle" fill="%23bbb" font-family="Arial">🏍</text></svg>'
+  );
+  const n1=document.getElementById('p1-name'); if(n1) n1.textContent=p1Name;
+  const n2=document.getElementById('p2-name'); if(n2) n2.textContent=p2Name;
+  const a1=document.getElementById('p1-avatar'); if(a1){ a1.src=p1Photo||FALLBACK; a1.onerror=()=>{a1.onerror=null;a1.src=FALLBACK;}; }
+  const a2=document.getElementById('p2-avatar'); if(a2){ a2.src=p2Photo||FALLBACK; a2.onerror=()=>{a2.onerror=null;a2.src=FALLBACK;}; }
+  // Use real names in the winner banner too
+  window._RACE_NAMES = { p1: p1Name, p2: p2Name };
+})();
 function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
 
 // car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
@@ -1146,9 +1180,19 @@ function spawnP(x,y,z,vx,vy,vz,type){
 //  GAME STATE
 // ═══════════════════════════════════════════════════════════════
 const START_Z=5;
-const gears=[0,0.082,0.165,0.265,0.385,0.525,0.665];
-const gearThr=[0,14,38,70,106,148,198];
-const MAX_SPD=325;
+// (5) Level 0 = bicycle → softer/slower gear curve so it actually moves believably
+const IS_BIKE0 = (PLAYER_LV === 0 && AI_LV === 0);
+const gears   = IS_BIKE0 ? [0,0.055,0.095,0.140,0.190,0.235,0.275] : [0,0.082,0.165,0.265,0.385,0.525,0.665];
+const gearThr = IS_BIKE0 ? [0,5,11,18,26,34,42]                    : [0,14,38,70,106,148,198];
+// (11) Dynamic max speed based on bike's actual top speed (passed via URL param)
+// (5) Level 0 cap defaults to a realistic bicycle top speed (~52 km/h) instead of 325
+let MAX_SPD = IS_BIKE0 ? 52 : 325;
+try {
+  const _qsMax = new URLSearchParams(location.search).get('maxSpeed');
+  if (_qsMax && !isNaN(+_qsMax)) MAX_SPD = Math.max(20, Math.min(2000, +_qsMax));
+} catch(_) {}
+// (5) acceleration multiplier — lower for the bicycle so push-off feels natural
+const ACCEL_K = IS_BIKE0 ? 95 : 285;
 
 const state={phase:'idle',timer:0,raceStart:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
@@ -1351,7 +1395,7 @@ function updatePhysics(dt){
     const ga=gears[Math.min(cs.gear,gears.length-1)];
     const ar=cs.speed/MAX_SPD;
     const vr=1+(Math.sin(elapsed*3.9+mult*12)*0.022);
-    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*285, MAX_SPD);
+    cs.speed=Math.min(cs.speed+(ga*(1-ar*0.78)*mult*vr)*dt*ACCEL_K, MAX_SPD);
     cs.pos+=cs.speed/3.6*dt;
   }
   updateCar(state.p1,p1M); updateCar(state.p2,p2M);
@@ -1403,7 +1447,7 @@ function updatePhysics(dt){
   if(!state.p2.finished&&state.p2.pos>=FINISH_Z){ state.p2.finished=true; state.p2.finTime=(now-state.raceStart)/1000; }
   if(state.p1.finished&&state.p2.finished&&state.phase==='racing'){
     state.phase='finished';
-    const w=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';
+    const w=state.p1.finTime<=state.p2.finTime?(window._RACE_NAMES?.p1||'Player 1'):(window._RACE_NAMES?.p2||'Player 2');
     showWinner(w,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));
   } else if((state.p1.finished||state.p2.finished)&&state.phase==='racing'){
     const leader=state.p1.finished?state.p1:state.p2;
@@ -1411,7 +1455,7 @@ function updatePhysics(dt){
     if(leader.pos>FINISH_Z+25&&!other.finished){
       other.finished=true; other.finTime=(now-state.raceStart)/1000+0.06+Math.random()*0.28;
       state.phase='finished';
-      const wn=state.p1.finTime<=state.p2.finTime?'Player 1':'Player 2';
+      const wn=state.p1.finTime<=state.p2.finTime?(window._RACE_NAMES?.p1||'Player 1'):(window._RACE_NAMES?.p2||'Player 2');
       showWinner(wn,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));
     }
   }
@@ -1488,10 +1532,37 @@ function updateHUD(){
 // ═══════════════════════════════════════════════════════════════
 //  MAIN LOOP
 // ═══════════════════════════════════════════════════════════════
+// ── (8) PERF: adaptive quality + tab-visibility pause ──────────────
 let lastT=0, hudFrame=0;
+let _perfAvgMs = 16.7;          // EMA of frame time (ms)
+let _perfPixelRatio = renderer.getPixelRatio();
+let _perfLastTune = 0;
+let _perfSkipFrame = false;     // every-other-frame render on very slow GPUs
+function _tunePerf(now){
+  if(now - _perfLastTune < 1500) return;
+  _perfLastTune = now;
+  // Average above 33ms (≈30fps): drop pixel ratio progressively
+  if(_perfAvgMs > 33 && _perfPixelRatio > 0.6){
+    _perfPixelRatio = Math.max(0.6, _perfPixelRatio - 0.15);
+    renderer.setPixelRatio(_perfPixelRatio);
+  } else if(_perfAvgMs > 45){
+    _perfSkipFrame = true;
+  } else if(_perfAvgMs < 22 && _perfSkipFrame){
+    _perfSkipFrame = false;
+  }
+}
+
 function animate(time){
   requestAnimationFrame(animate);
-  const dt=Math.min((time-lastT)/1000,0.05); lastT=time;
+  // Pause heavy work when tab is hidden (saves battery / CPU)
+  if(document.hidden){ lastT = time; return; }
+
+  const rawDt = (time - lastT) / 1000;
+  const dt = Math.min(rawDt, 0.05);
+  // Frame-time EMA for adaptive perf
+  _perfAvgMs = _perfAvgMs * 0.92 + (rawDt * 1000) * 0.08;
+  lastT = time;
+
   updatePhysics(dt);
   spawnCarParticles();
   updateParticles(dt);
@@ -1503,7 +1574,12 @@ function animate(time){
 
   // FIX 2: Reduced HUD update frequency (was % 2, now % 3)
   if(hudFrame++ % 5 === 0) updateHUD();
-  renderer.render(scene,camera);
+
+  // (8) On very slow devices, render every other frame
+  if(!_perfSkipFrame || (hudFrame & 1) === 0){
+    renderer.render(scene, camera);
+  }
+  _tunePerf(time);
 }
 resetGame();
 requestAnimationFrame(animate);

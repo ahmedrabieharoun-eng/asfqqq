@@ -1317,7 +1317,8 @@ function refreshBikeViews(){
   try{ if(typeof renderBikes==='function') renderBikes(); }catch(e){}
   try{ if(typeof renderGarage==='function') renderGarage(); }catch(e){}
   try{ if(typeof renderMiningPage==='function') renderMiningPage(); }catch(e){}
-  try{ if(typeof window._raceRefreshIfActive==='function') window._raceRefreshIfActive(); }catch(e){}
+  // Always rebuild race carousel so it reflects current ownedBikes + bikeMining state
+  try{ if(typeof window._raceInit==='function') window._raceInit(); }catch(e){}
   try{ if(typeof syncTopbar==='function') syncTopbar(); }catch(e){}
 }
 window.refreshBikeViews = refreshBikeViews;
@@ -1654,7 +1655,7 @@ async function doUpgradeStat(bikeLevel, stat){
     S.user.tonBalance = res.tonBalance;
     S.user.bikeUpgrades = res.bikeUpgrades;
     _garageSelectedLv = bikeLevel;
-    refreshBikeViews();
+    await refreshAppState({ silent: true });
     showNotif(`✅ ${STAT_LABELS[stat]} улучшена! +${UPGRADE_INC[stat]}`,'s');
   }catch(e){
     showNotif(`❌ ${e.message||'Failed'}`,'e');
@@ -5063,8 +5064,7 @@ async function claimMission(taskId){
     if(!S.completedMissions) S.completedMissions = [];
     S.completedMissions.push(taskId);
     S.user.tonBalance = res.tonBalance;
-    syncTopbar(); syncFinanceHeader();
-    renderMissions();
+    await refreshAppState({ silent: true });
     showNotif(`✅ +${res.tonAdded} TON added!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message}`,'e');
@@ -5079,8 +5079,7 @@ async function claimRefMission(taskId){
     if(!S.doneTasks) S.doneTasks = [];
     S.doneTasks.push(taskId);
     S.user.tonBalance = res.tonBalance;
-    syncTopbar(); syncFinanceHeader();
-    renderRefMissions();
+    await refreshAppState({ silent: true });
     showNotif(`✅ +${res.tonAdded} TON added!`,'s');
   }catch(e){
     showNotif(`❌ ${e.message}`,'e');
@@ -5827,18 +5826,13 @@ async function loadState(){
   // Only update UI if we have confirmed server data at least once
   if(S._dataLoaded){
     updateUI();
-    // Only re-render garage/bikes if user is NOT currently on race/select phase
-    const raceSec = document.getElementById('sectionTasks');
-    const raceActive = raceSec && raceSec.classList.contains('active');
-    // Don't re-render garage+bikes if race page is active (user may be selecting a bike)
-    if(!raceActive){
-      renderGarage();
-      renderBikes();
-    }
+    // Always render garage and bikes regardless of active section
+    renderGarage();
+    renderBikes();
     renderMiningPage();
-    // Only re-init race carousel if race section is active AND user is not mid-selection
-    if(raceActive && typeof window._raceRefreshIfActive==='function'){
-      window._raceRefreshIfActive();
+    // Always refresh race carousel so newly bought/mined bikes appear immediately
+    if(typeof window._raceInit==='function'){
+      window._raceInit();
     }
   }
   S._initialized = true;
@@ -6172,7 +6166,7 @@ async function doDbTask(tid,link,type,cat){
     try{
       const r=await api('verifyTask',{taskId:tid,taskType:type,taskCategory:cat});
       S.doneTasks.push(tid);
-      updateUI(); renderTasks();
+      await refreshAppState({ silent: true });
       if(typeof renderMissions==='function') try{renderMissions();}catch(_){}
       showNotif(`✅ Task completed!`,'s');
     }catch(e){

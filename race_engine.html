@@ -916,7 +916,7 @@ const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
   // Use real names in the winner banner too
   window._RACE_NAMES = { p1: p1Name, p2: p2Name };
 })();
-function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
+function _bikeUrl(lv){ return encodeURIComponent('Bike Level '+lv+'.glb'); }
 
 // car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
 const BIKE1_URL_PRIMARY  = _bikeUrl(PLAYER_LV);

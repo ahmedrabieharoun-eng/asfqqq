@@ -28,9 +28,9 @@ if ('serviceWorker' in navigator) {
                 .catch(() => fetch(url, { cache: 'reload' }));
             } catch (e) { /* ignore */ }
           };
-          // 1) Bike GLB models (Level 0 has no 3D model — use image only, start GLB from 1)
-          for (let lv = 1; lv <= 7; lv++) {
-            await queue('Bike Level ' + lv + '.glb');
+          // 1) Bike GLB models (Level 0..7)
+          for (let lv = 0; lv <= 7; lv++) {
+            await queue('Bike%20Level%20' + lv + '.glb');
           }
           // 2) All website images — scan DOM + CSS for image URLs and preload them
           const collectImageUrls = () => {

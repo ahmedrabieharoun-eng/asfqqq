@@ -948,12 +948,8 @@ function applyBike1Gltf(gltf){
   const r = setupBikeModel(bikeModel);
   car1._wheels = r.namedWheels;
   car1._allWheelMeshes = r.allDetected;
-  // Level 0: skip all wheel/mesh spinning to prevent entire model from rotating
-  if(PLAYER_LV === 0){
-    car1._skipWheelSpin = true;
-    car1._wheels = [];
-    car1._allWheelMeshes = [];
-  }
+  // Level 0: disable all mesh spinning — fallback detection rotates wrong parts
+  if(PLAYER_LV === 0){ car1._skipWheelSpin = true; car1._wheels = []; car1._allWheelMeshes = []; }
   car1.remove(debugCube1);
   car1.add(bikeModel);
   loadProgress('model1');
@@ -967,12 +963,8 @@ function applyBike2Gltf(gltf){
   const r = setupBikeModel(bikeModel);
   car2._wheels = r.namedWheels;
   car2._allWheelMeshes = r.allDetected;
-  // Level 0: skip all wheel/mesh spinning to prevent entire model from rotating
-  if(AI_LV === 0){
-    car2._skipWheelSpin = true;
-    car2._wheels = [];
-    car2._allWheelMeshes = [];
-  }
+  // Level 0: disable all mesh spinning — fallback detection rotates wrong parts
+  if(AI_LV === 0){ car2._skipWheelSpin = true; car2._wheels = []; car2._allWheelMeshes = []; }
   car2.remove(debugCube2);
   car2.add(bikeModel);
   loadProgress('model2');
@@ -1191,15 +1183,15 @@ function spawnP(x,y,z,vx,vy,vz,type){
 //  GAME STATE
 // ═══════════════════════════════════════════════════════════════
 const START_Z=5;
-// Faster acceleration + stronger gears for a more exciting race
-const gears   = [0,0.110,0.210,0.320,0.455,0.610,0.760];
+// Same physics for all levels including level 0 — no special cases
+const gears   = [0,0.082,0.165,0.265,0.385,0.525,0.665];
 const gearThr = [0,14,38,70,106,148,198];
 let MAX_SPD = 325;
 try {
   const _qsMax = new URLSearchParams(location.search).get('maxSpeed');
   if (_qsMax && !isNaN(+_qsMax)) MAX_SPD = Math.max(20, Math.min(2000, +_qsMax));
 } catch(_) {}
-const ACCEL_K = 340;
+const ACCEL_K = 285;
 
 const state={phase:'idle',timer:0,raceStart:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},
@@ -1218,9 +1210,9 @@ function resetGame(){
   document.getElementById('launch-hint').style.display='block';
   // Multipliers biased so the server-decided winner crosses the line first.
   // No bias if winner not provided (legacy / standalone testing).
-  if(FORCED_WINNER==='p1'){      p1M=1.010+Math.random()*0.015; p2M=0.990+Math.random()*0.010; }
-  else if(FORCED_WINNER==='p2'){ p2M=1.010+Math.random()*0.015; p1M=0.990+Math.random()*0.010; }
-  else {                          p1M=0.995+Math.random()*0.010; p2M=0.995+Math.random()*0.010; }
+  if(FORCED_WINNER==='p1'){      p1M=1.04+Math.random()*0.06; p2M=0.90+Math.random()*0.05; }
+  else if(FORCED_WINNER==='p2'){ p2M=1.04+Math.random()*0.06; p1M=0.90+Math.random()*0.05; }
+  else {                          p1M=0.92+Math.random()*0.16; p2M=0.92+Math.random()*0.16; }
   cShake=0;
   for(let i=0;i<MAX_P;i++){ pPos2[i*3]=9999; pLf[i]=0; }
   document.getElementById('timer-val').textContent = '0.000';
@@ -1409,7 +1401,6 @@ function updatePhysics(dt){
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
-    // Level 0 bikes: skip ALL wheel/mesh rotation to keep model static
     if(c._skipWheelSpin) return;
     const spd = spds[ci];
     const rotAmt = spd * 0.052 * dt;
@@ -1461,8 +1452,8 @@ function updatePhysics(dt){
   } else if((state.p1.finished||state.p2.finished)&&state.phase==='racing'){
     const leader=state.p1.finished?state.p1:state.p2;
     const other=state.p1.finished?state.p2:state.p1;
-    if(leader.pos>FINISH_Z+8&&!other.finished){
-      other.finished=true; other.finTime=(now-state.raceStart)/1000+0.08+Math.random()*0.18;
+    if(leader.pos>FINISH_Z+25&&!other.finished){
+      other.finished=true; other.finTime=(now-state.raceStart)/1000+0.06+Math.random()*0.28;
       state.phase='finished';
       const wn=state.p1.finTime<=state.p2.finTime?(window._RACE_NAMES?.p1||'Player 1'):(window._RACE_NAMES?.p2||'Player 2');
       showWinner(wn,Math.min(state.p1.finTime,state.p2.finTime),Math.abs(state.p1.finTime-state.p2.finTime));

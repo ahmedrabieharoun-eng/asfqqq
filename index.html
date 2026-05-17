@@ -8420,9 +8420,17 @@ function applyLang(lang,flag,code){
   const depBtn=document.getElementById('submitDepositBtn');
   if(depBtn) depBtn.innerHTML=`<i class="fas fa-arrow-down"></i> ${t.depositBtn}`;
 
-  // ── Connect wallet button (keep icon) ──
+  // ── Connect wallet button (keep icon, preserve disconnect state) ──
   const connBtn=document.getElementById('connectWalletBtn');
-  if(connBtn && !connBtn.classList.contains('is-disconnect')) connBtn.innerHTML=`<i class="fas fa-plug"></i> ${t.connectBtn}`;
+  if(connBtn){
+    if(connBtn.classList.contains('is-disconnect')){
+      connBtn.innerHTML='<i class="fas fa-unlink"></i> Disconnect';
+      connBtn.onclick=disconnectWallet;
+    } else {
+      connBtn.innerHTML=`<i class="fas fa-plug"></i> ${t.connectBtn}`;
+      connBtn.onclick=connectWallet;
+    }
+  }
 
   // ── Withdraw button (keep image) ──
   const wdBtn=document.getElementById('wdBtn');

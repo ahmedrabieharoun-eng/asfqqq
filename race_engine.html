@@ -948,6 +948,12 @@ function applyBike1Gltf(gltf){
   const r = setupBikeModel(bikeModel);
   car1._wheels = r.namedWheels;
   car1._allWheelMeshes = r.allDetected;
+  // Level 0: skip all wheel/mesh spinning to prevent entire model from rotating
+  if(PLAYER_LV === 0){
+    car1._skipWheelSpin = true;
+    car1._wheels = [];
+    car1._allWheelMeshes = [];
+  }
   car1.remove(debugCube1);
   car1.add(bikeModel);
   loadProgress('model1');
@@ -961,6 +967,12 @@ function applyBike2Gltf(gltf){
   const r = setupBikeModel(bikeModel);
   car2._wheels = r.namedWheels;
   car2._allWheelMeshes = r.allDetected;
+  // Level 0: skip all wheel/mesh spinning to prevent entire model from rotating
+  if(AI_LV === 0){
+    car2._skipWheelSpin = true;
+    car2._wheels = [];
+    car2._allWheelMeshes = [];
+  }
   car2.remove(debugCube2);
   car2.add(bikeModel);
   loadProgress('model2');
@@ -1397,6 +1409,8 @@ function updatePhysics(dt){
   car1.position.z=state.p1.pos; car2.position.z=state.p2.pos;
   const ws=[car1,car2]; const spds=[state.p1.speed,state.p2.speed];
   ws.forEach((c,ci)=>{
+    // Level 0 bikes: skip ALL wheel/mesh rotation to keep model static
+    if(c._skipWheelSpin) return;
     const spd = spds[ci];
     const rotAmt = spd * 0.052 * dt;
     if(c._wheels && c._wheels.length > 0){

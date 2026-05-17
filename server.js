@@ -69,6 +69,21 @@ const BIKE_DAILY_TON = {
 };
 const BIKE_MINING_MS = 24*60*60*1000;
 
+// Real-world bike model names (single source of truth)
+const BIKE_NAMES = {
+  0:  'Specialized Allez',
+  1:  'Honda CB350',
+  2:  'Honda CBR650R',
+  3:  'Suzuki GSX-S750',
+  4:  'Suzuki GSX-R1000',
+  5:  'Kawasaki Z900',
+  6:  'KTM RC 8C',
+  7:  'Kawasaki Ninja H2',
+  8:  'Bike Level 8',
+  9:  'Bike Level 9',
+  10: 'Bike Level 10',
+};
+
 // Default partner tasks
 const DEFAULT_PARTNER_TASKS = [
   { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacing_chat', imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747937/payments_c5ifxk.jpg', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
@@ -150,11 +165,11 @@ const MSG={
     fr:(winnerName,cost,prize)=>`❌ <b>Pas de Chance!</b>\n\n🏍️ <b>${winnerName}</b> vous a battu cette fois.\n💔 Vous avez perdu ${cost} TON de frais d'entrée.\n💪 Recourez pour gagner ${prize} TON!`,
   },
   bike_upgraded:{
-    ar:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>تم ترقية الدراجة!</b>\n\n🏍️ دراجة المستوى ${lv}\n📊 ${statName}: ${oldVal} ← ${newVal} (+${inc})\n💎 التكلفة: ${price} TON`,
-    en:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Bike Upgraded!</b>\n\n🏍️ Bike Level ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Cost: ${price} TON`,
-    ru:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Мотоцикл улучшен!</b>\n\n🏍️ Уровень ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Стоимость: ${price} TON`,
-    es:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>¡Moto Mejorada!</b>\n\n🏍️ Nivel ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Costo: ${price} TON`,
-    fr:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Moto Améliorée!</b>\n\n🏍️ Niveau ${lv}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Coût: ${price} TON`,
+    ar:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>تم ترقية الدراجة!</b>\n\n🏍️ ${BIKE_NAMES[lv]||('Bike '+lv)}\n📊 ${statName}: ${oldVal} ← ${newVal} (+${inc})\n💎 التكلفة: ${price} TON`,
+    en:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Bike Upgraded!</b>\n\n🏍️ ${BIKE_NAMES[lv]||('Bike '+lv)}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Cost: ${price} TON`,
+    ru:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Мотоцикл улучшен!</b>\n\n🏍️ ${BIKE_NAMES[lv]||('Bike '+lv)}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Стоимость: ${price} TON`,
+    es:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>¡Moto Mejorada!</b>\n\n🏍️ ${BIKE_NAMES[lv]||('Bike '+lv)}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Costo: ${price} TON`,
+    fr:(lv,statName,oldVal,newVal,inc,price)=>`🛠️ <b>Moto Améliorée!</b>\n\n🏍️ ${BIKE_NAMES[lv]||('Bike '+lv)}\n📊 ${statName}: ${oldVal} → ${newVal} (+${inc})\n💎 Coût: ${price} TON`,
   },
   wd_approved:{
     ar:(amt)=>`✅ تمت الموافقة على سحب ${amt} TON الخاص بك!`,
@@ -369,7 +384,7 @@ async function hGetState(env,uid,tg,data={},_meta={},ctx=null){
           const _wl=(tg&&tg.language_code&&['ar','en','ru','es','fr'].includes(tg.language_code))?tg.language_code:'en';
           const b0=BIKE_BASE_STATS[0];
           const d0=BIKE_DAILY_TON[0];
-          await sendTgNotification(env,uid,m('welcome_bike',_wl,'Bike Level 0',b0.speed,b0.nitro,b0.accel,b0.maneuver,d0,G.MIN_WITHDRAW_TON));
+          await sendTgNotification(env,uid,m('welcome_bike',_wl,BIKE_NAMES[0],b0.speed,b0.nitro,b0.accel,b0.maneuver,d0,G.MIN_WITHDRAW_TON));
         }catch(_){}
       })().catch(()=>{}));
     }else{
@@ -465,7 +480,7 @@ async function hBuyBike(env,uid,data,_meta={},ctx=null){
     const newTotal=(user.totalBikesBought||0)+1;
     await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,ownedBikes:newOwned,totalBikesBought:newTotal});
     log(env,uid,'buy_bike',{bikeLevel:lv,price:priceTon,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
-    const _bkNames={0:'Bike Level 0',1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
+    const _bkNames=BIKE_NAMES;
     const _bkDaily=BIKE_DAILY_TON[lv]||0;
     if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ul=await getUserLang(env,uid);await sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(4)));})().catch(()=>{}));
     if(user.referredBy&&user.referredBy!==uid){
@@ -874,6 +889,7 @@ async function hRaceJoinQueue(env,uid,data,_meta={},ctx=null){
     const lvRaw=parseInt(data.bikeLevel,10);
     const lv=Number.isFinite(lvRaw)?lvRaw:NaN;
     if(!Object.prototype.hasOwnProperty.call(BIKE_BASE_STATS,lv)) return{success:false,error:'Invalid bike level'};
+    if(lv===0) return{success:false,error:'Free bike is not allowed in races. Use a paid bike to race against others.'};
     const ru=await dbGet(env,`users/${uid}`); let user=ru.data;
     if(!user) return{success:false,error:'User not found'};
     const owned=(user.ownedBikes||[]).map(Number);

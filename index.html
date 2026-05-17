@@ -1105,14 +1105,14 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 <script>
 /* ══ BIKE INVESTMENT DATA ══ */
 const BIKES = [
-  {lv:0,  name:'Specialized Allez', img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
-  {lv:1,  name:'Honda CB350',       img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
-  {lv:2,  name:'Honda CBR650R',     img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
-  {lv:3,  name:'Suzuki GSX-S750',   img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
+  {lv:0,  name:'Specialized Allez',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778862358/card_mz6jsx.jpg',                                                         speed:10,   nitro:5,    accel:3,   maneuver:2,   price:0,   dailyTon:0.0001},
+  {lv:1,  name:'Honda CB350',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463425/848f5854-5038-441c-83e3-a1c27608ec08_g8nmgi.png',  speed:40,   nitro:20,   accel:15,  maneuver:10,  price:1,   dailyTon:0.022},
+  {lv:2,  name:'Honda CBR650R',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463363/3ae9f959-74f3-48bf-90c1-74e2cdd5bc51_rdgt6t.png',  speed:60,   nitro:35,   accel:25,  maneuver:16,  price:5,   dailyTon:0.111},
+  {lv:3,  name:'Suzuki GSX-S750',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463443/c17cd56d-71ae-4acf-8628-e26ecfb3d6c5_qne8ah.png',  speed:90,   nitro:55,   accel:38,  maneuver:24,  price:10,  dailyTon:0.222},
   {lv:4,  name:'Suzuki GSX-R1000',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463478/b86af832-2e97-4ecb-8037-3b0cb824619e_q6j720.png',  speed:135,  nitro:85,   accel:57,  maneuver:36,  price:20,  dailyTon:0.444},
-  {lv:5,  name:'Kawasaki Z900',     img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
-  {lv:6,  name:'KTM RC 8C',         img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
-  {lv:7,  name:'Kawasaki Ninja H2', img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
+  {lv:5,  name:'Kawasaki Z900',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463491/ee262ea7-72ef-422b-983f-a6e1d546271b_mmjqts.png',  speed:200,  nitro:130,  accel:85,  maneuver:50,  price:50,  dailyTon:1.11},
+  {lv:6,  name:'KTM RC 8C',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463322/9f8df68a-d7a9-4275-a68d-ac2e577699f4_jnbecv.png',  speed:300,  nitro:200,  accel:125, maneuver:70,  price:100, dailyTon:2.22},
+  {lv:7,  name:'Kawasaki Ninja H2',  img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463492/bdc5daa8-2f06-4ef3-acfd-7802b6daba26_blfuxu.png',  speed:450,  nitro:300,  accel:180, maneuver:95,  price:200, dailyTon:4.44},
 ];
 
 const TON_IMG = 'https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png';
@@ -1438,7 +1438,7 @@ function renderGarage(){
       thumb.innerHTML = `
         <div class="gr-bike-thumb-no" style="color:${isActive?ACTIVE_COLOR:'rgba(255,255,255,.55)'}">No ${noNum}</div>
         <img class="gr-bike-thumb-img" src="${b.img}" onerror="this.style.opacity='.3'" style="${isActive?'':'filter:grayscale(.45) brightness(.75);'}">
-        <div class="gr-bike-thumb-label">${b.name || (tr('bikeLevelLabel')+' '+b.lv)}</div>
+        <div class="gr-bike-thumb-label">${tr('bikeLevelLabel')} ${b.lv}</div>
       `;
       thumb.onclick = () => { _garageSelectedLv = b.lv; renderGarage(); };
       trackEl.appendChild(thumb);
@@ -3459,10 +3459,6 @@ async function doUpgradeStat(bikeLevel, stat){
     });
     const b=_raceBikes[_raceIdx];
     if(b) _renderStats(b);
-    // Warn user that the free starter bike cannot enter PvP races.
-    if(b && b.lv === 0){
-      try{ showNotif('⚠️ This bike is not allowed in races. Use a paid bike to race against others.','w'); }catch(e){}
-    }
   }
 
   /* swipe on big carousel card disabled — navigation is via thumbnails only */
@@ -3624,30 +3620,8 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
-      // Resolve real max speed for each side (with upgrades) so the engine
-      // uses the correct physics for every level including level 0.
-      const leftBike   = BIKES.find(b=>b.lv===leftLv)  || BIKES[0];
-      const rightBike  = BIKES.find(b=>b.lv===rightLv) || BIKES[0];
-      const leftStats  = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(leftBike)  : leftBike;
-      const rightStats = (typeof getBikeCurrentStats==='function') ? getBikeCurrentStats(rightBike) : rightBike;
-      const leftMaxSpd  = Math.max(10, leftStats.speed  || leftBike.speed);
-      const rightMaxSpd = Math.max(10, rightStats.speed || rightBike.speed);
-      // Player names + photos from Telegram
-      const tgUser    = S?.tg?.initDataUnsafe?.user;
-      const myName    = tgUser?.first_name || 'You';
-      const myPhoto   = tgUser?.photo_url  || '';
-      const oppName2  = matchData.opp.name     || 'Opponent';
-      const oppPhoto2 = matchData.opp.photoUrl || '';
-      const p1Name  = youAreP1 ? encodeURIComponent(myName)    : encodeURIComponent(oppName2);
-      const p2Name  = youAreP1 ? encodeURIComponent(oppName2)  : encodeURIComponent(myName);
-      const p1Photo = youAreP1 ? encodeURIComponent(myPhoto)   : encodeURIComponent(oppPhoto2);
-      const p2Photo = youAreP1 ? encodeURIComponent(oppPhoto2) : encodeURIComponent(myPhoto);
-      fr.src='race_engine.html?t='+Date.now()
-        +'&player='+leftLv+'&ai='+rightLv
-        +'&winner='+winnerSide
-        +'&maxSpeed='+leftMaxSpd+'&maxAiSpeed='+rightMaxSpd
-        +'&p1Name='+p1Name+'&p2Name='+p2Name
-        +'&p1Photo='+p1Photo+'&p2Photo='+p2Photo;
+      // Bike Level 0.glb exists — send real levels directly like all other levels
+      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }
@@ -3671,10 +3645,9 @@ async function doUpgradeStat(bikeLevel, stat){
   window.startRace = async function(){
     if(_raceActive||_raceStarted||_raceQueueing) return;
     if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
-    // Free starter bike (Level 0) is not allowed in PvP races.
-    const _selBike = _raceBikes[_raceIdx];
-    if(_selBike && _selBike.lv === 0){
-      showNotif('❌ This bike is not allowed in races. Race against others using paid bikes, not the free one.','e');
+    const _selBike=_raceBikes[_raceIdx];
+    if(_selBike && _selBike.lv===0){
+      showNotif('🚫 هذه الدراجة المجانية غير مصرح لها بالسباق. استخدم دراجة مدفوعة للسباق مع الآخرين.','e');
       return;
     }
     const ton=S?.user?.tonBalance||0;
@@ -8266,9 +8239,7 @@ function tr(key){
 /* Translate a bike's display name to current language */
 function trBikeName(b){
   if(!b) return '';
-  // Prefer the bike's real model name (set on the BIKES array).
-  if(b.name) return b.name;
-  return tr('bikeNamePrefix') + ' ' + b.lv;
+  return b.name || (tr('bikeNamePrefix') + ' ' + b.lv);
 }
 
 

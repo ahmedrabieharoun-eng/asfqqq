@@ -9,7 +9,7 @@
 // ================================================================
 
 const G = {
-  MIN_WITHDRAW_TON: 0.1,
+  MIN_WITHDRAW_TON: 0.0001,
   WITHDRAW_FEE_PCT: 10, // 10% withdrawal fee
   MIN_DEPOSIT_TON: 1,
   REF_BONUS_PCT: 10,
@@ -49,6 +49,7 @@ const G = {
 
 // Bike base stats
 const BIKE_BASE_STATS = {
+  0 :{ speed:10,  nitro:5,   accel:3,  maneuver:2,  price:0   },
   1 :{ speed:40,  nitro:20,  accel:15, maneuver:10, price:1   },
   2 :{ speed:60,  nitro:35,  accel:25, maneuver:16, price:5   },
   3 :{ speed:90,  nitro:55,  accel:38, maneuver:24, price:10  },
@@ -62,6 +63,7 @@ const BIKE_BASE_STATS = {
 };
 
 const BIKE_DAILY_TON = {
+  0:0.0001,
   1:0.022, 2:0.111, 3:0.222, 4:0.444, 5:1.11,
   6:2.22, 7:4.44, 8:5.55, 9:8.88, 10:11.11,
 };
@@ -69,7 +71,7 @@ const BIKE_MINING_MS = 24*60*60*1000;
 
 // Default partner tasks
 const DEFAULT_PARTNER_TASKS = [
-  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacingpayouts', imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747937/payments_c5ifxk.jpg', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
+  { id:'partner_payouts', name:'Join Payouts Channel', type:'channel', link:'https://t.me/RaseenRacing_chat', imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747937/payments_c5ifxk.jpg', bambooReward:100, targetUsers:null, status:'active', isDefault:true },
   { id:'partner_news',    name:'Join News Channel',    type:'channel', link:'https://t.me/RaseenRacing',        imageUrl:'https://res.cloudinary.com/dktppfipy/image/upload/v1778747938/news_ek96ui.jpg',     bambooReward:100, targetUsers:null, status:'active', isDefault:true },
 ];
 
@@ -181,6 +183,13 @@ const MSG={
     ru:()=>`❌ Ваш пост отклонён.`,
     es:()=>`❌ Tu publicación fue rechazada.`,
     fr:()=>`❌ Votre publication a été rejetée.`,
+  },
+  welcome_bike:{
+    ar:(bkName,speed,nitro,accel,maneuver,daily,minWd)=>`🎁 <b>مكافأة التسجيل!</b>\n\n🏍️ حصلت على <b>${bkName}</b> مجاناً!\n\n📊 <b>المواصفات:</b>\n• السرعة: ${speed}\n• النيترو: ${nitro}\n• التسارع: ${accel}\n• المناورة: ${maneuver}\n\n💰 الربح اليومي: <b>${daily} TON</b>\n\n✅ يمكنك سحب أرباحك لأن الحد الأدنى للسحب هو <b>${minWd} TON</b> فقط!\n\n🔋 أرسلها للتعدين لتبدأ الكسب!`,
+    en:(bkName,speed,nitro,accel,maneuver,daily,minWd)=>`🎁 <b>Registration Bonus!</b>\n\n🏍️ You received <b>${bkName}</b> for FREE!\n\n📊 <b>Specs:</b>\n• Speed: ${speed}\n• Nitro: ${nitro}\n• Acceleration: ${accel}\n• Handling: ${maneuver}\n\n💰 Daily earning: <b>${daily} TON</b>\n\n✅ You can withdraw your earnings — the minimum withdrawal is only <b>${minWd} TON</b>!\n\n🔋 Send it to mining to start earning!`,
+    ru:(bkName,speed,nitro,accel,maneuver,daily,minWd)=>`🎁 <b>Бонус за регистрацию!</b>\n\n🏍️ Вы получили <b>${bkName}</b> бесплатно!\n\n📊 <b>Характеристики:</b>\n• Скорость: ${speed}\n• Нитро: ${nitro}\n• Ускорение: ${accel}\n• Управление: ${maneuver}\n\n💰 Доход в день: <b>${daily} TON</b>\n\n✅ Вы можете вывести заработок — минимальный вывод всего <b>${minWd} TON</b>!\n\n🔋 Отправьте в майнинг, чтобы начать зарабатывать!`,
+    es:(bkName,speed,nitro,accel,maneuver,daily,minWd)=>`🎁 <b>¡Bono de Registro!</b>\n\n🏍️ ¡Recibiste <b>${bkName}</b> GRATIS!\n\n📊 <b>Especificaciones:</b>\n• Velocidad: ${speed}\n• Nitro: ${nitro}\n• Aceleración: ${accel}\n• Manejo: ${maneuver}\n\n💰 Ganancia diaria: <b>${daily} TON</b>\n\n✅ Puedes retirar tus ganancias — el mínimo es solo <b>${minWd} TON</b>!\n\n🔋 ¡Envíala a minería para empezar a ganar!`,
+    fr:(bkName,speed,nitro,accel,maneuver,daily,minWd)=>`🎁 <b>Bonus d'Inscription!</b>\n\n🏍️ Vous avez reçu <b>${bkName}</b> GRATUITEMENT!\n\n📊 <b>Caractéristiques:</b>\n• Vitesse: ${speed}\n• Nitro: ${nitro}\n• Accélération: ${accel}\n• Maniabilité: ${maneuver}\n\n💰 Gain quotidien: <b>${daily} TON</b>\n\n✅ Vous pouvez retirer vos gains — le minimum est de seulement <b>${minWd} TON</b>!\n\n🔋 Envoyez en minage pour commencer à gagner!`,
   },
 };
 // Get user language (saved in DB) or fallback to 'en'
@@ -333,6 +342,7 @@ function makeUser(uid,tg={},ref=null){
     withdrawWallet:null,
     createdAt:Date.now(),
     welcomeBonusGiven:true,
+    ownedBikes:[0],
   };
 }
 
@@ -353,6 +363,15 @@ async function hGetState(env,uid,tg,data={},_meta={},ctx=null){
       user=makeUser(uid,tg,ref);
       if(user.referredBy)await registerReferral(env,uid,user,user.referredBy,ctx);
       await dbSet(env,`users/${uid}`,user);
+      // Send welcome bike notification (Bike Level 0 — free registration bonus)
+      if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{
+        try{
+          const _wl=(tg&&tg.language_code&&['ar','en','ru','es','fr'].includes(tg.language_code))?tg.language_code:'en';
+          const b0=BIKE_BASE_STATS[0];
+          const d0=BIKE_DAILY_TON[0];
+          await sendTgNotification(env,uid,m('welcome_bike',_wl,'Bike Level 0',b0.speed,b0.nitro,b0.accel,b0.maneuver,d0,G.MIN_WITHDRAW_TON));
+        }catch(_){}
+      })().catch(()=>{}));
     }else{
       if(tg){
         if(tg.first_name)user.firstName=tg.first_name.slice(0,64);
@@ -440,15 +459,15 @@ async function hBuyBike(env,uid,data,_meta={},ctx=null){
     const owned=(user.ownedBikes||[]).map(Number);
     if(owned.includes(lv))return{success:false,error:'Bike already owned'};
     const priceTon=bike.price;
-    if((user.tonBalance||0)<priceTon)return{success:false,error:`Need ${priceTon} TON. Your balance: ${(user.tonBalance||0).toFixed(2)} TON`};
+    if((user.tonBalance||0)<priceTon)return{success:false,error:`Need ${priceTon} TON. Your balance: ${(user.tonBalance||0).toFixed(4)} TON`};
     const newTon=Math.round(((user.tonBalance||0)-priceTon)*1e8)/1e8;
     const newOwned=[...owned,lv];
     const newTotal=(user.totalBikesBought||0)+1;
     await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,ownedBikes:newOwned,totalBikesBought:newTotal});
     log(env,uid,'buy_bike',{bikeLevel:lv,price:priceTon,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
-    const _bkNames={1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
+    const _bkNames={0:'Bike Level 0',1:'Starter',2:'Street',3:'Sport',4:'Super Sport',5:'Hyper',6:'Legend',7:'Elite',8:'Champion',9:'Ultimate',10:'Apex'};
     const _bkDaily=BIKE_DAILY_TON[lv]||0;
-    if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ul=await getUserLang(env,uid);await sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(2)));})().catch(()=>{}));
+    if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ul=await getUserLang(env,uid);await sendTgNotification(env,uid,m('bike_bought',_ul,_bkNames[lv]||'Level '+lv,lv,bike.speed,bike.nitro,bike.accel,bike.maneuver,_bkDaily,(_bkDaily*30).toFixed(4)));})().catch(()=>{}));
     if(user.referredBy&&user.referredBy!==uid){
       // Fix: use toFixed(8) to avoid Math.round zeroing small commissions
       const comm=parseFloat((priceTon*G.REF_BONUS_PCT/100).toFixed(8));
@@ -469,7 +488,7 @@ async function hBuyBike(env,uid,data,_meta={},ctx=null){
             await dbSet(env,`users/${user.referredBy}/referrals/${uid}`,{userId:uid,firstName:user.firstName||'',lastName:user.lastName||'',username:user.username||'',photoUrl:user.photoUrl||'',joinedAt:Date.now(),earned:newEarned,hasWithdrawn:user.hasWithdrawn||false});
           }
           log(env,user.referredBy,'referral_commission',{from:uid,bikeLevel:lv,bikePriceTon:priceTon,comm,tonBalance_before:rr.data.tonBalance||0,tonBalance_after:newRefBal},_meta);
-          if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _rl=await getUserLang(env,user.referredBy);await sendTgNotification(env,user.referredBy,m('ref_commission',_rl,user.firstName||'Friend',lv,comm,newRefBal.toFixed(4)));})().catch(()=>{}));
+          if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _rl=await getUserLang(env,user.referredBy);await sendTgNotification(env,user.referredBy,m('ref_commission',_rl,user.firstName||'Friend',lv,comm.toFixed(4),newRefBal.toFixed(4)));})().catch(()=>{}));
         }else{
           console.error('hBuyBike: referredBy user not found:',user.referredBy);
         }
@@ -541,14 +560,15 @@ async function settleBikeMining(env,uid,user,_meta={},ctx=null){
   const newTon=parseFloat(((user.tonBalance||0)+tonAdded).toFixed(8));
   await dbUpdate(env,`users/${uid}`,{tonBalance:newTon,bikeMining:mining});
   log(env,uid,'bike_mining_claim',{ton_reward:tonAdded,completed,tonBalance_before:user.tonBalance||0,tonBalance_after:newTon},_meta);
-  if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ml=await getUserLang(env,uid);await sendTgNotification(env,uid,m('mining_done',_ml,tonAdded.toFixed(3)));})().catch(()=>{}));
+  if(ctx&&ctx.waitUntil)ctx.waitUntil((async()=>{const _ml=await getUserLang(env,uid);await sendTgNotification(env,uid,m('mining_done',_ml,tonAdded.toFixed(4)));})().catch(()=>{}));
   return{user:{...user,tonBalance:newTon,bikeMining:mining},bikeMining:mining,tonAdded,completed};
 }
 
 async function hStartBikeMining(env,uid,data,_meta={},ctx=null){
   try{
-    const lv=parseInt(data.bikeLevel)||0;
-    if(!BIKE_BASE_STATS[lv])return{success:false,error:'Unknown bike'};
+    const lvRaw=parseInt(data.bikeLevel,10);
+    const lv=Number.isFinite(lvRaw)?lvRaw:NaN;
+    if(!Object.prototype.hasOwnProperty.call(BIKE_BASE_STATS,lv))return{success:false,error:'Unknown bike'};
     const r=await dbGet(env,`users/${uid}`);let user=r.data;
     if(!user)return{success:false,error:'User not found'};
     const settled=await settleBikeMining(env,uid,user,_meta,ctx);
@@ -603,6 +623,12 @@ async function hWithdraw(env,uid,data,_meta={}){
       if(!user){await dbSet(env,lockKey,{ts:0});return{success:false,error:'User not found'};}
       if((user.tonBalance||0)<amt){await dbSet(env,lockKey,{ts:0});return{success:false,error:'Insufficient TON balance'};}
       if((now-(user._lastWdTs||0))<60000){await dbSet(env,lockKey,{ts:0});return{success:false,error:'Please wait 60 seconds before next withdrawal'};}
+      
+      // Check for existing pending withdrawal
+      const wdHistRec=await dbGet(env,`users/${uid}/wdHistory`);
+      const wdHistMap=wdHistRec.data||{};
+      const hasPendingWd=Object.values(wdHistMap).some(w=>w&&w.status==='pending');
+      if(hasPendingWd){await dbSet(env,lockKey,{ts:0});return{success:false,error:'You already have a pending withdrawal. Please wait for it to be processed before creating a new one.',errorCode:'PENDING_WITHDRAW_EXISTS'};}
       
       const tpr=await dbGet(env,'tasks/partner');
       const partnerTasks=tpr.data?Object.values(tpr.data).filter(t=>t.status==='active'):[];
@@ -845,8 +871,9 @@ async function hRaceResult(env,uid,_data,_meta={}){
 // Join (or create) the matchmaking queue. Always charges 0.5 TON up-front.
 async function hRaceJoinQueue(env,uid,data,_meta={},ctx=null){
   try{
-    const lv=parseInt(data.bikeLevel)||0;
-    if(!lv||!BIKE_BASE_STATS[lv]) return{success:false,error:'Invalid bike level'};
+    const lvRaw=parseInt(data.bikeLevel,10);
+    const lv=Number.isFinite(lvRaw)?lvRaw:NaN;
+    if(!Object.prototype.hasOwnProperty.call(BIKE_BASE_STATS,lv)) return{success:false,error:'Invalid bike level'};
     const ru=await dbGet(env,`users/${uid}`); let user=ru.data;
     if(!user) return{success:false,error:'User not found'};
     const owned=(user.ownedBikes||[]).map(Number);

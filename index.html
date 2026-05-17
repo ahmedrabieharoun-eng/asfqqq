@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3620,8 +3619,18 @@ async function doUpgradeStat(bikeLevel, stat){
       // Engine treats `player` as car1 (left) bike model, `ai` as car2 (right).
       const leftLv  = youAreP1 ? myLv  : oppLv;
       const rightLv = youAreP1 ? oppLv : myLv;
+      const p1Name  = youAreP1 ? (matchData.you.name||'You') : (matchData.opp.name||'Opponent');
+      const p2Name  = youAreP1 ? (matchData.opp.name||'Opponent') : (matchData.you.name||'You');
+      const p1Photo = youAreP1 ? (matchData.you.photoUrl||'') : (matchData.opp.photoUrl||'');
+      const p2Photo = youAreP1 ? (matchData.opp.photoUrl||'') : (matchData.you.photoUrl||'');
+      const p1MaxSpd= youAreP1 ? (matchData.you.maxKmh||120) : (matchData.opp.maxKmh||120);
+      const p2MaxSpd= youAreP1 ? (matchData.opp.maxKmh||120) : (matchData.you.maxKmh||120);
       // Bike Level 0.glb exists — send real levels directly like all other levels
-      fr.src='race_engine.html?t='+Date.now()+'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide;
+      fr.src='race_engine.html?t='+Date.now()
+        +'&player='+leftLv+'&ai='+rightLv+'&winner='+winnerSide
+        +'&p1Name='+encodeURIComponent(p1Name)+'&p2Name='+encodeURIComponent(p2Name)
+        +'&p1Photo='+encodeURIComponent(p1Photo)+'&p2Photo='+encodeURIComponent(p2Photo)
+        +'&p1MaxSpd='+p1MaxSpd+'&p2MaxSpd='+p2MaxSpd;
     }
     setTimeout(()=>{ if(!_raceReady && _raceShowFn){ _raceReady=true; const f=_raceShowFn; _raceShowFn=null; f(); } }, 15000);
   }
@@ -3647,7 +3656,9 @@ async function doUpgradeStat(bikeLevel, stat){
     if(_raceBikes.length===0){ showNotif('❌ Нет байков! Купите в Гараже','e'); return; }
     const _selBike=_raceBikes[_raceIdx];
     if(_selBike && _selBike.lv===0){
-      showNotif('🚫 هذه الدراجة المجانية غير مصرح لها بالسباق. استخدم دراجة مدفوعة للسباق مع الآخرين.','e');
+      const _fbLang=localStorage.getItem('pandaLang')||'en';
+      const _fbT=TRANSLATIONS[_fbLang]||TRANSLATIONS['en'];
+      showNotif(_fbT.freeBikeNotAllowed||'🚫 This free bike is not allowed to race. Use a paid bike to race with others.','e');
       return;
     }
     const ton=S?.user?.tonBalance||0;
@@ -7225,6 +7236,7 @@ const TRANSLATIONS = {
     taskConfirmCost:'التكلفة:',
     taskConfirmBtn:'✅ فهمت، أنشئ المهمة',
     cancelBtn:'إلغاء',
+    freeBikeNotAllowed:'🚫 هذه الدراجة المجانية غير مصرح لها بالسباق. استخدم دراجة مدفوعة للسباق مع الآخرين.',
     multiAccount:'⚠️ هذا الجهاز مرتبط بحساب آخر — حساب واحد لكل جهاز 🏍️',
     compTabActive:'💎 الإحالات النشطة',
     compTabMining:'⚡ سرعة التعدين',
@@ -7402,6 +7414,7 @@ const TRANSLATIONS = {
     taskConfirmCost:'Cost:',
     taskConfirmBtn:'✅ Understood, Create Task',
     cancelBtn:'Cancel',
+    freeBikeNotAllowed:'🚫 This free bike is not allowed to race. Use a paid bike to race with others.',
     multiAccount:'⚠️ This device is linked to another account — one device per account 🏍️',
     compTabActive:'💎 Active Refs',
     compTabMining:'⚡ Mining Speed',
@@ -7570,6 +7583,7 @@ const TRANSLATIONS = {
     taskConfirmCost:'Стоимость:',
     taskConfirmBtn:'✅ Понял, создать задание',
     cancelBtn:'Отмена',
+    freeBikeNotAllowed:'🚫 Этот бесплатный байк не допускается к гонкам. Используйте платный байк для участия в гонках.',
     multiAccount:'⚠️ Это устройство привязано к другому аккаунту — один аккаунт на устройство 🏍️',
     compTabActive:'💎 Активные рефералы',
     compTabMining:'⚡ Скорость майнинга',
@@ -7738,6 +7752,7 @@ const TRANSLATIONS = {
     taskConfirmCost:'Costo:',
     taskConfirmBtn:'✅ Entendido, crear tarea',
     cancelBtn:'Cancelar',
+    freeBikeNotAllowed:'🚫 Esta moto gratuita no tiene permitido competir. Usa una moto de pago para correr con otros.',
     multiAccount:'⚠️ Este dispositivo está vinculado a otra cuenta — una cuenta por dispositivo 🏍️',
     compTabActive:'💎 Referidos activos',
     compTabMining:'⚡ Velocidad de minería',
@@ -7906,6 +7921,7 @@ const TRANSLATIONS = {
     taskConfirmCost:'Coût:',
     taskConfirmBtn:'✅ Compris, créer la tâche',
     cancelBtn:'Annuler',
+    freeBikeNotAllowed:'🚫 Cette moto gratuite n\'est pas autorisée à courir. Utilisez une moto payante pour courir avec d\'autres.',
     multiAccount:'⚠️ Cet appareil est lié à un autre compte — un compte par appareil 🏍️',
     compTabActive:'💎 Réf. actifs',
     compTabMining:'⚡ Vitesse de minage',

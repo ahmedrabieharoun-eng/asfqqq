@@ -917,7 +917,7 @@ const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
   // Use real names in the winner banner too
   window._RACE_NAMES = { p1: p1Name, p2: p2Name };
 })();
-function _bikeUrl(lv){ return 'Bike Level '+lv+'.glb'; }
+function _bikeUrl(lv){ return encodeURIComponent('Bike Level '+lv+'.glb'); }
 
 // car1 (left lane, x=-3) — PLAYER bike (selected on bike-selection page)
 const BIKE1_URL_PRIMARY  = _bikeUrl(PLAYER_LV);
@@ -1180,15 +1180,19 @@ function spawnP(x,y,z,vx,vy,vz,type){
 //  GAME STATE
 // ═══════════════════════════════════════════════════════════════
 const START_Z=5;
-// Same physics for all levels including level 0 — no special cases
-const gears   = [0,0.082,0.165,0.265,0.385,0.525,0.665];
-const gearThr = [0,14,38,70,106,148,198];
-let MAX_SPD = 325;
+// (5) Level 0 = bicycle → softer/slower gear curve so it actually moves believably
+const IS_BIKE0 = (PLAYER_LV === 0 && AI_LV === 0);
+const gears   = IS_BIKE0 ? [0,0.055,0.095,0.140,0.190,0.235,0.275] : [0,0.082,0.165,0.265,0.385,0.525,0.665];
+const gearThr = IS_BIKE0 ? [0,5,11,18,26,34,42]                    : [0,14,38,70,106,148,198];
+// (11) Dynamic max speed based on bike's actual top speed (passed via URL param)
+// (5) Level 0 cap defaults to a realistic bicycle top speed (~52 km/h) instead of 325
+let MAX_SPD = IS_BIKE0 ? 52 : 325;
 try {
   const _qsMax = new URLSearchParams(location.search).get('maxSpeed');
   if (_qsMax && !isNaN(+_qsMax)) MAX_SPD = Math.max(20, Math.min(2000, +_qsMax));
 } catch(_) {}
-const ACCEL_K = 285;
+// (5) acceleration multiplier — lower for the bicycle so push-off feels natural
+const ACCEL_K = IS_BIKE0 ? 95 : 285;
 
 const state={phase:'idle',timer:0,raceStart:0,
   p1:{pos:START_Z,speed:0,gear:1,finished:false,finTime:0},

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1191,6 +1190,14 @@ try {
   const _qsMax = new URLSearchParams(location.search).get('maxSpeed');
   if (_qsMax && !isNaN(+_qsMax)) MAX_SPD = Math.max(20, Math.min(2000, +_qsMax));
 } catch(_) {}
+// Per-player display speed caps (visual only — physics stays at MAX_SPD)
+let P1_DISPLAY_MAX = MAX_SPD, P2_DISPLAY_MAX = MAX_SPD;
+try {
+  const _qs = new URLSearchParams(location.search);
+  const _p1m = _qs.get('p1MaxSpd'), _p2m = _qs.get('p2MaxSpd');
+  if (_p1m && !isNaN(+_p1m)) P1_DISPLAY_MAX = Math.max(10, Math.min(2000, +_p1m));
+  if (_p2m && !isNaN(+_p2m)) P2_DISPLAY_MAX = Math.max(10, Math.min(2000, +_p2m));
+} catch(_) {}
 // (5) acceleration multiplier — lower for the bicycle so push-off feels natural
 const ACCEL_K = IS_BIKE0 ? 95 : 285;
 
@@ -1507,8 +1514,13 @@ function updateParticles(dt){
 //  HUD
 // ═══════════════════════════════════════════════════════════════
 function updateHUD(){
-  document.getElementById('p1-speed').textContent=Math.round(state.p1.speed);
-  document.getElementById('p2-speed').textContent=Math.round(state.p2.speed);
+  // Virtual display speeds: scale actual speed to each player's max display speed
+  const p1RealRatio = MAX_SPD > 0 ? state.p1.speed / MAX_SPD : 0;
+  const p2RealRatio = MAX_SPD > 0 ? state.p2.speed / MAX_SPD : 0;
+  const p1DisplaySpd = Math.min(Math.round(p1RealRatio * P1_DISPLAY_MAX), P1_DISPLAY_MAX);
+  const p2DisplaySpd = Math.min(Math.round(p2RealRatio * P2_DISPLAY_MAX), P2_DISPLAY_MAX);
+  document.getElementById('p1-speed').textContent = p1DisplaySpd;
+  document.getElementById('p2-speed').textContent = p2DisplaySpd;
   const r1=Math.min(state.p1.speed/MAX_SPD*100,100), r2=Math.min(state.p2.speed/MAX_SPD*100,100);
   document.getElementById('p1-rpm').style.width=r1+'%';
   document.getElementById('p2-rpm').style.width=r2+'%';

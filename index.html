@@ -4361,8 +4361,8 @@ async function doUpgradeStat(bikeLevel, stat){
         </div>
         <!-- Fee preview box -->
         <div id="wdFeePreview" style="display:none;margin:8px 0;padding:10px 12px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:10px;font-size:12px;font-weight:600;color:#FFD740;line-height:1.8">
-          <div><span data-i18n="wdFeeLabel">💸 Withdrawal Fee (10%)</span>: <span id="wdFeeAmt" style="font-weight:800;color:#ff8a80">-0.00 TON</span></div>
-          <div>✅ المبلغ الصافي بعد الخصم: <span id="wdNetAmt" style="font-weight:800;color:#00F27A">0.00 TON</span></div>
+          <div id="wdFeeRow">💸 <span data-i18n="wdFeeLabel">Fee</span> (10%): <span id="wdFeeAmt" style="font-weight:800;color:#ff8a80">-0.00 TON</span></div>
+          <div>✅ <span data-i18n="wdNetLabel">Net amount after fee</span>: <span id="wdNetAmt" style="font-weight:800;color:#00F27A">0.00 TON</span></div>
         </div>
         <button class="btn-wd-new" id="wdBtn" onclick="doWithdraw()">
           <img src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463497/toncoin-ton-logo_vpeeux.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0">
@@ -4375,10 +4375,6 @@ async function doUpgradeStat(bikeLevel, stat){
       <div class="wd-new-hist-card" style="margin-top:10px">
         <div class="wd-new-hist-hdr">📋 <span data-i18n="wdHistory">Withdrawal History</span></div>
         <div id="wdHistList"><div class="hist-empty" data-i18n="noWithdrawals">No withdrawals yet</div></div>
-
-        <!-- Activity / Balance Log -->
-        <div class="wd-new-hist-hdr" style="margin-top:18px">📊 <span data-i18n="activityLog">Activity Log</span></div>
-        <div id="activityLogList"><div class="hist-empty" data-i18n="noActivity">No activity yet</div></div>
       </div>
 
     </div>
@@ -5976,7 +5972,7 @@ function updateUI(){
   if(gTon) gTon.textContent = tonBal.toFixed(4);
   updateRefUI();
   renderWdHist();
-  renderWdHistNew(); renderActivityLog();
+  renderWdHistNew();
   syncFinanceHeader();
 }
 
@@ -6016,7 +6012,7 @@ function goNav(el){
   el.classList.add('active');
   document.getElementById(el.dataset.s).classList.add('active');
   hideFab();
-  if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew(); renderActivityLog();if(typeof syncProfileTopbar==='function')syncProfileTopbar();}
+  if(el.dataset.s==='sectionFinance'){syncFinanceHeader();renderWdHistNew();if(typeof syncProfileTopbar==='function')syncProfileTopbar();}
   if(el.dataset.s==='sectionHome'){renderBikes();syncTopbar();}
   if(el.dataset.s==='sectionMarket'){renderGarage();}
   if(el.dataset.s==='sectionFriends'){renderMiningPage(); if(typeof syncMineTopbar==='function') syncMineTopbar();}
@@ -6331,22 +6327,22 @@ function updateWdFeePreview(){
   const preview=document.getElementById('wdFeePreview');
   const feeEl=document.getElementById('wdFeeAmt');
   const netEl=document.getElementById('wdNetAmt');
+  const feeRow=document.getElementById('wdFeeRow');
   if(!preview||!feeEl||!netEl) return;
-  const lang=localStorage.getItem('pandaLang')||'en';
   const FREE_FEE_THRESHOLD=0.01;
   if(amt>=0.0001){
-    const hasFee=amt>FREE_FEE_THRESHOLD;
-    const fee=hasFee?+(amt*0.1).toFixed(8):0;
-    const net=+(amt-fee).toFixed(8);
-    if(hasFee){
+    if(amt>FREE_FEE_THRESHOLD){
+      const fee=+(amt*0.1).toFixed(8);
+      const net=+(amt-fee).toFixed(8);
       feeEl.textContent=`-${fee.toFixed(4)} TON`;
-      feeEl.style.color='#ff8a80';
+      netEl.textContent=`${net.toFixed(4)} TON`;
+      if(feeRow) feeRow.style.display='';
     } else {
-      const noFeeLbl={ar:'بدون رسوم 🎉',en:'No Fee 🎉',ru:'Без комиссии 🎉',es:'Sin comisión 🎉',fr:'Sans frais 🎉'}[lang]||'No Fee 🎉';
-      feeEl.textContent=noFeeLbl;
-      feeEl.style.color='#00F27A';
+      // No fee for small amounts
+      feeEl.textContent='-0.0000 TON';
+      netEl.textContent=`${amt.toFixed(4)} TON`;
+      if(feeRow) feeRow.style.display='none';
     }
-    netEl.textContent=`${net.toFixed(4)} TON`;
     preview.style.display='block';
   } else {
     preview.style.display='none';
@@ -6388,11 +6384,16 @@ async function doWithdraw(){
     if(document.getElementById('wdAddrInput')) document.getElementById('wdAddrInput').value='';
     if(document.getElementById('wdAmtInput')) document.getElementById('wdAmtInput').value='';
     if(document.getElementById('wdFeePreview')) document.getElementById('wdFeePreview').style.display='none';
-    syncTopbar(); syncFinanceHeader(); renderWdHistNew(); renderActivityLog(); updateUI();
+    syncTopbar(); syncFinanceHeader(); renderWdHistNew(); updateUI();
     const lang=localStorage.getItem('pandaLang')||'en';
-    const feeMsg=feeAmt>0?({ar:`— رسوم 10%: ${feeAmt} TON — ستستلم: ${netAmt} TON`,en:`— Fee: ${feeAmt} TON — You receive: ${netAmt} TON`,ru:`— Комиссия: ${feeAmt} TON — Получите: ${netAmt} TON`,es:`— Comisión: ${feeAmt} TON — Recibirás: ${netAmt} TON`,fr:`— Frais: ${feeAmt} TON — Vous recevrez: ${netAmt} TON`}[lang]||`— Fee: ${feeAmt} TON`):({ar:'— بدون رسوم 🎉',en:'— No fee 🎉',ru:'— Без комиссии 🎉',es:'— Sin comisión 🎉',fr:'— Sans frais 🎉'}[lang]||'— No fee 🎉');
-    const wdMsg={ar:`✅ طلب سحب ${amt} TON ${feeMsg}`,en:`✅ Withdrawal ${amt} TON ${feeMsg}`,ru:`✅ Вывод ${amt} TON ${feeMsg}`,es:`✅ Retiro ${amt} TON ${feeMsg}`,fr:`✅ Retrait ${amt} TON ${feeMsg}`}[lang]||`✅ Withdrawal ${amt} TON ${feeMsg}`;
-    showNotif(wdMsg,'s');
+    const successMsg={
+      ar:`✅ طلب سحب ${amt} TON${feeAmt>0?` — رسوم 10%: ${feeAmt} TON — ستستلم: ${netAmt} TON`:''}`,
+      en:`✅ Withdrawal request: ${amt} TON${feeAmt>0?` — Fee 10%: ${feeAmt} TON — You get: ${netAmt} TON`:''}`,
+      ru:`✅ Запрос вывода: ${amt} TON${feeAmt>0?` — Комиссия 10%: ${feeAmt} TON — Получите: ${netAmt} TON`:''}`,
+      es:`✅ Retiro solicitado: ${amt} TON${feeAmt>0?` — Comisión 10%: ${feeAmt} TON — Recibirás: ${netAmt} TON`:''}`,
+      fr:`✅ Retrait demandé: ${amt} TON${feeAmt>0?` — Frais 10%: ${feeAmt} TON — Vous recevrez: ${netAmt} TON`:''}`,
+    };
+    showNotif(successMsg[lang]||successMsg['en'],'s');
   }catch(e){
     const msg=e.message||'';
     const errCode=e.errorCode||'';
@@ -6553,22 +6554,21 @@ function renderWdHistNew(){
   if(!S.wdHist||!S.wdHist.length){el.innerHTML=`<div class="hist-empty">${T.noWithdrawals||'No withdrawals yet'}</div>`;return;}
   el.innerHTML=S.wdHist.slice(0,20).map(h=>{
     const rawStatus=(h.status||'pending').toLowerCase();
-    // Map all final-failure statuses to 'cancelled' for display
-    const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'||rawStatus==='rejected'?'cancelled':rawStatus;
+    // failed and rejected both map to cancelled display; paid maps to approved
+    const normStatus=rawStatus==='paid'?'approved':rawStatus==='failed'?'cancelled':rawStatus==='rejected'?'cancelled':rawStatus;
     const statusIcon={approved:'✅',pending:'⏳',cancelled:'❌'}[normStatus]||'⏳';
-    const statusTextMap={
-      approved:{ar:'تمت الموافقة',en:'Approved',ru:'Одобрено',es:'Aprobado',fr:'Approuvé'},
-      pending:{ar:'قيد الانتظار',en:'Pending',ru:'В ожидании',es:'Pendiente',fr:'En attente'},
-      cancelled:{ar:'ملغى',en:'Cancelled',ru:'Отменено',es:'Cancelado',fr:'Annulé'},
-    };
-    const statusText=(statusTextMap[normStatus]||statusTextMap['pending'])[lang]||(statusTextMap[normStatus]||statusTextMap['pending'])['en'];
+    const statusText={
+      approved:T.wdStatusApproved||'Approved',
+      pending:T.wdStatusPending||'Pending',
+      cancelled:T.wdStatusCancelled||'Cancelled'
+    }[normStatus]||(normStatus.charAt(0).toUpperCase()+normStatus.slice(1));
     const statusCls={approved:'approved',pending:'pending',cancelled:'cancelled'}[normStatus]||'pending';
     const amtTon=h.amt||h.amount||0;
-    // Translatable fee and requested labels
-    const feeLbl={ar:'رسوم',en:'Fee',ru:'Комиссия',es:'Comisión',fr:'Frais'}[lang]||'Fee';
-    const reqLbl={ar:'طُلب',en:'Requested',ru:'Запрошено',es:'Solicitado',fr:'Demandé'}[lang]||'Requested';
-    const feeInfo=h.fee&&h.fee>0?`<div style="font-size:9px;color:rgba(255,100,100,.7);font-weight:600">${feeLbl}: -${h.fee} TON</div>`:'';
-    const requestedInfo=h.amtRequested&&h.amtRequested!==h.amt?`<div style="font-size:9px;color:rgba(255,255,255,.35);font-weight:600">${reqLbl}: ${h.amtRequested} TON</div>`:'';
+    // Fee info — only show if there is a fee (amounts > 0.01 TON)
+    const feeLabel=T.wdFeeLabel||'Fee';
+    const requestedLabel=T.wdRequestedLabel||'Requested';
+    const feeInfo=h.fee&&h.fee>0?`<div style="font-size:9px;color:rgba(255,100,100,.7);font-weight:600">${feeLabel}: -${h.fee} TON</div>`:'';
+    const requestedInfo=h.amtRequested&&h.amtRequested!==h.amt?`<div style="font-size:9px;color:rgba(255,255,255,.35);font-weight:600">${requestedLabel}: ${h.amtRequested} TON</div>`:'';
     const ts=h.ts||h.d||null;
     const dateStr=ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'})+' \u2022 '+new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'--';
     const fullAddr=h.address||h.addr||'--';
@@ -6589,103 +6589,7 @@ function renderWdHistNew(){
     </div>`;
   }).join('');
 }
-function renderActivityLog(){
-  const el=document.getElementById('activityLogList');
-  if(!el) return;
-  const lang=localStorage.getItem('pandaLang')||'en';
-  const T=TRANSLATIONS[lang]||TRANSLATIONS['en'];
-  if(!S.balLog||!S.balLog.length){el.innerHTML=`<div class="hist-empty">${T.noActivity||'No activity yet'}</div>`;return;}
-
-  // Type labels per language
-  const typeLabel={
-    withdraw_request:   {ar:'🏧 طلب سحب',         en:'🏧 Withdrawal',         ru:'🏧 Вывод',              es:'🏧 Retiro',           fr:'🏧 Retrait'},
-    withdraw_approved:  {ar:'✅ سحب تمت الموافقة', en:'✅ Withdrawal Approved', ru:'✅ Вывод одобрен',     es:'✅ Retiro Aprobado',  fr:'✅ Retrait Approuvé'},
-    withdraw_rejected:  {ar:'❌ سحب مرفوض (مُسترد)',en:'❌ Withdrawal Rejected (Refunded)',ru:'❌ Вывод отклонён (возврат)',es:'❌ Retiro Rechazado (reembolso)',fr:'❌ Retrait Rejeté (remboursé)'},
-    deposit_completed:  {ar:'💰 إيداع مكتمل',      en:'💰 Deposit Completed',   ru:'💰 Депозит зачислен',  es:'💰 Depósito Completado',fr:'💰 Dépôt Complété'},
-    admin_confirm_deposit:{ar:'💰 إيداع (أدمن)',   en:'💰 Deposit (Admin)',      ru:'💰 Депозит (Админ)',   es:'💰 Depósito (Admin)', fr:'💰 Dépôt (Admin)'},
-    admin_set_balance:  {ar:'🔧 تعديل رصيد (أدمن)',en:'🔧 Balance Set (Admin)',  ru:'🔧 Баланс изменён (Админ)',es:'🔧 Saldo Ajustado (Admin)',fr:'🔧 Solde Modifié (Admin)'},
-    buy_bike:           {ar:'🏍️ شراء دراجة',       en:'🏍️ Bike Purchased',      ru:'🏍️ Куплен мотоцикл',  es:'🏍️ Moto Comprada',   fr:'🏍️ Moto Achetée'},
-    upgrade_stats:      {ar:'🛠️ ترقية دراجة',      en:'🛠️ Bike Upgraded',       ru:'🛠️ Мотоцикл улучшен', es:'🛠️ Moto Mejorada',   fr:'🛠️ Moto Améliorée'},
-    bike_mining_start:  {ar:'⛏️ بدء تعدين',        en:'⛏️ Mining Started',      ru:'⛏️ Майнинг запущен',  es:'⛏️ Minería Iniciada', fr:'⛏️ Minage Démarré'},
-    bike_mining_claim:  {ar:'💎 مكافأة تعدين',     en:'💎 Mining Reward',        ru:'💎 Награда за майнинг',es:'💎 Recompensa Minería',fr:'💎 Récompense Minage'},
-    race_join:          {ar:'🏁 دخول سباق',        en:'🏁 Race Entered',         ru:'🏁 Вход в гонку',     es:'🏁 Carrera Ingresada',fr:'🏁 Course Rejointe'},
-    race_result:        {ar:'🏆 نتيجة سباق',       en:'🏆 Race Result',          ru:'🏆 Итог гонки',       es:'🏆 Resultado Carrera',fr:'🏆 Résultat Course'},
-    race_refund:        {ar:'↩️ استرداد سباق',     en:'↩️ Race Refund',          ru:'↩️ Возврат за гонку', es:'↩️ Reembolso Carrera',fr:'↩️ Remboursement Course'},
-    referral_commission:{ar:'👥 عمولة إحالة',      en:'👥 Referral Commission',  ru:'👥 Реф. комиссия',    es:'👥 Comisión Referido',fr:'👥 Commission Parrainage'},
-    claim_task:         {ar:'🎯 مهمة إحالة',       en:'🎯 Referral Task',        ru:'🎯 Реф. задание',     es:'🎯 Tarea Referido',   fr:'🎯 Tâche Parrainage'},
-    claim_mission_task: {ar:'🎯 مهمة مكتملة',      en:'🎯 Mission Completed',    ru:'🎯 Миссия выполнена', es:'🎯 Misión Completada', fr:'🎯 Mission Accomplie'},
-    verify_task:        {ar:'✅ تحقق من مهمة',     en:'✅ Task Verified',         ru:'✅ Задание верифицировано',es:'✅ Tarea Verificada',fr:'✅ Tâche Vérifiée'},
-    create_task:        {ar:'➕ إنشاء مهمة',       en:'➕ Task Created',          ru:'➕ Задание создано',  es:'➕ Tarea Creada',     fr:'➕ Tâche Créée'},
-    partner_post_reward:{ar:'📢 مكافأة منشور',     en:'📢 Post Reward',           ru:'📢 Награда за пост',  es:'📢 Recompensa Post',  fr:'📢 Récompense Post'},
-  };
-
-  el.innerHTML=S.balLog.map(e=>{
-    const lbl=(typeLabel[e.type]||{})[lang]||(typeLabel[e.type]||{})['en']||e.type;
-    const ts=e.ts||null;
-    const dateStr=ts?new Date(ts).toLocaleDateString('en-US',{month:'short',day:'2-digit'})+' '+new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'--';
-
-    // Build detail line
-    let detail='';
-    const before=e.tonBalance_before!=null?parseFloat(e.tonBalance_before).toFixed(4):null;
-    const after=e.tonBalance_after!=null?parseFloat(e.tonBalance_after).toFixed(4):null;
-    const balStr=before!=null&&after!=null?`${before} → ${after} TON`:'';
-
-    if(e.type==='race_result'){
-      const wonLbl={ar:e.won?'فزت ✅':'خسرت ❌',en:e.won?'Won ✅':'Lost ❌',ru:e.won?'Победа ✅':'Поражение ❌',es:e.won?'Ganaste ✅':'Perdiste ❌',fr:e.won?'Gagné ✅':'Perdu ❌'}[lang]||'';
-      const oppStr=e.opponentName?` vs ${e.opponentName}`:'';
-      const prizeStr=e.won&&e.prize?` +${e.prize} TON`:'';
-      detail=`${wonLbl}${oppStr}${prizeStr}${balStr?' • '+balStr:''}`;
-    } else if(e.type==='race_join'){
-      detail=`-${e.cost||0.5} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='bike_mining_claim'){
-      detail=`+${(e.ton_reward||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='bike_mining_start'){
-      const bName=e.bikeName||('Bike Lv'+(e.bikeLevel||''));
-      detail=`${bName} • ${(e.dailyReward||e.reward||0).toFixed(4)} TON/day${balStr?' • Bal: '+after+' TON':''}`;
-    } else if(e.type==='buy_bike'){
-      const bName=e.bikeName||('Bike Lv'+(e.bikeLevel||''));
-      detail=`${bName} • -${(e.price||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='upgrade_stats'){
-      detail=`Lv${e.bikeLevel||''} • -${(e.upgPrice||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='withdraw_request'){
-      const feeStr=e.fee&&e.fee>0?` (fee -${(e.fee).toFixed(4)})`:' (no fee)';
-      detail=`-${(e.amount_requested||e.amtRequested||0)} TON${feeStr}${balStr?' • '+balStr:''}`;
-    } else if(e.type==='withdraw_rejected'){
-      detail=`+${(e.refunded||0).toFixed(4)} TON refund${balStr?' • '+balStr:''}`;
-    } else if(e.type==='withdraw_approved'){
-      detail=`${e.amt||''} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='referral_commission'){
-      detail=`+${(e.comm||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='claim_task'||e.type==='claim_mission_task'){
-      const name=e.taskName||e.taskId||'';
-      detail=`${name} • +${(e.ton_reward||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='admin_confirm_deposit'||e.type==='deposit_completed'){
-      detail=`+${(e.amount_ton||e.amount||0)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='partner_post_reward'){
-      detail=`+${(e.reward||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else if(e.type==='race_refund'){
-      detail=`+${(e.refunded||0).toFixed(4)} TON${balStr?' • '+balStr:''}`;
-    } else {
-      detail=balStr||'';
-    }
-
-    // Color: green for income, red for expense, yellow for neutral
-    const incomeTypes=new Set(['bike_mining_claim','race_result','referral_commission','claim_task','claim_mission_task','admin_confirm_deposit','deposit_completed','partner_post_reward','withdraw_rejected','race_refund','withdraw_approved']);
-    const expenseTypes=new Set(['buy_bike','upgrade_stats','withdraw_request','race_join','create_task']);
-    const isIncome=incomeTypes.has(e.type)||(e.type==='race_result'&&e.won);
-    const isExpense=expenseTypes.has(e.type)||(e.type==='race_result'&&!e.won);
-    const amtColor=isIncome?'#00F27A':isExpense?'#ff8a80':'#FFD740';
-
-    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lbl}</div>
-        <div style="font-size:10px;color:${amtColor};font-weight:600;margin-top:2px;word-break:break-all">${detail}</div>
-      </div>
-      <div style="font-size:9px;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:2px">${dateStr}</div>
-    </div>`;
-  }).join('');
-}
-
+function renderWdHist(){
   const el=document.getElementById('wdHist');
   if(!el) return;
   if(!S.wdHist.length){el.innerHTML='<div class="hist-empty">No withdrawals yet</div>';return;}
@@ -6802,7 +6706,7 @@ function openProfilePage(page){
   if(page==='missions'){renderMissions();}
   else if(page==='partnership'){renderPartnerPosts();}
   else if(page==='referrals'){renderRefMissions();updateRefUI();}
-  else if(page==='withdraw'||page==='deposit'){syncFinanceHeader();renderWdHistNew(); renderActivityLog();}
+  else if(page==='withdraw'||page==='deposit'){syncFinanceHeader();renderWdHistNew();}
   const cidEl=document.getElementById('manualCommentId');
   if(cidEl) cidEl.value=S.userId||'???';
   // Re-apply translations to the freshly-injected content so all data-i18n nodes are localized
@@ -7271,10 +7175,9 @@ const TRANSLATIONS = {
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'فوري • بدون تحويل',
     wdHistory:'سجل السحوبات',
+    wdStatusApproved:'تمت الموافقة',wdStatusPending:'قيد الانتظار',wdStatusCancelled:'ملغي',
+    wdFeeLabel:'رسوم',wdRequestedLabel:'المطلوب',wdNetLabel:'المبلغ الصافي بعد الخصم',
     noWithdrawals:'لا توجد سحوبات',
-    wdFeeLabel:'💸 رسوم السحب (10%)',
-    activityLog:'سجل النشاط',
-    noActivity:'لا يوجد نشاط بعد',
     labelCoins:'كوينز',labelBamboo:'بامبو',
     statAccrued:'المتراكم',statRateDay:'المعدل/يوم',statBambooDay:'بامبو/يوم',
     claimBtn:'جمع Bamboo',lvLabel:'مستوى ',
@@ -7456,10 +7359,10 @@ const TRANSLATIONS = {
     walletAddress:'TON Wallet Address',
     walletPlaceholder:'UQA...',
     wdHistory:'Withdrawal History',
+    wdStatusApproved:'Approved',wdStatusPending:'Pending',wdStatusCancelled:'Cancelled',
+    wdFeeLabel:'Fee',wdRequestedLabel:'Requested',wdNetLabel:'Net amount after fee',
     noWithdrawals:'No withdrawals yet',
-    wdFeeLabel:'💸 Withdrawal Fee (10%)',
-    activityLog:'Activity Log',
-    noActivity:'No activity yet',
+    tabReferralTxt:'Referral',tabSocialTxt:'Social',
     tabPartner:'⭐ Partner',tabCommunity:'🌍 Community',floatAdd:'➕ Add Task',
     friendsTitle:'Friends & Referrals',refProgTitle:'Referral Program',
     refCommission:'Commission when friends buy from Market!',
@@ -7623,10 +7526,10 @@ const TRANSLATIONS = {
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Мгновенно • Без конвертации',
     wdHistory:'История выводов',
+    wdStatusApproved:'Одобрено',wdStatusPending:'В ожидании',wdStatusCancelled:'Отменено',
+    wdFeeLabel:'Комиссия',wdRequestedLabel:'Запрошено',wdNetLabel:'Сумма после комиссии',
     noWithdrawals:'Выводов нет',
-    wdFeeLabel:'💸 Комиссия (10%)',
-    activityLog:'Журнал активности',
-    noActivity:'Активности нет',labelBamboo:'Бамбук',
+    labelCoins:'Коины',labelBamboo:'Бамбук',
     statAccrued:'Накоплено',statRateDay:'Темп/день',statBambooDay:'Бамбук/день',
     claimBtn:'Забрать Bamboo',lvLabel:'Ур.',
     tabDeposit:'💰 Депозит',tabWithdraw:'🌟 Сезон 2',tabExchange:'⚡ Обмен',
@@ -7794,10 +7697,10 @@ const TRANSLATIONS = {
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantáneo • Sin conversión',
     wdHistory:'Historial de retiros',
+    wdStatusApproved:'Aprobado',wdStatusPending:'Pendiente',wdStatusCancelled:'Cancelado',
+    wdFeeLabel:'Comisión',wdRequestedLabel:'Solicitado',wdNetLabel:'Neto después de comisión',
     noWithdrawals:'Sin retiros',
-    wdFeeLabel:'💸 Comisión de retiro (10%)',
-    activityLog:'Registro de actividad',
-    noActivity:'Sin actividad aún',labelBamboo:'Bambú',
+    labelCoins:'Monedas',labelBamboo:'Bambú',
     statAccrued:'Acumulado',statRateDay:'Tasa/Día',statBambooDay:'Bambú/día',
     claimBtn:'Reclamar Bamboo',lvLabel:'Nv.',
     tabDeposit:'💰 Depósito',tabWithdraw:'🌟 Temporada 2',tabExchange:'⚡ Cambio',
@@ -7965,10 +7868,10 @@ const TRANSLATIONS = {
     withdrawRate:'1 TON = 1 TON',
     depositSimpleNote:'Instantané • Sans conversion',
     wdHistory:'Historique retraits',
+    wdStatusApproved:'Approuvé',wdStatusPending:'En attente',wdStatusCancelled:'Annulé',
+    wdFeeLabel:'Frais',wdRequestedLabel:'Demandé',wdNetLabel:'Montant net après frais',
     noWithdrawals:'Aucun retrait',
-    wdFeeLabel:'💸 Frais de retrait (10%)',
-    activityLog:'Journal d\'activité',
-    noActivity:'Aucune activité',labelBamboo:'Bambou',
+    labelCoins:'Pièces',labelBamboo:'Bambou',
     statAccrued:'Accumulé',statRateDay:'Taux/Jour',statBambooDay:'Bambou/jour',
     claimBtn:'Réclamer Bamboo',lvLabel:'Nv.',
     tabDeposit:'💰 Dépôt',tabWithdraw:'🌟 Saison 2',tabExchange:'⚡ Échange',

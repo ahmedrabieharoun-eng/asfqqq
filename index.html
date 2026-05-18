@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3826,8 +3827,11 @@ async function doUpgradeStat(bikeLevel, stat){
     .pf-hero-bottom{position:absolute;left:0;right:0;bottom:0;height:80px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 100%);pointer-events:none;}
 
     /* Top-right: EN dropdown + music icon (square cards like reference) */
-    .pf-actions{position:absolute;top:14px;right:14px;z-index:11;display:flex;gap:10px;}
+    .pf-actions{position:absolute;top:14px;right:14px;z-index:11;display:flex;gap:10px;align-items:flex-start;}
     .pf-tb-btn{background:rgba(20,20,20,.85);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px;height:38px;}
+    .pf-tb-support{background:rgba(20,20,20,.85);border:1px solid rgba(0,212,255,.45);border-radius:12px;padding:4px 10px;color:#fff;cursor:pointer;backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:38px;text-decoration:none;box-shadow:0 0 10px rgba(0,212,255,.25);}
+    .pf-tb-support i{font-size:14px;color:#00D4FF;line-height:1;}
+    .pf-tb-support span{font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;line-height:1;}
     .pf-tb-icon{width:38px;height:38px;border-radius:12px;background:rgba(20,20,20,.85);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);}
 
     /* Left-aligned avatar + name — no green ring */
@@ -3858,6 +3862,7 @@ async function doUpgradeStat(bikeLevel, stat){
 
     <!-- top-right Lang -->
     <div class="pf-actions">
+      <a class="pf-tb-support" href="https://t.me/RaseenRacing_support" target="_blank" rel="noopener" aria-label="Support"><i class="fa-solid fa-headset"></i><span data-i18n="supportBtn">Support</span></a>
       <button class="pf-tb-btn" onclick="toggleLangMenu()" id="langBtnFin"><span id="langFlagFin">🇬🇧</span> <span id="langLblFin">EN</span> <span style="font-size:10px;opacity:.7">▼</span></button>
     </div>
 
@@ -7164,7 +7169,7 @@ async function init(){
 /* ════ LANGUAGE SYSTEM ════ */
 const TRANSLATIONS = {
   ar:{
-    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',
+    navHome:'الرئيسية',navMarket:'الجراج',navTasks:'السباق',navFriends:'المزرعة',navFinance:'الملف',supportBtn:'الدعم',totalBalance:'الرصيد الإجمالي',cardDeposit:'إيداع',cardWithdraw:'سحب',cardReferrals:'الإحالات',cardMissions:'المهام',cardPartnership:'شراكة',
     tabMissions:'المهام',
     tabPartnership:'الشراكة',
     tabReferrals:'الإحالات',
@@ -7335,7 +7340,7 @@ const TRANSLATIONS = {
     bsFu5:'إمكانية بيع التصاميم داخل الماركت.',
   },
   en:{
-    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
+    navHome:'Home',navMarket:'Garage',navTasks:'Racing',navFriends:'Farm',navFinance:'Profile',supportBtn:'Support',totalBalance:'Total Balance',cardDeposit:'Deposit',cardWithdraw:'Withdraw',cardReferrals:'Referrals',cardMissions:'Missions',cardPartnership:'Partnership',
     labelCoins:'Coins',labelBamboo:'Bamboo',
     statAccrued:'Accrued',statRateDay:'Rate/Day',statBambooDay:'Bamboo/day',
     claimBtn:'Claim Bamboo',lvLabel:'Lv.',
@@ -7515,7 +7520,7 @@ const TRANSLATIONS = {
     bsFu5:'Ability to sell designs inside the Market.',
   },
   ru:{
-    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
+    navHome:'Главная',navMarket:'Гараж',navTasks:'Гонка',navFriends:'Ферма',navFinance:'Профиль',supportBtn:'Поддержка',totalBalance:'Общий баланс',cardDeposit:'Депозит',cardWithdraw:'Вывод',cardReferrals:'Рефералы',cardMissions:'Миссии',cardPartnership:'Партнёрство',
     tabMissions:'Задания',
     tabPartnership:'Партнёрство',
     tabReferrals:'Рефералы',
@@ -7686,7 +7691,7 @@ const TRANSLATIONS = {
     bsFu5:'Возможность продавать дизайны в Маркете.',
   },
   es:{
-    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
+    navHome:'Inicio',navMarket:'Garaje',navTasks:'Carrera',navFriends:'Granja',navFinance:'Perfil',supportBtn:'Soporte',totalBalance:'Saldo Total',cardDeposit:'Depósito',cardWithdraw:'Retirar',cardReferrals:'Referidos',cardMissions:'Misiones',cardPartnership:'Asociación',
     tabMissions:'Misiones',
     tabPartnership:'Asociación',
     tabReferrals:'Referidos',
@@ -7857,7 +7862,7 @@ const TRANSLATIONS = {
     bsFu5:'Posibilidad de vender diseños en el Mercado.',
   },
   fr:{
-    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
+    navHome:'Accueil',navMarket:'Garage',navTasks:'Course',navFriends:'Ferme',navFinance:'Profil',supportBtn:'Support',totalBalance:'Solde Total',cardDeposit:'Dépôt',cardWithdraw:'Retrait',cardReferrals:'Parrainages',cardMissions:'Missions',cardPartnership:'Partenariat',
     tabMissions:'Missions',
     tabPartnership:'Partenariat',
     tabReferrals:'Parrainages',

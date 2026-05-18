@@ -16,6 +16,14 @@ if ('serviceWorker' in navigator) {
   body { background:#000; overflow:hidden; font-family:'Segoe UI',Arial,sans-serif; }
   #canvas-container { position:relative; width:100vw; height:100vh; }
   canvas { display:block; width:100%!important; height:100%!important; }
+  /* Fix image flickering: force GPU compositing on images */
+  img {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    image-rendering: auto;
+  }
 
   /* ── LOADING SCREEN ── */
   #loading-screen {
@@ -185,21 +193,11 @@ if ('serviceWorker' in navigator) {
   }
   @keyframes blink { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
 
-  /* Camera mode button */
-  #camBtn{
-    position:fixed; bottom:70px; right:14px; z-index:99999;
-    background:rgba(0,0,0,0.85); border:2px solid rgba(255,255,255,0.4);
-    color:#fff; font-size:13px; font-weight:800; letter-spacing:0.5px;
-    padding:10px 18px; border-radius:24px; cursor:pointer;
-    transition:background 0.2s, transform 0.1s;
-    font-family:'Segoe UI',sans-serif; user-select:none;
-    pointer-events:all; touch-action:manipulation;
-  }
-  #camBtn:active{ transform:scale(0.90); }
+
 </style>
 </head>
 <body>
-<button id="camBtn" onclick="cycleCam()">🎥 Chase</button>
+
 <!-- top back button removed -->
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="display:none!important">
@@ -272,7 +270,6 @@ if ('serviceWorker' in navigator) {
       <div id="winner-name">Player 1</div>
       <div id="winner-time">Time: 0.000s</div>
       <div id="winner-margin">Won by 0.000s</div>
-      <button id="race-again-btn">🔁 Race Again</button>
     </div>
     <div id="launch-hint" style="display:none">Press SPACE or tap to launch</div>
   </div>
@@ -902,10 +899,16 @@ const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
 
 // (11) Real player names + photos from Telegram via parent URL params
 (function _wirePlayerCards(){
-  const p1Name  = (_raceParams.get('p1Name')  || 'Opponent').slice(0,24);
-  const p2Name  = (_raceParams.get('p2Name')  || 'You').slice(0,24);
-  const p1Photo = _raceParams.get('p1Photo') || '';
-  const p2Photo = _raceParams.get('p2Photo') || '';
+  // car1 = PLAYER (left lane x=-3), car2 = AI (right lane x=+3)
+  // p1-hud = left card, p2-hud = right card
+  // p1Name param = Opponent (shown in left card = car1 lane — matches)
+  // HOWEVER: from the user's perspective their bike is in left lane
+  // and HUD shows opponent data there. Swap name/photo assignment so
+  // p1-hud shows PLAYER info (car1/left lane = player) and p2-hud shows opponent.
+  const p1Name  = (_raceParams.get('p2Name')  || 'You').slice(0,24);
+  const p2Name  = (_raceParams.get('p1Name')  || 'Opponent').slice(0,24);
+  const p1Photo = _raceParams.get('p2Photo') || '';
+  const p2Photo = _raceParams.get('p1Photo') || '';
   const FALLBACK = 'data:image/svg+xml;utf8,'+encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23222"/><text x="50%" y="55%" font-size="22" text-anchor="middle" fill="%23bbb" font-family="Arial">🏍</text></svg>'
   );
@@ -913,7 +916,7 @@ const FORCED_WINNER = (_raceParams.get('winner')==='p1') ? 'p1'
   const n2=document.getElementById('p2-name'); if(n2) n2.textContent=p2Name;
   const a1=document.getElementById('p1-avatar'); if(a1){ a1.src=p1Photo||FALLBACK; a1.onerror=()=>{a1.onerror=null;a1.src=FALLBACK;}; }
   const a2=document.getElementById('p2-avatar'); if(a2){ a2.src=p2Photo||FALLBACK; a2.onerror=()=>{a2.onerror=null;a2.src=FALLBACK;}; }
-  // Use real names in the winner banner too
+  // _RACE_NAMES: p1 = car1/left lane = player, p2 = car2/right lane = AI
   window._RACE_NAMES = { p1: p1Name, p2: p2Name };
 })();
 function _bikeUrl(lv){ return encodeURIComponent('Bike Level '+lv+'.glb'); }
@@ -1267,7 +1270,6 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Space'||e.key===' '){ e.preventDefault(); if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); }
 });
 document.getElementById('canvas-container').addEventListener('click',()=>{ if(state.phase==='idle') startCountdown(); else if(state.phase==='finished') resetGame(); });
-document.getElementById('race-again-btn').addEventListener('click',e=>{ e.stopPropagation(); resetGame(); });
 
 // ═══════════════════════════════════════════════════════════════
 //  CAMERA — FIX 1: Multi-phase cinematic intro

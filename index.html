@@ -124,9 +124,9 @@ body{
 }
 button,input,select,textarea,span,div,p,h1,h2,h3,a{font-family:'Fredoka',cursive!important;}
 @keyframes soft-shine{0%,100%{opacity:1}50%{opacity:.6}}
-.sec{display:none;padding:10px 12px;animation:fi .26s ease}
-.sec.active{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sec{display:none;padding:10px 12px}
+.sec.active{display:block;animation:fi .22s ease}
+@keyframes fi{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .panda-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
 .panda-char{font-size:104px;animation:pf 3.2s ease-in-out infinite;cursor:pointer;user-select:none;filter:drop-shadow(0 12px 26px rgba(0,0,0,.65))}
 @keyframes pf{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-9px) rotate(1.5deg)}}
@@ -749,7 +749,15 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
   position:relative;width:100%;height:260px;overflow:hidden;
   margin:0;
 }
-.hub-hero-img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.hub-hero-img{
+  width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+  /* منع الـ flickering في صورة الـ hero */
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  will-change:auto;
+  contain:paint;
+}
 .hub-hero-overlay{
   position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.1) 45%,rgba(0,0,0,.55) 80%,rgba(0,0,0,.88) 100%);
@@ -825,7 +833,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 /* ══════════════════════════════════════
    BIKE INVESTMENT — matches reference UI
 ══════════════════════════════════════ */
-@keyframes bk-card-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bk-card-in{from{transform:translateY(6px)}to{transform:translateY(0)}}
 @keyframes bk-owned-pulse{0%,100%{box-shadow:0 4px 24px rgba(76,175,80,.25),0 0 0 1.5px rgba(76,175,80,.35)}50%{box-shadow:0 4px 32px rgba(76,175,80,.55),0 0 0 2px rgba(76,175,80,.7)}}
 @keyframes bk-shimmer{0%{left:-120%}100%{left:160%}}
 @keyframes notif-slide{0%,100%{transform:translateX(0)}50%{transform:translateX(-6px)}}
@@ -915,7 +923,14 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 .bk-card-imgbox img{
   width:100%;height:100%;object-fit:cover;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
-  transform:translateZ(0);will-change:transform;backface-visibility:hidden;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  /* منع الـ flickering */
+  opacity:1!important;
+  transition:none!important;
+  /* منع GPU layer يتعيد بناؤه */
+  contain:paint;
 }
 
 /* Right: name + stats — uses card bg image */
@@ -1073,7 +1088,7 @@ h1,h2,h3,h4,h5,h6,b,strong,.bold { font-weight: 800 !important; }
 
 <!-- HOME HERO — lives inside sectionHome so it hides with the section -->
 <div class="hub-hero">
-  <img class="hub-hero-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463352/2e3e4cd2-2d2f-4c24-9bda-579dfab53703_s0r7xe.png" alt="hero moto">
+  <img class="hub-hero-img" src="https://res.cloudinary.com/dktppfipy/image/upload/v1778463352/2e3e4cd2-2d2f-4c24-9bda-579dfab53703_s0r7xe.png" alt="hero moto" loading="eager" decoding="sync" fetchpriority="high">
   <div class="hub-hero-overlay"></div>
   <div class="hub-topbar">
     <div class="hub-tb-card">
@@ -1150,7 +1165,7 @@ function renderBikes(){
     div.innerHTML = `
       <div class="bk-card-top">
         <div class="bk-card-imgbox">
-          <img src="${b.img}" onerror="this.style.opacity='.2'">
+          <img src="${b.img}" loading="eager" decoding="sync" onerror="this.style.opacity='.2'">
         </div>
         <div class="bk-card-info" style="background-image:url('${cardImg}');background-size:cover;background-position:center;background-repeat:no-repeat;">
           <div class="bk-card-info-content">
@@ -1669,7 +1684,12 @@ async function doUpgradeStat(bikeLevel, stat){
 <div class="sec" id="sectionFriends">
   <style>
     #sectionFriends{padding:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:78px;z-index:5}
-    .mine-map{position:absolute;inset:0;background:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463490/e44ea9db-c50f-4be7-82b6-b74540fc7034_a7z3nk.png') center center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+    .mine-map{position:absolute;inset:0;background:url('https://res.cloudinary.com/dktppfipy/image/upload/v1778463490/e44ea9db-c50f-4be7-82b6-b74540fc7034_a7z3nk.png') center center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+      /* منع الـ background image من الـ flicker */
+      transform:translateZ(0);
+      will-change:auto;
+      -webkit-transform:translateZ(0);
+    }
     .mine-map::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.15) 35%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1}
 
     /* Floating topbar (avatar+name | TON balance) — same style as home topbar but no background */
@@ -1738,7 +1758,8 @@ async function doUpgradeStat(bikeLevel, stat){
     /* Inner bike sub-cards: BLACK background (per user request) instead of white */
     .mine-car-card{background:#000;border-radius:12px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.5);border:1px solid rgba(124,179,66,.25)}
     .mine-card-img{height:96px;position:relative;overflow:hidden;background:#0a0a0a}
-    .mine-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .mine-card-img img{width:100%;height:100%;object-fit:cover;display:block;
+      transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;contain:paint;}
     .mine-card-name{position:absolute;left:9px;top:8px;color:#fff;font-size:15px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.9);max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .mine-card-body{padding:8px 10px 10px;background:#000}
     .mine-in-garage{font-size:14px;font-weight:900;color:#fff;margin-bottom:8px}
@@ -4393,9 +4414,6 @@ async function doUpgradeStat(bikeLevel, stat){
       <!-- Race Missions -->
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">🏁 <span data-i18n="raceMissions">Race Missions</span></div>
       <div id="raceMissionsList"></div>
-      <!-- Mining Missions -->
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 8px;text-transform:uppercase;letter-spacing:.5px">⛏️ <span data-i18n="mineMissions">Mining Missions</span></div>
-      <div id="mineMissionsList"></div>
     </div>
   </div>
 
@@ -4913,10 +4931,6 @@ const MISSION_DEFS = {
     { id:'rc50', img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463436/bc375662-249d-4a27-8e0b-182995c4aa6d_y5omjw.png', title:'50 Races',   desc:'Race 50 times',   reward:3,   total:50 },
     { id:'rc100',img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463501/d2dbe6bf-92f5-4ed9-ae62-833692f8f217_daxeoz.png', title:'100 Races',  desc:'Race 100 times',  reward:6,   total:100},
   ],
-  MINE: [
-    { id:'mt20', img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463332/69c4dbb5-132e-40b3-a05a-86d028db5798_ewjyre.png', title:'Mine 20 Times', desc:'Send bike to mine 20 times', reward:1, total:20 },
-    { id:'mt50', img:'https://res.cloudinary.com/dktppfipy/image/upload/v1778463320/44a53c6c-95e7-4556-a60e-d2ca6a5c4e78_iakpmq.png', title:'Mine 50 Times', desc:'Send bike to mine 50 times', reward:3, total:50 },
-  ],
 };
 
 const REF_MISSION_DEFS = [
@@ -4935,7 +4949,6 @@ function renderMissions(){
   const completedMissions = S.completedMissions || [];
   const totalBikes = user.totalBikesBought || 0;
   const totalRaces = user.totalRacesPlayed || 0;
-  const totalMine  = user.totalMiningRuns  || 0;
 
   function missionCard(m, current, type){
     const done = completedMissions.includes(m.id);
@@ -4979,8 +4992,6 @@ function renderMissions(){
   if(bl) bl.innerHTML = MISSION_DEFS.BIKE.map(m=>missionCard(m,totalBikes,'BIKE')).join('');
   const rl = document.getElementById('raceMissionsList');
   if(rl) rl.innerHTML = MISSION_DEFS.RACE.map(m=>missionCard(m,totalRaces,'RACE')).join('');
-  const ml = document.getElementById('mineMissionsList');
-  if(ml) ml.innerHTML = MISSION_DEFS.MINE.map(m=>missionCard(m,totalMine,'MINE')).join('');
 
   // ── Partner Tasks (join channels) ──
   const pl = document.getElementById('missionPartnerList');

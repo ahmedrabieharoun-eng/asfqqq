@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة إحالات RaseenRacing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #050a12;
+    --surface: #0d1520;
+    --card: #111d2e;
+    --border: #1e3050;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #39ff14;
+    --gold: #ffd700;
+    --text: #e8f4ff;
+    --muted: #5a7a9a;
+    --danger: #ff3d5a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(0,212,255,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(255,107,53,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+
+  .logo-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #00d4ff, #0057ff);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 0 24px rgba(0,212,255,0.4);
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%, 100% { box-shadow: 0 0 24px rgba(0,212,255,0.4); }
+    50% { box-shadow: 0 0 40px rgba(0,212,255,0.7); }
+  }
+
+  .logo-text h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .logo-text p { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(57,255,20,0.1);
+    border: 1px solid rgba(57,255,20,0.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent3);
+    letter-spacing: 1px;
+  }
+
+  .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent3);
+    animation: blink 1.2s step-start infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ─── Stats Grid ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); border-color: rgba(0,212,255,0.3); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.3;
+  }
+
+  .stat-card.blue::before { background: #00d4ff; }
+  .stat-card.orange::before { background: #ff6b35; }
+  .stat-card.green::before { background: #39ff14; }
+  .stat-card.gold::before { background: #ffd700; }
+
+  .stat-icon { font-size: 28px; margin-bottom: 10px; }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  .stat-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-card.blue .stat-value { color: var(--accent); }
+  .stat-card.orange .stat-value { color: var(--accent2); }
+  .stat-card.green .stat-value { color: var(--accent3); }
+  .stat-card.gold .stat-value { color: var(--gold); }
+
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ─── Search ─── */
+  .search-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+
+  .search-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    direction: ltr;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); direction: rtl; }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0057ff);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── User Card Result ─── */
+  .user-result {
+    display: none;
+    background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,87,255,0.05));
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .user-result.show { display: block; }
+
+  .user-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .user-id-badge {
+    font-family: 'Rajdhani', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,212,255,0.2);
+    letter-spacing: 1px;
+  }
+
+  .user-stats-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .mini-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .mini-stat .value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .mini-stat .label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+  .mini-stat.c1 .value { color: var(--accent); }
+  .mini-stat.c2 .value { color: var(--accent3); }
+  .mini-stat.c3 .value { color: var(--gold); }
+  .mini-stat.c4 .value { color: var(--accent2); }
+
+  /* ─── Table ─── */
+  .table-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .table-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .count-badge {
+    background: rgba(0,212,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .refresh-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .refresh-btn.loading .refresh-icon { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+  }
+
+  thead th {
+    background: rgba(0,212,255,0.05);
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(30,48,80,0.5);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(0,212,255,0.03); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 13px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .rank-1 { background: linear-gradient(135deg, #ffd700, #ff9500); color: #000; }
+  .rank-2 { background: linear-gradient(135deg, #c0c0c0, #888); color: #000; }
+  .rank-3 { background: linear-gradient(135deg, #cd7f32, #8B4513); color: #fff; }
+  .rank-other { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+  .user-id-cell {
+    font-family: 'Rajdhani', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .user-id-cell:hover { opacity: 0.7; text-decoration: underline; }
+
+  .total-ref {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .active-ref {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent3);
+  }
+
+  .ton-amount {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), #0057ff);
+    transition: width 0.5s ease;
+  }
+
+  /* ─── Loading / Empty ─── */
+  .loading-state {
+    padding: 60px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  .error-msg {
+    padding: 20px;
+    background: rgba(255,61,90,0.1);
+    border: 1px solid rgba(255,61,90,0.3);
+    border-radius: 10px;
+    color: var(--danger);
+    font-size: 13px;
+    margin: 12px 0;
+  }
+
+  .last-update {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    td, thead th { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-icon">🏍️</div>
+      <div class="logo-text">
+        <h1>RaseenRacing</h1>
+        <p>لوحة تحكم الإحالات — مباشر</p>
+      </div>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      مباشر
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-label">إجمالي المستخدمين</div>
+      <div class="stat-value" id="totalUsers">—</div>
+      <div class="stat-sub">مستخدم لديه إحالات</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">🔗</div>
+      <div class="stat-label">إجمالي الإحالات</div>
+      <div class="stat-value" id="totalRefs">—</div>
+      <div class="stat-sub">عبر جميع المستخدمين</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-label">إحالات نشطة</div>
+      <div class="stat-value" id="activeRefs">—</div>
+      <div class="stat-sub">أودعوا رصيدًا</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">💎</div>
+      <div class="stat-label">إجمالي المدفوع</div>
+      <div class="stat-value" id="totalPaid">—</div>
+      <div class="stat-sub">TON مسحوبة لمن أحالوا</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-title">🔍 بحث بالـ ID</div>
+    <div class="search-row">
+      <input class="search-input" id="searchInput" type="text" placeholder="أدخل ID المستخدم..." />
+      <button class="btn btn-primary" onclick="searchUser()">بحث</button>
+      <button class="btn btn-secondary" onclick="clearSearch()">مسح</button>
+    </div>
+    <div id="userResult" class="user-result"></div>
+    <div id="searchError" class="error-msg" style="display:none"></div>
+  </div>
+
+  <!-- Top 30 Table -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-title">
+        🏆 أعلى 30 مستخدم في الإحالات
+        <span class="count-badge" id="rowCount">0</span>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+        <span class="refresh-icon">↻</span> تحديث
+      </button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ID المستخدم</th>
+            <th>إجمالي الإحالات</th>
+            <th>الإحالات النشطة</th>
+            <th>إجمالي المدفوع (TON)</th>
+            <th>نسبة النشاط</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div>جاري التحميل...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="last-update" id="lastUpdate">—</div>
+  </div>
+
+</div>
+
+<script>
+// ─── Firebase Init ───
+const firebaseConfig = {
+  apiKey: "AIzaSyBmrSw-178Bx59TnRs03vaJGp8zS519sDc",
+  authDomain: "hhhrhdhd-2f68c.firebaseapp.com",
+  databaseURL: "https://hhhrhdhd-2f68c-default-rtdb.firebaseio.com",
+  projectId: "hhhrhdhd-2f68c",
+  storageBucket: "hhhrhdhd-2f68c.firebasestorage.app",
+  messagingSenderId: "159295815105",
+  appId: "1:159295815105:web:d23916911ae39e6f95c340",
+  measurementId: "G-TLG6TP348R"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let allData = [];
+
+// ─── Load All Data ───
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+  setTableLoading();
+
+  try {
+    const usersSnap = await db.ref('users').once('value');
+    const users = usersSnap.val() || {};
+
+    const results = [];
+
+    // جمع جميع المستخدمين اللي عندهم إحالات
+    const entries = Object.entries(users);
+    const refUsers = entries.filter(([, u]) => u.referrals && Object.keys(u.referrals).length > 0);
+
+    // لكل مستخدم: احسب الإحالات النشطة + مجموع السحوبات
+    const tasks = refUsers.map(async ([uid, userData]) => {
+      const referrals = userData.referrals || {};
+      const refIds = Object.keys(referrals);
+      const totalRefs = refIds.length;
+
+      // الإحالات النشطة = من hasDeposited === true
+      let activeRefs = 0;
+      for (const rid of refIds) {
+        const refUser = users[rid];
+        if (refUser && refUser.hasDeposited === true) activeRefs++;
+      }
+
+      // إجمالي السحوبات المدفوعة لهذا المستخدم
+      const wdHistory = userData.wdHistory || {};
+      const totalPaid = Object.values(wdHistory)
+        .filter(w => w.status === 'paid')
+        .reduce((s, w) => s + (Number(w.sentAmount || 0)), 0);
+
+      return { uid, totalRefs, activeRefs, totalPaid };
+    });
+
+    const rows = await Promise.all(tasks);
+
+    // ترتيب تنازلي حسب إجمالي الإحالات
+    rows.sort((a, b) => b.totalRefs - a.totalRefs);
+
+    allData = rows;
+    renderTable(rows.slice(0, 30));
+    updateSummaryStats(rows);
+
+  } catch (e) {
+    showTableError('فشل تحميل البيانات: ' + e.message);
+  }
+
+  btn.classList.remove('loading');
+  document.getElementById('lastUpdate').textContent =
+    'آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG');
+}
+
+// ─── Render Table ───
+function renderTable(rows) {
+  const tbody = document.getElementById('tableBody');
+  document.getElementById('rowCount').textContent = rows.length;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-state">لا توجد بيانات</div></td></tr>`;
+    return;
+  }
+
+  const maxRefs = rows[0]?.totalRefs || 1;
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const rank = i + 1;
+    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const pct = Math.round((r.activeRefs / (r.totalRefs || 1)) * 100);
+    const barWidth = Math.round((r.totalRefs / maxRefs) * 100);
+
+    return `
+    <tr>
+      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td><span class="user-id-cell" onclick="fillSearch('${r.uid}')">${r.uid}</span></td>
+      <td><span class="total-ref">${r.totalRefs.toLocaleString()}</span></td>
+      <td><span class="active-ref">${r.activeRefs.toLocaleString()}</span> <small style="color:var(--muted)">(${pct}%)</small></td>
+      <td><span class="ton-amount">${r.totalPaid.toFixed(4)}</span> <small style="color:var(--muted)">TON</small></td>
+      <td>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${barWidth}%"></div></div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Summary Stats ───
+function updateSummaryStats(rows) {
+  document.getElementById('totalUsers').textContent = rows.length.toLocaleString();
+  const totalRefs = rows.reduce((s, r) => s + r.totalRefs, 0);
+  const activeRefs = rows.reduce((s, r) => s + r.activeRefs, 0);
+  const totalPaid = rows.reduce((s, r) => s + r.totalPaid, 0);
+
+  document.getElementById('totalRefs').textContent = totalRefs.toLocaleString();
+  document.getElementById('activeRefs').textContent = activeRefs.toLocaleString();
+  document.getElementById('totalPaid').textContent = totalPaid.toFixed(2);
+}
+
+// ─── Search User ───
+async function searchUser() {
+  const uid = document.getElementById('searchInput').value.trim();
+  if (!uid) return;
+
+  const resultDiv = document.getElementById('userResult');
+  const errorDiv = document.getElementById('searchError');
+  resultDiv.classList.remove('show');
+  errorDiv.style.display = 'none';
+
+  resultDiv.innerHTML = '<div class="loading-state"><div class="spinner"></div>جاري البحث...</div>';
+  resultDiv.classList.add('show');
+
+  try {
+    const [userSnap, wdQueueSnap] = await Promise.all([
+      db.ref(`users/${uid}`).once('value'),
+      db.ref('users').once('value'),
+    ]);
+
+    const userData = userSnap.val();
+    if (!userData) {
+      resultDiv.classList.remove('show');
+      errorDiv.textContent = `❌ المستخدم "${uid}" غير موجود في قاعدة البيانات`;
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    const allUsers = wdQueueSnap.val() || {};
+    const referrals = userData.referrals || {};
+    const refIds = Object.keys(referrals);
+    const totalRefs = refIds.length;
+
+    let activeRefs = 0;
+    let depositedRefs = [];
+    for (const rid of refIds) {
+      const refUser = allUsers[rid];
+      if (refUser && refUser.hasDeposited === true) {
+        activeRefs++;
+        depositedRefs.push(rid);
+      }
+    }
+
+    // إجمالي السحوبات
+    const wdHistory = userData.wdHistory || {};
+    const wdList = Object.values(wdHistory);
+    const paidWds = wdList.filter(w => w.status === 'paid');
+    const totalPaid = paidWds.reduce((s, w) => s + Number(w.sentAmount || 0), 0);
+    const totalPaidCount = paidWds.length;
+
+    // إجمالي الإيداعات
+    const deposits = userData.deposits || {};
+    const totalDeposit = Object.values(deposits).reduce((s, d) => s + Number(d.amount || 0), 0);
+
+    resultDiv.innerHTML = `
+      <div class="user-result-header">
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">نتيجة البحث</div>
+          <div class="user-id-badge">${uid}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">
+          💎 رصيد: ${Number(userData.tonBalance || 0).toFixed(4)} TON
+        </div>
+      </div>
+      <div class="user-stats-mini">
+        <div class="mini-stat c1">
+          <div class="value">${totalRefs.toLocaleString()}</div>
+          <div class="label">إجمالي الإحالات</div>
+        </div>
+        <div class="mini-stat c2">
+          <div class="value">${activeRefs.toLocaleString()}</div>
+          <div class="label">إحالات نشطة (أودعوا)</div>
+        </div>
+        <div class="mini-stat c3">
+          <div class="value">${totalPaid.toFixed(4)}</div>
+          <div class="label">إجمالي المسحوب (TON)</div>
+        </div>
+        <div class="mini-stat c4">
+          <div class="value">${totalPaidCount}</div>
+          <div class="label">عدد عمليات السحب</div>
+        </div>
+        <div class="mini-stat c1">
+          <div class="value">${totalDeposit.toFixed(3)}</div>
+          <div class="label">إجمالي الإيداع (TON)</div>
+        </div>
+        <div class="mini-stat c2">
+          <div class="value">${totalRefs > 0 ? Math.round((activeRefs/totalRefs)*100) : 0}%</div>
+          <div class="label">نسبة الإحالات النشطة</div>
+        </div>
+      </div>
+    `;
+
+  } catch (e) {
+    resultDiv.classList.remove('show');
+    errorDiv.textContent = '❌ خطأ: ' + e.message;
+    errorDiv.style.display = 'block';
+  }
+}
+
+function fillSearch(uid) {
+  document.getElementById('searchInput').value = uid;
+  searchUser();
+  document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('userResult').classList.remove('show');
+  document.getElementById('searchError').style.display = 'none';
+}
+
+function setTableLoading() {
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td colspan="6"><div class="loading-state"><div class="spinner"></div>جاري التحميل...</div></td></tr>`;
+}
+
+function showTableError(msg) {
+  document.getElementById('tableBody').innerHTML =
+    `<tr><td colspan="6"><div class="error-msg">${msg}</div></td></tr>`;
+}
+
+// Enter key in search
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchUser();
+});
+
+// ─── Auto Refresh كل 60 ثانية ───
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>

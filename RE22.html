@@ -1,854 +1,542 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة إحالات RaseenRacing</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<title>Firebase Admin — rabbit-kombat</title>
 <style>
-  :root {
-    --bg: #050a12;
-    --surface: #0d1520;
-    --card: #111d2e;
-    --border: #1e3050;
-    --accent: #00d4ff;
-    --accent2: #ff6b35;
-    --accent3: #39ff14;
-    --gold: #ffd700;
-    --text: #e8f4ff;
-    --muted: #5a7a9a;
-    --danger: #ff3d5a;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(0,212,255,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(255,107,53,0.05) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .grid-bg {
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 24px 20px;
-  }
-
-  /* ─── Header ─── */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .logo-area { display: flex; align-items: center; gap: 14px; }
-
-  .logo-icon {
-    width: 52px; height: 52px;
-    background: linear-gradient(135deg, #00d4ff, #0057ff);
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-    box-shadow: 0 0 24px rgba(0,212,255,0.4);
-    animation: pulse-logo 3s ease-in-out infinite;
-  }
-
-  @keyframes pulse-logo {
-    0%, 100% { box-shadow: 0 0 24px rgba(0,212,255,0.4); }
-    50% { box-shadow: 0 0 40px rgba(0,212,255,0.7); }
-  }
-
-  .logo-text h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .logo-text p { font-size: 12px; color: var(--muted); font-weight: 600; }
-
-  .live-badge {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(57,255,20,0.1);
-    border: 1px solid rgba(57,255,20,0.3);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent3);
-    letter-spacing: 1px;
-  }
-
-  .live-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent3);
-    animation: blink 1.2s step-start infinite;
-  }
-
-  @keyframes blink { 50% { opacity: 0; } }
-
-  /* ─── Stats Grid ─── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-
-  .stat-card:hover { transform: translateY(-2px); border-color: rgba(0,212,255,0.3); }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    filter: blur(30px);
-    opacity: 0.3;
-  }
-
-  .stat-card.blue::before { background: #00d4ff; }
-  .stat-card.orange::before { background: #ff6b35; }
-  .stat-card.green::before { background: #39ff14; }
-  .stat-card.gold::before { background: #ffd700; }
-
-  .stat-icon { font-size: 28px; margin-bottom: 10px; }
-  .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-
-  .stat-value {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .stat-card.blue .stat-value { color: var(--accent); }
-  .stat-card.orange .stat-value { color: var(--accent2); }
-  .stat-card.green .stat-value { color: var(--accent3); }
-  .stat-card.gold .stat-value { color: var(--gold); }
-
-  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-  /* ─── Search ─── */
-  .search-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 28px;
-  }
-
-  .search-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .search-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .search-input {
-    flex: 1;
-    min-width: 200px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 16px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    direction: ltr;
-  }
-
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--muted); direction: rtl; }
-
-  .btn {
-    padding: 10px 22px;
-    border-radius: 10px;
-    border: none;
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #0057ff);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(0,212,255,0.3);
-  }
-
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,0.5); }
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ─── User Card Result ─── */
-  .user-result {
-    display: none;
-    background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,87,255,0.05));
-    border: 1px solid rgba(0,212,255,0.3);
-    border-radius: 14px;
-    padding: 20px;
-    margin-top: 16px;
-    animation: slideIn 0.3s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .user-result.show { display: block; }
-
-  .user-result-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .user-id-badge {
-    font-family: 'Rajdhani', monospace;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-    background: rgba(0,212,255,0.1);
-    padding: 4px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(0,212,255,0.2);
-    letter-spacing: 1px;
-  }
-
-  .user-stats-mini {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-  }
-
-  .mini-stat {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-  }
-
-  .mini-stat .value {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-  }
-
-  .mini-stat .label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
-  .mini-stat.c1 .value { color: var(--accent); }
-  .mini-stat.c2 .value { color: var(--accent3); }
-  .mini-stat.c3 .value { color: var(--gold); }
-  .mini-stat.c4 .value { color: var(--accent2); }
-
-  /* ─── Table ─── */
-  .table-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .table-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .table-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .count-badge {
-    background: rgba(0,212,255,0.15);
-    color: var(--accent);
-    border: 1px solid rgba(0,212,255,0.3);
-    border-radius: 20px;
-    padding: 2px 10px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .refresh-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .refresh-btn.loading .refresh-icon { animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .table-scroll { overflow-x: auto; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 700px;
-  }
-
-  thead th {
-    background: rgba(0,212,255,0.05);
-    padding: 12px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    text-align: right;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(30,48,80,0.5);
-    transition: background 0.15s;
-  }
-
-  tbody tr:hover { background: rgba(0,212,255,0.03); }
-  tbody tr:last-child { border-bottom: none; }
-
-  td {
-    padding: 13px 16px;
-    font-size: 13px;
-    vertical-align: middle;
-  }
-
-  .rank-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-  }
-
-  .rank-1 { background: linear-gradient(135deg, #ffd700, #ff9500); color: #000; }
-  .rank-2 { background: linear-gradient(135deg, #c0c0c0, #888); color: #000; }
-  .rank-3 { background: linear-gradient(135deg, #cd7f32, #8B4513); color: #fff; }
-  .rank-other { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
-
-  .user-id-cell {
-    font-family: 'Rajdhani', monospace;
-    font-size: 13px;
-    color: var(--accent);
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .user-id-cell:hover { opacity: 0.7; text-decoration: underline; }
-
-  .total-ref {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .active-ref {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent3);
-  }
-
-  .ton-amount {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gold);
-  }
-
-  .bar-wrap {
-    width: 80px;
-    height: 6px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, var(--accent), #0057ff);
-    transition: width 0.5s ease;
-  }
-
-  /* ─── Loading / Empty ─── */
-  .loading-state {
-    padding: 60px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-  }
-
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-
-  .error-msg {
-    padding: 20px;
-    background: rgba(255,61,90,0.1);
-    border: 1px solid rgba(255,61,90,0.3);
-    border-radius: 10px;
-    color: var(--danger);
-    font-size: 13px;
-    margin: 12px 0;
-  }
-
-  .last-update {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    padding: 10px;
-    border-top: 1px solid var(--border);
-  }
-
-  @media (max-width: 600px) {
-    .header { flex-direction: column; align-items: flex-start; }
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    td, thead th { padding: 10px 10px; }
-  }
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',system-ui,sans-serif;background:#f3f4f6;min-height:100vh;color:#1a1a1a;font-size:14px}
+/* Tabler icons via CDN */
+.ti{font-family:'tabler-icons'!important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;line-height:1;display:inline-block;vertical-align:middle}
+.topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.logo{font-size:18px;color:#f97316}
+.topbar h1{font-size:14px;font-weight:700;flex:1}
+.dot{width:8px;height:8px;border-radius:50%;background:#d1d5db;display:inline-block}
+.dot.ok{background:#22c55e}.dot.err{background:#ef4444}
+#statusText{font-size:12px;color:#6b7280}
+.layout{display:flex;min-height:calc(100vh - 46px)}
+.sidebar{width:200px;flex-shrink:0;background:#fff;border-left:1px solid #e5e7eb;overflow-y:auto;padding:8px 0}
+.sb-title{font-size:10px;font-weight:700;color:#9ca3af;padding:10px 14px 4px;text-transform:uppercase;letter-spacing:.5px}
+.sb-item{display:flex;align-items:center;gap:7px;padding:8px 14px;cursor:pointer;font-size:13px;color:#374151;border-right:2px solid transparent;transition:.1s;user-select:none}
+.sb-item:hover{background:#f9fafb}.sb-item.active{background:#eff6ff;color:#1d4ed8;border-right-color:#3b82f6}
+.sb-cnt{margin-right:auto;background:#dbeafe;color:#1e40af;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.sb-sep{border-top:1px solid #f3f4f6;margin:6px 0}
+.content{flex:1;padding:16px;overflow-y:auto;min-width:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid #d1d5db;border-radius:7px;background:#fff;color:#374151;font-size:12px;cursor:pointer;font-family:inherit;transition:.1s;white-space:nowrap;user-select:none}
+.btn:hover{background:#f3f4f6}.btn:active{transform:scale(.98)}
+.btn.primary{background:#3b82f6;border-color:#2563eb;color:#fff}.btn.primary:hover{background:#2563eb}
+.btn.danger{border-color:#fca5a5;color:#dc2626}.btn.danger:hover{background:#fef2f2}
+.btn.sm{padding:4px 8px;font-size:11px}
+.btn.green{background:#22c55e;border-color:#16a34a;color:#fff}.btn.green:hover{background:#16a34a}
+.hdr{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.hdr h2{font-size:15px;font-weight:700;flex:1}
+.bc{font-size:12px;color:#9ca3af;margin-bottom:12px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.bc .seg{color:#3b82f6;cursor:pointer;padding:1px 4px;border-radius:4px}.bc .seg:hover{background:#eff6ff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.sc{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;text-align:center}
+.sc-n{font-size:22px;font-weight:700;color:#111}.sc-l{font-size:11px;color:#9ca3af;margin-top:2px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.card-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:#f9fafb;font-size:11px;font-weight:700;color:#6b7280;text-align:right;padding:9px 13px;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid #f3f4f6;vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border:none}tr:hover td{background:#f9fafb}
+.acts{display:flex;gap:5px;align-items:center}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.b-str{background:#dbeafe;color:#1e40af}.b-num{background:#dcfce7;color:#15803d}
+.b-bool{background:#fef3c7;color:#92400e}.b-obj{background:#f3e8ff;color:#6b21a8}.b-null{background:#f1f5f9;color:#64748b}
+.nest{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#1d4ed8;background:#dbeafe;padding:2px 8px;border-radius:10px;cursor:pointer;font-weight:600}
+.nest:hover{background:#bfdbfe}
+.srch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;margin-bottom:12px}
+.srch input{border:none;background:transparent;flex:1;font-size:13px;color:#111;outline:none;font-family:inherit}
+.empty{text-align:center;padding:50px;color:#9ca3af;font-size:13px}
+.empty-icon{font-size:40px;display:block;margin-bottom:10px;color:#d1d5db}
+.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.mh{padding:14px 18px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px}
+.mh h3{font-size:14px;font-weight:700;flex:1}
+.mb{padding:18px;overflow-y:auto;flex:1}
+.mf{padding:12px 18px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end}
+.fl{margin-bottom:13px}
+.fl label{display:block;font-size:11px;color:#6b7280;margin-bottom:4px;font-weight:600}
+.fl input,.fl textarea,.fl select{width:100%;border:1px solid #d1d5db;border-radius:7px;padding:8px 10px;font-size:13px;background:#fff;color:#111;outline:none;font-family:inherit;transition:.1s}
+.fl input:focus,.fl textarea:focus,.fl select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.fl textarea{resize:vertical;font-family:monospace;font-size:12px;line-height:1.5}
+.hint{font-size:10px;color:#9ca3af;margin-top:3px}
+.jpre{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:13px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:360px;overflow-y:auto;line-height:1.6}
+.toast-wrap{position:fixed;bottom:20px;left:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:11px 16px;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.1);display:flex;align-items:center;gap:9px;animation:tin .25s ease;max-width:320px}
+@keyframes tin{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.ok{border-right:3px solid #22c55e}.toast.err{border-right:3px solid #ef4444}
+code{font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:4px;color:#374151}
+.warn-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400e;margin-bottom:14px;line-height:1.6}
 </style>
 </head>
 <body>
-
-<div class="grid-bg"></div>
-
-<div class="container">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="logo-area">
-      <div class="logo-icon">🏍️</div>
-      <div class="logo-text">
-        <h1>RaseenRacing</h1>
-        <p>لوحة تحكم الإحالات — مباشر</p>
-      </div>
-    </div>
-    <div class="live-badge">
-      <div class="live-dot"></div>
-      مباشر
-    </div>
-  </div>
-
-  <!-- Summary Stats -->
-  <div class="stats-grid">
-    <div class="stat-card blue">
-      <div class="stat-icon">👥</div>
-      <div class="stat-label">إجمالي المستخدمين</div>
-      <div class="stat-value" id="totalUsers">—</div>
-      <div class="stat-sub">مستخدم لديه إحالات</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-icon">🔗</div>
-      <div class="stat-label">إجمالي الإحالات</div>
-      <div class="stat-value" id="totalRefs">—</div>
-      <div class="stat-sub">عبر جميع المستخدمين</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-icon">✅</div>
-      <div class="stat-label">إحالات نشطة</div>
-      <div class="stat-value" id="activeRefs">—</div>
-      <div class="stat-sub">أودعوا رصيدًا</div>
-    </div>
-    <div class="stat-card gold">
-      <div class="stat-icon">💎</div>
-      <div class="stat-label">إجمالي المدفوع</div>
-      <div class="stat-value" id="totalPaid">—</div>
-      <div class="stat-sub">TON مسحوبة لمن أحالوا</div>
-    </div>
-  </div>
-
-  <!-- Search -->
-  <div class="search-section">
-    <div class="search-title">🔍 بحث بالـ ID</div>
-    <div class="search-row">
-      <input class="search-input" id="searchInput" type="text" placeholder="أدخل ID المستخدم..." />
-      <button class="btn btn-primary" onclick="searchUser()">بحث</button>
-      <button class="btn btn-secondary" onclick="clearSearch()">مسح</button>
-    </div>
-    <div id="userResult" class="user-result"></div>
-    <div id="searchError" class="error-msg" style="display:none"></div>
-  </div>
-
-  <!-- Top 30 Table -->
-  <div class="table-section">
-    <div class="table-header">
-      <div class="table-title">
-        🏆 أعلى 30 مستخدم في الإحالات
-        <span class="count-badge" id="rowCount">0</span>
-      </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
-        <span class="refresh-icon">↻</span> تحديث
-      </button>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>ID المستخدم</th>
-            <th>إجمالي الإحالات</th>
-            <th>الإحالات النشطة</th>
-            <th>إجمالي المدفوع (TON)</th>
-            <th>نسبة النشاط</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div>جاري التحميل...</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="last-update" id="lastUpdate">—</div>
-  </div>
-
+<div class="topbar">
+  <span class="logo">&#128database;</span>
+  <h1>&#128;&#57344; Firebase Admin &mdash; rabbit-kombat</h1>
+  <span class="dot" id="dot"></span>
+  <span id="statusText">جاري الاتصال...</span>
+  <button class="btn sm" onclick="refreshAll()">&#8635; تحديث</button>
 </div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-title">المجموعات</div>
+    <div id="sbList"><div style="padding:14px;font-size:12px;color:#9ca3af">جاري التحميل...</div></div>
+  </div>
+  <div class="content" id="main">
+    <div class="empty"><span class="empty-icon">🗄️</span><p>اختر مجموعة من القائمة</p></div>
+  </div>
+</div>
+<div id="modals"></div>
+<div class="toast-wrap" id="toasts"></div>
 
-<script>
-// ─── Firebase Init ───
-const firebaseConfig = {
-  apiKey: "AIzaSyBmrSw-178Bx59TnRs03vaJGp8zS519sDc",
-  authDomain: "hhhrhdhd-2f68c.firebaseapp.com",
-  databaseURL: "https://hhhrhdhd-2f68c-default-rtdb.firebaseio.com",
-  projectId: "hhhrhdhd-2f68c",
-  storageBucket: "hhhrhdhd-2f68c.firebasestorage.app",
-  messagingSenderId: "159295815105",
-  appId: "1:159295815105:web:d23916911ae39e6f95c340",
-  measurementId: "G-TLG6TP348R"
+<!-- Firebase via module (works from file://) -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, get, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ── Config ──────────────────────────────────────────────
+const CFG = {
+  apiKey:"AIzaSyCAyf3HizLe6s8N9Xa7ONXxI7UgWt-gZ3U",
+  authDomain:"rabbit-kombat.firebaseapp.com",
+  databaseURL:"https://rabbit-kombat-default-rtdb.firebaseio.com",
+  projectId:"rabbit-kombat",
+  storageBucket:"rabbit-kombat.firebasestorage.app",
+  messagingSenderId:"726035321546",
+  appId:"1:726035321546:web:b41785e7cd0e2f56d45a33"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(CFG);
+const DB  = getDatabase(app);
 
-let allData = [];
+// ── State ────────────────────────────────────────────────
+let ROOT = {}, PATH = [];
+const STORE = {};
+let SID = 0;
+function stor(v){ const id='s'+(++SID); STORE[id]=v; return id; }
+function getStor(id){ return STORE[id]; }
 
-// ─── Load All Data ───
-async function loadData() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('loading');
-  setTableLoading();
-
-  try {
-    const usersSnap = await db.ref('users').once('value');
-    const users = usersSnap.val() || {};
-
-    const results = [];
-
-    // جمع جميع المستخدمين اللي عندهم إحالات
-    const entries = Object.entries(users);
-    const refUsers = entries.filter(([, u]) => u.referrals && Object.keys(u.referrals).length > 0);
-
-    // لكل مستخدم: احسب الإحالات النشطة + مجموع السحوبات
-    const tasks = refUsers.map(async ([uid, userData]) => {
-      const referrals = userData.referrals || {};
-      const refIds = Object.keys(referrals);
-      const totalRefs = refIds.length;
-
-      // الإحالات النشطة = من hasDeposited === true
-      let activeRefs = 0;
-      for (const rid of refIds) {
-        const refUser = users[rid];
-        if (refUser && refUser.hasDeposited === true) activeRefs++;
-      }
-
-      // إجمالي السحوبات المدفوعة لهذا المستخدم
-      const wdHistory = userData.wdHistory || {};
-      const totalPaid = Object.values(wdHistory)
-        .filter(w => w.status === 'paid')
-        .reduce((s, w) => s + (Number(w.sentAmount || 0)), 0);
-
-      return { uid, totalRefs, activeRefs, totalPaid };
-    });
-
-    const rows = await Promise.all(tasks);
-
-    // ترتيب تنازلي حسب إجمالي الإحالات
-    rows.sort((a, b) => b.totalRefs - a.totalRefs);
-
-    allData = rows;
-    renderTable(rows.slice(0, 30));
-    updateSummaryStats(rows);
-
-  } catch (e) {
-    showTableError('فشل تحميل البيانات: ' + e.message);
-  }
-
-  btn.classList.remove('loading');
-  document.getElementById('lastUpdate').textContent =
-    'آخر تحديث: ' + new Date().toLocaleTimeString('ar-EG');
+// ── Helpers ──────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const h = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cnt = v => (!v && v!==0 && v!==false) ? 0 : typeof v==='object' ? Object.keys(v).length : 1;
+function depth(o,d=0){ if(typeof o!=='object'||!o) return d; const vs=Object.values(o); return vs.length?Math.max(...vs.map(v=>depth(v,d+1))):d; }
+function badge(v){
+  if(v===null||v===undefined) return '<span class="badge b-null">null</span>';
+  if(typeof v==='object') return '<span class="badge b-obj">object ('+ Object.keys(v).length +' عناصر)</span>';
+  if(typeof v==='boolean') return '<span class="badge b-bool">'+v+'</span>';
+  if(typeof v==='number') return '<span class="badge b-num">'+v+'</span>';
+  return '<span class="badge b-str">string</span>';
+}
+function fmtVal(v){
+  if(v===null||v===undefined) return '<span class="badge b-null">null</span>';
+  if(typeof v==='boolean') return '<span class="badge b-bool">'+v+'</span>';
+  if(typeof v==='number') return '<span class="badge b-num">'+v+'</span>';
+  if(typeof v==='object') return '<span class="badge b-obj">object</span>';
+  const s=String(v); return '<span title="'+h(s)+'">'+h(s.length>55?s.slice(0,55)+'…':s)+'</span>';
+}
+function setMain(html){ $('main').innerHTML=html; }
+function setStatus(ok,txt){
+  $('dot').className='dot '+(ok?'ok':'err');
+  $('statusText').textContent=txt;
 }
 
-// ─── Render Table ───
-function renderTable(rows) {
-  const tbody = document.getElementById('tableBody');
-  document.getElementById('rowCount').textContent = rows.length;
+// ── Firebase ops ─────────────────────────────────────────
+async function fbGet(path){ const s=await get(ref(DB,path)); return s.val(); }
+async function fbSet(path,val){ await set(ref(DB,path),val); }
+async function fbUpdate(path,obj){ await update(ref(DB,path),obj); }
+async function fbDel(path){ await remove(ref(DB,path)); }
 
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-state">لا توجد بيانات</div></td></tr>`;
-    return;
+// ── Load root ────────────────────────────────────────────
+async function loadRoot(){
+  setMain('<div class="empty"><span class="spin">⏳</span><p style="margin-top:8px">جاري تحميل البيانات...</p></div>');
+  try {
+    ROOT = (await fbGet('/')) || {};
+    buildSidebar();
+    showHome();
+    setStatus(true,'متصل ✓');
+  } catch(e){
+    setStatus(false,'خطأ في الاتصال');
+    setMain('<div class="empty"><p style="color:#ef4444">'+h(e.message)+'</p></div>');
+    toast(e.message,false);
   }
+}
 
-  const maxRefs = rows[0]?.totalRefs || 1;
+// ── Sidebar ──────────────────────────────────────────────
+function buildSidebar(){
+  const keys = ROOT && typeof ROOT==='object' ? Object.keys(ROOT) : [];
+  let html = keys.map(k=>
+    '<div class="sb-item" data-key="'+h(k)+'" onclick="APP.openCol(this.dataset.key)">'+
+    '📁 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+h(k)+'</span>'+
+    '<span class="sb-cnt">'+cnt(ROOT[k])+'</span></div>'
+  ).join('');
+  html += '<div class="sb-sep"></div>';
+  html += '<div class="sb-item" onclick="APP.showRaw()">📄 JSON كامل</div>';
+  html += '<div class="sb-item" onclick="APP.modalNewCol()">➕ مجموعة جديدة</div>';
+  $('sbList').innerHTML = html;
+  // restore active
+  if(PATH.length){
+    const el = $('sbList').querySelector('[data-key="'+PATH[0]+'"]');
+    if(el) el.classList.add('active');
+  }
+}
 
-  tbody.innerHTML = rows.map((r, i) => {
-    const rank = i + 1;
-    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-    const pct = Math.round((r.activeRefs / (r.totalRefs || 1)) * 100);
-    const barWidth = Math.round((r.totalRefs / maxRefs) * 100);
+function activeSb(key){
+  $('sbList').querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const el = $('sbList').querySelector('[data-key="'+key+'"]');
+  if(el) el.classList.add('active');
+}
 
-    return `
-    <tr>
-      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
-      <td><span class="user-id-cell" onclick="fillSearch('${r.uid}')">${r.uid}</span></td>
-      <td><span class="total-ref">${r.totalRefs.toLocaleString()}</span></td>
-      <td><span class="active-ref">${r.activeRefs.toLocaleString()}</span> <small style="color:var(--muted)">(${pct}%)</small></td>
-      <td><span class="ton-amount">${r.totalPaid.toFixed(4)}</span> <small style="color:var(--muted)">TON</small></td>
-      <td>
-        <div class="bar-wrap"><div class="bar-fill" style="width:${barWidth}%"></div></div>
-      </td>
-    </tr>`;
+// ── Home ────────────────────────────────────────────────
+function showHome(){
+  PATH=[];
+  const keys = ROOT&&typeof ROOT==='object' ? Object.keys(ROOT) : [];
+  let total=0; keys.forEach(k=>total+=cnt(ROOT[k]));
+  const rows = keys.map(k=>{
+    const sid = stor({action:'delNode', fpath:k});
+    const sid2= stor({action:'openCol',key:k});
+    return '<tr>'+
+      '<td><strong>'+h(k)+'</strong></td>'+
+      '<td>'+cnt(ROOT[k])+'</td>'+
+      '<td>'+badge(ROOT[k])+'</td>'+
+      '<td><div class="acts">'+
+      '<button class="btn sm" data-sid="'+sid2+'" onclick="APP.runStor(this.dataset.sid)">👁 فتح</button>'+
+      '<button class="btn sm danger" data-sid="'+sid+'" onclick="APP.runStor(this.dataset.sid)">🗑 حذف</button>'+
+      '</div></td></tr>';
   }).join('');
+  setMain(
+    '<div class="stats">'+
+    '<div class="sc"><div class="sc-n">'+keys.length+'</div><div class="sc-l">مجموعات</div></div>'+
+    '<div class="sc"><div class="sc-n">'+total+'</div><div class="sc-l">إجمالي السجلات</div></div>'+
+    '<div class="sc"><div class="sc-n">'+JSON.stringify(ROOT).length+'</div><div class="sc-l">حجم (bytes)</div></div>'+
+    '<div class="sc"><div class="sc-n">'+depth(ROOT)+'</div><div class="sc-l">عمق التداخل</div></div>'+
+    '</div>'+
+    '<div class="card"><div class="card-scroll"><table>'+
+    '<thead><tr><th>المجموعة</th><th>السجلات</th><th>النوع</th><th>إجراءات</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>'
+  );
 }
 
-// ─── Summary Stats ───
-function updateSummaryStats(rows) {
-  document.getElementById('totalUsers').textContent = rows.length.toLocaleString();
-  const totalRefs = rows.reduce((s, r) => s + r.totalRefs, 0);
-  const activeRefs = rows.reduce((s, r) => s + r.activeRefs, 0);
-  const totalPaid = rows.reduce((s, r) => s + r.totalPaid, 0);
+// ── Render node ──────────────────────────────────────────
+function renderNode(){
+  let node=ROOT;
+  for(const p of PATH){ node=(node&&typeof node==='object')?node[p]:undefined; }
+  const fpath=PATH.join('/');
 
-  document.getElementById('totalRefs').textContent = totalRefs.toLocaleString();
-  document.getElementById('activeRefs').textContent = activeRefs.toLocaleString();
-  document.getElementById('totalPaid').textContent = totalPaid.toFixed(2);
+  let bc='<div class="bc"><span class="seg" onclick="APP.showHome()">🏠</span>';
+  PATH.forEach((p,i)=>{ bc+=' <span style="color:#9ca3af">/</span> <span class="seg" data-idx="'+i+'" onclick="APP.navTo(this.dataset.idx)">'+h(p)+'</span>'; });
+  bc+='</div>';
+
+  if(node===null||node===undefined){ setMain(bc+'<div class="empty">🕳 لا توجد بيانات</div>'); return; }
+  if(typeof node!=='object'){ renderScalar(bc,fpath,node); return; }
+  renderObj(bc,fpath,node);
 }
 
-// ─── Search User ───
-async function searchUser() {
-  const uid = document.getElementById('searchInput').value.trim();
-  if (!uid) return;
+function navTo(idx){ PATH=PATH.slice(0,Number(idx)+1); renderNode(); }
+function drillPath(base,key){ PATH=[...base.split('/').filter(Boolean),key]; renderNode(); }
 
-  const resultDiv = document.getElementById('userResult');
-  const errorDiv = document.getElementById('searchError');
-  resultDiv.classList.remove('show');
-  errorDiv.style.display = 'none';
+// ── Render scalar ────────────────────────────────────────
+function renderScalar(bc,fpath,val){
+  const sidEdit = stor({action:'modalScalar',fpath,val});
+  const sidDel  = stor({action:'delNode',fpath});
+  setMain(bc+
+    '<div class="hdr"><h2>'+h(PATH[PATH.length-1])+'</h2>'+
+    '<button class="btn" data-sid="'+sidEdit+'" onclick="APP.runStor(this.dataset.sid)">✏️ تعديل</button>'+
+    '<button class="btn danger" data-sid="'+sidDel+'" onclick="APP.runStor(this.dataset.sid)">🗑 حذف</button></div>'+
+    '<div class="card" style="padding:14px">'+
+    '<div class="fl"><label>القيمة</label><div class="jpre">'+h(JSON.stringify(val,null,2))+'</div></div>'+
+    '<div class="fl"><label>النوع</label>'+badge(val)+'</div></div>'
+  );
+}
 
-  resultDiv.innerHTML = '<div class="loading-state"><div class="spinner"></div>جاري البحث...</div>';
-  resultDiv.classList.add('show');
+// ── Render object ────────────────────────────────────────
+function renderObj(bc,fpath,node){
+  const keys=Object.keys(node);
+  const allCols=new Set();
+  const isRecords=keys.length>0&&keys.every(k=>node[k]&&typeof node[k]==='object');
+  if(isRecords) keys.forEach(k=>Object.keys(node[k]).forEach(c=>allCols.add(c)));
+  const cols=[...allCols].slice(0,6);
 
-  try {
-    const [userSnap, wdQueueSnap] = await Promise.all([
-      db.ref(`users/${uid}`).once('value'),
-      db.ref('users').once('value'),
-    ]);
+  const sfpath=stor(fpath);
+  let tableHtml='';
 
-    const userData = userSnap.val();
-    if (!userData) {
-      resultDiv.classList.remove('show');
-      errorDiv.textContent = `❌ المستخدم "${uid}" غير موجود في قاعدة البيانات`;
-      errorDiv.style.display = 'block';
-      return;
-    }
-
-    const allUsers = wdQueueSnap.val() || {};
-    const referrals = userData.referrals || {};
-    const refIds = Object.keys(referrals);
-    const totalRefs = refIds.length;
-
-    let activeRefs = 0;
-    let depositedRefs = [];
-    for (const rid of refIds) {
-      const refUser = allUsers[rid];
-      if (refUser && refUser.hasDeposited === true) {
-        activeRefs++;
-        depositedRefs.push(rid);
-      }
-    }
-
-    // إجمالي السحوبات
-    const wdHistory = userData.wdHistory || {};
-    const wdList = Object.values(wdHistory);
-    const paidWds = wdList.filter(w => w.status === 'paid');
-    const totalPaid = paidWds.reduce((s, w) => s + Number(w.sentAmount || 0), 0);
-    const totalPaidCount = paidWds.length;
-
-    // إجمالي الإيداعات
-    const deposits = userData.deposits || {};
-    const totalDeposit = Object.values(deposits).reduce((s, d) => s + Number(d.amount || 0), 0);
-
-    resultDiv.innerHTML = `
-      <div class="user-result-header">
-        <div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600">نتيجة البحث</div>
-          <div class="user-id-badge">${uid}</div>
-        </div>
-        <div style="font-size:12px;color:var(--muted)">
-          💎 رصيد: ${Number(userData.tonBalance || 0).toFixed(4)} TON
-        </div>
-      </div>
-      <div class="user-stats-mini">
-        <div class="mini-stat c1">
-          <div class="value">${totalRefs.toLocaleString()}</div>
-          <div class="label">إجمالي الإحالات</div>
-        </div>
-        <div class="mini-stat c2">
-          <div class="value">${activeRefs.toLocaleString()}</div>
-          <div class="label">إحالات نشطة (أودعوا)</div>
-        </div>
-        <div class="mini-stat c3">
-          <div class="value">${totalPaid.toFixed(4)}</div>
-          <div class="label">إجمالي المسحوب (TON)</div>
-        </div>
-        <div class="mini-stat c4">
-          <div class="value">${totalPaidCount}</div>
-          <div class="label">عدد عمليات السحب</div>
-        </div>
-        <div class="mini-stat c1">
-          <div class="value">${totalDeposit.toFixed(3)}</div>
-          <div class="label">إجمالي الإيداع (TON)</div>
-        </div>
-        <div class="mini-stat c2">
-          <div class="value">${totalRefs > 0 ? Math.round((activeRefs/totalRefs)*100) : 0}%</div>
-          <div class="label">نسبة الإحالات النشطة</div>
-        </div>
-      </div>
-    `;
-
-  } catch (e) {
-    resultDiv.classList.remove('show');
-    errorDiv.textContent = '❌ خطأ: ' + e.message;
-    errorDiv.style.display = 'block';
+  if(isRecords&&cols.length>0){
+    const rows=keys.map(k=>{
+      const row=node[k];
+      const sidEdit=stor({action:'modalEditRow',fpath:fpath+'/'+k,key:k,row});
+      const sidDel =stor({action:'delNode',fpath:fpath+'/'+k});
+      const sidDrill=stor({action:'drillPath',base:fpath,key:k});
+      return '<tr>'+
+        '<td><code>'+h(k)+'</code></td>'+
+        cols.map(c=>{
+          const v=row&&row[c]!==undefined?row[c]:'';
+          if(v&&typeof v==='object'){
+            const ds=stor({action:'drillPath',base:fpath+'/'+k,key:c});
+            return '<td><span class="nest" data-sid="'+ds+'" onclick="APP.runStor(this.dataset.sid)">📁 '+Object.keys(v).length+'</span></td>';
+          }
+          return '<td>'+fmtVal(v)+'</td>';
+        }).join('')+
+        '<td><div class="acts">'+
+        '<button class="btn sm" data-sid="'+sidEdit+'" onclick="APP.runStor(this.dataset.sid)">✏️ تعديل</button>'+
+        '<button class="btn sm danger" data-sid="'+sidDel+'" onclick="APP.runStor(this.dataset.sid)">🗑</button>'+
+        '<button class="btn sm" data-sid="'+sidDrill+'" onclick="APP.runStor(this.dataset.sid)">↪</button>'+
+        '</div></td></tr>';
+    }).join('');
+    tableHtml='<div class="card"><div class="card-scroll"><table style="min-width:600px">'+
+      '<thead><tr><th>المعرف</th>'+cols.map(c=>'<th>'+h(c)+'</th>').join('')+'<th>إجراءات</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div></div>';
+  } else {
+    const rows=keys.map(k=>{
+      const v=node[k];
+      const isObj=v&&typeof v==='object';
+      const sidEdit=stor(isObj?{action:'drillPath',base:fpath,key:k}:{action:'modalScalar',fpath:fpath+'/'+k,val:v});
+      const sidDel =stor({action:'delNode',fpath:fpath+'/'+k});
+      return '<tr>'+
+        '<td><code>'+h(k)+'</code></td>'+
+        '<td>'+(isObj?'<span class="nest" data-sid="'+stor({action:'drillPath',base:fpath,key:k})+'" onclick="APP.runStor(this.dataset.sid)">📁 '+Object.keys(v).length+' عنصر</span>':fmtVal(v))+'</td>'+
+        '<td>'+badge(v)+'</td>'+
+        '<td><div class="acts">'+
+        '<button class="btn sm" data-sid="'+sidEdit+'" onclick="APP.runStor(this.dataset.sid)">'+(isObj?'↪ فتح':'✏️ تعديل')+'</button>'+
+        '<button class="btn sm danger" data-sid="'+sidDel+'" onclick="APP.runStor(this.dataset.sid)">🗑</button>'+
+        '</div></td></tr>';
+    }).join('');
+    tableHtml='<div class="card"><div class="card-scroll"><table>'+
+      '<thead><tr><th>المفتاح</th><th>القيمة</th><th>النوع</th><th>إجراءات</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div></div>';
   }
+
+  const sidAdd  =stor({action:'modalAddField',fpath});
+  const sidJson =stor({action:'modalJson',fpath});
+  const sidDelAll=stor({action:'delNode',fpath});
+
+  setMain(bc+
+    '<div class="hdr"><h2>'+h(PATH[PATH.length-1])+' <span style="font-size:12px;color:#9ca3af;font-weight:400">('+keys.length+' عنصر)</span></h2>'+
+    '<button class="btn sm green" data-sid="'+sidAdd+'" onclick="APP.runStor(this.dataset.sid)">➕ إضافة</button>'+
+    '<button class="btn sm" data-sid="'+sidJson+'" onclick="APP.runStor(this.dataset.sid)">📄 JSON</button>'+
+    '<button class="btn sm danger" data-sid="'+sidDelAll+'" onclick="APP.runStor(this.dataset.sid)">🗑 حذف الكل</button></div>'+
+    '<div class="srch"><span>🔍</span><input placeholder="بحث في البيانات..." oninput="APP.filter(this.value)"></div>'+
+    '<div id="tbl">'+tableHtml+'</div>'
+  );
 }
 
-function fillSearch(uid) {
-  document.getElementById('searchInput').value = uid;
-  searchUser();
-  document.getElementById('searchInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+// ── Action dispatcher ─────────────────────────────────────
+function runStor(sid){
+  const d=STORE[sid]; if(!d) return;
+  const a=d.action;
+  if(a==='openCol') openCol(d.key);
+  else if(a==='delNode') delNode(d.fpath);
+  else if(a==='drillPath') drillPath(d.base,d.key);
+  else if(a==='modalScalar') modalScalar(d.fpath,d.val);
+  else if(a==='modalEditRow') modalEditRow(d.fpath,d.key,d.row);
+  else if(a==='modalAddField') modalAddField(d.fpath);
+  else if(a==='modalJson') modalJson(d.fpath);
 }
 
-function clearSearch() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('userResult').classList.remove('show');
-  document.getElementById('searchError').style.display = 'none';
+function openCol(key){ activeSb(key); PATH=[key]; renderNode(); }
+function filter(q){ $('tbl')&&$('tbl').querySelectorAll('tbody tr').forEach(r=>{ r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'; }); }
+
+// ── Modals ───────────────────────────────────────────────
+function openModal(title,body,onSave,saveLabel='حفظ'){
+  $('modals').innerHTML=
+    '<div class="ov" id="ov">'+
+    '<div class="modal">'+
+    '<div class="mh"><h3>'+h(title)+'</h3><button class="btn sm" onclick="APP.closeModal()">✕</button></div>'+
+    '<div class="mb">'+body+'</div>'+
+    '<div class="mf">'+
+    '<button class="btn" onclick="APP.closeModal()">إلغاء</button>'+
+    '<button class="btn primary" id="msave">✔ '+h(saveLabel)+'</button>'+
+    '</div></div></div>';
+  $('msave').onclick=onSave;
+  $('ov').addEventListener('click',e=>{ if(e.target===$('ov')) closeModal(); });
+}
+function closeModal(){ $('modals').innerHTML=''; }
+
+// Edit record row
+function modalEditRow(fpath,key,row){
+  const isObj = row&&typeof row==='object';
+  const entries= isObj?Object.entries(row):[['value',row]];
+  const PREFIX='mfld_'+SID+'_';
+  const inputs=entries.map(([k,v])=>{
+    const fid=PREFIX+k.replace(/\W/g,'_');
+    const isO=v&&typeof v==='object';
+    return '<div class="fl"><label><code>'+h(k)+'</code> <span class="hint" style="display:inline">'+typeof v+'</span></label>'+
+      (isO
+        ? '<textarea id="'+fid+'" rows="4">'+h(JSON.stringify(v,null,2))+'</textarea>'
+        : '<input id="'+fid+'" value="'+h(String(v===null?'':v))+'">')+
+      '</div>';
+  }).join('');
+  openModal('تعديل: '+key, inputs, async ()=>{
+    const updates={};
+    let ok=true;
+    for(const [k,v] of entries){
+      const fid=PREFIX+k.replace(/\W/g,'_');
+      const el=$(fid); if(!el) continue;
+      let val=el.value;
+      if(v&&typeof v==='object'){ try{val=JSON.parse(val);}catch(e){toast('JSON خطأ في: '+k,false);ok=false;break;} }
+      else if(v===true||v===false){ val=val==='true'; }
+      else if(typeof v==='number'){ val=isNaN(Number(val))?val:Number(val); }
+      updates[k]=val;
+    }
+    if(!ok) return;
+    closeModal();
+    try{ await fbUpdate(fpath,updates); toast('تم التحديث ✓'); reload(); }
+    catch(e){ toast(e.message,false); }
+  });
 }
 
-function setTableLoading() {
-  document.getElementById('tableBody').innerHTML =
-    `<tr><td colspan="6"><div class="loading-state"><div class="spinner"></div>جاري التحميل...</div></td></tr>`;
+// Edit scalar
+function modalScalar(fpath,val){
+  const key=fpath.split('/').pop();
+  const fid='scl_'+SID;
+  openModal('تعديل: '+key,
+    '<div class="fl"><label>القيمة <span class="hint" style="display:inline">('+typeof val+')</span></label>'+
+    '<input id="'+fid+'" value="'+h(String(val===null?'':val))+'"></div>',
+    async ()=>{
+      let nv=$(fid).value;
+      if(typeof val==='number') nv=isNaN(Number(nv))?nv:Number(nv);
+      if(typeof val==='boolean') nv=nv==='true';
+      closeModal();
+      try{ await fbSet(fpath,nv); toast('تم التحديث ✓'); reload(); }
+      catch(e){ toast(e.message,false); }
+    }
+  );
 }
 
-function showTableError(msg) {
-  document.getElementById('tableBody').innerHTML =
-    `<tr><td colspan="6"><div class="error-msg">${msg}</div></td></tr>`;
+// Add field
+function modalAddField(fpath){
+  openModal('إضافة حقل جديد',
+    '<div class="fl"><label>المفتاح</label><input id="nk" placeholder="اسم الحقل"></div>'+
+    '<div class="fl"><label>النوع</label>'+
+    '<select id="nt" onchange="APP.toggleNt()">'+
+    '<option value="string">نص (string)</option>'+
+    '<option value="number">رقم (number)</option>'+
+    '<option value="boolean">منطقي (boolean)</option>'+
+    '<option value="json">JSON / Object</option>'+
+    '</select></div>'+
+    '<div id="nvw"><div class="fl"><label>القيمة</label><input id="nv" placeholder="القيمة"></div></div>',
+    async ()=>{
+      const k=$('nk').value.trim();
+      if(!k){toast('أدخل اسم الحقل',false);return;}
+      const t=$('nt').value;
+      const el=$('nv'); if(!el){toast('خطأ',false);return;}
+      let v=el.value;
+      if(t==='number') v=Number(v);
+      else if(t==='boolean') v=v==='true';
+      else if(t==='json'){try{v=JSON.parse(v);}catch(e){toast('JSON غير صحيح',false);return;}}
+      closeModal();
+      try{ await fbSet(fpath+'/'+k,v); toast('تمت الإضافة ✓'); reload(); }
+      catch(e){ toast(e.message,false); }
+    },'إضافة'
+  );
+}
+function toggleNt(){
+  const t=$('nt').value, w=$('nvw');
+  if(t==='json') w.innerHTML='<div class="fl"><label>قيمة JSON</label><textarea id="nv" rows="4">{}</textarea></div>';
+  else if(t==='boolean') w.innerHTML='<div class="fl"><label>القيمة</label><select id="nv"><option>true</option><option>false</option></select></div>';
+  else w.innerHTML='<div class="fl"><label>القيمة</label><input id="nv" placeholder="القيمة"></div>';
 }
 
-// Enter key in search
-document.getElementById('searchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') searchUser();
-});
+// JSON editor
+async function modalJson(fpath){
+  const data=await fbGet(fpath);
+  const fid='rj_'+SID;
+  openModal('تعديل JSON: '+fpath,
+    '<div class="fl"><label>البيانات</label><textarea id="'+fid+'" rows="12">'+h(JSON.stringify(data,null,2))+'</textarea></div>',
+    async ()=>{
+      let nd; try{nd=JSON.parse($(fid).value);}catch(e){toast('JSON غير صحيح',false);return;}
+      closeModal();
+      try{ await fbSet(fpath,nd); toast('تم الحفظ ✓'); reload(); }
+      catch(e){ toast(e.message,false); }
+    },'حفظ JSON'
+  );
+}
 
-// ─── Auto Refresh كل 60 ثانية ───
-loadData();
-setInterval(loadData, 60000);
+// New collection
+function modalNewCol(){
+  openModal('مجموعة جديدة',
+    '<div class="fl"><label>اسم المجموعة</label><input id="cn" placeholder="مثال: products"></div>'+
+    '<div class="fl"><label>معرف أول سجل</label><input id="ck" placeholder="مثال: item_001"></div>'+
+    '<div class="fl"><label>البيانات (JSON)</label><textarea id="cv" rows="5">{"name": "", "value": 0}</textarea></div>',
+    async ()=>{
+      const col=$('cn').value.trim(), key=$('ck').value.trim();
+      if(!col||!key){toast('أدخل الاسم والمعرف',false);return;}
+      let val; try{val=JSON.parse($('cv').value);}catch(e){toast('JSON غير صحيح',false);return;}
+      closeModal();
+      try{ await fbSet(col+'/'+key,val); toast('تم الإنشاء ✓'); reloadFull(true); }
+      catch(e){ toast(e.message,false); }
+    },'إنشاء'
+  );
+}
+
+// Show raw JSON
+function showRaw(){
+  $('sbList').querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  PATH=[];
+  setMain(
+    '<div class="hdr"><h2>JSON كامل لقاعدة البيانات</h2>'+
+    '<button class="btn sm" onclick="navigator.clipboard.writeText(JSON.stringify(ROOT,null,2)).then(()=>APP.toast(\'تم النسخ ✓\'))">📋 نسخ</button>'+
+    '<button class="btn sm primary" onclick="APP.modalJsonRoot()">✏️ تعديل مباشر</button></div>'+
+    '<div class="jpre">'+h(JSON.stringify(ROOT,null,2))+'</div>'
+  );
+}
+async function modalJsonRoot(){
+  const fid='rjr_'+SID;
+  openModal('تعديل JSON كامل',
+    '<div class="fl"><label>البيانات الكاملة</label><textarea id="'+fid+'" rows="14">'+h(JSON.stringify(ROOT,null,2))+'</textarea></div>',
+    async ()=>{
+      let nd; try{nd=JSON.parse($(fid).value);}catch(e){toast('JSON غير صحيح',false);return;}
+      closeModal();
+      try{ await fbSet('/',nd); toast('تم الحفظ ✓'); reloadFull(false); }
+      catch(e){ toast(e.message,false); }
+    },'حفظ'
+  );
+}
+
+// Delete
+async function delNode(fpath){
+  if(!confirm('هل أنت متأكد من حذف:\n'+fpath+'\n\nلا يمكن التراجع!')) return;
+  try{ await fbDel(fpath); toast('تم الحذف ✓'); reloadFull(PATH.join('/')===fpath); }
+  catch(e){ toast(e.message,false); }
+}
+
+// Reload
+async function reload(){
+  const saved=[...PATH];
+  ROOT=(await fbGet('/'))||{};
+  buildSidebar();
+  PATH=saved;
+  if(PATH.length){ activeSb(PATH[0]); renderNode(); } else showHome();
+}
+async function reloadFull(goHome){
+  ROOT=(await fbGet('/'))||{};
+  buildSidebar();
+  if(goHome||!PATH.length) showHome(); else renderNode();
+}
+async function refreshAll(){ PATH=[]; await loadRoot(); }
+
+// Toast
+function toast(msg,ok=true){
+  const el=document.createElement('div');
+  el.className='toast '+(ok?'ok':'err');
+  el.textContent=(ok?'✓ ':'✗ ')+msg;
+  $('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+// ── Expose to global for onclick ─────────────────────────
+window.APP={
+  openCol,showHome,showRaw,showRaw,refreshAll,closeModal,toggleNt,filter,navTo,
+  runStor,modalNewCol,modalJsonRoot,toast
+};
+
+// ── Start ────────────────────────────────────────────────
+loadRoot();
 </script>
 </body>
 </html>
